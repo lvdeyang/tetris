@@ -31,12 +31,16 @@ define([
                 groups: context.getProp('groups'),
                 agendaId: p.agendaId,
                 agendaName: p.agendaName,
+                businessInfoTypes:[],
                 forwardType:[{
                     id:'VIDEO',
                     name:'视频'
                 },{
                     id:'AUDIO',
                     name:'音频'
+                },{
+                    id:'AUDIO_VIDEO',
+                    name:'音视频'
                 }],
                 sourceTypes:[{
                     id:'ROLE',
@@ -87,11 +91,15 @@ define([
                     addForward:{
                         visible:false,
                         loading:false,
-                        type:'',
+                        type:'AUDIO_VIDEO',
+                        businessInfoType:'',
                         sourceTypes:[],
+                        audioSourceTypes:[],
                         destinationTypes:[],
                         sourceType:'',
                         source:'',
+                        audioSourceType:'',
+                        audioSource:'',
                         destinationType:'',
                         destination:''
                     },
@@ -100,7 +108,8 @@ define([
                         data:[],
                         props:{
                             label:'roleName'
-                        }
+                        },
+                        type:''
                     },
                     selectSourceRoleChannel:{
                         visible:false,
@@ -108,29 +117,34 @@ define([
                         props:{
                             label:'roleName',
                             children:'channels'
-                        }
+                        },
+                        type:''
                     },
                     selectSourceBundle:{
                         visible:false,
-                        data:[]
+                        data:[],
+                        type:''
                     },
                     selectSourceBundleChannel:{
                         visible:false,
-                        data:[]
+                        data:[],
+                        type:''
                     },
                     selectCombineVideo:{
                         visible:false,
                         data:[],
                         props:{
                             label:'name'
-                        }
+                        },
+                        type:''
                     },
                     selectCombineAudio:{
                         visible:false,
                         data:[],
                         props:{
                             label:'name'
-                        }
+                        },
+                        type:''
                     },
                     selectDestinationRole:{
                         visible:false,
@@ -170,25 +184,39 @@ define([
                 handleCreate:function(){
                     var self = this;
                     self.dialog.addForward.visible = true;
-                },
-                forwardTypeChange:function(type){
-                    var self = this;
                     self.dialog.addForward.sourceTypes.splice(0, self.dialog.addForward.sourceTypes.length);
                     for(var i=0; i<self.sourceTypes.length; i++){
-                        if(self.sourceTypes[i].type.indexOf(type) >= 0){
+                        if(self.sourceTypes[i].type.indexOf('VIDEO') >= 0){
                             self.dialog.addForward.sourceTypes.push(self.sourceTypes[i]);
+                        }
+                    }
+                    self.dialog.addForward.audioSourceTypes.splice(0, self.dialog.addForward.audioSourceTypes.length);
+                    for(var i=0; i<self.sourceTypes.length; i++){
+                        if(self.sourceTypes[i].type.indexOf('AUDIO') >= 0){
+                            self.dialog.addForward.audioSourceTypes.push(self.sourceTypes[i]);
                         }
                     }
                     self.dialog.addForward.destinationTypes.splice(0, self.dialog.addForward.destinationTypes.length);
                     for(var i=0; i<self.destinationTypes.length; i++){
-                        if(self.destinationTypes[i].type.indexOf(type) >= 0){
-                            self.dialog.addForward.destinationTypes.push(self.destinationTypes[i]);
-                        }
+                        self.dialog.addForward.destinationTypes.push(self.destinationTypes[i]);
                     }
                 },
-                handleSelectSource:function(){
+                forwardTypeChange:function(type){
                     var self = this;
-                    if(self.dialog.addForward.sourceType === 'ROLE'){
+                    if(type === 'VIDEO'){
+                        self.dialog.addForward.audioSourceType = '';
+                        self.dialog.addForward.audioSource = '';
+                    }else if(type === 'AUDIO'){
+                        self.dialog.addForward.sourceType = '';
+                        self.dialog.addForward.source = '';
+                    }
+                },
+                handleSelectSource:function(type){
+                    var self = this;
+                    var filed = 'sourceType';
+                    if(type === 'audio') var filed = 'audioSourceType';
+                    if(self.dialog.addForward[filed] === 'ROLE'){
+                        self.dialog.selectSourceRole.type = type;
                         self.dialog.selectSourceRole.data.splice(0,  self.dialog.selectSourceRole.data.length);
                         ajax.post('/tetris/bvc/model/role/agenda/permission/load', {
                             agendaId:self.agendaId
@@ -200,13 +228,14 @@ define([
                             }
                             self.dialog.selectSourceRole.visible = true;
                         });
-                    }else if(self.dialog.addForward.sourceType === 'ROLE_CHANNEL'){
+                    }else if(self.dialog.addForward[filed] === 'ROLE_CHANNEL'){
                         var channelType = '';
                         if(self.dialog.addForward.type === 'VIDEO'){
                             channelType = 'VIDEO_ENCODE';
                         }else{
                             channelType = 'AUDIO_ENCODE';
                         }
+                        self.dialog.selectSourceRoleChannel.type = type;
                         self.dialog.selectSourceRoleChannel.data.splice(0,  self.dialog.selectSourceRoleChannel.data.length);
                         ajax.post('/tetris/bvc/model/role/agenda/permission/load/with/channels', {
                             agendaId:self.agendaId,
@@ -219,11 +248,12 @@ define([
                             }
                             self.dialog.selectSourceRoleChannel.visible = true;
                         });
-                    }else if(self.dialog.addForward.sourceType === 'BUNDLE'){
+                    }else if(self.dialog.addForward[filed] === 'BUNDLE'){
 
-                    }else if(self.dialog.addForward.sourceType === 'CHANNEL'){
+                    }else if(self.dialog.addForward[filed] === 'CHANNEL'){
 
-                    }else if(self.dialog.addForward.sourceType === 'COMBINE_VIDEO'){
+                    }else if(self.dialog.addForward[filed] === 'COMBINE_VIDEO'){
+                        self.dialog.selectCombineVideo.type = type;
                         self.dialog.selectCombineVideo.data.splice(0, self.dialog.selectCombineVideo.data.length);
                         ajax.post('/tetris/bvc/model/agenda/combine/video/load', {
                             businessId:self.agendaId,
@@ -236,7 +266,8 @@ define([
                             }
                             self.dialog.selectCombineVideo.visible = true;
                         });
-                    }else if(self.dialog.addForward.sourceType === 'COMBINE_AUDIO'){
+                    }else if(self.dialog.addForward[filed] === 'COMBINE_AUDIO'){
+                        self.dialog.selectCombineAudio.type = type;
                         self.dialog.selectCombineAudio.data.splice(0, self.dialog.selectCombineAudio.data.length);
                         ajax.post('/tetris/bvc/model/agenda/combine/audio/load', {
                             businessId:self.agendaId,
@@ -255,13 +286,16 @@ define([
                     var self = this;
                     var node = self.$refs.selectSourceRoleTree.getCurrentNode();
                     if(node){
-                        Vue.set( self.dialog.addForward, 'source', {
+                        var filed = 'source';
+                        if(self.dialog.selectSourceRole.type === 'audio') filed = 'audioSource';
+                        Vue.set( self.dialog.addForward, filed, {
                             id:node.roleId,
                             type:'ROLE',
                             name:node.roleName
                         });
                     }
                     self.dialog.selectSourceRole.data.splice(0, self.dialog.selectSourceRole.data.length);
+                    self.dialog.selectSourceRole.type = '';
                     self.dialog.selectSourceRole.visible = false;
                 },
                 handleSelectSourceRoleChannelClose:function(){
@@ -275,7 +309,9 @@ define([
                         });
                         return;
                     }
-                    Vue.set( self.dialog.addForward, 'source', {
+                    var filed = 'source';
+                    if(self.dialog.selectSourceRoleChannel.type === 'audio') filed = 'audioSource';
+                    Vue.set( self.dialog.addForward, filed, {
                         id:node.id,
                         type:'ROLE_CHANNEL',
                         name:node.roleName+'-'+node.name
@@ -300,7 +336,7 @@ define([
                     var self = this;
                     var node = self.$refs.selectCombineAudioTree.getCurrentNode();
                     if(node){
-                        Vue.set( self.dialog.addForward, 'source', {
+                        Vue.set( self.dialog.addForward, 'audioSource', {
                             id:node.id,
                             type:'COMBINE_AUDIO',
                             name:node.name
@@ -384,9 +420,11 @@ define([
                     var self = this;
                     self.dialog.addForward.visible = false;
                     self.dialog.addForward.loading = false;
-                    self.dialog.addForward.type = '';
+                    self.dialog.addForward.type = 'AUDIO_VIDEO';
                     self.dialog.addForward.sourceType = '';
                     self.dialog.addForward.source = '';
+                    self.dialog.addForward.audioSourceType = '';
+                    self.dialog.addForward.audioSource = '';
                     self.dialog.addForward.destinationType = '';
                     self.dialog.addForward.destination = '';
                 },
@@ -402,7 +440,14 @@ define([
                     if(!self.dialog.addForward.source){
                         self.$message({
                             type:'error',
-                            message:'源为空'
+                            message:'视频源为空'
+                        });
+                        return;
+                    }
+                    if(!self.dialog.addForward.audioSource){
+                        self.$message({
+                            type:'error',
+                            message:'音频源为空'
                         });
                         return;
                     }
@@ -416,8 +461,11 @@ define([
                     self.dialog.addForward.loading = true;
                     ajax.post('/tetris/bvc/model/agenda/forward/add', {
                         type:self.dialog.addForward.type,
+                        businessInfoType:self.dialog.addForward.businessInfoType,
                         sourceType:self.dialog.addForward.source.type,
                         sourceId:self.dialog.addForward.source.id,
+                        audioSourceType:self.dialog.addForward.audioSource.type,
+                        audioSourceId:self.dialog.addForward.audioSource.id,
                         destinationType:self.dialog.addForward.destination.type,
                         destinationId:self.dialog.addForward.destination.id,
                         agendaId:self.agendaId
@@ -481,11 +529,23 @@ define([
                             }
                         }
                     });
+                },
+                loadBusinessInfoTypes:function(){
+                    var self = this;
+                    self.businessInfoTypes.splice(0, self.businessInfoTypes.length);
+                    ajax.post('/tetris/bvc/model/agenda/forward/query/business/info/types', null, function(data){
+                       if(data && data.length>0){
+                           for(var i=0; i<data.length; i++){
+                               self.businessInfoTypes.push(data[i]);
+                           }
+                       }
+                    });
                 }
             },
             created:function(){
                 var self = this;
                 self.load();
+                self.loadBusinessInfoTypes();
             }
         });
 

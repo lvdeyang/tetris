@@ -9,6 +9,10 @@ public class AgendaForwardVO extends AbstractBaseVO<AgendaForwardVO, AgendaForwa
 	
 	private String typeName;
 	
+	private String businessInfoType;
+	
+	private String businessInfoTypeName;
+	
 	private String sourceId;
 	
 	private String sourceName;
@@ -16,6 +20,14 @@ public class AgendaForwardVO extends AbstractBaseVO<AgendaForwardVO, AgendaForwa
 	private String sourceType;
 	
 	private String sourceTypeName;
+	
+	private String audioSourceId;
+	
+	private String audioSourceName;
+	
+	private String audioSourceType;
+	
+	private String audioSourceTypeName;
 	
 	private String destinationId;
 	
@@ -42,6 +54,24 @@ public class AgendaForwardVO extends AbstractBaseVO<AgendaForwardVO, AgendaForwa
 
 	public AgendaForwardVO setTypeName(String typeName) {
 		this.typeName = typeName;
+		return this;
+	}
+
+	public String getBusinessInfoType() {
+		return businessInfoType;
+	}
+
+	public AgendaForwardVO setBusinessInfoType(String businessInfoType) {
+		this.businessInfoType = businessInfoType;
+		return this;
+	}
+
+	public String getBusinessInfoTypeName() {
+		return businessInfoTypeName;
+	}
+
+	public AgendaForwardVO setBusinessInfoTypeName(String businessInfoTypeName) {
+		this.businessInfoTypeName = businessInfoTypeName;
 		return this;
 	}
 
@@ -78,6 +108,42 @@ public class AgendaForwardVO extends AbstractBaseVO<AgendaForwardVO, AgendaForwa
 
 	public AgendaForwardVO setSourceTypeName(String sourceTypeName) {
 		this.sourceTypeName = sourceTypeName;
+		return this;
+	}
+
+	public String getAudioSourceId() {
+		return audioSourceId;
+	}
+
+	public AgendaForwardVO setAudioSourceId(String audioSourceId) {
+		this.audioSourceId = audioSourceId;
+		return this;
+	}
+
+	public String getAudioSourceName() {
+		return audioSourceName;
+	}
+
+	public AgendaForwardVO setAudioSourceName(String audioSourceName) {
+		this.audioSourceName = audioSourceName;
+		return this;
+	}
+
+	public String getAudioSourceType() {
+		return audioSourceType;
+	}
+
+	public AgendaForwardVO setAudioSourceType(String audioSourceType) {
+		this.audioSourceType = audioSourceType;
+		return this;
+	}
+
+	public String getAudioSourceTypeName() {
+		return audioSourceTypeName;
+	}
+
+	public AgendaForwardVO setAudioSourceTypeName(String audioSourceTypeName) {
+		this.audioSourceTypeName = audioSourceTypeName;
 		return this;
 	}
 
@@ -133,9 +199,16 @@ public class AgendaForwardVO extends AbstractBaseVO<AgendaForwardVO, AgendaForwa
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setType(entity.getType().toString())
 			.setTypeName(entity.getType().getName())
+			.setBusinessInfoType(entity.getBusinessInfoType()==null?null:entity.getBusinessInfoType().toString())
+			.setBusinessInfoTypeName(entity.getBusinessInfoType()==null?null:entity.getBusinessInfoType().getName())
 			.setSourceId(entity.getSourceId())
-			.setSourceType(entity.getSourceType().toString())
-			.setSourceTypeName(entity.getSourceType().getName())
+			.setSourceName("-")
+			.setSourceType(entity.getSourceType()==null?null:entity.getSourceType().toString())
+			.setSourceTypeName(entity.getSourceType()==null?"-":entity.getSourceType().getName())
+			.setAudioSourceId(entity.getAudioSourceId())
+			.setAudioSourceName("-")
+			.setAudioSourceType(entity.getAudioSourceType()==null?null:entity.getAudioSourceType().toString())
+			.setAudioSourceTypeName(entity.getAudioSourceType()==null?"-":entity.getAudioSourceType().getName())
 			.setDestinationId(entity.getDestinationId())
 			.setDestinationType(entity.getDestinationType().toString())
 			.setDestinationTypeName(entity.getDestinationType().getName())

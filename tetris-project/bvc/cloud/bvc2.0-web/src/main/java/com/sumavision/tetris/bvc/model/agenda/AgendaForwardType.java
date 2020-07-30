@@ -8,7 +8,6 @@ public enum AgendaForwardType {
 	AUDIO("音频"),
 	AUDIO_VIDEO("音视频");
 	
-	
 	private String name;
 	
 	private AgendaForwardType(String name){

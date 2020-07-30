@@ -12,8 +12,8 @@
 
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建议程</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除议程</el-button>
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建转发</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除转发</el-button>
 
             <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -26,12 +26,20 @@
                                 width="55">
                         </el-table-column>
                         <el-table-column
-                                label="源类型"
+                                label="视频源类型"
                                 prop="sourceTypeName">
                         </el-table-column>
                         <el-table-column
-                                label="源"
+                                label="视频源"
                                 prop="sourceName">
+                        </el-table-column>
+                        <el-table-column
+                                label="音频源类型"
+                                prop="audioSourceTypeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="音频源"
+                                prop="audioSourceName">
                         </el-table-column>
                         <el-table-column
                                 label="目的类型"
@@ -44,6 +52,10 @@
                         <el-table-column
                                 label="转发类型"
                                 prop="typeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="业务类型"
+                                prop="businessInfoTypeName">
                         </el-table-column>
                         <el-table-column
                                 label="操作"
@@ -66,29 +78,54 @@
                 :visible.sync="dialog.addForward.visible"
                 width="500px"
                 :before-close="handleAddForwardClose">
-            <el-form label-width="80px">
-                <el-form-item label="转发类型">
-                    <el-select v-model="dialog.addForward.type" style="width:100%;" @change="forwardTypeChange">
-                        <el-option v-for="item in forwardType" :label="item.name" :value="item.id"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="源类型">
-                    <el-select v-model="dialog.addForward.sourceType" style="width:100%;">
-                        <el-option v-for="item in dialog.addForward.sourceTypes" :label="item.name" :value="item.id"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="源">
-                    <el-input v-model="dialog.addForward.source.name" readonly @click.native="handleSelectSource"></el-input>
-                </el-form-item>
-                <el-form-item label="目的类型">
-                    <el-select v-model="dialog.addForward.destinationType" style="width:100%;">
-                        <el-option v-for="item in dialog.addForward.destinationTypes" :label="item.name" :value="item.id"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="目的">
-                    <el-input v-model="dialog.addForward.destination.name" readonly @click.native="handleSelectDestination"></el-input>
-                </el-form-item>
-            </el-form>
+            <div style="height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="100px">
+                        <el-form-item label="转发类型">
+                            <el-select v-model="dialog.addForward.type" style="width:100%;" @change="forwardTypeChange">
+                                <el-option v-for="item in forwardType" :key="'op0_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="业务类型">
+                            <el-select v-model="dialog.addForward.businessInfoType" style="width:100%;">
+                                <el-option v-for="item in businessInfoTypes" :key="'op5_'+item" :label="item" :value="item"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="视频源类型">
+                            <el-select v-if="dialog.addForward.type==='AUDIO'" v-model="dialog.addForward.sourceType" style="width:100%;" disabled>
+                                <el-option v-for="item in dialog.addForward.sourceTypes" :key="'op1_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                            <el-select v-else v-model="dialog.addForward.sourceType" style="width:100%;">
+                                <el-option v-for="item in dialog.addForward.sourceTypes" :key="'op1_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="视频源">
+                            <el-input v-if="dialog.addForward.type==='AUDIO'" v-model="dialog.addForward.source.name" disabled></el-input>
+                            <el-input v-else v-model="dialog.addForward.source.name" readonly @click.native="handleSelectSource('video')"></el-input>
+                        </el-form-item>
+                        <el-form-item label="音频源类型">
+                            <el-select v-if="dialog.addForward.type==='VIDEO'" v-model="dialog.addForward.audioSourceType" style="width:100%;" disabled>
+                                <el-option v-for="item in dialog.addForward.audioSourceTypes" :key="'op2_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                            <el-select v-else v-model="dialog.addForward.audioSourceType" style="width:100%;">
+                                <el-option v-for="item in dialog.addForward.audioSourceTypes" :key="'op2_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="音频源">
+                            <el-input v-if="dialog.addForward.type==='VIDEO'" v-model="dialog.addForward.audioSource.name" disabled></el-input>
+                            <el-input v-else v-model="dialog.addForward.audioSource.name" readonly @click.native="handleSelectSource('audio')"></el-input>
+                        </el-form-item>
+                        <el-form-item label="目的类型">
+                            <el-select v-model="dialog.addForward.destinationType" style="width:100%;">
+                                <el-option v-for="item in dialog.addForward.destinationTypes" :key="'op3_'+item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="目的">
+                            <el-input v-model="dialog.addForward.destination.name" readonly @click.native="handleSelectDestination"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleAddForwardClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleAddForwardSubmit" :loading="dialog.addForward.loading">确定</el-button>

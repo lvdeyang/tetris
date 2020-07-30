@@ -20,6 +20,21 @@ public class AgendaForwardController {
 	private AgendaForwardService agendaForwardService;
 	
 	/**
+	 * 查询业务类型<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月30日 下午3:44:09
+	 * @return Set<String> 业务类型列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/business/info/types")
+	public Object queryBusinessInfoTypes(HttpServletRequest request) throws Exception{
+		
+		return agendaForwardQuery.queryBusinessInfoTypes();
+	}
+	
+	/**
 	 * 查询议程转发<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -43,8 +58,11 @@ public class AgendaForwardController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年7月9日 上午10:11:51
 	 * @param String type 议程转发类型
+	 * @param String businessInfoType 议程转发业务类型
 	 * @param String sourceType 源类型
 	 * @param String sourceId 源id
+	 * @param String audioSourceType 音频源类型
+	 * @param String audioSourceId 音频源id
 	 * @param String destinationType 目的类型
 	 * @param String destinationId 目的id
 	 * @param Long agendaId 议程id
@@ -55,14 +73,17 @@ public class AgendaForwardController {
 	@RequestMapping(value = "/add")
 	public Object add(
 			String type,
+			String businessInfoType,
 			String sourceType,
 			String sourceId,
+			String audioSourceType,
+			String audioSourceId,
 			String destinationType,
 			String destinationId,
 			Long agendaId,
 			HttpServletRequest request) throws Exception{
 		
-		return agendaForwardService.add(type, sourceType, sourceId, destinationType, destinationId, agendaId);
+		return agendaForwardService.add(type, businessInfoType, sourceType, sourceId, audioSourceType, audioSourceId, destinationType, destinationId, agendaId);
 	}
 	
 	/**
