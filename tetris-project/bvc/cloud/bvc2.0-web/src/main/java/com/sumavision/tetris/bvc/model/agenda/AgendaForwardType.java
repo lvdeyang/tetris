@@ -5,7 +5,9 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum AgendaForwardType {
 
 	VIDEO("视频"),
-	AUDIO("音频");
+	AUDIO("音频"),
+	AUDIO_VIDEO("音视频");
+	
 	
 	private String name;
 	
