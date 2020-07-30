@@ -29,6 +29,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                terminalTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -40,13 +41,15 @@ define([
                     createTerminal:{
                         visible:false,
                         loading:false,
-                        name:''
+                        name:'',
+                        typeName:''
                     },
                     editTerminal:{
                         visible:false,
                         loading:false,
                         id:'',
-                        name:''
+                        name:'',
+                        typeName:''
                     }
                 }
             },
@@ -74,7 +77,8 @@ define([
                     var self = this;
                     self.dialog.createTerminal.loading = true;
                     ajax.post('/tetris/bvc/model/terminal/create', {
-                        name:self.dialog.createTerminal.name
+                        name:self.dialog.createTerminal.name,
+                        typeName:self.dialog.createTerminal.typeName
                     }, function(data, status){
                         self.dialog.createTerminal.loading = false;
                         if(status !== 200) return;
@@ -91,6 +95,7 @@ define([
                     var row = scope.row;
                     self.dialog.editTerminal.id = row.id;
                     self.dialog.editTerminal.name = row.name;
+                    self.dialog.editTerminal.typeName = row.typeName;
                     self.dialog.editTerminal.visible = true;
                 },
                 handleEditTerminalClose:function(){
@@ -105,7 +110,8 @@ define([
                     self.dialog.editTerminal.loading = true;
                     ajax.post('/tetris/bvc/model/terminal/edit', {
                         id:self.dialog.editTerminal.id,
-                        name:self.dialog.editTerminal.name
+                        name:self.dialog.editTerminal.name,
+                        typeName:self.dialog.editTerminal.typeName
                     }, function(data, status){
                         self.dialog.editTerminal.loading = false;
                         if(status!==200) return;
@@ -184,6 +190,17 @@ define([
                     var self = this;
                     self.load(currentPage);
                 },
+                loadTypes:function(){
+                    var self = this;
+                    self.terminalTypes.splice(0, self.terminalTypes.length);
+                    ajax.post('/tetris/bvc/model/terminal/query/types', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.terminalTypes.push(data[i]);
+                            }
+                        }
+                    });
+                },
                 load:function(currentPage){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
@@ -206,6 +223,7 @@ define([
             created:function(){
                 var self = this;
                 self.load(1);
+                self.loadTypes();
             }
         });
 

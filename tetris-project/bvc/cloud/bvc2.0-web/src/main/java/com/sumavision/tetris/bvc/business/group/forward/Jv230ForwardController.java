@@ -20,33 +20,33 @@ public class Jv230ForwardController {
 	private Jv230ForwardService jv230ForwardService;
 	
 	/**
-	 * 查询用户有权限的jv230设备<br/>
+	 * 查询用户有权限的设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年7月16日 下午2:50:06
-	 * @return List<TreeNodeVO> jv230列表
+	 * <b>日期：</b>2020年7月27日 下午2:04:30
+	 * @return List<TreeNodeVO> 设备列表
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/query/usable/jv230/bundles")
-	public Object queryUsableJv230Bundles(HttpServletRequest request) throws Exception{
+	@RequestMapping(value = "/query/usable/bundles")
+	public Object queryUseableBundles(HttpServletRequest request) throws Exception{
 		
-		return jv230ForwardQuery.queryUsableJv230Bundles();
+		return jv230ForwardQuery.queryUsableBundles();
 	}
 	
 	/**
-	 * 查询上屏的jv230<br/>
+	 * 查询终端的上屏设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年7月17日 上午11:33:15
-	 * @return List<TreeNodeVO> jv230列表
+	 * @return List<TreeNodeVO> 设备树
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/query/forward/jv230/bundles")
-	public Object queryForwardJv230Bundles(HttpServletRequest request) throws Exception{
+	@RequestMapping(value = "/query/forward/bundles")
+	public Object queryForwardBundles(HttpServletRequest request) throws Exception{
 	
-		return jv230ForwardQuery.queryForwardJv230Bundles();
+		return jv230ForwardQuery.queryForwardBundles();
 	}
 	
 	/**
@@ -65,6 +65,21 @@ public class Jv230ForwardController {
 			HttpServletRequest request) throws Exception{
 		
 		return jv230ForwardQuery.queryJv230Forwards(bundleId);
+	}
+	
+	/**
+	 * 查询终端合屏<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月29日 上午9:23:41
+	 * @return List<Jv230ForwardVO> 合屏源列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/combine/video")
+	public Object queryCombineVideo(HttpServletRequest request) throws Exception{
+		
+		return jv230ForwardQuery.queryCombineVideo();
 	}
 	
 	/**

@@ -41,6 +41,10 @@
                                 prop="volume">
                         </el-table-column>
                         <el-table-column
+                                label="业务类型"
+                                prop="businessInfoTypeName">
+                        </el-table-column>
+                        <el-table-column
                                 label="操作"
                                 width="350">
                             <template slot-scope="scope">
@@ -111,6 +115,16 @@
                 <el-form-item label="音量">
                     <el-slider v-model="dialog.createAgenda.volume"></el-slider>
                 </el-form-item>
+                <el-form-item label="业务类型">
+                    <el-select v-model="dialog.createAgenda.businessInfoTypeName" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in businessInfoTypes"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.createAgenda.remark"></el-input>
                 </el-form-item>
@@ -144,6 +158,16 @@
                 </el-form-item>
                 <el-form-item label="音量">
                     <el-slider v-model="dialog.editAgenda.volume"></el-slider>
+                </el-form-item>
+                <el-form-item label="业务类型">
+                    <el-select v-model="dialog.editAgenda.businessInfoTypeName" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in businessInfoTypes"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.editAgenda.remark"></el-input>

@@ -1,8 +1,10 @@
 package com.sumavision.tetris.bvc.model.agenda;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 @Component
@@ -30,6 +33,24 @@ public class AgendaQuery {
 		AudioOperationType[] values= AudioOperationType.values();
 		for(AudioOperationType value:values){
 			types.put(value.toString(), value.getName());
+		}
+		return types;
+	}
+	
+	/**
+	 * 查询议程业务类型<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月30日 上午8:45:29
+	 * @return Set<String> 业务类型
+	 */
+	public Set<String> queryBusinessTypes() throws Exception{
+		BusinessInfoType[] values = BusinessInfoType.values();
+		Set<String> types = new HashSet<String>();
+		for(BusinessInfoType value:values){
+			if(value.isShow()){
+				types.add(value.getName());
+			}
 		}
 		return types;
 	}

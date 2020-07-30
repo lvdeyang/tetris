@@ -19,11 +19,15 @@ public class TerminalService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年6月5日 下午3:14:38
 	 * @param String name 终端名称
+	 * @param String typeName 类型名称
 	 * @return TerminalVO 终端
 	 */
-	public TerminalVO create(String name) throws Exception{
+	public TerminalVO create(String name, String typeName) throws Exception{
 		TerminalPO entity = new TerminalPO();
 		entity.setName(name);
+		if(typeName != null){
+			entity.setType(TerminalType.fromName(typeName));
+		}
 		entity.setUpdateTime(new Date());
 		terminalDao.save(entity);
 		return new TerminalVO().set(entity);
@@ -36,14 +40,18 @@ public class TerminalService {
 	 * <b>日期：</b>2020年6月8日 上午9:37:28
 	 * @param Long id 终端id
 	 * @param String name 名称
+	 * @param String typeName 类型名称
 	 * @return TerminalVO 终端
 	 */
-	public TerminalVO edit(Long id, String name) throws Exception{
+	public TerminalVO edit(Long id, String name, String typeName) throws Exception{
 		TerminalPO entity = terminalDao.findOne(id);
 		if(entity == null){
 			throw new TerminalNotFoundException(id);
 		}
 		entity.setName(name);
+		if(typeName != null){
+			entity.setType(TerminalType.fromName(typeName));
+		}
 		entity.setUpdateTime(new Date());
 		terminalDao.save(entity);
 		return new TerminalVO().set(entity);

@@ -75,7 +75,6 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 		
 	}
 	
-
 	@Column(name = "USER_ID")
 	public Long getUserId() {
 		return userId;

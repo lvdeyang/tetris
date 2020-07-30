@@ -2,7 +2,7 @@ package com.sumavision.tetris.bvc.business.group.forward;
 
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
-public enum Jv230ForwardSourceType {
+public enum ForwardSourceType {
 
 	COMBINE_VIDEO("合屏"),
 	CHANNEL_VIDEO("视频通道"),
@@ -11,7 +11,7 @@ public enum Jv230ForwardSourceType {
 	
 	private String name;
 	
-	private Jv230ForwardSourceType(String name){
+	private ForwardSourceType(String name){
 		this.name = name;
 	}
 	
@@ -19,9 +19,9 @@ public enum Jv230ForwardSourceType {
 		return this.name;
 	}
 	
-	public static Jv230ForwardSourceType fromName(String name) throws Exception{
-		Jv230ForwardSourceType[] values = Jv230ForwardSourceType.values();
-		for(Jv230ForwardSourceType value:values){
+	public static ForwardSourceType fromName(String name) throws Exception{
+		ForwardSourceType[] values = ForwardSourceType.values();
+		for(ForwardSourceType value:values){
 			if(value.getName().equals(name)){
 				return value;
 			}

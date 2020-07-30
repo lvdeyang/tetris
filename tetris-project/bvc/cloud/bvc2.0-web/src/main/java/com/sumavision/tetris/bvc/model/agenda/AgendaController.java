@@ -35,6 +35,21 @@ public class AgendaController {
 	}
 	
 	/**
+	 * 查询议程业务类型<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月30日 上午8:45:29
+	 * @return Set<String> 业务类型
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/business/types")
+	public Object queryBusinessTypes(HttpServletRequest request) throws Exception{
+		
+		return agendaQuery.queryBusinessTypes();
+	}
+	
+	/**
 	 * 分页查询议程<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -64,6 +79,7 @@ public class AgendaController {
 	 * @param String remark 备注
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
+	 * @param String businessTypeName 业务类型
 	 * @return AgendaVO 议程
 	 */
 	@JsonBody
@@ -74,9 +90,10 @@ public class AgendaController {
 			String remark,
 			Integer volume,
 			String audioOperationType,
+			String businessInfoTypeName,
 			HttpServletRequest request) throws Exception{
 		
-		return agendaService.add(name, remark, volume, audioOperationType);
+		return agendaService.add(name, remark, volume, audioOperationType, businessInfoTypeName);
 	}
 	
 	/**
@@ -89,6 +106,7 @@ public class AgendaController {
 	 * @param String remark 备注
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
+	 * @param String businessInfoTypeName 业务类型
 	 * @return AgendaVO 议程
 	 */
 	@JsonBody
@@ -100,9 +118,10 @@ public class AgendaController {
 			String remark,
 			Integer volume,
 			String audioOperationType,
+			String businessInfoTypeName,
 			HttpServletRequest request) throws Exception{
 		
-		return agendaService.edit(id, name, remark, volume, audioOperationType);
+		return agendaService.edit(id, name, remark, volume, audioOperationType, businessInfoTypeName);
 	}
 	
 	/**

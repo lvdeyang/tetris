@@ -1,5 +1,8 @@
 package com.sumavision.tetris.bvc.model.terminal;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,25 @@ public class TerminalController {
 	}
 	
 	/**
+	 * 查询终端类型<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月29日 下午2:52:52
+	 * @return Set<String> 终端类型列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/types")
+	public Object queryTypes(HttpServletRequest request) throws Exception{
+		TerminalType[] values = TerminalType.values();
+		Set<String> terminalTypes = new HashSet<String>();
+		for(TerminalType value:values){
+			terminalTypes.add(value.getName());
+		}
+		return terminalTypes;
+	}
+	
+	/**
 	 * 分页查询终端<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -61,6 +83,7 @@ public class TerminalController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年6月5日 下午3:14:38
 	 * @param String name 终端名称
+	 * @param String typeName 类型名称
 	 * @return TerminalVO 终端
 	 */
 	@JsonBody
@@ -68,9 +91,10 @@ public class TerminalController {
 	@RequestMapping(value = "/create")
 	public Object create(
 			String name,
+			String typeName,
 			HttpServletRequest request) throws Exception{
 		
-		return terminalService.create(name);
+		return terminalService.create(name, typeName);
 	}
 	
 	/**
@@ -80,6 +104,7 @@ public class TerminalController {
 	 * <b>日期：</b>2020年6月8日 上午9:37:28
 	 * @param Long id 终端id
 	 * @param String name 名称
+	 * @param String typeName 类型名称
 	 * @return TerminalVO 终端
 	 */
 	@JsonBody
@@ -88,9 +113,10 @@ public class TerminalController {
 	public Object edit(
 			Long id,
 			String name,
+			String typeName,
 			HttpServletRequest request) throws Exception{
 		
-		return terminalService.edit(id, name);
+		return terminalService.edit(id, name, typeName);
 	}
 	
 	/**

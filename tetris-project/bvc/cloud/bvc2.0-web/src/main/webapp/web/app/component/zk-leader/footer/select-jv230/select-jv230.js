@@ -24,7 +24,8 @@ define([
                         children: 'children',
                         label: 'name'
                     },
-                    data: []
+                    data: [],
+                    current:''
                 }
             }
         },
@@ -87,7 +88,8 @@ define([
             //提交按钮事件
             handleSelectJv230Commit: function () {
                 var self = this;
-                var node = self.$refs.tree.getCurrentNode();
+                //var node = self.$refs.tree.getCurrentNode();
+                var node = self.tree.current;
                 if(!node){
                     self.qt.error('您没有选择设备');
                     return;
@@ -126,7 +128,14 @@ define([
                 });
 
                 self.tree.data.splice(0, self.tree.data.length);
-                ajax.post('/tetris/bvc/business/jv230/forward/query/usable/jv230/bundles', null, function(data){
+                /*ajax.post('/tetris/bvc/business/jv230/forward/query/usable/jv230/bundles', null, function(data){
+                    if(data && data.length>0){
+                        for(var i=0; i<data.length; i++){
+                            self.tree.data.push(data[i]);
+                        }
+                    }
+                });*/
+                ajax.post('/tetris/bvc/business/jv230/forward/query/usable/bundles', null, function(data){
                     if(data && data.length>0){
                         for(var i=0; i<data.length; i++){
                             self.tree.data.push(data[i]);

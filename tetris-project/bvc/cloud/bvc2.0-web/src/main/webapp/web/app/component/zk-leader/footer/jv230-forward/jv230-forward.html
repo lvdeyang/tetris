@@ -10,10 +10,19 @@
                     <el-tree
                         ref="tree"
                         :data="bundles.data"
-                        highlight-current
                         node-key="id"
                         :props="bundles.props"
                         @current-change="currentBundleChange">
+                        <div slot-scope="scope">
+                            <span v-if="scope.data.type==='FOLDER'">
+                                <span :class="scope.data.icon" :style="scope.data.style"></span>
+                                <span>{{scope.data.name}}</span>
+                            </span>
+                            <el-radio v-else v-model="tree.current" :label="scope.data">
+                                <span :class="scope.data.icon" :style="scope.data.style"></span>
+                                <span>{{scope.data.name}}</span>
+                            </el-radio>
+                        </div>
                     </el-tree>
                 </el-scrollbar>
             </div>

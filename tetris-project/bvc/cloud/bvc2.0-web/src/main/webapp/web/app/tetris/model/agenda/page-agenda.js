@@ -30,6 +30,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 audioOperationTypes:[],
+                businessInfoTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -44,7 +45,8 @@ define([
                         name:'',
                         remark:'',
                         volume:0,
-                        audioOperationType:''
+                        audioOperationType:'',
+                        businessInfoTypeName:''
                     },
                     editAgenda:{
                         visible:false,
@@ -53,7 +55,8 @@ define([
                         name:'',
                         remark:'',
                         volume:0,
-                        audioOperationType:''
+                        audioOperationType:'',
+                        businessInfoTypeName:''
                     }
                 }
             },
@@ -77,6 +80,7 @@ define([
                     self.dialog.createAgenda.remark = '';
                     self.dialog.createAgenda.volume = 0;
                     self.dialog.createAgenda.audioOperationType = '';
+                    self.dialog.createAgenda.businessInfoTypeName = '';
                     self.dialog.createAgenda.loading = false;
                     self.dialog.createAgenda.visible = false;
                 },
@@ -87,7 +91,8 @@ define([
                         name:self.dialog.createAgenda.name,
                         remark:self.dialog.createAgenda.remark,
                         volume:self.dialog.createAgenda.volume,
-                        audioOperationType:self.dialog.createAgenda.audioOperationType
+                        audioOperationType:self.dialog.createAgenda.audioOperationType,
+                        businessInfoTypeName:self.dialog.createAgenda.businessInfoTypeName
                     }, function(data, status){
                         self.dialog.createAgenda.loading = false;
                         if(status !== 200) return;
@@ -107,6 +112,7 @@ define([
                     self.dialog.editAgenda.remark = row.remark;
                     self.dialog.editAgenda.volume = row.volume;
                     self.dialog.editAgenda.audioOperationType = row.audioOperationType;
+                    self.dialog.editAgenda.businessInfoTypeName = row.businessInfoTypeName;
                     self.dialog.editAgenda.visible = true;
                 },
                 handleEditAgendaClose:function(){
@@ -116,6 +122,7 @@ define([
                     self.dialog.editAgenda.remark = '';
                     self.dialog.editAgenda.volume = 0;
                     self.dialog.editAgenda.audioOperationType = '';
+                    self.dialog.editAgenda.businessInfoTypeName = '';
                     self.dialog.editAgenda.loading = false;
                     self.dialog.editAgenda.visible = false;
                 },
@@ -127,7 +134,8 @@ define([
                         name:self.dialog.editAgenda.name,
                         remark:self.dialog.editAgenda.remark,
                         volume:self.dialog.editAgenda.volume,
-                        audioOperationType:self.dialog.editAgenda.audioOperationType
+                        audioOperationType:self.dialog.editAgenda.audioOperationType,
+                        businessInfoTypeName:self.dialog.editAgenda.businessInfoTypeName
                     }, function(data, status){
                         self.dialog.editAgenda.loading = false;
                         if(status!==200) return;
@@ -238,12 +246,21 @@ define([
                             });
                         }
                     });
+                },
+                queryBusinessTypes:function(){
+                    var self = this;
+                    ajax.post('/tetris/bvc/model/agenda/query/business/types', null, function(data){
+                        for(var i=0; i<data.length; i++){
+                            self.businessInfoTypes.push(data[i]);
+                        }
+                    });
                 }
             },
             created:function(){
                 var self = this;
                 self.load(1);
                 self.queryTypes();
+                self.queryBusinessTypes();
             }
         });
 

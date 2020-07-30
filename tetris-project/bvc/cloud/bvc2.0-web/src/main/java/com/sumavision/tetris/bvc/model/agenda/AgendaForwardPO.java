@@ -33,6 +33,12 @@ public class AgendaForwardPO extends AbstractBasePO{
 	/** 源类型 */
 	private AgendaSourceType sourceType;
 	
+	/** 音频源id */
+	private String audioSourceId;
+	
+	/** 音频源类型 */
+	private AgendaSourceType audioSourceType;
+	
 	/** 目的id */
 	private String destinationId;
 	
@@ -79,6 +85,25 @@ public class AgendaForwardPO extends AbstractBasePO{
 
 	public void setSourceType(AgendaSourceType sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	@Column(name = "AUDIO_SOURCE_ID")
+	public String getAudioSourceId() {
+		return audioSourceId;
+	}
+
+	public void setAudioSourceId(String audioSourceId) {
+		this.audioSourceId = audioSourceId;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "AUDIO_SOURCE_TYPE")
+	public AgendaSourceType getAudioSourceType() {
+		return audioSourceType;
+	}
+
+	public void setAudioSourceType(AgendaSourceType audioSourceType) {
+		this.audioSourceType = audioSourceType;
 	}
 
 	@Column(name = "DESTINATION_ID")

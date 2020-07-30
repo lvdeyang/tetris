@@ -29,6 +29,10 @@
                                 prop="name">
                         </el-table-column>
                         <el-table-column
+                                label="类型"
+                                prop="typeName">
+                        </el-table-column>
+                        <el-table-column
                                 label="操作"
                                 width="350">
                             <template slot-scope="scope">
@@ -80,7 +84,16 @@
                 width="500px"
                 :before-close="handleCreateTerminalClose">
 
-            <el-input v-model="dialog.createTerminal.name" placeholder="请输入终端名称"></el-input>
+            <el-form label-width="80px">
+                <el-form-item label="终端名称">
+                    <el-input v-model="dialog.createTerminal.name" placeholder="请输入终端名称"></el-input>
+                </el-form-item>
+                <el-form-item label="终端类型">
+                    <el-select v-model="dialog.createTerminal.typeName" style="width:100%;">
+                        <el-option v-for="item in terminalTypes" :label="item" :value="item"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleCreateTerminalClose">取消</el-button>
@@ -96,7 +109,16 @@
                 width="500px"
                 :before-close="handleEditTerminalClose">
 
-            <el-input v-model="dialog.editTerminal.name" placeholder="请输入终端名称"></el-input>
+            <el-form label-width="80px">
+                <el-form-item label="终端名称">
+                    <el-input v-model="dialog.editTerminal.name" placeholder="请输入终端名称"></el-input>
+                </el-form-item>
+                <el-form-item label="终端类型">
+                    <el-select v-model="dialog.editTerminal.typeName" style="width:100%;">
+                        <el-option v-for="item in terminalTypes" :label="item" :value="item"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditTerminalClose">取消</el-button>

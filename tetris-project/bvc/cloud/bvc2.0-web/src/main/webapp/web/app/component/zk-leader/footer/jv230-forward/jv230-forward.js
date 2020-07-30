@@ -56,8 +56,17 @@ define([
                 }
             }
         },
+        computed:{
+            bundlesCurrent:function(){
+                var self = this;
+                return self.bundles.current;
+            }
+        },
         watch: {
-
+            bundlesCurrent:function(){
+                var self = this;
+                self.currentBundleChange(self.bundles.current);
+            }
         },
         methods: {
             handleWindowClose:function(){
@@ -103,8 +112,12 @@ define([
                         self.layout[i][j].data = '';
                     }
                 }
-                self.bundles.current = data;
-                ajax.post('/tetris/bvc/business/jv230/forward/query/jv230/forwards', {
+                var param = $.parseJSON(data.param);
+                var url = '/tetris/bvc/business/jv230/forward/query/jv230/forwards';
+                if(param.bundleType !== 'jv230'){
+                    url = '/tetris/bvc/business/jv230/forward/query/combine/video';
+                }
+                ajax.post(url, {
                     bundleId:self.bundles.current.id
                 }, function(data){
                     if(data && data.length>0){
@@ -154,7 +167,7 @@ define([
                     }
                 });
                 self.bundles.data.splice(0, self.bundles.data.length);
-                ajax.post('/tetris/bvc/business/jv230/forward/query/forward/jv230/bundles', null, function(data){
+                ajax.post('/tetris/bvc/business/jv230/forward/query/forward/bundles', null, function(data){
                     if(data && data.length>0){
                         for(var i=0; i<data.length; i++){
                             self.bundles.data.push(data[i]);

@@ -213,6 +213,7 @@ public class AgendaService {
 	 * @param String remark 备注
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
+	 * @param String businessInfoTypeName 业务类型
 	 * @return AgendaVO 议程
 	 */
 	@Transactional(rollbackFor = Exception.class)
@@ -220,12 +221,16 @@ public class AgendaService {
 			String name,
 			String remark,
 			Integer volume,
-			String audioOperationType) throws Exception{
+			String audioOperationType,
+			String businessInfoTypeName) throws Exception{
 		AgendaPO agenda = new AgendaPO();
 		agenda.setName(name);
 		agenda.setRemark(remark);
 		agenda.setVolume(volume);
 		agenda.setAudioOperationType(AudioOperationType.valueOf(audioOperationType));
+		if(businessInfoTypeName!=null && !"".equals(businessInfoTypeName)){
+			agenda.setBusinessInfoType(BusinessInfoType.fromName(businessInfoTypeName));
+		}
 		agenda.setUpdateTime(new Date());
 		agendaDao.save(agenda);
 		return new AgendaVO().set(agenda);
@@ -241,6 +246,7 @@ public class AgendaService {
 	 * @param String remark 备注
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
+	 * @param String businessInfoTypeName 业务类型
 	 * @return AgendaVO 议程
 	 */
 	@Transactional(rollbackFor = Exception.class)
@@ -249,7 +255,8 @@ public class AgendaService {
 			String name,
 			String remark,
 			Integer volume,
-			String audioOperationType) throws Exception{
+			String audioOperationType,
+			String businessInfoTypeName) throws Exception{
 		AgendaPO agenda = agendaDao.findOne(id);
 		if(agenda == null){
 			throw new AgendaNotFoundException(id);
@@ -258,6 +265,9 @@ public class AgendaService {
 		agenda.setRemark(remark);
 		agenda.setVolume(volume);
 		agenda.setAudioOperationType(AudioOperationType.valueOf(audioOperationType));
+		if(businessInfoTypeName!=null && !"".equals(businessInfoTypeName)){
+			agenda.setBusinessInfoType(BusinessInfoType.fromName(businessInfoTypeName));
+		}
 		agenda.setUpdateTime(new Date());
 		agendaDao.save(agenda);
 		return new AgendaVO().set(agenda);
