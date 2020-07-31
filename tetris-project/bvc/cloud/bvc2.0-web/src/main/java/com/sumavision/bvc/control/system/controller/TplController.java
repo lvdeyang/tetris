@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.control.system.vo.AutoBuildAgendaVO;
 import com.sumavision.bvc.control.system.vo.BusinessRoleVO;
@@ -36,6 +37,8 @@ import com.sumavision.bvc.system.po.TplContentPO;
 import com.sumavision.bvc.system.po.TplPO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.util.HttpServletRequestParser;
+
+import lombok.experimental.var;
 
 
 /**
@@ -160,9 +163,29 @@ public class TplController {
 			throw new CommonNameAlreadyExistedException("会议模板", name);
 		}
 		
-		List<BusinessRoleVO> _roles = JSON.parseArray(roles, BusinessRoleVO.class);
-		List<ScreenLayoutVO> _layouts = JSON.parseArray(layouts, ScreenLayoutVO.class);
-		List<RecordSchemeVO> _records = JSON.parseArray(records, RecordSchemeVO.class);
+		List<BusinessRoleVO> _roles = new ArrayList<BusinessRoleVO>();
+		JSONArray roleJsons = JSON.parseArray(roles);
+		for(int i=0; i<roleJsons.size(); i++){
+			BusinessRoleVO _role = new BusinessRoleVO().setId(roleJsons.getJSONObject(i).getLong("id"))
+													   .setName(roleJsons.getJSONObject(i).getString("name"));
+			_roles.add(_role);
+		}
+		
+		List<ScreenLayoutVO> _layouts = new ArrayList<ScreenLayoutVO>();
+		JSONArray layoutJsons = JSON.parseArray(layouts);
+		for(int i=0; i<layoutJsons.size(); i++){
+			ScreenLayoutVO _layout = new ScreenLayoutVO().setId(layoutJsons.getJSONObject(i).getLong("id"))
+														.setName(layoutJsons.getJSONObject(i).getString("name"));
+			_layouts.add(_layout);
+		}
+		
+		List<RecordSchemeVO> _records = new ArrayList<RecordSchemeVO>();
+		JSONArray recordJsons = JSON.parseArray(records);
+		for(int i=0; i<recordJsons.size(); i++){
+			RecordSchemeVO _record = new RecordSchemeVO().setId(recordJsons.getJSONObject(i).getLong("id"))
+					                                     .setName(recordJsons.getJSONObject(i).getString("name"));
+			_records.add(_record);
+		} 
 		
 		//添加一个会议模板
 		TplPO tpl = new TplPO();
@@ -222,9 +245,29 @@ public class TplController {
 			String autoBuildAgendaIds,
 			HttpServletRequest request) throws Exception{
 		
-		List<BusinessRoleVO> _roles = JSON.parseArray(roles, BusinessRoleVO.class);
-		List<ScreenLayoutVO> _layouts = JSON.parseArray(layouts, ScreenLayoutVO.class);
-		List<RecordSchemeVO> _records = JSON.parseArray(records, RecordSchemeVO.class);
+		List<BusinessRoleVO> _roles = new ArrayList<BusinessRoleVO>();
+		JSONArray roleJsons = JSON.parseArray(roles);
+		for(int i=0; i<roleJsons.size(); i++){
+			BusinessRoleVO _role = new BusinessRoleVO().setId(roleJsons.getJSONObject(i).getLong("id"))
+													   .setName(roleJsons.getJSONObject(i).getString("name"));
+			_roles.add(_role);
+		}
+		
+		List<ScreenLayoutVO> _layouts = new ArrayList<ScreenLayoutVO>();
+		JSONArray layoutJsons = JSON.parseArray(layouts);
+		for(int i=0; i<layoutJsons.size(); i++){
+			ScreenLayoutVO _layout = new ScreenLayoutVO().setId(layoutJsons.getJSONObject(i).getLong("id"))
+														.setName(layoutJsons.getJSONObject(i).getString("name"));
+			_layouts.add(_layout);
+		}
+		
+		List<RecordSchemeVO> _records = new ArrayList<RecordSchemeVO>();
+		JSONArray recordJsons = JSON.parseArray(records);
+		for(int i=0; i<recordJsons.size(); i++){
+			RecordSchemeVO _record = new RecordSchemeVO().setId(recordJsons.getJSONObject(i).getLong("id"))
+					                                     .setName(recordJsons.getJSONObject(i).getString("name"));
+			_records.add(_record);
+		} 
 		
 		TplPO tpl = tplDAO.findOne(id);
 		if(!tpl.getName().equals(name)){
@@ -242,6 +285,7 @@ public class TplController {
 			content.setTpl(null);
 		}
 		tpl.getContents().removeAll(oldContents);
+		tplDAO.save(tpl);
 		tplContentDAO.deleteInBatch(oldContents);
 		
 		//添加新会议模板内容
