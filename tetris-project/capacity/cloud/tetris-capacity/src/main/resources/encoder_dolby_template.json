@@ -1,0 +1,99 @@
+{
+	"dolby": {
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"bitrate",
+					"sample_rate",
+					"sample_fmt",
+					"channel_layout",
+					"type"
+				]
+			}
+		},
+		"constraint": {
+			"bitrate": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 7,
+					"values": [
+						"96",
+						"128",
+						"192",
+						"256",
+						"272",
+						"288",
+						"304",
+						"320",
+						"336",
+						"352",
+						"368",
+						"384",
+						"400",
+						"448",
+						"512",
+						"576",
+						"640",
+						"704",
+						"768",
+						"832",
+						"896",
+						"960",
+						"1024"
+					]
+				}
+			},
+			"sample_rate": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"48"
+					]
+				}
+			},
+			"sample_fmt": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"s16"
+					]
+				}
+			},
+			"channel_layout": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"stereo",
+						"5.1",
+						"7.1"
+					]
+				}
+			},
+			"type": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"ac3",
+						"eac3"
+					]
+				}
+			}
+		}
+	}
+}

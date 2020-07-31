@@ -1,0 +1,15 @@
+{
+	"parrent_template":"encode_mpeg2_template.json",
+	"parrent":"mpeg2",
+	"msdk_encode":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[]
+			}
+		},
+		"constraint": {
+		}
+	}
+}

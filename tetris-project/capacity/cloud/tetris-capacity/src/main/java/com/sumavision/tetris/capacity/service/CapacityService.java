@@ -90,8 +90,7 @@ public class CapacityService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月28日 下午2:39:30
-	 * @param AllRequest all
-	 * @return AllResponse  
+	 * @return AllResponse
 	 */
 	private AllResponse createAll(AllRequest all, String ip, Long port) throws Exception{
 		
@@ -103,7 +102,7 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[create-all] request, url: {}", url);
+		LOG.info("[create-all] request, url: {} \nbody: {}", url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-all] response, result: {}" , res);
 		if(res == null) throw new HttpTimeoutException(ip);
@@ -144,11 +143,11 @@ public class CapacityService {
 										      .append(port)
 										      .append(UrlConstant.URL_COMBINE)
 										      .toString();
-		LOG.info("[delete-all] request, url: {}",url);
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all));
-		LOG.info("[delete-all] response, result: {}" , request);
+		LOG.info("[delete-all] request, url: {}",url,request);
 
-		HttpUtil.httpDelete(url, request);
+		JSONObject result = HttpUtil.httpDelete(url, request);
+		LOG.info("[delete-all] response, result: {}",result);
 	}
 
 	/**
@@ -525,7 +524,7 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
 		LOG.info("[modify-program] request, url: {} \n body: {}",url,request);
-		JSONObject res = HttpUtil.httpPatch(url, request);
+		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-program] response, result: {}",res);
 
 		if(res == null) throw new HttpTimeoutException(ip);
@@ -573,9 +572,9 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-		LOG.info("[delete-program] request, url: {} \n body: {}",url,"");
+		LOG.info("[analysis-input] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		LOG.info("[delete-program] response, result: {}",res);
+		LOG.info("[analysis-input] response, result: {}",res);
 
 		if(res == null) throw new HttpTimeoutException(ip);
 		
@@ -637,14 +636,30 @@ public class CapacityService {
 	 * @param CreateTaskRequest task 不带msg_id的task
 	 * @return CreateTaskResponse
 	 */
-	public CreateTaskResponse createTasksAddMsgId(CreateTaskRequest task) throws Exception{
+	public CreateTaskResponse createTasksAddMsgId(CreateTaskRequest task,String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		task.setMsg_id(msg_id);
 		
 		System.out.println(JSONObject.toJSONString(task));
 		
-		return createTasks(task);
+		return createTasks(capacityIp,task);
+	}
+
+	/**
+	 * 创建任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午2:21:59
+	 * @param CreateTaskRequest task 不带msg_id的task
+	 * @return CreateTaskResponse
+	 */
+	public CreateTaskResponse createTasksWithMsgId(CreateTaskRequest task,String capacityIp) throws Exception{
+		if (StringUtils.isBlank(task.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			task.setMsg_id(msg_id);
+		}
+		return createTasks(capacityIp,task);
 	}
 	
 	/**
@@ -655,10 +670,10 @@ public class CapacityService {
 	 * @param CreateTaskRequest task 创建任务参数
 	 * @return CreateTaskResponse 创建任务返回
 	 */
-	private CreateTaskResponse createTasks(CreateTaskRequest task) throws Exception{
+	private CreateTaskResponse createTasks(String ip, CreateTaskRequest task) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -685,10 +700,27 @@ public class CapacityService {
 	 * @param DeleteTasksRequest task 不带msg_id的task
 	 */
 	public void deleteTasksAddMsgId(DeleteTasksRequest task, String capacityIp) throws Exception{
-		
+
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		task.setMsg_id(msg_id);
-		
+
+		deleteTasks(task, capacityIp);
+	}
+
+	/**
+	 * 删除任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午2:53:36
+	 * @param DeleteTasksRequest task 不带msg_id的task
+	 */
+	public void deleteTasksWithMsgId(DeleteTasksRequest task, String capacityIp) throws Exception{
+
+		if (StringUtils.isBlank(task.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			task.setMsg_id(msg_id);
+		}
+
 		deleteTasks(task, capacityIp);
 	}
 	

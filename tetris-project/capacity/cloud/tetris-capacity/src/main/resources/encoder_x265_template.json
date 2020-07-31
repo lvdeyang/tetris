@@ -1,0 +1,76 @@
+{
+	"parrent_template":"encode_h265_template.json",
+	"parrent":"hevc",
+	"x265":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"preset",
+					"refine",
+					"pixel_format",
+					"bframe_reference"
+				]
+			}
+		},
+		"constraint": {
+			"preset": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 2,
+					"values": [
+						"ultrafast",
+						"superfast",
+						"veryfast",
+						"faster",
+						"fast",
+						"medium",
+						"slow",
+						"slower",
+						"veryslow",
+						"placebo"						
+					]
+				}
+			},
+			"refine": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 4,
+					"min_value": 1,
+					"max_value": 7,
+					"step": 1
+				}
+			},
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420",
+						"yuv420_10bit"
+					]
+				}
+			},
+			"bframe_reference": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"none",
+						"strict",
+						"normal"
+					]
+				}
+			}
+		}
+	}
+}

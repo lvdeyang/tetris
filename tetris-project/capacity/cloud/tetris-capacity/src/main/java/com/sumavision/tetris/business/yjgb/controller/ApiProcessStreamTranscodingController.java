@@ -45,7 +45,7 @@ public class ApiProcessStreamTranscodingController {
 			String transcode_streamTranscodingInfo, 
 			String transcode_recordInfo, 
 			HttpServletRequest request) throws Exception{
-		
+		System.out.println("process param of strem transcode : "+ transcode_streamTranscodingInfo);
 		UserVO user = userQuery.current();
 		
 		StreamTranscodingVO info = JSON.parseObject(transcode_streamTranscodingInfo, StreamTranscodingVO.class);
