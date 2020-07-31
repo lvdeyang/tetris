@@ -142,6 +142,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/do/wechat/login")
 												   .add("/after/login/success")
 												   .add("/index")
+												   .add("/tetris/index/*")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
 												   .add("/api/server/media/upload")
