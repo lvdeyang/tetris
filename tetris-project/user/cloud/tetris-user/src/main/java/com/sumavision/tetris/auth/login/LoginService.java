@@ -114,8 +114,10 @@ public class LoginService {
 		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
 			throw new TooManyAbnormalLoginTimesException();
 		} 
-		for(int i=0; i<5; i++){
-			password = base64.decode(password);
+		if(!TerminalType.ANDROID_TVOS.equals(terminalType)){
+			for(int i=0; i<5; i++){
+				password = base64.decode(password);
+			}
 		}
 		password = sha256Encoder.encode(password);
 		if(!user.getPassword().equals(password)){
