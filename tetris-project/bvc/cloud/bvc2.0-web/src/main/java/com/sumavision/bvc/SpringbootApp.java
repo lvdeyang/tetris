@@ -20,7 +20,7 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @Import(SpringContext.class)
 @ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
 			   basePackages = {"com.sumavision.bvc", "com.sumavision.tetris", "com.suma.venus.resource", "com.suma.venus.message"})
-@ServletComponentScan(basePackages = {"com.sumavision.bvc.listener", "com.sumavision.bvc.control.device.monitor.record"})
+@ServletComponentScan(basePackages = {"com.sumavision.bvc.listener", "com.sumavision.bvc.control.device.monitor.record", "com.sumavision.tetris"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableCaching
 @EnableFeignClients(basePackages={"com.sumavision.bvc", "com.suma.venus.resource", "com.sumavision.tetris"})
