@@ -55,6 +55,8 @@ public class MediaVideoVO{
 	
 	private List<MediaVideoVO> children;
 	
+	private String ftpUrl;
+	
 	public Long getId() {
 		return id;
 	}
@@ -268,6 +270,15 @@ public class MediaVideoVO{
 
 	public MediaVideoVO setChildren(List<MediaVideoVO> children) {
 		this.children = children;
+		return this;
+	}
+
+	public String getFtpUrl() {
+		return ftpUrl;
+	}
+
+	public MediaVideoVO setFtpUrl(String ftpUrl) {
+		this.ftpUrl = ftpUrl;
 		return this;
 	}
 	

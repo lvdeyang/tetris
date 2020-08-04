@@ -80,6 +80,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private List<MediaVideoVO> children;
 	
+	private String ftpUrl;
+	
 	public String getName() {
 		return name;
 	}
@@ -377,6 +379,9 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setProgress(0)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setFtpUrl((entity.getStoreType() == StoreType.REMOTE) ? "" : new StringBufferWrapper().append("ftp://").
+					append(serverProps.getFtpUsername()).append(":").append(serverProps.getFtpPassword()).append("@").
+					append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(serverProps.getFtpPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setEncryptionUrl(entity.getEncryptionUrl())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
@@ -406,6 +411,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setIcon(MediaVideoItemType.FOLDER.getIcon())
 			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");
+		return this;
+	}
+
+	public String getFtpUrl() {
+		return ftpUrl;
+	}
+
+	public MediaVideoVO setFtpUrl(String ftpUrl) {
+		this.ftpUrl = ftpUrl;
 		return this;
 	}
 	
