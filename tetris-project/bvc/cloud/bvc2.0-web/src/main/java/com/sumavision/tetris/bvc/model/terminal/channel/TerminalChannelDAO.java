@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
-import com.sumavision.tetris.bvc.model.terminal.TerminalBundleChannelPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = TerminalChannelPO.class, idClass = Long.class)

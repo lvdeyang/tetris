@@ -66,9 +66,17 @@ public class TerminalBundleUserPermissionQuery {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<BundlePO> pagedEntities = null;
 		if(bundleName==null || "".equals(bundleName)){
-			pagedEntities = bundleDao.findByDeviceModelAndBundleType(deviceModel, "VenusTerminal", page);
+			if(deviceModel==null || "".equals(deviceModel)){
+				pagedEntities = bundleDao.findByBundleType("VenusTerminal", page);
+			}else{
+				pagedEntities = bundleDao.findByDeviceModelAndBundleType(deviceModel, "VenusTerminal", page);
+			}
 		}else{
-			pagedEntities = bundleDao.findByDeviceModelAndBundleTypeAndBundleNameLike(deviceModel, "VenusTerminal", new StringBufferWrapper().append("%").append(bundleName).append("%").toString(), page);
+			if(deviceModel==null || "".equals(deviceModel)){
+				pagedEntities = bundleDao.findByBundleTypeAndBundleNameLike("VenusTerminal", new StringBufferWrapper().append("%").append(bundleName).append("%").toString(), page);
+			}else{
+				pagedEntities = bundleDao.findByDeviceModelAndBundleTypeAndBundleNameLike(deviceModel, "VenusTerminal", new StringBufferWrapper().append("%").append(bundleName).append("%").toString(), page);
+			}
 		}
 		List<BundlePO> entities = pagedEntities.getContent();
 		long total = pagedEntities.getTotalElements();

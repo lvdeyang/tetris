@@ -21,6 +21,10 @@ public class AgendaVO extends AbstractBaseVO<AgendaVO, AgendaPO>{
 	
 	private String businessInfoTypeName;
 	
+	private String agendaModeType;
+	
+	private String agendaModeTypeName;
+	
 	public String getName() {
 		return name;
 	}
@@ -93,6 +97,24 @@ public class AgendaVO extends AbstractBaseVO<AgendaVO, AgendaPO>{
 		return this;
 	}
 
+	public String getAgendaModeType() {
+		return agendaModeType;
+	}
+
+	public AgendaVO setAgendaModeType(String agendaModeType) {
+		this.agendaModeType = agendaModeType;
+		return this;
+	}
+
+	public String getAgendaModeTypeName() {
+		return agendaModeTypeName;
+	}
+
+	public AgendaVO setAgendaModeTypeName(String agendaModeTypeName) {
+		this.agendaModeTypeName = agendaModeTypeName;
+		return this;
+	}
+
 	@Override
 	public AgendaVO set(AgendaPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -105,7 +127,9 @@ public class AgendaVO extends AbstractBaseVO<AgendaVO, AgendaPO>{
 			.setAudioOperationType(entity.getAudioOperationType().toString())
 			.setAudioOperationTypeName(entity.getAudioOperationType().getName())
 			.setBusinessInfoType(entity.getBusinessInfoType()==null?"":entity.getBusinessInfoType().toString())
-			.setBusinessInfoTypeName(entity.getBusinessInfoType()==null?"":entity.getBusinessInfoType().getName());
+			.setBusinessInfoTypeName(entity.getBusinessInfoType()==null?"":entity.getBusinessInfoType().getName())
+			.setAgendaModeType(entity.getAgendaModeType()==null?"":entity.getAgendaModeType().toString())
+			.setAgendaModeTypeName(entity.getAgendaModeType()==null?"":entity.getAgendaModeType().getName());
 		return this;
 	}
 

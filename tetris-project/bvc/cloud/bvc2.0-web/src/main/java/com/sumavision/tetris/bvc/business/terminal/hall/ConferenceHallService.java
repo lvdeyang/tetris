@@ -1,13 +1,20 @@
 package com.sumavision.tetris.bvc.business.terminal.hall;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.bvc.business.terminal.hall.exception.ConferenceHallNotFoundException;
+import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalBundlePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.exception.TerminalNotFoundException;
@@ -22,7 +29,57 @@ public class ConferenceHallService {
 	private TerminalDAO terminalDao;
 	
 	@Autowired
+	private TerminalBundleDAO terminalBundleDao;
+	
+	@Autowired
 	private TerminalBundleConferenceHallPermissionDAO terminalBundleConferenceHallPermissionDao;
+	
+	/**
+	 * 批量添加会场（直接绑定设备）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月4日 上午10:29:52
+	 * @param Long terminalId 终端id
+	 * @param JSONString bundles 设备列表
+	 * @return List<ConferenceHallVO> 会场列表
+	 */
+	public List<ConferenceHallVO> addBatch(
+			Long terminalId,
+			JSONArray bundles) throws Exception{
+		TerminalPO terminal = terminalDao.findOne(terminalId);
+		List<TerminalBundlePO> terminalBundles = terminalBundleDao.findByTerminalId(terminalId);
+		TerminalBundlePO terminalBundle = terminalBundles.get(0);
+		List<ConferenceHallPO> halls = new ArrayList<ConferenceHallPO>();
+		List<TerminalBundleConferenceHallPermissionPO> permissions = new ArrayList<TerminalBundleConferenceHallPermissionPO>();
+		Map<JSONObject, ConferenceHallPO> bundleHallMapper = new HashMap<JSONObject, ConferenceHallPO>();
+		for(int i=0; i<bundles.size(); i++){
+			JSONObject bundle = bundles.getJSONObject(i);
+			ConferenceHallPO hall = new ConferenceHallPO();
+			hall.setUpdateTime(new Date());
+			hall.setName(bundle.getString("bundleName"));
+			hall.setTerminalId(terminalId);
+			halls.add(hall);
+			bundleHallMapper.put(bundle, hall);
+		}
+		conferenceHallDao.save(halls);
+		for(int i=0; i<bundles.size(); i++){
+			JSONObject bundle = bundles.getJSONObject(i);
+			TerminalBundleConferenceHallPermissionPO permission = new TerminalBundleConferenceHallPermissionPO();
+			permission.setUpdateTime(new Date());
+			permission.setConferenceHallId(bundleHallMapper.get(bundle).getId());
+			permission.setTerminalBundleId(terminalBundle.getId());
+			permission.setBundleId(bundle.getString("bundleId"));
+			permission.setBundleName(bundle.getString("bundleName"));
+			permission.setBundleType(bundle.getString("bundleType"));
+			permissions.add(permission);
+		}
+		terminalBundleConferenceHallPermissionDao.save(permissions);
+		List<ConferenceHallVO> hallVOs = ConferenceHallVO.getConverter(ConferenceHallVO.class).convert(halls, ConferenceHallVO.class);
+		for(ConferenceHallVO hallVO:hallVOs){
+			hallVO.setTerminalName(terminal.getName());
+		}
+		return hallVOs;
+	}
 	
 	/**
 	 * 添加会场<br/>

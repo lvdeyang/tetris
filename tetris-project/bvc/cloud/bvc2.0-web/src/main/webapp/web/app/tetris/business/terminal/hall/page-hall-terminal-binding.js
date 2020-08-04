@@ -72,6 +72,20 @@ define([
                         name:'',
                         terminal:''
                     },
+                    createHallBatch:{
+                        visible:false,
+                        loading:false,
+                        terminal:''
+                    },
+                    selectSingleBundleTerminal:{
+                        visible:false,
+                        loading:false,
+                        data:[],
+                        props:{
+                            label:'name'
+                        },
+                        current:''
+                    },
                     editHall:{
                         visible:false,
                         loading:false,
@@ -91,11 +105,11 @@ define([
                         data:[],
                         page:{
                             currentPage:0,
-                            pageSize:0,
                             total:0,
                             pageSize:20
                         },
-                        currentRow:''
+                        currentRow:'',
+                        selected:[]
                     }
                 }
             },
@@ -155,6 +169,7 @@ define([
                                 self.terminalBundle.data.push(data[i]);
                             }
                         }
+                        self.terminalBundle.current = '';
                     });
                 },
                 handleCreateHall:function(){
@@ -196,6 +211,87 @@ define([
                         }
                         self.handleCreateHallClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                handleCreateHallBatch:function(){
+                    var self = this;
+                    self.dialog.createHallBatch.visible = true;
+                    self.loadBundles(1);
+                },
+                handleBundleSelected:function(selection){
+                    var self = this;
+                    console.log(selection);
+                    self.dialog.selectBundle.selected.splice(0, self.dialog.selectBundle.selected.length);
+                    if(selection.length > 0){
+                        for(var i=0; i<selection.length; i++){
+                            self.dialog.selectBundle.selected.push(selection[i]);
+                        }
+                    }
+                },
+                handleSelectSingleBundleTerminal:function(){
+                    var self = this;
+                    self.dialog.selectSingleBundleTerminal.visible = true;
+                    self.dialog.selectSingleBundleTerminal.data.splice(0, self.dialog.selectSingleBundleTerminal.data.length);
+                    ajax.post('/tetris/bvc/business/conference/hall/load/single/bundle/terminal', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectSingleBundleTerminal.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectSingleBundleTerminalClose:function(){
+                    var self = this;
+                    var currentNode = self.$refs.singleBundleTerminalTree.getCurrentNode();
+                    if(currentNode){
+                        self.dialog.createHallBatch.terminal = currentNode;
+                    }
+                    self.dialog.selectSingleBundleTerminal.visible = false;
+                },
+                handleCreateHallBatchClose:function(){
+                    var self = this;
+                    self.dialog.createHallBatch.visible = false;
+
+                    self.dialog.selectSingleBundleTerminal.visible = false;
+                    self.dialog.selectSingleBundleTerminal.loading = false;
+                    self.dialog.selectSingleBundleTerminal.data.splice(0,  self.dialog.selectSingleBundleTerminal.data.length);
+                    self.dialog.selectSingleBundleTerminal.current = '';
+
+                    self.dialog.selectBundle.filter.bundleName = '';
+                    self.dialog.selectBundle.data.splice(0, self.dialog.selectBundle.data.length);
+                    self.dialog.selectBundle.page.currentPage = 0;
+                    self.dialog.selectBundle.page.total = 0;
+                    self.dialog.selectBundle.page.currentPage = 0;
+                    self.dialog.selectBundle.currentRow = '';
+                    self.dialog.selectBundle.selected.splice(0, self.dialog.selectBundle.selected.length);
+                },
+                handleCreateHallBatchSubmit:function(){
+                    var self = this;
+                    if(!self.dialog.createHallBatch.terminal){
+                        self.$message({
+                            type:'error',
+                            message:'请选择终端类型'
+                        });
+                        return;
+                    }
+                    if(self.dialog.selectBundle.selected.length <= 0){
+                        self.$message({
+                            type:'error',
+                            message:'请勾选设备'
+                        });
+                        return;
+                    }
+                    ajax.post('/tetris/bvc/business/conference/hall/add/batch', {
+                        terminalId:self.dialog.createHallBatch.terminal.id,
+                        bundles:$.toJSON(self.dialog.selectBundle.selected)
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.hall.data.push(data[i]);
+                            }
+                            self.hall.page.total += data.length;
+                        }
+                        self.handleCreateHallBatchClose();
+                    });
                 },
                 loadTerminals:function(){
                     var self = this;
@@ -332,7 +428,7 @@ define([
                     self.dialog.selectBundle.data.splice(0,  self.dialog.selectBundle.data.length);
                     ajax.post('/tetris/bvc/business/terminal/bundle/user/permission/load/bundles', {
                         bundleName:self.dialog.selectBundle.filter.bundleName,
-                        deviceModel:self.terminalBundle.current.bundleType,
+                        //deviceModel:self.terminalBundle.current.bundleType,
                         currentPage:currentPage,
                         pageSize:self.dialog.selectBundle.page.pageSize
                     }, function(data){

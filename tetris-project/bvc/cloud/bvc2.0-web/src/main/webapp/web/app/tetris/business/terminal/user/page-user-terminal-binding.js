@@ -185,7 +185,7 @@ define([
                     self.dialog.selectBundle.data.splice(0,  self.dialog.selectBundle.data.length);
                     ajax.post('/tetris/bvc/business/terminal/bundle/user/permission/load/bundles', {
                         bundleName:self.dialog.selectBundle.filter.bundleName,
-                        deviceModel:self.terminalBundle.current.bundleType,
+                        //deviceModel:self.terminalBundle.current.bundleType,
                         currentPage:currentPage,
                         pageSize:self.dialog.selectBundle.page.pageSize
                     }, function(data){
