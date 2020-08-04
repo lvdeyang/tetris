@@ -3,6 +3,8 @@ package com.sumavision.tetris.bvc.business.bo;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 
 /**
  * 描述源<br/>
@@ -12,6 +14,9 @@ import com.sumavision.tetris.bvc.business.BusinessInfoType;
  * <b>日期：</b>2020年7月2日 下午3:50:16
  */
 public class SourceBO {
+	
+	/** 源类型 */
+	private AgendaSourceType sourceType;
 	
 	ChannelSchemeDTO videoSource;
 	
@@ -25,6 +30,8 @@ public class SourceBO {
 	
 	String businessId;
 	
+	AgendaForwardType agendaForwardType;
+	
 	/** 用户userId/设备bundleId/文件id/合屏uuid */
 	String srcId;
 
@@ -33,6 +40,24 @@ public class SourceBO {
 	String srcName;
 	
 	String srcCode;
+	
+	/**  音频源信息 */
+	String srcAudioId;
+
+	Long srcAudioMemberId;
+	
+	String srcAudioName;
+	
+	String srcAudioCode;
+
+	public AgendaSourceType getSourceType() {
+		return sourceType;
+	}
+
+	public SourceBO setSourceType(AgendaSourceType sourceType) {
+		this.sourceType = sourceType;
+		return this;
+	}
 
 	public ChannelSchemeDTO getVideoSource() {
 		return videoSource;
@@ -88,6 +113,15 @@ public class SourceBO {
 		return this;
 	}
 	
+	public AgendaForwardType getAgendaForwardType() {
+		return agendaForwardType;
+	}
+
+	public SourceBO setAgendaForwardType(AgendaForwardType agendaForwardType) {
+		this.agendaForwardType = agendaForwardType;
+		return this;
+	}
+
 	public String getSrcId() {
 		return srcId;
 	}
@@ -121,6 +155,42 @@ public class SourceBO {
 
 	public SourceBO setSrcCode(String srcCode) {
 		this.srcCode = srcCode;
+		return this;
+	}
+
+	public String getSrcAudioId() {
+		return srcAudioId;
+	}
+
+	public SourceBO setSrcAudioId(String srcAudioId) {
+		this.srcAudioId = srcAudioId;
+		return this;
+	}
+
+	public Long getSrcAudioMemberId() {
+		return srcAudioMemberId;
+	}
+
+	public SourceBO setSrcAudioMemberId(Long srcAudioMemberId) {
+		this.srcAudioMemberId = srcAudioMemberId;
+		return this;
+	}
+
+	public String getSrcAudioName() {
+		return srcAudioName;
+	}
+
+	public SourceBO setSrcAudioName(String srcAudioName) {
+		this.srcAudioName = srcAudioName;
+		return this;
+	}
+
+	public String getSrcAudioCode() {
+		return srcAudioCode;
+	}
+
+	public SourceBO setSrcAudioCode(String srcAudioCode) {
+		this.srcAudioCode = srcAudioCode;
 		return this;
 	}
 	

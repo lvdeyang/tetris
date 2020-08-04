@@ -15,7 +15,7 @@ public interface PageTaskDAO extends MetBaseDAO<PageTaskPO>{
 
 	public List<PageTaskPO> findByBusinessIdIn(Collection<String> businessIds);
 	
-	public List<PageTaskPO> findByVideoForwardUuidIn(Collection<String> uuids);
+	public List<PageTaskPO> findByForwardUuidIn(Collection<String> uuids);
 	
 	public List<PageTaskPO> findByDstMemberIdIn(Collection<Long> dstMemberIds);
 	

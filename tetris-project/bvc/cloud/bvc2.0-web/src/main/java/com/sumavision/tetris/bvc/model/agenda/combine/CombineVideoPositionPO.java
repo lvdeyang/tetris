@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年6月4日 下午3:32:26
  */
-@Entity
+@Entity(name = "com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionPO")
 @Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_VIDEO_POSITION")
 public class CombineVideoPositionPO extends AbstractBasePO{
 

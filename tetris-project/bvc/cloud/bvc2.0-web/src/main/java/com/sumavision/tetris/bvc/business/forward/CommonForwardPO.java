@@ -6,12 +6,15 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.sumavision.bvc.device.group.enumeration.ForwardDstType;
+import com.sumavision.bvc.device.group.enumeration.ForwardSourceType;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.system.po.TplContentPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -30,14 +33,14 @@ public class CommonForwardPO extends AbstractBasePO{
 	/** 音/视频 */
 	private AgendaForwardType type;
 	
-	/** 对应的音频/视频转发uuid */
-	private String relativeUuid;
+	/** 视频执行状态 */
+	private ExecuteStatus videoStatus = ExecuteStatus.DONE;
 	
-	/** 执行状态 */
-	private ExecuteStatus executeStatus = ExecuteStatus.DONE;
+	/** 音频执行状态 */
+	private ExecuteStatus audioStatus = ExecuteStatus.DONE;
 	
 	/** 业务类型 */
-	private BusinessInfoType businessType;
+	private BusinessInfoType businessInfoType;
 
 	/** 关联业务 */
 	/** 业务id，
@@ -49,8 +52,19 @@ public class CommonForwardPO extends AbstractBasePO{
 	private String businessId;
 
 	/************
-	 ***源****
+	 ***视频源****
 	 ************/
+	
+	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
+	private AgendaSourceType videoSourceType;
+	
+//	private ForwardDstType forwardDstType;
+	
+//	/** 记录这个转发来源于哪个配置 */
+//	private String originVideoUuid;
+	
+	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
+	private String combineVideoUuid;
 	
 	/** 用户名/设备名/文件名 */
 	private String srcName;
@@ -85,6 +99,50 @@ public class CommonForwardPO extends AbstractBasePO{
 	
 	/** 源通道名称 */
 	private String srcChannelName;
+
+	/************
+	 ***音频源****
+	 ************/
+	
+	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
+	private AgendaSourceType audioSourceType;
+	
+	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
+	private String combineAudioUuid;
+	
+	/** 用户名/设备名/文件名 */
+	private String srcAudioName;
+	
+	/** 用户号码/设备号码 */
+	private String srcAudioCode;
+	
+	private OriginType srcAudioOrigin = OriginType.INNER;
+	
+	private Long srcAudioMemberId;
+	
+	/** 用户userId/设备bundleId/文件id/合屏uuid */
+	private String srcAudioId;
+	
+	/** 源设备名称 */
+	private String srcAudioBundleName;
+	
+	/** 源设备类型 */
+	private String srcAudioBundleType;
+	
+	/** 源设备类型 */
+	private String srcAudioBundleId;
+	
+	/** 源设备接入层id */
+	private String srcAudioLayerId;
+	
+	/** 源通道id */
+	private String srcAudioChannelId;
+	
+	/** 源存通道类型 */
+	private String srcAudioBaseType;
+	
+	/** 源通道名称 */
+	private String srcAudioChannelName;
 	
 	/** osd id */
 	private Long osdId;
@@ -106,25 +164,6 @@ public class CommonForwardPO extends AbstractBasePO{
 	/** 目标设备类型 */
 	private DstDeviceType dstDeviceType;
 
-	@Column(name = "RELATIVE_UUID")
-	public String getRelativeUuid() {
-		return relativeUuid;
-	}
-
-	public void setRelativeUuid(String relativeUuid) {
-		this.relativeUuid = relativeUuid;
-	}
-
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "EXECUTE_STATUS")
-	public ExecuteStatus getExecuteStatus() {
-		return executeStatus;
-	}
-
-	public void setExecuteStatus(ExecuteStatus executeStatus) {
-		this.executeStatus = executeStatus;
-	}
-
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "DST_DEVICE_TYPE")
 	public DstDeviceType getDstDeviceType() {
@@ -143,6 +182,26 @@ public class CommonForwardPO extends AbstractBasePO{
 
 	public void setType(AgendaForwardType type) {
 		this.type = type;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_STATUS")
+	public ExecuteStatus getVideoStatus() {
+		return videoStatus;
+	}
+
+	public void setVideoStatus(ExecuteStatus videoStatus) {
+		this.videoStatus = videoStatus;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "AUDIO_STATUS")
+	public ExecuteStatus getAudioStatus() {
+		return audioStatus;
+	}
+
+	public void setAudioStatus(ExecuteStatus audioStatus) {
+		this.audioStatus = audioStatus;
 	}
 
 	public String getBusinessId() {
@@ -168,6 +227,24 @@ public class CommonForwardPO extends AbstractBasePO{
 //	public void setDstId(String dstId) {
 //		this.dstId = dstId;
 //	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_SOURCE_TYPE")
+	public AgendaSourceType getVideoSourceType() {
+		return videoSourceType;
+	}
+
+	public void setVideoSourceType(AgendaSourceType videoSourceType) {
+		this.videoSourceType = videoSourceType;
+	}
+
+	public String getCombineVideoUuid() {
+		return combineVideoUuid;
+	}
+
+	public void setCombineVideoUuid(String combineVideoUuid) {
+		this.combineVideoUuid = combineVideoUuid;
+	}
 
 	public String getSrcName() {
 		return srcName;
@@ -280,11 +357,127 @@ public class CommonForwardPO extends AbstractBasePO{
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "BUSINESS_INFO_TYPE")
 	public BusinessInfoType getBusinessInfoType() {
-		return businessType;
+		return businessInfoType;
 	}
 
-	public void setBusinessInfoType(BusinessInfoType businessType) {
-		this.businessType = businessType;
+	public void setBusinessInfoType(BusinessInfoType businessInfoType) {
+		this.businessInfoType = businessInfoType;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "AUDIO_SOURCE_TYPE")
+	public AgendaSourceType getAudioSourceType() {
+		return audioSourceType;
+	}
+
+	public void setAudioSourceType(AgendaSourceType audioSourceType) {
+		this.audioSourceType = audioSourceType;
+	}
+
+	public String getCombineAudioUuid() {
+		return combineAudioUuid;
+	}
+
+	public void setCombineAudioUuid(String combineAudioUuid) {
+		this.combineAudioUuid = combineAudioUuid;
+	}
+
+	public String getSrcAudioName() {
+		return srcAudioName;
+	}
+
+	public void setSrcAudioName(String srcAudioName) {
+		this.srcAudioName = srcAudioName;
+	}
+
+	public String getSrcAudioCode() {
+		return srcAudioCode;
+	}
+
+	public void setSrcAudioCode(String srcAudioCode) {
+		this.srcAudioCode = srcAudioCode;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SRC_AUDIO_ORIGIN")
+	public OriginType getSrcAudioOrigin() {
+		return srcAudioOrigin;
+	}
+
+	public void setSrcAudioOrigin(OriginType srcAudioOrigin) {
+		this.srcAudioOrigin = srcAudioOrigin;
+	}
+
+	public Long getSrcAudioMemberId() {
+		return srcAudioMemberId;
+	}
+
+	public void setSrcAudioMemberId(Long srcAudioMemberId) {
+		this.srcAudioMemberId = srcAudioMemberId;
+	}
+
+	public String getSrcAudioId() {
+		return srcAudioId;
+	}
+
+	public void setSrcAudioId(String srcAudioId) {
+		this.srcAudioId = srcAudioId;
+	}
+
+	public String getSrcAudioBundleName() {
+		return srcAudioBundleName;
+	}
+
+	public void setSrcAudioBundleName(String srcAudioBundleName) {
+		this.srcAudioBundleName = srcAudioBundleName;
+	}
+
+	public String getSrcAudioBundleType() {
+		return srcAudioBundleType;
+	}
+
+	public void setSrcAudioBundleType(String srcAudioBundleType) {
+		this.srcAudioBundleType = srcAudioBundleType;
+	}
+
+	public String getSrcAudioBundleId() {
+		return srcAudioBundleId;
+	}
+
+	public void setSrcAudioBundleId(String srcAudioBundleId) {
+		this.srcAudioBundleId = srcAudioBundleId;
+	}
+
+	public String getSrcAudioLayerId() {
+		return srcAudioLayerId;
+	}
+
+	public void setSrcAudioLayerId(String srcAudioLayerId) {
+		this.srcAudioLayerId = srcAudioLayerId;
+	}
+
+	public String getSrcAudioChannelId() {
+		return srcAudioChannelId;
+	}
+
+	public void setSrcAudioChannelId(String srcAudioChannelId) {
+		this.srcAudioChannelId = srcAudioChannelId;
+	}
+
+	public String getSrcAudioBaseType() {
+		return srcAudioBaseType;
+	}
+
+	public void setSrcAudioBaseType(String srcAudioBaseType) {
+		this.srcAudioBaseType = srcAudioBaseType;
+	}
+
+	public String getSrcAudioChannelName() {
+		return srcAudioChannelName;
+	}
+
+	public void setSrcAudioChannelName(String srcAudioChannelName) {
+		this.srcAudioChannelName = srcAudioChannelName;
 	}
 
 	public Long getOsdId() {
@@ -448,6 +641,10 @@ public class CommonForwardPO extends AbstractBasePO{
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((srcId == null) ? 0 : srcId.hashCode());
 		result = prime * result + ((dstMemberId == null) ? 0 : dstMemberId.hashCode());
+		result = prime * result + ((videoSourceType == null) ? 0 : videoSourceType.hashCode());
+		result = prime * result + ((combineVideoUuid == null) ? 0 : combineVideoUuid.hashCode());
+		result = prime * result + ((audioSourceType == null) ? 0 : audioSourceType.hashCode());
+		result = prime * result + ((combineAudioUuid == null) ? 0 : combineAudioUuid.hashCode());
 		return result;
 	}
 	
@@ -460,8 +657,12 @@ public class CommonForwardPO extends AbstractBasePO{
 		CommonForwardPO forward = (CommonForwardPO) obj;
 		if(type.equals(forward.getType())
 				&& srcId.equals(forward.getSrcId())
-				&& srcMemberId.equals(forward.getSrcMemberId())
-				&& dstMemberId.equals(forward.getDstMemberId())){
+				&& (videoSourceType == null || videoSourceType.equals(forward.getVideoSourceType()))
+				&& (combineVideoUuid == null || combineVideoUuid.equals(forward.getCombineVideoUuid()))
+				&& (audioSourceType == null || audioSourceType.equals(forward.getAudioSourceType()))
+				&& (combineAudioUuid == null || combineAudioUuid.equals(forward.getCombineAudioUuid()))
+				&& (srcMemberId == null || srcMemberId.equals(forward.getSrcMemberId()))
+				&& (dstMemberId == null || dstMemberId.equals(forward.getDstMemberId()))){
 			return true;
 		}
 		return false;
