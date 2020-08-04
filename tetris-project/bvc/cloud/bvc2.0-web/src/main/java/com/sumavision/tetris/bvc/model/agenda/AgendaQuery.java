@@ -22,6 +22,22 @@ public class AgendaQuery {
 	private AgendaDAO agendaDao;
 	
 	/**
+	 * 查询议程模式<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月4日 下午1:57:01
+	 * @return Set<String> 模式议程列表
+	 */
+	public Set<String> queryModeTypes() throws Exception{
+		Set<String> modeTypes = new HashSet<String>();
+		AgendaModeType[] values = AgendaModeType.values();
+		for(AgendaModeType value:values){
+			modeTypes.add(value.getName());
+		}
+		return modeTypes;
+	}
+	
+	/**
 	 * 查询类型<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

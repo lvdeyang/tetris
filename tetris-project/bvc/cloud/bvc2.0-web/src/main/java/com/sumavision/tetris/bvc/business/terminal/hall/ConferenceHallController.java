@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -18,6 +19,21 @@ public class ConferenceHallController {
 	
 	@Autowired
 	private ConferenceHallService conferenceHallService;
+	
+	/**
+	 * 查询但设备终端<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月3日 下午6:09:24
+	 * @return List<TerminalVO> 终端列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/single/bundle/terminal")
+	public Object loadSingleBundleTerminal(HttpServletRequest request) throws Exception{
+		
+		return conferenceHallQuery.loadSingleBundleTerminal();
+	}
 	
 	/**
 	 * 分页查询会场<br/>
@@ -40,6 +56,26 @@ public class ConferenceHallController {
 			HttpServletRequest request) throws Exception{
 		
 		return conferenceHallQuery.load(name, currentPage, pageSize);
+	}
+	
+	/**
+	 * 批量添加会场（直接绑定设备）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月4日 上午10:29:52
+	 * @param Long terminalId 终端id
+	 * @param JSONString bundles 设备列表
+	 * @return List<ConferenceHallVO> 会场列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/batch")
+	public Object addBatch(
+			Long terminalId,
+			String bundles,
+			HttpServletRequest request) throws Exception{
+		
+		return conferenceHallService.addBatch(terminalId, JSON.parseArray(bundles));
 	}
 	
 	/**

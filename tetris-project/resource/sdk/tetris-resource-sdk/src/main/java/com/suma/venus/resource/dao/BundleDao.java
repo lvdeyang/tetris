@@ -26,7 +26,11 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	public Page<BundlePO> findByDeviceModelAndBundleType(String deviceModel, String bundleType, Pageable page);
 	
+	public Page<BundlePO> findByBundleType(String bundleType, Pageable page);
+	
 	public Page<BundlePO> findByDeviceModelAndBundleTypeAndBundleNameLike(String deviceModel, String bundleType, String bundleName, Pageable page);
+	
+	public Page<BundlePO> findByBundleTypeAndBundleNameLike(String bundleType, String bundleName, Pageable page);
 
 	public List<BundlePO> findByDeviceModelIsNotNull();
 

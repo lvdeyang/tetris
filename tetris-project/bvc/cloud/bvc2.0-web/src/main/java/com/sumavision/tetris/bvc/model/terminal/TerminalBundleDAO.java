@@ -23,6 +23,16 @@ public interface TerminalBundleDAO extends BaseDAO<TerminalBundlePO>{
 	public List<TerminalBundlePO> findByTerminalId(Long terminalId);
 	
 	/**
+	 * 批量查询终端设备<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月9日 下午5:58:47
+	 * @param Collection<Long> terminalIds 终端id
+	 * @return List<TerminalBundlePO> 设备列表
+	 */
+	public List<TerminalBundlePO> findByTerminalIdIn(Collection<Long> terminalIds);
+	
+	/**
 	 * 根据终端查询设备模板<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

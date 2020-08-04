@@ -38,6 +38,9 @@ public class AgendaPO extends AbstractBasePO{
 	
 	/** 音频处理方式 */
 	private AudioOperationType audioOperationType;
+	
+	/** 模式 */
+	private AgendaModeType agendaModeType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -93,6 +96,16 @@ public class AgendaPO extends AbstractBasePO{
 
 	public void setAudioOperationType(AudioOperationType audioOperationType) {
 		this.audioOperationType = audioOperationType;
+	}
+
+	@Column(name = "AGENDA_MODE_TYPE")
+	@Enumerated(value = EnumType.STRING)
+	public AgendaModeType getAgendaModeType() {
+		return agendaModeType;
+	}
+
+	public void setAgendaModeType(AgendaModeType agendaModeType) {
+		this.agendaModeType = agendaModeType;
 	}
 	
 }

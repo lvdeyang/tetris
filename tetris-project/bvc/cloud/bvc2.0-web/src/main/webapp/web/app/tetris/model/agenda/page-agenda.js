@@ -31,6 +31,7 @@ define([
                 groups: context.getProp('groups'),
                 audioOperationTypes:[],
                 businessInfoTypes:[],
+                modeTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -46,7 +47,8 @@ define([
                         remark:'',
                         volume:0,
                         audioOperationType:'',
-                        businessInfoTypeName:''
+                        businessInfoTypeName:'',
+                        agendaModeTypeName:''
                     },
                     editAgenda:{
                         visible:false,
@@ -56,7 +58,8 @@ define([
                         remark:'',
                         volume:0,
                         audioOperationType:'',
-                        businessInfoTypeName:''
+                        businessInfoTypeName:'',
+                        agendaModeTypeName:''
                     }
                 }
             },
@@ -81,6 +84,7 @@ define([
                     self.dialog.createAgenda.volume = 0;
                     self.dialog.createAgenda.audioOperationType = '';
                     self.dialog.createAgenda.businessInfoTypeName = '';
+                    self.dialog.createAgenda.agendaModeTypeName = '';
                     self.dialog.createAgenda.loading = false;
                     self.dialog.createAgenda.visible = false;
                 },
@@ -92,7 +96,8 @@ define([
                         remark:self.dialog.createAgenda.remark,
                         volume:self.dialog.createAgenda.volume,
                         audioOperationType:self.dialog.createAgenda.audioOperationType,
-                        businessInfoTypeName:self.dialog.createAgenda.businessInfoTypeName
+                        businessInfoTypeName:self.dialog.createAgenda.businessInfoTypeName,
+                        agendaModeTypeName:self.dialog.createAgenda.agendaModeTypeName
                     }, function(data, status){
                         self.dialog.createAgenda.loading = false;
                         if(status !== 200) return;
@@ -113,6 +118,7 @@ define([
                     self.dialog.editAgenda.volume = row.volume;
                     self.dialog.editAgenda.audioOperationType = row.audioOperationType;
                     self.dialog.editAgenda.businessInfoTypeName = row.businessInfoTypeName;
+                    self.dialog.editAgenda.agendaModeTypeName = row.agendaModeTypeName;
                     self.dialog.editAgenda.visible = true;
                 },
                 handleEditAgendaClose:function(){
@@ -123,6 +129,7 @@ define([
                     self.dialog.editAgenda.volume = 0;
                     self.dialog.editAgenda.audioOperationType = '';
                     self.dialog.editAgenda.businessInfoTypeName = '';
+                    self.dialog.editAgenda.agendaModeTypeName = '';
                     self.dialog.editAgenda.loading = false;
                     self.dialog.editAgenda.visible = false;
                 },
@@ -135,7 +142,8 @@ define([
                         remark:self.dialog.editAgenda.remark,
                         volume:self.dialog.editAgenda.volume,
                         audioOperationType:self.dialog.editAgenda.audioOperationType,
-                        businessInfoTypeName:self.dialog.editAgenda.businessInfoTypeName
+                        businessInfoTypeName:self.dialog.editAgenda.businessInfoTypeName,
+                        agendaModeTypeName:self.dialog.editAgenda.agendaModeTypeName
                     }, function(data, status){
                         self.dialog.editAgenda.loading = false;
                         if(status!==200) return;
@@ -254,6 +262,16 @@ define([
                             self.businessInfoTypes.push(data[i]);
                         }
                     });
+                },
+                queryModeTypes:function(){
+                    var self = this;
+                    ajax.post('/tetris/bvc/model/agenda/query/mode/types', null, function(data){
+                       if(data && data.length>0){
+                           for(var i=0; i<data.length; i++){
+                               self.modeTypes.push(data[i]);
+                           }
+                       }
+                    });
                 }
             },
             created:function(){
@@ -261,6 +279,7 @@ define([
                 self.load(1);
                 self.queryTypes();
                 self.queryBusinessTypes();
+                self.queryModeTypes();
             }
         });
 

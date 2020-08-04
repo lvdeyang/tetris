@@ -19,6 +19,7 @@
                         <div style="width:32%; float:left; box-sizing:border-box; padding:10px 10px 10px 5px;">
                             <el-button size="small" type="primary" icon="el-icon-search" circle @click="loadHalls(hall.page.currentPage)"></el-button>
                             <el-button size="small" type="primary" icon="el-icon-plus" circle @click="handleCreateHall"></el-button>
+                            <el-button size="small" type="primary" icon="el-icon-tickets" circle @click="handleCreateHallBatch"></el-button>
                         </div>
                         <div style="position:absolute; left:0; top:52px; right:0; bottom:50px; padding:0 10px;">
                             <el-scrollbar style="height:100%;">
@@ -86,6 +87,7 @@
         </el-card>
 
         <el-dialog
+                :close-on-click-modal="false"
                 title="添加会场"
                 :visible.sync="dialog.createHall.visible"
                 width="500px"
@@ -127,6 +129,93 @@
         </el-dialog>
 
         <el-dialog
+                :close-on-click-modal="false"
+                title="快速添加"
+                :visible.sync="dialog.createHallBatch.visible"
+                width="900px"
+                :before-close="handleCreateHallBatchClose"
+                class="select-bundle">
+
+            <el-dialog
+                    append-to-body
+                    title="选择终端"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectSingleBundleTerminal.visible"
+                    width="400px"
+                    :before-close="handleSelectSingleBundleTerminalClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectSingleBundleTerminal.visible"
+                                ref="singleBundleTerminalTree"
+                                :props="dialog.selectSingleBundleTerminal.props"
+                                highlight-current
+                                :data="dialog.selectSingleBundleTerminal.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <div style="width:100%; height:500px; position:relative;">
+                <div style="float:left; margin-right:20px;">
+                    <el-button type="text" size="small" @click.native="handleSelectSingleBundleTerminal" style="font-size:14px;">选择终端：</el-button>
+                    <span>{{dialog.createHallBatch.terminal.name}}</span>
+                </div>
+                <div style="width:200px; float:left;">
+                    <el-input size="small" placeholder v-model="dialog.selectBundle.filter.bundleName"></el-input>
+                </div>
+                <div style="float:left; margin-left:10px;">
+                    <el-button size="small" type="primary" circle icon="el-icon-search" @click="loadBundles(dialog.selectBundle.page.currentPage)"></el-button>
+                </div>
+                <div style="position:absolute; left:0; top:42px; right:0; bottom:50px; padding:0 10px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                :data="dialog.selectBundle.data"
+                                style="width: 100%"
+                                @selection-change="handleBundleSelected">
+                            <el-table-column
+                                type="selection"
+                                width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleId"
+                                    label="设备id">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleName"
+                                    label="设备名称">
+                            </el-table-column>
+                            <el-table-column
+                                    width="200"
+                                    prop="bundleType"
+                                    label="设备类型">
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+                <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @current-change="handleBundleCurrentChange"
+                            :current-page="dialog.selectBundle.page.currentPage"
+                            :page-size="dialog.selectBundle.page.pageSize"
+                            layout="total, prev, pager, next"
+                            :total="dialog.selectBundle.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateHallBatchClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateHallBatchSubmit" :loading="dialog.createHallBatch.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
                 title="修改名称"
                 :visible.sync="dialog.editHall.visible"
                 width="500px"
@@ -142,6 +231,7 @@
 
         <el-dialog
                 title="选择设备"
+                :close-on-click-modal="false"
                 :visible.sync="dialog.selectBundle.visible"
                 :before-close="handleSelectBundleClose"
                 width="800px;"

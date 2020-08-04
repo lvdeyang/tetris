@@ -1,7 +1,7 @@
 package com.sumavision.tetris.bvc.model.agenda;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,31 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-
-import com.sumavision.tetris.bvc.model.agenda.exception.AgendaNotFoundException;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
-import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskBO;
-import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
-import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
-import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserLayoutShemeVO;
-import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
-import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
@@ -49,12 +28,9 @@ import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
-import com.sumavision.bvc.system.po.AvtplGearsPO;
-import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.bo.MemberChangedTaskBO;
@@ -76,13 +52,11 @@ import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
-import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.agenda.exception.AgendaNotFoundException;
 import com.sumavision.tetris.bvc.model.role.RoleChannelDAO;
 import com.sumavision.tetris.bvc.model.role.RoleChannelPO;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
-import com.sumavision.tetris.bvc.model.terminal.TerminalBundleChannelDAO;
-import com.sumavision.tetris.bvc.model.terminal.TerminalBundleChannelPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundlePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleType;
@@ -91,18 +65,12 @@ import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelDAO;
 import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelPO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
-import com.sumavision.tetris.bvc.page.PageTaskBO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
-import com.sumavision.tetris.commons.exception.BaseException;
-import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.orm.po.AbstractBasePO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
-import com.sumavision.tetris.websocket.message.WebsocketMessageType;
-import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -214,6 +182,7 @@ public class AgendaService {
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
 	 * @param String businessInfoTypeName 业务类型
+	 * @param String agendaModeTypeName 模式
 	 * @return AgendaVO 议程
 	 */
 	@Transactional(rollbackFor = Exception.class)
@@ -222,7 +191,8 @@ public class AgendaService {
 			String remark,
 			Integer volume,
 			String audioOperationType,
-			String businessInfoTypeName) throws Exception{
+			String businessInfoTypeName,
+			String agendaModeTypeName) throws Exception{
 		AgendaPO agenda = new AgendaPO();
 		agenda.setName(name);
 		agenda.setRemark(remark);
@@ -230,6 +200,9 @@ public class AgendaService {
 		agenda.setAudioOperationType(AudioOperationType.valueOf(audioOperationType));
 		if(businessInfoTypeName!=null && !"".equals(businessInfoTypeName)){
 			agenda.setBusinessInfoType(BusinessInfoType.fromName(businessInfoTypeName));
+		}
+		if(agendaModeTypeName!=null && !"".equals(agendaModeTypeName)){
+			agenda.setAgendaModeType(AgendaModeType.fromName(agendaModeTypeName));
 		}
 		agenda.setUpdateTime(new Date());
 		agendaDao.save(agenda);
@@ -247,6 +220,7 @@ public class AgendaService {
 	 * @param Integer volume 音量
 	 * @param String audioOperationType 音频操作类型
 	 * @param String businessInfoTypeName 业务类型
+	 * @param String agendaModeTypeName 模式
 	 * @return AgendaVO 议程
 	 */
 	@Transactional(rollbackFor = Exception.class)
@@ -256,7 +230,8 @@ public class AgendaService {
 			String remark,
 			Integer volume,
 			String audioOperationType,
-			String businessInfoTypeName) throws Exception{
+			String businessInfoTypeName,
+			String agendaModeTypeName) throws Exception{
 		AgendaPO agenda = agendaDao.findOne(id);
 		if(agenda == null){
 			throw new AgendaNotFoundException(id);
@@ -267,6 +242,9 @@ public class AgendaService {
 		agenda.setAudioOperationType(AudioOperationType.valueOf(audioOperationType));
 		if(businessInfoTypeName!=null && !"".equals(businessInfoTypeName)){
 			agenda.setBusinessInfoType(BusinessInfoType.fromName(businessInfoTypeName));
+		}
+		if(agendaModeTypeName!=null && !"".equals(agendaModeTypeName)){
+			agenda.setAgendaModeType(AgendaModeType.fromName(agendaModeTypeName));
 		}
 		agenda.setUpdateTime(new Date());
 		agendaDao.save(agenda);

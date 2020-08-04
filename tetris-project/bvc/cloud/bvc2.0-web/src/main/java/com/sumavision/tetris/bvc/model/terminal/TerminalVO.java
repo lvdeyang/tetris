@@ -9,6 +9,8 @@ public class TerminalVO extends AbstractBaseVO<TerminalVO, TerminalPO>{
 	
 	private String type;
 	
+	private String singleBundleMode;
+	
 	private String typeName;
 	
 	public String getName() {
@@ -26,6 +28,15 @@ public class TerminalVO extends AbstractBaseVO<TerminalVO, TerminalPO>{
 
 	public TerminalVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getSingleBundleMode() {
+		return singleBundleMode;
+	}
+
+	public TerminalVO setSingleBundleMode(String singleBundleMode) {
+		this.singleBundleMode = singleBundleMode;
 		return this;
 	}
 
