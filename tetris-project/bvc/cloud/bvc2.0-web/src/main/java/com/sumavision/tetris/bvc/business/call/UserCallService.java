@@ -470,7 +470,8 @@ public class UserCallService {
 		List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(businessId.toString());
 		List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(businessId.toString());
 		for(CommonForwardPO forward : forwards){
-			forward.setExecuteStatus(ExecuteStatus.DONE);
+			forward.setVideoStatus(ExecuteStatus.DONE);
+			forward.setAudioStatus(ExecuteStatus.DONE);
 		}
 		for(PageTaskPO task : tasks){
 			boolean change = false;

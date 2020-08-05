@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年6月4日 下午3:33:01
  */
-@Entity
+@Entity(name = "com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO")
 @Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_AUDIO")
 public class CombineAudioPO extends AbstractBasePO{
 

@@ -15,6 +15,8 @@ public interface RunningAgendaDAO extends MetBaseDAO<RunningAgendaPO>{
 	
 	public List<RunningAgendaPO> findByGroupIdAndAgendaIdIn(Long groupId, List<Long> agendaIds);
 	
+	public List<RunningAgendaPO> findByGroupId(Long groupId);
+	
 	@Query(value = "select r.agendaId from com.sumavision.tetris.bvc.business.group.RunningAgendaPO r where r.groupId = ?1 and r.running = true")
 	public List<Long> findRunningAgendaIdsByGroupId(Long groupId);
 	

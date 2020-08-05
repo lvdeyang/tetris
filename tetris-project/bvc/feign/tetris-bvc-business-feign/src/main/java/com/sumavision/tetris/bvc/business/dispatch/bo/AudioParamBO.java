@@ -4,7 +4,7 @@ public class AudioParamBO {
 
 	private String codec = "aac";
 
-	private String bitrate = "64000";
+	private int bitrate = 64000;
 	
 	private int sample_rate = 48000;
 	
@@ -24,11 +24,11 @@ public class AudioParamBO {
 		return this;
 	}
 
-	public String getBitrate() {
+	public int getBitrate() {
 		return bitrate;
 	}
 
-	public AudioParamBO setBitrate(String bitrate) {
+	public AudioParamBO setBitrate(int bitrate) {
 		this.bitrate = bitrate;
 		return this;
 	}

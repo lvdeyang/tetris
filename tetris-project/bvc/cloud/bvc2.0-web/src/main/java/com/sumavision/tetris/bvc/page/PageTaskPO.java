@@ -16,6 +16,7 @@ import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -55,9 +56,7 @@ public class PageTaskPO extends AbstractBasePO {
 	 */
 	private String businessId;
 	
-	private String videoForwardUuid;
-	
-	private String audioForwardUuid;
+	private String forwardUuid;
 
 	/** 业务名称，用于文字显示，对应播放器信息中的businessInfo */
 	private String businessName;
@@ -65,6 +64,12 @@ public class PageTaskPO extends AbstractBasePO {
 	/************
 	 ***视频源****
 	 ************/
+	
+	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
+	private AgendaSourceType videoSourceType;
+	
+	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
+	private String combineVideoUuid;
 	
 	private String playUrl;
 	
@@ -103,6 +108,12 @@ public class PageTaskPO extends AbstractBasePO {
 	/************
 	 ***音频源****
 	 ************/
+	
+	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
+	private AgendaSourceType audioSourceType;
+	
+	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
+	private String combineAudioUuid;
 	
 	/** 用户userId/设备bundleId/文件id/合屏uuid */
 	private String srcAudioId;
@@ -257,20 +268,30 @@ public class PageTaskPO extends AbstractBasePO {
 		this.businessId = businessId;
 	}
 
-	public String getVideoForwardUuid() {
-		return videoForwardUuid;
+	public String getForwardUuid() {
+		return forwardUuid;
 	}
 
-	public void setVideoForwardUuid(String videoForwardUuid) {
-		this.videoForwardUuid = videoForwardUuid;
+	public void setForwardUuid(String forwardUuid) {
+		this.forwardUuid = forwardUuid;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_SOURCE_TYPE")
+	public AgendaSourceType getVideoSourceType() {
+		return videoSourceType;
 	}
 
-	public String getAudioForwardUuid() {
-		return audioForwardUuid;
+	public void setVideoSourceType(AgendaSourceType videoSourceType) {
+		this.videoSourceType = videoSourceType;
 	}
 
-	public void setAudioForwardUuid(String audioForwardUuid) {
-		this.audioForwardUuid = audioForwardUuid;
+	public String getCombineVideoUuid() {
+		return combineVideoUuid;
+	}
+
+	public void setCombineVideoUuid(String combineVideoUuid) {
+		this.combineVideoUuid = combineVideoUuid;
 	}
 
 	public String getPlayUrl() {
@@ -369,6 +390,24 @@ public class PageTaskPO extends AbstractBasePO {
 
 	public void setSrcVideoChannelName(String srcVideoChannelName) {
 		this.srcVideoChannelName = srcVideoChannelName;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "AUDIO_SOURCE_TYPE")
+	public AgendaSourceType getAudioSourceType() {
+		return audioSourceType;
+	}
+
+	public void setAudioSourceType(AgendaSourceType audioSourceType) {
+		this.audioSourceType = audioSourceType;
+	}
+
+	public String getCombineAudioUuid() {
+		return combineAudioUuid;
+	}
+
+	public void setCombineAudioUuid(String combineAudioUuid) {
+		this.combineAudioUuid = combineAudioUuid;
 	}
 
 	public String getSrcAudioName() {
@@ -691,8 +730,7 @@ public class PageTaskPO extends AbstractBasePO {
 	public PageTaskPO set(PageTaskBO task){//TODO
 		this.businessType = task.getBusinessInfoType();
 		this.businessId = task.getBusinessId();
-		this.videoForwardUuid = task.getVideoForwardUuid();
-		this.audioForwardUuid = task.getAudioForwardUuid();
+		this.forwardUuid = task.getVideoForwardUuid();
 		this.businessName = task.getBusinessName();
 		
 		return this;

@@ -6,10 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+import org.springframework.stereotype.Component;
 
 import com.sumavision.bvc.device.group.po.CombineVideoSrcPO;
 import com.sumavision.tetris.orm.dao.MetBaseDAO;
 
+@Component("com.sumavision.bvc.device.group.dao.CombineVideoSrcDAO")
 @RepositoryDefinition(domainClass = CombineVideoSrcPO.class, idClass = long.class)
 public interface CombineVideoSrcDAO extends MetBaseDAO<CombineVideoSrcPO>{
 

@@ -230,7 +230,8 @@ define([
                         });
                     }else if(self.dialog.addForward[filed] === 'ROLE_CHANNEL'){
                         var channelType = '';
-                        if(self.dialog.addForward.type === 'VIDEO'){
+                        //if(self.dialog.addForward.type === 'VIDEO' || self.dialog.addForward.type === 'AUDIO_VIDEO'){
+                        if(type === 'video'){
                             channelType = 'VIDEO_ENCODE';
                         }else{
                             channelType = 'AUDIO_ENCODE';

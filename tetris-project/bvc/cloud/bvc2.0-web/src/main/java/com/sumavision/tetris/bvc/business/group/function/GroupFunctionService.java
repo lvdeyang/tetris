@@ -285,7 +285,8 @@ public class GroupFunctionService {
 			List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(groupId.toString());
 			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
 			for(CommonForwardPO forward : forwards){
-				forward.setExecuteStatus(ExecuteStatus.UNDONE);
+				forward.setVideoStatus(ExecuteStatus.UNDONE);
+				forward.setAudioStatus(ExecuteStatus.UNDONE);
 			}
 			for(PageTaskPO task : tasks){
 				boolean change = false;
@@ -402,7 +403,8 @@ public class GroupFunctionService {
 			List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(groupId.toString());
 			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
 			for(CommonForwardPO forward : forwards){
-				forward.setExecuteStatus(ExecuteStatus.DONE);
+				forward.setVideoStatus(ExecuteStatus.DONE);
+				forward.setAudioStatus(ExecuteStatus.DONE);
 			}
 			for(PageTaskPO task : tasks){
 				boolean change = false;

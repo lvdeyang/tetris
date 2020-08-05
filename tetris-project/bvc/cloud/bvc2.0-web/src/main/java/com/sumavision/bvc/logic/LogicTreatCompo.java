@@ -1099,7 +1099,7 @@ public class LogicTreatCompo{
 							//业务层新添加的参数，指定mustLockAll，批量锁定
 							boolean mustLockAllBundle = businessOperateBO.isMustLockAllBundle();
 //							ResultMap lockBundleMap = resourseLayer.lockBundleResource(dstBundlesToLock, businessOperateBO.getUserId(), true);
-							ResultMap lockBundleMap = resourseLayer.batchLockBundleResource(dstBundlesToLock, businessOperateBO.getUserId(), mustLockAllBundle);
+							ResultMap lockBundleMap = resourseLayer.batchLockBundleResource(dstBundlesToLock, businessOperateBO.getAdminUserId(), mustLockAllBundle);
 							Boolean lockBundleResult = (Boolean)lockBundleMap.get("lockResult");
 							
 							if(lockBundleResult != null && lockBundleResult){//mustLockAll==true表示所有bundle锁定成功；mustLockAll==false表示调用成功
@@ -1131,7 +1131,7 @@ public class LogicTreatCompo{
 								if(!dstChannelsToLock.isEmpty()){
 									log.info("--------------rollback all dstChannels------------------");
 								}
-								resourseLayer.rollbackToUnlockChannels(dstChannelsToLock, businessOperateBO.getUserId());
+								resourseLayer.rollbackToUnlockChannels(dstChannelsToLock, businessOperateBO.getAdminUserId());
 								JSONObject jsonObj = new JSONObject();
 								JSONArray failBundleArray = generateBundleLockFailResultJsonArray(lockBundleMap, dstBundlesToLock);
 								if(failBundleArray != null){
@@ -1208,7 +1208,7 @@ public class LogicTreatCompo{
 					 * 释放bundle
 					 */
 					//有可能在停会时，一部分设备已经从资源层删除，所以最后一个参数使用false，不要求全部解锁成功
-					ResultMap disconnect_unlockBundleResultMap = resourseLayer.batchUnlockBundleResource(disconnect_bundlesToUnlock, businessOperateBO.getUserId(), false);
+					ResultMap disconnect_unlockBundleResultMap = resourseLayer.batchUnlockBundleResource(disconnect_bundlesToUnlock, businessOperateBO.getAdminUserId(), false);
 					//获取待关闭通道
 					List<BundleSchemeBO> disconnect_bundlesToClose = new ArrayList<BundleSchemeBO>();
 					List<Integer> operateIndexList = new ArrayList<Integer>();

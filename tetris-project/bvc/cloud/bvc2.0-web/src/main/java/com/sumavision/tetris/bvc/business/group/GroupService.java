@@ -96,6 +96,8 @@ import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
 import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandService;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
@@ -136,6 +138,9 @@ public class GroupService {
 	
 	/** synchronized锁的前缀 */
 	private static final String lockProcessPrefix = "tetris-group-";
+	
+	@Autowired
+	private ConferenceHallDAO conferenceHallDao;
 	
 	@Autowired
 	private TerminalDAO terminalDao;
@@ -2734,10 +2739,13 @@ public class GroupService {
 			
 			List<Long> userIdList = new ArrayList<Long>();
 			List<String> memberBundleIds = new ArrayList<String>();
+			List<Long> hallIdList = new ArrayList<Long>();
 			for(MemberTerminalBO userTerminalBO : memberTerminalBOs){
 				GroupMemberType groupMemberType = userTerminalBO.getGroupMemberType();
 				if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
 					userIdList.add(Long.parseLong(userTerminalBO.getOriginId()));
+				}else if(GroupMemberType.MEMBER_HALL.equals(groupMemberType)){
+					hallIdList.add(Long.parseLong(userTerminalBO.getOriginId()));
 				}else if(GroupMemberType.MEMBER_DEVICE.equals(groupMemberType)){
 					memberBundleIds.add(userTerminalBO.getOriginId());
 				}
@@ -2747,6 +2755,7 @@ public class GroupService {
 			String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 			List<UserBO> memberUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 			if(memberUserBos == null) memberUserBos = new ArrayList<UserBO>();
+			List<ConferenceHallPO> halls = conferenceHallDao.findAll(hallIdList);
 			List<FolderPO> allFolders = resourceService.queryAllFolders();
 			
 			List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIdList);
@@ -2791,6 +2800,15 @@ public class GroupService {
 						memberPO.setOriginType(OriginType.OUTER);
 	//					continue;
 					}				
+				}else if(GroupMemberType.MEMBER_HALL.equals(groupMemberType)){
+					ConferenceHallPO hall = queryUtil.queryHallById(halls, Long.parseLong(memberTerminalBO.getOriginId()));
+					if(hall == null) continue;
+					memberPO.setName(hall.getName());
+					memberPO.setFolderId(hall.getFolderId());
+					/*if(queryUtil.isLdapUser(hall, folderUserMaps)){
+						memberPO.setOriginType(OriginType.OUTER);
+	//					continue;
+					}*/
 				}else if(GroupMemberType.MEMBER_DEVICE.equals(groupMemberType)){
 					BundlePO bundle = queryUtil.queryBundlePOByBundleId(memberBundles, memberTerminalBO.getOriginId());
 					if(bundle == null) continue;

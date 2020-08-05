@@ -9,6 +9,7 @@ require.config({
         'jquery':window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
         'json':window.LIBPATH + 'frame/jQuery/jquery.json',
         'element-ui':window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+        'extral':window.LIBPATH + 'extral/extral',
 
         /* commons */
         'context':window.COMMONSPATH + 'context/context',

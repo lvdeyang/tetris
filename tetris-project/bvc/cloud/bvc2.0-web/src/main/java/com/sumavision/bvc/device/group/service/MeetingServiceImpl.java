@@ -20,6 +20,7 @@ import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
+import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.RecordSetBO;
 import com.sumavision.bvc.device.group.dao.ChannelForwardDAO;
@@ -869,13 +870,23 @@ public class MeetingServiceImpl {
 				}
 				connectBundlesLogic.setConnectBundle(group, connectBundles, codec);
 				try{
+					
+					//首次开会，需要计数+1
+					if(GroupStatus.STOP.equals(group.getStatus())){
+						List<ConnectBundleBO> connectBundleBOs = connectBundlesLogic.getConnectBundle();
+						for(ConnectBundleBO connectBundle : connectBundleBOs){
+							connectBundle.setBusinessType("vod");
+							connectBundle.setOperateType("start");
+						}				
+					}
+					
 					ExecuteBusinessReturnBO executeBusinessReturnBO = executeBusiness.execute(connectBundlesLogic, "呼叫会议成员：");
 					List<ResultDstBO> connectBundleResults = executeBusinessReturnBO.getConnectBundle();
 					for(ResultDstBO connectBundleResult : connectBundleResults){
 						//从map中取出锁定成功的DeviceGroupMemberPO
 						DeviceGroupMemberPO bundle = uuidMemberMap.get(connectBundleResult.getBundleId());
 						String bundleType = bundle.getBundleType();
-						if("jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
+						if("tvos".equals(bundleType) || "jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
 							bundle.setMemberStatus(MemberStatus.CONNECT);
 						}else{
 							//如果已经CONNECT，则不修改
@@ -1049,7 +1060,16 @@ public class MeetingServiceImpl {
 				 .setJv230Disconnect(jv230Channels)
 				 .setCombineVideoDel(combineVideos)
 				 .setCombineAudioDel(combineAudios)
-				 .deleteForward(forwards, codec);
+				 .deleteForward(forwards, codec);			
+			
+			//停会，计数-1
+			if(GroupStatus.START.equals(group.getStatus())){
+				List<DisconnectBundleBO> disconnectBundleBOs = logic.getDisconnectBundle();
+				for(DisconnectBundleBO disconnectBundle : disconnectBundleBOs){
+					disconnectBundle.setBusinessType("vod");
+					disconnectBundle.setOperateType("stop");
+				}
+			}
 			
 			//修改会议状态
 			group.setStatus(GroupStatus.STOP);

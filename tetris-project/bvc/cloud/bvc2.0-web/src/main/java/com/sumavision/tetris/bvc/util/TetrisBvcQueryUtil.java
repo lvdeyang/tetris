@@ -48,6 +48,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
@@ -753,9 +754,19 @@ public class TetrisBvcQueryUtil {
 		return null;
 	}
 	
-	public TerminalBundleUserPermissionPO queryTerminalBundleUserPermissionByBerminalBundleId(Collection<TerminalBundleUserPermissionPO> ps, Long terminalBundleId){
+	public TerminalBundleUserPermissionPO queryTerminalBundleUserPermissionByTerminalBundleId(Collection<TerminalBundleUserPermissionPO> ps, Long terminalBundleId){
 		if(ps == null) return null;
 		for(TerminalBundleUserPermissionPO p : ps){
+			if(p.getTerminalBundleId().equals(terminalBundleId)){
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	public TerminalBundleConferenceHallPermissionPO queryTerminalBundleConferenceHallPermissionByTerminalBundleId(Collection<TerminalBundleConferenceHallPermissionPO> ps, Long terminalBundleId){
+		if(ps == null) return null;
+		for(TerminalBundleConferenceHallPermissionPO p : ps){
 			if(p.getTerminalBundleId().equals(terminalBundleId)){
 				return p;
 			}

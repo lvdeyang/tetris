@@ -64,6 +64,7 @@ import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
+import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
 import com.sumavision.tetris.bvc.business.dao.VodDAO;
 import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -73,6 +74,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupService;
+import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
@@ -126,6 +128,9 @@ public class VodService {
 	
 	@Autowired
 	private AgendaDAO agendaDao;
+	
+	@Autowired
+	private RunningAgendaDAO runningAgendaDao;
 	
 	@Autowired
 	private PageInfoDAO pageInfoDao;
@@ -420,6 +425,7 @@ public class VodService {
 			List<Long> memberIds = businessCommonService.obtainMemberIds(members);
 			List<GroupMemberRolePermissionPO> permissions = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
 			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
+			List<RunningAgendaPO> runningAgendas = runningAgendaDao.findByGroupId(groupId);
 			
 			//挂断编码解码，删除分页
 			Long srcMemberId = vod.getSrcMemberId();
@@ -430,7 +436,7 @@ public class VodService {
 			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 			
-			//找到分页任务，停止【可能应该停止议程】
+			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
 			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(dstMember.getOriginId(), dstMember.getTerminalId());
@@ -442,7 +448,8 @@ public class VodService {
 			vodDao.delete(vod);
 			groupMemberDao.deleteInBatch(members);
 			groupMemberRolePermissionDao.deleteInBatch(permissions);
-			commonForwardDao.deleteInBatch(forwards);//???
+			commonForwardDao.deleteInBatch(forwards);
+			runningAgendaDao.deleteInBatch(runningAgendas);
 		}
 	}
 	
@@ -608,6 +615,7 @@ public class VodService {
 			List<Long> memberIds = businessCommonService.obtainMemberIds(members);
 			List<GroupMemberRolePermissionPO> permissions = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
 			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
+			List<RunningAgendaPO> runningAgendas = runningAgendaDao.findByGroupId(groupId);
 			
 			//挂断编码解码，删除分页
 			Long srcMemberId = vod.getSrcMemberId();
@@ -618,7 +626,7 @@ public class VodService {
 			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 			
-			//找到分页任务，停止【可能应该停止议程】
+			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
 			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(dstMember.getOriginId(), dstMember.getTerminalId());
@@ -630,7 +638,8 @@ public class VodService {
 			vodDao.delete(vod);
 			groupMemberDao.deleteInBatch(members);
 			groupMemberRolePermissionDao.deleteInBatch(permissions);
-			commonForwardDao.deleteInBatch(forwards);//???
+			commonForwardDao.deleteInBatch(forwards);
+			runningAgendaDao.deleteInBatch(runningAgendas);
 		}
 		
 	}

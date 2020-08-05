@@ -14,13 +14,13 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年6月4日 下午3:32:39
  */
-@Entity
+@Entity(name = "com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcPO")
 @Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_VIDEO_SRC")
 public class CombineVideoSrcPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
-	/** 源id */
+	/** 源id，设备通道格式为:"channelId@@bundleId@layerId" */
 	private String srcId;
 	
 	/** 源类型 */
