@@ -51,7 +51,8 @@ require.config({
         'page-combine-video':window.APPPATH + 'tetris/model/agenda/combine/page-combine-video',
         'page-combine-audio':window.APPPATH + 'tetris/model/agenda/combine/page-combine-audio',
         'page-user-terminal-binding':window.APPPATH + 'tetris/business/terminal/user/page-user-terminal-binding',
-        'page-hall-terminal-binding':window.APPPATH + 'tetris/business/terminal/hall/page-hall-terminal-binding'
+        'page-hall-terminal-binding':window.APPPATH + 'tetris/business/terminal/hall/page-hall-terminal-binding',
+        'page-hall-role-permission':window.APPPATH + 'tetris/business/terminal/hall/page-hall-role-permission'
 
     },
     shim:{

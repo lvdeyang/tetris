@@ -21,6 +21,21 @@ public class ConferenceHallController {
 	private ConferenceHallService conferenceHallService;
 	
 	/**
+	 * 查询组织机构<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月4日 下午5:44:17
+	 * @return List<TreeNodeVO> 组织机构树
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/total/folders")
+	public Object queryTotalFolders() throws Exception{
+		
+		return conferenceHallQuery.queryTotalFolders();
+	}
+	
+	/**
 	 * 查询但设备终端<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -85,6 +100,7 @@ public class ConferenceHallController {
 	 * <b>日期：</b>2020年7月10日 下午4:45:20
 	 * @param String name 会场名称
 	 * @param Long terminalId 终端类型id
+	 * @param Long folderId 文件夹id
 	 * @return ConferenceHallVO 会场
 	 */
 	@JsonBody
@@ -93,9 +109,10 @@ public class ConferenceHallController {
 	public Object add(
 			String name,
 			Long terminalId,
+			Long folderId,
 			HttpServletRequest request) throws Exception{
 		
-		return conferenceHallService.add(name, terminalId);
+		return conferenceHallService.add(name, terminalId, folderId);
 	}
 	
 	/**
@@ -105,6 +122,7 @@ public class ConferenceHallController {
 	 * <b>日期：</b>2020年7月13日 上午11:14:43
 	 * @param Long id 会场id
 	 * @param String name 会场名称
+	 * @param Long folderId 文件夹id
 	 * @return ConferenceHallVO 会场
 	 */
 	@JsonBody
@@ -113,9 +131,10 @@ public class ConferenceHallController {
 	public Object editName(
 			Long id,
 			String name,
+			Long folderId,
 			HttpServletRequest request) throws Exception{
 		
-		return conferenceHallService.editName(id, name);
+		return conferenceHallService.editName(id, name, folderId);
 	}
 	 
 	/**

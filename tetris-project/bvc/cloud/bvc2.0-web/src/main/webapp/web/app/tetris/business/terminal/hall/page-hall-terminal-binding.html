@@ -1,10 +1,10 @@
 <mi-frame id="page-hall-terminal-binding-wrapper" :menus="menus" :user="userInfo" :groups="groups">
 
-    <template slot="title">会场绑定设备</template>
+    <template slot="title">虚拟设备管理</template>
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>会场绑定设备</el-breadcrumb-item>
+        <el-breadcrumb-item>虚拟设备管理</el-breadcrumb-item>
     </template>
 
     <template>
@@ -114,12 +114,38 @@
                 </div>
             </el-dialog>
 
+            <el-dialog
+                    append-to-body
+                    title="选择分组"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectFolder.visible"
+                    width="400px"
+                    :before-close="handelSelectFolderClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectFolder.visible"
+                                ref="createHallFolderTree"
+                                :props="dialog.selectFolder.props"
+                                highlight-current
+                                :data="dialog.selectFolder.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
             <el-form label-width="40px">
                 <el-form-item label="名称">
                     <el-input v-model="dialog.createHall.name"></el-input>
                 </el-form-item>
                 <el-form-item label="终端">
                     <el-input v-model="dialog.createHall.terminal.name" readonly @click.native="handelSelectTerminal"></el-input>
+                </el-form-item>
+                <el-form-item label="分组">
+                    <el-input v-model="dialog.createHall.folder.name" readonly @click.native="handelSelectFolder">
+                        <i slot="suffix" class="el-input__icon el-icon-error" @click.stop="dialog.createHall.folder='';"></i>
+                    </el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -216,12 +242,42 @@
 
         <el-dialog
                 :close-on-click-modal="false"
-                title="修改名称"
+                title="修改会场"
                 :visible.sync="dialog.editHall.visible"
                 width="500px"
                 :before-close="handleEditHallClose">
 
-            <el-input v-model="dialog.editHall.name"></el-input>
+            <el-dialog
+                    append-to-body
+                    title="选择分组"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectFolder.visible"
+                    width="400px"
+                    :before-close="handelEditHallSelectFolderClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectFolder.visible"
+                                ref="editHallFolderTree"
+                                :props="dialog.selectFolder.props"
+                                highlight-current
+                                :data="dialog.selectFolder.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <el-form label-width="40px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editHall.name"></el-input>
+                </el-form-item>
+                <el-form-item label="分组">
+                    <el-input v-model="dialog.editHall.folder.name" readonly @click.native="handelSelectFolder">
+                        <i slot="suffix" class="el-input__icon el-icon-error" @click.stop="dialog.editHall.folder='';"></i>
+                    </el-input>
+                </el-form-item>
+            </el-form>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditHallClose">取消</el-button>
