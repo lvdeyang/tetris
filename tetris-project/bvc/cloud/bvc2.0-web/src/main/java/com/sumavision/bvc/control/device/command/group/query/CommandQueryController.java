@@ -69,15 +69,23 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallRolePermissionDAO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.system.role.SystemRoleQuery;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 @Controller
 @RequestMapping(value = "/command/query")
@@ -137,6 +145,15 @@ public class CommandQueryController {
 	@Autowired
 	private CommandFightTimeServiceImpl commandFightTimeServiceImpl;
 	
+	@Autowired
+	private ConferenceHallRolePermissionDAO conferenceHallRolePermissionDao;
+	
+	@Autowired
+	private ConferenceHallDAO conferenceHallDao;
+	
+	@Autowired
+	private SystemRoleQuery systemRoleQuery;
+	
 	/**
 	 * 查询组织机构及用户<br/>
 	 * <b>作者:</b>zsy<br/>
@@ -180,6 +197,24 @@ public class CommandQueryController {
 			}
 		}
 		
+		//查询有权限的会场
+		List<SystemRoleVO> roles = systemRoleQuery.queryUserRoles(userId.toString());
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		List<ConferenceHallPO> conferenceHalls = null;
+		if(roleIds.size() > 0){
+			List<Object> result = conferenceHallRolePermissionDao.findDistinctConferenceHallIdByRoleIdIn(roleIds);
+			List<Long> conferenceHallIds = new ArrayList<Long>();
+			for(Object id:result){
+				conferenceHallIds.add(Long.valueOf(id.toString()));
+			}
+			conferenceHalls = conferenceHallDao.findAll(conferenceHallIds);
+		}
+		
 		//查询所有非点播的文件夹
 		List<FolderPO> totalFolders = resourceService.queryAllFolders();
 		for(FolderPO folder:totalFolders){
@@ -194,7 +229,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, conferenceHalls);
 		}
 		
 		return _roots;
@@ -262,7 +297,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, null);
 		}
 		
 		return _roots;
@@ -377,7 +412,16 @@ public class CommandQueryController {
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 				
-		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
+		List<GroupMemberPO> groupMembers = groupMemberDao.findByGroupId(Long.parseLong(id));
+		List<Long> existUserIds = new ArrayList<Long>();
+		List<Long> existHallIds = new ArrayList<Long>();
+		for(GroupMemberPO groupMember:groupMembers){
+			if(GroupMemberType.MEMBER_USER.equals(groupMember.getGroupMemberType())){
+				existUserIds.add(Long.valueOf(groupMember.getOriginId()));
+			}else if(GroupMemberType.MEMBER_HALL.equals(groupMember.getGroupMemberType())){
+				existHallIds.add(Long.valueOf(groupMember.getOriginId()));
+			}
+		}
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
@@ -393,11 +437,29 @@ public class CommandQueryController {
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null) && !encoderId.equals("")){// && user.getDecoderId()!=null)){
-					if(!memberUserIds.contains(user.getId())){
+					if(!existUserIds.contains(user.getId())){
 						filteredUsers.add(user);
 					}
 				}
 			}
+		}
+		
+		List<SystemRoleVO> roles = systemRoleQuery.queryUserRoles(userId.toString());
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		List<ConferenceHallPO> conferenceHalls = null;
+		if(roleIds.size() > 0){
+			List<Object> result = conferenceHallRolePermissionDao.findDistinctConferenceHallIdByRoleIdIn(roleIds);
+			List<Long> conferenceHallIds = new ArrayList<Long>();
+			for(Object rId:result){
+				Long lId = Long.valueOf(rId.toString());
+				if(!existHallIds.contains(lId)) conferenceHallIds.add(lId);
+			}
+			conferenceHalls = conferenceHallDao.findAll(conferenceHallIds);
 		}
 		
 		//查询所有非点播的文件夹
@@ -414,7 +476,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, conferenceHalls);
 		}
 		
 		return _roots;
@@ -520,9 +582,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -637,9 +699,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -759,9 +821,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -959,7 +1021,8 @@ public class CommandQueryController {
 			List<FolderBO> folders, 
 			List<BundleBO> bundles, 
 			List<ChannelBO> channels,
-			List<UserBO> users){
+			List<UserBO> users,
+			List<ConferenceHallPO> conferenceHalls){
 		
 		//往里装文件夹
 		for(FolderBO folder:folders){
@@ -967,7 +1030,7 @@ public class CommandQueryController {
 				TreeNodeVO folderNode = new TreeNodeVO().set(folder)
 														.setChildren(new ArrayList<TreeNodeVO>());
 				root.getChildren().add(folderNode);
-				recursionFolder(folderNode, folders, bundles, channels, users);
+				recursionFolder(folderNode, folders, bundles, channels, users, conferenceHalls);
 			}
 		}
 		
@@ -1002,6 +1065,16 @@ public class CommandQueryController {
 					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 					TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
 					root.getChildren().add(userNode);
+				}
+			}
+		}
+		
+		//往里装会场
+		if(conferenceHalls!=null && conferenceHalls.size()>0){
+			for(ConferenceHallPO conferenceHall:conferenceHalls){
+				if(conferenceHall.getFolderId()!=null && conferenceHall.getFolderId().toString().equals(root.getId())){
+					TreeNodeVO hallNode = new TreeNodeVO().set(conferenceHall);
+					root.getChildren().add(hallNode);
 				}
 			}
 		}

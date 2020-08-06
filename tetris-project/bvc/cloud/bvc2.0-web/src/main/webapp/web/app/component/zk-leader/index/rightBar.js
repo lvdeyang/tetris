@@ -539,7 +539,16 @@ define([
                         self.contextMenu.call = true;
                         self.contextMenu.vod = true;
                         self.contextMenu.intercom = true;
-                        self.contextMenu.dedicatedCommand = true;
+                        self.contextMenu.dedicatedCommand = false;
+                        self.contextMenu.enterCommand = false;
+                        self.contextMenu.removeRecord = false;
+                        self.contextMenu.recordRecord = true;
+                        self.contextMenu.download = false;
+                    }else if(data.type === 'CONFERENCE_HALL'){
+                        self.contextMenu.call = false;
+                        self.contextMenu.vod = true;
+                        self.contextMenu.intercom = false;
+                        self.contextMenu.dedicatedCommand = false;
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
@@ -1206,11 +1215,7 @@ define([
             addCommand: function (type) {  //type区分是建指挥还是建会议，1：指挥，2：会议
                 var self = this;
                 if (!self.buttons.addCommand) return;
-                var userIds = [];
-                for (var i = 0; i < self.institution.select.length; i++) {
-                    userIds.push(self.institution.select[i].id);
-                }
-                if (!userIds.length) {
+                if (!self.institution.select.length) {
                     self.qt.warning('您还没有选择成员呢');
                     return false;
                 }
@@ -1260,9 +1265,16 @@ define([
                     }
                 }
                 var userIds = [];
+                var hallIds = [];
                 for (var i = 0; i < self.institution.select.length; i++) {
-                    userIds.push(self.institution.select[i].id);
+                    var node = self.institution.select[i];
+                    if(node.type === 'USER'){
+                        userIds.push(node.id);
+                    }else if(node.type === 'CONFERENCE_HALL'){
+                        hallIds.push(node.id);
+                    }
                 }
+
                 self.dialog.resetName.name.replace(/^\s*|\s*$/g, ''); //去除头尾空格
 
                 if (self.dialog.resetName.createType == 1) {  //指挥
@@ -1270,6 +1282,7 @@ define([
                         // 新建指挥
                         ajax.post('/command/basic/save', {
                             members: $.toJSON(userIds),
+                            hallIds: $.toJSON(hallIds),
                             name: self.dialog.resetName.name.trim()
                         }, function (data) {
                             data.type = 'command';
@@ -1303,6 +1316,7 @@ define([
                     if (self.dialog.resetName.type === 'new') {
                         ajax.post('/command/meeting/save', {
                             members: $.toJSON(userIds),
+                            hallIds: $.toJSON(hallIds),
                             name: self.dialog.resetName.name.trim()
                         }, function (data) {
                             // error代表有重名的情况

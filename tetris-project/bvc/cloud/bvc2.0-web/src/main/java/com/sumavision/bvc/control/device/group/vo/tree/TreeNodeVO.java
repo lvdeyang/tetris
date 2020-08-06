@@ -31,7 +31,9 @@ import com.sumavision.bvc.device.group.po.DeviceGroupConfigVideoPO;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.po.AuthorizationMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 /**
@@ -327,6 +329,16 @@ public class TreeNodeVO {
 		return this;
 	}
 	
+	public TreeNodeVO set(ConferenceHallPO conferenceHall){
+		this.setId(conferenceHall.getId().toString())
+			.setName(conferenceHall.getName())
+			.setType(TreeNodeType.CONFERENCE_HALL)
+			.setIcon(TreeNodeIcon.BUNDLE.getName())
+			.setStyle("color:#0dcc19;")
+			.setKey(this.generateKey());
+		return this;
+	}
+	
 	/**
 	 * 从UserBO得到绑定编码器的bundleId<br/>
 	 * <p>如果绑定的外部编码器（如210设备）bundleId有效则返回；</p>
@@ -389,15 +401,15 @@ public class TreeNodeVO {
 		return this;
 	}
 	public TreeNodeVO set(GroupMemberPO member, UserBO userBO){
-		this.setId(member.getOriginId())
+		this.setId(member.getId().toString())
 			.setUuid(member.getUuid())
 			.setName(member.getName())
 			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("id", member.getOriginId())
 																			.put("username", member.getName())
 																			.put("status", "")
 																		    .getMap()))
-			.setType(TreeNodeType.USER)
-			.setIcon(TreeNodeIcon.SPOKESMAN.getName());
+			.setType(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeType.USER:GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeType.CONFERENCE_HALL:null)
+			.setIcon(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeIcon.SPOKESMAN.getName():GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeIcon.BUNDLE.getName():null);
 //			.setKey(new StringBufferWrapper().append(this.generateKey()).append("@@").append(user.getCreater()).toString());
 		
 		//查询成员状态，添加样式等
@@ -462,8 +474,8 @@ public class TreeNodeVO {
 																			.put("username", member.getName())
 																			.put("status", "")
 																		    .getMap()))
-			.setType(TreeNodeType.USER)
-			.setIcon(TreeNodeIcon.SPOKESMAN.getName());
+			.setType(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeType.USER:GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeType.CONFERENCE_HALL:null)
+			.setIcon(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeIcon.SPOKESMAN.getName():GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeIcon.BUNDLE.getName():null);
 //			.setKey(new StringBufferWrapper().append(this.generateKey()).append("@@").append(user.getCreater()).toString());
 		
 		//查询成员状态，添加样式等

@@ -11,47 +11,39 @@
         <!--第一部分,指挥相关的的菜单-->
         <div class="firstMenu" v-show="switchStatus1">
             <div class="commandBtn" v-if="group.currentId">
-                <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始指挥':'恢复指挥'" placement="top-start"
-                            v-if="group.current.creator==user.id">
+                <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始指挥':'恢复指挥'" placement="top-start" v-if="group.current.creator==user.id">
                     <el-button type="text" :disabled="group.current.status =='start' || group.current.status =='remind'" class="icon-play" @click="startCommand"></el-button>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
-                            v-if="group.current.creator==user.id">
+                <el-tooltip class="item" effect="dark" content="暂停" placement="top-start" v-if="group.current.creator==user.id">
                     <el-button type="text" :disabled="group.current.status =='stop' || group.current.status =='pause'" class="icon-pause" @click="pauseCommand"></el-button>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
-                            v-if="group.current.creator==user.id">
+                <el-tooltip class="item" effect="dark" content="停止" placement="top-start" v-if="group.current.creator==user.id">
                     <el-button type="text" :disabled="group.current.status =='stop'" class="icon-stop" @click="exitCommand"></el-button>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
-                            v-if="group.current.creator!=user.id" style="font-size: 20px">
+                <el-tooltip class="item" effect="dark" content="进入" placement="top-start" v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <el-button type="text" :disabled="!buttons.enterCommand" class="icon-signin" @click="enterCommandBatch"></el-button>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
-                            v-if="group.current.creator!=user.id" style="font-size: 20px">
+                <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start" v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <el-button type="text" :disabled="!buttons.exitCommand" class="icon-signout" @click="exitCommand"></el-button>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
-                            v-if="group.current.creator==user.id">
+                <el-tooltip class="item" effect="dark" content="删除" placement="top-start" v-if="group.current.creator==user.id">
                     <el-button type="text" :disabled="group.current.status !=='stop'" class="el-icon-delete" @click="removeCommand"></el-button>
                 </el-tooltip>
             </div>
             <!--下拉选项-->
             <div>
                 <el-select @change="currentGroupChange" size="small" v-model="group.currentId"
-                           placeholder="当前还没有指挥组"
-                           style="width: 300px;left:8px;" :popper-append-to-body="false">
+                           placeholder="当前还没有指挥组" style="width: 300px;left:8px;" :popper-append-to-body="false">
                     <el-option
-                            v-for="(group,index) in command.data"
-                            :key="'command-'+index"
-                            :label="group.name"
-                            :value="group.id"
-                            :style="group.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
+                        v-for="(group,index) in command.data"
+                        :key="'command-'+index"
+                        :label="group.name"
+                        :value="group.id"
+                        :style="group.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
                         <el-tooltip class="item" effect="dark" :content="group.name" placement="top-start">
                             <span class="commandName">{{ group.name }}</span>
                         </el-tooltip>
-                        <span v-if="JSON.parse(group.param).creator == user.id" class="icon-user"
-                              style="font-size: 14px">[主席]</span>
+                        <span v-if="JSON.parse(group.param).creator == user.id" class="icon-user" style="font-size: 14px">[主席]</span>
                         <span v-else-if="group.bundleStatus==='bundle-offline'" style="font-size: 14px">[停止]</span>      
                         <span v-else-if="group.bundleStatus==='bundle-online' && JSON.parse(group.param).entered" style="font-size: 14px">[已进入]</span>
                         <span v-else-if="group.bundleStatus==='bundle-online' && !JSON.parse(group.param).entered" style="font-size: 14px">[未进入]</span>
@@ -63,125 +55,96 @@
             <div v-if="group.currentId" class="commandTable">
                 <el-scrollbar style="height:100%;">
                     <el-tree
-                            :data="group.tree"
-                            node-key="id"
-                            :props="props">
-                                <span class="headline" slot-scope="{node,data}">
-                                      <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
-                                            style="font-size: 20px;margin: 5px;color: #00ceff"
-                                            @click="handleContextMenuShow($event, data,null,'观看')"></span>
-
-                                    <span v-if="group.current.creator != user.id">
-                                         <span v-if="data.type==='USER'">
-                                             <span :class="data.icon"
-                                                   :style="data.style+' position:relative; top:1px;'"></span>
-                                            <span class="headFonts">{{data.name}}</span>
-                                         <el-popover
-                                                 placement="top"
-                                                 width="200"
-                                                 trigger="click"
-                                                 :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
-                                        </el-popover>
-                                         </span>
-                                         <span v-else>
-                                        <span :class="data.icon" :style="data.style"></span>
-                                        <span class="sheadFont">{{data.name}}</span>
-                                        </span>
-                                    </span>
-                                    <span v-else>
-                                            <el-checkbox v-if="data.type==='USER'" v-model="data.checked"
-                                                         @change="onCommandUserCheckChange(data,'指挥')">
-                                        <span :class="data.icon"
-                                              :style="data.style+' position:relative; top:1px;'"></span>
-                                            <span class="headFonts">{{data.name}}</span>
-                                         <el-popover
-                                                 placement="top"
-                                                 width="200"
-                                                 trigger="click"
-                                                 :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
-                                        </el-popover>
-                                    </el-checkbox>
-                                    <span v-else>
-                                        <span :class="data.icon" :style="data.style"></span>
-                                        <span class="sheadFont">{{data.name}}</span>
-                                    </span>
-                                    </span>
-
+                        :data="group.tree"
+                        node-key="id"
+                        :props="props">
+                        <span class="headline" slot-scope="{node,data}">
+                            <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
+                                    style="font-size: 20px;margin: 5px;color: #00ceff"
+                                    @click="handleContextMenuShow($event, data,null,'观看')"></span>
+                            <span v-if="group.current.creator != user.id">
+                                <span v-if="data.type==='USER' || data.type==='CONFERENCE_HALL'">
+                                    <span :class="data.icon"
+                                          :style="data.style+' position:relative; top:1px;'"></span>
+                                    <span class="headFonts">{{data.name}}</span>
+                                    <el-popover
+                                        placement="top"
+                                        width="200"
+                                        trigger="click"
+                                        :content="data.name">
+                                        <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                   </el-popover>
                                 </span>
+                                <span v-else>
+                                    <span :class="data.icon" :style="data.style"></span>
+                                    <span class="sheadFont">{{data.name}}</span>
+                                </span>
+                            </span>
+                            <span v-else>
+                                <el-checkbox v-if="data.type==='USER' || data.type==='CONFERENCE_HALL'" v-model="data.checked"
+                                             @change="onCommandUserCheckChange(data,'指挥')">
+                                    <span :class="data.icon"
+                                          :style="data.style+' position:relative; top:1px;'"></span>
+                                    <span class="headFonts">{{data.name}}</span>
+                                    <el-popover
+                                         placement="top"
+                                         width="200"
+                                         trigger="click"
+                                         :content="data.name">
+                                        <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                    </el-popover>
+                                </el-checkbox>
+                                <span v-else>
+                                    <span :class="data.icon" :style="data.style"></span>
+                                    <span class="sheadFont">{{data.name}}</span>
+                                </span>
+                            </span>
+                        </span>
                     </el-tree>
                 </el-scrollbar>
             </div>
 
             <!--底部按钮-->
             <div class="btnContainer" v-if="group.currentId && group.current.type==='command'">
-                <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员"
-                     @click="addCommandMember">
-                    <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'"
-                         draggable="false"/>
+                <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员" @click="addCommandMember">
+                    <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'" draggable="false"/>
                 </div>
-                <div :class="'option-button '+(buttons.removeMember?'':'disable')" title="强退成员"
-                     @click="removeCommandMember">
-                    <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"
-                         draggable="false"/>
+                <div :class="'option-button '+(buttons.removeMember?'':'disable')" title="强退成员" @click="removeCommandMember">
+                    <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'" draggable="false"/>
                 </div>
                 <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
-                <div :class="'option-button'+(buttons.addMember?'':' disable')" title="修改指挥名称"
-                     @click="handleResetName('edit',1)">
+                <div :class="'option-button'+(buttons.addMember?'':' disable')" title="修改指挥名称" @click="handleResetName('edit',1)">
                     <img :src="baseUrl+'images/zk-leader/able/commandModify.png'" alt="修改指挥名称"/>
                 </div>
-                <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥"
-                     @click="cooperativeCommand('指挥')">
-                    <img v-if="buttons.cooperativeCommand"
-                         :src="baseUrl+'images/zk-leader/able/zhihui/cooperativeCommand.png'"/>
+                <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥" @click="cooperativeCommand('指挥')">
+                    <img v-if="buttons.cooperativeCommand" :src="baseUrl+'images/zk-leader/able/zhihui/cooperativeCommand.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.cancelCooperative?'':'disable')" title="取消协同"
-                     @click="cancelCooperativeCommand('指挥')">
-                    <i class=" icon-globe"
-                       style="position: absolute;top:6px;left: 13px;font-size: 36px;color: #fff"></i>
+                <div :class="'option-button '+(buttons.cancelCooperative?'':'disable')" title="取消协同" @click="cancelCooperativeCommand('指挥')">
+                    <i class=" icon-globe" style="position: absolute;top:6px;left: 13px;font-size: 36px;color: #fff"></i>
                     <span style="position: absolute;bottom: 1px;color: #fff;font-size: 10px;left: 10px">取消协同</span>
                 </div>
-                <div :class="'option-button '+(buttons.commandForward?'':'disable')" title="指挥转发"
-                     @click="commandForward('指挥')">
-                    <img v-if="buttons.commandForward"
-                         :src="baseUrl+'images/zk-leader/able/zhihui/commandForward.png'"/>
+                <div :class="'option-button '+(buttons.commandForward?'':'disable')" title="指挥转发" @click="commandForward('指挥')">
+                    <img v-if="buttons.commandForward" :src="baseUrl+'images/zk-leader/able/zhihui/commandForward.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.silenceUp?'':'disable')"
-                     :title="buttons.silenceUp && buttons.silenceUpStart?'关闭对上静默':'开启对上静默'" @click="silenceUp">
-                    <img v-if="buttons.silenceUp && buttons.silenceUpStart"
-                         :src="baseUrl+'images/zk-leader/able/silenceUpStop.png'"/>
-                    <img v-if="buttons.silenceUp && !buttons.silenceUpStart"
-                         :src="baseUrl+'images/zk-leader/able/silenceUpStart.png'"/>
+                <div :class="'option-button '+(buttons.silenceUp?'':'disable')" :title="buttons.silenceUp && buttons.silenceUpStart?'关闭对上静默':'开启对上静默'" @click="silenceUp">
+                    <img v-if="buttons.silenceUp && buttons.silenceUpStart" :src="baseUrl+'images/zk-leader/able/silenceUpStop.png'"/>
+                    <img v-if="buttons.silenceUp && !buttons.silenceUpStart" :src="baseUrl+'images/zk-leader/able/silenceUpStart.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.silenceDown?'':'disable')"
-                     :title="buttons.silenceDown && buttons.silenceDownStart?'关闭对下静默':'开启对下静默'"
-                     @click="silenceDown">
-                    <img v-if="buttons.silenceDown && buttons.silenceDownStart"
-                         :src="baseUrl+'images/zk-leader/able/silenceDownStop.png'"/>
-                    <img v-if="buttons.silenceDown && !buttons.silenceDownStart"
-                         :src="baseUrl+'images/zk-leader/able/silenceDownStart.png'"/>
+                <div :class="'option-button '+(buttons.silenceDown?'':'disable')" :title="buttons.silenceDown && buttons.silenceDownStart?'关闭对下静默':'开启对下静默'" @click="silenceDown">
+                    <img v-if="buttons.silenceDown && buttons.silenceDownStart" :src="baseUrl+'images/zk-leader/able/silenceDownStop.png'"/>
+                    <img v-if="buttons.silenceDown && !buttons.silenceDownStart" :src="baseUrl+'images/zk-leader/able/silenceDownStart.png'"/>
                 </div>
                 <div :class="'option-button '+(buttons.sendMessage?'':'disable')" title="发送通知" @click="sendMessage">
                     <img v-if="buttons.sendMessage" :src="baseUrl+'images/zk-leader/able/sendMessage.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.commandRecord?'':'disable')"
-                     :title="buttons.isRecord?'关闭指挥录制':'开启指挥录制'" @click="commandRecord">
-                    <img v-if="buttons.commandRecord && !buttons.isRecord"
-                         :src="baseUrl+'images/zk-leader/able/zhihui/commandRecord.png'"/>
-                    <img v-if="buttons.commandRecord && buttons.isRecord"
-                         :src="baseUrl+'images/zk-leader/able/zhihui/commandRecordPause.png'">
+                <div :class="'option-button '+(buttons.commandRecord?'':'disable')" :title="buttons.isRecord?'关闭指挥录制':'开启指挥录制'" @click="commandRecord">
+                    <img v-if="buttons.commandRecord && !buttons.isRecord" :src="baseUrl+'images/zk-leader/able/zhihui/commandRecord.png'"/>
+                    <img v-if="buttons.commandRecord && buttons.isRecord" :src="baseUrl+'images/zk-leader/able/zhihui/commandRecordPause.png'">
                 </div>
-                <div :class="'option-button '+(buttons.commandReminder?'':'disable')"
-                     :title="buttons.isRemind?'关闭指挥提醒':'开启指挥提醒'" @click="commandRemind">
-                    <img v-if="buttons.commandReminder && !buttons.isRemind"
-                         :src="baseUrl+'images/zk-leader/able/commandReminder.png'"/>
-                    <img v-if="buttons.commandReminder && buttons.isRemind"
-                         :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
-                    <img v-if="!buttons.commandReminder"
-                         :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
+                <div :class="'option-button '+(buttons.commandReminder?'':'disable')" :title="buttons.isRemind?'关闭指挥提醒':'开启指挥提醒'" @click="commandRemind">
+                    <img v-if="buttons.commandReminder && !buttons.isRemind" :src="baseUrl+'images/zk-leader/able/commandReminder.png'"/>
+                    <img v-if="buttons.commandReminder && buttons.isRemind" :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
+                    <img v-if="!buttons.commandReminder" :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
                 </div>
                 <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
@@ -190,7 +153,6 @@
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
-
         </div>
 
         <!--第二部分，左侧tab对应的右侧 菜单-->
@@ -199,7 +161,7 @@
                 <!--组织结构-->
                 <el-tab-pane class="tabPage">
                     <span slot="label" class="myTitle">
-                      <img class="fontPic" src="../../../../../images/zk-leader/organization.png" draggable="false">
+                        <img class="fontPic" src="../../../../../images/zk-leader/organization.png" draggable="false">
                     </span>
                     <div class="scrollTab" v-if="switchStatus2">
                         <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 7px;width: 300px">
@@ -207,27 +169,25 @@
                         <el-scrollbar style="height:90%">
                             <el-tree :data="institution.data"  ref="tree" node-key="id" :props="props"  :filter-node-method="filterNode">
                                 <span class="headline" slot-scope="{node,data}">
-                                    <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
+                                    <span :class="data.type==='USER' || data.type==='CONFERENCE_HALL'?'handDown el-icon-tickets':''"
                                           style="font-size: 20px;margin: 5px;color: #00ceff"
                                           @click="handleContextMenuShow($event, data)"></span>
                                     <!--v-model绑定选中状态，在进行底部按钮操作后，保持树的展开状态，并去掉勾选-->
-                                    <el-checkbox v-if="data.type==='USER'" v-model="data.checked" :value="data.id"
-                                                  @change="onUserCheckChange(data)">
+                                    <el-checkbox v-if="data.type==='USER' || data.type==='CONFERENCE_HALL'" v-model="data.checked" :value="data.id" @change="onUserCheckChange(data)">
                                         <span draggable="true" @dragstart="userDragStart($event, data)">          
-	                                        <span :class="data.icon"
-	                                              :style="data.style+' position:relative; top:1px;'"></span>
+	                                        <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
 	                                        <span class="headFont">{{data.name}}</span>
                                         </span>
                                         <el-popover
-                                                 placement="top"
-                                                 width="200"
-                                                 trigger="click"
-                                                 :content="data.name">
+                                            placement="top"
+                                            width="200"
+                                            trigger="click"
+                                            :content="data.name">
                                             <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
                                     <span v-else>
-                                         <span :class="data.icon" :style="data.style"></span>
+                                        <span :class="data.icon" :style="data.style"></span>
                                         <span class="sheadFont">{{data.name}}</span>
                                     </span>
                                 </span>
@@ -282,25 +242,22 @@
                                     <span :class="data.type==='VOD_RESOURCE'?'handDown el-icon-tickets':''"
                                           style="font-size: 20px;margin: 5px;color: #00ceff"
                                           @click="handleContextMenuShow($event, data)"></span>
-                                	<el-checkbox v-if="data.type==='VOD_RESOURCE'" v-model="data.checked"
-                                             @change="onFileCheckChange(data)">
+                                	<el-checkbox v-if="data.type==='VOD_RESOURCE'" v-model="data.checked" @change="onFileCheckChange(data)">
                                         <span draggable="true" @dragstart="fileDragStart($event, data)">     
-	                                        <span class="icon-file-alt"
-	                                              style="font-size:15px; position:relative; top:1px;"></span>
+	                                        <span class="icon-file-alt" style="font-size:15px; position:relative; top:1px;"></span>
 	                                        <span class="headFont">{{data.name}}</span>
                                         </span>
-                                    <el-popover
+                                        <el-popover
                                             placement="top"
                                             width="200"
                                             trigger="click"
                                             :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
+                                            <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
                                     <span v-else>
                                         <span class="icon-folder-close"></span>
-                                       <span class="sheadFont">{{data.name}}</span>
+                                        <span class="sheadFont">{{data.name}}</span>
                                     </span>
                                 </span>
                             </el-tree>
@@ -309,9 +266,9 @@
                 </el-tab-pane>
                 <!--录像回放-->
                 <el-tab-pane class="tabPage">
-                <span slot="label" class="myTitle">
-                <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
-                </span>
+                    <span slot="label" class="myTitle">
+                        <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
+                    </span>
                     <div class="scrollTab" v-if="switchStatus2">
                         <el-scrollbar style="height:90%">
                             <el-tree :data="record.data" node-key="id"
@@ -319,33 +276,31 @@
                                      :props="props"
                                      :expand-on-click-node="false">
                                 <span class="headline" slot-scope="{node,data}">
-                                <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
-                                      style="font-size: 20px;margin: 5px;color: #00ceff"
-                                      @click="handleContextMenuShow($event, data)"></span>
-                                <el-checkbox v-if="data.type==='RECORD_PLAYBACK' && data.level ==3" v-model="data.checked"
-                                             @change="onRecordCheckChange(data)">
-                                <span class="icon-file-alt"
-                                      style="font-size:15px; position:relative; top:1px;"></span>
-                                <span class="headFont">{{data.groupName}}</span>
-                                <el-popover
-                                        placement="top"
-                                        width="200"
-                                        trigger="click"
-                                        :content="data.groupName">
-                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                                </el-popover>
-                                </el-checkbox>
-                                <span v-else>
-                                <span class="icon-folder-close"></span>
-                                <span class="sheadFont">{{data.groupName}}</span>
-                                <el-popover
-                                        placement="top"
-                                        width="200"
-                                        trigger="click"
-                                        :content="data.groupName">
-                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                                </el-popover>
-                                </span>
+                                    <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
+                                          style="font-size: 20px;margin: 5px;color: #00ceff"
+                                          @click="handleContextMenuShow($event, data)"></span>
+                                    <el-checkbox v-if="data.type==='RECORD_PLAYBACK' && data.level ==3" v-model="data.checked" @change="onRecordCheckChange(data)">
+                                        <span class="icon-file-alt" style="font-size:15px; position:relative; top:1px;"></span>
+                                        <span class="headFont">{{data.groupName}}</span>
+                                        <el-popover
+                                            placement="top"
+                                            width="200"
+                                            trigger="click"
+                                            :content="data.groupName">
+                                            <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                        </el-popover>
+                                    </el-checkbox>
+                                    <span v-else>
+                                        <span class="icon-folder-close"></span>
+                                        <span class="sheadFont">{{data.groupName}}</span>
+                                        <el-popover
+                                                placement="top"
+                                                width="200"
+                                                trigger="click"
+                                                :content="data.groupName">
+                                            <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                        </el-popover>
+                                    </span>
                                 </span>
                             </el-tree>
                         </el-scrollbar>
@@ -431,24 +386,19 @@
                                 v-if="meet.current.creator==user.id">
                         <el-button type="text" :disabled="meet.current.status =='start' || group.current.status =='remind'" class="icon-play" @click="startCommand"></el-button>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
-                                v-if="meet.current.creator==user.id">
+                    <el-tooltip class="item" effect="dark" content="暂停" placement="top-start" v-if="meet.current.creator==user.id">
                         <el-button type="text" :disabled="meet.current.status =='stop' || meet.current.status =='pause'" class="icon-pause" @click="pauseCommand"></el-button>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
-                                v-if="meet.current.creator==user.id">
+                    <el-tooltip class="item" effect="dark" content="停止" placement="top-start" v-if="meet.current.creator==user.id">
                         <el-button type="text" :disabled="meet.current.status =='stop'" class="icon-stop" @click="exitCommand('会议')"></el-button>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
-                                v-if="meet.current.creator!=user.id" style="font-size: 20px">
+                    <el-tooltip class="item" effect="dark" content="进入" placement="top-start" v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <el-button type="text" :disabled="!buttons.enterMeet" class="icon-signin" @click="enterMyCommand()"></el-button>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
-                                v-if="meet.current.creator!=user.id" style="font-size: 20px">
+                    <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start" v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <el-button type="text" :disabled="!buttons.exitMeet" class="icon-signout" @click="exitCommand('会议')"></el-button>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
-                                v-if="meet.current.creator==user.id">
+                    <el-tooltip class="item" effect="dark" content="删除" placement="top-start" v-if="meet.current.creator==user.id">
                         <el-button type="text" :disabled="meet.current.status !=='stop'" class="el-icon-delete" @click="removeMyCommand()"></el-button>
                     </el-tooltip>
                 </div>
@@ -458,16 +408,15 @@
                                placeholder="当前还没有会议"
                                style="width: 300px;left:8px;" :popper-append-to-body="false">
                         <el-option
-                                v-for="meet in command.data"
-                                :key="'meeting-'+meet.id"
-                                :label="meet.name"
-                                :value="meet.id"
-                                :style="meet.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
+                            v-for="meet in command.data"
+                            :key="'meeting-'+meet.id"
+                            :label="meet.name"
+                            :value="meet.id"
+                            :style="meet.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
                             <el-tooltip class="item" effect="dark" :content="meet.name" placement="top-start">
                                 <span class="commandName">{{ meet.name }}</span>
                             </el-tooltip>
-                            <span v-if="JSON.parse(meet.param).creator == user.id" class="icon-user"
-                                  style="font-size: 14px">[主席]</span>
+                            <span v-if="JSON.parse(meet.param).creator == user.id" class="icon-user" style="font-size: 14px">[主席]</span>
                             <span v-else-if="JSON.parse(meet.param).entered" style="font-size: 14px">[已进入]</span>
                             <span v-else style="font-size: 14px">[未进入]</span>
                         </el-option>
@@ -477,54 +426,49 @@
                 <div v-if="meet.currentId" class="commandTable">
                     <el-scrollbar style="height:100%;">
                         <el-tree
-                                :data="meet.tree"
-                                node-key="id"
-                                :props="props">
-                                <span class="headline" slot-scope="{node,data}">
-                                      <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
-                                            style="font-size: 20px;margin: 5px;color: #00ceff"
-                                            @click="handleContextMenuShow($event, data,null,'观看')"></span>
-
-                                    <span v-if="meet.current.creator != user.id">
-                                         <span v-if="data.type==='USER'">
-                                             <span :class="data.icon"
-                                                   :style="data.style+' position:relative; top:1px;'"></span>
-                                            <span class="headFonts">{{data.name}}</span>
-                                         <el-popover
-                                                 placement="top"
-                                                 width="200"
-                                                 trigger="click"
-                                                 :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
-                                        </el-popover>
-                                         </span>
-                                         <span v-else>
-                                        <span :class="data.icon" :style="data.style"></span>
-                                        <span class="sheadFont">{{data.name}}</span>
-                                        </span>
+                            :data="meet.tree"
+                            node-key="id"
+                            :props="props">
+                            <span class="headline" slot-scope="{node,data}">
+                                <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
+                                    style="font-size: 20px;margin: 5px;color: #00ceff"
+                                    @click="handleContextMenuShow($event, data,null,'观看')"></span>
+                                <span v-if="meet.current.creator != user.id">
+                                    <span v-if="data.type==='USER'">
+                                        <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                        <span class="headFonts">{{data.name}}</span>
+                                        <el-popover
+                                            placement="top"
+                                            width="200"
+                                            trigger="click"
+                                            :content="data.name">
+                                            <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                       </el-popover>
                                     </span>
                                     <span v-else>
-                                         <el-checkbox v-if="data.type==='USER'" v-model="data.checked"
-                                                      @change="onCommandUserCheckChange(data,'会议')">
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span class="sheadFont">{{data.name}}</span>
+                                    </span>
+                                </span>
+                                <span v-else>
+                                    <el-checkbox v-if="data.type==='USER'" v-model="data.checked" @change="onCommandUserCheckChange(data,'会议')">
                                         <span :class="data.icon"
                                               :style="data.style+' position:relative; top:1px;'"></span>
-                                            <span class="headFonts">{{data.name}}</span>
-                                         <el-popover
-                                                 placement="top"
-                                                 width="200"
-                                                 trigger="click"
-                                                 :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
+                                        <span class="headFonts">{{data.name}}</span>
+                                        <el-popover
+                                             placement="top"
+                                             width="200"
+                                             trigger="click"
+                                             :content="data.name">
+                                             <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
                                     <span v-else>
                                         <span :class="data.icon" :style="data.style"></span>
                                         <span class="sheadFont">{{data.name}}</span>
                                     </span>
-                                    </span>
                                 </span>
+                            </span>
                         </el-tree>
                     </el-scrollbar>
                 </div>
@@ -618,11 +562,8 @@
 
 
     <!--名称前图标点击出来的菜单-->
-    <div v-if="contextMenu.visible" class="context-menu"
-         :style="('left:'+contextMenu.left+'; ')+('top:'+contextMenu.top+';')">
-        <div class="header">目标：{{contextMenu.currentNode.name ? contextMenu.currentNode.name :
-            contextMenu.currentNode.groupName}}
-        </div>
+    <div v-if="contextMenu.visible" class="context-menu" :style="('left:'+contextMenu.left+'; ')+('top:'+contextMenu.top+';')">
+        <div class="header">目标：{{contextMenu.currentNode.name?contextMenu.currentNode.name:contextMenu.currentNode.groupName}}</div>
         <div style="padding:0 15px">
             <div :class="'menu ' + (contextMenu.call?'':'disable')" @click="callUser">
                 <i class="menuIcon icon-phone"></i>
