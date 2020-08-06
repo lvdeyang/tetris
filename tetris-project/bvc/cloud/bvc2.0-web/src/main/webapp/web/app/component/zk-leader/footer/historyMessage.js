@@ -20,6 +20,10 @@ define([
                 playerLayout: 16,
                 activeIndex: null, //当前哪个分屏按钮高亮
                 callBoard: ['暂无消息'],
+                page:{
+                    total:0,
+                    currentPage:0
+                },
                 settings: {
                     //auto(自动)/manual(手动)
                     responseMode: '',
@@ -201,6 +205,54 @@ define([
                     }
                     self.qt.invoke('changeSplit', index, data.settings);
                 });
+            },
+            handleLayoutChange:function(data){
+                var self = this;
+                var total = data.total;
+                var currentPage = data.currentPage;
+                self.page.total = total;
+                self.page.currentPage = currentPage;
+                if (data.playerSplitLayout == 0) {
+                    self.playerLayout = 1;
+                    self.activeIndex = 0;
+                    self.buttons.one = true;
+                } else if (data.playerSplitLayout == 1) {
+                    self.playerLayout = 4;
+                    self.activeIndex = 1;
+                    self.buttons.four = true;
+                } else if (data.playerSplitLayout == 2) {
+                    self.playerLayout = 6;
+                    self.activeIndex = 2;
+                    self.buttons.six = true;
+                } else if (data.playerSplitLayout == 3) {
+                    self.playerLayout = 9;
+                    self.activeIndex = 3;
+                    self.buttons.nine = true;
+                } else if (data.playerSplitLayout == 4) {
+                    self.playerLayout = 16;
+                    self.activeIndex = 4;
+                    self.buttons.sixteen = true;
+                } else if (data.playerSplitLayout == 5) {
+                    self.playerLayout = 16;
+                    self.activeIndex = 5;
+                    self.buttons.two = true;
+                }
+                if (data.players && data.players.length > 0) {
+                    self.qt.invoke('changeSplit', data.playerSplitLayout, data.players);
+                    $($('.screenCtrl span')[self.activeIndex]).css('color', '#00e9ff').siblings().css('color', '#fff');
+                }
+            },
+            handlePrePage:function(){
+                var self = this;
+                ajax.post('/command/split/previous/page', null, function(){
+                   self.qt.success('操作成功');
+                });
+            },
+            handleNextPage:function(){
+                var self = this;
+                ajax.post('/command/split/next/page', null, function(){
+                    self.qt.success('操作成功');
+                });
             }
         },
         mounted: function () {
@@ -231,35 +283,7 @@ define([
 
                 // 获取屏幕个数
                 ajax.post('/command/user/info/get/current', null, function (data) {
-                    if (data.playerSplitLayout == 0) {
-                        self.playerLayout = 1;
-                        self.activeIndex = 0;
-                        self.buttons.one = true;
-                    } else if (data.playerSplitLayout == 1) {
-                        self.playerLayout = 4;
-                        self.activeIndex = 1;
-                        self.buttons.four = true;
-                    } else if (data.playerSplitLayout == 2) {
-                        self.playerLayout = 6;
-                        self.activeIndex = 2;
-                        self.buttons.six = true;
-                    } else if (data.playerSplitLayout == 3) {
-                        self.playerLayout = 9;
-                        self.activeIndex = 3;
-                        self.buttons.nine = true;
-                    } else if (data.playerSplitLayout == 4) {
-                        self.playerLayout = 16;
-                        self.activeIndex = 4;
-                        self.buttons.sixteen = true;
-                    } else if (data.playerSplitLayout == 5) {
-                        self.playerLayout = 16;
-                        self.activeIndex = 5;
-                        self.buttons.two = true;
-                    }
-                    if (data.players && data.players.length > 0) {
-                        self.qt.invoke('changeSplit', data.playerSplitLayout, data.players);
-                        $($('.screenCtrl span')[self.activeIndex]).css('color', '#00e9ff').siblings().css('color', '#fff');
-                    }
+                    self.handleLayoutChange(data);
                 });
 
                 //查询设置
@@ -770,7 +794,7 @@ define([
                 
                 //刷新分屏
                 self.qt.on('refreshPage', function (e) {
-                	self.qt.invoke('changeSplit', e.params.playerSplitLayout, e.params.players);
+                    self.handleLayoutChange(e.params);
                 });
             });
         }

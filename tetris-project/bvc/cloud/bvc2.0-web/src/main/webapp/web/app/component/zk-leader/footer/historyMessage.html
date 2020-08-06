@@ -26,9 +26,9 @@
                 <img v-if="!buttons.sixteen" :src="baseUrl+'images/zk-leader/btns/sixteen.png'"/>
                 <img v-else :src="baseUrl+'images/zk-leader/btns/sixteenActive.png'"/>
             </div>
-            <div title="上一页" style="font-size:14px;"><span class="icon-chevron-left"></span></div>
-            <span style="font-size:14px; color:#fff; float:left; position:relative; top:1px;">1/2，30</span>
-            <div title="下一页" style="font-size:14px;"><span class="icon-chevron-right"></span></div>
+            <div title="上一页" style="font-size:14px;" @click="handlePrePage"><span class="icon-chevron-left"></span></div>
+            <span style="font-size:14px; color:#fff; float:left; position:relative; top:1px;">{{page.currentPage}}/{{page.total}}</span>
+            <div title="下一页" style="font-size:14px;" @click="handleNextPage"><span class="icon-chevron-right"></span></div>
             <div title="全部上屏" style="font-size:16px;" @click="jv230totalForward"><span class="icon-external-link"></span></div>
             <div title="上屏列表" style="font-size:16px;" @click="jv230ForwardList"><span class="icon-list"></span></div>
             <!--换一批-->
