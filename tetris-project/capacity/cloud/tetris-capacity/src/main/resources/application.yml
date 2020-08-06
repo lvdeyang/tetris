@@ -3,7 +3,8 @@ spring:
     #type: ehcache
     #ehcache:
       #config: classpath:ehcache.xml
-  #activiti:    #check-process-definitions: true
+  #activiti:
+    #check-process-definitions: true
     #database-schema-update: true
     #这里保存全部历史记录
     #history-level: full
@@ -14,7 +15,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.84
+      ipAddress: 10.10.40.24
 #  profiles:
 #    active: pro
   datasource:
@@ -47,7 +48,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
   thymeleaf:
@@ -84,6 +85,7 @@ server:
 #  context-path: /menu 
 #  address: 192.165.56.71
   port: 8092
+  max-http-header-size: 10485760 #spring feign用了get请求，参数写在了url上，导致长度受限8K
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -99,11 +101,11 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.84:8081/eureka/
+      defaultZone: http://10.10.40.184:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
-    ip-address: 192.165.56.84
+    ip-address: 10.10.40.24
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务
     #lease-renewal-interval-in-seconds: 1

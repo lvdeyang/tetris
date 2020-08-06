@@ -1,0 +1,70 @@
+{
+	"parrent_template":"encode_h264_template.json",
+	"parrent":"h264",
+	"msdk_encode":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"pixel_format",
+					"bframe_reference",
+					"bframe_adaptive",
+					"refine",
+					"quality"
+				]
+			}
+		},
+		"constraint": {
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420"
+					]
+				}
+			},
+			"bframe_reference": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
+				}
+			},
+			"bframe_adaptive": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
+				}
+			},
+			"refine": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 5,
+					"min_value": 1,
+					"max_value": 11,
+					"step": 1
+				}
+			},
+			"quality": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 10,
+					"min_value": 1,
+					"max_value": 51,
+					"step": 1
+				}
+			}
+		}
+	}
+}

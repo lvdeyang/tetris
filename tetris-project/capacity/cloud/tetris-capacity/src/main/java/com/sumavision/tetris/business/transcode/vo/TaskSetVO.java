@@ -33,6 +33,12 @@ public class TaskSetVO implements Serializable {
 
     private ArrayList<DeleteTaskEncodeResponse> delete_encoders;
 
+    //添加任务
+    private CreateTaskRequest add_task;
+
+    //删任务
+    private DeleteTasksRequest delete_task;
+
     //修改输出
     private ArrayList<PutOutputRequest> modify_output;
 
@@ -166,5 +172,21 @@ public class TaskSetVO implements Serializable {
 
     public void setDelete_output(DeleteOutputsRequest delete_output) {
         this.delete_output = delete_output;
+    }
+
+    public DeleteTasksRequest getDelete_task() {
+        return delete_task;
+    }
+
+    public void setDelete_task(DeleteTasksRequest delete_task) {
+        this.delete_task = delete_task;
+    }
+
+    public CreateTaskRequest getAdd_task() {
+        return add_task;
+    }
+
+    public void setAdd_task(CreateTaskRequest add_task) {
+        this.add_task = add_task;
     }
 }

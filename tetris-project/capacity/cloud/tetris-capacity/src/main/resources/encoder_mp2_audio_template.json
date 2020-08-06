@@ -1,0 +1,81 @@
+{
+	"mp2": {
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"bitrate",
+					"sample_rate",
+					"sample_fmt",
+					"channel_layout"
+				]
+			}
+		},
+		"constraint": {
+			"bitrate": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 7,
+					"values": [
+						"32",
+						"48",
+						"56",
+						"64",
+						"80",
+						"96",
+						"112",
+						"128",
+						"160",
+						"192",
+						"224",
+						"256",
+						"320",
+						"384"
+					]
+				}
+			},
+			"sample_rate": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 1,
+					"values": [
+						"32",
+						"44.1",
+						"48"
+					]
+				}
+			},
+			"sample_fmt": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"s16",
+						"s16_planner",
+						"flt",
+						"flt_planner"
+					]
+				}
+			},
+			"channel_layout": {
+				"type": "enum",
+				"require": true,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"mono",
+						"stereo"
+					]
+				}
+			}
+		}
+	}
+}

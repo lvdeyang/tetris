@@ -1,0 +1,88 @@
+{
+	"parrent_template":"encode_h265_template.json",
+	"parrent":"hevc",
+	"ux265":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"pixel_format",
+					"max_cu_size",
+					"max_tu_size",
+					"tu_depth",
+					"cu_depth",
+					"frame_num_threads"
+				]
+			}
+		},
+		"constraint": {
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420"				
+					]
+				}
+			},
+			"max_cu_size": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 32,
+					"min_value": 16,
+					"max_value": 64,
+					"step": 1
+				}
+			},
+			"max_tu_size": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 16,
+					"min_value": 4,
+					"max_value": 32,
+					"step": 1
+				}
+			},
+			"tu_depth": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 2,
+					"min_value": 1,
+					"max_value": 4,
+					"step": 1
+				}
+			},
+			"cu_depth": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 2,
+					"min_value": 1,
+					"max_value": 4,
+					"step": 1
+				}
+			},
+			"frame_num_threads": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 3,
+					"min_value": 2,
+					"max_value": 6,
+					"step": 1
+				}
+			}
+		}
+	}
+}

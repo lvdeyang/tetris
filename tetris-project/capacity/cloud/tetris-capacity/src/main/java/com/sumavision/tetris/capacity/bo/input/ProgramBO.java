@@ -30,6 +30,8 @@ public class ProgramBO {
 	
 	private List<ProgramSubtitleBO> subtitle_array;
 
+	private String input_id;
+
 	public Integer getProgram_number() {
 		return program_number;
 	}
@@ -101,5 +103,12 @@ public class ProgramBO {
 		this.subtitle_array = subtitle_array;
 		return this;
 	}
-	
+
+	public String getInput_id() {
+		return input_id;
+	}
+
+	public void setInput_id(String input_id) {
+		this.input_id = input_id;
+	}
 }
