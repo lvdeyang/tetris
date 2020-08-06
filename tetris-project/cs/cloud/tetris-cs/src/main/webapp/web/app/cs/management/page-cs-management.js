@@ -146,6 +146,17 @@ define([
                         outputCount: 1,
                         output: []
                     },
+                    pcversion:{
+                    	visible: false,
+                        loading: false,
+                        data: {},
+                        version:'',
+                        tarCheck: {
+                            name: '',
+                            previewUrl: '',
+                            size: ''
+                        }
+                    },
                     editMenu: {
                         visible: false,
                         loading: false,
@@ -499,7 +510,7 @@ define([
                         broadWay: self.dialog.addProgram.broadWay,
                         outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
                         outputUserPort: self.dialog.addProgram.outputUserPort || '9999',
-                        ouputUserEndPort: self.dialog.addProgram.outputUserEndPort,
+                        outputUserEndPort: self.dialog.addProgram.outputUserEndPort,
                         output: JSON.stringify(self.dialog.addProgram.output),
                         encryption: self.dialog.addProgram.encryption,
                         autoBroad: self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.autoBroad : false,
@@ -1572,6 +1583,16 @@ define([
                     var self = this;
                     self.dialog.upgrade.visible = true;
                 },
+                handleSetPCVersion:function(){
+                	var self = this;
+                    self.dialog.pcversion.visible = true;
+                    ajax.get('/cs/pcversion/getVersion', null, function(data){
+                    	self.dialog.pcversion.version=data.version;
+                    	self.dialog.pcversion.tarCheck.previewUrl=data.url;
+                    	self.dialog.pcversion.tarCheck.name=data.name;
+                    	self.dialog.pcversion.tarCheck.size=data.size;
+                    });
+                },
                 handleCompressSelect: function(buff) {
                     var self = this;
                     self.$refs.selectCompress.setBuffer(buff);
@@ -1610,6 +1631,46 @@ define([
                     self.dialog.upgrade.way = '';
                     self.dialog.upgrade.tarCheck = {};
                     self.dialog.upgrade.areaCheck = [];
+                },
+                handlePcversionClose:function(){
+                	var self = this;
+                    self.dialog.pcversion.visible = false;
+                    self.dialog.pcversion.loading = false;
+                },
+                handlePcversionCommit: function() {
+                    var self = this;
+                    self.dialog.pcversion.loding = true;
+                    if (!self.dialog.pcversion.version) {
+                        self.$message({
+                            message: '请输入版本号',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    if (!self.dialog.pcversion.tarCheck.name || !self.dialog.pcversion.tarCheck.previewUrl) {
+                        self.$message({
+                            message: '请选择安装包',
+                            type: 'warning'
+                        });
+                        return
+                    }
+          
+                    var questData = {
+                        version: self.dialog.pcversion.version,
+                        url:self.dialog.pcversion.tarCheck.previewUrl,
+                        name:self.dialog.pcversion.tarCheck.name,
+                        size:self.dialog.pcversion.tarCheck.size
+                    };
+                    ajax.post('/cs/pcversion/edit', questData, function (data, status) {
+                        if (status == 200) {
+                            self.$message({
+                                message: 'pc终端版本设置成功',
+                                type: 'success'
+                            });
+                            self.handlePcversionClose();
+                        }
+                        self.dialog.pcversion.loading = false;
+                    })
                 },
                 handleUpgradeCommit: function() {
                     var self = this;

@@ -31,6 +31,10 @@
                                 <span class="icon-upload-alt" style="margin-right:5px;"></span>
                                 push终端升级
                             </el-button>
+                            <el-button size="small" type="primary" @click="handleSetPCVersion()">
+                                <span class="icon-set" style="margin-right:5px;"></span>
+                                PC终端版本
+                            </el-button>
                             <span style="position: absolute; right: 10px">{{ time }}</span>
                         </div>
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
@@ -159,6 +163,37 @@
 
         <!-- 选择图片对话框 -->
         <mi-compress-dialog ref="selectCompress" @selected-compress="selectedCompress"></mi-compress-dialog>
+
+
+        <el-dialog
+                title="PC终端版本设置"
+                :visible.sync="dialog.pcversion.visible"
+                width="650px"
+                :before-close="handlePcversionClose">
+            <div style="height:350px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="版本号">
+                            <el-input v-model="dialog.pcversion.version"></el-input>
+                        </el-form-item>
+                        
+                        <el-form-item label="升级包">
+                            <el-button @click="handleCompressSelect(dialog.pcversion.tarCheck)" type="primary" size="small">选择升级包</el-button>
+                        </el-form-item>
+                        <el-form-item v-if="dialog.pcversion.tarCheck.name" label="升级包名">
+                            <span>{{ dialog.pcversion.tarCheck.name }}</span>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handlePcversionClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handlePcversionCommit"
+                           :loading="dialog.upgrade.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
 
         <el-dialog
                 title="终端升级"

@@ -31,10 +31,20 @@ public class MimsServerPropsQuery {
 		String ftpUserName = jsonObject.getString("ftpUsername");
 		String ftpPassword = jsonObject.getString("ftpPassword");
 		
+		String omcftpIp = jsonObject.getString("omcftpIp");
+		String omcftpPort = jsonObject.getString("omcftpPort");
+		String omcftpUserName = jsonObject.getString("omcftpUsername");
+		String omcftpPassword = jsonObject.getString("omcftpPassword");
+		
 		serverProps.setFtpIp(ftpIp.isEmpty() ? serverProps.getIp() : ftpIp);
 		serverProps.setFtpPort(ftpPort.isEmpty() ? "21" : ftpPort);
 		serverProps.setFtpUsername(ftpUserName);
 		serverProps.setFtpPassword(ftpPassword);
+		
+		serverProps.setOmcftpIp(omcftpIp);
+		serverProps.setOmcftpPort(omcftpPort);
+		serverProps.setOmcftpUsername(omcftpUserName);
+		serverProps.setOmcftpPassword(omcftpPassword);
 		
 		return serverProps;
 	}
