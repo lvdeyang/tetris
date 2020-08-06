@@ -48,8 +48,7 @@
 							"640x480",
 							"720x576",
 							"1920x1080",
-							"3840x2160",
-							"follow_src"
+							"3840x2160"
 						]
 					}
 				}
@@ -136,7 +135,7 @@
 				"constraint": {
 					"default_value": 1500,
 					"min_value": 0,
-					"max_value": 400000,
+					"max_value": 40000,
 					"step": 1
 				}
 			},

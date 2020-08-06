@@ -49,8 +49,7 @@
 							"640x480",
 							"720x576",
 							"1920x1080",
-							"3840x2160",
-							"follow_src"
+							"3840x2160"
 						]
 					}
 				}
@@ -150,7 +149,7 @@
 					"default_value": 1500,
 					"min_value": 0,
 					"max_value": 400000,
-					"step": 1
+					"step": 1000
 				}
 			},
 			"open_gop": {
@@ -212,7 +211,7 @@
 				"require": false,
 				"forbidden":false,
 				"constraint": {
-					"default_value": 0,
+					"default_value": 3,
 					"min_value": 0,
 					"max_value": 100,
 					"step": 1

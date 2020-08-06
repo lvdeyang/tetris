@@ -10,7 +10,8 @@
 					"preset",
 					"refine",
 					"pixel_format",
-					"bframe_reference"
+					"bframe_reference",
+					"scenecut"
 				]
 			}
 		},
@@ -69,6 +70,14 @@
 						"strict",
 						"normal"
 					]
+				}
+			},
+			"scenecut": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
 				}
 			}
 		}

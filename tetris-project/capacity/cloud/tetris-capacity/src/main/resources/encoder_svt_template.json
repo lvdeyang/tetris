@@ -10,7 +10,8 @@
 					"pixel_format",
 					"enc_mode",
 					"encoding_type",
-					"bframe_reference"
+					"bframe_reference",
+					"scenecut"
 				]
 			}
 		},
@@ -62,6 +63,14 @@
 						"none",
 						"normal"
 					]
+				}
+			},
+			"scenecut": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
 				}
 			}
 		}
