@@ -1,6 +1,10 @@
 package com.sumavision.tetris.business.transcode.vo;
 
-public class TaskVO {
+import java.io.Serializable;
+
+public class TaskVO implements Serializable {
+
+	private static final long serialVersionUID = 6233458714652958134L;
 
 	private String task_id;
 	

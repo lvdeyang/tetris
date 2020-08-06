@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.sumavision.tetris.capacity.constant.EncodeConstant;
+import com.sumavision.tetris.capacity.template.TemplateService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -46,6 +48,8 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class BvcService {
@@ -64,6 +68,9 @@ public class BvcService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
+
+	@Autowired
+	private TemplateService templateService;
 
 	/**
 	 * 添加bvc转码任务<br/>
@@ -434,28 +441,44 @@ public class BvcService {
 			//h265
 			if(codec.equals("h265")){
 			
-				H265BO h265 = new H265BO().setBitrate(Integer.valueOf(bitrate))
-															 .setRatio(new StringBufferWrapper().append(width)
-																  							    .append(":")
-																  							    .append(height)
-																  							    .toString())
-															 .setFps(fps)
-															 .setWidth(width)
-															 .setHeight(height);
-				videoEncode.setHevc(h265);
+//				H265BO h265 = new H265BO().setBitrate(Integer.valueOf(bitrate))
+//															 .setRatio(new StringBufferWrapper().append(width)
+//																  							    .append(":")
+//																  							    .append(height)
+//																  							    .toString())
+//															 .setFps(fps)
+//															 .setWidth(width)
+//															 .setHeight(height);
+
+				String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X265);
+				JSONObject obj = JSONObject.parseObject(params);
+				obj.put("bitrate", Integer.valueOf(bitrate)/1000);
+				obj.put("ratio",width+":"+height);
+				obj.put("resolution",width+"x"+height);
+				obj.put("fps",fps);
+
+				videoEncode.setHevc(obj);
 			
 			//h264
 			}else if(codec.equals("h264")){
 			
-				H264BO h264 = new H264BO().setBitrate(Integer.valueOf(bitrate))
-										  .setRatio(new StringBufferWrapper().append(width)
-				   		  							    					 .append(":")
-				   		  							    					 .append(height)
-				   		  							    					 .toString())
-										  .setFps(fps)
-										  .setWidth(width)
-										  .setHeight(height);
-				videoEncode.setH264(h264);
+//				H264BO h264 = new H264BO().setBitrate(Integer.valueOf(bitrate))
+//										  .setRatio(new StringBufferWrapper().append(width)
+//				   		  							    					 .append(":")
+//				   		  							    					 .append(height)
+//				   		  							    					 .toString())
+//										  .setFps(fps)
+//										  .setWidth(width)
+//										  .setHeight(height);
+
+				String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+				JSONObject obj = JSONObject.parseObject(params);
+				obj.put("bitrate", Integer.valueOf(bitrate)/1000);
+				obj.put("ratio",width+":"+height);
+				obj.put("resolution",width+"x"+height);
+				obj.put("fps",fps);
+
+				videoEncode.setH264(obj);
 			
 			}
 			
