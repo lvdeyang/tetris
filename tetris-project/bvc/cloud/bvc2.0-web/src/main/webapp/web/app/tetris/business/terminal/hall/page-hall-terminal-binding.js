@@ -39,7 +39,6 @@ define([
                     data:[],
                     page:{
                         currentPage:1,
-                        pageSize:0,
                         total:0,
                         pageSize:50
                     },
@@ -70,7 +69,8 @@ define([
                         visible:false,
                         loading:false,
                         name:'',
-                        terminal:''
+                        terminal:'',
+                        folder:''
                     },
                     createHallBatch:{
                         visible:false,
@@ -90,7 +90,16 @@ define([
                         visible:false,
                         loading:false,
                         id:'',
-                        name:''
+                        name:'',
+                        folder:''
+                    },
+                    selectFolder:{
+                        visible:false,
+                        data:[],
+                        props:{
+                            label:'name',
+                            children:'children'
+                        }
                     },
                     selectTerminal:{
                         visible:false,
@@ -202,7 +211,8 @@ define([
                     self.dialog.createHall.loading = true;
                     ajax.post('/tetris/bvc/business/conference/hall/add', {
                         name:self.dialog.createHall.name,
-                        terminalId:self.dialog.createHall.terminal.id
+                        terminalId:self.dialog.createHall.terminal.id,
+                        folderId:self.dialog.createHall.folder?self.dialog.createHall.folder.id:null
                     }, function(data, status){
                         self.dialog.createHall.loading = false;
                         if(status !== 200) return;
@@ -316,12 +326,48 @@ define([
                     }
                     self.terminal.visible = false;
                 },
+                handelSelectFolder:function(){
+                    var self = this;
+                    self.dialog.selectFolder.visible = true;
+                    self.dialog.selectFolder.data.splice(0, self.dialog.selectFolder.data.length);
+                    ajax.post('/tetris/bvc/business/conference/hall/query/total/folders', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectFolder.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handelSelectFolderClose:function(){
+                    var self = this;
+                    var node = self.$refs.createHallFolderTree.getCurrentNode();
+                    if(node){
+                        self.dialog.createHall.folder = node;
+                    }else{
+                        self.dialog.createHall.folder = '';
+                    }
+                    self.dialog.selectFolder.visible = false;
+                },
+                handelEditHallSelectFolderClose:function(){
+                    var self = this;
+                    var node = self.$refs.editHallFolderTree.getCurrentNode();
+                    if(node){
+                        self.dialog.editHall.folder = node;
+                    }
+                    self.dialog.selectFolder.visible = false;
+                },
                 handleEditHall:function(scope){
                     var self = this;
                     var data = scope.data;
                     self.dialog.editHall.visible = true;
                     self.dialog.editHall.id = data.id;
                     self.dialog.editHall.name = data.name;
+                    if(data.folderId && data.folderName){
+                        self.dialog.editHall.folder = {
+                            id:data.folderId,
+                            name:data.folderName
+                        };
+                    }
                 },
                 handleEditHallClose:function(){
                     var self = this;
@@ -342,13 +388,16 @@ define([
                     self.dialog.editHall.loading = true;
                     ajax.post('/tetris/bvc/business/conference/hall/edit/name', {
                         id:self.dialog.editHall.id,
-                        name:self.dialog.editHall.name
+                        name:self.dialog.editHall.name,
+                        folderId:self.dialog.editHall.folder.id
                     }, function(data, status){
                         self.dialog.editHall.loading = false;
                         if(status !== 200) return;
                         for(var i=0; i<self.hall.data.length; i++){
                             if(self.hall.data[i].id === data.id){
                                 self.hall.data[i].name = data.name;
+                                self.hall.data[i].folderId = data.folderId;
+                                self.hall.data[i].folderName = data.folderName;
                                 break;
                             }
                         }
