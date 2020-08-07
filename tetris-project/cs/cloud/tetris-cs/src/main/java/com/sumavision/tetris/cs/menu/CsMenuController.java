@@ -244,4 +244,25 @@ public class CsMenuController {
 		
 		return resource;
 	}
+
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>sum<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月7日 上午8:34:39
+	 * @param id
+	 * @return
+	 */
+	@JsonBody
+    @ResponseBody
+    @RequestMapping(value = "/resource/removeall")
+    public Object removeallResource(String id, HttpServletRequest request) throws Exception {
+		List<Long> ids = JSON.parseArray(id, Long.class);
+		resourceService.removeallResource(ids);
+		return null;
+	}
+
+
 }
