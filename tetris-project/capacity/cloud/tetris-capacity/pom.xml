@@ -26,7 +26,7 @@
 	</properties>
 
     <dependencies>
-    
+
     	<!-- mysql驱动 -->
 		<dependency>
             <groupId>mysql</groupId>
@@ -121,7 +121,7 @@
     </dependencyManagement>
     
     <build>
-    	<finalName>springboot</finalName>
+    	<finalName>tetris-capacity</finalName>
 	    <plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

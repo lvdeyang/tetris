@@ -1,0 +1,49 @@
+{
+	"parrent_template":"encode_h264_template.json",
+	"parrent":"h264",
+	"uux264":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"pixel_format",
+					"stastical_id",
+					"stastical_flag"
+				]
+			}
+		},
+		"constraint": {
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420"
+					]
+				}
+			},
+			"stastical_id": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"min_value": 0,
+					"max_value": 100000,
+					"step": 1
+				}
+			},
+			"stastical_flag": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": false
+				}
+			}
+		}
+	}
+}

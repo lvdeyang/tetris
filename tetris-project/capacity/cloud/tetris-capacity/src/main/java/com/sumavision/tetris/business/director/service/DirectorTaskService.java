@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sumavision.tetris.capacity.constant.EncodeConstant;
+import com.sumavision.tetris.capacity.template.TemplateService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -53,7 +55,6 @@ import com.sumavision.tetris.capacity.bo.request.AllRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.IdRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
-import com.sumavision.tetris.capacity.bo.task.AacBO;
 import com.sumavision.tetris.capacity.bo.task.DynamicPictureOsdBO;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.FpsConvertBO;
@@ -97,6 +98,9 @@ public class DirectorTaskService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
+
+	@Autowired
+	private TemplateService templateService;
 	
 	/**
 	 * 添加导播任务<br/>
@@ -682,28 +686,47 @@ public class DirectorTaskService {
 			EncodeBO videoEncode = new EncodeBO().setEncode_id(encodeVideoId);
 			
 			if("h264".equals(codec)){
-				
-				H264BO h264 = new H264BO().setBitrate(format_bitrate)
-										  .setMax_bitrate(format_max_bitrate)
-										  .setRatio(ratio)
-										  .setWidth(width)
-										  .setHeight(height);
-				
-				if(fps != null) h264.setFps(fps);
 
-				videoEncode.setH264(h264);
+				String x264Map = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+				JSONObject x264Obj = JSONObject.parseObject(x264Map);
+				x264Obj.put("bitrate",format_bitrate/1000);
+				x264Obj.put("max_bitrate",format_max_bitrate/1000);
+				x264Obj.put("ratio",ratio);
+				x264Obj.put("resolution",width+"x"+height);
+				if (fps != null) {
+					x264Obj.put("fps",fps);
+				}
+//
+//				H264BO h264 = new H264BO().setBitrate(format_bitrate)
+//										  .setMax_bitrate(format_max_bitrate)
+//										  .setRatio(ratio)
+//										  .setWidth(width)
+//										  .setHeight(height);
+				
+//				if(fps != null) h264.setFps(fps);
+				videoEncode.setH264(x264Obj);
 				
 			}else if("h265".equals(codec)){
+
+				String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X265);
+				JSONObject obj = JSONObject.parseObject(params);
+				obj.put("bitrate",format_bitrate/1000);
+				obj.put("max_bitrate",format_max_bitrate/1000);
+				obj.put("ratio",ratio);
+				obj.put("resolution",width+"x"+height);
+				if (fps != null) {
+					obj.put("fps",fps);
+				}
+
+//				H265BO h265 = new H265BO().setBitrate(format_bitrate)
+//						  				  .setMax_bitrate(format_max_bitrate)
+//										  .setRatio(ratio)
+//										  .setWidth(width)
+//										  .setHeight(height);
 				
-				H265BO h265 = new H265BO().setBitrate(format_bitrate)
-						  				  .setMax_bitrate(format_max_bitrate)
-										  .setRatio(ratio)
-										  .setWidth(width)
-										  .setHeight(height);
+//				if(fps != null) h265.setFps(fps);
 				
-				if(fps != null) h265.setFps(fps);
-				
-				videoEncode.setHevc(h265);
+				videoEncode.setHevc(obj);
 				
 			}
 			
@@ -845,25 +868,30 @@ public class DirectorTaskService {
 			EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId);
 			
 			if("aac".equals(codec)){
+
+				String aacMap = templateService.getAudioEncodeMap("aac");
+				JSONObject aacObj = JSONObject.parseObject(aacMap);
+				aacObj.put("bitrate",String.valueOf(bitrate/1000));
+				aacObj.put("sample_rate",String.valueOf(sampleRate/1000));
+
+//				AacBO aac = new AacBO().setAac()
+//			   			   			   .setBitrate(String.valueOf(bitrate/1000))
+//			   			   			   .setSample_rate(String.valueOf(sampleRate/1000));
 				
-				AacBO aac = new AacBO().setAac()
-			   			   			   .setBitrate(bitrate)
-			   			   			   .setSample_rate(sampleRate);
-				
-				audioEncode.setAac(aac);
+				audioEncode.setAac(aacObj);
 				
 			}else if("pcma".equals(codec)){
 				//TODO:转码不支持
-				G711BO g711a = new G711BO().setBitrate(bitrate)
-										   .setSample_rate(sampleRate)
+				G711BO g711a = new G711BO().setBitrate(String.valueOf(bitrate/1000))
+										   .setSample_rate(String.valueOf(sampleRate/1000))
 										   .setSample_byte(8);
 				
 				audioEncode.setG711a(g711a);
 				
 			}else if("pcmu".equals(codec)){
 				//TODO:转码不支持
-				G711BO g711u = new G711BO().setBitrate(bitrate)
-						   				   .setSample_rate(sampleRate)
+				G711BO g711u = new G711BO().setBitrate(String.valueOf(bitrate/1000))
+						   				   .setSample_rate(String.valueOf(sampleRate/1000))
 						   				   .setSample_byte(8);
 
 				audioEncode.setG711a(g711u);

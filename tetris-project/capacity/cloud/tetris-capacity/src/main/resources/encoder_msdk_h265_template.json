@@ -1,0 +1,37 @@
+{
+	"parrent_template":"encode_h265_template.json",
+	"parrent":"hevc",
+	"msdk_encode":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"preset"
+				]
+			}
+		},
+		"constraint": {
+			"preset": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 2,
+					"values": [
+						"ultrafast",
+						"superfast",
+						"veryfast",
+						"faster",
+						"fast",
+						"medium",
+						"slow",
+						"slower",
+						"veryslow",
+						"placebo"						
+					]
+				}
+			}
+		}
+	}
+}

@@ -10,6 +10,10 @@ public class RtpEsBO {
 
 	/** 本地接收数据地址 0~65535 */
 	private Integer local_port;
+
+	private String source_ip;
+
+	private String local_ip;
 	
 	/** 数据类型 video/audio */
 	private String type;
@@ -44,5 +48,22 @@ public class RtpEsBO {
 		this.codec = codec;
 		return this;
 	}
-	
+
+	public String getSource_ip() {
+		return source_ip;
+	}
+
+	public RtpEsBO setSource_ip(String source_ip) {
+		this.source_ip = source_ip;
+		return this;
+	}
+
+	public String getLocal_ip() {
+		return local_ip;
+	}
+
+	public RtpEsBO setLocal_ip(String local_ip) {
+		this.local_ip = local_ip;
+		return this;
+	}
 }
