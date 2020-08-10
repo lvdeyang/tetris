@@ -77,6 +77,7 @@ public class MediaVideoFeignController {
 	
 	@Autowired
 	private UserQuery userQuery;
+
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
