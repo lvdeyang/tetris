@@ -15,6 +15,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
+import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -688,7 +689,7 @@ public class PageTaskPO extends AbstractBasePO {
 		return false;
 	}*/
 	
-	public PageTaskPO setDst(TerminalBundleUserPermissionPO player, BundlePO bundlePO){
+	public PageTaskPO setDstByUser(TerminalBundleUserPermissionPO player, BundlePO bundlePO){
 //		this.businessType = player.getPlayerBusinessType();//TODO
 //		this.locationIndex = player.getLocationIndex();
 //		this.businessId = player.getBusinessId();
@@ -698,6 +699,25 @@ public class PageTaskPO extends AbstractBasePO {
 		this.dstAudioChannelId = ChannelType.AUDIODECODE1.getChannelId();
 		this.dstAudioChannelName = ChannelType.AUDIODECODE1.getName();
 		this.dstBundleId = player.getBundleId();
+		this.dstBundleName = bundlePO.getBundleName();
+		this.dstBundleType = bundlePO.getBundleType();
+		this.dstLayerId = bundlePO.getAccessNodeUid();
+		this.dstVideoBaseType = "VenusVideoOut";
+		this.dstVideoChannelId = ChannelType.VIDEODECODE1.getChannelId();
+		this.dstVideoChannelName = ChannelType.VIDEOENCODE1.getName();
+		return this;
+	}
+	
+	public PageTaskPO setDstByHall(TerminalBundleConferenceHallPermissionPO decoder, BundlePO bundlePO){
+//		this.businessType = player.getPlayerBusinessType();//TODO
+//		this.locationIndex = player.getLocationIndex();
+//		this.businessId = player.getBusinessId();
+//		this.businessName = player.getBusinessName();
+		this.dstId = decoder.getId().toString();
+		this.dstAudioBaseType = "VenusAudioOut";
+		this.dstAudioChannelId = ChannelType.AUDIODECODE1.getChannelId();
+		this.dstAudioChannelName = ChannelType.AUDIODECODE1.getName();
+		this.dstBundleId = decoder.getBundleId();
 		this.dstBundleName = bundlePO.getBundleName();
 		this.dstBundleType = bundlePO.getBundleType();
 		this.dstLayerId = bundlePO.getAccessNodeUid();

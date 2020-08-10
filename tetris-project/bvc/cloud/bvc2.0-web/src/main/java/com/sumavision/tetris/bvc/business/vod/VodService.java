@@ -439,7 +439,7 @@ public class VodService {
 			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
 			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
-			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(dstMember.getOriginId(), dstMember.getTerminalId());
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(dstMember.getOriginId(), dstMember.getTerminalId(), GroupMemberType.MEMBER_USER);
 			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
 			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
 			
@@ -629,7 +629,7 @@ public class VodService {
 			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
 			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
-			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(dstMember.getOriginId(), dstMember.getTerminalId());
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(dstMember.getOriginId(), dstMember.getTerminalId(), GroupMemberType.MEMBER_USER);
 			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
 			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
 			

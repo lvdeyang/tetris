@@ -18,6 +18,7 @@ import java.util.Date;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.bvc.model.agenda.exception.AgendaNotFoundException;
 
 import com.alibaba.fastjson.JSON;
@@ -46,12 +47,17 @@ import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
+import com.sumavision.bvc.device.group.bo.CombineAudioBO;
+import com.sumavision.bvc.device.group.bo.CombineVideoBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
+import com.sumavision.bvc.device.group.bo.ForwardSetBO;
+import com.sumavision.bvc.device.group.bo.ForwardSetDstBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.PositionSrcBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
@@ -80,6 +86,8 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
+import com.sumavision.tetris.bvc.business.group.forward.Jv230CombineAudioSrcPO;
+import com.sumavision.tetris.bvc.business.group.forward.QtTerminalCombineVideoSrcPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
@@ -107,7 +115,10 @@ import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -135,6 +146,13 @@ public class AutoCombineService {
 	@Autowired
 	@Qualifier("com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcDAO")
 	private CombineVideoSrcDAO combineVideoSrcDao;
+
+	@Autowired
+	private CombineAudioDAO combineAudioDao;
+		
+	@Autowired
+	@Qualifier("com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioSrcDAO")
+	private CombineAudioSrcDAO combineAudioSrcDao;
 	
 	@Autowired
 	private BundleDao bundleDao;
@@ -191,6 +209,12 @@ public class AutoCombineService {
 	private RunningAgendaDAO runningAgendaDao;
 	
 	@Autowired
+	private CombineVideoService combineVideoService;
+	
+	@Autowired
+	private CombineAudioService combineAudioService;
+	
+	@Autowired
 	private PageTaskService pageTaskService;
 	
 	@Autowired
@@ -216,6 +240,9 @@ public class AutoCombineService {
 
 	@Autowired
 	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
+
+	@Autowired
+	private UserQuery userQuery;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -223,15 +250,39 @@ public class AutoCombineService {
 	@Autowired
 	private AgendaDAO agendaDao;
 	
-	public List<CommonForwardPO> combine(List<GroupMemberPO> dstMembers, List<SourceBO> sourceBOs) throws Exception{
+	/**
+	 * 自动合屏，包括协议下发<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月7日 上午10:21:30
+	 * @param sourceBOs
+	 * @param combineVideoPOs 已经存在的合屏，用来update，正常最多只有1个
+	 * @param combineAudioPOs 已经存在的混音，用来update，正常最多只有1个
+	 * @return
+	 * @throws Exception
+	 */
+	public SourceBO autoCombine(List<SourceBO> sourceBOs, List<CombineVideoPO> combineVideoPOs, List<CombineAudioPO> combineAudioPOs) throws Exception{
 		
+		if(sourceBOs.size() == 0){
+			System.out.println("无法自动合屏，sourceBOs大小为0");
+			return null;
+		}
+		Long businessId = Long.parseLong(sourceBOs.get(0).getBusinessId());
+		
+		//----------合屏----------
 		String name = "自动合屏";		
 		int sourceSize = sourceBOs.size();
 		
-		CombineVideoPO entity = new CombineVideoPO();
+		CombineVideoPO entity = null;
+		if(combineVideoPOs!=null && combineVideoPOs.size()>0){
+			entity = combineVideoPOs.get(0);
+		}else{
+			entity = new CombineVideoPO();
+		}
 		entity.setName(name);
-//		entity.setBusinessId(businessId);
-		entity.setBusinessType(CombineBusinessType.AGENDA);
+		entity.setBusinessId(businessId);
+		entity.setBusinessType(CombineBusinessType.GROUP);
 		entity.setUpdateTime(new Date());
 		combineVideoDao.save(entity);
 		
@@ -251,7 +302,7 @@ public class AutoCombineService {
 		combineVideoDao.save(entity);
 		
 		//自动生成布局，关联到CombineVideoPO
-		List<CombineVideoPositionPO> positionEntities = autoLayout(sourceBOs.size());
+		List<CombineVideoPositionPO> positionEntities = autoLayout(sourceSize);
 		for(CombineVideoPositionPO positionEntity : positionEntities){
 			positionEntity.setCombineVideoId(entity.getId());
 		}		
@@ -261,7 +312,6 @@ public class AutoCombineService {
 		List<CombineVideoSrcPO> srcEntities = new ArrayList<CombineVideoSrcPO>();
 		Iterator<SourceBO> iterator = sourceBOs.iterator();
 		for(CombineVideoPositionPO positionEntity : positionEntities){
-//		for(int i=0; i<positions.size(); i++){
 			if(!iterator.hasNext()) break;
 			SourceBO sourceBO = iterator.next();
 			AgendaForwardType agendaforwardType = sourceBO.getAgendaForwardType();
@@ -278,14 +328,120 @@ public class AutoCombineService {
 			srcEntity.setUpdateTime(new Date());
 			srcEntity.setCombineVideoPositionId(positionEntity.getId());
 			srcEntities.add(srcEntity);
-//				}
-//			}
 		}
 		combineVideoSrcDao.save(srcEntities);
 		
 		
+		//----------混音----------
+		CombineAudioPO combineAudioPO = null;
+		if(combineAudioPOs!=null && combineAudioPOs.size()>0){
+			combineAudioPO = combineAudioPOs.get(0);
+		}else{
+			combineAudioPO = new CombineAudioPO();
+		}
+		combineAudioPO.setName("自动混音");
+		combineAudioPO.setBusinessId(businessId);
+		combineAudioPO.setBusinessType(CombineBusinessType.GROUP);
+		combineAudioDao.save(combineAudioPO);		
 		
-		return null;
+		List<CombineAudioSrcPO> audioSrcs = new ArrayList<CombineAudioSrcPO>();
+		for(SourceBO sourceBO : sourceBOs){			
+			String audioSrcId = sourceBO.getAudioSource().getChannelId()
+					+ "@@" + sourceBO.getAudioSource().getBundleId()
+					+ "@@" + sourceBO.getAudioBundle().getAccessNodeUid();
+			
+			CombineAudioSrcPO src = new CombineAudioSrcPO();
+			src.setSrcId(audioSrcId);
+			src.setCombineAudioSrcType(CombineAudioSrcType.CHANNEL);
+			src.setCombineAudioId(combineAudioPO.getId());
+			audioSrcs.add(src);
+		}
+		combineAudioSrcDao.save(audioSrcs);
+		
+		
+		//----------生成、下发协议----------
+		//生成协议
+		UserVO user = userQuery.current();
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO protocol = new LogicBO()
+				.setUserId(user.getId().toString())
+				.setCombineVideoSet(new ArrayList<CombineVideoBO>())
+				.setCombineAudioSet(new ArrayList<CombineAudioBO>())
+				.setForwardSet(new ArrayList<ForwardSetBO>());
+		
+		CombineVideoBO combineVideoProtocol = new CombineVideoBO().setUuid(entity.getUuid())
+																  .setCodec_param(codec)
+																  .setPosition(new ArrayList<PositionSrcBO>());
+		for(CombineVideoPositionPO positionPO : positionEntities){
+			PositionSrcBO position = new PositionSrcBO().setX(Integer.parseInt(positionPO.getX()))
+								.setY(Integer.parseInt(positionPO.getY()))
+								.setW(Integer.parseInt(positionPO.getW()))
+								.setY(Integer.parseInt(positionPO.getH()))
+								.setSrc(new ArrayList<com.sumavision.bvc.device.group.bo.SourceBO>());
+			//找到对应的CombineAudioSrcPO
+			for(CombineVideoSrcPO srcEntity : srcEntities){
+				if(srcEntity.getCombineVideoPositionId().equals(positionPO.getId())){
+					String srcId = srcEntity.getSrcId();
+					String[] srcIdSplit = srcId.split("@@");
+					com.sumavision.bvc.device.group.bo.SourceBO src = new com.sumavision.bvc.device.group.bo.SourceBO()
+							.setLayerId(srcIdSplit[2])
+							.setBundleId(srcIdSplit[1])
+							.setChannelId(srcIdSplit[0]);
+					position.getSrc().add(src);
+				}
+			}
+			combineVideoProtocol.getPosition().add(position);
+		}
+		protocol.getCombineVideoSet().add(combineVideoProtocol);
+		
+		CombineAudioBO combineAudioProtocol = new CombineAudioBO().setUuid(combineAudioPO.getUuid())
+						  .setCodec_param(codec)
+						  .setSrc(new ArrayList<com.sumavision.bvc.device.group.bo.SourceBO>());
+		for(CombineAudioSrcPO combineAudioSrc : audioSrcs){
+			String audioSrcId = combineAudioSrc.getSrcId();
+			String[] srcIdSplit = audioSrcId.split("@@");
+			com.sumavision.bvc.device.group.bo.SourceBO combineAudioSrcProtocol = new com.sumavision.bvc.device.group.bo.SourceBO()
+					.setLayerId(srcIdSplit[2])
+					.setBundleId(srcIdSplit[1])
+					.setChannelId(srcIdSplit[0]);
+			combineAudioProtocol.getSrc().add(combineAudioSrcProtocol);
+		}
+		protocol.getCombineAudioSet().add(combineAudioProtocol);
+		
+		executeBusiness.execute(protocol, new StringBufferWrapper().append("自动合屏混音").toString());
+		
+		return generateSourceFromCombine(entity.getUuid(), combineAudioPO.getUuid(), businessId.toString());
+	}
+	
+	public void deleteCombine(List<String> videoUuids, List<String> audioUuids, boolean doProtocal) throws Exception{
+		UserVO user = userQuery.current();
+		LogicBO protocol = new LogicBO()
+				.setCombineAudioDel(new ArrayList<CombineAudioBO>())
+				.setCombineVideoDel(new ArrayList<CombineVideoBO>())
+				.setUserId(user.getId().toString());
+		List<CombineVideoPO> videos = combineVideoDao.findByUuidIn(videoUuids);
+		for(CombineVideoPO video : videos){
+			protocol.getCombineVideoDel().add(new CombineVideoBO().setUuid(video.getUuid()));
+			combineVideoService.delete(video.getId());
+		}
+		List<CombineAudioPO> audios = combineAudioDao.findByUuidIn(audioUuids);
+		for(CombineAudioPO audio : audios){
+			protocol.getCombineAudioDel().add(new CombineAudioBO().setUuid(audio.getUuid()));
+			combineAudioService.delete(audio.getId());
+		}
+		if(doProtocal) executeBusiness.execute(protocol, new StringBufferWrapper().append("删除合屏混音").toString());
+	}
+	
+	private SourceBO generateSourceFromCombine(String videoUuid, String audioUuid, String businessId){
+		SourceBO sourceBO = new SourceBO()
+				.setBusinessId(businessId)
+				.setBusinessInfoType(BusinessInfoType.COMMON)
+				.setAgendaForwardType(AgendaForwardType.AUDIO_VIDEO)
+				.setVideoSourceType(AgendaSourceType.COMBINE_VIDEO)
+				.setSrcVideoId(videoUuid)
+				.setAudioSourceType(AgendaSourceType.COMBINE_AUDIO)
+				.setSrcAudioId(audioUuid);		
+		return sourceBO;
 	}
 	
 	private List<CombineVideoPositionPO> autoLayout(int size) throws Exception{

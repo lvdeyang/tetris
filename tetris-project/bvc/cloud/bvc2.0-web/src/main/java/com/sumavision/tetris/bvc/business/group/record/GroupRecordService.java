@@ -66,6 +66,8 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RolePO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
@@ -102,6 +104,9 @@ public class GroupRecordService {
 	
 	@Autowired
 	private PageTaskDAO pageTaskDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 	
 	@Autowired
 	private AgendaDAO agendaDao;
@@ -618,8 +623,8 @@ public class GroupRecordService {
 		}
 		
 		String originId = userId.toString();
-		Long terminalId = null;//TODO
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+		Long terminalId = terminalDao.findByType(TerminalType.QT_ZK).getId();//TODO
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, GroupMemberType.MEMBER_USER);
 		pageTaskService.addAndRemoveTasks(pageInfo, newTasks, null);
 	}
 
@@ -639,8 +644,8 @@ public class GroupRecordService {
 		List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessIdIn(businessIds);
 		
 		String originId = userId.toString();
-		Long terminalId = null;//TODO
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+		Long terminalId = terminalDao.findByType(TerminalType.QT_ZK).getId();//TODO
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, GroupMemberType.MEMBER_USER);
 		pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
 		
 	}

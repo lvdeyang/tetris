@@ -271,6 +271,7 @@ public class GroupService {
 			BusinessType groupBusinessType,
 			OriginType originType,
 			List<Long> userIdList,
+			List<Long> hallIds,
 			List<String> bundleIdList,
 			String uuid
 			) throws Exception{
@@ -298,6 +299,16 @@ public class GroupService {
 		
 		//后续支持设备成员
 		
+		//会场
+		List<ConferenceHallPO> halls = conferenceHallDao.findAll(hallIds);
+		for(ConferenceHallPO hall : halls){
+			MemberTerminalBO memberBO = new MemberTerminalBO()
+					.setGroupMemberType(GroupMemberType.MEMBER_HALL)
+					.setOriginId(hall.getId().toString())
+					.setTerminalId(hall.getTerminalId());
+			memberTerminalBOs.add(memberBO);
+		}
+				
 		return save(
 				creatorUserId,
 				chairmanBO,
@@ -328,17 +339,6 @@ public class GroupService {
 			log.warn("级联建会，uuid已经存在：" + uuid);
 			return group1;
 		}
-		
-		/*List<Long> userIdList = new ArrayList<Long>();
-		List<String> memberBundleIds = new ArrayList<String>();
-		for(MemberTerminalBO userTerminalBO : memberTerminalBOs){
-			GroupMemberType groupMemberType = userTerminalBO.getGroupMemberType();
-			if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
-				userIdList.add(Long.parseLong(userTerminalBO.getOriginId()));
-			}else if(GroupMemberType.MEMBER_DEVICE.equals(groupMemberType)){
-				memberBundleIds.add(userTerminalBO.getOriginId());
-			}
-		}*/
 		
 		//校验
 		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId, TerminalType.QT_ZK);
@@ -826,7 +826,8 @@ public class GroupService {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择。仅在专向会议中可以指定序号；普通会议中必须为-1。
 	 * @return result 主席的播放器信息
 	 * @throws Exception
-	 */	
+	 */
+	@Transactional(rollbackFor = Exception.class)
 	public Object start(Long groupId, int locationIndex) throws Exception{
 		return start(groupId, locationIndex, true, null, null, null);
 	}
@@ -940,11 +941,11 @@ public class GroupService {
 			
 			groupDao.save(group);
 			
+			membersResponse(group, members, acceptMembers);
+			
 			//执行默认议程
 			AgendaPO commandAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);//TODO
 			agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(commandAgenda.getId()).getList(), null);
-			
-			membersResponse(group, members, acceptMembers);
 			
 			//级联
 			if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -1031,6 +1032,8 @@ public class GroupService {
 			Date endTime = new Date();
 			group.setEndTime(endTime);
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+			//sourceBOs用于关闭编码通道
+			List<SourceBO> sourceBOs = agendaService.obtainSource(members, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 	//		List<CommandGroupForwardPO> forwards = group.getForwards();
 	//		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			List<GroupMemberPO> connectMembers = new ArrayList<GroupMemberPO>();
@@ -1080,7 +1083,8 @@ public class GroupService {
 //					member.setMessageCoId(null);
 //				}			
 				
-				if(OriginType.OUTER.equals(member.getOriginType())){
+				if(OriginType.OUTER.equals(member.getOriginType())
+						|| !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
 					//状态重置（本系统用户的状态重置写在下头）
 					member.setGroupMemberStatus(GroupMemberStatus.DISCONNECT);
 					member.setSilenceToHigher(false);
@@ -1088,9 +1092,9 @@ public class GroupService {
 					continue;
 				}
 				
-				if(!GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
-					continue;
-				}
+//				if(!GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+//					continue;
+//				}
 								
 				//普通指挥/会议，给其它 会议中的 成员发通知
 				if(!member.getIsAdministrator() && group.getBusinessType().equals(BusinessType.COMMAND)
@@ -1192,7 +1196,6 @@ public class GroupService {
 			groupMemberRolePermissionDao.deleteInBatch(ps);
 			
 			//关闭编码通道
-			List<SourceBO> sourceBOs = agendaService.obtainSource(connectMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = closeEncoder(sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + " 会议停止");
@@ -1295,7 +1298,7 @@ public class GroupService {
 //					}
 //				}
 				
-				addOrEnterMembers(groupId, new ArrayListWrapper<Long>().add(userId).getList(), null);
+				addOrEnterMembers(groupId, new ArrayListWrapper<Long>().add(userId).getList(), null, null);
 				
 				
 				GroupPO group = groupDao.findOne(groupId);
@@ -1384,9 +1387,10 @@ public class GroupService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
-	public Object addOrEnterMembers(Long groupId, List<Long> userIdList, List<String> bundleIdList) throws Exception{
+	public Object addOrEnterMembers(Long groupId, List<Long> userIdList, List<Long> hallIds, List<String> bundleIdList) throws Exception{
 		
 		if(userIdList == null) userIdList = new ArrayList<Long>();
+		if(hallIds == null) hallIds = new ArrayList<Long>();
 		if(bundleIdList == null) bundleIdList = new ArrayList<String>();
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
@@ -1399,6 +1403,17 @@ public class GroupService {
 					.setTerminalId(terminal.getId());
 			memberTerminalBOs.add(memberBO);
 		}
+
+		//会场
+		List<ConferenceHallPO> halls = conferenceHallDao.findAll(hallIds);
+		for(ConferenceHallPO hall : halls){
+			MemberTerminalBO memberBO = new MemberTerminalBO()
+					.setGroupMemberType(GroupMemberType.MEMBER_HALL)
+					.setOriginId(hall.getId().toString())
+					.setTerminalId(hall.getTerminalId());
+			memberTerminalBOs.add(memberBO);
+		}
+		
 		return addOrEnterMembersByBO(groupId, memberTerminalBOs);
 	}
 	
@@ -1441,16 +1456,17 @@ public class GroupService {
 			List<String> existedOriginIdList = groupMemberDao.findOriginIdsByGroupId(groupId);
 			for(MemberTerminalBO memberTerminalBO : memberTerminalBOs){
 				String originId = memberTerminalBO.getOriginId();
-				if(existedOriginIdList.contains(originId)){
+				GroupMemberType groupMemberType = memberTerminalBO.getGroupMemberType();
+//				if(existedOriginIdList.contains(originId)){
 					
-					GroupMemberPO member = tetrisBvcQueryUtil.queryMemberByOriginId(members, originId);
+				GroupMemberPO member = tetrisBvcQueryUtil.queryMemberByOriginIdAndGroupMemberType(members, originId, groupMemberType);
+				if(member!=null){
 					if(member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
 						//已经进会的成员，不用再处理
 					}else{
 						enterOriginIdList.add(originId);
 						enterMembers.add(member);
 					}
-					
 				}else{
 					newOriginIdList.add(originId);
 					newMemberTerminalBOs.add(memberTerminalBO);
@@ -1459,362 +1475,7 @@ public class GroupService {
 			
 			List<GroupMemberPO> newMembers = generateMembers(group.getId(), newMemberTerminalBOs, null);
 			groupMemberDao.save(newMembers);
-			
-			/*
-			//用户管理层的批量接口，根据userIds查询List<UserBO>，由于缺少folderId，所以额外查询queryAllFolders，给UserBO中的folderId赋值
-			String newUserIdListStr = StringUtils.join(newUserIdList.toArray(), ",");
-			List<UserBO> commandUserBos = resourceService.queryUserListByIds(newUserIdListStr, TerminalType.QT_ZK);
-			if(commandUserBos == null) commandUserBos = new ArrayList<UserBO>();
-			List<FolderPO> allFolders = resourceService.queryAllFolders();
-			List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(newUserIdList);
-			String localLayerId = null;
-		
-			//从List<UserBO>取出bundleId列表，注意判空；给UserBO中的folderId赋值
-			List<String> bundleIds = new ArrayList<String>();
-			for(UserBO user : commandUserBos){
-				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(encoderId != null){
-					bundleIds.add(encoderId);
-				}
-				for(FolderPO folder : allFolders){
-					if(folder.getUuid().equals(user.getFolderUuid())){
-						user.setFolderId(folder.getId());
-						break;
-					}
-				}
-			}
-			
-			//从bundleId列表查询所有的bundlePO
-			List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(bundleIds);
-			if(srcBundleEntities == null) srcBundleEntities = new ArrayList<BundlePO>();
-			
-			//从bundleId列表查询所有的视频编码1通道
-			List<ChannelSchemeDTO> videoEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.VIDEOENCODE1.getChannelId());
-			if(videoEncode1Channels == null) videoEncode1Channels = new ArrayList<ChannelSchemeDTO>();
-			//通过视频编码通道来校验编码器是否可用
-			if(videoEncode1Channels.size() < commandUserBos.size()){
-				for(UserBO user : commandUserBos){
-					
-					//外部系统用户则跳过
-					if(queryUtil.isLdapUser(user, folderUserMaps)){
-						continue;
-					}
-
-					boolean hasChannel = false;
-					String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-					for(ChannelSchemeDTO channel : videoEncode1Channels){
-						if(channel.getBundleId().equals(encoderId)){
-							hasChannel = true;
-							break;
-						}
-					}
-					if(!hasChannel){
-						throw new UserHasNoAvailableEncoderException(user.getName());
-					}
-				}
-			}
 						
-			//从bundleId列表查询所有的音频编码1通道
-			List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
-			if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
-			
-//			Set<CommandGroupForwardPO> forwards = group.getForwards();
-			GroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-			Long creatorUserId = chairmanMember.getUserId();
-			CommandGroupAvtplPO g_avtpl = group.getAvtpl();
-			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
-			
-			List<GroupMemberPO> newMembers = new ArrayList<GroupMemberPO>();
-			List<CommandGroupForwardPO> newForwards = new ArrayList<CommandGroupForwardPO>();
-			
-//			BasicRolePO chairmanRole = basicRoleDao.findByName("主席");
-//			BasicRolePO memberRole = basicRoleDao.findByName("会议员");
-			for(UserBO user : commandUserBos){
-				GroupMemberPO memberPO = new GroupMemberPO();
-				//关联会议员角色
-//				memberPO.setRoleId(memberRole.getId());
-//				memberPO.setRoleName(memberRole.getName());
-				
-				memberPO.setUserId(user.getId());
-				memberPO.setUserName(user.getName());
-				memberPO.setUserNum(user.getUserNo());
-				memberPO.setGroup(group);
-				if(user.getFolderId() == null){
-					throw new BaseException(StatusCode.FORBIDDEN, memberPO.getUserName() + " 没有组织机构！");
-				}
-				memberPO.setFolderId(user.getFolderId());
-				newMembers.add(memberPO);
-				
-				//ldap用户，生成一套参数id
-				if(queryUtil.isLdapUser(user, folderUserMaps)){
-					if(localLayerId == null){
-						localLayerId = resourceRemoteService.queryLocalLayerId();
-					}
-					memberPO.setOriginType(OriginType.OUTER);
-					memberPO.setSrcBundleId(memberPO.getUserNum() + "user" + UUID.randomUUID().toString().replace("-", ""));
-					memberPO.setSrcLayerId(localLayerId);
-					memberPO.setSrcVideoChannelId(ChannelType.VIDEOENCODE1.getChannelId());
-					memberPO.setSrcAudioChannelId(ChannelType.AUDIOENCODE1.getChannelId());
-					continue;
-				}
-				
-				//遍历bundle
-				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				for(BundlePO bundle : srcBundleEntities){
-					if(bundle.getBundleId().equals(encoderId)){
-						memberPO.setSrcBundleId(bundle.getBundleId());
-						memberPO.setSrcBundleName(bundle.getBundleName());
-						memberPO.setSrcBundleType(bundle.getDeviceModel());
-						memberPO.setSrcVenusBundleType(bundle.getBundleType());
-						memberPO.setSrcLayerId(bundle.getAccessNodeUid());
-						break;
-					}
-				}
-				
-				//遍历视频通道
-				for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
-					if(videoChannel.getBundleId().equals(encoderId)){
-						memberPO.setSrcVideoChannelId(videoChannel.getChannelId());
-						break;
-					}
-				}			
-				
-				//遍历音频通道
-				for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
-					if(audioChannel.getBundleId().equals(encoderId)){
-						memberPO.setSrcAudioChannelId(audioChannel.getChannelId());
-						break;
-					}
-				}
-			}
-			
-			//保存以获得member的id
-			members.addAll(newMembers);
-			commandGroupMemberDao.save(newMembers);
-			commandGroupDao.save(group);
-			
-			List<Long> newMemberIds = new ArrayList<Long>();
-			for(GroupMemberPO member : newMembers){
-				newMemberIds.add(member.getId());
-				if(member.isAdministrator()){
-					//建立所有成员到主席的转发（在下边）
-					
-				}else{
-					//建立主席到成员的转发
-					CommandGroupForwardPO c2m_forward = new CommandGroupForwardPO(
-							ForwardBusinessType.BASIC_COMMAND,
-							ExecuteStatus.UNDONE,
-							ForwardDstType.USER,
-							member.getId(),
-							chairmanMember.getId(),
-							chairmanMember.getSrcBundleId(),
-							chairmanMember.getSrcBundleName(),
-							chairmanMember.getSrcVenusBundleType(),
-							chairmanMember.getSrcLayerId(),
-							chairmanMember.getSrcVideoChannelId(),
-							"VenusVideoIn",//videoBaseType,
-							chairmanMember.getSrcBundleId(),
-							chairmanMember.getSrcBundleName(),
-							chairmanMember.getSrcBundleType(),
-							chairmanMember.getSrcLayerId(),
-							chairmanMember.getSrcAudioChannelId(),
-							"VenusAudioIn",//String audioBaseType,
-							null,//member.getDstBundleId(),
-							null,//member.getDstBundleName(),
-							null,//member.getDstBundleType(),
-							null,//member.getDstLayerId(),
-							null,//member.getDstVideoChannelId(),
-							"VenusVideoOut",//String dstVideoBaseType,
-							null,//member.getDstAudioChannelId(),
-							null,//member.getDstBundleName(),
-							null,//member.getDstBundleType(),
-							null,//member.getDstLayerId(),
-							null,//member.getDstAudioChannelId(),
-							"VenusAudioOut",//String dstAudioBaseType,
-							creatorUserId,
-							g_avtpl.getId(),//Long avTplId,
-							currentGear.getId(),//Long gearId,
-							DstDeviceType.WEBSITE_PLAYER,
-							null,//LiveType type,
-							null,//Long osdId,
-							null//String osdUsername);
-							);
-					c2m_forward.setGroup(group);
-					newForwards.add(c2m_forward);
-					
-					//建立成员到主席的转发
-					CommandGroupForwardPO m2c_forward = new CommandGroupForwardPO(
-							ForwardBusinessType.BASIC_COMMAND,
-							ExecuteStatus.UNDONE,
-							ForwardDstType.USER,
-							chairmanMember.getId(),
-							member.getId(),
-							member.getSrcBundleId(),
-							member.getSrcBundleName(),
-							member.getSrcVenusBundleType(),
-							member.getSrcLayerId(),
-							member.getSrcVideoChannelId(),
-							"VenusVideoIn",//videoBaseType,
-							member.getSrcBundleId(),
-							member.getSrcBundleName(),
-							member.getSrcBundleType(),
-							member.getSrcLayerId(),
-							member.getSrcAudioChannelId(),
-							"VenusAudioIn",//String audioBaseType,
-							null,//chairmanMember.getDstBundleId(),
-							null,//chairmanMember.getDstBundleName(),
-							null,//chairmanMember.getDstBundleType(),
-							null,//chairmanMember.getDstLayerId(),
-							null,//chairmanMember.getDstVideoChannelId(),
-							null,//String dstVideoBaseType,
-							null,//chairmanMember.getDstAudioChannelId(),
-							null,//chairmanMember.getDstBundleName(),
-							null,//chairmanMember.getDstBundleType(),
-							null,//chairmanMember.getDstLayerId(),
-							null,//chairmanMember.getDstAudioChannelId(),
-							null,//String dstAudioBaseType,
-							creatorUserId,
-							g_avtpl.getId(),//Long avTplId,
-							currentGear.getId(),//Long gearId,
-							DstDeviceType.WEBSITE_PLAYER,
-							null,//LiveType type,
-							null,//Long osdId,
-							null//String osdUsername);
-							);
-					m2c_forward.setGroup(group);
-					newForwards.add(m2c_forward);
-					
-				}
-			}*/
-			
-			/*//协同或发言人
-			Set<GroupMemberPO> cooperateMembers = new HashSet<GroupMemberPO>();
-			GroupSpeakType speakType = group.getSpeakType();
-			if(GroupSpeakType.DISCUSS.equals(speakType)){
-				//讨论模式下，除了主席，所有进会成员都是“发言人”
-				for(GroupMemberPO member : members){
-					if(member.isAdministrator()) continue;
-					if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
-						cooperateMembers.add(member);
-					}
-				}
-			}else{
-				for(GroupMemberPO member : members){
-					if(member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING)){
-						cooperateMembers.add(member);
-					}
-				}
-			}
-			
-			//生成协同或发言的转发
-			for(GroupMemberPO member : newMembers){
-				
-				if(member.isAdministrator()){
-					continue;
-				}
-				
-				for(GroupMemberPO cooperateMember : cooperateMembers){
-					
-					//避免自己看自己
-					if(member.getUuid().equals(cooperateMember.getUuid())){
-						continue;
-					}
-					
-					//协同给新成员的转发
-					CommandGroupForwardPO c2m_forward = new CommandGroupForwardPO(
-							ForwardBusinessType.COOPERATE_COMMAND,
-							ExecuteStatus.UNDONE,
-							ForwardDstType.USER,
-							member.getId(),
-							cooperateMember.getId(),
-							cooperateMember.getSrcBundleId(),
-							cooperateMember.getSrcBundleName(),
-							cooperateMember.getSrcVenusBundleType(),
-							cooperateMember.getSrcLayerId(),
-							cooperateMember.getSrcVideoChannelId(),
-							"VenusVideoIn",//videoBaseType,
-							cooperateMember.getSrcBundleId(),
-							cooperateMember.getSrcBundleName(),
-							cooperateMember.getSrcBundleType(),
-							cooperateMember.getSrcLayerId(),
-							cooperateMember.getSrcAudioChannelId(),
-							"VenusAudioIn",//String audioBaseType,
-							null,//member.getDstBundleId(),
-							null,//member.getDstBundleName(),
-							null,//member.getDstBundleType(),
-							null,//member.getDstLayerId(),
-							null,//member.getDstVideoChannelId(),
-							"VenusVideoOut",//String dstVideoBaseType,
-							null,//member.getDstAudioChannelId(),
-							null,//member.getDstBundleName(),
-							null,//member.getDstBundleType(),
-							null,//member.getDstLayerId(),
-							null,//member.getDstAudioChannelId(),
-							"VenusAudioOut",//String dstAudioBaseType,
-							group.getUserId(),
-							group.getAvtpl().getId(),//g_avtpl.getId(),//Long avTplId,
-							currentGear.getId(),//Long gearId,
-							DstDeviceType.WEBSITE_PLAYER,
-							null,//LiveType type,
-							null,//Long osdId,
-							null//String osdUsername);
-							);
-					c2m_forward.setGroup(group);
-					newForwards.add(c2m_forward);
-					
-					//会议模式下，发言人不用看新成员
-					if(GroupType.MEETING.equals(businessType)){
-						continue;
-					}
-					
-					//新成员给协同成员的转发
-					CommandGroupForwardPO m2c_forward = new CommandGroupForwardPO(
-							ForwardBusinessType.COOPERATE_COMMAND,
-							ExecuteStatus.UNDONE,
-							ForwardDstType.USER,
-							cooperateMember.getId(),
-							member.getId(),
-							member.getSrcBundleId(),
-							member.getSrcBundleName(),
-							member.getSrcVenusBundleType(),
-							member.getSrcLayerId(),
-							member.getSrcVideoChannelId(),
-							"VenusVideoIn",//videoBaseType,
-							member.getSrcBundleId(),
-							member.getSrcBundleName(),
-							member.getSrcBundleType(),
-							member.getSrcLayerId(),
-							member.getSrcAudioChannelId(),
-							"VenusAudioIn",//String audioBaseType,
-							null,//cooperateMember.getDstBundleId(),
-							null,//cooperateMember.getDstBundleName(),
-							null,//cooperateMember.getDstBundleType(),
-							null,//cooperateMember.getDstLayerId(),
-							null,//cooperateMember.getDstVideoChannelId(),
-							"VenusVideoOut",//String dstVideoBaseType,
-							null,//cooperateMember.getDstAudioChannelId(),
-							null,//cooperateMember.getDstBundleName(),
-							null,//cooperateMember.getDstBundleType(),
-							null,//cooperateMember.getDstLayerId(),
-							null,//cooperateMember.getDstAudioChannelId(),
-							"VenusAudioOut",//String dstAudioBaseType,
-							group.getUserId(),
-							group.getAvtpl().getId(),//g_avtpl.getId(),//Long avTplId,
-							currentGear.getId(),//Long gearId,
-							DstDeviceType.WEBSITE_PLAYER,
-							null,//LiveType type,
-							null,//Long osdId,
-							null//String osdUsername);
-							);
-					m2c_forward.setGroup(group);
-					newForwards.add(m2c_forward);
-				}
-			}
-			
-			group.getForwards().addAll(newForwards);
-			
-			commandGroupDao.save(group);*/
-			
 			//这两个变量用来生成message用
 			StringBufferWrapper newMembersNames = new StringBufferWrapper();
 			JSONArray newMemberIdsJSONArray = new JSONArray();
@@ -1978,7 +1639,8 @@ public class GroupService {
 	 * @return 1删人时给主席返回chairSplits；0退出时给退出成员返回exitMemberSplits；后续优化
 	 * @throws Exception
 	 */
-	private Object removeMembersByMemberIds(Long groupId, List<Long> memberIdList, int mode) throws Exception{
+	@Transactional(rollbackFor = Exception.class)
+	public Object removeMembersByMemberIds(Long groupId, List<Long> memberIdList, int mode) throws Exception{
 		UserVO user = userQuery.current();
 		//“重复退出会再次挂断编码器”已改好
 		
@@ -2202,8 +1864,9 @@ public class GroupService {
 				for(GroupMemberPO member : connectRemoveMembers){
 					List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
 					List<Long> removeRoleIds = businessCommonService.obtainGroupMemberRolePermissionPOIds(ps);
-					agendaService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds);
+					agendaService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds, false);
 				}
+				agendaService.executeToFinal(groupId);
 			}
 			
 			if(mode == 0){
@@ -2339,7 +2002,7 @@ public class GroupService {
 				JSONObject message = new JSONObject();
 				message.put("businessType", "exitApply");
 				message.put("businessInfo", exitMember.getName() + "申请退出" + group.getName());
-				message.put("businessId", group.getId().toString() + "-" + exitMember.getOriginId());
+				message.put("businessId", group.getId().toString() + "-" + exitMember.getId());
 				
 				WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
 				websocketMessageService.consume(ws.getId());
@@ -2360,7 +2023,7 @@ public class GroupService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
-	public void exitApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
+	public void exitApplyDisagree(Long userId, Long groupId, List<Long> memberIds) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if(groupId==null || groupId.equals("")){
@@ -2373,7 +2036,7 @@ public class GroupService {
 			GroupPO group = groupDao.findOne(groupId);
 			BusinessType groupType = group.getBusinessType();
 			
-			if(group.getStatus().equals(GroupStatus.STOP) || userIds.size()==0){
+			if(group.getStatus().equals(GroupStatus.STOP) || memberIds.size()==0){
 				return;
 			}
 			
@@ -2381,7 +2044,7 @@ public class GroupService {
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();			
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			GroupMemberPO chairmanMember = tetrisBvcQueryUtil.queryChairmanMember(members);
-			List<GroupMemberPO> exitMembers = tetrisBvcQueryUtil.queryMembersByUserIds(members, userIds);
+			List<GroupMemberPO> exitMembers = tetrisBvcQueryUtil.queryMembersByIds(members, memberIds);
 			JSONObject message = new JSONObject();
 			message.put("businessType", "exitApplyDisagree");
 			message.put("businessInfo", "主席不同意您退出");
@@ -2417,7 +2080,7 @@ public class GroupService {
 			
 			log.info(group.getName() + " 主席拒绝了 " + exitMembers.get(0).getName() + " 等人退出");
 		}
-		operationLogService.send(user.getNickname(), "拒绝申请退出", user.getNickname() + "拒绝申请退出groupId:" + groupId + ", userIds" + userIds.toString());
+		operationLogService.send(user.getNickname(), "拒绝申请退出", user.getNickname() + "拒绝申请退出groupId:" + groupId + ", memberIds" + memberIds.toString());
 	}
 	
 	/**
@@ -2456,6 +2119,10 @@ public class GroupService {
 			for(GroupMemberPO acceptMember : acceptMembers){
 				
 				if(OriginType.OUTER.equals(acceptMember.getOriginType())){
+					continue;
+				}
+				
+				if(!GroupMemberType.MEMBER_USER.equals(acceptMember.getGroupMemberType())){
 					continue;
 				}
 				
@@ -2551,8 +2218,9 @@ public class GroupService {
 				RolePO chairmanRolePO = businessCommonService.queryGroupChairmanRole(group);
 				addRoleIds.add(chairmanRolePO.getId());
 			}
-			agendaService.modifyMemberRole(group.getId(), acceptMember.getId(), addRoleIds, null);
+			agendaService.modifyMemberRole(group.getId(), acceptMember.getId(), addRoleIds, null, false);
 		}
+		agendaService.executeToFinal(group.getId());
 		
 		
 		

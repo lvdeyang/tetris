@@ -220,8 +220,9 @@ public class GroupCooperateService {
 			addRoleIds.add(cooperateRole.getId());
 			
 			for(GroupMemberPO cooperateMember : cooperateMembers){
-				agendaService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null);
+				agendaService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
 			}
+			agendaService.executeToFinal(groupId);
 			
 	//		commandGroupDao.save(group);
 			
@@ -308,8 +309,9 @@ public class GroupCooperateService {
 			removeRoleIds.add(cooperateRole.getId());
 			
 			for(GroupMemberPO revokeMember : revokeMembers){
-				agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds);
+				agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
 			}
+			agendaService.executeToFinal(groupId);
 			
 			//发送websocket通知
 			JSONObject message = new JSONObject();

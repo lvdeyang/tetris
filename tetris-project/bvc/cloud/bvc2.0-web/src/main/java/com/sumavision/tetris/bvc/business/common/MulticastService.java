@@ -121,15 +121,15 @@ import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 业务快捷查询类<br/>
+ * 组播业务<br/>
  * <p>详细描述</p>
  * <b>作者:</b>zsy<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年6月10日 下午1:19:13
+ * <b>日期：</b>2020年8月10日 下午1:19:13
  */
 @Slf4j
 @Service
-public class BusinessCommonService {
+public class MulticastService {
 	
 	@Autowired
 	private RoleDAO roleDao;
@@ -221,156 +221,7 @@ public class BusinessCommonService {
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
 	
-	public RolePO queryGroupMemberRole(GroupPO group){
-		BusinessType businessType = group.getBusinessType();
-		if(BusinessType.COMMAND.equals(businessType)){
-			return roleDao.findByInternalRoleType(InternalRoleType.COMMAND_AUDIENCE);
-		}else if(BusinessType.MEETING_QT.equals(businessType)){
-			return roleDao.findByInternalRoleType(InternalRoleType.MEETING_AUDIENCE);
-		}
-		return null;
-	}
-	
-	public RolePO queryGroupChairmanRole(GroupPO group){
-		BusinessType businessType = group.getBusinessType();
-		if(BusinessType.COMMAND.equals(businessType)){
-			return roleDao.findByInternalRoleType(InternalRoleType.COMMAND_CHAIRMAN);
-		}else if(BusinessType.MEETING_QT.equals(businessType)){
-			return roleDao.findByInternalRoleType(InternalRoleType.MEETING_CHAIRMAN);
-		}
-		return null;
-	}
-	
-	public List<Long> fromUserIdsToMemberIds(Long groupId, List<Long> userIds){
-		List<String> originIds = new ArrayList<String>();
-		for(Long userId : userIds){
-			originIds.add(userId.toString());
-		}
-		List<Long> memberIds = groupMemberDao.findIdsByGroupIdAndOriginIds(groupId, originIds);
-		return memberIds;
-	}
-	
-	/** 只能查出用户成员，设备成员会被忽略 */
-	public List<UserBO> queryUsersByGroupMembers(Collection<GroupMemberPO> members){
-		List<String> userIdList = new ArrayList<String>();
-		for(GroupMemberPO member : members){
-			userIdList.add(member.getOriginId());
-		}
-		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
-		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
-		return commandUserBos;
-	}
-	
-	public Set<Long> obtainTerminalBundleIdsFromTerminalChannel(List<TerminalChannelPO> channels){
-		Set<Long> ids = new HashSet<Long>();
-		for(TerminalChannelPO channel : channels){
-			ids.add(channel.getTerminalBundleId());
-		}
-		return ids;
-	}
-	
-	public Set<String> obtainChannelIdsFromTerminalChannel(List<TerminalChannelPO> channels){
-		Set<String> ids = new HashSet<String>();
-		for(TerminalChannelPO channel : channels){
-			ids.add(channel.getRealChannelId());
-		}
-		return ids;
-	}
-	
-	public Set<Long> obtainTerminalBundleIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
-		Set<Long> ids = new HashSet<Long>();
-		for(TerminalBundleChannelPO channel : channels){
-			ids.add(channel.getTerminalBundleId());
-		}
-		return ids;
-	}
-	
-	public Set<String> obtainChannelIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
-		Set<String> ids = new HashSet<String>();
-		for(TerminalBundleChannelPO channel : channels){
-			ids.add(channel.getChannelId());
-		}
-		return ids;
-	}
-	
-	public List<String> obtainMemberNames(List<GroupMemberPO> members){
-		List<String> memberNames = new ArrayList<String>();
-		for(GroupMemberPO member : members){
-			memberNames.add(member.getName());
-		}
-		return memberNames;
-	}
-	
-	public List<Long> obtainMemberIds(Long groupId, boolean connected, boolean includingChairman){
-		List<Long> memberIds = new ArrayList<Long>();
-		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-		for(GroupMemberPO member : members){
-			boolean fit = true;
-			if(connected){
-				if(!GroupMemberStatus.CONNECT.equals(member.getGroupMemberStatus())){
-					fit = false;
-				}
-			}
-			if(!includingChairman){
-				if(member.getIsAdministrator()){
-					fit = false;
-				}
-			}
-			if(fit){
-				memberIds.add(member.getId());
-			}
-		}
-		return memberIds;
-	}
-	
-	public List<Long> obtainGroupMemberRolePermissionPOIds(List<GroupMemberRolePermissionPO> ps){
-		List<Long> ids = new ArrayList<Long>();
-		for(GroupMemberRolePermissionPO p : ps){
-			ids.add(p.getRoleId());
-		}
-		return ids;
-	}
-
-	public List<Long> obtainMemberIds(List<GroupMemberPO> members){
-		List<Long> memberIds = new ArrayList<Long>();
-		for(GroupMemberPO member : members){
-			memberIds.add(member.getId());
-		}
-		return memberIds;
-	}
-
-	public void notifyUserInfo(
-			List<Long> userIds,
-			String message,
-			WebsocketMessageType type) throws Exception{
-		List<Long> consumeIds = new ArrayList<Long>();
-		for(Long userId : userIds){
-			//这里缺少判断该userID是否是本系统的
-			WebsocketMessageVO ws = websocketMessageService.send(userId, message, type);
-			consumeIds.add(ws.getId());
-		}
-		websocketMessageService.consumeAll(consumeIds);
-	}
-	
-	public void notifyMemberInfo(
-			List<Long> memberIds,
-			String message,
-			WebsocketMessageType type) throws Exception{
+	public void getAddr(BundlePO bundle){
 		
-		List<GroupMemberPO> members = groupMemberDao.findAll(memberIds);
-		List<Long> userIds = new ArrayList<Long>();
-		for(GroupMemberPO member : members){
-			if(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())
-					&& !OriginType.OUTER.equals(member.getOriginType())){
-				userIds.add(Long.parseLong(member.getOriginId()));
-			}
-		}
-		
-		List<Long> consumeIds = new ArrayList<Long>();		
-		for(Long userId : userIds){
-			WebsocketMessageVO ws = websocketMessageService.send(userId, message, type);
-			consumeIds.add(ws.getId());
-		}
-		websocketMessageService.consumeAll(consumeIds);
 	}
 }

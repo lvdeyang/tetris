@@ -24,6 +24,13 @@ import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -40,6 +47,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class CommandVodRecordParser {
+		
+	@Autowired
+	private TerminalDAO terminalDao;
+		
+	@Autowired
+	private PageInfoDAO pageInfoDao;
 		
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
@@ -63,6 +76,9 @@ public class CommandVodRecordParser {
 	private QueryUtil queryUtil;
 	
 	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
+	
+	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	@Autowired
@@ -80,13 +96,15 @@ public class CommandVodRecordParser {
 			String startTime, 
 			String endTime) throws Exception{
 		
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), locationIndex);
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);		
+		PageTaskPO pageTask = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), locationIndex);
 		
-		//从播放器找当前业务
-		PlayerInfoBO playerInfoBO = commandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
-		String code = playerInfoBO.getSrcCode();
-		if(!playerInfoBO.isHasBusiness() || code==null || code.equals("")){
+		if(pageTask == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有可以录制的内容");
+		}
+		
+		String code = pageTask.getSrcVideoCode();
+		if(code==null || code.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "没有可以录制的内容");
 		}
 		UserBO srcUser = userUtils.queryUserByUserno(code);

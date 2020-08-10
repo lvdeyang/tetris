@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+
 /**
  * 
  * PageTaskQueryService<br/>
@@ -30,7 +32,7 @@ public class PageTaskQueryService {
 	 * @return 每页个数
 	 */
 	public int queryCurrentPageSize(String originId, Long terminalId){
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, GroupMemberType.MEMBER_USER);
 		return pageInfo.getPageSize();
 	}
 	
@@ -45,7 +47,7 @@ public class PageTaskQueryService {
 	 * @return
 	 */
 	public List<PageTaskPO> queryCurrentPageTasks(String originId, Long terminalId){
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, GroupMemberType.MEMBER_USER);
 		return queryCurrentPageTasks(pageInfo);
 	}
 

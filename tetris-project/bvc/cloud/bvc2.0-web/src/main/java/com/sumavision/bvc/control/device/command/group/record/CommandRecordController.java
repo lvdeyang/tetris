@@ -188,14 +188,16 @@ public class CommandRecordController {
 			String recordId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userUtils.getUserFromSession(request);
+		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
+		
+		/*UserVO user = userUtils.getUserFromSession(request);
 		
 		List<CommandGroupUserPlayerPO> players = commandRecordServiceImpl.startPlayGroupRecord(user.getId(), Long.parseLong(recordId));
 		JSONArray result = new JSONArray();
 		for(CommandGroupUserPlayerPO player : players){
 			result.add(new CommandGroupUserPlayerSettingVO().set(player));
 		}
-		return result;
+		return result;*/
 		
 	}
 	
@@ -217,7 +219,9 @@ public class CommandRecordController {
 			String fragmentIds,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userUtils.getUserFromSession(request);
+		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
+		
+		/*UserVO user = userUtils.getUserFromSession(request);
 		List<Long> fragmentIdsArray = JSONArray.parseArray(fragmentIds, Long.class);
 		
 		List<CommandGroupUserPlayerPO> players = commandRecordServiceImpl.startPlayFragments(user.getId(), fragmentIdsArray);
@@ -225,7 +229,7 @@ public class CommandRecordController {
 		for(CommandGroupUserPlayerPO player : players){
 			result.add(new CommandGroupUserPlayerSettingVO().set(player));
 		}
-		return result;
+		return result;*/
 		
 	}
 

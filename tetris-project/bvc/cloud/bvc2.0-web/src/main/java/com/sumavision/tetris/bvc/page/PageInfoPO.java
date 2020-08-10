@@ -5,10 +5,13 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -28,7 +31,10 @@ public class PageInfoPO extends AbstractBasePO {
 	@Deprecated
 	private Long userId;
 	
-	/** 隶属用户id/设备id/会场id */
+	/** 类型：用户、会场、设备 */
+	private GroupMemberType groupMemberType;
+	
+	/** 隶属用户id/设备id/会场id:"hall-id" */
 	private String originId;
 	
 	/** 隶属终端 */
@@ -50,6 +56,16 @@ public class PageInfoPO extends AbstractBasePO {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "GROUP_MEMBER_TYPE")
+	public GroupMemberType getGroupMemberType() {
+		return groupMemberType;
+	}
+
+	public void setGroupMemberType(GroupMemberType groupMemberType) {
+		this.groupMemberType = groupMemberType;
 	}
 
 	@Column(name = "ORIGIN_ID")
@@ -99,9 +115,10 @@ public class PageInfoPO extends AbstractBasePO {
 	
 	public PageInfoPO() {}
 			
-	public PageInfoPO(String originId, Long terminalId) {
+	public PageInfoPO(String originId, Long terminalId, GroupMemberType groupMemberType) {
 		this.originId = originId;
 		this.terminalId = terminalId;
+		this.groupMemberType = groupMemberType;
 	}
 	
 	/**

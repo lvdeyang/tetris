@@ -41,11 +41,14 @@ import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -119,9 +122,9 @@ public class CommandUserInfoController {
 		
 		//重构的分页信息
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(user.getId().toString(), terminal.getId());
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		if(null == pageInfo){
-			pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId());
+			pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 			pageInfo.setPageSize(16);
 			pageInfoDao.save(pageInfo);
 		}
@@ -255,6 +258,8 @@ public class CommandUserInfoController {
 			String bundleIds,
 			HttpServletRequest request) throws Exception{
 		
+		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		/*
 		UserVO user = userUtils.getUserFromSession(request);
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
@@ -263,7 +268,7 @@ public class CommandUserInfoController {
 		
 		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
 		
-		return playerVO;
+		return playerVO;*/
 	}
 	
 	/**
@@ -286,6 +291,8 @@ public class CommandUserInfoController {
 			String bundleId,
 			HttpServletRequest request) throws Exception{
 		
+		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		/*
 		UserVO user = userUtils.getUserFromSession(request);
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
@@ -293,7 +300,7 @@ public class CommandUserInfoController {
 		
 		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
 		
-		return playerVO;
+		return playerVO;*/
 	}
 	
 	/**
@@ -316,6 +323,8 @@ public class CommandUserInfoController {
 			String bundleId,
 			HttpServletRequest request) throws Exception{
 		
+		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		/*
 		UserVO user = userUtils.getUserFromSession(request);
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
@@ -323,7 +332,7 @@ public class CommandUserInfoController {
 		
 		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
 		
-		return playerVO;
+		return playerVO;*/
 	}
 	
 	/**

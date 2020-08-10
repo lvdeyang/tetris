@@ -12,8 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
+import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineBusinessType;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.model.agenda.exception.AgendaNotFoundException;
-
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
@@ -53,6 +59,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
+import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
@@ -88,6 +95,12 @@ import lombok.extern.slf4j.Slf4j;
 //@Transactional(rollbackFor = Exception.class)
 @Service
 public class AgendaService {
+	
+	@Autowired
+	private CombineVideoDAO combineVideoDao;
+	
+	@Autowired
+	private CombineAudioDAO combineAudioDao;
 	
 	@Autowired
 	private BundleDao bundleDao;
@@ -142,6 +155,9 @@ public class AgendaService {
 	
 	@Autowired
 	private RunningAgendaDAO runningAgendaDao;
+	
+	@Autowired
+	private AutoCombineService autoCombineService;
 	
 	@Autowired
 	private PageTaskService pageTaskService;
@@ -286,7 +302,7 @@ public class AgendaService {
 		if(stopAgendaIds == null) stopAgendaIds = new ArrayList<Long>();		
 		
 		//先获取原来的转发关系
-		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
+//		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
 		
 		//持久化agenda执行状态。TODO:先校验是否已经执行，也就是判重
 		List<RunningAgendaPO> newRunnings = new ArrayList<RunningAgendaPO>();
@@ -299,7 +315,7 @@ public class AgendaService {
 		List<RunningAgendaPO> stopRunnings = runningAgendaDao.findByGroupIdAndAgendaIdIn(groupId, stopAgendaIds);
 		runningAgendaDao.deleteInBatch(stopRunnings);
 								
-		executeToFinal(groupId, oldForwards);
+		executeToFinal(groupId);
 	}
 
 	/**
@@ -343,7 +359,20 @@ public class AgendaService {
 					}
 				}
 			}if(groupMemberType.equals(GroupMemberType.MEMBER_HALL)){
-				/*TODO
+				//TODO
+				Long hallId = Long.parseLong(member.getOriginId());
+				List<TerminalBundleConferenceHallPermissionPO> hps = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(hallId);
+				for(TerminalBundleConferenceHallPermissionPO hp : hps){					
+					
+					Long terminalBundleId = hp.getTerminalBundleId();
+					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
+					TerminalBundleType type = terminalBundlePO.getType();
+					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
+						String bundleId = hp.getBundleId();
+						bundleIds.add(bundleId);
+					}
+				}
+				
 				List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
 				//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
 				for(TerminalBundleUserPermissionPO p : ps){
@@ -354,7 +383,7 @@ public class AgendaService {
 						String bundleId = p.getBundleId();
 						bundleIds.add(bundleId);
 					}
-				}*/
+				}
 			}else if(groupMemberType.equals(GroupMemberType.MEMBER_DEVICE)){
 				bundleIds.add(originId);
 			}
@@ -376,10 +405,10 @@ public class AgendaService {
 				SourceBO sourceBO = new SourceBO()
 						.setBusinessId(businessId)
 						.setBusinessInfoType(businessInfoType)
-						.setSrcId(member.getOriginId())
-						.setSrcMemberId(member.getId())
-						.setSrcName(member.getName())
-						.setSrcCode(member.getCode())
+						.setSrcVideoId(member.getOriginId())
+						.setSrcVideoMemberId(member.getId())
+						.setSrcVideoName(member.getName())
+						.setSrcVideoCode(member.getCode())
 						.setVideoSource(videoEncode1Channel)
 						.setVideoBundle(videoBundle);
 				String bundleId = videoEncode1Channel.getBundleId();
@@ -524,10 +553,10 @@ public class AgendaService {
 							.setBusinessId(businessId)
 							.setBusinessInfoType(businessInfoType)
 							.setAgendaForwardType(agendaForwardType)
-							.setSrcId(member.getOriginId())
-							.setSrcMemberId(member.getId())
-							.setSrcName(member.getName())
-							.setSrcCode(member.getCode())
+							.setSrcVideoId(member.getOriginId())
+							.setSrcVideoMemberId(member.getId())
+							.setSrcVideoName(member.getName())
+							.setSrcVideoCode(member.getCode())
 							.setVideoSource(encodeChannel)
 							.setVideoBundle(videoBundle);
 					String bundleId = encodeChannel.getBundleId();
@@ -688,47 +717,69 @@ public class AgendaService {
 //			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
 //			if(pageInfo == null) pageInfo = new PageInfoPO(originId, terminalId);
 			
-			for(SourceBO sourceBO : sourceBOs){
+			for(SourceBO sourceBO : sourceBOs){				
 				
 				//过滤掉自己看自己
-				if(dstMember.getId().equals(sourceBO.getSrcMemberId())) continue;
+				if(dstMember.getId().equals(sourceBO.getSrcVideoMemberId())) continue;
 				
 				CommonForwardPO forward = new CommonForwardPO();
 				forward.setBusinessId(sourceBO.getBusinessId());
 				forward.setBusinessInfoType(sourceBO.getBusinessInfoType());
 				forward.setType(sourceBO.getAgendaForwardType());
-				forward.setDstMemberId(dstMember.getId());
+				forward.setVideoSourceType(sourceBO.getVideoSourceType());
+				forward.setAudioSourceType(sourceBO.getAudioSourceType());
+				forward.setDstMemberId(dstMember.getId());				
 				
 				AgendaForwardType agendaForwardType = sourceBO.getAgendaForwardType();
 				if(AgendaForwardType.AUDIO_VIDEO.equals(agendaForwardType) || AgendaForwardType.VIDEO.equals(agendaForwardType)){
-					ChannelSchemeDTO video = sourceBO.getVideoSource();
-					BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
-					forward.setSrcId(sourceBO.getSrcId());
-					forward.setSrcName(sourceBO.getSrcName());
-					forward.setSrcMemberId(sourceBO.getSrcMemberId());
-					forward.setSrcCode(bundlePO.getUsername());
-					forward.setSrcBundleName(bundlePO.getBundleName());
-					forward.setSrcBundleType(bundlePO.getBundleType());
-					forward.setSrcBundleId(bundlePO.getBundleId());
-					forward.setSrcLayerId(bundlePO.getAccessNodeUid());
-					forward.setSrcChannelId(video.getChannelId());
-					forward.setSrcBaseType(video.getBaseType());
-					forward.setSrcChannelName(video.getChannelName());
+										
+					AgendaSourceType videoSourceType = sourceBO.getVideoSourceType();
+					if(AgendaSourceType.COMBINE_VIDEO.equals(videoSourceType)){
+						forward.setSrcId(sourceBO.getSrcVideoId());
+						forward.setSrcName(sourceBO.getSrcVideoName());
+						forward.setSrcMemberId(sourceBO.getSrcVideoMemberId());
+					}else{						
+						ChannelSchemeDTO video = sourceBO.getVideoSource();
+						BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+						forward.setSrcId(sourceBO.getSrcVideoId());
+						forward.setSrcName(sourceBO.getSrcVideoName());
+						forward.setSrcMemberId(sourceBO.getSrcVideoMemberId());
+						forward.setSrcCode(bundlePO.getUsername());
+						forward.setSrcBundleName(bundlePO.getBundleName());
+						forward.setSrcBundleType(bundlePO.getBundleType());
+						forward.setSrcBundleId(bundlePO.getBundleId());
+						forward.setSrcLayerId(bundlePO.getAccessNodeUid());
+						forward.setSrcChannelId(video.getChannelId());
+						forward.setSrcBaseType(video.getBaseType());
+						forward.setSrcChannelName(video.getChannelName());
+						if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
+							forward.setVideoTransmissionMode(TransmissionMode.MULTICAST);
+							forward.setVideoMultiAddr(bundlePO.getMulticastEncodeAddr());
+						}
+					}
 				}
 				if(AgendaForwardType.AUDIO_VIDEO.equals(agendaForwardType) || AgendaForwardType.AUDIO.equals(agendaForwardType)){
-					ChannelSchemeDTO audio = sourceBO.getAudioSource();
-					BundlePO audioBundlePO = bundleDao.findByBundleId(audio.getBundleId());
-					forward.setSrcAudioId(sourceBO.getSrcAudioId());
-					forward.setSrcAudioName(sourceBO.getSrcAudioName());
-					forward.setSrcAudioMemberId(sourceBO.getSrcAudioMemberId());
-					forward.setSrcAudioCode(audioBundlePO.getUsername());
-					forward.setSrcAudioBundleName(audioBundlePO.getBundleName());
-					forward.setSrcAudioBundleType(audioBundlePO.getBundleType());
-					forward.setSrcAudioBundleId(audioBundlePO.getBundleId());
-					forward.setSrcAudioLayerId(audioBundlePO.getAccessNodeUid());
-					forward.setSrcAudioChannelId(audio.getChannelId());
-					forward.setSrcAudioBaseType(audio.getBaseType());
-					forward.setSrcAudioChannelName(audio.getChannelName());
+					
+					AgendaSourceType audioSourceType = sourceBO.getAudioSourceType();
+					if(AgendaSourceType.COMBINE_AUDIO.equals(audioSourceType)){
+						forward.setSrcAudioId(sourceBO.getSrcAudioId());
+						forward.setSrcAudioName(sourceBO.getSrcAudioName());
+						forward.setSrcAudioMemberId(sourceBO.getSrcAudioMemberId());
+					}else{
+						ChannelSchemeDTO audio = sourceBO.getAudioSource();
+						BundlePO audioBundlePO = bundleDao.findByBundleId(audio.getBundleId());
+						forward.setSrcAudioId(sourceBO.getSrcAudioId());
+						forward.setSrcAudioName(sourceBO.getSrcAudioName());
+						forward.setSrcAudioMemberId(sourceBO.getSrcAudioMemberId());
+						forward.setSrcAudioCode(audioBundlePO.getUsername());
+						forward.setSrcAudioBundleName(audioBundlePO.getBundleName());
+						forward.setSrcAudioBundleType(audioBundlePO.getBundleType());
+						forward.setSrcAudioBundleId(audioBundlePO.getBundleId());
+						forward.setSrcAudioLayerId(audioBundlePO.getAccessNodeUid());
+						forward.setSrcAudioChannelId(audio.getChannelId());
+						forward.setSrcAudioBaseType(audio.getBaseType());
+						forward.setSrcAudioChannelName(audio.getChannelName());
+					}
 				}
 				
 //				videoForward.setDstDeviceType(DstDeviceType.DEVICE);
@@ -748,12 +799,14 @@ public class AgendaService {
 		return forwards;
 	}
 
-	public List<CommonForwardPO> obtainCommonForwards(AgendaPO agenda, Long groupId){
+	public List<CommonForwardPO> obtainCommonForwards(AgendaPO agenda, Long groupId) throws Exception{
 		
 		GroupPO group = groupDao.findOne(groupId);
 		GroupStatus groupStatus = group.getStatus();
 		
 		List<CommonForwardPO> result = new ArrayList<CommonForwardPO>();
+		//TODO:这个List<SourceBO>应该改成Set，否则无法判重，还需要给SourceBO写hashCode和equals方法
+		Map<GroupMemberPO, List<SourceBO>> memberSourceMap = new HashMap<GroupMemberPO, List<SourceBO>>();
 		
 		//查找该议程的转发
 		List<AgendaForwardPO> agendaForwards = agendaForwardDao.findByAgendaId(agenda.getId());
@@ -772,7 +825,7 @@ public class AgendaService {
 				//TODO:根据业务组类型确定
 			}
 			
-			//确认源（可能多个）
+			//----------确认源（可能多个）----------
 			List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
 			AgendaSourceType sourceType = agendaForward.getSourceType();
 			String sourceId = agendaForward.getSourceId();
@@ -812,14 +865,38 @@ public class AgendaService {
 			}
 			
 			
-			//确认目的
+			//----------确认目的----------
 			AgendaDestinationType destinationType = agendaForward.getDestinationType();
 			String destinationId = agendaForward.getDestinationId();
 			List<CommonForwardPO> forwards = new ArrayList<CommonForwardPO>();
 			switch (destinationType) {
 			case ROLE:
 				RolePO dstRole = roleDao.findOne(Long.valueOf(destinationId));
-				List<GroupMemberPO> dstMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, dstRole.getId());
+				List<GroupMemberPO> dstMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, dstRole.getId());				
+				List<GroupMemberPO> pageDstMembers = new ArrayList<GroupMemberPO>(dstMembers);				
+				List<GroupMemberPO> combineDstMembers = new ArrayList<GroupMemberPO>();
+				
+				//当模式为合屏时，且源不止一个时，给非用户进行合屏
+				/*AgendaModeType agendaModeType = agenda.getAgendaModeType();
+				if(AgendaModeType.COMBINE_VIDEO.equals(agendaModeType)
+						&& sourceBOs.size() > 1){
+					for(GroupMemberPO dstMember : dstMembers){
+						if(!GroupMemberType.MEMBER_USER.equals(dstMember.getGroupMemberType())){
+							combineDstMembers.add(dstMember);
+							pageDstMembers.remove(dstMember);
+						}
+					}
+				}else{
+					//TODO:查找合屏，判断是否需要删掉
+				}
+				
+				if(combineDstMembers.size() > 0){
+					SourceBO combineSourceBO = autoCombineService.autoCombine(sourceBOs);
+					List<SourceBO> combineSourceBOs = new ArrayListWrapper<SourceBO>().add(combineSourceBO).getList();
+					List<CommonForwardPO> forwards2 = obtainCommonForwardsFromSource(combineDstMembers, combineSourceBOs);
+					result.addAll(forwards2);
+				}*/
+				
 				
 				//如果需要，在这里生成合屏、混音
 				//先判断是否有生成，findByGroupIdAndAgendaIdAnd???
@@ -834,13 +911,77 @@ public class AgendaService {
 				
 				
 				
+				for(GroupMemberPO dstMember : dstMembers){
+					List<SourceBO> memberSourceBOs = memberSourceMap.get(dstMember);
+					if(memberSourceBOs == null){
+						memberSourceBOs = new ArrayList<SourceBO>();
+						memberSourceMap.put(dstMember, memberSourceBOs);
+					}
+					memberSourceBOs.addAll(sourceBOs);
+				}
+				
 				//从源和目的生成转发
-				forwards = obtainCommonForwardsFromSource(dstMembers, sourceBOs);
-				result.addAll(forwards);
+//				forwards = obtainCommonForwardsFromSource(pageDstMembers, sourceBOs);
+//				result.addAll(forwards);
 				
 				break;
 			default:
 				break;
+			}
+		}
+		
+		//遍历map，是否需要合屏
+		List<SourceBO> sourceBOs4Combine = null;
+		for(GroupMemberPO member : memberSourceMap.keySet()){			
+			if(BusinessInfoType.MEETING_DISCUSS.equals(agenda.getBusinessInfoType())					
+					|| BusinessInfoType.BASIC_MEETING.equals(agenda.getBusinessInfoType())){
+				if(!member.getIsAdministrator()
+						&& !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+					List<SourceBO> memberSourceBOs = memberSourceMap.get(member);
+					if(memberSourceBOs.size() > 1){
+						//如果源数量大于1，且存在非用户成员，则需要合屏。认为这些成员的源列表都是一样的
+						sourceBOs4Combine = new ArrayList<SourceBO>(memberSourceBOs);
+						break;
+					}
+				}
+			}
+		}
+		
+		SourceBO combineSourceBO = null;
+		//会议中判断是否需要合屏
+		if(BusinessInfoType.MEETING_DISCUSS.equals(agenda.getBusinessInfoType())					
+				|| BusinessInfoType.BASIC_MEETING.equals(agenda.getBusinessInfoType())){
+			List<CombineVideoPO> combineVideoPOs = combineVideoDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
+			List<CombineAudioPO> combineAudioPOs = combineAudioDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
+			if(sourceBOs4Combine != null){
+				//需要合屏，判断是否已经存在，TODO:存在则更新
+				combineSourceBO = autoCombineService.autoCombine(sourceBOs4Combine, combineVideoPOs, combineAudioPOs);
+			}else{
+				//不需要合屏，查询是否需要删除
+				List<String> videoUuids = new ArrayList<String>();
+				for(CombineVideoPO combineVideoPO : combineVideoPOs){
+					videoUuids.add(combineVideoPO.getUuid());
+				}
+				List<String> audioUuids = new ArrayList<String>();
+				for(CombineAudioPO combineAudioPO : combineAudioPOs){
+					audioUuids.add(combineAudioPO.getUuid());
+				}
+				autoCombineService.deleteCombine(videoUuids, audioUuids, true);
+			}
+		}
+		
+		//再次遍历map，非用户的成员观看合屏
+		for(GroupMemberPO member : memberSourceMap.keySet()){
+			if(combineSourceBO != null
+					&& !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+				List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(
+						new ArrayListWrapper<GroupMemberPO>().add(member).getList(), 
+						new ArrayListWrapper<SourceBO>().add(combineSourceBO).getList());
+				result.addAll(forwards);
+			}else{
+				List<SourceBO> memberSourceBOs = memberSourceMap.get(member);			
+				List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(new ArrayListWrapper<GroupMemberPO>().add(member).getList(), memberSourceBOs);
+				result.addAll(forwards);
 			}
 		}
 		
@@ -855,7 +996,20 @@ public class AgendaService {
 		return result;
 	}
 	
-	public void modifyMemberRole(Long groupId, Long memberId, List<Long> addRoleIds, List<Long> removeRoleIds) throws Exception{
+	/**
+	 * 修改成员的角色<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月5日 下午4:15:31
+	 * @param groupId
+	 * @param memberId
+	 * @param addRoleIds 新增角色的id
+	 * @param removeRoleIds 解绑角色的id
+	 * @param executeToFinal 是否执行，通常false，在对所有成员的绑定都完成之后，统一执行一次
+	 * @throws Exception
+	 */
+	public void modifyMemberRole(Long groupId, Long memberId, List<Long> addRoleIds, List<Long> removeRoleIds, boolean executeToFinal) throws Exception{
 		
 		if(addRoleIds == null) addRoleIds = new ArrayList<Long>();
 		if(removeRoleIds == null) removeRoleIds = new ArrayList<Long>();
@@ -863,7 +1017,7 @@ public class AgendaService {
 		GroupMemberPO member = groupMemberDao.findOne(memberId);
 		
 		//先获取原来的转发关系
-		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
+//		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
 		
 		//得到最终成员角色状态。TODO:先校验是否已经有角色，也就是判重
 		List<RolePO> addRoles = roleDao.findAll(addRoleIds);
@@ -876,8 +1030,10 @@ public class AgendaService {
 		List<GroupMemberRolePermissionPO> dps = groupMemberRolePermissionDao.findByRoleIdInAndGroupMemberId(removeRoleIds, memberId);
 		groupMemberRolePermissionDao.deleteInBatch(dps);
 //		groupMemberRolePermissionDao.deleteByRoleIdInAndGroupMemberId(removeRoleIds, memberId);
-				
-		executeToFinal(groupId, oldForwards);
+		
+		if(executeToFinal){
+			executeToFinal(groupId);
+		}
 		
 	}
 	
@@ -966,15 +1122,98 @@ public class AgendaService {
 			List<PageTaskPO> removeTasks =  pageTaskDao.findByForwardUuidIn(forwardUuids);
 			
 			String originId = member.getOriginId();
-			Long terminalId = member.getTerminalId();		
-			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+			Long terminalId = member.getTerminalId();
+			GroupMemberType groupMemberType = member.getGroupMemberType();
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, groupMemberType);
 			
 			pageTaskService.addAndRemoveTasks(pageInfo, newTasks, removeTasks);
 		}
 		
 	}
 	
-	private void executeToFinal(Long groupId, List<CommonForwardPO> oldForwards) throws Exception{
+	public void executeToFinal(Long groupId) throws Exception{
+		
+		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
+		
+		//获取到所有需要执行的议程，通过每个议程获取到最终的转发关系，求并集
+		List<CommonForwardPO> newForwards = new ArrayList<CommonForwardPO>();
+		List<AgendaPO> agendas = agendaDao.findRunningAgendasByGroupId(groupId);
+		for(AgendaPO agenda : agendas){
+			List<CommonForwardPO> forwards = obtainCommonForwards(agenda, groupId);
+			//取并集
+			newForwards.removeAll(forwards);
+			newForwards.addAll(forwards);
+		}
+		
+		//与原来的转发关系做对比，得到新增addForwards与删除的removeForwards
+		List<CommonForwardPO> addForwards = new ArrayList<CommonForwardPO>(newForwards);
+		addForwards.removeAll(oldForwards);
+		List<CommonForwardPO> removeForwards = new ArrayList<CommonForwardPO>(oldForwards);
+		removeForwards.removeAll(newForwards);
+		
+		//删除的从分页任务中删除
+		List<String> forwardUuids = new ArrayList<String>();
+		for(CommonForwardPO removeForward : removeForwards){
+			forwardUuids.add(removeForward.getUuid());
+		}
+		//所有需要删除的分页任务
+		List<PageTaskPO> removeTasks =  pageTaskDao.findByForwardUuidIn(forwardUuids);
+		
+		
+		//按照成员来划分分页
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+		Map<Long, MemberChangedTaskBO> memberTaskMap = new HashMap<Long, MemberChangedTaskBO>();
+		
+		for(CommonForwardPO addForward : addForwards){
+			Long dstMemberId = addForward.getDstMemberId();
+			MemberChangedTaskBO memberChangedTask = memberTaskMap.get(dstMemberId);
+			if(memberChangedTask == null){
+				memberChangedTask = new MemberChangedTaskBO();
+				memberTaskMap.put(dstMemberId, memberChangedTask);
+			}
+			memberChangedTask.getAddForwards().add(addForward);
+		}
+		
+		for(PageTaskPO removeTask : removeTasks){
+			Long dstMemberId = removeTask.getDstMemberId();
+			MemberChangedTaskBO memberChangedTask = memberTaskMap.get(dstMemberId);
+			if(memberChangedTask == null){
+				memberChangedTask = new MemberChangedTaskBO();
+				memberTaskMap.put(dstMemberId, memberChangedTask);
+			}
+			memberChangedTask.getRemoveTasks().add(removeTask);
+		}
+		
+		for(Long id : memberTaskMap.keySet()){
+			MemberChangedTaskBO memberChangedTask = memberTaskMap.get(id);
+			List<CommonForwardPO> thisAddForwards = memberChangedTask.getAddForwards();
+			List<PageTaskPO> newTasks = forwardToPageTaskPO(thisAddForwards);
+			List<PageTaskPO> thisRemoveTasks = memberChangedTask.getRemoveTasks();
+			
+			GroupMemberPO thisMember = tetrisBvcQueryUtil.queryMemberById(members, id);
+			String originId = thisMember.getOriginId();
+			Long terminalId = thisMember.getTerminalId();		
+			GroupMemberType groupMemberType = thisMember.getGroupMemberType();
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, groupMemberType);
+			
+			//对于会场，不分页，直接删除前边的task
+			if(GroupMemberType.MEMBER_HALL.equals(groupMemberType)){
+				pageInfo.getPageTasks().removeAll(thisRemoveTasks);
+				pageInfo.setCurrentPage(1);
+				thisRemoveTasks.clear();
+				pageInfoDao.save(pageInfo);
+			}
+			
+			pageTaskService.addAndRemoveTasks(pageInfo, newTasks, thisRemoveTasks);
+		}
+		
+		//持久化 oldForwards不需要吧？
+		commonForwardDao.save(addForwards);
+		commonForwardDao.deleteInBatch(removeForwards);
+	}
+
+	@Deprecated
+	private void executeToFinal_Deprecated(Long groupId, List<CommonForwardPO> oldForwards) throws Exception{
 		//获取到所有需要执行的议程，通过每个议程获取到最终的转发关系，求并集
 		List<CommonForwardPO> newForwards = new ArrayList<CommonForwardPO>();
 		List<AgendaPO> agendas = agendaDao.findRunningAgendasByGroupId(groupId);
@@ -1035,7 +1274,8 @@ public class AgendaService {
 			GroupMemberPO thisMember = tetrisBvcQueryUtil.queryMemberById(members, id);
 			String originId = thisMember.getOriginId();
 			Long terminalId = thisMember.getTerminalId();		
-			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
+			GroupMemberType groupMemberType = thisMember.getGroupMemberType();
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminalId, groupMemberType);
 			
 			pageTaskService.addAndRemoveTasks(pageInfo, newTasks, thisRemoveTasks);
 		}
@@ -1044,25 +1284,6 @@ public class AgendaService {
 		commonForwardDao.save(addForwards);
 		commonForwardDao.deleteInBatch(removeForwards);		
 	}
-
-	/*
-	private List<PageTaskBO> forwardToPageTask(List<CommonForwardPO> forwards){
-		List<PageTaskBO> pageTaskBOs = new ArrayList<PageTaskBO>();
-		for(CommonForwardPO forward : forwards){
-			if(forward.getType().equals(AgendaForwardType.AUDIO)) continue;			
-			String audioUuid = forward.getRelativeUuid();
-//			if(audioUuid != null){
-//				CommonForwardPO audioForward = tetrisBvcQueryUtil.queryForwardByUuid(forwards, audioUuid);
-//			}
-			
-			PageTaskBO task = new PageTaskBO();
-			task.setBusinessInfoType(forward.getBusinessInfoType());
-			task.setBusinessId(forward.getBusinessId());
-			task.setVideoForwardUuid(forward.getUuid());
-			task.setAudioForwardUuid(audioUuid);
-		}
-		return pageTaskBOs;
-	}*/
 
 	private List<PageTaskPO> forwardToPageTaskPO(List<CommonForwardPO> forwards){
 		List<PageTaskPO> pageTaskPOs = new ArrayList<PageTaskPO>();
@@ -1080,7 +1301,7 @@ public class AgendaService {
 			AgendaForwardType type = forward.getType();
 			if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.VIDEO.equals(type)){
 				task.setVideoSourceType(forward.getVideoSourceType());
-				task.setCombineVideoUuid(forward.getCombineVideoUuid());
+//				task.setCombineVideoUuid(forward.getCombineVideoUuid());
 				task.setSrcVideoId(forward.getSrcId());
 				task.setSrcVideoBundleId(forward.getSrcBundleId());
 				task.setSrcVideoLayerId(forward.getSrcLayerId());
@@ -1091,7 +1312,7 @@ public class AgendaService {
 			}			
 			if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.AUDIO.equals(type)){
 				task.setAudioSourceType(forward.getAudioSourceType());
-				task.setCombineAudioUuid(forward.getCombineAudioUuid());
+//				task.setCombineAudioUuid(forward.getCombineAudioUuid());
 				task.setSrcAudioId(forward.getSrcAudioId());
 				task.setSrcAudioBundleId(forward.getSrcAudioBundleId());
 				task.setSrcAudioLayerId(forward.getSrcAudioLayerId());

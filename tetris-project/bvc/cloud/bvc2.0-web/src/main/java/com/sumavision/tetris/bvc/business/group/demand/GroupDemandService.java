@@ -242,7 +242,7 @@ public class GroupDemandService {
 			
 			//校验转发目的成员是否进会
 			List<GroupMemberPO> dstMembers = new ArrayList<GroupMemberPO>();
-			List<GroupMemberPO> _dstMembers = tetrisBvcQueryUtil.queryMembersByMemberIds(members, memberIds);
+			List<GroupMemberPO> _dstMembers = tetrisBvcQueryUtil.queryMembersByIds(members, memberIds);
 			for(GroupMemberPO dstMember : _dstMembers){
 				if(!dstMember.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
 //					if(!OriginType.OUTER.equals(group.getOriginType())){

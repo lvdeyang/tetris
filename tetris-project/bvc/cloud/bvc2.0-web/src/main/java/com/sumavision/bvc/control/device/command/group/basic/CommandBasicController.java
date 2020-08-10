@@ -256,19 +256,26 @@ public class CommandBasicController {
 		
 		return info;		
 	}
-		
+	
 	/**
-	 * 新建会议<br/>
+	 * 重构新建会议<br/>
+	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
-	 * <b>日期：</b>2019年9月26日
-	 * @param userIdList json格式的用户id列表
-	 * @return 
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月7日 上午11:34:54
+	 * @param members json格式的用户id列表
+	 * @param hallIds json格式的会场id列表
+	 * @param name 会议名称
+	 * @param request
+	 * @return
+	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/save")
 	public Object save(
 			String members,
+			String hallIds,
 			String name,
 			HttpServletRequest request) throws Exception{
 		//考虑区分创建者和主席
@@ -289,13 +296,13 @@ public class CommandBasicController {
 		String subject = name;
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
+		List<Long> hallIdArray = JSONArray.parseArray(hallIds, Long.class);
 		List<String> bundleIdArray = new ArrayList<String>();
 		
-//		CommandGroupPO group2 = null;
 		GroupPO group = null;
 		try{
 //			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, subject, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, bundleIdArray, null);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, subject, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -558,7 +565,7 @@ public class CommandBasicController {
 //		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		Object splits = groupService.removeMembers2(Long.parseLong(id), userIdArray, 0);
+		Object splits = groupService.removeMembersByMemberIds(Long.parseLong(id), userIdArray, 0);
 		
 		return splits;
 	}
@@ -587,10 +594,12 @@ public class CommandBasicController {
 	public Object addMembers(
 			String id,
 			String members,
+			String hallIds,
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = groupService.addOrEnterMembers(Long.parseLong(id), userIdArray, null);
+		List<Long> hallIdArray = JSONArray.parseArray(hallIds, Long.class);
+		Object splits = groupService.addOrEnterMembers(Long.parseLong(id), userIdArray, hallIdArray, null);
 		return splits;
 	}
 		
