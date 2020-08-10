@@ -388,7 +388,10 @@
                     bundleId: row.bundleId,
                     bundleName: row.bundleName,
                     deviceIp: row.deviceAddr.deviceIp,
-                    devicePort: row.deviceAddr.devicePort
+                    devicePort: row.deviceAddr.devicePort,
+                    multicastEncode:row.multicastEncode,
+                    multicastEncodeAddr:row.multicastEncodeAddr,
+                    multicastDecode:row.multicastDecode
                 }
             });
         }

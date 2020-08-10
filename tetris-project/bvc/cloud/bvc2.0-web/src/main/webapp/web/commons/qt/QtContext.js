@@ -120,7 +120,7 @@ QtContext.prototype.confirm = function(){
 };
 
 /**
- * 弹出窗体
+ * 弹出无边框窗体
  * @param url
  * @param params
  * @param settings
@@ -132,6 +132,21 @@ QtContext.prototype.window = function(url, params, settings){
     params = params?encodeURI($.toJSON(params)):'';
     settings = settings? $.toJSON(settings):'';
     this.channel.objects.content.slotPopPage(url, params, settings);
+};
+
+/**
+ * 弹出有边框窗体
+ * @param url
+ * @param params
+ * @param settings
+ *     int width 宽
+ *     int height 高
+ *     string title 窗体标题
+ */
+QtContext.prototype.windowWithFrame = function(url, params, settings){
+    params = params?encodeURI($.toJSON(params)):'';
+    settings = settings? $.toJSON(settings):'';
+    this.channel.objects.content.slotPopPageWithFrame(url, params, settings);
 };
 
 QtContext.prototype.getWindowParams = function(){

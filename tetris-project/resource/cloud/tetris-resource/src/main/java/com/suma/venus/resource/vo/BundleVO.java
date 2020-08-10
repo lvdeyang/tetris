@@ -51,6 +51,15 @@ public class BundleVO {
 	/** 标识 */
 	private String identify;
 	
+	/** 是否开启组播编码 */
+	private Boolean multicastEncode;
+	
+	/** 组播编码地址 */
+	private String multicastEncodeAddr;
+	
+	/** 是否开启组播解码 */
+	private Boolean multicastDecode;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -70,6 +79,9 @@ public class BundleVO {
 		po.setLatitude(this.getLatitude());
 		po.setStreamUrl(this.getStreamUrl());
 		po.setIdentify(this.getIdentify());
+		po.setMulticastEncode(this.getMulticastEncode());
+		po.setMulticastEncodeAddr(this.getMulticastEncodeAddr());
+		po.setMulticastDecode(this.getMulticastDecode());
 		return po;
 	}
 	
@@ -93,6 +105,9 @@ public class BundleVO {
 		vo.setLatitude(po.getLatitude());
 		vo.setStreamUrl(po.getStreamUrl());
 		vo.setIdentify(po.getIdentify());
+		vo.setMulticastEncode(po.getMulticastEncode()==null?false:po.getMulticastEncode());
+		vo.setMulticastEncodeAddr(po.getMulticastEncodeAddr()==null?"":po.getMulticastEncodeAddr());
+		vo.setMulticastDecode(po.getMulticastDecode()==null?false:po.getMulticastDecode());
 		return vo;
 	}
 	
@@ -268,6 +283,30 @@ public class BundleVO {
 
 	public void setIdentify(String identify) {
 		this.identify = identify;
+	}
+
+	public Boolean getMulticastEncode() {
+		return multicastEncode;
+	}
+
+	public void setMulticastEncode(Boolean multicastEncode) {
+		this.multicastEncode = multicastEncode;
+	}
+
+	public String getMulticastEncodeAddr() {
+		return multicastEncodeAddr;
+	}
+
+	public void setMulticastEncodeAddr(String multicastEncodeAddr) {
+		this.multicastEncodeAddr = multicastEncodeAddr;
+	}
+
+	public Boolean getMulticastDecode() {
+		return multicastDecode;
+	}
+
+	public void setMulticastDecode(Boolean multicastDecode) {
+		this.multicastDecode = multicastDecode;
 	}
 	
 }

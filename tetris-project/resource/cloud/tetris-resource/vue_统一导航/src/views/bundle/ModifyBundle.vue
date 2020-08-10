@@ -18,6 +18,18 @@
             <el-input v-model="devicePort" style="width: 200px;"  placeholder="输入新的设备端口"></el-input>
           </el-form-item>
 
+          <el-form-item size="small" label="编码组播">
+            <el-switch v-model="multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          </el-form-item>
+
+          <el-form-item size="small" label="编码组播地址">
+            <el-input v-if="multicastEncode" v-model="multicastEncodeAddr" style="width: 200px;"></el-input>
+            <el-input v-else v-model="multicastEncodeAddr" style="width: 200px;" disabled></el-input>
+          </el-form-item>
+
+          <el-form-item size="small" label="解码组播">
+            <el-switch v-model="multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          </el-form-item>
           <!--
           <div style="margin-top:10px;">
             <el-input v-model="bundleName" placeholder="输入新的设备名称" style="width: 300px;">
@@ -55,6 +67,9 @@
           bundleName : this.$route.query.bundleName,
           deviceIp : this.$route.query.deviceIp,
           devicePort : this.$route.query.devicePort,
+          multicastEncode:this.$route.query.multicastEncode,
+          multicastEncodeAddr:this.$route.query.multicastEncodeAddr,
+          multicastDecode:this.$route.query.multicastDecode,
           extraInfos : []
         };
       },
@@ -99,6 +114,9 @@
             bundleName : this.bundleName,
             deviceIp : this.deviceIp,
             devicePort : this.devicePort,
+            multicastEncode:this.multicastEncode,
+            multicastEncodeAddr:this.multicastEncodeAddr,
+            multicastDecode:this.multicastDecode,
             extraInfos : JSON.stringify(this.extraInfos)
           };
 

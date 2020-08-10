@@ -71,6 +71,19 @@
         <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
       </el-form-item>
 
+      <el-form-item size="small" label="编码组播">
+        <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+
+      <el-form-item size="small" label="编码组播地址">
+        <el-input v-if="bundleForm.multicastEncode" v-model="bundleForm.multicastEncodeAddr" style="width: 200px;"></el-input>
+        <el-input v-else v-model="bundleForm.multicastEncodeAddr" style="width: 200px;" disabled></el-input>
+      </el-form-item>
+
+      <el-form-item size="small" label="解码组播">
+        <el-switch v-model="bundleForm.multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+
       <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
         <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
       </el-form-item>
@@ -234,6 +247,9 @@
             deviceIp : "",
             devicePort : 5060
           },
+          multicastEncode:false,
+          multicastEncodeAddr:'',
+          multicastDecode:false,
           coderType : "DEFAULT",
           longitude : '',
           latitude : '',
@@ -354,6 +370,20 @@
           }
         }
       };
+    },
+    computed:{
+      bundleFormMulticastEncode:function(){
+        var self = this;
+        return self.bundleForm.multicastEncode;
+      }
+    },
+    watch:{
+      bundleFormMulticastEncode:function(v){
+        var self = this;
+        if(!v){
+          self.bundleForm.multicastEncodeAddr = '';
+        }
+      }
     },
     methods : {
       handleTabClick:function(tab, event) {

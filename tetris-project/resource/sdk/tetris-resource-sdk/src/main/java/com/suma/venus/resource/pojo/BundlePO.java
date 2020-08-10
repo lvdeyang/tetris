@@ -116,6 +116,15 @@ public class BundlePO extends CommonPO<BundlePO> {
 	/** 设备所属用户id */
 	private Long userId;
 	
+	/** 是否开启组播编码 */
+	private Boolean multicastEncode;
+	
+	/** 组播编码地址 */
+	private String multicastEncodeAddr;
+	
+	/** 是否开启组播解码 */
+	private Boolean multicastDecode;
+	
 	public static String createBundleId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
@@ -466,6 +475,30 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setIdentify(String identify) {
 		this.identify = identify;
+	}
+
+	public Boolean getMulticastEncode() {
+		return multicastEncode;
+	}
+
+	public void setMulticastEncode(Boolean multicastEncode) {
+		this.multicastEncode = multicastEncode;
+	}
+
+	public String getMulticastEncodeAddr() {
+		return multicastEncodeAddr;
+	}
+
+	public void setMulticastEncodeAddr(String multicastEncodeAddr) {
+		this.multicastEncodeAddr = multicastEncodeAddr;
+	}
+
+	public Boolean getMulticastDecode() {
+		return multicastDecode;
+	}
+
+	public void setMulticastDecode(Boolean multicastDecode) {
+		this.multicastDecode = multicastDecode;
 	}
 
 	@Override

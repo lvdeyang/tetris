@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
@@ -160,7 +161,7 @@ public class BundleManageController extends ControllerBase {
 		// TODO: 没有事务
 		try {
 			LOGGER.info("add bundle=" + JSONObject.toJSONString(bundle));
-
+			
 			BundleVO bundleVO = JSONObject.parseObject(bundle, BundleVO.class);
 			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
 			BundlePO bundlePO = bundleVO.toPO();
@@ -562,6 +563,9 @@ public class BundleManageController extends ControllerBase {
 	public Map<String, Object> modifyExtraInfo(@RequestParam(value = "bundleId") String bundleId,
 			@RequestParam(value = "bundleName") String bundleName, @RequestParam(value = "deviceIp") String deviceIp,
 			@RequestParam(value = "devicePort") Integer devicePort,
+			Boolean multicastEncode,
+			String multicastEncodeAddr,
+			Boolean multicastDecode,
 			@RequestParam(value = "extraInfos") String extraInfos) {
 		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
 				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
@@ -580,6 +584,9 @@ public class BundleManageController extends ControllerBase {
 			if (!devicePort.equals(bundle.getDevicePort())) {
 				bundle.setDevicePort(devicePort);
 			}
+			bundle.setMulticastEncode(multicastEncode);
+			bundle.setMulticastEncodeAddr(multicastEncodeAddr);
+			bundle.setMulticastDecode(multicastDecode);
 
 			bundle.setSyncStatus(SYNC_STATUS.ASYNC);
 			bundleService.save(bundle);
