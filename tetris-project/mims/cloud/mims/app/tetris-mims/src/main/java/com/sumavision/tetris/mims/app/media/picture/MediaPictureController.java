@@ -131,7 +131,7 @@ public class MediaPictureController {
             String keyWords,
             String remark,
 			Long folderId, 
-			String addition,
+			String addition,			
 			HttpServletRequest request) throws Exception{
 		
 		MediaPictureTaskVO taskParam = JSON.parseObject(task, MediaPictureTaskVO.class);

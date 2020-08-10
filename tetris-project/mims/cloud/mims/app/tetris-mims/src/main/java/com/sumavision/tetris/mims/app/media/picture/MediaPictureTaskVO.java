@@ -31,6 +31,18 @@ public class MediaPictureTaskVO  extends AbstractBaseVO<MediaPictureTaskVO, Medi
 	
 	private Integer progress;
 	
+	private Boolean synchro;
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaPictureTaskVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+
 	public Long getLastModified() {
 		return lastModified;
 	}
@@ -163,7 +175,8 @@ public class MediaPictureTaskVO  extends AbstractBaseVO<MediaPictureTaskVO, Medi
 			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
 			.setFolderId(entity.getFolderId())
 			.setUploadStatus(entity.getUploadStatus().toString())
-			.setProgress(0);
+			.setProgress(0)
+			.setSynchro(entity.getSynchro());;
 		return this;
 	}
 
