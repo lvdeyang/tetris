@@ -49,7 +49,7 @@ define([
             //bvc页面
             showBvc:function(){
                 var self = this;
-                self.qt.windowWithFrame('/index/'+window.TOKEN+'#/page-monitor-terminal-live', null, {width: '100%', height: '100%', title:'管理页面'});
+                self.qt.windowWithFrame('/index/'+window.TOKEN+'#/page-monitor-terminal-live', 'qt-terminal', {width: '100%', height: '100%', title:'管理页面'});
             },
             //退出
             closeExit: function () {

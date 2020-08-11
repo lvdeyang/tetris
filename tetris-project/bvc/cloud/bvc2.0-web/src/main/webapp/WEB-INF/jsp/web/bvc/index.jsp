@@ -12,7 +12,7 @@
 	scope = scope==null?"":scope;
 	String sessionId = (String)request.getAttribute("sessionId");
 	sessionId = sessionId==null?"":sessionId;
-	
+
 %>
 <!DOCTYPE HTML>
 <html lang="zh-cmn-Hans">

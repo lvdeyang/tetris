@@ -24,6 +24,9 @@ require.config({
         'commons':window.APPPATH + 'commons',
         'menu':window.COMMONSPATH + 'menu/menu',
 
+        /* themes */
+        'theme-adapter':window.APPPATH + 'component/frame/theme-adapter',
+
         /* components */
         'bvc2-header':window.APPPATH + 'component/bvc2-header/bvc2-header',
         'bvc2-tab':window.APPPATH + 'component/bvc2-tab/bvc2-tab',
@@ -205,7 +208,8 @@ require([
     'restfull',
     'commons',
     'element-ui',
-    'bvc2-monitor-call'
+    'bvc2-monitor-call',
+    'theme-adapter'
 ], function(storage, Vue, router, context, config, menuUtil, ajax, commons){
 
     var app = null;

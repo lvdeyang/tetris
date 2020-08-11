@@ -10,6 +10,7 @@ define([
     'vue',
     'element-ui',
     'mi-sub-title',
+    window.APPPATH + 'component/frame/theme-adapter',
     'css!' + window.APPPATH + 'component/frame/frame.css'
 ], function(tpl, i18n, ajax, context, menuUtil, Vue){
 
