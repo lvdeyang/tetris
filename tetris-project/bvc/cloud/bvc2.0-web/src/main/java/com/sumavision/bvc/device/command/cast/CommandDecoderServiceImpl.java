@@ -51,6 +51,10 @@ import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistExce
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -70,6 +74,12 @@ import lombok.extern.slf4j.Slf4j;
 //@Transactional(rollbackFor = Exception.class)
 @Service
 public class CommandDecoderServiceImpl {
+	
+@Autowired
+private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
 	
 	@Autowired
 	private CommandGroupDecoderScreenDAO commandGroupDecoderScreenDao;
@@ -156,35 +166,92 @@ public class CommandDecoderServiceImpl {
 			bundleIds.add(castDevice.getDstBundleId());
 		}
 		
-		//查出播放器和当前业务
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), locationIndex);		
-		PlayerInfoBO playerInfoBO = commandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
+		//查找分页任务
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);		
+		PageTaskPO pageTask = pageTaskQueryService.queryPageTask(userId.toString(), terminal.getId(), locationIndex);
 		
-//		//创建点播任务
-		startFromPlayer(userId, player, playerInfoBO, bundleIds);
-//		
+		if(pageTask == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有可以录制的内容");
+		}
+		
+		//建立点播
+		startFromPageTask(userId, pageTask, bundleIds);
+		
 //		//字幕
-		Long osdId = playerInfoBO.getOsdId();
+		Long osdId = pageTask.getOsdId();
 		if(osdId != null){
-			commandOsdServiceImpl.setOsd(castDevices, playerInfoBO.getSrcCode(), playerInfoBO.getSrcInfo(), osdId);
+			commandOsdServiceImpl.setOsd(castDevices, pageTask.getSrcVideoCode(), pageTask.getSrcVideoName(), osdId);
 		}else{
 			commandOsdServiceImpl.clearOsd(castDevices);
 		}
 		
 		//给screen补充参数
-		screen.setSrcCode(playerInfoBO.getSrcCode());
-		screen.setSrcInfo(playerInfoBO.getSrcInfo());
-		screen.setBusinessInfo(playerInfoBO.getSrcInfo());
-		screen.setBusinessType(playerInfoBO.getSrcType());
+		screen.setSrcCode(pageTask.getSrcVideoCode());
+		screen.setSrcInfo(pageTask.getSrcVideoName());
+		screen.setBusinessInfo(pageTask.getSrcVideoName());
+//		screen.setBusinessType(playerInfoBO.getSrcType());
 		screen.setOsdId(osdId);
-		screen.setOsdName(playerInfoBO.getOsdName());
-		screen.setPlayUrl(playerInfoBO.getPlayUrl());
+		screen.setOsdName(pageTask.getOsdName());
+		screen.setPlayUrl(pageTask.getPlayUrl());
 		
 		commandGroupDecoderScreenDao.save(screen);
 		return screen;
 	}
 	
+	/**
+	 * 从分页任务给解码器上屏<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月11日 上午9:10:23
+	 * @param userId
+	 * @param task 分页任务
+	 * @param bundleIds
+	 * @return
+	 * @throws Exception
+	 */
+	private List<CommandVodPO> startFromPageTask(Long userId, PageTaskPO task, List<String> bundleIds) throws Exception{
+		
+		log.info(task.getLocationIndex() + "序号的播放器进行设备上屏，解码器bundleId个数：" + bundleIds.size());
+		
+		UserBO userBO = userUtils.queryUserById(userId);
+		
+		//从分页任务找当前业务
+		String code = task.getSrcVideoCode();
+		if(code==null || code.equals("")){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有可以上屏的内容");
+		}
+		
+		//各种已有任务都停止，但不挂断解码器.（编码器也不会被close，因为播放器在播放，计数大于1）
+		List<CommandVodPO> vods1 = commandVodDao.findByDstBundleIdIn(bundleIds);
+		stopVods(userBO, vods1, false);
+		
+		//文件上屏
+		/*if(SrcType.FILE.equals(playerInfoBO.getSrcType())){			
+			List<CommandVodPO> vods = resourceVodStart(userBO, bundleIds, playerInfoBO.getPlayUrl(), playerInfoBO.getSrcInfo());			
+			return vods;
+		}*/
+		
+		UserBO srcUser = userUtils.queryUserByUserno(code);
+		UserBO admin = new UserBO(); admin.setId(-1L);
+		if(srcUser != null){
+			//用户上屏Long id = userUtils.getUserIdFromSession(request);			
+			List<CommandVodPO> vods = userStart(userBO, bundleIds, srcUser);
+			return vods;
+		}else{
+			//设备上屏
+			BundlePO bundle = bundleDao.findByUsername(code);
+			String bundleId = bundle.getBundleId();
+			List<CommandVodPO> vods = deviceStart(userBO, bundleIds, bundleId);
+			return vods;
+			//TODO:鉴权
+		}
+		
+//		return null;
+		//下发字幕放在上层调用中了
+
+	}
+
 	/**
 	 * 从播放器给解码器上屏<br/>
 	 * <p>与“分屏”无关</p>
@@ -215,37 +282,6 @@ public class CommandDecoderServiceImpl {
 //		boolean hasSame = false;
 		List<CommandVodPO> vods1 = commandVodDao.findByDstBundleIdIn(bundleIds);
 		stopVods(userBO, vods1, false);
-//		for(CommandVodPO vod : vods1){
-//			if(SrcType.FILE.equals(playerInfoBO.getSrcType())){
-//				if(vod.getPlayUrl().equals(playerInfoBO.getPlayUrl())){
-//					//不变
-//					hasSame = true;
-//					break;
-//				}else{
-//					//停止（考虑改成批量）
-//					resourceVodStop(userBO, vod, false);
-//				}
-//			}else if(SrcType.USER.equals(playerInfoBO.getSrcType())){
-//				if(vod.getSourceNo().equals(playerInfoBO.getSrcCode())){
-//					//不变
-//					hasSame = true;
-//					break;
-//				}else{
-//					//停止（考虑改成批量）
-//					userStop(userBO, vod, false);
-//				}
-//			}else if(SrcType.DEVICE.equals(playerInfoBO.getSrcType())){
-//				if(vod.getSourceNo().equals(playerInfoBO.getSrcCode())){
-//					//不变
-//					hasSame = true;
-//					break;
-//				}else{
-//					//停止（考虑改成批量）
-//					deviceStop(userBO, vod, false);
-//				}
-//			}
-//		}
-//		if(hasSame) return vods1;
 		
 		//文件上屏
 		if(SrcType.FILE.equals(playerInfoBO.getSrcType())){			

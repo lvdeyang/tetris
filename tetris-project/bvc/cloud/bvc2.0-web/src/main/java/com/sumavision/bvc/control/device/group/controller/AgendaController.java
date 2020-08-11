@@ -444,7 +444,9 @@ public class AgendaController {
 		if(audioArr != null && audioArr.size()>0){
 			for(int i=0;i<audioArr.size();i++){
 				JSONObject audioObject = audioArr.getJSONObject(i);
-				JSONObject paramObject = audioObject.getJSONObject("param");
+				String paramStr = audioObject.getString("param");
+				JSONObject paramObject = JSONObject.parseObject(paramStr);
+//				JSONObject paramObject = audioObject.getJSONObject("param");
 				DeviceGroupConfigAudioPO audioPO = new DeviceGroupConfigAudioPO();
 				audioPO.setBundleId(paramObject.getString("bundleId"));
 				audioPO.setBundleName(audioObject.getString("name"));

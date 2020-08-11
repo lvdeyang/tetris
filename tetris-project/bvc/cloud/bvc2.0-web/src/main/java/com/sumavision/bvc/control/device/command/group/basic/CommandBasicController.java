@@ -278,7 +278,10 @@ public class CommandBasicController {
 			String hallIds,
 			String name,
 			HttpServletRequest request) throws Exception{
-		//考虑区分创建者和主席
+		
+		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持，请新建会议");
+		
+		/*
 		UserVO user = userUtils.getUserFromSession(request);
 		
 		Date date = new Date();
@@ -324,7 +327,7 @@ public class CommandBasicController {
 //		Object membersArray = treeUtils.queryGroupTree(group.getId());
 //		info.put("members", membersArray);
 				
-		return info;
+		return info;*/
 	}
 	
 	/**

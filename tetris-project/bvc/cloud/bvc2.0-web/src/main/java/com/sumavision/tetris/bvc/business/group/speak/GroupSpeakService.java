@@ -333,6 +333,7 @@ public class GroupSpeakService {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "当前正在进行讨论");
 			}
 			
+			//只能有1个发言人
 			List<GroupMemberPO> speakingMembers = querySpeakMembers(groupId);
 			if(speakingMembers.size() > 0){
 				throw new BaseException(StatusCode.FORBIDDEN, speakingMembers.get(0).getName() + "正在发言");
@@ -418,6 +419,7 @@ public class GroupSpeakService {
 				throw new BaseException(StatusCode.FORBIDDEN, "只能同意1人进行发言");
 			}
 			
+			//只能有1个发言人
 			List<GroupMemberPO> speakingMembers = querySpeakMembers(groupId);
 			if(speakingMembers.size() > 0){
 				throw new BaseException(StatusCode.FORBIDDEN, speakingMembers.get(0).getName() + "正在发言");
