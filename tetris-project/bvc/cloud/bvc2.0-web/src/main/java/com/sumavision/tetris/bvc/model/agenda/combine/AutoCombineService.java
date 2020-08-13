@@ -376,7 +376,7 @@ public class AutoCombineService {
 			PositionSrcBO position = new PositionSrcBO().setX(Integer.parseInt(positionPO.getX()))
 								.setY(Integer.parseInt(positionPO.getY()))
 								.setW(Integer.parseInt(positionPO.getW()))
-								.setY(Integer.parseInt(positionPO.getH()))
+								.setH(Integer.parseInt(positionPO.getH()))
 								.setSrc(new ArrayList<com.sumavision.bvc.device.group.bo.SourceBO>());
 			//找到对应的CombineAudioSrcPO
 			for(CombineVideoSrcPO srcEntity : srcEntities){
@@ -479,7 +479,7 @@ public class AutoCombineService {
 				positionEntity.setW(tenThousand(w));
 				positionEntity.setH(tenThousand(h));
 				positionEntity.setPictureType(PictureType.STATIC);
-//				positionEntity.setPollingTime(data.getString("pollingTime"));
+				positionEntity.setPollingTime("0");
 				positionEntity.setUpdateTime(new Date());
 //				positionEntity.setCombineVideoId(entity.getId());
 				positionEntities.add(positionEntity);
