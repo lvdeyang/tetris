@@ -221,7 +221,21 @@ public class MulticastService {
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
 	
-	public void getAddr(BundlePO bundle){
-		
+	/**
+	 * 给地址的端口增加addPort的数值<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月18日 下午3:53:13
+	 * @param baseAddr 格式为“IP:port”("2.2.2.2:1234")，通常来自BundlePO.getMulticastEncodeAddr
+	 * @param addPort 给端口增加的数值，例如视频+2，音频+4
+	 * @return
+	 */
+	public String addrAddPort(String baseAddr, int addPort){
+		String[] ipPort = baseAddr.split(":");
+		String ip = ipPort[0];
+		String port = ipPort[1];
+		Integer port2 = Integer.parseInt(port) + addPort;
+		return ip + ":" + port2;
 	}
 }

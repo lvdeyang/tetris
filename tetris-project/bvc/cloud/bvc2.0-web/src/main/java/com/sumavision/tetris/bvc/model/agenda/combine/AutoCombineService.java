@@ -317,8 +317,8 @@ public class AutoCombineService {
 			AgendaForwardType agendaforwardType = sourceBO.getAgendaForwardType();
 			
 			
-			String srcId = sourceBO.getVideoSource().getChannelId()
-					+ "@@" + sourceBO.getVideoSource().getBundleId()
+			String srcId = sourceBO.getVideoSourceChannel().getChannelId()
+					+ "@@" + sourceBO.getVideoSourceChannel().getBundleId()
 					+ "@@" + sourceBO.getVideoBundle().getAccessNodeUid();
 			
 			CombineVideoSrcPO srcEntity = new CombineVideoSrcPO();
@@ -346,8 +346,8 @@ public class AutoCombineService {
 		
 		List<CombineAudioSrcPO> audioSrcs = new ArrayList<CombineAudioSrcPO>();
 		for(SourceBO sourceBO : sourceBOs){			
-			String audioSrcId = sourceBO.getAudioSource().getChannelId()
-					+ "@@" + sourceBO.getAudioSource().getBundleId()
+			String audioSrcId = sourceBO.getAudioSourceChannel().getChannelId()
+					+ "@@" + sourceBO.getAudioSourceChannel().getBundleId()
 					+ "@@" + sourceBO.getAudioBundle().getAccessNodeUid();
 			
 			CombineAudioSrcPO src = new CombineAudioSrcPO();

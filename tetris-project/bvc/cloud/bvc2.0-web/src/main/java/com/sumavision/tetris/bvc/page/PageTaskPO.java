@@ -15,6 +15,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
+import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
@@ -69,6 +70,12 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
 	private AgendaSourceType videoSourceType;
 	
+	/** 单播/组播 */
+	private TransmissionMode videoTransmissionMode = TransmissionMode.UNICAST;
+
+	/** 组播地址 */
+	private String videoMultiAddr;
+	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineVideoUuid;
 	
@@ -112,6 +119,12 @@ public class PageTaskPO extends AbstractBasePO {
 	
 	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
 	private AgendaSourceType audioSourceType;
+	
+	/** 音频单播/组播 */
+	private TransmissionMode audioTransmissionMode = TransmissionMode.UNICAST;
+	
+	/** 音频组播地址 */
+	private String audioMultiAddr;
 	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineAudioUuid;
@@ -286,6 +299,23 @@ public class PageTaskPO extends AbstractBasePO {
 	public void setVideoSourceType(AgendaSourceType videoSourceType) {
 		this.videoSourceType = videoSourceType;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	public TransmissionMode getVideoTransmissionMode() {
+		return videoTransmissionMode;
+	}
+
+	public void setVideoTransmissionMode(TransmissionMode videoTransmissionMode) {
+		this.videoTransmissionMode = videoTransmissionMode;
+	}
+
+	public String getVideoMultiAddr() {
+		return videoMultiAddr;
+	}
+
+	public void setVideoMultiAddr(String videoMultiAddr) {
+		this.videoMultiAddr = videoMultiAddr;
+	}
 
 	public String getCombineVideoUuid() {
 		return combineVideoUuid;
@@ -402,7 +432,24 @@ public class PageTaskPO extends AbstractBasePO {
 	public void setAudioSourceType(AgendaSourceType audioSourceType) {
 		this.audioSourceType = audioSourceType;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	public TransmissionMode getAudioTransmissionMode() {
+		return audioTransmissionMode;
+	}
 
+	public void setAudioTransmissionMode(TransmissionMode audioTransmissionMode) {
+		this.audioTransmissionMode = audioTransmissionMode;
+	}
+
+	public String getAudioMultiAddr() {
+		return audioMultiAddr;
+	}
+
+	public void setAudioMultiAddr(String audioMultiAddr) {
+		this.audioMultiAddr = audioMultiAddr;
+	}
+	
 	public String getCombineAudioUuid() {
 		return combineAudioUuid;
 	}
