@@ -62,6 +62,7 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.vod.DstType;
 import com.sumavision.tetris.bvc.business.vod.VodPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
@@ -145,7 +146,7 @@ public class GroupRecordService {
 	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private BusinessCommonService businessCommonService;
@@ -208,7 +209,7 @@ public class GroupRecordService {
 			record.setFragments(new ArrayList<CommandGroupRecordFragmentPO>());			
 			
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			List<SourceBO> sourceBOs = agendaService.obtainSource(members, groupId.toString(), BusinessInfoType.BASIC_COMMAND);
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(members, groupId.toString(), BusinessInfoType.BASIC_COMMAND);
 			
 			GroupMemberPO thisMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
 			for(GroupMemberPO member : members){

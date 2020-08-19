@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,33 +23,18 @@ import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.EditStatus;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
-import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MediaType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
-import com.sumavision.bvc.device.command.exception.HasNotUsefulPlayerException;
 import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
@@ -62,23 +45,17 @@ import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
-import com.sumavision.bvc.device.group.bo.ForwardDelBO;
-import com.sumavision.bvc.device.group.bo.ForwardSetBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.PassByContentBO;
-import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
-import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.log.OperationLogService;
-import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -89,40 +66,31 @@ import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.bo.MemberTerminalBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
-import com.sumavision.tetris.bvc.business.bo.UserTerminalBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDemandDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
-import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandService;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
-import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
-import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
-import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
-import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -197,7 +165,7 @@ public class GroupService {
 	private ResourceService resourceService;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private BusinessCommonService businessCommonService;
@@ -948,7 +916,7 @@ public class GroupService {
 			
 			//执行默认议程
 			AgendaPO commandAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);//TODO
-			agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(commandAgenda.getId()).getList(), null);
+			agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(commandAgenda.getId()).getList(), null);
 			
 			//级联
 			if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -1036,7 +1004,7 @@ public class GroupService {
 			group.setEndTime(endTime);
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			//sourceBOs用于关闭编码通道
-			List<SourceBO> sourceBOs = agendaService.obtainSource(members, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(members, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 	//		List<CommandGroupForwardPO> forwards = group.getForwards();
 	//		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			List<GroupMemberPO> connectMembers = new ArrayList<GroupMemberPO>();
@@ -1191,7 +1159,7 @@ public class GroupService {
 			//停止所有的议程
 //			List<Long> runningAgendaIds = agendaDao.findRunningAgendaIdsByGroupId(groupId);
 			List<Long> runningAgendaIds = runningAgendaDao.findRunningAgendaIdsByGroupId(groupId);
-			agendaService.runAndStopAgenda(groupId, null, runningAgendaIds);
+			agendaExecuteService.runAndStopAgenda(groupId, null, runningAgendaIds);
 			
 			//删除角色 TODO:这个查询可能漏掉一些媒体转发的角色
 			List<Long> memberIds = businessCommonService.obtainMemberIds(members);
@@ -1847,7 +1815,7 @@ public class GroupService {
 				}
 				
 				//关闭编码通道
-				List<SourceBO> sourceBOs = agendaService.obtainSource(connectRemoveMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
+				List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(connectRemoveMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 				LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
 				executeBusiness.execute(logic, group.getName() + " " + description);
@@ -1867,9 +1835,9 @@ public class GroupService {
 				for(GroupMemberPO member : connectRemoveMembers){
 					List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
 					List<Long> removeRoleIds = businessCommonService.obtainGroupMemberRolePermissionPOIds(ps);
-					agendaService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds, false);
+					agendaExecuteService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds, false);
 				}
-				agendaService.executeToFinal(groupId);
+				agendaExecuteService.executeToFinal(groupId);
 			}
 			
 			if(mode == 0){
@@ -2196,7 +2164,7 @@ public class GroupService {
 //		
 //		commandGroupDao.save(group);
 		
-		List<SourceBO> sourceBOs = agendaService.obtainSource(acceptMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(acceptMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = openEncoder(group,sourceBOs, codec, -1L);
 		
@@ -2221,9 +2189,9 @@ public class GroupService {
 				RolePO chairmanRolePO = businessCommonService.queryGroupChairmanRole(group);
 				addRoleIds.add(chairmanRolePO.getId());
 			}
-			agendaService.modifyMemberRole(group.getId(), acceptMember.getId(), addRoleIds, null, false);
+			agendaExecuteService.modifyMemberRole(group.getId(), acceptMember.getId(), addRoleIds, null, false);
 		}
-		agendaService.executeToFinal(group.getId());
+		agendaExecuteService.executeToFinal(group.getId());
 		
 		
 		
@@ -2520,7 +2488,7 @@ public class GroupService {
 				 			 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(SourceBO sourceBO : sourceBOs){
-			ChannelSchemeDTO video = sourceBO.getVideoSource();
+			ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
 			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
 			PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 			ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
@@ -2535,7 +2503,7 @@ public class GroupService {
 					      .setBase_type(video.getBaseType())
 					      .setCodec_param(codec);
 			connectEncoderBundle.getChannels().add(connectEncoderVideoChannel);
-			ChannelSchemeDTO audio = sourceBO.getAudioSource();
+			ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
 			if(audio != null){
 				ConnectBO connectEncoderAudioChannel = new ConnectBO().setChannelId(audio.getChannelId())
 					      .setChannel_status("Open")
@@ -2574,7 +2542,7 @@ public class GroupService {
 									 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(SourceBO sourceBO : sourceBOs){
-			ChannelSchemeDTO video = sourceBO.getVideoSource();
+			ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
 			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
 			PassByBO passBy = new PassByBO().setHangUp(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 			DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)

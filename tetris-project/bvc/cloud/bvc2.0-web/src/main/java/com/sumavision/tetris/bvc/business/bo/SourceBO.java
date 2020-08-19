@@ -21,9 +21,9 @@ public class SourceBO {
 	/** 音频源类型 */
 	private AgendaSourceType audioSourceType;
 	
-	ChannelSchemeDTO videoSource;
+	ChannelSchemeDTO videoSourceChannel;
 	
-	ChannelSchemeDTO audioSource;
+	ChannelSchemeDTO audioSourceChannel;
 	
 	BundlePO videoBundle;
 	
@@ -71,21 +71,21 @@ public class SourceBO {
 		return this;
 	}
 
-	public ChannelSchemeDTO getVideoSource() {
-		return videoSource;
+	public ChannelSchemeDTO getVideoSourceChannel() {
+		return videoSourceChannel;
 	}
 
-	public SourceBO setVideoSource(ChannelSchemeDTO videoSource) {
-		this.videoSource = videoSource;
+	public SourceBO setVideoSourceChannel(ChannelSchemeDTO videoSource) {
+		this.videoSourceChannel = videoSource;
 		return this;
 	}
 
-	public ChannelSchemeDTO getAudioSource() {
-		return audioSource;
+	public ChannelSchemeDTO getAudioSourceChannel() {
+		return audioSourceChannel;
 	}
 
-	public SourceBO setAudioSource(ChannelSchemeDTO audioSource) {
-		this.audioSource = audioSource;
+	public SourceBO setAudioSourceChannel(ChannelSchemeDTO audioSource) {
+		this.audioSourceChannel = audioSource;
 		return this;
 	}
 	

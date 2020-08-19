@@ -76,6 +76,7 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupService;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
@@ -190,7 +191,7 @@ public class VodService {
 	private BusinessCommonService businessCommonService;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private GroupService groupService;
@@ -266,7 +267,7 @@ public class VodService {
 		
 		//执行议程
 		AgendaPO agenda = null;
-		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
 	}
 
 	/**
@@ -396,14 +397,14 @@ public class VodService {
 		//TODO:建立转发PO?
 		
 		//呼叫被点播的编码
-		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "，打开编码");
 		
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_USER);//TODO
-		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
 	}
 	
 	/** 重构停止点播用户 */
@@ -430,7 +431,7 @@ public class VodService {
 			//挂断编码解码，删除分页
 			Long srcMemberId = vod.getSrcMemberId();
 			GroupMemberPO srcMember = tetrisBvcQueryUtil.queryMemberById(members, srcMemberId);
-			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
@@ -577,14 +578,14 @@ public class VodService {
 		//TODO:建立转发PO?
 		
 		//呼叫被点播的编码
-		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "，打开编码");
 		
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_DEVICE);//TODO
-		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
 	}
 	
 	/**
@@ -620,7 +621,7 @@ public class VodService {
 			//挂断编码解码，删除分页
 			Long srcMemberId = vod.getSrcMemberId();
 			GroupMemberPO srcMember = tetrisBvcQueryUtil.queryMemberById(members, srcMemberId);
-			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);

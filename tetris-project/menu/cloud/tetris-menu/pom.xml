@@ -85,6 +85,12 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 		
+        <dependency>
+			 <groupId>com.sumavision.tetris</groupId>
+			 <artifactId>tetris-spring-eureka-feign</artifactId>
+			 <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+		
 		<!-- jsp热部署
 		<dependency> 
 	        <groupId>org.springframework.boot</groupId> 

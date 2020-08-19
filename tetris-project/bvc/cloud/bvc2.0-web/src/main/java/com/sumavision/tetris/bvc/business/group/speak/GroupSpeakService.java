@@ -1,10 +1,7 @@
 package com.sumavision.tetris.bvc.business.group.speak;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,22 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.querydsl.core.support.QueryMixin.Role;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
-import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
@@ -35,12 +18,8 @@ import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
-import com.sumavision.bvc.device.group.bo.CodecParamBO;
-import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.log.OperationLogService;
-import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
@@ -57,10 +36,9 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
-import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
@@ -70,7 +48,6 @@ import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -128,7 +105,7 @@ public class GroupSpeakService {
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -259,9 +236,9 @@ public class GroupSpeakService {
 		//给这些人授予发言人角色。后续改成批量
 		List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 		for(GroupMemberPO cooperateMember : speakMembers){
-			agendaService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
+			agendaExecuteService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
 		}
-		agendaService.executeToFinal(groupId);
+		agendaExecuteService.executeToFinal(groupId);
 		
 //		commandGroupDao.save(group);
 		
@@ -484,9 +461,9 @@ public class GroupSpeakService {
 			//给这些人授予发言人角色。后续改成批量
 			List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 			for(GroupMemberPO speakMember : speakMembers){
-				agendaService.modifyMemberRole(groupId, speakMember.getId(), addRoleIds, null, false);
+				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), addRoleIds, null, false);
 			}
-			agendaService.executeToFinal(groupId);
+			agendaExecuteService.executeToFinal(groupId);
 			
 			//发消息
 			for(MessageSendCacheBO cache : messageCaches){
@@ -593,9 +570,9 @@ public class GroupSpeakService {
 			}else{
 				//解绑协同指挥角色
 				List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
-				agendaService.modifyMemberRole(groupId, speakMember.getId(), null, removeRoleIds, false);
+				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), null, removeRoleIds, false);
 			}
-			agendaService.executeToFinal(groupId);
+			agendaExecuteService.executeToFinal(groupId);
 			
 			//websocket通知其它成员.
 			JSONObject message = new JSONObject();
@@ -681,9 +658,9 @@ public class GroupSpeakService {
 		//给这些人解绑协同指挥角色。后续改成批量
 		List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 		for(GroupMemberPO revokeMember : revokeMembers){
-			agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
+			agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
 		}
-		agendaService.executeToFinal(groupId);
+		agendaExecuteService.executeToFinal(groupId);
 		
 		//发送websocket通知
 		JSONObject message = new JSONObject();
@@ -754,7 +731,7 @@ public class GroupSpeakService {
 			//执行讨论议程，停止会议议程
 			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
 			AgendaPO meetingAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);
-			agendaService.runAndStopAgenda(groupId,
+			agendaExecuteService.runAndStopAgenda(groupId,
 					new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList(),
 					new ArrayListWrapper<Long>().add(meetingAgenda.getId()).getList());
 			
@@ -806,7 +783,7 @@ public class GroupSpeakService {
 			//停止讨论议程，执行会议议程
 			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
 			AgendaPO meetingAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);
-			agendaService.runAndStopAgenda(groupId,
+			agendaExecuteService.runAndStopAgenda(groupId,
 					new ArrayListWrapper<Long>().add(meetingAgenda.getId()).getList(),
 					new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList());
 			

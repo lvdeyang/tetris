@@ -87,6 +87,7 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupService;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
@@ -130,7 +131,7 @@ public class UserCallService {
 	private MonitorLiveUserDAO monitorLiveUserDao;
 	
 	@Autowired 
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired 
 	private GroupService groupService;
@@ -326,14 +327,14 @@ public class UserCallService {
 		groupMemberRolePermissionDao.save(calledRolePermission);
 		
 		//呼叫编码
-		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
 		
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.USER_CALL);
-		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
 		
 		if(!bCalledUserLdap){
 			
@@ -456,7 +457,7 @@ public class UserCallService {
 		
 		//呼叫编码
 //		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);		
-		List<SourceBO> sourceBOs = agendaService.obtainSource(members, group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(members, group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
@@ -584,7 +585,7 @@ public class UserCallService {
 		
 		//停止编码
 		if(call.getStatus().equals(CallStatus.ONGOING) || call.getStatus().equals(CallStatus.PAUSE)){
-			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(members.get(0)).add(members.get(1)).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(members.get(0)).add(members.get(1)).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
@@ -592,7 +593,7 @@ public class UserCallService {
 		
 		//停止议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.USER_CALL);
-		agendaService.runAndStopAgenda(group.getId(), null, new ArrayListWrapper<Long>().add(agenda.getId()).getList());//所有业务都使用groupPO
+		agendaExecuteService.runAndStopAgenda(group.getId(), null, new ArrayListWrapper<Long>().add(agenda.getId()).getList());//所有业务都使用groupPO
 		
 		//删除数据		
 		userCallDao.delete(call);
