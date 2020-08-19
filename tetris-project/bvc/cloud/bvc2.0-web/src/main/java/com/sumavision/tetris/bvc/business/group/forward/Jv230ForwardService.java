@@ -207,7 +207,8 @@ public class Jv230ForwardService {
 			jv230ForwardDao.save(forwards);
 			
 			//生成协议
-			protocol = new LogicBO().setCombineAudioSet(new ArrayList<CombineAudioBO>())
+			protocol = new LogicBO().setUserId(user.getId().toString())
+									.setCombineAudioSet(new ArrayList<CombineAudioBO>())
 									.setJv230AudioSet(new ArrayList<Jv230ForwardBO>())
 									.setJv230ForwardSet(new ArrayList<Jv230ForwardBO>());
 			
@@ -345,7 +346,8 @@ public class Jv230ForwardService {
 			qtTerminalForwardDao.save(audioForward);
 			
 			//生成协议
-			protocol = new LogicBO().setCombineVideoSet(new ArrayList<CombineVideoBO>())
+			protocol = new LogicBO().setUserId(user.getId().toString())
+									.setCombineVideoSet(new ArrayList<CombineVideoBO>())
 									.setCombineAudioSet(new ArrayList<CombineAudioBO>())
 									.setForwardSet(new ArrayList<ForwardSetBO>());
 			
@@ -356,7 +358,7 @@ public class Jv230ForwardService {
 				PositionSrcBO position = new PositionSrcBO().setX(terminalCombineVideoSrc.getX())
 															.setY(terminalCombineVideoSrc.getY())
 															.setW(terminalCombineVideoSrc.getW())
-															.setY(terminalCombineVideoSrc.getH())
+															.setH(terminalCombineVideoSrc.getH())
 															.setSrc(new ArrayList<SourceBO>());
 				SourceBO src = new SourceBO().setLayerId(terminalCombineVideoSrc.getSourceLayerId())
 											 .setBundleId(terminalCombineVideoSrc.getSourceBundleId())
@@ -369,11 +371,11 @@ public class Jv230ForwardService {
 			ForwardSetBO videoForwardProtocol = new ForwardSetBO().setSrc(new ForwardSetSrcBO())
 														  		  .setDst(new ForwardSetDstBO());
 			videoForwardProtocol.getSrc().setType("combineVideo")
-										 .setUuid(videoForward.getUuid());
+										 .setUuid(videoForward.getSourceId());
 			videoForwardProtocol.getDst().setLayerId(videoForward.getLayerId())
 										 .setBundleId(videoForward.getBundleId())
 										 .setChannelId(videoForward.getChannelId())
-										 .setBase_type("VenusAudioOut")
+										 .setBase_type("VenusVideoOut")
 										 .setBundle_type(bundle.getBundleType())
 										 .setCodec_param(codec);
 			protocol.getForwardSet().add(videoForwardProtocol);
@@ -492,7 +494,8 @@ public class Jv230ForwardService {
 		jv230ForwardDao.save(forwards);
 		
 		//协议
-		LogicBO protocol = new LogicBO().setCombineVideoUpdate(new ArrayList<CombineVideoBO>())
+		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+										.setCombineVideoUpdate(new ArrayList<CombineVideoBO>())
 										.setCombineAudioUpdate(new ArrayList<CombineAudioBO>())
 										.setJv230ForwardSet(new ArrayList<Jv230ForwardBO>());
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
@@ -547,7 +550,7 @@ public class Jv230ForwardService {
 				PositionSrcBO position = new PositionSrcBO().setX(terminalCombineVideoSrc.getX())
 															.setY(terminalCombineVideoSrc.getY())
 															.setW(terminalCombineVideoSrc.getW())
-															.setY(terminalCombineVideoSrc.getH())
+															.setH(terminalCombineVideoSrc.getH())
 															.setSrc(new ArrayList<SourceBO>());
 				SourceBO src = new SourceBO().setLayerId(terminalCombineVideoSrc.getSourceLayerId())
 											 .setBundleId(terminalCombineVideoSrc.getSourceBundleId())
@@ -686,7 +689,8 @@ public class Jv230ForwardService {
 		List<LayoutPositionPO> layoutPositions = layoutPositionDao.findByLayoutId(layout.getId());
 		List<Jv230ForwardPO> forwards = new ArrayList<Jv230ForwardPO>();
 		//生成协议
-		LogicBO protocol = new LogicBO().setCombineVideoUpdate(new ArrayList<CombineVideoBO>())
+		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+										.setCombineVideoUpdate(new ArrayList<CombineVideoBO>())
 										.setCombineAudioUpdate(new ArrayList<CombineAudioBO>())
 										.setJv230ForwardSet(new ArrayList<Jv230ForwardBO>());
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
@@ -763,7 +767,7 @@ public class Jv230ForwardService {
 				PositionSrcBO position = new PositionSrcBO().setX(terminalCombineVideoSrc.getX())
 															.setY(terminalCombineVideoSrc.getY())
 															.setW(terminalCombineVideoSrc.getW())
-															.setY(terminalCombineVideoSrc.getH())
+															.setH(terminalCombineVideoSrc.getH())
 															.setSrc(new ArrayList<SourceBO>());
 				SourceBO src = new SourceBO().setLayerId(terminalCombineVideoSrc.getSourceLayerId())
 											 .setBundleId(terminalCombineVideoSrc.getSourceBundleId())
@@ -903,7 +907,8 @@ public class Jv230ForwardService {
 		}
 		Jv230ForwardPO videoForward = jv230ForwardDao.findByBundleIdAndSerialNumAndUserIdAndTerminalIdAndBusinessType(bundleId, serialNum, String.valueOf(user.getId()), terminalEntity.getId(), ForwardBusinessType.QT_TOTAL_FORWARD);
 		if(videoForward == null) return;
-		LogicBO protocol = new LogicBO().setJv230ForwardDel(new ArrayList<SourceBO>());
+		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+										.setJv230ForwardDel(new ArrayList<SourceBO>());
 		SourceBO deleteJv230ForwardProtocol = new SourceBO();
 		deleteJv230ForwardProtocol.setLayerId(videoForward.getLayerId());
 		deleteJv230ForwardProtocol.setBundleId(videoForward.getBundleId());
@@ -986,7 +991,8 @@ public class Jv230ForwardService {
 		}
 		List<Jv230ForwardPO> videoForwards = jv230ForwardDao.findBySerialNumAndUserIdAndTerminalIdAndBusinessType(serialNum, String.valueOf(user.getId()), terminalEntity.getId(), ForwardBusinessType.QT_TOTAL_FORWARD);
 		if(videoForwards==null || videoForwards.size()<=0) return;
-		LogicBO protocol = new LogicBO().setCombineAudioUpdate(new ArrayList<CombineAudioBO>())
+		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+										.setCombineAudioUpdate(new ArrayList<CombineAudioBO>())
 										.setJv230ForwardDel(new ArrayList<SourceBO>());
 		for(Jv230ForwardPO forward:videoForwards){
 			SourceBO deleteJv230ForwardProtocol = new SourceBO();
@@ -1075,7 +1081,8 @@ public class Jv230ForwardService {
 			if(forwards==null || forwards.size()<=0) return;
 			List<Jv230ForwardPO> combineAudioForwards = new ArrayList<Jv230ForwardPO>();
 			List<Jv230ForwardPO> combineVideoForwards = new ArrayList<Jv230ForwardPO>();
-			LogicBO protocol = new LogicBO().setCombineAudioDel(new ArrayList<CombineAudioBO>())
+			LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+											.setCombineAudioDel(new ArrayList<CombineAudioBO>())
 											.setJv230ForwardDel(new ArrayList<SourceBO>());
 			for(Jv230ForwardPO forward:forwards){
 				if(ForwardSourceType.COMBINE_VIDEO.equals(forward.getSourceType())){
@@ -1102,7 +1109,8 @@ public class Jv230ForwardService {
 			executeBusiness.execute(protocol, new StringBufferWrapper().append("qt终端jv230停止转发，bundleId：").append(bundleId).toString());
 			jv230ForwardDao.deleteInBatch(forwards);
 		}else{
-			LogicBO protocol = new LogicBO().setCombineAudioDel(new ArrayList<CombineAudioBO>())
+			LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+											.setCombineAudioDel(new ArrayList<CombineAudioBO>())
 											.setCombineVideoDel(new ArrayList<CombineVideoBO>())
 											.setDisconnectBundle(new ArrayList<DisconnectBundleBO>());
 			List<QtTerminalForwardPO> forwards = qtTerminalForwardDao.findByUserIdAndTerminalIdAndBundleId(user.getId().toString(), terminalEntity.getId(), bundleId);
@@ -1159,7 +1167,8 @@ public class Jv230ForwardService {
 		if(forwards==null || forwards.size()<=0) return;
 		List<Jv230ForwardPO> combineAudioForwards = new ArrayList<Jv230ForwardPO>();
 		List<Jv230ForwardPO> combineVideoForwards = new ArrayList<Jv230ForwardPO>();
-		LogicBO protocol = new LogicBO().setCombineAudioDel(new ArrayList<CombineAudioBO>())
+		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
+										.setCombineAudioDel(new ArrayList<CombineAudioBO>())
 				                        .setCombineVideoDel(new ArrayList<CombineVideoBO>())
 										.setJv230ForwardDel(new ArrayList<SourceBO>())
 										.setDisconnectBundle(new ArrayList<DisconnectBundleBO>());
