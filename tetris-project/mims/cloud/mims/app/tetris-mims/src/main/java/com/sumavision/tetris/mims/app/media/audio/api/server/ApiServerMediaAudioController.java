@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.mims.app.boss.BossService;
+import com.sumavision.tetris.mims.app.boss.MediaType;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -34,6 +36,7 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorBegin
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -58,6 +61,9 @@ public class ApiServerMediaAudioController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private BossService bossService;
 	
 	/**
 	 * 添加上传音频媒资任务<br/>
@@ -216,5 +222,16 @@ public class ApiServerMediaAudioController {
 		UserVO user = userQuery.current();
 		
 		return mediaAudioService.addTask(user, name, "", httpUrl, ftpUrl);
+	}
+	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/price")
+	public Object setPrice(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		JSONHttpServletRequestWrapper wrapper=new JSONHttpServletRequestWrapper(request);
+		bossService.setMediaPrice(wrapper.getString("mediaId"), MediaType.AUDIO, wrapper.getLongValue("price"));
+		return "success";
 	}
 }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.mims.app.boss.BossService;
+import com.sumavision.tetris.mims.app.boss.MediaType;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
@@ -28,6 +30,9 @@ public class ApiQtMediaAudioController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private BossService bossService;
 	
 	/**
 	 * 加载所有的音频媒资<br/>
@@ -97,4 +102,26 @@ public class ApiQtMediaAudioController {
 		UserVO user = userQuery.current();
 		return mediaAudioService.downloadAdd(user, id);
 	}
+	
+	/**
+	 * qt终端点播时调用
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月19日 下午2:07:01
+	 * @param id 音频媒资id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/play")
+	public Object play(Long id, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		bossService.playMedia(id, user.getUuid(), MediaType.AUDIO);
+		return "success";
+	}
+	
 }

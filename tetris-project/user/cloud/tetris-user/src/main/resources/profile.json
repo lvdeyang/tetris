@@ -2,5 +2,7 @@
 	"dataWarehouseIp": "192.165.58.123",
 	"dataWarehousePort": "8090",
 	"dataWarehouseUsername": "testUser",
-	"dataWarehousePassword": "test@@123456"
+	"dataWarehousePassword": "test@@123456",
+	"bossAddUserUrl":"http://192.165.56.64/mims/user/add"
+	
  }
