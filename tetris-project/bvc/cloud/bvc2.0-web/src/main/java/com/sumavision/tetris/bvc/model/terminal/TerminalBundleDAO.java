@@ -63,4 +63,14 @@ public interface TerminalBundleDAO extends BaseDAO<TerminalBundlePO>{
 	 */
 	public List<TerminalBundlePO> findByTerminalIdAndTypeIn(Long terminalId, Collection<TerminalBundleType> types);
 	
+	/**
+	 * 根据终端和类型查询设备<br/>
+	 * <b>作者:</b>lixin<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月18日 下午2:50:34
+	 * @param terminalId 终端id
+	 * @param bundleType 设备类型
+	 * @return TerminalBundlePO 设备
+	 */
+	public List<TerminalBundlePO> findByTerminalIdAndBundleType(Long terminalId , String bundleType);
 }

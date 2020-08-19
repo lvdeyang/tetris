@@ -216,6 +216,19 @@ define([
                     var self = this;
                     self.dialog.selectBundle.currentRow = currentRow;
                 },
+                
+                //一键设备自动配置
+                handleAddAllBundles:function(){
+                    var self = this;
+                        ajax.post('/tetris/bvc/business/terminal/bundle/user/permission/add/all', {
+                            userId:self.user.current.id,
+                            terminalId:self.terminal.current.id,
+                        }, function(data, status){
+                            if(status !== 200) return;
+                            alert("绑定成功");
+                        }, null, ajax.TOTAL_CATCH_CODE);
+                },
+            	
                 handleSelectBundleSubmit:function(){
                     var self = this;
                     if(!self.dialog.selectBundle.currentRow){

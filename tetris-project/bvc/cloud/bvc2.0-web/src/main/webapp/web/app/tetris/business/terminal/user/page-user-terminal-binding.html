@@ -59,6 +59,9 @@
                         </el-scrollbar>
                     </div>
                     <div v-if="terminal.current" style="width:25%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; padding:10px;">
+                    	<div v-if="terminal.current.id=='1'">
+                    		<el-button type="primary" size="small" @click="handleAddAllBundles">一键绑定</el-button>
+                    	</div>
                         <el-scrollbar style="height:100%;">
                             <el-tree
                                     ref="terminalBundleTree"

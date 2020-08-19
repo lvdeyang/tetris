@@ -46,7 +46,7 @@ public class TerminalBundleQuery {
 			Long terminalId, 
 			int currentPage, 
 			int pageSize) throws Exception{
-		Long total = terminalBundleDao.count();
+		Long total = terminalBundleDao.countByTerminalId(terminalId);
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<TerminalBundlePO> pagedEntities = terminalBundleDao.findByTerminalIdOrderByBundleTypeAscNameAsc(terminalId, page);
 		List<TerminalBundlePO> entities = null;
@@ -80,5 +80,5 @@ public class TerminalBundleQuery {
 		List<TerminalBundlePO> entities = terminalBundleDao.findByTerminalIdAndTypeIn(terminalId, types);
 		return TerminalBundleVO.getConverter(TerminalBundleVO.class).convert(entities, TerminalBundleVO.class);
 	}
-	
+
 }

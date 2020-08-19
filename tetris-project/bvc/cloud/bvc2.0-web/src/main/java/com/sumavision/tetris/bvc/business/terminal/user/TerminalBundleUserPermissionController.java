@@ -165,4 +165,22 @@ public class TerminalBundleUserPermissionController {
 		return null;
 	}
 	
+	/**
+	 * 为用户设备自动绑定<br/>
+	 * <b>作者:</b>lixin<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月17日 上午11:11:41
+	 * @param String userId 用户id
+	 * @param terminalId 终端id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/add/all")
+	public Object addAll(
+			String userId,
+			Long terminalId,
+			HttpServletRequest request)throws Exception{
+		terminalBundleUserPermissionService.addAll(userId,terminalId);
+		return null;
+	}
 }
