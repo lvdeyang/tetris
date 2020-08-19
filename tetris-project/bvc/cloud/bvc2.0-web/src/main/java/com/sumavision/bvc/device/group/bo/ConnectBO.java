@@ -44,6 +44,16 @@ public class ConnectBO {
 	private String base_type = "";
 	
 	/**
+	 * 单播/组播模式
+	 */
+	private String mode = "single";
+	
+	/**
+	 * 组播地址
+	 */
+	private String multi_addr;
+	
+	/**
 	 * 编解码参数
 	 */
 	private CodecParamBO codec_param = new CodecParamBO();
@@ -113,6 +123,24 @@ public class ConnectBO {
 
 	public ConnectBO setBase_type(String base_type) {
 		this.base_type = base_type;
+		return this;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public ConnectBO setMode(String mode) {
+		this.mode = mode;
+		return this;
+	}
+
+	public String getMulti_addr() {
+		return multi_addr;
+	}
+
+	public ConnectBO setMulti_addr(String multi_addr) {
+		this.multi_addr = multi_addr;
 		return this;
 	}
 

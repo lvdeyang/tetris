@@ -75,6 +75,16 @@ public class ChannelSchemeBO {
 	private DecodeLayoutBO position;
 	
 	/**
+	 * 单播/组播模式
+	 */
+	private String mode;
+	
+	/**
+	 * 组播地址
+	 */
+	private String multi_addr;
+	
+	/**
 	 * 源
 	 */
 	private List<SrcBO> src;
@@ -421,6 +431,8 @@ public class ChannelSchemeBO {
 			channel.setChannelId(bundle_Channel.getChannelId());
 			channel.setChannelParam(bundle_Channel.getCodec_param());
 			channel.setBaseType(bundle_Channel.getBase_type());
+			channel.setMode(bundle_Channel.getMode());
+			channel.setMulti_addr(bundle_Channel.getMulti_addr());
 			if(bundle_Channel.getSource_param() != null){
 				channel.setSrc(new ArrayList<ForwardSetBO.SrcBO>());
 				channel.getSrc().add(bundle_Channel.getSource_param());

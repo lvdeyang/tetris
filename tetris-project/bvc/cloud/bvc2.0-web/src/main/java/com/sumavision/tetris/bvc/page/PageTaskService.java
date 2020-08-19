@@ -124,7 +124,7 @@ public class PageTaskService {
 		JSONObject message = new JSONObject();
 		message.put("businessType", "refreshPage");
 		message.put("pageInfo", schemeVO);
-		log.info("layout: " + JSON.toJSONString(schemeVO));
+		log.info("推送" + userInfo.getUserName() + "用户的当前分页layout: " + JSON.toJSONString(schemeVO));
 		
 		MessageSendCacheBO cache = new MessageSendCacheBO(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
 	

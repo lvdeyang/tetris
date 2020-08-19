@@ -27,7 +27,7 @@ public class AgendaForwardPO extends AbstractBasePO{
 	/** 转发类型 */
 	private AgendaForwardType type;
 	
-	/** 源id bundleId-channelId*/
+	/** 视频源id bundleId-channelId*/
 	private String sourceId;
 	
 	/** 源类型 */

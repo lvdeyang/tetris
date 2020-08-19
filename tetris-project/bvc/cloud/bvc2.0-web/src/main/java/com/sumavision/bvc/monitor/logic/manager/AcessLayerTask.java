@@ -820,7 +820,7 @@ public class AcessLayerTask extends asyncTask {
 		}
 		
 		try{
-			log.info("operateIndexList is " + operateIndexList + " and bundlesToOperate size is " + bundlesToOperate.size());
+			//log.info("operateIndexList is " + operateIndexList + " and bundlesToOperate size is " + bundlesToOperate.size());
 			List<Future<ResultMap>> results = new ArrayList<Future<ResultMap>>();
 			List<String> taskIdList = new ArrayList<String>();
 			int j = 0;
@@ -830,7 +830,7 @@ public class AcessLayerTask extends asyncTask {
 					log.info("-------------this bundle has no channels" + " bundleId is " + bundle.getBundleId());
 					continue;
 				}
-				log.info("-----------------add " +  operate + " bundleTask with bundleId " + bundle.getBundleId());
+				//log.info("-----------------add " +  operate + " bundleTask with bundleId " + bundle.getBundleId());
 				results.add(CompletableFuture.supplyAsync(()->operateBundle(bundle, operateIndex, userId, operate), ThreadPool.getScheduledExecutor()));
 				taskIdList.add(bundle.getTaskId());
 				j++;

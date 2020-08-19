@@ -67,6 +67,7 @@ import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.bo.MemberTerminalBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDemandDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -160,6 +161,9 @@ public class GroupService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private MulticastService multicastService;
 	
 	@Autowired
 	private ResourceService resourceService;
@@ -2502,6 +2506,10 @@ public class GroupService {
 					      .setChannel_status("Open")
 					      .setBase_type(video.getBaseType())
 					      .setCodec_param(codec);
+			if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
+				String videoAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
+				connectEncoderVideoChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(videoAddr);
+			}
 			connectEncoderBundle.getChannels().add(connectEncoderVideoChannel);
 			ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
 			if(audio != null){
@@ -2509,6 +2517,10 @@ public class GroupService {
 					      .setChannel_status("Open")
 					      .setBase_type(audio.getBaseType())
 					      .setCodec_param(codec);
+				if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
+					String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
+					connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr);
+				}
 				connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);
 			}
 //			connectEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectEncoderVideoChannel).add(connectEncoderAudioChannel).getList());
