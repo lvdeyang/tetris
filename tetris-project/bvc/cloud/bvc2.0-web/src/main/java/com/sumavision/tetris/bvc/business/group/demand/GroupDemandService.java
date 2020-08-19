@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,27 +15,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
@@ -45,22 +29,14 @@ import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
-import com.sumavision.bvc.device.group.bo.CodecParamBO;
-import com.sumavision.bvc.device.group.bo.LogicBO;
-import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
-import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
-import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
-import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDemandDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -75,11 +51,11 @@ import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDestinationType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
@@ -87,10 +63,8 @@ import com.sumavision.tetris.bvc.model.role.RoleUserMappingType;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -176,7 +150,7 @@ public class GroupDemandService {
 	private ResourceChannelDAO resourceChannelDao;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
@@ -242,7 +216,7 @@ public class GroupDemandService {
 			
 			//校验转发目的成员是否进会
 			List<GroupMemberPO> dstMembers = new ArrayList<GroupMemberPO>();
-			List<GroupMemberPO> _dstMembers = tetrisBvcQueryUtil.queryMembersByMemberIds(members, memberIds);
+			List<GroupMemberPO> _dstMembers = tetrisBvcQueryUtil.queryMembersByIds(members, memberIds);
 			for(GroupMemberPO dstMember : _dstMembers){
 				if(!dstMember.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
 //					if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -381,7 +355,7 @@ public class GroupDemandService {
 			groupDemandDao.save(newDemands);//持久化agendaId和srcMemberId
 			
 			//执行议程
-			agendaService.runAndStopAgenda(groupId, agendaIds, null);
+			agendaExecuteService.runAndStopAgenda(groupId, agendaIds, null);
 			
 			/*//logic
 			LogicBO logic = commandBasicServiceImpl.openBundle(null, needDemands, needPlayers, null, null, codec, chairmanMember.getUserNum());
@@ -581,7 +555,7 @@ public class GroupDemandService {
 			
 			//停止议程，后续修改成批量
 			Long agendaId = demand.getAgendaId();
-			agendaService.runAndStopAgenda(group.getId(), null, new ArrayListWrapper<Long>().add(agendaId).getList());
+			agendaExecuteService.runAndStopAgenda(group.getId(), null, new ArrayListWrapper<Long>().add(agendaId).getList());
 			
 			AgendaPO agenda = agendaDao.findOne(agendaId);
 			List<AgendaForwardPO> forwards = agendaForwardDao.findByAgendaId(agendaId);

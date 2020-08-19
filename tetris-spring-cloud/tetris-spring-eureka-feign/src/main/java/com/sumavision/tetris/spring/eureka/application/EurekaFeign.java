@@ -140,7 +140,22 @@ public class EurekaFeign {
 					"根据appId查询app实例列表失败");
 		}
 		
+		/**
+		 * 获取app实例列表<br/>
+		 * <b>作者:</b>lqxuhv<br/>
+		 * <b>版本：</b>1.0<br/>
+		 * <b>日期：</b>2020年8月14日 下午5:43:57
+		 * @return eureka api  返回  .xml文件
+		 */
+		public String findAll() throws Exception{
+			return doGet(new StringBufferWrapper().append(applicationYml.getEurekaUrl()).append("apps/").toString(), 
+					null,
+					"获取app实例列表失败");
+		}
+		
 	}
+	
+	
 	
 	/**
 	 * 数据库查询<br/>
@@ -182,5 +197,6 @@ public class EurekaFeign {
 		}
 		
 	}
+	
 	
 }

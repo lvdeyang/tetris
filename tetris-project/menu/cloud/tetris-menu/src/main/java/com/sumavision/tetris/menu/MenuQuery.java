@@ -1,19 +1,29 @@
 package com.sumavision.tetris.menu;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
+
+import org.hibernate.mapping.Subclass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.commons.util.xml.XMLReader;
 import com.sumavision.tetris.menu.MenuPO.MenuComparator;
+import com.sumavision.tetris.spring.eureka.application.EurekaFeign;
+import com.sumavision.tetris.spring.eureka.application.EurekaFeign.MemoryQuery;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserVO;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 /**
  * 菜单工具类<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -31,6 +41,9 @@ public class MenuQuery {
 	
 	@Autowired
 	private MenuComparator menuComparator;
+	
+	@Autowired
+	private MemoryQuery memoryQuery;
 	
 	@Autowired
 	private SystemRoleMenuPermissionDAO systemRoleMenuPermissionDao;
@@ -54,6 +67,32 @@ public class MenuQuery {
 			
 			//根据权限获取菜单
 			List<MenuPO> menus = menuDao.findByRoleIdIn(roleIds);
+			String xmlString = memoryQuery.findAll();
+			for (MenuPO menuPO : menus) {
+				String appName = menuPO.getLink().split("//")[1].split("/")[0].toLowerCase();
+				XMLReader reader = new XMLReader(xmlString);
+				List<Node> nodes = reader.readNodeList("applications.application");
+				for (Node node : nodes) {
+					List<Node> nodesto = reader.readNodeList("application.instance",node);
+					String ip = null;
+					String port  = null;
+					Random r = new Random();
+					int i = r.nextInt(nodesto.size());
+					Node instanceNode = nodesto.get(i);
+					ip = reader.readString("instance.hostName",instanceNode);
+					if(menuPO.getLink().startsWith("http://")){
+						port = reader.readString("instance.port",instanceNode);
+					}else {
+						port = reader.readString("instance.securePort",instanceNode);
+					}
+					String nodePort = new StringBufferWrapper().append(ip).append(":").append(port).toString();
+					String name = reader.readString("application.name", node).toLowerCase();
+					if(name.equals(appName)){
+						menuPO.setLink(menuPO.getLink().replaceAll(appName,nodePort ));
+						break;
+					}
+				}
+			}
 			
 			List<MenuPO> parentMenus = null;
 			if(menus!=null && menus.size()>0) parentMenus = queryParentMenus(menus);

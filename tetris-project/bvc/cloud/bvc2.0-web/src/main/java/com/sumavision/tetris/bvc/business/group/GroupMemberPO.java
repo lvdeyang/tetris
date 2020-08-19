@@ -30,7 +30,7 @@ public class GroupMemberPO extends AbstractBasePO{
 	/** 用户/设备号码 */
 	private String code;
 	
-	/** 成员为用户时存userId, 设备时存bundleId, */
+	/** 成员为用户时存userId, 设备时存bundleId，会场存会场id */
 	private String originId;
 	
 	/** 终端类型 */

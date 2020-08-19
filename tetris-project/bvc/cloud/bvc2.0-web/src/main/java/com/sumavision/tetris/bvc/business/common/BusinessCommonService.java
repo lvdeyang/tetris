@@ -120,7 +120,13 @@ import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 import lombok.extern.slf4j.Slf4j;
 
-
+/**
+ * 业务快捷查询类<br/>
+ * <p>详细描述</p>
+ * <b>作者:</b>zsy<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月10日 下午1:19:13
+ */
 @Slf4j
 @Service
 public class BusinessCommonService {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 
 /**
  * @ClassName: 透传信息内容 
@@ -128,6 +129,16 @@ public class PassByContentBO implements BasePassByContent{
 		return this;
 	}
 	
+//614
+	public PassByContentBO setIncomingCall(GroupPO group){
+		this.setType("1")
+			.setCaller_name(group.getName())
+			.setUuid(group.getUuid())
+			.setGroupUuid(group.getUuid())
+		 	.setUserId("-1");
+		
+		return this;
+	}
 	/**
 	 * @Title: 透传HangUp
 	 * @param group 设备组信息
@@ -136,6 +147,15 @@ public class PassByContentBO implements BasePassByContent{
 	 */
 	public PassByContentBO setHangUp(DeviceGroupPO group, DeviceGroupMemberPO member){
 		this.setType(group.getType().getProtocalId())
+		   .setCaller_name(group.getName())
+		   .setGroupUuid(group.getUuid());
+		
+		return this;
+	}
+
+//614
+	public PassByContentBO setHangUp(GroupPO group){
+		this.setType("1")
 		   .setCaller_name(group.getName())
 		   .setGroupUuid(group.getUuid());
 		

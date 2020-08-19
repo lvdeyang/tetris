@@ -67,6 +67,7 @@ public class CommandMeetingController {
 	@RequestMapping(value = "/save")
 	public Object save(
 			String members,
+			String hallIds,
 			String name,
 			HttpServletRequest request) throws Exception{
 		//考虑区分创建者和主席
@@ -85,12 +86,13 @@ public class CommandMeetingController {
 		}
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
+		List<Long> hallIdArray = JSONArray.parseArray(hallIds, Long.class);
 		List<String> bundleIdArray = new ArrayList<String>();
 		
 		GroupPO group = null;
 		try{
 //			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.MEETING, OriginType.INNER, userIdArray);
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.MEETING_QT, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, bundleIdArray, null);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.MEETING_QT, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -138,7 +140,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		groupSpeakService.speakAppointU(Long.parseLong(id), userIdArray);
+		groupSpeakService.speakAppointM(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -191,7 +193,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		groupSpeakService.speakApplyAgreeU(Long.parseLong(id), userIdArray);
+		groupSpeakService.speakApplyAgreeM(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -272,7 +274,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		groupSpeakService.speakStopByChairmanU(Long.parseLong(id), userIdArray);
+		groupSpeakService.speakStopByChairmanM(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}

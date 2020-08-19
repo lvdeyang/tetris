@@ -53,6 +53,16 @@ import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
+import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -103,7 +113,19 @@ public class CommandVodService {
 	private FolderUserMapDAO folderUserMapDao;
 	
 	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageInfoDAO pageInfoDao;
+	
+	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private PageTaskService pageTaskService;
+	
+	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
 	
 	@Autowired
 	private ResourceServiceClient resourceServiceClient;
@@ -787,7 +809,19 @@ public class CommandVodService {
 	
 	public CommandGroupUserPlayerPO recordVodStart(UserBO user, String businessType, String businessInfo, String url, int locationIndex) throws Exception{
 		
-		//占用播放器
+		String originId = user.getId().toString();
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
+		PageTaskPO task = new PageTaskPO();
+		task.setBusinessInfoType(BusinessInfoType.PLAY_RECORD);
+		task.setBusinessName(businessInfo);
+		task.setBusinessId("-2");
+		task.setPlayUrl(url);
+		pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
+		
+		return new CommandGroupUserPlayerPO();
+		
+		/*//占用播放器
 		CommandGroupUserPlayerPO player = null;
 		if(locationIndex == -1){
 			player = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_RECORD);
@@ -805,12 +839,20 @@ public class CommandVodService {
 		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
 		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
 		
-		return player;
+		return player;*/
 	}
 
 	
 	public CommandGroupUserPlayerPO recordVodStop(UserBO user, int serial) throws Exception{
 		
+		String originId = user.getId().toString();
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);	
+		PageTaskPO removeTask = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		pageTaskService.addAndRemoveTasks(pageInfo, null, new ArrayListWrapper<PageTaskPO>().add(removeTask).getList());
+		return new CommandGroupUserPlayerPO();
+		
+		/*
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);		
 		player.setFree();
@@ -821,7 +863,7 @@ public class CommandVodService {
 		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(allNeedClosePlayers, null, null, allNeedClosePlayers, codec, -1L);
 		executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播录制文件");
 		
-		return player;		
+		return player;*/
 	}
 
 	/**

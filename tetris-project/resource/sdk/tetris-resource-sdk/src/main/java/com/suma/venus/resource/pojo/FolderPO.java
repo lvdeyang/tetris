@@ -17,8 +17,8 @@ import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
  *
  */
 @Entity
-public class FolderPO extends CommonPO<FolderPO> {
 
+public class FolderPO extends CommonPO<FolderPO> {
 	private String uuid = BundlePO.createBundleId();
 
 	/** 文件夹显示名称 */

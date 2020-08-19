@@ -17,6 +17,7 @@ import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.split.CommandSplitServiceImpl;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
@@ -71,7 +72,7 @@ public class CommandSplitController {
 		commandSplitServiceImpl.changeLayoutScheme_re(userId, split);
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		PlayerSplitLayout newSplitLayout = PlayerSplitLayout.fromId(split);
 		int pageSize = newSplitLayout.getPlayerCount();
 		
@@ -89,7 +90,7 @@ public class CommandSplitController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		
 		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()+1, pageInfo.getPageSize());
 		
@@ -105,7 +106,7 @@ public class CommandSplitController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		
 		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()-1, pageInfo.getPageSize());
 		
@@ -157,10 +158,12 @@ public class CommandSplitController {
 	public Object clearAllPlayers(
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		throw new BaseException(StatusCode.FORBIDDEN, "请翻页观看其它画面");
 		
-		commandSplitServiceImpl.clearAllPlayers(userId);
-		
-		return null;
+//		Long userId = userUtils.getUserIdFromSession(request);
+//		
+//		commandSplitServiceImpl.clearAllPlayers(userId);
+//		
+//		return null;
 	}
 }

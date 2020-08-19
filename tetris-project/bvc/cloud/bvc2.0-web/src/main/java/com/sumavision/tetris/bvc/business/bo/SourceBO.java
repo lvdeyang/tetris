@@ -15,12 +15,15 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
  */
 public class SourceBO {
 	
-	/** 源类型 */
-	private AgendaSourceType sourceType;
+	/** 视频源类型 */
+	private AgendaSourceType videoSourceType;
+
+	/** 音频源类型 */
+	private AgendaSourceType audioSourceType;
 	
-	ChannelSchemeDTO videoSource;
+	ChannelSchemeDTO videoSourceChannel;
 	
-	ChannelSchemeDTO audioSource;
+	ChannelSchemeDTO audioSourceChannel;
 	
 	BundlePO videoBundle;
 	
@@ -33,13 +36,13 @@ public class SourceBO {
 	AgendaForwardType agendaForwardType;
 	
 	/** 用户userId/设备bundleId/文件id/合屏uuid */
-	String srcId;
+	String srcVideoId;
 
-	Long srcMemberId;
+	Long srcVideoMemberId;
 	
-	String srcName;
+	String srcVideoName;
 	
-	String srcCode;
+	String srcVideoCode;
 	
 	/**  音频源信息 */
 	String srcAudioId;
@@ -49,31 +52,40 @@ public class SourceBO {
 	String srcAudioName;
 	
 	String srcAudioCode;
-
-	public AgendaSourceType getSourceType() {
-		return sourceType;
+	
+	public AgendaSourceType getVideoSourceType() {
+		return videoSourceType;
 	}
 
-	public SourceBO setSourceType(AgendaSourceType sourceType) {
-		this.sourceType = sourceType;
+	public SourceBO setVideoSourceType(AgendaSourceType videoSourceType) {
+		this.videoSourceType = videoSourceType;
 		return this;
 	}
 
-	public ChannelSchemeDTO getVideoSource() {
-		return videoSource;
+	public AgendaSourceType getAudioSourceType() {
+		return audioSourceType;
 	}
 
-	public SourceBO setVideoSource(ChannelSchemeDTO videoSource) {
-		this.videoSource = videoSource;
+	public SourceBO setAudioSourceType(AgendaSourceType audioSourceType) {
+		this.audioSourceType = audioSourceType;
 		return this;
 	}
 
-	public ChannelSchemeDTO getAudioSource() {
-		return audioSource;
+	public ChannelSchemeDTO getVideoSourceChannel() {
+		return videoSourceChannel;
 	}
 
-	public SourceBO setAudioSource(ChannelSchemeDTO audioSource) {
-		this.audioSource = audioSource;
+	public SourceBO setVideoSourceChannel(ChannelSchemeDTO videoSource) {
+		this.videoSourceChannel = videoSource;
+		return this;
+	}
+
+	public ChannelSchemeDTO getAudioSourceChannel() {
+		return audioSourceChannel;
+	}
+
+	public SourceBO setAudioSourceChannel(ChannelSchemeDTO audioSource) {
+		this.audioSourceChannel = audioSource;
 		return this;
 	}
 	
@@ -122,39 +134,39 @@ public class SourceBO {
 		return this;
 	}
 
-	public String getSrcId() {
-		return srcId;
+	public String getSrcVideoId() {
+		return srcVideoId;
 	}
 
-	public SourceBO setSrcId(String srcId) {
-		this.srcId = srcId;
+	public SourceBO setSrcVideoId(String srcVideoId) {
+		this.srcVideoId = srcVideoId;
 		return this;
 	}
 
-	public Long getSrcMemberId() {
-		return srcMemberId;
+	public Long getSrcVideoMemberId() {
+		return srcVideoMemberId;
 	}
 
-	public SourceBO setSrcMemberId(Long memberId) {
-		this.srcMemberId = memberId;
+	public SourceBO setSrcVideoMemberId(Long memberId) {
+		this.srcVideoMemberId = memberId;
 		return this;
 	}
 
-	public String getSrcName() {
-		return srcName;
+	public String getSrcVideoName() {
+		return srcVideoName;
 	}
 
-	public SourceBO setSrcName(String srcName) {
-		this.srcName = srcName;
+	public SourceBO setSrcVideoName(String srcVideoName) {
+		this.srcVideoName = srcVideoName;
 		return this;
 	}
 
-	public String getSrcCode() {
-		return srcCode;
+	public String getSrcVideoCode() {
+		return srcVideoCode;
 	}
 
-	public SourceBO setSrcCode(String srcCode) {
-		this.srcCode = srcCode;
+	public SourceBO setSrcVideoCode(String srcVideoCode) {
+		this.srcVideoCode = srcVideoCode;
 		return this;
 	}
 

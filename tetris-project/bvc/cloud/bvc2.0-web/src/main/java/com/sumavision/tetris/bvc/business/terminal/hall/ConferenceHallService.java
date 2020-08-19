@@ -15,15 +15,21 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.terminal.hall.exception.ConferenceHallNotFoundException;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundlePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.exception.TerminalNotFoundException;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
 
 @Service
 public class ConferenceHallService {
+
+	@Autowired
+	private PageInfoDAO pageInfoDao;
 
 	@Autowired
 	private ConferenceHallDAO conferenceHallDao;
@@ -87,6 +93,14 @@ public class ConferenceHallService {
 			permissions.add(permission);
 		}
 		terminalBundleConferenceHallPermissionDao.save(permissions);
+		
+		List<PageInfoPO> pageInfos = new ArrayList<PageInfoPO>();
+		for(ConferenceHallPO hall : halls){
+			PageInfoPO pageInfo = new PageInfoPO(hall.getId().toString(), terminalId, GroupMemberType.MEMBER_HALL);
+			pageInfos.add(pageInfo);
+		}
+		pageInfoDao.save(pageInfos);
+		
 		List<ConferenceHallVO> hallVOs = ConferenceHallVO.getConverter(ConferenceHallVO.class).convert(halls, ConferenceHallVO.class);
 		for(ConferenceHallVO hallVO:hallVOs){
 			hallVO.setTerminalName(terminal.getName());
@@ -120,6 +134,9 @@ public class ConferenceHallService {
 		entity.setFolderId(folderId);
 		entity.setUpdateTime(new Date());
 		conferenceHallDao.save(entity);
+		
+		PageInfoPO pageInfo = new PageInfoPO(entity.getId().toString(), terminalId, GroupMemberType.MEMBER_HALL);
+		pageInfoDao.save(pageInfo);
 		
 		return new ConferenceHallVO().set(entity).setTerminalName(terminalEntity.getName());
 	}
@@ -168,6 +185,11 @@ public class ConferenceHallService {
 		List<TerminalBundleConferenceHallPermissionPO> permissions = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(id);
 		if(permissions!=null && permissions.size()>0){
 			terminalBundleConferenceHallPermissionDao.deleteInBatch(permissions);
+		}
+		
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(id.toString(), entity.getTerminalId(), GroupMemberType.MEMBER_HALL);
+		if(pageInfo != null){
+			pageInfoDao.delete(pageInfo);
 		}
 	}
 	

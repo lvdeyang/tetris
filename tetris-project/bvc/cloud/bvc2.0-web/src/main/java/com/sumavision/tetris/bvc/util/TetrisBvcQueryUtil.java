@@ -53,6 +53,13 @@ import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermis
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 
+/**
+ * 查询工具类<br/>
+ * <p>详细描述</p>
+ * <b>作者:</b>zsy<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月10日 下午1:19:21
+ */
 @Service
 public class TetrisBvcQueryUtil {
 	
@@ -532,18 +539,19 @@ public class TetrisBvcQueryUtil {
 	}
 	
 	/**
-	 * 根据originId查找成员<br/>
+	 * 根据originId和类型查找成员<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月5日 上午9:44:19
 	 * @param members
 	 * @param originId
+	 * @param groupMemberType
 	 * @return
 	 */
-	public GroupMemberPO queryMemberByOriginId(Collection<GroupMemberPO> members, String originId){
+	public GroupMemberPO queryMemberByOriginIdAndGroupMemberType(Collection<GroupMemberPO> members, String originId, GroupMemberType groupMemberType){
 		for(GroupMemberPO member : members){
-			if(originId.equals(member.getOriginId())){
+			if(originId.equals(member.getOriginId()) && groupMemberType.equals(member.getGroupMemberType())){
 				return member;
 			}
 		}
@@ -562,7 +570,8 @@ public class TetrisBvcQueryUtil {
 	 */
 	public GroupMemberPO queryMemberByUserId(Collection<GroupMemberPO> members, Long userId){
 		for(GroupMemberPO member : members){
-			if(userId.toString().equals(member.getOriginId())){
+			if(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())
+					&& userId.toString().equals(member.getOriginId())){
 				return member;
 			}
 		}
@@ -582,6 +591,7 @@ public class TetrisBvcQueryUtil {
 	public List<GroupMemberPO> queryMembersByUserIds(Collection<GroupMemberPO> members, List<Long> userIds){
 		List<GroupMemberPO> target = new ArrayList<GroupMemberPO>();
 		for(GroupMemberPO member : members){
+			if(!GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())) continue;
 			try{
 				//OriginId可能不是数字
 				Long memberUserId = Long.parseLong(member.getOriginId());
@@ -593,7 +603,7 @@ public class TetrisBvcQueryUtil {
 		return target;
 	}
 	
-	public List<GroupMemberPO> queryMembersByMemberIds(Collection<GroupMemberPO> members, List<Long> memberIds){
+	public List<GroupMemberPO> queryMembersByIds(Collection<GroupMemberPO> members, List<Long> memberIds){
 		List<GroupMemberPO> target = new ArrayList<GroupMemberPO>();
 		for(GroupMemberPO member : members){
 			try{
@@ -778,7 +788,7 @@ public class TetrisBvcQueryUtil {
 		List<SourceBO> target = new ArrayList<SourceBO>();
 		for(SourceBO sourceBO : sourceBOs){
 			try{
-				if(memberId.equals(sourceBO.getSrcMemberId())){
+				if(memberId.equals(sourceBO.getSrcVideoMemberId())){
 					target.add(sourceBO);
 				}
 			}catch(Exception e){}			

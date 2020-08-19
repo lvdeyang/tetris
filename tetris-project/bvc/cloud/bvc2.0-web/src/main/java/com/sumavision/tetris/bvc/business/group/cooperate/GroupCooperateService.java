@@ -1,10 +1,7 @@
 package com.sumavision.tetris.bvc.business.group.cooperate;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,33 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.querydsl.core.support.QueryMixin.Role;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
-import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
-import com.sumavision.bvc.device.group.bo.CodecParamBO;
-import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.log.OperationLogService;
-import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
@@ -51,22 +31,17 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
-import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
-import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -109,7 +84,7 @@ public class GroupCooperateService {
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -220,8 +195,9 @@ public class GroupCooperateService {
 			addRoleIds.add(cooperateRole.getId());
 			
 			for(GroupMemberPO cooperateMember : cooperateMembers){
-				agendaService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null);
+				agendaExecuteService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
 			}
+			agendaExecuteService.executeToFinal(groupId);
 			
 	//		commandGroupDao.save(group);
 			
@@ -308,8 +284,9 @@ public class GroupCooperateService {
 			removeRoleIds.add(cooperateRole.getId());
 			
 			for(GroupMemberPO revokeMember : revokeMembers){
-				agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds);
+				agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
 			}
+			agendaExecuteService.executeToFinal(groupId);
 			
 			//发送websocket通知
 			JSONObject message = new JSONObject();

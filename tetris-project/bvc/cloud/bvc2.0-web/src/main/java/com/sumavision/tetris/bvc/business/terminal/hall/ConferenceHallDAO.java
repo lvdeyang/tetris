@@ -1,5 +1,7 @@
 package com.sumavision.tetris.bvc.business.terminal.hall;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -21,4 +23,5 @@ public interface ConferenceHallDAO extends BaseDAO<ConferenceHallPO>{
 	 */
 	public Page<ConferenceHallPO> findByNameLike(String name, Pageable page);
 	
+	public List<ConferenceHallPO> findByFolderId(Long folderId);
 }

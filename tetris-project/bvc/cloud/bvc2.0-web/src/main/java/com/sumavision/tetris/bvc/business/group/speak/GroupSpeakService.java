@@ -1,10 +1,7 @@
 package com.sumavision.tetris.bvc.business.group.speak;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,22 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.querydsl.core.support.QueryMixin.Role;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
-import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
@@ -35,12 +18,8 @@ import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
-import com.sumavision.bvc.device.group.bo.CodecParamBO;
-import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
-import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.log.OperationLogService;
-import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
@@ -57,10 +36,9 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
-import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
@@ -70,7 +48,6 @@ import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -128,7 +105,7 @@ public class GroupSpeakService {
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
 	
 	@Autowired
-	private AgendaService agendaService;
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -259,8 +236,9 @@ public class GroupSpeakService {
 		//给这些人授予发言人角色。后续改成批量
 		List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 		for(GroupMemberPO cooperateMember : speakMembers){
-			agendaService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null);
+			agendaExecuteService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
 		}
+		agendaExecuteService.executeToFinal(groupId);
 		
 //		commandGroupDao.save(group);
 		
@@ -332,6 +310,7 @@ public class GroupSpeakService {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "当前正在进行讨论");
 			}
 			
+			//只能有1个发言人
 			List<GroupMemberPO> speakingMembers = querySpeakMembers(groupId);
 			if(speakingMembers.size() > 0){
 				throw new BaseException(StatusCode.FORBIDDEN, speakingMembers.get(0).getName() + "正在发言");
@@ -353,7 +332,7 @@ public class GroupSpeakService {
 				JSONObject message = new JSONObject();
 				message.put("businessType", "speakApply");
 				message.put("businessInfo", speakMember.getName() + "申请发言");
-				message.put("businessId", group.getId().toString() + "-" + speakMember.getOriginId());
+				message.put("businessId", group.getId().toString() + "-" + speakMember.getId());
 				
 				WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
 				websocketMessageService.consume(ws.getId());
@@ -417,6 +396,7 @@ public class GroupSpeakService {
 				throw new BaseException(StatusCode.FORBIDDEN, "只能同意1人进行发言");
 			}
 			
+			//只能有1个发言人
 			List<GroupMemberPO> speakingMembers = querySpeakMembers(groupId);
 			if(speakingMembers.size() > 0){
 				throw new BaseException(StatusCode.FORBIDDEN, speakingMembers.get(0).getName() + "正在发言");
@@ -481,8 +461,9 @@ public class GroupSpeakService {
 			//给这些人授予发言人角色。后续改成批量
 			List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 			for(GroupMemberPO speakMember : speakMembers){
-				agendaService.modifyMemberRole(groupId, speakMember.getId(), addRoleIds, null);
+				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), addRoleIds, null, false);
 			}
+			agendaExecuteService.executeToFinal(groupId);
 			
 			//发消息
 			for(MessageSendCacheBO cache : messageCaches){
@@ -495,7 +476,7 @@ public class GroupSpeakService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
-	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
+	public void speakApplyDisagree(Long userId, Long groupId, List<Long> memberIds) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if(groupId==null || groupId.equals("")){
@@ -507,7 +488,7 @@ public class GroupSpeakService {
 			
 			GroupPO group = groupDao.findOne(groupId);
 			
-			if(group.getStatus().equals(GroupStatus.STOP) || userIds.size()==0){
+			if(group.getStatus().equals(GroupStatus.STOP) || memberIds.size()==0){
 				return;
 			}
 			
@@ -516,7 +497,7 @@ public class GroupSpeakService {
 			
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			GroupMemberPO chairmanMember = tetrisBvcQueryUtil.queryChairmanMember(members);
-			List<GroupMemberPO> speakMembers = tetrisBvcQueryUtil.queryMembersByUserIds(members, userIds);
+			List<GroupMemberPO> speakMembers = tetrisBvcQueryUtil.queryMembersByIds(members, memberIds);
 			
 			JSONObject message = new JSONObject();
 			message.put("businessType", "speakApplyDisagree");
@@ -548,9 +529,19 @@ public class GroupSpeakService {
 			
 			log.info(group.getName() + " 主席拒绝了 " + speakMembers.get(0).getName() + " 等人的发言申请");
 		}
-		operationLogService.send(user.getNickname(), "拒绝申请发言", user.getNickname() + "拒绝申请发言groupId:" + groupId + ", userIds" + userIds.toString());
+		operationLogService.send(user.getNickname(), "拒绝申请发言", user.getNickname() + "拒绝申请发言groupId:" + groupId + ", memberIds" + memberIds.toString());
 	}
 	
+	/**
+	 * 成员停止自己发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月7日 下午1:33:05
+	 * @param userId 成员、停止发言者的userId
+	 * @param groupId
+	 * @throws Exception
+	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void speakStopByMember(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
@@ -579,8 +570,9 @@ public class GroupSpeakService {
 			}else{
 				//解绑协同指挥角色
 				List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
-				agendaService.modifyMemberRole(groupId, speakMember.getId(), null, removeRoleIds);
+				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), null, removeRoleIds, false);
 			}
+			agendaExecuteService.executeToFinal(groupId);
 			
 			//websocket通知其它成员.
 			JSONObject message = new JSONObject();
@@ -607,7 +599,7 @@ public class GroupSpeakService {
 	public void speakStopByChairmanU(Long groupId, List<Long> userIds) throws Exception{
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
 			List<Long> memberIds = businessCommonService.fromUserIdsToMemberIds(groupId, userIds);
-			speakStopByChairman(groupId, memberIds);
+			speakStopByChairmanM(groupId, memberIds);
 		}
 	}
 	
@@ -621,7 +613,8 @@ public class GroupSpeakService {
 	 * @param memberIds
 	 * @throws Exception
 	 */
-	private void speakStopByChairman(Long groupId, List<Long> memberIds) throws Exception{
+	@Transactional(rollbackFor = Exception.class)
+	public void speakStopByChairmanM(Long groupId, List<Long> memberIds) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if(groupId==null || groupId.equals("")){
@@ -665,8 +658,9 @@ public class GroupSpeakService {
 		//给这些人解绑协同指挥角色。后续改成批量
 		List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 		for(GroupMemberPO revokeMember : revokeMembers){
-			agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds);
+			agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
 		}
+		agendaExecuteService.executeToFinal(groupId);
 		
 		//发送websocket通知
 		JSONObject message = new JSONObject();
@@ -734,9 +728,12 @@ public class GroupSpeakService {
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
 			groupMemberRolePermissionDao.deleteInBatch(ps);
 			
-			//执讨论议程
+			//执行讨论议程，停止会议议程
 			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
-			agendaService.runAndStopAgenda(groupId, new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList(), null);
+			AgendaPO meetingAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);
+			agendaExecuteService.runAndStopAgenda(groupId,
+					new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList(),
+					new ArrayListWrapper<Long>().add(meetingAgenda.getId()).getList());
 			
 			//发送websocket通知
 			JSONObject message = new JSONObject();
@@ -783,9 +780,12 @@ public class GroupSpeakService {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
 			}
 			
-			//停止讨论议程
+			//停止讨论议程，执行会议议程
 			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
-			agendaService.runAndStopAgenda(groupId, null, new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList());
+			AgendaPO meetingAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);
+			agendaExecuteService.runAndStopAgenda(groupId,
+					new ArrayListWrapper<Long>().add(meetingAgenda.getId()).getList(),
+					new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList());
 			
 			//发送websocket通知
 			JSONObject message = new JSONObject();

@@ -341,9 +341,9 @@ public class CommandGroupRecordFragmentPO extends AbstractBasePO{
 	
 	/** 无法设置info信息，需要额外设置 */
 	public CommandGroupRecordFragmentPO setByMemberSource(GroupMemberPO member, SourceBO source, Date date) throws Exception{
-		ChannelSchemeDTO videoSource = source.getVideoSource();
+		ChannelSchemeDTO videoSource = source.getVideoSourceChannel();
 		BundlePO videoBundle = source.getVideoBundle();
-		ChannelSchemeDTO audioSource = source.getAudioSource();
+		ChannelSchemeDTO audioSource = source.getAudioSourceChannel();
 		if(audioSource == null) audioSource = new ChannelSchemeDTO();
 		BundlePO audioBundle = source.getAudioBundle();
 		if(audioBundle == null) audioBundle = new BundlePO();

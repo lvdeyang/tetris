@@ -15,6 +15,8 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
+import com.sumavision.tetris.bvc.business.group.TransmissionMode;
+import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -68,6 +70,12 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
 	private AgendaSourceType videoSourceType;
 	
+	/** 单播/组播 */
+	private TransmissionMode videoTransmissionMode = TransmissionMode.UNICAST;
+
+	/** 组播地址 */
+	private String videoMultiAddr;
+	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineVideoUuid;
 	
@@ -111,6 +119,12 @@ public class PageTaskPO extends AbstractBasePO {
 	
 	/** 转发类型，枚举类型：合屏【|通道】 【|混音】【|通道】*/
 	private AgendaSourceType audioSourceType;
+	
+	/** 音频单播/组播 */
+	private TransmissionMode audioTransmissionMode = TransmissionMode.UNICAST;
+	
+	/** 音频组播地址 */
+	private String audioMultiAddr;
 	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineAudioUuid;
@@ -285,6 +299,23 @@ public class PageTaskPO extends AbstractBasePO {
 	public void setVideoSourceType(AgendaSourceType videoSourceType) {
 		this.videoSourceType = videoSourceType;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	public TransmissionMode getVideoTransmissionMode() {
+		return videoTransmissionMode;
+	}
+
+	public void setVideoTransmissionMode(TransmissionMode videoTransmissionMode) {
+		this.videoTransmissionMode = videoTransmissionMode;
+	}
+
+	public String getVideoMultiAddr() {
+		return videoMultiAddr;
+	}
+
+	public void setVideoMultiAddr(String videoMultiAddr) {
+		this.videoMultiAddr = videoMultiAddr;
+	}
 
 	public String getCombineVideoUuid() {
 		return combineVideoUuid;
@@ -401,7 +432,24 @@ public class PageTaskPO extends AbstractBasePO {
 	public void setAudioSourceType(AgendaSourceType audioSourceType) {
 		this.audioSourceType = audioSourceType;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	public TransmissionMode getAudioTransmissionMode() {
+		return audioTransmissionMode;
+	}
 
+	public void setAudioTransmissionMode(TransmissionMode audioTransmissionMode) {
+		this.audioTransmissionMode = audioTransmissionMode;
+	}
+
+	public String getAudioMultiAddr() {
+		return audioMultiAddr;
+	}
+
+	public void setAudioMultiAddr(String audioMultiAddr) {
+		this.audioMultiAddr = audioMultiAddr;
+	}
+	
 	public String getCombineAudioUuid() {
 		return combineAudioUuid;
 	}
@@ -688,7 +736,7 @@ public class PageTaskPO extends AbstractBasePO {
 		return false;
 	}*/
 	
-	public PageTaskPO setDst(TerminalBundleUserPermissionPO player, BundlePO bundlePO){
+	public PageTaskPO setDstByUser(TerminalBundleUserPermissionPO player, BundlePO bundlePO){
 //		this.businessType = player.getPlayerBusinessType();//TODO
 //		this.locationIndex = player.getLocationIndex();
 //		this.businessId = player.getBusinessId();
@@ -698,6 +746,25 @@ public class PageTaskPO extends AbstractBasePO {
 		this.dstAudioChannelId = ChannelType.AUDIODECODE1.getChannelId();
 		this.dstAudioChannelName = ChannelType.AUDIODECODE1.getName();
 		this.dstBundleId = player.getBundleId();
+		this.dstBundleName = bundlePO.getBundleName();
+		this.dstBundleType = bundlePO.getBundleType();
+		this.dstLayerId = bundlePO.getAccessNodeUid();
+		this.dstVideoBaseType = "VenusVideoOut";
+		this.dstVideoChannelId = ChannelType.VIDEODECODE1.getChannelId();
+		this.dstVideoChannelName = ChannelType.VIDEOENCODE1.getName();
+		return this;
+	}
+	
+	public PageTaskPO setDstByHall(TerminalBundleConferenceHallPermissionPO decoder, BundlePO bundlePO){
+//		this.businessType = player.getPlayerBusinessType();//TODO
+//		this.locationIndex = player.getLocationIndex();
+//		this.businessId = player.getBusinessId();
+//		this.businessName = player.getBusinessName();
+		this.dstId = decoder.getId().toString();
+		this.dstAudioBaseType = "VenusAudioOut";
+		this.dstAudioChannelId = ChannelType.AUDIODECODE1.getChannelId();
+		this.dstAudioChannelName = ChannelType.AUDIODECODE1.getName();
+		this.dstBundleId = decoder.getBundleId();
 		this.dstBundleName = bundlePO.getBundleName();
 		this.dstBundleType = bundlePO.getBundleType();
 		this.dstLayerId = bundlePO.getAccessNodeUid();
