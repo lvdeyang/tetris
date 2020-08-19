@@ -9,5 +9,7 @@
 	"omcftpIp": "192.166.62.151",
 	"omcftpPort": "21",
 	"omcftpUsername": "root",
-	"omcftpPassword": "123456"
+	"omcftpPassword": "123456",
+	"bossAddMediaUrl":"",
+	"bossPlayRecordUrl":""
  }
