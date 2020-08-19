@@ -398,7 +398,7 @@ public class VodService {
 		//呼叫被点播的编码
 		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
+		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "，打开编码");
 		
 		//执行议程
@@ -433,7 +433,7 @@ public class VodService {
 			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
+			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 			
 			//找到分页任务，停止。也可以通过“停止议程”来实现
@@ -579,7 +579,7 @@ public class VodService {
 		//呼叫被点播的编码
 		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
+		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "，打开编码");
 		
 		//执行议程
@@ -623,7 +623,7 @@ public class VodService {
 			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
+			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 			
 			//找到分页任务，停止。也可以通过“停止议程”来实现

@@ -328,7 +328,7 @@ public class UserCallService {
 		//呼叫编码
 		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
+		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
 		
 		//执行议程
@@ -458,7 +458,7 @@ public class UserCallService {
 //		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);		
 		List<SourceBO> sourceBOs = agendaService.obtainSource(members, group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
+		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
 		
 //		//执行议程
@@ -586,7 +586,7 @@ public class UserCallService {
 		if(call.getStatus().equals(CallStatus.ONGOING) || call.getStatus().equals(CallStatus.PAUSE)){
 			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(members.get(0)).add(members.get(1)).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
+			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 		}
 		

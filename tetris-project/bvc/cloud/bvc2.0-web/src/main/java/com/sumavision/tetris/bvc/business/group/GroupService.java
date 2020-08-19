@@ -67,8 +67,11 @@ import com.sumavision.bvc.device.group.bo.ForwardSetBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.PassByContentBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
+import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
@@ -1197,7 +1200,7 @@ public class GroupService {
 			
 			//关闭编码通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-			LogicBO logic = closeEncoder(sourceBOs, codec, -1L);
+			LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + " 会议停止");
 			
 			/*
@@ -1846,7 +1849,7 @@ public class GroupService {
 				//关闭编码通道
 				List<SourceBO> sourceBOs = agendaService.obtainSource(connectRemoveMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-				LogicBO logic = closeEncoder(sourceBOs, codec, -1L);
+				LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
 				executeBusiness.execute(logic, group.getName() + " " + description);
 								
 				//录制更新
@@ -2195,7 +2198,7 @@ public class GroupService {
 		
 		List<SourceBO> sourceBOs = agendaService.obtainSource(acceptMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = openEncoder(sourceBOs, codec, -1L);
+		LogicBO logic = openEncoder(group,sourceBOs, codec, -1L);
 		
 		//执行logic，打开编码通道
 		executeBusiness.execute(logic, group.getName() + " 会议成员进会，打开编码");
@@ -2507,6 +2510,7 @@ public class GroupService {
 	 * @throws Exception
 	 */
 	public LogicBO openEncoder(
+			GroupPO group,
 			List<SourceBO> sourceBOs,
 			CodecParamBO codec,
 			Long userId) throws Exception{
@@ -2518,12 +2522,14 @@ public class GroupService {
 		for(SourceBO sourceBO : sourceBOs){
 			ChannelSchemeDTO video = sourceBO.getVideoSource();
 			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+			PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 			ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 					            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
 							    .setLock_type("write")
 							    .setBundleId(video.getBundleId())
 							    .setLayerId(bundlePO.getAccessNodeUid())
-							    .setBundle_type(bundlePO.getBundleType());
+							    .setBundle_type(bundlePO.getBundleType())
+							    .setPass_by_str(passBy);
 			ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(video.getChannelId())
 					      .setChannel_status("Open")
 					      .setBase_type(video.getBaseType())
@@ -2557,6 +2563,7 @@ public class GroupService {
 	 */
 	//TODO:检索设备或通道是否还在使用
 	public LogicBO closeEncoder(
+			GroupPO group,
 			List<SourceBO> sourceBOs,
 			CodecParamBO codec,
 			Long userId) throws Exception{
@@ -2568,12 +2575,14 @@ public class GroupService {
 		
 		for(SourceBO sourceBO : sourceBOs){
 			ChannelSchemeDTO video = sourceBO.getVideoSource();
-			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());			
+			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+			PassByBO passBy = new PassByBO().setHangUp(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 			DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 					             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 					             .setBundleId(video.getBundleId())
 					             .setBundle_type(bundlePO.getBundleType())
-					             .setLayerId(bundlePO.getAccessNodeUid());
+					             .setLayerId(bundlePO.getAccessNodeUid())
+					             .setPass_by_str(passBy);
 			logic.getDisconnectBundle().add(disconnectEncoderBundle);
 		}
 		

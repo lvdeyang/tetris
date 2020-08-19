@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.orm.dao.MetBaseDAO;
 
 @RepositoryDefinition(domainClass = GroupMemberPO.class, idClass = long.class)
@@ -34,4 +35,6 @@ public interface GroupMemberDAO extends MetBaseDAO<GroupMemberPO>{
 	/** 从originId列表获取成员id列表，通常用来把userId列表转换为成员id列表 */
 	@Query(value = "select m.id from com.sumavision.tetris.bvc.business.group.GroupMemberPO m where m.groupId = ?1 and m.originId in ?2")
 	public List<Long> findIdsByGroupIdAndOriginIds(Long groupId, Collection<String> originIds);
+	
+	public List<GroupMemberPO> findByGroupMemberTypeAndOriginId(GroupMemberType groupMemberType,String originId);
 }

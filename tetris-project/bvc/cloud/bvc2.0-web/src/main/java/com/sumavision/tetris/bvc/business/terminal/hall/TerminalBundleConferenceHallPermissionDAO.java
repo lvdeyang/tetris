@@ -32,4 +32,6 @@ public interface TerminalBundleConferenceHallPermissionDAO extends BaseDAO<Termi
 	
 	public List<TerminalBundleConferenceHallPermissionPO> findByBundleIdIn(List<String> bundleIds);
 	
+	public List<TerminalBundleConferenceHallPermissionPO> findByTerminalBundleIdAndBundleId(Long terminalBundleId,String bundleId);
+	
 }

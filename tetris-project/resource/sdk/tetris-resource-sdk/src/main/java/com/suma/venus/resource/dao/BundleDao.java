@@ -188,4 +188,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<String> findBundleIdByUsernameIn(Collection<String> usernames);
 	
 	public List<BundlePO> findByDeviceModelAndAccessNodeUid(String deviceModel, String layerId);
+	
+	
+	public List<BundlePO> findBundleByUserIdAndDeviceModel(Long userId,String deviceModel);
 }
