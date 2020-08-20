@@ -4,6 +4,8 @@ spring:
   cloud:
     client:
       ipAddress: 192.165.56.85
+    inetutils:
+      preferred-networks: 192.165.56.85
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/zuul?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
@@ -42,7 +44,6 @@ server:
 zuul:
   servlet-path: /
 #需要忽略的头部信息，不在传播到其他服务
-  sensitive-headers: Access-Control-Allow-Origin
   ignored-headers: Access-Control-Allow-Origin,H-APP-Id,Token,APPToken
   routes:
 #标识你服务的名字，这里可以自己定义，一般方便和规范来讲还是跟自己服务的名字一样
@@ -53,21 +54,39 @@ zuul:
 #这里一定要是你Eureka注册中心的服务的名称，是所以这里配置serviceId因为跟eureka结合了，如果单独使用zuul,那么就必须写自己机器的IP了，
 #如url:http://localhost:8080/  这样的不好就是写死IP了，万一这IP挂了，这高可用性，服务注册那套东西就用不起来了
       serviceId: tetris-user
+      sensitive-headers: Access-Control-Allow-Origin
     tetris-menu: 
       path: /tetris-menu/**
       serviceId: tetris-menu
+      sensitive-headers: Access-Control-Allow-Origin
     tetris-mims:
       path: /tetris-mims/**
       serviceId: tetris-mims
+      sensitive-headers: Access-Control-Allow-Origin
     tetris-cms:
       path: /tetris-cms/**
       serviceId: tetris-cms 
+      sensitive-headers: Access-Control-Allow-Origin
     tetris-resource:
       path: /tetris-resource/**
-      serviceId: tetris-resource  
+      serviceId: tetris-resource
+      sensitive-headers: Access-Control-Allow-Origin  
     eb-insert-web:
       path: /eb-insert-web/**
-      serviceId: eb-insert-web
+      serviceId: eb-insert-web      
+    eb-monitor-web:
+      path: /eb-monitor-web/**
+      serviceId: eb-monitor-web              
+    eb-resource-web:
+      path: /eb-resource-web/**
+      serviceId: eb-resource-web   
+    eb-screendisplay-web:
+      path: /eb-screendisplay-web/**
+      serviceId: eb-screendisplay-web      
+    eb-statistics-web:
+      path: /eb-statistics-web/**
+      serviceId: eb-statistics-web   
+           
 eureka:
 #客户端
   client:

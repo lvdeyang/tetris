@@ -41,7 +41,16 @@ public class ApiFilter extends ZuulFilter{
 
 	@Override
 	public boolean shouldFilter() {
-		return true;
+		RequestContext ctx = RequestContext.getCurrentContext();
+		HttpServletRequest request = ctx.getRequest();
+		String requestUri = request.getRequestURI();
+		requestUri = requestUri.replaceFirst(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
+		if(requestUri.startsWith("/eb-insert-web") || requestUri.startsWith("/eb-monitor-web") || 
+				requestUri.startsWith("/eb-screendisplay-web") || requestUri.startsWith("/eb-statistics-web") || requestUri.startsWith("/eb-resource-web")){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 	@Override

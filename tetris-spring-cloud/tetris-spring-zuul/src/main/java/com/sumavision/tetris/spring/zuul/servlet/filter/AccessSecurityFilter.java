@@ -77,7 +77,12 @@ public class AccessSecurityFilter implements Filter{
 				!requestUri.startsWith("/tetris-resource") &&
 				!requestUri.startsWith("/tetris-capacity") &&
 				!requestUri.startsWith("/tetris-bvc-business") &&
-				!requestUri.startsWith("/tetris-zoom")){
+				!requestUri.startsWith("/tetris-zoom") &&
+				!requestUri.startsWith("/eb-insert-web") &&
+				!requestUri.startsWith("/eb-monitor-web") &&
+				!requestUri.startsWith("/eb-statistics-web") &&
+				!requestUri.startsWith("/eb-screendisplay-web") &&
+				!requestUri.startsWith("/eb-resource-web")){
 			
 			LOG.error("----------------------------");
 			LOG.error(requestUri);
