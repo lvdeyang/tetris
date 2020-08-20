@@ -31,6 +31,10 @@ public class MediaVideoTaskVO  extends AbstractBaseVO<MediaVideoTaskVO, MediaVid
 	
 	private Integer progress;
 	
+	private Boolean synchro;
+	
+	
+	
 	public Long getLastModified() {
 		return lastModified;
 	}
@@ -148,6 +152,15 @@ public class MediaVideoTaskVO  extends AbstractBaseVO<MediaVideoTaskVO, MediaVid
 		return this;
 	}
 	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaVideoTaskVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+
 	@Override
 	public MediaVideoTaskVO set(MediaVideoPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -163,6 +176,7 @@ public class MediaVideoTaskVO  extends AbstractBaseVO<MediaVideoTaskVO, MediaVid
 			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setFolderId(entity.getFolderId())
 			.setUploadStatus(entity.getUploadStatus().toString())
+			.setSynchro(entity.getSynchro())
 			.setProgress(0);
 		return this;
 	}

@@ -8,28 +8,28 @@ package com.sumavision.tetris.capacity.bo.task;
  */
 public class BaseAudioEncodeBO <V extends BaseAudioEncodeBO>{
 
-	private Integer bitrate = 192000;
+	private String bitrate = "192";
 	
-	private Integer sample_rate = 44100;
-	
+	private String sample_rate = "44.1";
+
 	private Integer sample_byte = 2;
 	
 	private String channel_layout = "stereo";
 	
-	public Integer getBitrate() {
+	public String getBitrate() {
 		return bitrate;
 	}
 
-	public V setBitrate(Integer bitrate) {
+	public V setBitrate(String bitrate) {
 		this.bitrate = bitrate;
 		return (V)this;
 	}
 
-	public Integer getSample_rate() {
+	public String getSample_rate() {
 		return sample_rate;
 	}
 
-	public V setSample_rate(Integer sample_rate) {
+	public V setSample_rate(String sample_rate) {
 		this.sample_rate = sample_rate;
 		return (V)this;
 	}

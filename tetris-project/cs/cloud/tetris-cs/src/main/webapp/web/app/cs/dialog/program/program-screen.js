@@ -319,7 +319,8 @@ define([
 
                             if ((self.options.currentScreen.contentType == '图片资源' && data[i].type != 'PICTURE')
                                 || (self.options.currentScreen.contentType == '视频资源' && (data[i].type != 'VIDEO' && data[i].type != 'VIDEO_STREAM'&& data[i].type != 'PUSH_LIVE'))
-                                || (self.options.currentScreen.contentType == '音频资源' && (data[i].type != 'AUDIO' && data[i].type != 'AUDIO_STREAM'))) {
+                                || (self.options.currentScreen.contentType == '音频资源' && (data[i].type != 'AUDIO' && data[i].type != 'AUDIO_STREAM'))
+                                || (self.options.currentScreen.contentType == '视频资源' && (data[i].duration < 10000))) {
                                 data[i].disabled = true;
                             }
 

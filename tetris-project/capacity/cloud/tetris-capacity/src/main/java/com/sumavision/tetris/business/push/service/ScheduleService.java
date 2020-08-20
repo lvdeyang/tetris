@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sumavision.tetris.capacity.constant.EncodeConstant;
+import com.sumavision.tetris.capacity.template.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,6 @@ import com.sumavision.tetris.capacity.bo.request.PutScheduleRequest;
 import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
 import com.sumavision.tetris.capacity.bo.request.ScheduleRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
-import com.sumavision.tetris.capacity.bo.task.AacBO;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.H264BO;
 import com.sumavision.tetris.capacity.bo.task.PreProcessingBO;
@@ -89,6 +89,9 @@ public class ScheduleService {
 	
 	@Autowired
 	private ResponseService responseService;
+
+	@Autowired
+	private TemplateService templateService;
 
 	/**
 	 * 添加排期任务<br/>
@@ -586,13 +589,21 @@ public class ScheduleService {
 			PreProcessingBO preProcessing = new PreProcessingBO().setScale(scale);
 			videoEncode.getProcess_array().add(preProcessing);
 			
-			H264BO h264 = new H264BO().setBitrate(2000000)
-									  .setMax_bitrate(2000000)
-									  .setRatio("16:9")
-									  .setWidth(1280)
-									  .setHeight(720);
-			
-			videoEncode.setH264(h264);
+//			H264BO h264 = new H264BO().setBitrate(3000000)
+//									  .setMax_bitrate(3000000)
+//									  .setRatio("16:9")
+//									  .setWidth(1280)
+//									  .setHeight(720);
+
+
+			String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+			JSONObject obj = JSONObject.parseObject(params);
+			obj.put("bitrate",3000);
+			obj.put("max_bitrate",3000);
+			obj.put("ratio","16:9");
+			obj.put("resolution","1280x720");
+
+			videoEncode.setH264(obj);
 			
 			videoTask.getEncode_array().add(videoEncode);
 			
@@ -615,12 +626,15 @@ public class ScheduleService {
 										   .setEncode_array(new ArrayList<EncodeBO>());
 
 			EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId);
+
+			String aacMap = templateService.getAudioEncodeMap("aac");
+			JSONObject aacObj = JSONObject.parseObject(aacMap);
+
+//			AacBO aac = new AacBO().setAac()
+//		   			   			   .setBitrate("192")
+//		   			   			   .setSample_rate("44.1");
 			
-			AacBO aac = new AacBO().setAac()
-		   			   			   .setBitrate(192000)
-		   			   			   .setSample_rate(44100);
-			
-			audioEncode.setAac(aac);
+			audioEncode.setAac(aacObj);
 			
 			audioEncode.setProcess_array(new ArrayList<PreProcessingBO>());
 			
@@ -680,8 +694,6 @@ public class ScheduleService {
 																.setIp(outputIp)
 																.setPort(outputPort)
 																.setLocal_ip(push.getDeviceIp())
-																.setRate_ctrl("CBR")
-																.setBitrate(3000000)
 																.setProgram_array(new ArrayList<OutputProgramBO>());
 
 				//拼媒体

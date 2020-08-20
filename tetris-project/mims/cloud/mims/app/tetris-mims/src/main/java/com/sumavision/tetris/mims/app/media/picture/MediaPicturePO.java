@@ -105,6 +105,18 @@ public class MediaPicturePO extends AbstractBasePO{
 	/** 附加字段 */
 	private String addition;
 	
+	private Boolean synchro;
+	
+	
+	@Column(name = "SYNCHRO")
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public void setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+	}
+
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
 		return lastModified;

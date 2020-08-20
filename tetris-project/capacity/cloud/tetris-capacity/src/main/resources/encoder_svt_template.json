@@ -1,0 +1,78 @@
+{
+	"parrent_template":"encode_h265_template.json",
+	"parrent":"hevc",
+	"svt":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"pixel_format",
+					"enc_mode",
+					"encoding_type",
+					"bframe_reference",
+					"scenecut"
+				]
+			}
+		},
+		"constraint": {
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420",
+						"yuv422",
+						"yuv420_10bit",
+						"yuv422_10bit"
+					]
+				}
+			},
+			"refine": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 5,
+					"min_value": 0,
+					"max_value": 11,
+					"step": 1
+				}
+			},
+			"encoding_type": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"progressive",
+						"interlace"					
+					]
+				}
+			},
+			"bframe_reference": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"none",
+						"normal"
+					]
+				}
+			},
+			"scenecut": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
+				}
+			}
+		}
+	}
+}

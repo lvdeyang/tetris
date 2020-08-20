@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,9 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SyncService {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(SyncService.class);
+
 	@Autowired
 	private CapacityService capacityService;
 	
@@ -49,7 +53,8 @@ public class SyncService {
 	 * @param String deviceIp 转换模块ip
 	 */
 	public void sync(String deviceIp) throws Exception{
-		
+
+		LOG.info("sync start, deviceIp :{}",deviceIp);
 		//获取转换模块上全部信息
 		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp);
 		
@@ -198,8 +203,7 @@ public class SyncService {
 			}
 		}
 		
-		System.out.println("同步：");
-		
+		LOG.info("sync send cmd, deviceIp :{}",deviceIp);
 		//新增
 		if(needAddInputs.size() > 0 || needAddTasks.size() > 0 || needAddOutputs.size() > 0){
 			AllRequest add = new AllRequest();
@@ -229,6 +233,6 @@ public class SyncService {
 			}
 			capacityService.deleteAllAddMsgId(delete, deviceIp, capacityProps.getPort());
 		}
-		
+		LOG.info("sync end, deviceIp :{}",deviceIp);
 	}
 }

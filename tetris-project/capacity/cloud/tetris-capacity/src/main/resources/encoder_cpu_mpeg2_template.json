@@ -1,0 +1,34 @@
+{
+	"parrent_template":"encode_mpeg2_template.json",
+	"parrent":"mpeg2",
+	"m2v":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"ts_control",
+					"scenecut"
+				]
+			}
+		},
+		"constraint": {
+			"ts_control": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": false
+				}
+			},
+			"scenecut": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
+				}
+			}
+		}
+	}
+}

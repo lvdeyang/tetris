@@ -15,32 +15,32 @@ public class EncodeBO {
 
 	/** 编码预处理 */
 	private List<PreProcessingBO> process_array;
-	
+
 	private String encode_id;
-	
-	private H264BO h264;
-	
-	private H265BO hevc;
-	
-	private Mpeg2BO mpeg2;
-	
-	private Avs2BO avs2;
+
+	private JSONObject h264;
+
+	private JSONObject hevc;
+
+	private JSONObject mpeg2;
+
+	private JSONObject avs2;
 	
 	@JSONField(name = "avs+")
 	private AvsPlusBO avs_plus;
-	
-	private AacBO aac;
-	
-	private DolbyBO dolby;
-	
+
+	private JSONObject aac;
+
+	private JSONObject dolby;
+
 	private G711BO g711a;
-	
+
 	private G711BO g711u;
-	
-	private MpegBO mp3;
-	
-	private MpegBO mp2;
-	
+
+	private JSONObject mp3;
+
+	private JSONObject mp2;
+
 	private JSONObject passby;
 
 	public List<PreProcessingBO> getProcess_array() {
@@ -61,29 +61,29 @@ public class EncodeBO {
 		return this;
 	}
 
-	public H264BO getH264() {
+	public JSONObject getH264() {
 		return h264;
 	}
 
-	public EncodeBO setH264(H264BO h264) {
+	public EncodeBO setH264(JSONObject h264) {
 		this.h264 = h264;
 		return this;
 	}
 
-	public H265BO getHevc() {
+	public JSONObject getHevc() {
 		return hevc;
 	}
 
-	public EncodeBO setHevc(H265BO hevc) {
+	public EncodeBO setHevc(JSONObject hevc) {
 		this.hevc = hevc;
 		return this;
 	}
 
-	public Mpeg2BO getMpeg2() {
+	public JSONObject getMpeg2() {
 		return mpeg2;
 	}
 
-	public EncodeBO setMpeg2(Mpeg2BO mpeg2) {
+	public EncodeBO setMpeg2(JSONObject mpeg2) {
 		this.mpeg2 = mpeg2;
 		return this;
 	}
@@ -97,20 +97,20 @@ public class EncodeBO {
 		return this;
 	}
 
-	public AacBO getAac() {
+	public JSONObject getAac() {
 		return aac;
 	}
 
-	public EncodeBO setAac(AacBO aac) {
+	public EncodeBO setAac(JSONObject aac) {
 		this.aac = aac;
 		return this;
 	}
 
-	public DolbyBO getDolby() {
+	public JSONObject getDolby() {
 		return dolby;
 	}
 
-	public EncodeBO setDolby(DolbyBO dolby) {
+	public EncodeBO setDolby(JSONObject dolby) {
 		this.dolby = dolby;
 		return this;
 	}
@@ -133,20 +133,20 @@ public class EncodeBO {
 		return this;
 	}
 
-	public MpegBO getMp3() {
+	public JSONObject getMp3() {
 		return mp3;
 	}
 
-	public EncodeBO setMp3(MpegBO mp3) {
+	public EncodeBO setMp3(JSONObject mp3) {
 		this.mp3 = mp3;
 		return this;
 	}
 
-	public MpegBO getMp2() {
+	public JSONObject getMp2() {
 		return mp2;
 	}
 
-	public EncodeBO setMp2(MpegBO mp2) {
+	public EncodeBO setMp2(JSONObject mp2) {
 		this.mp2 = mp2;
 		return this;
 	}
@@ -160,13 +160,4 @@ public class EncodeBO {
 		return this;
 	}
 
-	public Avs2BO getAvs2() {
-		return avs2;
-	}
-
-	public EncodeBO setAvs2(Avs2BO avs2) {
-		this.avs2 = avs2;
-		return this;
-	}
-	
 }

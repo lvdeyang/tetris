@@ -27,7 +27,7 @@ public class TaskBO {
 	private AudioMixSourceBO audio_mix_source;
 	
 	private List<DecodePreProcessingBO> decode_process_array;
-	
+
 	private List<EncodeBO> encode_array;
 
 	public String getId() {
@@ -110,5 +110,5 @@ public class TaskBO {
 		this.encode_array = encode_array;
 		return this;
 	}
-	
+
 }

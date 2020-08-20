@@ -1,0 +1,42 @@
+{
+	"parrent_template":"encode_h264_template.json",
+	"parrent":"h264",
+	"cuda_encode":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"pixel_format",
+					"nv_card_idx"
+				]
+			}
+		},
+		"constraint": {
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420",
+						"yuv422",
+						"yuv420_10bit"
+					]
+				}
+			},
+			"nv_card_idx": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"min_value": 0,
+					"max_value": 4,
+					"step": 1
+				}
+			}
+		}
+	}
+}

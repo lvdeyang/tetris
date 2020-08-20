@@ -1,0 +1,102 @@
+{
+	"parrent_template":"encode_h264_template.json",
+	"parrent":"h264",
+	"x264":{
+		"type": "container",
+		"items": {
+			"type": "enum",
+			"constraint": {
+				"values":[
+					"keyint_min",
+					"refine",
+					"pixel_format",
+					"bframe_reference",
+					"bframe_adaptive",
+					"me_range",
+					"tune_mode"
+				]
+			}
+		},
+		"constraint": {
+			"keyint_min": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"min_value": 0,
+					"max_value": 200,
+					"step": 1
+				}
+			},
+			"refine": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 4,
+					"min_value": 1,
+					"max_value": 7,
+					"step": 1
+				}
+			},
+			"pixel_format": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"yuv420"
+					]
+				}
+			},
+			"bframe_reference": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"none",
+						"strict",
+						"normal"
+					]
+				}
+			},
+			"bframe_adaptive": {
+				"type": "bool",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": true
+				}
+			},
+			"me_range": {
+				"type": "num",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 32,
+					"min_value": 16,
+					"max_value": 256,
+					"step": 1
+				}
+			},
+			"tune_mode": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 2,
+					"values": [
+						"film",
+						"animation",
+						"lowlatency",
+						"source"
+					]
+				}
+			}
+		}
+	}
+}

@@ -77,6 +77,7 @@ public class MediaVideoFeignController {
 	
 	@Autowired
 	private UserQuery userQuery;
+
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -391,6 +392,7 @@ public class MediaVideoFeignController {
 			byte[] blockBytes = ByteUtil.inputStreamToBytes(block);
 			out = new FileOutputStream(file, true);
 			out.write(blockBytes);
+			out.flush();
 		}finally{
 			if(block != null) block.close();
 			if(out != null) out.close();

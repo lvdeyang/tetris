@@ -2,6 +2,8 @@ package com.sumavision.tetris.business.alarm.service;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +23,10 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class AlarmService {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(AlarmService.class);
+
+
 	@Autowired
 	private CapacityService capacityService;
 	
@@ -75,6 +80,7 @@ public class AlarmService {
 		
 		try {
 			if("11070001".equals(alarmCode)){
+				LOG.info("transform online");
 				syncService.sync(capacityIp);
 			}
 		} catch (Exception e) {
