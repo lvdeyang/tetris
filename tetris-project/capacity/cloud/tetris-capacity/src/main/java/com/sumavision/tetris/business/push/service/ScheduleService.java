@@ -586,8 +586,8 @@ public class ScheduleService {
 			PreProcessingBO preProcessing = new PreProcessingBO().setScale(scale);
 			videoEncode.getProcess_array().add(preProcessing);
 			
-			H264BO h264 = new H264BO().setBitrate(3000000)
-									  .setMax_bitrate(3000000)
+			H264BO h264 = new H264BO().setBitrate(2000000)
+									  .setMax_bitrate(2000000)
 									  .setRatio("16:9")
 									  .setWidth(1280)
 									  .setHeight(720);
@@ -680,6 +680,8 @@ public class ScheduleService {
 																.setIp(outputIp)
 																.setPort(outputPort)
 																.setLocal_ip(push.getDeviceIp())
+																.setRate_ctrl("CBR")
+																.setBitrate(3000000)
 																.setProgram_array(new ArrayList<OutputProgramBO>());
 
 				//拼媒体
