@@ -28,6 +28,9 @@ public class PassByContentBO implements BasePassByContent{
 	private String uuid = "";
 	
 	/** 业务唯一标识 */
+	private String groupId = "";
+	
+	/** 业务唯一标识 */
 	private String groupUuid = "";
 	
 	/** 是否可以拒绝 */
@@ -75,6 +78,15 @@ public class PassByContentBO implements BasePassByContent{
 		return this;
 	}
 
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public PassByContentBO setGroupId(String groupId) {
+		this.groupId = groupId;
+		return this;
+	}
+
 	public String getGroupUuid() {
 		return groupUuid;
 	}
@@ -97,8 +109,9 @@ public class PassByContentBO implements BasePassByContent{
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public PassByContentBO setUserId(String userId) {
 		this.userId = userId;
+		return this;
 	}
 
 	public List<BundleBO> getBundles() {
@@ -135,7 +148,8 @@ public class PassByContentBO implements BasePassByContent{
 			.setCaller_name(group.getName())
 			.setUuid(group.getUuid())
 			.setGroupUuid(group.getUuid())
-		 	.setUserId("-1");
+			.setGroupId(group.getId().toString())
+		 	.setUserId(group.getUserId().toString());
 		
 		return this;
 	}

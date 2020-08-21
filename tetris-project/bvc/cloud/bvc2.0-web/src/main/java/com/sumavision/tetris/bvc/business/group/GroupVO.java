@@ -1,14 +1,6 @@
 package com.sumavision.tetris.bvc.business.group;
 
-import java.util.Date;
-
-import org.springframework.boot.ansi.AnsiOutput.Enabled;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
-
-import com.sumavision.bvc.device.group.enumeration.TransmissionMode;
-import com.sumavision.tetris.bvc.business.OriginType;
-import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
-import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallVO;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class GroupVO extends AbstractBaseVO<GroupVO, GroupPO> {
@@ -26,31 +18,38 @@ public class GroupVO extends AbstractBaseVO<GroupVO, GroupPO> {
 	private String userName;
 	
 	/** 创建时间 */
-	private Date createtime;
+	private String createtime;
 	
 	/** 最后一次开始时间 */
-	private Date startTime;
+	private String startTime;
 	
 	/** 最后一次停止时间 */
-	private Date endTime;
+	private String endTime;
 	
 	/** 设置的作战时间 */
-	private Date fightTime;
+	private String fightTime;
 	
 	/** 业务类型 */
-	private BusinessType groupBusinessType;
+	private String groupBusinessType;
+	
+	private String groupBusinessTypeName;
 	
 	/** 发流方式：单播或组播 */
-	private TransmissionMode transmissionMode = TransmissionMode.UNICAST;
+	private String transmissionMode;
+	
+	private String transmissionModeName;
 	
 	/** 会议中的模式，主席模式/讨论模式 */
-
 	
 	/** 来源类型，本系统创建/外部系统创建 */
-	private OriginType originType = OriginType.INNER;
+	private String originType;
+	
+	private String originTypeName;
 	
 	/** 状态 */
-	private GroupStatus status;
+	private String status;
+	
+	private String statusName;
 	
 	/** 音视频参数模板id */
 	private Long audioVideoTemplateId;
@@ -92,75 +91,111 @@ public class GroupVO extends AbstractBaseVO<GroupVO, GroupPO> {
 		return this;
 	}
 
-	public Date getCreatetime() {
+	public String getCreatetime() {
 		return createtime;
 	}
 
-	public GroupVO setCreatetime(Date createtime) {
+	public GroupVO setCreatetime(String createtime) {
 		this.createtime = createtime;
 		return this;
 	}
 
-	public Date getStartTime() {
+	public String getStartTime() {
 		return startTime;
 	}
 
-	public GroupVO setStartTime(Date startTime) {
+	public GroupVO setStartTime(String startTime) {
 		this.startTime = startTime;
 		return this;
 	}
 
-	public Date getEndTime() {
+	public String getEndTime() {
 		return endTime;
 	}
 
-	public GroupVO setEndTime(Date endTime) {
+	public GroupVO setEndTime(String endTime) {
 		this.endTime = endTime;
 		return this;
 	}
 
-	public Date getFightTime() {
+	public String getFightTime() {
 		return fightTime;
 	}
 
-	public GroupVO setFightTime(Date fightTime) {
+	public GroupVO setFightTime(String fightTime) {
 		this.fightTime = fightTime;
 		return this;
 	}
 
-	public BusinessType getGroupBusinessType() {
+	public String getGroupBusinessType() {
 		return groupBusinessType;
 	}
 
-	public GroupVO setGroupBusinessType(BusinessType groupBusinessType) {
+	public GroupVO setGroupBusinessType(String groupBusinessType) {
 		this.groupBusinessType = groupBusinessType;
 		return this;
 	}
 
-	public TransmissionMode getTransmissionMode() {
+	public String getGroupBusinessTypeName() {
+		return groupBusinessTypeName;
+	}
+
+	public GroupVO setGroupBusinessTypeName(String groupBusinessTypeName) {
+		this.groupBusinessTypeName = groupBusinessTypeName;
+		return this;
+	}
+
+	public String getTransmissionMode() {
 		return transmissionMode;
 	}
 
-	public GroupVO setTransmissionMode(TransmissionMode transmissionMode) {
+	public GroupVO setTransmissionMode(String transmissionMode) {
 		this.transmissionMode = transmissionMode;
 		return this;
 	}
-
-	public OriginType getOriginType() {
-		return originType;
+	
+	public String getTransmissionModeName() {
+		return transmissionModeName;
 	}
 
-	public GroupVO setOriginType(OriginType originType) {
-		this.originType = originType;
+	public GroupVO setTransmissionModeName(String transmissionModeName) {
+		this.transmissionModeName = transmissionModeName;
 		return this;
 	}
 
-	public GroupStatus getStatus() {
+	public String getOriginType() {
+		return originType;
+	}
+
+	public GroupVO setOriginType(String originType) {
+		this.originType = originType;
+		return this;
+	}
+	
+	public String getOriginTypeName() {
+		return originTypeName;
+	}
+
+	public GroupVO setOriginTypeName(String originTypeName) {
+		this.originTypeName = originTypeName;
+		return this;
+	}
+
+	public String getStatus() {
 		return status;
 	}
 
-	public GroupVO setStatus(GroupStatus status) {
+	public GroupVO setStatus(String status) {
 		this.status = status;
+		return this;
+	}
+
+	public String getStatusName() {
+		return statusName;
+	}
+
+	public GroupVO setStatusName(String statusName) {
+		this.statusName = statusName;
 		return this;
 	}
 
@@ -172,25 +207,27 @@ public class GroupVO extends AbstractBaseVO<GroupVO, GroupPO> {
 		this.audioVideoTemplateId = audioVideoTemplateId;
 		return this;
 	}
-
 	
 	@Override
 	public GroupVO set(GroupPO entity) throws Exception {
-		// TODO Auto-generated method stub
-		this.setName(entity.getName())
+		this.setId(entity.getId())
+			.setName(entity.getName())
 		    .setSubject(entity.getSubject())
 		    .setUserId(entity.getUserId())
 		    .setUserName(entity.getUserName())
-		    .setCreatetime(entity.getCreatetime())
-		    .setStartTime(entity.getStartTime())
-		    .setEndTime(entity.getEndTime())
-		    .setFightTime(entity.getFightTime())
-		    .setGroupBusinessType(entity.getBusinessType())
-		    .setTransmissionMode(entity.getTransmissionMode())
-		    .setOriginType(entity.getOriginType())
-		    .setStatus(entity.getStatus())
+		    .setCreatetime(entity.getCreatetime()==null?"":DateUtil.format(entity.getCreatetime(), DateUtil.dateTimePattern))
+		    .setStartTime(entity.getStartTime()==null?"":DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
+		    .setEndTime(entity.getEndTime()==null?"":DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
+		    .setFightTime(entity.getFightTime()==null?"":DateUtil.format(entity.getFightTime(), DateUtil.dateTimePattern))
+		    .setGroupBusinessType(entity.getBusinessType().toString())
+		    .setGroupBusinessTypeName(entity.getBusinessType().getName())
+		    .setTransmissionMode(entity.getTransmissionMode().toString())
+		    .setTransmissionModeName(entity.getTransmissionMode().getName())
+		    .setOriginType(entity.getOriginType().toString())
+		    .setOriginTypeName(entity.getOriginType().getName())
+		    .setStatus(entity.getStatus().toString())
+		    .setStatusName(entity.getStatus().getName())
 		    .setAudioVideoTemplateId(entity.getAudioVideoTemplateId());
-		
 		return this;
 	}
 
