@@ -57,4 +57,16 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	public List<FolderPO> findBvcRootFolders();
 	
 	public List<FolderPO> findByParentPathLike(String path);
+	
+	/**
+	 * 查询根目录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月19日 下午1:18:10
+	 * @param Collection<FolderPO.FolderType> folderTypes 不查的文件夹类型
+	 * @param Long parentId 父文件夹id
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	@Query(value = "SELECT * FROM folderpo WHERE parent_id=?1 AND (folder_type IS NULL OR folder_type NOT IN ('ON_DEMAND'))", nativeQuery = true)
+	public List<FolderPO> findByParentIdAndFolderTypeNotIn(Long parentId);
 }

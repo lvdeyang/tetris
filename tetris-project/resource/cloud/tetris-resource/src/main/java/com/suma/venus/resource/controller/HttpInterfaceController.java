@@ -1051,7 +1051,8 @@ public class HttpInterfaceController {
 		bundleService.save(bundle);
 		
 		respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
-		respBody.setUserId(bundle.getId());
+		//respBody.setUserId(bundle.getId());
+		respBody.setUserId(userBO.getUser().getId());
 		// respBody.setUser_extra_info(checkResult.getExtraInfo());
 		respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
 		

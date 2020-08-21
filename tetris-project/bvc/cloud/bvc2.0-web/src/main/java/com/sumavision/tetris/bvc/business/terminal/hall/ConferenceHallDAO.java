@@ -1,9 +1,11 @@
 package com.sumavision.tetris.bvc.business.terminal.hall;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -23,5 +25,15 @@ public interface ConferenceHallDAO extends BaseDAO<ConferenceHallPO>{
 	 */
 	public Page<ConferenceHallPO> findByNameLike(String name, Pageable page);
 	
-	public List<ConferenceHallPO> findByFolderId(Long folderId);
+
+	/**
+	 * 查询文件夹下游权限的会场<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月19日 下午1:48:46
+	 * @param Long folderId 文件夹id
+	 * @return List<ConferenceHallPO> 会场列表
+	 */
+	@Query(value = "SELECT DISTINCT H.* FROM TETRIS_BVC_BUSINESS_TERMINAL_CONFERENCE_HALL H LEFT JOIN TETRIS_BVC_BUSINESS_CONFERENCE_HALL_ROLE_PERMISSION P ON H.ID=P.CONFERENCE_HALL_ID WHERE P.ROLE_ID IN ?1 AND H.FOLDER_ID=?2", nativeQuery = true)
+	public List<ConferenceHallPO> findPermissionConferenceHallsByFolderId(Collection<Long> roleIds, Long folderId);
 }
