@@ -1,26 +1,22 @@
 package com.sumavision.tetris.bvc.business.group.api;
 
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.GroupLayout.Group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jayway.jsonpath.internal.function.json.Append;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.bvc.control.utils.TreeUtils;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -29,8 +25,7 @@ import com.sumavision.tetris.bvc.business.group.GroupQuery;
 import com.sumavision.tetris.bvc.business.group.GroupService;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.bvc.control.welcome.UserVO;
-import io.swagger.annotations.Info;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 @Controller
 @RequestMapping(value = "/api/tvos/group")
@@ -48,44 +43,34 @@ public class ApiTvosGroupController {
 	@Autowired	
 	private TreeUtils treeUtils;
 	
-	
 	/**
-	 * 
 	 * 获取会议列表<br/>
-	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月14日 上午11:50:51
-	 * @param request
 	 * @return
-	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/tvos/group/list")
 	public Object queryTvosGroupList(HttpServletRequest request) throws Exception{
 		return groupQuery.queryTvosGroupList();
-		
 	}
 
 	/**
-	 * 
 	 * 开始会议<br/>
-	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月14日 上午11:53:37
-	 * @param id
-	 * @param request
+	 * @param String id 会议id
 	 * @return
-	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start")
-	public Object start(
-			String id,
-			HttpServletRequest request)throws Exception{
+	public Object start(HttpServletRequest request)throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String id = requestWrapper.getString("id");
 		Object result = groupService.start(Long.parseLong(id), -1);
 		return result;	
 	}
@@ -93,20 +78,19 @@ public class ApiTvosGroupController {
 	/**
 	 * 
 	 * 停止会议<br/>
-	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月14日 上午11:52:39
-	 * @param id
-	 * @param request
+	 * @param String id 会议id
 	 * @return
-	 * @throws Exception
 	 */
-	@ResponseBody
 	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/stop")
-	public Object stop(String id,
-			HttpServletRequest request) throws Exception{
+	public Object stop(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String id = requestWrapper.getString("id");
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		Object chairSplits = groupService.stop(userId, Long.parseLong(id), 0);
@@ -114,22 +98,21 @@ public class ApiTvosGroupController {
 	}
 	
 	/**
-	 * 
 	 * 删除会议<br/>
-	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月14日 上午11:51:38
-	 * @param ids
-	 * @param request
+	 * @param JSONString ids 会议id列表
 	 * @return
-	 * @throws Exception
 	 */
-	@ResponseBody
 	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/remove")
-	public Object remove(String ids,
-			HttpServletRequest request) throws Exception{
+	public Object remove(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String ids = requestWrapper.getString("ids");
+		
 		Long userId = userUtils.getUserIdFromSession(request);
 				
 		JSONArray idsArray = JSON.parseArray(ids);
@@ -143,15 +126,26 @@ public class ApiTvosGroupController {
 		return null;
 	}
 	
-	@ResponseBody
+	/**
+	 * 创建会议<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月19日 上午11:52:30
+	 * @param JSONString members 用户成员列表
+	 * @param JSONString hallIds 会场成员列表
+	 * @param String name 会议名称
+	 * @return
+	 */
 	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/save")
-	public Object save(
-			String members,
-			String hallIds,
-			String name,
-			HttpServletRequest request
-			)throws Exception{
+	public Object save(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String name = requestWrapper.getString("name");
+		String members = requestWrapper.getString("members");
+		String hallIds = requestWrapper.getString("hallIds");
+		
 		UserVO user = userUtils.getUserFromSession(request);
 		
 		Date date = new Date();
@@ -170,7 +164,7 @@ public class ApiTvosGroupController {
 		
 		GroupPO group = null;
 		try {
-			groupService.saveCommand(user.getId(), user.getId(), user.getName(),name,name,BusinessType.MEETING_QT, OriginType.INNER, userIdArray,hallIdArray,bundleIdArray,null);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(),name,name,BusinessType.MEETING_QT, OriginType.INNER, userIdArray,hallIdArray,bundleIdArray,null);
 		} catch (CommandGroupNameAlreadyExistedException e) {
 			// TODO: handle exception
 			JSONObject info = new JSONObject();
@@ -196,11 +190,20 @@ public class ApiTvosGroupController {
 		return info;
 	}
 	
-	@ResponseBody
+	/**
+	 * 机顶盒查询组织机构<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月19日 上午11:53:37
+	 * @param Long folderId 组织机构id
+	 * @return List<TreeNodeVO> 成员列表
+	 */
 	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/query/organization")
-	public Object queryOrganization(Long id) throws Exception{
-		return groupQuery.queryOrganization(id);
+	public Object queryOrganization(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		return groupQuery.queryOrganization(requestWrapper.getLong("folderId"));
 		
 	}
 }
