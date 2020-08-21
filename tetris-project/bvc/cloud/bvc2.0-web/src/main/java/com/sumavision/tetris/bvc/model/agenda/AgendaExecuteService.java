@@ -272,20 +272,22 @@ public class AgendaExecuteService {
 				//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
 				for(TerminalBundleUserPermissionPO p : ps){
 					Long terminalBundleId = p.getTerminalBundleId();
-					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
+					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
 					TerminalBundleType type = terminalBundlePO.getType();
 					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
 						String bundleId = p.getBundleId();
 						bundleIds.add(bundleId);
 					}
 				}
-			}if(groupMemberType.equals(GroupMemberType.MEMBER_HALL)){
+				
+			}else if(groupMemberType.equals(GroupMemberType.MEMBER_HALL)){
+				
 				Long hallId = Long.parseLong(member.getOriginId());
 				List<TerminalBundleConferenceHallPermissionPO> hps = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(hallId);
 				for(TerminalBundleConferenceHallPermissionPO hp : hps){					
 					
 					Long terminalBundleId = hp.getTerminalBundleId();
-					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
+					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
 					TerminalBundleType type = terminalBundlePO.getType();
 					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
 						String bundleId = hp.getBundleId();
@@ -293,19 +295,10 @@ public class AgendaExecuteService {
 					}
 				}
 				
-				List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
-				//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
-				for(TerminalBundleUserPermissionPO p : ps){
-					Long terminalBundleId = p.getTerminalBundleId();
-					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
-					TerminalBundleType type = terminalBundlePO.getType();
-					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
-						String bundleId = p.getBundleId();
-						bundleIds.add(bundleId);
-					}
-				}
 			}else if(groupMemberType.equals(GroupMemberType.MEMBER_DEVICE)){
+				
 				bundleIds.add(originId);
+				
 			}
 			//查出bundle
 			List<BundlePO> srcBundlePOs = resourceBundleDao.findByBundleIds(bundleIds);
