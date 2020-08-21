@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
@@ -386,7 +387,7 @@ public class VodService {
 		vod.setDstMemberId(userMemberPO.getId());
 		vodDao.save(vod);
 		
-		//把成员授权给角色
+		//给成员授权角色
 		RolePO userRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_DST);
 		GroupMemberRolePermissionPO userRolePermission = new GroupMemberRolePermissionPO(userRole.getId(), userMemberPO.getId());
 		groupMemberRolePermissionDao.save(userRolePermission);
@@ -395,6 +396,7 @@ public class VodService {
 		groupMemberRolePermissionDao.save(srcRolePermission);
 		
 		//TODO:建立转发PO?
+		
 		
 		//呼叫被点播的编码
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);

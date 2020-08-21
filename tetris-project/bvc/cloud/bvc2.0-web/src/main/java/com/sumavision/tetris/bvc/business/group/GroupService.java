@@ -82,6 +82,7 @@ import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
@@ -919,7 +920,13 @@ public class GroupService {
 			membersResponse(group, members, acceptMembers);
 			
 			//执行默认议程
-			AgendaPO commandAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);//TODO
+			AgendaPO commandAgenda = null;
+			BusinessType businessType = group.getBusinessType();
+			if(BusinessType.COMMAND.equals(businessType)){
+				commandAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_COMMAND);
+			}else if(BusinessType.MEETING_QT.equals(businessType)){
+				commandAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.BASIC_MEETING);
+			}
 			agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(commandAgenda.getId()).getList(), null);
 			
 			//级联

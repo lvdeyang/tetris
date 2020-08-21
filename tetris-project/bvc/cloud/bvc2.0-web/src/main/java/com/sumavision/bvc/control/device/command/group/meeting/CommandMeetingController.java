@@ -140,7 +140,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		groupSpeakService.speakAppointM(Long.parseLong(id), userIdArray);
+		groupSpeakService.speakAppointU(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -274,7 +274,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		groupSpeakService.speakStopByChairmanM(Long.parseLong(id), userIdArray);
+		groupSpeakService.speakStopByChairmanU(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
