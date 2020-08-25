@@ -24,7 +24,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
  * @ClassName: 指挥组<br/>
- * @Description: 普通、专向；会议<br/>
+ * @Description: 老版本： 普通、专向；会议<br/>
  * @author zsy 
  * @date 2019年9月20日 下午1:06:00
  */
