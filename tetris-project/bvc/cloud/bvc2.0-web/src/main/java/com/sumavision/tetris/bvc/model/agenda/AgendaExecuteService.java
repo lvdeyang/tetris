@@ -16,10 +16,12 @@ import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineBusinessType;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineContentType;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.model.agenda.exception.AgendaNotFoundException;
 import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
@@ -251,6 +253,14 @@ public class AgendaExecuteService {
 			List<GroupMemberPO> sourceMembers,
 			String businessId,
 			BusinessInfoType businessInfoType){
+		return obtainSource(sourceMembers, businessId, businessInfoType, null);
+	}
+	
+	public List<SourceBO> obtainSource(
+			List<GroupMemberPO> sourceMembers,
+			String businessId,
+			BusinessInfoType businessInfoType,
+			AgendaForwardType agendaForwardType){
 		
 		//确认源（可能多个）
 		List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
@@ -284,7 +294,7 @@ public class AgendaExecuteService {
 				
 				Long hallId = Long.parseLong(member.getOriginId());
 				List<TerminalBundleConferenceHallPermissionPO> hps = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(hallId);
-				for(TerminalBundleConferenceHallPermissionPO hp : hps){					
+				for(TerminalBundleConferenceHallPermissionPO hp : hps){
 					
 					Long terminalBundleId = hp.getTerminalBundleId();
 					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
@@ -315,7 +325,7 @@ public class AgendaExecuteService {
 				SourceBO sourceBO = new SourceBO()
 						.setBusinessId(businessId)
 						.setBusinessInfoType(businessInfoType)
-//						.setAgendaForwardType(agendaForwardType)
+						.setAgendaForwardType(agendaForwardType)
 						.setSrcVideoId(member.getOriginId())
 						.setSrcVideoMemberId(member.getId())
 						.setSrcVideoName(member.getName())
@@ -645,6 +655,9 @@ public class AgendaExecuteService {
 				//TODO:根据业务组类型确定
 			}
 			
+			//转发业务类型
+			AgendaForwardType type = agendaForward.getType();
+			
 			//----------确认源（可能多个）----------
 			List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
 			AgendaSourceType sourceType = agendaForward.getSourceType();
@@ -655,12 +668,11 @@ public class AgendaExecuteService {
 				List<GroupMemberPO> sourceMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, sourceRole.getId());
 								
 				//这里直接获取了音视频，没有根据议程下的转发来获取。后续完善：查询该视频转发是否有对应的音频，如果没有则不生成音频源
-				sourceBOs = obtainSource(sourceMembers, groupId.toString(), businessInfoType);
+				sourceBOs = obtainSource(sourceMembers, groupId.toString(), businessInfoType, type);
 				
 				break;
 				
 			case ROLE_CHANNEL:
-				AgendaForwardType type = agendaForward.getType();
 				List<Long> roleChannelIds = new ArrayList<Long>();
 				if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.VIDEO.equals(type)){
 					RoleChannelPO sourceRoleVideoChannel = roleChannelDao.findOne(Long.valueOf(sourceId));
@@ -692,44 +704,7 @@ public class AgendaExecuteService {
 			switch (destinationType) {
 			case ROLE:
 				RolePO dstRole = roleDao.findOne(Long.valueOf(destinationId));
-				List<GroupMemberPO> dstMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, dstRole.getId());				
-				List<GroupMemberPO> pageDstMembers = new ArrayList<GroupMemberPO>(dstMembers);				
-				List<GroupMemberPO> combineDstMembers = new ArrayList<GroupMemberPO>();
-				
-				//当模式为合屏时，且源不止一个时，给非用户进行合屏
-				/*AgendaModeType agendaModeType = agenda.getAgendaModeType();
-				if(AgendaModeType.COMBINE_VIDEO.equals(agendaModeType)
-						&& sourceBOs.size() > 1){
-					for(GroupMemberPO dstMember : dstMembers){
-						if(!GroupMemberType.MEMBER_USER.equals(dstMember.getGroupMemberType())){
-							combineDstMembers.add(dstMember);
-							pageDstMembers.remove(dstMember);
-						}
-					}
-				}else{
-					//TODO:查找合屏，判断是否需要删掉
-				}
-				
-				if(combineDstMembers.size() > 0){
-					SourceBO combineSourceBO = autoCombineService.autoCombine(sourceBOs);
-					List<SourceBO> combineSourceBOs = new ArrayListWrapper<SourceBO>().add(combineSourceBO).getList();
-					List<CommonForwardPO> forwards2 = obtainCommonForwardsFromSource(combineDstMembers, combineSourceBOs);
-					result.addAll(forwards2);
-				}*/
-				
-				
-				//如果需要，在这里生成合屏、混音
-				//先判断是否有生成，findByGroupIdAndAgendaIdAnd???
-				
-				
-				
-				//如果有，是否需要update
-				
-				
-				//生成合屏、混音
-				//List<CombineVideoPO> List<CombineAudioPO>
-				
-				
+				List<GroupMemberPO> dstMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, dstRole.getId());
 				
 				for(GroupMemberPO dstMember : dstMembers){
 					List<SourceBO> memberSourceBOs = memberSourceMap.get(dstMember);
@@ -750,55 +725,96 @@ public class AgendaExecuteService {
 			}
 		}
 		
-		//遍历map，是否需要合屏
-		List<SourceBO> sourceBOs4Combine = null;
-		for(GroupMemberPO member : memberSourceMap.keySet()){			
-			if(BusinessInfoType.MEETING_DISCUSS.equals(agenda.getBusinessInfoType())					
-					|| BusinessInfoType.BASIC_MEETING.equals(agenda.getBusinessInfoType())){
-				if(!member.getIsAdministrator()
+		//----------遍历memberSourceMap，确认是否需要给成员及主席合屏
+		List<SourceBO> sourceBOs4Member = null;//用于给成员看的N个源
+		List<SourceBO> sourceBOs4Chairman = null;//用于给主席看的N个源
+		if(BusinessInfoType.MEETING_DISCUSS.equals(agenda.getBusinessInfoType())					
+				|| BusinessInfoType.BASIC_MEETING.equals(agenda.getBusinessInfoType())){
+			for(GroupMemberPO member : memberSourceMap.keySet()){
+				
+				if(member.getIsAdministrator()
+						&& sourceBOs4Chairman == null
+						&& !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+					List<SourceBO> memberSourceBOs = memberSourceMap.get(member);
+					if(memberSourceBOs.size() > 1){
+						//如果源数量大于1，则需要给主席合屏
+						sourceBOs4Chairman = new ArrayList<SourceBO>(memberSourceBOs);
+					}
+				}
+				
+				else if(!member.getIsAdministrator()
+						&& sourceBOs4Member == null
 						&& !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
 					List<SourceBO> memberSourceBOs = memberSourceMap.get(member);
 					if(memberSourceBOs.size() > 1){
 						//如果源数量大于1，且存在非用户成员，则需要合屏。认为这些成员的源列表都是一样的
-						sourceBOs4Combine = new ArrayList<SourceBO>(memberSourceBOs);
-						break;
+						sourceBOs4Member = new ArrayList<SourceBO>(memberSourceBOs);
 					}
 				}
 			}
 		}
 		
-		SourceBO combineSourceBO = null;
+		//----------生成自动合屏
+		SourceBO combineSourceBO4Member = null;//给成员的合屏
+		SourceBO combineSourceBO4Chairman = null;//给主席的合屏
 		//会议中判断是否需要合屏
 		if(BusinessInfoType.MEETING_DISCUSS.equals(agenda.getBusinessInfoType())					
 				|| BusinessInfoType.BASIC_MEETING.equals(agenda.getBusinessInfoType())){
 			List<CombineVideoPO> combineVideoPOs = combineVideoDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
 			List<CombineAudioPO> combineAudioPOs = combineAudioDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
-			if(sourceBOs4Combine != null){
-				//需要合屏，判断是否已经存在，TODO:存在则更新
-				combineSourceBO = autoCombineService.autoCombine(sourceBOs4Combine, combineVideoPOs, combineAudioPOs);
+						
+			//是否需要给主席合屏
+			CombineVideoPO combineVideo4ChairmanPO = tetrisBvcQueryUtil.queryCombineVideoPOByCombineContentType(combineVideoPOs, CombineContentType.FOR_CHAIRMAN);
+			CombineAudioPO combineAudio4ChairmanPO = tetrisBvcQueryUtil.queryCombineAudioPOByCombineContentType(combineAudioPOs, CombineContentType.FOR_CHAIRMAN);
+			if(sourceBOs4Chairman != null){
+				//需要合屏，判断是否已经存在，存在则更新
+				combineSourceBO4Chairman = autoCombineService.autoCombine(sourceBOs4Chairman, combineVideo4ChairmanPO, combineAudio4ChairmanPO, CombineContentType.FOR_CHAIRMAN);
 			}else{
-				//不需要合屏，查询是否需要删除
-				List<String> videoUuids = new ArrayList<String>();
-				for(CombineVideoPO combineVideoPO : combineVideoPOs){
-					videoUuids.add(combineVideoPO.getUuid());
-				}
-				List<String> audioUuids = new ArrayList<String>();
-				for(CombineAudioPO combineAudioPO : combineAudioPOs){
-					audioUuids.add(combineAudioPO.getUuid());
-				}
-				autoCombineService.deleteCombine(videoUuids, audioUuids, true);
+				//不需要合屏，则将已有的删除
+				List<CombineVideoPO> videos = new ArrayList<CombineVideoPO>();
+				if(combineVideo4ChairmanPO != null) videos.add(combineVideo4ChairmanPO);
+				List<CombineAudioPO> audios = new ArrayList<CombineAudioPO>();
+				if(combineAudio4ChairmanPO != null) audios.add(combineAudio4ChairmanPO);
+				autoCombineService.deleteCombine(videos, audios, true);
 			}
+			
+			//是否需要给成员合屏
+			CombineVideoPO combineVideo4MemberPO = tetrisBvcQueryUtil.queryCombineVideoPOByCombineContentType(combineVideoPOs, CombineContentType.FOR_MEMBER);
+			CombineAudioPO combineAudio4MemberPO = tetrisBvcQueryUtil.queryCombineAudioPOByCombineContentType(combineAudioPOs, CombineContentType.FOR_MEMBER);
+			if(sourceBOs4Member != null){
+				//需要合屏，判断是否已经存在，存在则更新
+				combineSourceBO4Member = autoCombineService.autoCombine(sourceBOs4Member, combineVideo4MemberPO, combineAudio4MemberPO, CombineContentType.FOR_MEMBER);
+			}else{
+				//不需要合屏，则将已有的删除
+				List<CombineVideoPO> videos = new ArrayList<CombineVideoPO>();
+				if(combineVideo4MemberPO != null) videos.add(combineVideo4MemberPO);
+				List<CombineAudioPO> audios = new ArrayList<CombineAudioPO>();
+				if(combineAudio4MemberPO != null) audios.add(combineAudio4MemberPO);
+				autoCombineService.deleteCombine(videos, audios, true);
+			}			
 		}
 		
-		//再次遍历map，非用户的成员观看合屏
+		//----------再次遍历memberSourceMap，非用户的成员观看合屏，用户看单画面，生成CommonForwardPO
 		for(GroupMemberPO member : memberSourceMap.keySet()){
-			if(combineSourceBO != null
+			
+			//如果主席看合屏
+			if(member.getIsAdministrator() && combineSourceBO4Chairman != null){
+				List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(
+						new ArrayListWrapper<GroupMemberPO>().add(member).getList(), 
+						new ArrayListWrapper<SourceBO>().add(combineSourceBO4Chairman).getList());
+				result.addAll(forwards);
+			}
+			//如果成员看合屏
+			else if(!member.getIsAdministrator()
+					&& combineSourceBO4Member != null
 					&& !GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
 				List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(
 						new ArrayListWrapper<GroupMemberPO>().add(member).getList(), 
-						new ArrayListWrapper<SourceBO>().add(combineSourceBO).getList());
+						new ArrayListWrapper<SourceBO>().add(combineSourceBO4Member).getList());
 				result.addAll(forwards);
-			}else{
+			}
+			//用户直接看画面
+			else{
 				List<SourceBO> memberSourceBOs = memberSourceMap.get(member);			
 				List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(new ArrayListWrapper<GroupMemberPO>().add(member).getList(), memberSourceBOs);
 				result.addAll(forwards);

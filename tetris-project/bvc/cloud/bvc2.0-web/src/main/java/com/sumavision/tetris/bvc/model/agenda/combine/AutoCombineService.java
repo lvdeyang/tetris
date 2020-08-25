@@ -257,12 +257,12 @@ public class AutoCombineService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月7日 上午10:21:30
 	 * @param sourceBOs
-	 * @param combineVideoPOs 已经存在的合屏，用来update，正常最多只有1个
-	 * @param combineAudioPOs 已经存在的混音，用来update，正常最多只有1个
+	 * @param combineVideoPO 已经存在的合屏，可能为null
+	 * @param combineAudioPO 已经存在的混音，可能为null
 	 * @return
 	 * @throws Exception
 	 */
-	public SourceBO autoCombine(List<SourceBO> sourceBOs, List<CombineVideoPO> combineVideoPOs, List<CombineAudioPO> combineAudioPOs) throws Exception{
+	public SourceBO autoCombine(List<SourceBO> sourceBOs, CombineVideoPO combineVideoPO, CombineAudioPO combineAudioPO, CombineContentType combineContentType) throws Exception{
 		
 		if(sourceBOs.size() == 0){
 			System.out.println("无法自动合屏，sourceBOs大小为0");
@@ -274,19 +274,15 @@ public class AutoCombineService {
 		String name = "自动合屏";		
 		int sourceSize = sourceBOs.size();
 		
-		CombineVideoPO entity = null;
-		if(combineVideoPOs!=null && combineVideoPOs.size()>0){
-			entity = combineVideoPOs.get(0);
-		}else{
-			entity = new CombineVideoPO();
-		}
-		entity.setName(name);
-		entity.setBusinessId(businessId);
-		entity.setBusinessType(CombineBusinessType.GROUP);
-		entity.setUpdateTime(new Date());
-		combineVideoDao.save(entity);
+		if(combineVideoPO == null) combineVideoPO = new CombineVideoPO();
+		combineVideoPO.setName(name);
+		combineVideoPO.setBusinessId(businessId);
+		combineVideoPO.setBusinessType(CombineBusinessType.GROUP);
+		combineVideoPO.setCombineContentType(combineContentType);
+		combineVideoPO.setUpdateTime(new Date());
+		combineVideoDao.save(combineVideoPO);
 		
-		List<CombineVideoPositionPO> existPositionEntities = combineVideoPositionDao.findByCombineVideoId(entity.getId());
+		List<CombineVideoPositionPO> existPositionEntities = combineVideoPositionDao.findByCombineVideoId(combineVideoPO.getId());
 		if(existPositionEntities!=null && existPositionEntities.size()>0){
 			List<Long> existPositionIds = new ArrayList<Long>();
 			for(CombineVideoPositionPO existPositionEntity:existPositionEntities){
@@ -299,12 +295,12 @@ public class AutoCombineService {
 			}
 		}
 //		entity.setWebsiteDraw(websiteDraw.toJSONString());
-		combineVideoDao.save(entity);
+		combineVideoDao.save(combineVideoPO);
 		
 		//自动生成布局，关联到CombineVideoPO
 		List<CombineVideoPositionPO> positionEntities = autoLayout(sourceSize);
 		for(CombineVideoPositionPO positionEntity : positionEntities){
-			positionEntity.setCombineVideoId(entity.getId());
+			positionEntity.setCombineVideoId(combineVideoPO.getId());
 		}		
 		combineVideoPositionDao.save(positionEntities);
 		
@@ -333,15 +329,12 @@ public class AutoCombineService {
 		
 		
 		//----------混音----------
-		CombineAudioPO combineAudioPO = null;
-		if(combineAudioPOs!=null && combineAudioPOs.size()>0){
-			combineAudioPO = combineAudioPOs.get(0);
-		}else{
-			combineAudioPO = new CombineAudioPO();
-		}
+		if(combineAudioPO == null) combineAudioPO = new CombineAudioPO();
 		combineAudioPO.setName("自动混音");
 		combineAudioPO.setBusinessId(businessId);
 		combineAudioPO.setBusinessType(CombineBusinessType.GROUP);
+		combineAudioPO.setCombineContentType(combineContentType);
+		combineVideoPO.setUpdateTime(new Date());
 		combineAudioDao.save(combineAudioPO);		
 		
 		List<CombineAudioSrcPO> audioSrcs = new ArrayList<CombineAudioSrcPO>();
@@ -369,7 +362,7 @@ public class AutoCombineService {
 				.setCombineAudioSet(new ArrayList<CombineAudioBO>())
 				.setForwardSet(new ArrayList<ForwardSetBO>());
 		
-		CombineVideoBO combineVideoProtocol = new CombineVideoBO().setUuid(entity.getUuid())
+		CombineVideoBO combineVideoProtocol = new CombineVideoBO().setUuid(combineVideoPO.getUuid())
 																  .setCodec_param(codec)
 																  .setPosition(new ArrayList<PositionSrcBO>());
 		for(CombineVideoPositionPO positionPO : positionEntities){
@@ -410,10 +403,29 @@ public class AutoCombineService {
 		
 		executeBusiness.execute(protocol, new StringBufferWrapper().append("自动合屏混音").toString());
 		
-		return generateSourceFromCombine(entity.getUuid(), combineAudioPO.getUuid(), businessId.toString());
+		return generateSourceFromCombine(combineVideoPO.getUuid(), combineAudioPO.getUuid(), businessId.toString());
 	}
 	
-	public void deleteCombine(List<String> videoUuids, List<String> audioUuids, boolean doProtocal) throws Exception{
+	public void deleteCombine(List<CombineVideoPO> videos, List<CombineAudioPO> audios, boolean doProtocal) throws Exception{
+		UserVO user = userQuery.current();
+		LogicBO protocol = new LogicBO()
+				.setCombineAudioDel(new ArrayList<CombineAudioBO>())
+				.setCombineVideoDel(new ArrayList<CombineVideoBO>())
+				.setUserId(user.getId().toString());
+		if(videos == null) videos = new ArrayList<CombineVideoPO>();
+		for(CombineVideoPO video : videos){
+			protocol.getCombineVideoDel().add(new CombineVideoBO().setUuid(video.getUuid()));
+			combineVideoService.delete(video.getId());
+		}
+		if(audios == null) audios = new ArrayList<CombineAudioPO>();
+		for(CombineAudioPO audio : audios){
+			protocol.getCombineAudioDel().add(new CombineAudioBO().setUuid(audio.getUuid()));
+			combineAudioService.delete(audio.getId());
+		}
+		if(doProtocal) executeBusiness.execute(protocol, new StringBufferWrapper().append("删除合屏混音").toString());
+	}
+	
+	public void deleteCombineByUuids(List<String> videoUuids, List<String> audioUuids, boolean doProtocal) throws Exception{
 		UserVO user = userQuery.current();
 		LogicBO protocol = new LogicBO()
 				.setCombineAudioDel(new ArrayList<CombineAudioBO>())
@@ -447,11 +459,38 @@ public class AutoCombineService {
 	private List<CombineVideoPositionPO> autoLayout(int size) throws Exception{
 		int combineSize = 0;
 		int combineBase = 1;
+		List<CombineVideoPositionPO> positionEntities = new ArrayList<CombineVideoPositionPO>();
 		if(size <= 0){
 			return null;
 		}else if(size == 1){
 			combineBase = 1;
 			combineSize = 1;
+		}else if(size == 2){
+			String w = "1/2";
+			String h = "1/2";
+			CombineVideoPositionPO positionEntity1 = new CombineVideoPositionPO();
+			positionEntity1.setSerialnum(1);
+			positionEntity1.setX(tenThousand("0/2"));
+			positionEntity1.setY(tenThousand("1/4"));
+			positionEntity1.setW(tenThousand(w));
+			positionEntity1.setH(tenThousand(h));
+			positionEntity1.setPictureType(PictureType.STATIC);
+			positionEntity1.setPollingTime("0");
+			positionEntity1.setUpdateTime(new Date());
+//			positionEntity.setCombineVideoId(entity.getId());
+			positionEntities.add(positionEntity1);
+			CombineVideoPositionPO positionEntity2 = new CombineVideoPositionPO();
+			positionEntity2.setSerialnum(1);
+			positionEntity2.setX(tenThousand("1/2"));
+			positionEntity2.setY(tenThousand("1/4"));
+			positionEntity2.setW(tenThousand(w));
+			positionEntity2.setH(tenThousand(h));
+			positionEntity2.setPictureType(PictureType.STATIC);
+			positionEntity2.setPollingTime("0");
+			positionEntity2.setUpdateTime(new Date());
+//			positionEntity.setCombineVideoId(entity.getId());
+			positionEntities.add(positionEntity2);
+			return positionEntities;
 		}else if(size <= 4){
 			combineBase = 2;
 			combineSize = 4;
@@ -463,7 +502,6 @@ public class AutoCombineService {
 			combineSize = 16;
 		}
 		
-		List<CombineVideoPositionPO> positionEntities = new ArrayList<CombineVideoPositionPO>();
 		int serialNum = 1;
 		String w = "1/" + combineBase;
 		String h = "1/" + combineBase;
@@ -485,7 +523,6 @@ public class AutoCombineService {
 				positionEntities.add(positionEntity);
 			}
 		}
-//		combineVideoPositionDao.save(positionEntities);
 		
 		return positionEntities;
 	}
