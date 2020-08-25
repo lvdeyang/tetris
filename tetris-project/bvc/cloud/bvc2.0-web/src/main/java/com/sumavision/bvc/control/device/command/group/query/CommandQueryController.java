@@ -68,14 +68,19 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallRolePermissionDAO;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -110,7 +115,13 @@ public class CommandQueryController {
 	private ResourceService resourceService;
 	
 	@Autowired
-	private GroupDAO groupDao;
+	private GroupDAO groupDAO;
+	
+	@Autowired
+	private RoleDAO roleDAO;
+	
+	@Autowired
+	private GroupMemberRolePermissionDAO groupMemberRolePermissionDAO;
 	
 	@Autowired
 	private GroupMemberDAO groupMemberDao;
@@ -241,7 +252,7 @@ public class CommandQueryController {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年2月18日 下午6:17:05
-	 * @param id
+	 * @param id business_group对应的id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -258,15 +269,17 @@ public class CommandQueryController {
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
-		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		List<CommandGroupMemberPO> members = group.getMembers();
+//		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		//List<CommandGroupMemberPO> members = group.getMembers();
+//		GroupPO group = groupDao.findOne(Long.valueOf(id));
+		List<GroupMemberPO> members =groupMemberDao.findByGroupId(Long.parseLong(id));
 		
 		//查询有权限的用户
-		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
-		List<Long> userIds = new ArrayList<Long>();
-		for(UserBO user : users){
-			userIds.add(user.getId());
-		}
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);//TODO 应该选出组中所有用户
+//		List<Long> userIds = new ArrayList<Long>();
+//		for(UserBO user : users){
+//			userIds.add(user.getId());
+//		}
 		
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
@@ -274,9 +287,10 @@ public class CommandQueryController {
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
-					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
-					if(member!=null
-							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
+					GroupMemberPO member = tetrisBvcQueryUtil.queryMemberByUserId(members, user.getId());
+					if(member!=null 
+							&& groupMemberRolePermissionDAO.findByRoleIdAndGroupMemberId((roleDAO.findByInternalRoleType(InternalRoleType.COMMAND_COOPERATION)).getId(), member.getId())!=null
+							&& (member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT) || member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECTING))){
 						filteredUsers.add(user);
 					}
 				}
@@ -863,8 +877,8 @@ public class CommandQueryController {
 			break;
 		}
 		
-		List<GroupPO> commands = groupDao.findByMemberOriginId(userId.toString());
-		List<GroupPO> enteredCommands = groupDao.findEnteredGroupByMemberOriginId(userId.toString());
+		List<GroupPO> commands = groupDAO.findByMemberOriginId(userId.toString());
+		List<GroupPO> enteredCommands = groupDAO.findEnteredGroupByMemberOriginId(userId.toString());
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
@@ -937,7 +951,7 @@ public class CommandQueryController {
 			break;
 		}
 		
-		List <GroupPO> commands = groupDao.findEnteredGroupByMemberOriginId(userId.toString());
+		List <GroupPO> commands = groupDAO.findEnteredGroupByMemberOriginId(userId.toString());
 		
 		for(GroupPO command : commands){
 			BusinessType groupType = command.getBusinessType();

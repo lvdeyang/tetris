@@ -32,12 +32,15 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -125,6 +128,9 @@ public class GroupCooperateService {
 	@Autowired
 	private CommandCascadeService commandCascadeService;
 	
+	@Autowired
+	private RoleDAO roleDAO;
+	
 	/**
 	 * 重构，发起协同会议<br/>
 	 * <p>详细描述</p>
@@ -166,15 +172,17 @@ public class GroupCooperateService {
 			
 			//协同成员，校验是否已经被授权协同
 			//查出这些成员，校验有没有未入会的，赋予协同角色
-			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+			
+			//groupMember中查找
+			List<GroupMemberPO> members = groupMemberDao.findByGroupIdAndIdIn(groupId,memberIds);
 			GroupMemberPO chairmanMember = tetrisBvcQueryUtil.queryChairmanMember(members);
 			if(chairmanMember != null){
 				if(memberIds.contains(chairmanMember.getId())){
 					throw new BaseException(StatusCode.FORBIDDEN, "不能选择主席进行协同");
 				}
 			}
-	
-			RolePO cooperateRole = null;//TODO
+			
+			RolePO cooperateRole = roleDAO.findByInternalRoleType(InternalRoleType.COMMAND_COOPERATION);//TODO
 			List<GroupMemberPO> cooperateMembers = new ArrayList<GroupMemberPO>();//统计本次新增的协同成员
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(cooperateRole.getId(), memberIds);
 			for(GroupMemberPO member : members){
@@ -231,18 +239,20 @@ public class GroupCooperateService {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年6月28日 下午4:24:30
-	 * @param groupId
-	 * @param memberIds
+	 * @param groupId 组id
+	 * @param userIds 用户id
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void revokeBatch(Long groupId, List<Long> memberIds) throws Exception{
+	public void revokeBatch(Long groupId, List<Long> userIds) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if(groupId==null || groupId.equals("")){
 			log.info("停止协同指挥，会议id有误");
 			return;
 		}
+
+		List<Long> memberIds = businessCommonService.fromUserIdsToMemberIds(groupId, userIds);
 		
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
 		
@@ -263,7 +273,7 @@ public class GroupCooperateService {
 			String commandString = commandCommonUtil.generateCommandString(groupType);
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			
-			RolePO cooperateRole = null;//TODO
+			RolePO cooperateRole = roleDAO.findByInternalRoleType(InternalRoleType.COMMAND_COOPERATION);
 			List<GroupMemberPO> revokeMembers = new ArrayList<GroupMemberPO>();//统计本次解除的协同成员
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(cooperateRole.getId(), memberIds);
 			for(GroupMemberPO member : members){
