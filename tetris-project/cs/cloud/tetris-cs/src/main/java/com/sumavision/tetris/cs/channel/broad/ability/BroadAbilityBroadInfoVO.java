@@ -8,6 +8,8 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 	private Long channelId;
 	/** 预播发地址 */
 	private String previewUrlIp;
+	/** 本地Ip */
+	private String localIp;
 	/** 预播发可用起始端口 */
 	private String previewUrlPort;
 	/** 预播发可用终止端口 */
@@ -81,6 +83,7 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		.setPreviewUrlIp(entity.getPreviewUrlIp())
 		.setPreviewUrlPort(entity.getPreviewUrlPort())
 		.setPreviewUrlEndPort(entity.getPreviewUrlEndPort())
+		.setLocalIp(entity.getLocalIp())
 		.setUserId(entity.getUserId());
 		return this;
 	}
@@ -91,9 +94,20 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		return  this.userId == infoVO.getUserId()
 				&& this.getPreviewUrlIp() != null
 				&& this.getPreviewUrlIp().equals(infoVO.getPreviewUrlIp())
+				&& this.getLocalIp() != null
+				&& this.getLocalIp().equals(infoVO.getLocalIp())
 				&& this.getPreviewUrlPort() != null
 				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
 				&& this.getPreviewUrlEndPort() != null
 				&& this.getPreviewUrlEndPort().equals(infoVO.getPreviewUrlEndPort());
+	}
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public BroadAbilityBroadInfoVO setLocalIp(String localIp) {
+		this.localIp = localIp;
+		return this;
 	}
 }

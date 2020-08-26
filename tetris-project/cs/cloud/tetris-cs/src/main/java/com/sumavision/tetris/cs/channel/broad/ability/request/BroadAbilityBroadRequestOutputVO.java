@@ -4,6 +4,8 @@ public class BroadAbilityBroadRequestOutputVO {
 	/** 输出地址 */
 	private String url;
 	
+	private String localIp;
+	
 	/** 输出封装 */
 	private String type;
 
@@ -22,6 +24,15 @@ public class BroadAbilityBroadRequestOutputVO {
 
 	public BroadAbilityBroadRequestOutputVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public BroadAbilityBroadRequestOutputVO setLocalIp(String localIp) {
+		this.localIp = localIp;
 		return this;
 	}
 }

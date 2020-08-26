@@ -514,6 +514,14 @@
                                 <el-form-item :label="'流输出地址 ' + i">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp"></el-input>
                                 </el-form-item>
+                                <el-form-item :label="'本地IP ' + i">
+                                    <el-select v-model="dialog.setOutput.output[i-1].localIp" placeholder="请选择本地IP">
+		                                <el-option
+		                                        v-for="item in dialog.setOutput.localIpOptions"
+		                                        :value="item">
+		                                </el-option>
+                            		</el-select>
+                                </el-form-item>
                                 <el-form-item :label="'可用初始端口 ' + i">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort"></el-input>
                                 </el-form-item>

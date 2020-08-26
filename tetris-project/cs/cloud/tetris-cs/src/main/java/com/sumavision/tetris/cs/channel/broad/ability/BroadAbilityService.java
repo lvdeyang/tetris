@@ -440,6 +440,7 @@ public class BroadAbilityService {
 						if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
 							outputVOs.add(new BroadAbilityBroadRequestOutputVO()
 									.setUrl(new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString())
+									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
 									.setType("udp"));
 						}
 					}
@@ -535,7 +536,7 @@ public class BroadAbilityService {
 					} else {
 						if (firstIndex + 1 == j) firstIndex++;
 					}
-					
+					System.out.println(JSONObject.toJSONString(requestVO));
 					//单源节目单
 					if (j == inputVOs.size() - 1 && requestVO.getInput() != null &&  requestVO.getInput().getPrev() != null && requestVO.getInput().getNext() == null) {
 						requestAddTask(channelId, 0l, JSONObject.toJSONString(requestVO), previewId, abilityIp);

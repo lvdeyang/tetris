@@ -116,6 +116,7 @@ public class BroadAbilityBroadInfoService {
 				if (previewIp.isEmpty() || previewPort.isEmpty()) continue;
 				infoPO.setPreviewUrlIp(previewIp);
 				infoPO.setPreviewUrlPort(previewPort);
+				infoPO.setLocalIp(broadAbilityBroadInfoVO.getLocalIp());
 //				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewIp, previewPort), channelPO.getName());
 //				infoPO.setMediaId(mediaVideoStream.getId());
 			} else {

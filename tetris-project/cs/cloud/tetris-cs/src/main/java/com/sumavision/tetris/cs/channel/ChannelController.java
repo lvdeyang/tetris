@@ -1,6 +1,10 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +58,39 @@ public class ChannelController {
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
+	}
+	/**
+	 * 获取本地网卡列表
+	 * 方法概述<br/>
+	 * <p>获取本地网卡IP列表</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月26日 上午9:17:54
+	 * @return List<String>
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/netcard/get")
+	public Object getNetCard() throws Exception {
+		List<String> netcards=new ArrayList<String>();
+		 Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+         NetworkInterface networkInterface;
+         Enumeration<InetAddress> inetAddresses;
+         InetAddress inetAddress;
+         String ip;
+         while (networkInterfaces.hasMoreElements()) {
+             networkInterface = networkInterfaces.nextElement();
+             inetAddresses = networkInterface.getInetAddresses();
+             while (inetAddresses.hasMoreElements()) {
+                 inetAddress = inetAddresses.nextElement();
+                 if (inetAddress != null && inetAddress instanceof Inet4Address) { // IPV4
+                     ip = inetAddress.getHostAddress();
+                     netcards.add(ip);
+                 }
+             }
+         }
+		return netcards;
 	}
 
 	/**
