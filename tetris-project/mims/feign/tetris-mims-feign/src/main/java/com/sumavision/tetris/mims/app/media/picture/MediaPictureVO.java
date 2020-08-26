@@ -54,6 +54,18 @@ public class MediaPictureVO{
 	
 	private List<MediaPictureVO> children;
 	
+    private Boolean synchro;
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaPictureVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+	
 	public Long getId() {
 		return id;
 	}

@@ -82,6 +82,18 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String ftpUrl;
 	
+	private Boolean synchro;
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaVideoVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -388,6 +400,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setAddition(entity.getAddition())
 			.setFileName(entity.getFileName())
+			.setSynchro(entity.getSynchro())
 			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));
 		if(mediaEditorPO != null) this.setEditorInfo(new MediaFileEditorVO().set(mediaEditorPO));

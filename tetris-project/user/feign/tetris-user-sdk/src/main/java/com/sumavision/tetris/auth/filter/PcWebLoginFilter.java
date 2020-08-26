@@ -169,8 +169,13 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/portal/login")
 												   .add("/covid19/register/statistics/*")
 												   .add("/router/*")
-													.add("/taskPreview/queryPreviewUrlList")
-													.add("/tetris-sts/*")
+												   .add("/taskPreview/queryPreviewUrlList")
+												   .add("/tetris-sts/*")
+												   .add("/eb-insert-web/*")
+												   .add("/eb-monitor-web/*")
+												   .add("/eb-resource-web/*")
+												   .add("/eb-screendisplay-web/*")
+												   .add("/eb-statistics-web/*")
 												   .getList();
 	}
 	

@@ -57,6 +57,18 @@ public class MediaVideoVO{
 	
 	private String ftpUrl;
 	
+	private Boolean synchro;
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaVideoVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+	
 	public Long getId() {
 		return id;
 	}

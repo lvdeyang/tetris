@@ -654,12 +654,15 @@
                 <el-container>
                     <el-header height="40px">
                         <el-button size="medium" type="primary" @click="loadingMenuResourceTree"
-                                   :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">添加资源
+                                   :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">
+                            添加资源
                         </el-button>
-                        <el-button size="medium" type="warning" @click="" :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">
+                        <el-button size="medium" type="warning" @click="menuResourceTreeDelete"
+                                   :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">
                             删除资源
                         </el-button>
                     </el-header>
+
                     <el-main>
                         <div style="width:100%; height:100%; position:relative;">
                             <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
@@ -672,7 +675,7 @@
                                                     :data="dialog.editMenu.resource.data"
                                                     tooltip-effect="dark"
                                                     style="width: 100%"
-                                                    @selection-change="">
+                                                    @selection-change="selectMuneResource">
                                                 <el-table-column type="selection" width="42"></el-table-column>
                                                 <el-table-column label="媒资名称" width="180" prop="name"></el-table-column>
                                                 <!--<el-table-column label="时长" width="110" prop="time"></el-table-column>-->

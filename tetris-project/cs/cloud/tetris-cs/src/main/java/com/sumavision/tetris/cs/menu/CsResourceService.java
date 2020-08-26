@@ -83,11 +83,32 @@ public class CsResourceService {
 		 CsResourcePO resource = resourceDao.findOne(resourceId);
 		
 		 resourceDao.delete(resourceId);
-		
+		  
 		 screenService.dealWithResourceRemove(resource.getChannelId(),resourceId);
 		
 		 return new CsResourceVO().set(resource);
 	}
+
+	
+	public void removeallResource(List<Long> ids) throws Exception{
+		List<CsResourcePO> es = resourceDao.findAll(ids);
+		resourceDao.deleteInBatch(es);
+		for(CsResourcePO e:es){
+			screenService.dealWithResourceRemove(e.getChannelId(),e.getId());
+		}
+		
+	}
+	
+	
+/*public CsResourceVO removeResources(String id) throws Exception{
+	CsResourcePO resource = resourceDao.findByUuid(id);
+	resourceDao.delete(id);
+	String mimsUuid = resource.getMimsUuid();
+	Long ChannelID = resource.getChannelId();
+	screenService.dealWithResourceRemove(resource.getChannelID(), id);
+	return new CsResourceVO().set(resource);
+}*/
+
 
 	// 根据MimsId来判断是否删除screen内的媒资
 	// public void removeResourcesByMenuId(Long menuId,Long channelId) throws
@@ -101,7 +122,7 @@ public class CsResourceService {
 	// }
 	// }
 	//
-	// public CsResourceVO removeResource(Long id) throws Exception {
+    // public CsResourceVO removeResource(Long id) throws Exception {
 	// CsResourcePO resource = resourceDao.findOne(id);
 	//
 	// resourceDao.delete(id);
