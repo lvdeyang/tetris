@@ -57,7 +57,9 @@ require.config({
         'page-omms-hardware-server-monitor':window.APPPATH + 'omms/hardware/monitor/page-omms-hardware-server-monitor',
         'NetworkLineChart':window.APPPATH + 'omms/hardware/monitor/echarts/NetworkLineChart',
         'SingleRateBar':window.APPPATH + 'omms/hardware/monitor/echarts/SingleRateBar',
-        'DiskPieChart':window.APPPATH + 'omms/hardware/monitor/echarts/DiskPieChart'
+        'DiskPieChart':window.APPPATH + 'omms/hardware/monitor/echarts/DiskPieChart',
+        'page-omms-software-service-installation-package':window.APPPATH + 'omms/software/service/installation-package/page-omms-software-service-installation-package',
+        'page-omms-software-service-installation-package-history':window.APPPATH + 'omms/software/service/installation-package/history/page-omms-software-service-installation-package-history'
 
     },
     shim:{
