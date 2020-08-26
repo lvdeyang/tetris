@@ -16,6 +16,12 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 	/** 小工具端口 */
 	private String gadgetPort;
 	
+	/** 小工具用户名 */
+	private String gadgetUsername;
+	
+	/** 小工具密码 */
+	private String gadgetPassword;
+	
 	/** 备注 */
 	private String remark;
 	
@@ -64,6 +70,24 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 		return this;
 	}
 
+	public String getGadgetUsername() {
+		return gadgetUsername;
+	}
+
+	public ServerVO setGadgetUsername(String gadgetUsername) {
+		this.gadgetUsername = gadgetUsername;
+		return this;
+	}
+
+	public String getGadgetPassword() {
+		return gadgetPassword;
+	}
+
+	public ServerVO setGadgetPassword(String gadgetPassword) {
+		this.gadgetPassword = gadgetPassword;
+		return this;
+	}
+
 	public String getRemark() {
 		return remark;
 	}
@@ -106,6 +130,8 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 			.setName(entity.getName())
 			.setIp(entity.getIp())
 			.setGadgetPort(entity.getGadgetPort())
+			.setGadgetUsername(entity.getGadgetUsername())
+			.setGadgetPassword(entity.getGadgetPassword())
 			.setRemark(entity.getRemark())
 			.setCreator(entity.getCreator())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))

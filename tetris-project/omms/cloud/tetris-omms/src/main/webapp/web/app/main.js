@@ -13,6 +13,7 @@ require.config({
         'or-bit-controls':window.LIBPATH + 'threejs/extentions/controls/OrbitControls',
         'css-2d-rebder':window.LIBPATH + 'threejs/extentions/renderers/CSS2DRenderer',
         'd3':window.LIBPATH+'d3/d3.v5',
+        'echarts':window.LIBPATH + 'echarts/echarts.min',
 
         'TweenLite':window.LIBPATH + 'TweenMax/cmd/TweenLite',
 
@@ -52,7 +53,11 @@ require.config({
         /* pages */
         'page-omms-monitor-service':window.APPPATH + 'omms/monitor/service/page-omms-monitor-service',
         'page-omms-software-service-type':window.APPPATH + 'omms/software/service/type/page-omms-software-service-type',
-        'page-omms-hardware-server':window.APPPATH + 'omms/hardware/server/page-omms-hardware-server'
+        'page-omms-hardware-server':window.APPPATH + 'omms/hardware/server/page-omms-hardware-server',
+        'page-omms-hardware-server-monitor':window.APPPATH + 'omms/hardware/monitor/page-omms-hardware-server-monitor',
+        'NetworkLineChart':window.APPPATH + 'omms/hardware/monitor/echarts/NetworkLineChart',
+        'SingleRateBar':window.APPPATH + 'omms/hardware/monitor/echarts/SingleRateBar',
+        'DiskPieChart':window.APPPATH + 'omms/hardware/monitor/echarts/DiskPieChart'
 
     },
     shim:{
