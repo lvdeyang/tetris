@@ -392,7 +392,7 @@ public class BroadAbilityService {
 						case "VIDEO":
 							BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
 							inputPrevFileVO.setCount(1)
-							.setUrl(adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
+							.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
 							.setDuration(Long.parseLong(screenDuration))
 							.setSeek(0l);
 							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile(inputPrevFileVO));

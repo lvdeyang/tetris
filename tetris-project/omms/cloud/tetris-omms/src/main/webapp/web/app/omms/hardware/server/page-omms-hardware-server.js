@@ -9,12 +9,11 @@ define([
     'context',
     'commons',
     'vue',
-    'ace-for-shell',
     'element-ui',
     'mi-frame',
     'date',
     'css!' + window.APPPATH + 'omms/hardware/server/page-omms-hardware-server.css'
-], function(tpl, config, $, ajax, context, commons, Vue, ace){
+], function(tpl, config, $, ajax, context, commons, Vue){
 
     var pageId = 'page-omms-hardware-server';
 
@@ -22,7 +21,6 @@ define([
 
     var init = function(){
 
-        //璁剧疆鏍囬
         commons.setTitle(pageId);
 
         var $page = document.getElementById(pageId);
@@ -50,6 +48,8 @@ define([
                         name:'',
                         ip:'',
                         gadgetPort:'',
+                        gadgetUsername:'',
+                        gadgetPassword:'',
                         creator:'',
                         remark:''
                     },
@@ -59,6 +59,8 @@ define([
                         name:'',
                         ip:'',
                         gadgetPort:'',
+                        gadgetUsername:'',
+                        gadgetPassword:'',
                         creator:'',
                         remark:''
                     }
@@ -99,6 +101,8 @@ define([
                     self.dialog.addServer.name = '';
                     self.dialog.addServer.ip = '';
                     self.dialog.addServer.gadgetPort = '';
+                    self.dialog.addServer.gadgetUsername = '';
+                    self.dialog.addServer.gadgetPassword = '';
                     self.dialog.addServer.creator = '';
                     self.dialog.addServer.remark = '';
                 },
@@ -108,6 +112,8 @@ define([
                         name:self.dialog.addServer.name,
                         ip:self.dialog.addServer.ip,
                         gadgetPort:self.dialog.addServer.gadgetPort,
+                        gadgetUsername:self.dialog.addServer.gadgetUsername,
+                        gadgetPassword:self.dialog.addServer.gadgetPassword,
                         remark:self.dialog.addServer.remark,
                         creator:self.dialog.addServer.creator
                     }, function(data){
@@ -130,8 +136,15 @@ define([
                     self.dialog.editServer.name = row.name;
                     self.dialog.editServer.ip = row.ip;
                     self.dialog.editServer.gadgetPort = row.gadgetPort;
+                    self.dialog.editServer.gadgetUsername = row.gadgetUsername;
+                    self.dialog.editServer.gadgetPassword = row.gadgetPassword;
                     self.dialog.editServer.creator = row.creator;
                     self.dialog.editServer.remark = row.remark;
+                },
+                gotoStatus:function(scope){
+                	var self = this;
+                	var row = scope.row;
+                	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
                 },
                 handleEditServerClose:function(){
                     var self = this;
@@ -140,6 +153,8 @@ define([
                     self.dialog.editServer.name = '';
                     self.dialog.editServer.ip = '';
                     self.dialog.editServer.gadgetPort = '';
+                    self.dialog.editServer.gadgetUsername = '';
+                    self.dialog.editServer.gadgetPassword = '';
                     self.dialog.editServer.creator = '';
                     self.dialog.editServer.remark = '';
                 },
@@ -150,6 +165,8 @@ define([
                         name:self.dialog.editServer.name,
                         ip:self.dialog.editServer.ip,
                         gadgetPort:self.dialog.editServer.gadgetPort,
+                        gadgetUsername:self.dialog.editServer.gadgetUsername,
+                        gadgetPassword:self.dialog.editServer.gadgetPassword,
                         remark:self.dialog.editServer.remark,
                         creator:self.dialog.editServer.creator
                     }, function(data){
@@ -159,6 +176,8 @@ define([
                                 self.table.data[i].name = data.name;
                                 self.table.data[i].ip = data.ip;
                                 self.table.data[i].gadgetPort = data.gadgetPort;
+                                self.table.data[i].gadgetUsername = data.gadgetUsername;
+                                self.table.data[i].gadgetPassword = data.gadgetPassword;
                                 self.table.data[i].remark = data.remark;
                                 self.table.data[i].creator = data.creator;
                                 break;

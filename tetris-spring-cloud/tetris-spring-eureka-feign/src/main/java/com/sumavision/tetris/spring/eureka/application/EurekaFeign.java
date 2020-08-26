@@ -121,7 +121,7 @@ public class EurekaFeign {
 		 * @return html页面
 		 */
 		public String homePage() throws Exception{
-			return doGet(applicationYml.getBaseUrl(), 
+			return doGet(new StringBufferWrapper().append(applicationYml.getBaseUrl()).append("/monitor").toString(), 
 					null, 
 					"获取eureka首页失败");
 		}

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
+import com.sumavision.tetris.boss.BossService;
 import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -118,6 +119,9 @@ public class UserService{
 	
 	@Autowired
 	private TokenDAO tokenDao;
+	
+	@Autowired
+	private BossService bossService;
 	
 	/**
 	 * 锁定用户<br/>
@@ -249,7 +253,8 @@ public class UserService{
 			UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
 			applicationEventPublisher.publishEvent(event);
 		}
-		
+		//boss系统添加一个用户
+		bossService.addUser(user.getId());
 		return new UserVO().set(user);
 	}
 	

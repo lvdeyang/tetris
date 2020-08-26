@@ -1,7 +1,6 @@
 package com.sumavision.tetris.auth.login;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -24,7 +23,6 @@ import com.sumavision.tetris.spring.eureka.application.EurekaFeign.MemoryQuery;
 import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
-import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 
@@ -64,15 +62,8 @@ public class LoginQuery {
 		TokenPO tokenEntity = tokenDao.findByToken(token);
 		UserPO user = userDao.findOne(tokenEntity.getUserId());
 		String redirectUrl = null;
-		List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.SYSTEM);
-		String xmlString = memoryQuery.findAll();
-		XMLReader reader = new XMLReader(xmlString);
-		List<Node> nodes = reader.readNodeList("applications.application");
-		String name = null; 
-		String xmlIp = null;
-		String port = null;
-		String nodePort = null;
 		MenuVO menu = null;
+		List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.SYSTEM);
 		if(permissions!=null && permissions.size()>0){
 			UserSystemRolePermissionPO permission = permissions.get(0);
 			menu = menuQuery.queryHomePage(permission.getRoleId());
@@ -85,23 +76,7 @@ public class LoginQuery {
 				in = LoginQuery.class.getClassLoader().getResourceAsStream("serverIp.properties");
 				properties.load(in);
 				String ip = properties.getProperty("ip");
-				for (Node node : nodes) {
-					List<Node> nodesto = reader.readNodeList("application.instance",node);
-					Random r = new Random();
-					int i = r.nextInt(nodesto.size());
-					Node instanceNode = nodesto.get(i);
-					xmlIp = reader.readString("instance.hostName",node);
-					port = reader.readString("instance.port",instanceNode);
-					nodePort = new StringBufferWrapper().append(xmlIp).append(":").append(port).toString();
-					name = reader.readString("application.name", node).toLowerCase();		
-					if(ip.equals(name)){
-						redirectUrl = new StringBufferWrapper().append("http://").append(nodePort).append("/index/").append(token).append("#/page-home").toString();
-					}
-				}
-				/*if(ip.equals(name)){
-					redirectUrl = new StringBufferWrapper().append("http://").append(nodePort).append("/index/").append(token).append("#/page-home").toString();
-				}*/
-//				redirectUrl = new StringBufferWrapper().append("http://").append(ip).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-home").toString();
+				redirectUrl = new StringBufferWrapper().append("http://").append(ip).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-home").toString();
 				/*if(UserClassify.INTERNAL.equals(user.getClassify())){
 					ServerProps props = userServerPropsQuery.queryProps();
 					redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-user").toString();
@@ -118,31 +93,33 @@ public class LoginQuery {
 				if(in != null) in.close();
 			}
 		}else{
+			String xmlString = memoryQuery.findAll();
+			XMLReader reader = new XMLReader(xmlString);
+			List<Node> nodes = reader.readNodeList("applications.application");
 			String trueName = menu.getLink().split("//")[1].split("/")[0].toLowerCase().toString();
+			boolean replaced = false;
 			for (Node node : nodes) {
 				List<Node> nodesto = reader.readNodeList("application.instance",node);
 				Random r = new Random();
 				int i = r.nextInt(nodesto.size());
 				Node instanceNode = nodesto.get(i);
-				xmlIp = reader.readString("instance.hostName",node);
-				port = reader.readString("instance.port",instanceNode);
-				nodePort = new StringBufferWrapper().append(xmlIp).append(":").append(port).toString();
-				name = reader.readString("application.name", node).toLowerCase();	
+				String xmlIp = reader.readString("instance.hostName",node);
+				String port = reader.readString("instance.port",instanceNode);
+				String nodePort = new StringBufferWrapper().append(xmlIp).append(":").append(port).toString();
+				String name = reader.readString("application.name", node).toLowerCase();	
 				if(trueName.equals(name)){
-					redirectUrl = menu.getLink().replace(trueName, nodePort);//获取返回到的是  link="http;//tetris-menu...."
+					redirectUrl = menu.getLink().replace(trueName, nodePort);
 					redirectUrl = redirectUrl.replace("{context:token}", token)
-							.replace("{context:user;prop:token}", token);
+											 .replace("{context:user;prop:token}", token);
+					replaced = true;
+					break;
 				}
 			}
-			/*if(trueName.equals(name)){
-				redirectUrl = menu.getLink().replace(trueName, nodePort);//获取返回到的是  link="http;//tetris-menu...."
+			if(!replaced){
+				redirectUrl = menu.getLink();			
 				redirectUrl = redirectUrl.replace("{context:token}", token)
-						.replace("{context:user;prop:token}", token);
-			}*/
-			/*redirectUrl = menu.getLink();			
-			redirectUrl = redirectUrl.replace("{context:token}", token)
-					   				 .replace("{context:user;prop:token}", token);
-			*/
+						   				 .replace("{context:user;prop:token}", token);
+			}
 		}	
 		return redirectUrl;
 	}

@@ -84,18 +84,17 @@ public class GroupQuery{
 	 */
 	public List<GroupVO> queryTvosGroupList() throws Exception{
 		UserVO user = userQuery.current();
-		List<GroupVO> groupList = new ArrayList<GroupVO>();
 		List<BundlePO> bundleList = bundleDao.findBundleByUserIdAndDeviceModel(user.getId(),"tvos");
 		TerminalPO terminal = terminalDao.findByType(TerminalType.ANDROID_TVOS);
 		List<TerminalBundlePO> terminalbundle = terminalBundleDao.findByTerminalId(terminal.getId());
-		List<TerminalBundleConferenceHallPermissionPO> terminalBundleConferenceHallPermissionPOs = terminalBundleConferenceHallPermissionDao.findByTerminalBundleIdAndBundleId(terminalbundle.get(0).getId(),bundleList.get(0).getBundleId());
-		List<GroupMemberPO> groupMemberPOs = groupMemberDao.findByGroupMemberTypeAndOriginId(GroupMemberType.MEMBER_HALL,terminalBundleConferenceHallPermissionPOs.get(0).getConferenceHallId().toString());
-		for (GroupMemberPO groupMemberPO:groupMemberPOs) {
-			GroupPO groupPO = groupDao.findOne(groupMemberPO.getGroupId());
-			groupList.add(new GroupVO().set(groupPO));
+		List<TerminalBundleConferenceHallPermissionPO> terminalBundleConferenceHallPermissions = terminalBundleConferenceHallPermissionDao.findByTerminalBundleIdAndBundleId(terminalbundle.get(0).getId(),bundleList.get(0).getBundleId());
+		List<GroupMemberPO> groupMembers = groupMemberDao.findByGroupMemberTypeAndOriginId(GroupMemberType.MEMBER_HALL,terminalBundleConferenceHallPermissions.get(0).getConferenceHallId().toString());
+		Set<Long> groupIds = new HashSet<Long>();
+		for (GroupMemberPO groupMember:groupMembers) {
+			groupIds.add(groupMember.getGroupId());
 		}
-		
-		return groupList;		 
+		List<GroupPO> groups = groupDao.findAll(groupIds);
+		return GroupVO.getConverter(GroupVO.class).convert(groups, GroupVO.class);
 	}
 	
 	/**

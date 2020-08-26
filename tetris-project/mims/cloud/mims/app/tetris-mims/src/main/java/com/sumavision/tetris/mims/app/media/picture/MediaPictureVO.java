@@ -66,6 +66,18 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private List<MediaPictureVO> children;
 	
+	private Boolean synchro;
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaPictureVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -319,7 +331,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setFileName(entity.getFileName())
 			.setFolderId(entity.getFolderId())
 			.setAddition(entity.getAddition())
-			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)) : new ArrayList<String>());
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)) : new ArrayList<String>())
+			.setSynchro(entity.getSynchro());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}

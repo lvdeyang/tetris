@@ -48,6 +48,44 @@
                             <el-form-item style="margin-bottom:0;" :label="columns.logFile.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('logFile', columns.logFile)"><span class="feather-icon-edit"></span>{{columns.logFile.value || '设置内容'}}</el-button>
                             </el-form-item>
+                            <el-form-item style="margin-bottom:0;" :label="columns.properties.name+':'">
+                                <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="columns.properties.show=!columns.properties.show"><span class="feather-icon-edit"></span>{{columns.properties.show?'收起编辑':'展开编辑'}}</el-button>
+                                <div v-if="columns.properties.show" style="width:100%;">
+                                    <el-button type="primary" size="small" @click=""><span class="icon-plus" style="position:relative; right:1px; margin-bottom:10px;"></span>&nbsp;添加属性</el-button>
+                                    <el-table
+                                        :data="columns.properties.rows"
+                                        style="width:100%">
+                                        <el-table-column
+                                                label="属性key"
+                                                prop="propertyKey">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="属性名称"
+                                                prop="propertyName">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="属性值类型"
+                                                prop="valueType">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="默认值"
+                                                prop="propertyDefaultValue">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="操作"
+                                                width="250">
+                                            <template slot-scope="scope">
+                                                <el-tooltip class="item" effect="dark" content="修改属性" placement="bottom-end">
+                                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click=""></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip class="item" effect="dark" content="删除属性" placement="bottom-end">
+                                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click=""></el-button>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </div>
+                            </el-form-item>
                         </el-form>
                         <div v-for="editor in editors" :class="'code-scope '+editor.name">
                             <el-form label-width="86px" label-position="left">

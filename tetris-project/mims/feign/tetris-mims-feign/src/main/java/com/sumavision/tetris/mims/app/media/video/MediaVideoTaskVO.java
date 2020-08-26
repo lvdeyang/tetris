@@ -27,6 +27,17 @@ public class MediaVideoTaskVO {
 	
 	private Integer progress;
 	
+	private Boolean synchro;
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public MediaVideoTaskVO setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+		return this;
+	}
+	
 	public Long getLastModified() {
 		return lastModified;
 	}

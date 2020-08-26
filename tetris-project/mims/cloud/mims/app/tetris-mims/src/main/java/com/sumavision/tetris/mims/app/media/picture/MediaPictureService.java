@@ -441,6 +441,8 @@ public class MediaPictureService {
 		entity.setUpdateTime(date);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		
+		entity.setSynchro(task.getSynchro());
+		
 		mediaPictureDao.save(entity);
 		
 		return entity;

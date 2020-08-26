@@ -33,6 +33,12 @@ public class ServerPO extends AbstractBasePO{
 	/** 小工具端口 */
 	private String gadgetPort;
 	
+	/** 小工具用户名 */
+	private String gadgetUsername;
+	
+	/** 小工具密码 */
+	private String gadgetPassword;
+	
 	/** 备注 */
 	private String remark;
 	
@@ -70,6 +76,24 @@ public class ServerPO extends AbstractBasePO{
 
 	public void setGadgetPort(String gadgetPort) {
 		this.gadgetPort = gadgetPort;
+	}
+
+	@Column(name = "GADGET_USERNAME")
+	public String getGadgetUsername() {
+		return gadgetUsername;
+	}
+
+	public void setGadgetUsername(String gadgetUsername) {
+		this.gadgetUsername = gadgetUsername;
+	}
+
+	@Column(name = "GADGET_PASSWORD")
+	public String getGadgetPassword() {
+		return gadgetPassword;
+	}
+
+	public void setGadgetPassword(String gadgetPassword) {
+		this.gadgetPassword = gadgetPassword;
 	}
 
 	@Column(name = "REMARK")

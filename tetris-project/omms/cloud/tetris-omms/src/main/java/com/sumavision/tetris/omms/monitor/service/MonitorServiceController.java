@@ -6,9 +6,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,7 +170,14 @@ public class MonitorServiceController {
 			CloseableHttpResponse response = null;
 			try{
 				String url = new StringBufferWrapper().append("http://").append(application.getIp()).append(":").append(application.getGadgetPort()).append("/action/get_capability_info").toString();
-				httpclient = HttpClients.createDefault();
+				
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				AuthScope authScope = new AuthScope(application.getIp(), Integer.parseInt(application.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials("Admin", "sumavisionrd"));
+				httpclient = HttpClients.custom()
+						                .setDefaultCredentialsProvider(credsProvider)
+						                .setRetryHandler(new DefaultHttpRequestRetryHandler(3,true))
+						                .build();
 				HttpPost httpPost = new HttpPost(url);
 				response = httpclient.execute(httpPost);
 				if(response.getStatusLine().getStatusCode() == 200){

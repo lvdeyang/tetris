@@ -512,7 +512,8 @@ public class MediaVideoService {
 			List<String> keyWords, 
 			String remark, 
 			MediaVideoTaskVO task, 
-			FolderPO folder) throws Exception{
+			FolderPO folder
+			) throws Exception{
 		String separator = File.separator;
 		//临时路径采取/base/companyName/folderuuid/fileNamePrefix/version
 		String webappPath = path.webappPath();

@@ -57,6 +57,11 @@ define([
                         name:'日志路径',
                         value:''
                     },
+                    properties:{
+                        name:'服务属性',
+                        show:false,
+                        rows:[]
+                    },
                     installScript:{
                         name:'安装脚本',
                         value:'',
@@ -122,6 +127,14 @@ define([
                     self.columns.installationDirectory.value = data.params.installationDirectory;
                     self.columns.logFile.value = data.params.logFile;
                     self.columns.installScript.value = data.params.installScript;
+                    var properties = data.params.properties;
+                    self.columns.properties.rows.splice(0, self.columns.properties.rows.length);
+                    if(properties && properties.length>0){
+                        for(var i=0; i<properties.length; i++){
+                            self.columns.properties.rows.push(properties[i]);
+                        }
+                    }
+
                     for(var i=0; i<self.editors.length; i++){
                         if(self.editors[i].name === 'installScript'){
                             if(self.editors[i].editor){

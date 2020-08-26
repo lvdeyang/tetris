@@ -110,6 +110,19 @@ public class MediaVideoPO extends AbstractBasePO{
 	
 	/** 附加字段 */
 	private String addition;
+	
+	/**是否同步*/
+	private Boolean synchro;
+	
+	
+	
+	public Boolean getSynchro() {
+		return synchro;
+	}
+
+	public void setSynchro(Boolean synchro) {
+		this.synchro = synchro;
+	}
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {

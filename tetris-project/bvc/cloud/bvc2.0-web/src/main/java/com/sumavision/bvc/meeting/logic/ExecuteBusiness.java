@@ -94,7 +94,7 @@ public class ExecuteBusiness {
 			throw new ExecuteBusinessException("参数解析有误");
 		}
 		log.info("基本命令转换得到并下发：");
-		System.out.println(combinedOperation);
+		//System.out.println(combinedOperation);
 		//下发执行，得到结果
 		JSONObject result = new JSONObject();
 		if(juintLogic.equals("true")){

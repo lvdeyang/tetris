@@ -48,9 +48,6 @@ import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
-import com.sumavision.bvc.device.group.bo.PassByContentBO;
-import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
-import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
@@ -82,7 +79,12 @@ import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineBusinessType;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
@@ -111,6 +113,12 @@ public class GroupService {
 	
 	/** synchronized锁的前缀 */
 	private static final String lockProcessPrefix = "tetris-group-";
+
+	@Autowired
+	private CombineVideoDAO combineVideoDao;
+
+	@Autowired
+	private CombineAudioDAO combineAudioDao;
 	
 	@Autowired
 	private ConferenceHallDAO conferenceHallDao;
@@ -162,6 +170,9 @@ public class GroupService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private AutoCombineService autoCombineService;
 	
 	@Autowired
 	private MulticastService multicastService;
@@ -1181,6 +1192,11 @@ public class GroupService {
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
 			executeBusiness.execute(logic, group.getName() + " 会议停止");
+			
+			//删除合屏混音
+			List<CombineVideoPO> combineVideoPOs = combineVideoDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
+			List<CombineAudioPO> combineAudioPOs = combineAudioDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
+			autoCombineService.deleteCombine(combineVideoPOs, combineAudioPOs, true);
 			
 			/*
 			//删除协同会议的forwardPO
