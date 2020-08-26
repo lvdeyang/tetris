@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
@@ -19,7 +21,6 @@ import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
@@ -39,6 +40,7 @@ import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -48,6 +50,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
+import com.sumavision.tetris.bvc.business.group.function.GroupFunctionService;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
@@ -74,6 +77,9 @@ public class TetrisBvcQueryUtil {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private GroupFunctionService groupFunctionService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -143,18 +149,15 @@ public class TetrisBvcQueryUtil {
 	 * @param forwards 转发列表
 	 * @param srcMemberIds
 	 * @param type 转发业务类型，如果为null则查全部类型
-	 * @param executeStatus 转发执行状态，如果为null则查全部状态
 	 * @return
 	 */
-	public Set<CommandGroupForwardPO> queryForwardsBySrcmemberIds(
-			Collection<CommandGroupForwardPO> forwards, Collection<Long> srcMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
-		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
-		for(CommandGroupForwardPO forward : forwards){
-			if(type==null || type.equals(forward.getForwardBusinessType())){
-				if(executeStatus==null || executeStatus.equals(forward.getExecuteStatus())){
-					if(srcMemberIds.contains(forward.getSrcMemberId())){
-						needForwards.add(forward);
-					}
+	public Set<CommonForwardPO> queryForwardsBySrcmemberIds(
+			Collection<CommonForwardPO> forwards, Collection<Long> srcMemberIds, BusinessInfoType type) {
+		Set<CommonForwardPO> needForwards = new HashSet<CommonForwardPO>();
+		for(CommonForwardPO forward : forwards){
+			if(type==null || type.equals(forward.getBusinessInfoType())){
+				if(srcMemberIds.contains(forward.getSrcMemberId())){
+					needForwards.add(forward);
 				}
 			}
 		}
