@@ -47,6 +47,7 @@ import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -65,6 +66,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/basic")
 public class CommandBasicController {
+	
+	@Autowired
+	private BusinessCommonService businessCommonService;
 
 	@Autowired
 	private GroupService groupService;
@@ -651,7 +655,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.startSilence(Long.parseLong(id), userId, true, false);
+		groupFunctionService.startSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
 	}
@@ -677,7 +681,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.stopSilence(Long.parseLong(id), userId, true, false);
+		groupFunctionService.stopSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
 	}
@@ -703,7 +707,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.startSilence(Long.parseLong(id), userId, false, true);
+		groupFunctionService.startSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
 	}
@@ -729,7 +733,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.stopSilence(Long.parseLong(id), userId, false, true);
+		groupFunctionService.stopSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
 	}
