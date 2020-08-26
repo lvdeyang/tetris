@@ -28,6 +28,9 @@ public class CombineAudioPO extends AbstractBasePO{
 	
 	/** 隶属业务类型 */
 	private CombineBusinessType businessType;
+	
+	/** 内容类型，用于自动合屏时标注 */
+	private CombineContentType combineContentType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -55,6 +58,15 @@ public class CombineAudioPO extends AbstractBasePO{
 
 	public void setBusinessType(CombineBusinessType businessType) {
 		this.businessType = businessType;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	public CombineContentType getCombineContentType() {
+		return combineContentType;
+	}
+
+	public void setCombineContentType(CombineContentType combineContentType) {
+		this.combineContentType = combineContentType;
 	}
 	
 }

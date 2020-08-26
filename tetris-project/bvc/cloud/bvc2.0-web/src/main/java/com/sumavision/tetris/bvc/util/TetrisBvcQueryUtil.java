@@ -51,6 +51,9 @@ import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineContentType;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 
 /**
@@ -794,6 +797,24 @@ public class TetrisBvcQueryUtil {
 			}catch(Exception e){}			
 		}
 		return target;
+	}
+	
+	public CombineVideoPO queryCombineVideoPOByCombineContentType(Collection<CombineVideoPO> combineVideos, CombineContentType combineContentType){
+		for(CombineVideoPO combineVideo : combineVideos){
+			if(combineContentType.equals(combineVideo.getCombineContentType())){
+				return combineVideo;
+			}
+		}
+		return null;
+	}
+	
+	public CombineAudioPO queryCombineAudioPOByCombineContentType(Collection<CombineAudioPO> combineAudios, CombineContentType combineContentType){
+		for(CombineAudioPO combineeAudio : combineAudios){
+			if(combineContentType.equals(combineeAudio.getCombineContentType())){
+				return combineeAudio;
+			}
+		}
+		return null;
 	}
 	
 	/**

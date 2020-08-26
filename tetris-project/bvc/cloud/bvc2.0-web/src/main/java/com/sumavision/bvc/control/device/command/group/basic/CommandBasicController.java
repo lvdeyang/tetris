@@ -279,9 +279,9 @@ public class CommandBasicController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持，请新建会议");
+		//throw new BaseException(StatusCode.FORBIDDEN, "暂不支持，请新建会议");
 		
-		/*
+	
 		UserVO user = userUtils.getUserFromSession(request);
 		
 		Date date = new Date();
@@ -296,7 +296,6 @@ public class CommandBasicController {
 				   .append(commandString)
 				   .toString();
 		}
-		String subject = name;
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		List<Long> hallIdArray = JSONArray.parseArray(hallIds, Long.class);
@@ -304,8 +303,8 @@ public class CommandBasicController {
 		
 		GroupPO group = null;
 		try{
-//			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, subject, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
+//			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.BASIC, OriginType.INNER, userIdArray);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -324,10 +323,10 @@ public class CommandBasicController {
 		info.put("status", group.getStatus().getCode());
 		info.put("commander", group.getUserId());
 		info.put("creator", group.getUserId());
-//		Object membersArray = treeUtils.queryGroupTree(group.getId());
-//		info.put("members", membersArray);
+		Object membersArray = treeUtils.queryGroupTree(group.getId());
+		info.put("members", membersArray);
 				
-		return info;*/
+		return info;
 	}
 	
 	/**
