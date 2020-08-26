@@ -74,6 +74,8 @@ import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandService;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
+import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
@@ -172,6 +174,9 @@ public class GroupService {
 	private FolderUserMapDAO folderUserMapDao;
 	
 	@Autowired
+	private TerminalBundleConferenceHallPermissionDAO terminalBundleConferenceHallPermissionDao;
+	
+	@Autowired
 	private AutoCombineService autoCombineService;
 	
 	@Autowired
@@ -249,10 +254,58 @@ public class GroupService {
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
 	
+	/**
+	 * 根据用户id和bundleType查找会场id<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月25日 下午4:06:58
+	 * @param userId
+	 * @param bundleType 对应BundlePO的deviceModel，取值如tvos
+	 * @return 会场id
+	 * @throws BaseException
+	 */
+	private Long findHallId(Long userId, String bundleType) throws BaseException{
+		BundlePO bundle = bundleDao.findByUserIdAndDeviceModel(userId, bundleType);
+		String bundleId = bundle.getBundleId();
+		List<TerminalBundleConferenceHallPermissionPO> ps = terminalBundleConferenceHallPermissionDao.findByBundleTypeAndBundleId(bundleType, bundleId);
+		if(ps.size() == 0){
+			throw new BaseException(StatusCode.FORBIDDEN, "请配置您的设备");
+		}
+		if(ps.size() > 1){
+			throw new BaseException(StatusCode.FORBIDDEN, "您的设备配置有重复，请修改");
+		}
+		TerminalBundleConferenceHallPermissionPO p = ps.get(0);
+		Long hallId = p.getConferenceHallId();
+		return hallId;
+	}
+	
+	/**
+	 * 创建会议/指挥<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月25日 下午4:46:46
+	 * @param creatorUserId 创建人id
+	 * @param creatorUsername 创建人名称
+	 * @param chairmanType null或self为默认，以创建人的用户作为主席；user指定用户为主席；hall指定会场为主席；tvosOfUser以创建人的机顶盒为主席
+	 * @param chairmanId 用户id/会场id
+	 * @param name 会议名称
+	 * @param subject 主题，可以与name相同
+	 * @param groupBusinessType
+	 * @param originType
+	 * @param userIdList 用户成员id列表
+	 * @param hallIds 会场成员id列表
+	 * @param bundleIdList 设备成员（暂不支持）
+	 * @param uuid 级联调用会传递uuid
+	 * @return
+	 * @throws Exception
+	 */
 	public GroupPO saveCommand(
 			Long creatorUserId,
-			Long chairmanUserId,
 			String creatorUsername,
+			String chairmanType,
+			String chairmanId,
 			String name,
 			String subject,
 			BusinessType groupBusinessType,
@@ -265,11 +318,41 @@ public class GroupService {
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
 		
-		MemberTerminalBO chairmanBO = new MemberTerminalBO()
+		//确定主席
+		MemberTerminalBO chairmanBO = null;		
+		if(chairmanType == null) chairmanType = "self";
+		switch (chairmanType){
+		case "user":
+			chairmanBO = new MemberTerminalBO()
 				.setGroupMemberType(GroupMemberType.MEMBER_USER)
-				.setOriginId(chairmanUserId.toString())
+				.setOriginId(chairmanId)
 				.setTerminalId(terminal.getId());
+			break;
+		case "hall":
+			TerminalPO t = terminalDao.findOne(Long.parseLong(chairmanId));
+			chairmanBO = new MemberTerminalBO()
+				.setGroupMemberType(GroupMemberType.MEMBER_HALL)
+				.setOriginId(chairmanId)
+				.setTerminalId(t.getId());
+			break;
+		case "tvosOfUser":
+			TerminalPO tvosT = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.ANDROID_TVOS);
+			Long hallId = findHallId(creatorUserId, "tvos");
+			chairmanBO = new MemberTerminalBO()
+					.setGroupMemberType(GroupMemberType.MEMBER_HALL)
+					.setOriginId(hallId.toString())
+					.setTerminalId(tvosT.getId());
+			break;
+		case "self":
+		default:
+			chairmanBO = new MemberTerminalBO()
+				.setGroupMemberType(GroupMemberType.MEMBER_USER)
+				.setOriginId(creatorUserId.toString())
+				.setTerminalId(terminal.getId());
+			break;			
+		}		
 		
+		//用户成员
 		List<MemberTerminalBO> memberTerminalBOs = new ArrayList<MemberTerminalBO>();
 		for(Long userId : userIdList){
 			MemberTerminalBO memberBO = new MemberTerminalBO()
@@ -279,14 +362,12 @@ public class GroupService {
 			memberTerminalBOs.add(memberBO);
 		}
 		
-		//确保成员中有创建者
-		if(!userIdList.contains(creatorUserId)){
-			memberTerminalBOs.add(chairmanBO);
-		}
+		//不再确保成员中有创建者，由save方法确认
+//		if(!userIdList.contains(creatorUserId)){
+//			memberTerminalBOs.add(chairmanBO);
+//		}
 		
-		//后续支持设备成员
-		
-		//会场
+		//会场成员
 		List<ConferenceHallPO> halls = conferenceHallDao.findAll(hallIds);
 		for(ConferenceHallPO hall : halls){
 			MemberTerminalBO memberBO = new MemberTerminalBO()
@@ -295,6 +376,8 @@ public class GroupService {
 					.setTerminalId(hall.getTerminalId());
 			memberTerminalBOs.add(memberBO);
 		}
+		
+		//暂不支持设备成员
 				
 		return save(
 				creatorUserId,
@@ -337,6 +420,9 @@ public class GroupService {
 		}
 		
 		//确保成员中有创建者
+		if(!memberTerminalBOs.contains(chairmanBO)){
+			memberTerminalBOs.add(chairmanBO);
+		}
 //		if(!userIdList.contains(creatorUserId)){
 //			throw new BaseException(StatusCode.FORBIDDEN, "当前用户已失效，请重新登录");
 //		}
@@ -797,6 +883,7 @@ public class GroupService {
 		}
 		
 		groupDao.deleteByIdIn(groupIds);
+		groupMemberDao.deleteByGroupIdIn(groupIds);
 		
 		log.info(dis.toString() + "被删除");
 		operationLogService.send(user.getNickname(), "删除指挥", user.getNickname() + "删除指挥groupIds:" + groupIds.toString());

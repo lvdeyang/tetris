@@ -39,4 +39,6 @@ public interface GroupMemberDAO extends MetBaseDAO<GroupMemberPO>{
 	public List<GroupMemberPO> findByGroupMemberTypeAndOriginId(GroupMemberType groupMemberType,String originId);
 	
 	public List<GroupMemberPO> findByGroupIdAndIdIn(Long groupId, Collection<Long> ids);
+	
+	public void deleteByGroupIdIn(Collection<Long> groupIds);
 }
