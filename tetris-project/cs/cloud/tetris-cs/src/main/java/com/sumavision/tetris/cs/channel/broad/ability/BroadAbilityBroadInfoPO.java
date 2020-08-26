@@ -19,6 +19,8 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	private Long channelId;
 	/** 预播发地址 */
 	private String previewUrlIp;
+	/** 本地Ip */
+	private String localIp;
 	/** 预播发可用起始端口 */
 	private String previewUrlPort;
 	/** 预播发可用终止端口 */
@@ -80,5 +82,13 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public void setLocalIp(String localIp) {
+		this.localIp = localIp;
 	}
 }
