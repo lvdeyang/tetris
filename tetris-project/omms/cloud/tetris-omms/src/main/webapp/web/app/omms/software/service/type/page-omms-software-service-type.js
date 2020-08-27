@@ -47,8 +47,8 @@ define([
                 },
                 columns:{
                     name:{
-                        name:'服务类型',
-                        value:'媒资服务'
+                        name:'当前服务',
+                        value:''
                     },
                     installationDirectory:{
                         name:'安装包路径',
@@ -126,6 +126,14 @@ define([
 
             },
             methods:{
+                goToInstallationPackage:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package/' + self.tree.current.id + '/' + self.tree.current.name;
+                },
+                goToInstallationPackageHistory:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package-history/0/' + self.tree.current.id + '/' + self.tree.current.name;
+                },
                 loadValueTypes:function(){
                     var self = this;
                     self.propertyValueTypes.splice(0, self.propertyValueTypes.length);

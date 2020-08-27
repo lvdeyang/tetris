@@ -18,7 +18,7 @@ public interface ServerHardDiskDataDAO extends BaseDAO<ServerHardDiskDataPO>{
 	 * @param Long serverId 服务器id
 	 * @return List<ServerHardDiskDataPO> 服务器硬盘信息
 	 */
-	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_HARD_DISK_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_HARD_DISK_DATA)", nativeQuery = true)
+	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_HARD_DISK_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_HARD_DISK_DATA WHERE SERVER_ID=?1)", nativeQuery = true)
 	public List<ServerHardDiskDataPO> findLastDataByServerId(Long serverId);
 	
 }

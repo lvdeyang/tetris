@@ -18,7 +18,7 @@ public interface ServerNetworkCardTrafficDataDAO extends BaseDAO<ServerNetworkCa
 	 * @param Long serverId 服务器id
 	 * @return List<ServerNetworkCardTrafficDataPO> 服务器网卡流量信息
 	 */
-	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_NETWORK_CARD_TRAFFIC_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_NETWORK_CARD_TRAFFIC_DATA)", nativeQuery = true)
+	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_NETWORK_CARD_TRAFFIC_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_NETWORK_CARD_TRAFFIC_DATA WHERE SERVER_ID=?1)", nativeQuery = true)
 	public List<ServerNetworkCardTrafficDataPO> findLastDataByServerId(Long serverId);
 	
 }

@@ -19,9 +19,8 @@ define([
 
     var charts = {};
 
-    var init = function(){
+    var init = function(p){
 
-        //璁剧疆鏍囬
         commons.setTitle(pageId);
 
         var $page = document.getElementById(pageId);
@@ -33,8 +32,21 @@ define([
                 basePath:window.BASEPATH,
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
-                groups: context.getProp('groups')
-
+                groups: context.getProp('groups'),
+                serviceId: p.serviceTypeId,
+                serviceName: p.serviceName,
+                table:{
+                    data:[]
+                },
+                dialog:{
+                    addPackage:{
+                        visible:false,
+                        loading:false,
+                        version:'',
+                        remark:'',
+                        creator:''
+                    }
+                }
             },
             computed:{
 
@@ -43,7 +55,21 @@ define([
 
             },
             methods:{
+                rowKey:function(row){
+                    return 'installation-package-' + row.id;
+                },
+                generateInstallationPackageHistory:function(scope){
+                    var self = this;
 
+                },
+                gotoInstallationPackageHistory:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package-history/' + self.serviceId;
+                },
+                handleRowDelete:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                }
             },
             mounted:function(){
                 var self = this;
@@ -58,7 +84,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId + '/:serviceTypeId',
+        path:'/' + pageId + '/:serviceTypeId/:serviceName',
         component:{
             template:'<div id="' + pageId + '" class="page-wrapper"></div>'
         },

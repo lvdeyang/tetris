@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataVO;
@@ -72,8 +73,9 @@ public class ServerQuery {
 		Map<String, Object> serverStatus = new HashMap<String, Object>();
 		ServerPO serverEntity = serverDao.findOne(id);
 		serverStatus.put("server", new ServerVO().set(serverEntity));
-		ServerOneDimensionalDataPO oneDimensionalDataEntity = serverOneDimensionalDataDao.findLastDataByServerId(id);
-		if(oneDimensionalDataEntity != null){
+		List<ServerOneDimensionalDataPO> oneDimensionalDataEntities = serverOneDimensionalDataDao.findLastDataByServerId(id);
+		if(oneDimensionalDataEntities!=null && oneDimensionalDataEntities.size()>0){
+			ServerOneDimensionalDataPO oneDimensionalDataEntity = oneDimensionalDataEntities.get(0);
 			serverStatus.put("oneDimensionalData", new ServerOneDimensionalDataVO().set(oneDimensionalDataEntity));
 		}
 		List<ServerHardDiskDataPO> diskEntities = serverHardDiskDataDao.findLastDataByServerId(id);
