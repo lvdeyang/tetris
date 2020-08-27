@@ -55,6 +55,7 @@ define([
             //服务器异常
             if(typeof _success==='function' && _catch[ajax.ERROR]){
                 _success(null, _status, data.message);
+                return;
             }else{
                 window.location.hash = baseError + '/' + _status + '/' + encodeURI(data.message);
             }
