@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.activemq.thread.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,10 @@ import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -59,6 +64,9 @@ public class CommandCommonServiceImpl {
 	
 	@Autowired
 	private AvtplDAO avtplDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 	
 	@Autowired
 	private CommandVodDAO commandVodDao;
@@ -95,6 +103,9 @@ public class CommandCommonServiceImpl {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
 	
 	@Autowired
 	private static ResourceService resourceServiceStatic;
@@ -467,6 +478,43 @@ public class CommandCommonServiceImpl {
 	 * @throws Exception
 	 */
 	public BundleBO queryBundleByPlayerIndexForCloudControl(Long userId, int index) throws Exception{
+		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);		
+		PageTaskPO pageTask = pageTaskQueryService.queryPageTask(userId.toString(), terminal.getId(), index);
+		
+		if(pageTask == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有云台可以控制");
+		}
+		
+		switch (pageTask.getBusinessInfoType()) {
+		case PLAY_USER_ONESELF:
+		case PLAY_DEVICE:
+			return new BundleBO()
+					.setBundleId(pageTask.getSrcVideoBundleId())
+					.setNodeUid(pageTask.getSrcVideoLayerId())
+					.setName(pageTask.getBusinessName());
+		case BASIC_COMMAND:
+		case BASIC_MEETING:
+		case MEETING_DISCUSS:
+		case CHAIRMAN_BASIC_COMMAND:
+		case COOPERATE_COMMAND:
+		case SPEAK_MEETING:
+		case SECRET_COMMAND:
+		case COMMAND_FORWARD:
+		case COMMAND_FORWARD_DEVICE:
+		case COMMAND_FORWARD_USER:
+		case PLAY_USER:
+		case USER_CALL:
+		case USER_VOICE:
+			throw new BaseException(StatusCode.FORBIDDEN, "不能控制对方的云台");
+		default:
+			throw new BaseException(StatusCode.FORBIDDEN, "没有云台可以控制");
+		}
+		
+	}
+	
+	@Deprecated
+	public BundleBO queryBundleByPlayerIndexForCloudControl_old(Long userId, int index) throws Exception{
 		
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), index);

@@ -697,6 +697,8 @@ public class PageTaskService {
 			ConnectBO connectDecoderVideoChannel = new ConnectBO().setChannelId(openTask.getDstVideoChannelId())
 														          .setChannel_status("Open")
 														          .setBase_type(openTask.getDstVideoBaseType())
+														          .setMode(openTask.getVideoTransmissionMode().getCode())
+														          .setMulti_addr(openTask.getVideoMultiAddr())
 														          .setCodec_param(codec)
 														          .setSource_param(decoderVideoForwardSet);
 			ForwardSetSrcBO decoderAudioForwardSet = null;
@@ -712,6 +714,8 @@ public class PageTaskService {
 			ConnectBO connectDecoderAudioChannel = new ConnectBO().setChannelId(openTask.getDstAudioChannelId())
 																  .setChannel_status("Open")
 																  .setBase_type(openTask.getDstAudioBaseType())
+														          .setMode(openTask.getAudioTransmissionMode().getCode())
+														          .setMulti_addr(openTask.getAudioMultiAddr())
 																  .setCodec_param(codec)
 																  .setSource_param(decoderAudioForwardSet);
 			

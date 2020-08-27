@@ -92,7 +92,7 @@ public class CommandMeetingController {
 		GroupPO group = null;
 		try{
 //			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.MEETING, OriginType.INNER, userIdArray);
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.MEETING_QT, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
+			group = groupService.saveCommand(user.getId(), user.getName(), null, null, name, name, BusinessType.MEETING_QT, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();

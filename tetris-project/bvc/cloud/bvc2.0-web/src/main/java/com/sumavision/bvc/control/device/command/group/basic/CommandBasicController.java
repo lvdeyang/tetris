@@ -20,12 +20,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
@@ -45,8 +43,8 @@ import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServic
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
-import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -65,6 +63,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/basic")
 public class CommandBasicController {
+	
+	@Autowired
+	private BusinessCommonService businessCommonService;
 
 	@Autowired
 	private GroupService groupService;
@@ -276,6 +277,8 @@ public class CommandBasicController {
 	public Object save(
 			String members,
 			String hallIds,
+			String chairmanType,
+			String chairmanId,
 			String name,
 			HttpServletRequest request) throws Exception{
 		
@@ -304,7 +307,7 @@ public class CommandBasicController {
 		GroupPO group = null;
 		try{
 //			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.BASIC, OriginType.INNER, userIdArray);
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
+			group = groupService.saveCommand(user.getId(), user.getName(), null, null, name, name, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -651,7 +654,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.startSilence(Long.parseLong(id), userId, true, false);
+		groupFunctionService.startSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
 	}
@@ -677,7 +680,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.stopSilence(Long.parseLong(id), userId, true, false);
+		groupFunctionService.stopSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
 	}
@@ -703,7 +706,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.startSilence(Long.parseLong(id), userId, false, true);
+		groupFunctionService.startSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
 	}
@@ -729,7 +732,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandSilenceServiceImpl.stopSilence(Long.parseLong(id), userId, false, true);
+		groupFunctionService.stopSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
 	}

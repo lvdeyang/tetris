@@ -71,8 +71,8 @@ public class MemberTerminalBO {
 			return false;
 		MemberTerminalBO bo = (MemberTerminalBO) obj;
 		if(groupMemberType!=null && groupMemberType.equals(bo.getGroupMemberType())
-				&& originId!=null && originId.equals(bo.getOriginId())
-				&& terminalId!=null && terminalId.equals(bo.getTerminalId())){
+				&& originId!=null && originId.equals(bo.getOriginId())){
+//				&& terminalId!=null && terminalId.equals(bo.getTerminalId())){
 			return true;
 		}
 		return false;
