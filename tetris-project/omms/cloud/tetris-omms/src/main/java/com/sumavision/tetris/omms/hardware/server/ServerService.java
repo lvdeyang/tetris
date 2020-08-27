@@ -215,6 +215,19 @@ public class ServerService {
 		basicInfo.setLastRebootTime("");
 		basicInfo.setUpTime("");
 		
+		//小工具升级之后支持的参数
+		if(serverInfo.containsKey("pid")){
+			basicInfo.setMemoryBuff(Long.valueOf(serverInfo.getJSONObject("memory").getString("cached").replace("M", "")) * 1024);
+			
+			basicInfo.setTaskTotal(serverInfo.getJSONObject("pid").getLong("total"));
+			basicInfo.setTaskRunning(serverInfo.getJSONObject("pid").getLong("run"));
+			basicInfo.setTaskSleeping(serverInfo.getJSONObject("pid").getLong("sleep"));
+			basicInfo.setTaskZombie(serverInfo.getJSONObject("pid").getLong("zombie"));
+			
+			basicInfo.setLastRebootTime(serverInfo.getJSONObject("cpu").getString("boot_time"));
+			basicInfo.setUpTime(serverInfo.getJSONObject("cpu").getString("up_time"));
+		}
+		
 		basicInfo.setServerId(serverId);
 		basicInfo.setUpdateTime(now);
 		serverOneDimensionalDataDao.save(basicInfo);

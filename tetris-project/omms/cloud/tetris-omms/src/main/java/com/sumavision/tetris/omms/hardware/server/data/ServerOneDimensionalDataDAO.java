@@ -1,5 +1,7 @@
 package com.sumavision.tetris.omms.hardware.server.data;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
@@ -16,7 +18,7 @@ public interface ServerOneDimensionalDataDAO extends BaseDAO<ServerOneDimensiona
 	 * @param Long serverId 服务器id
 	 * @return ServerOneDimensionalDataPO 服务器一维数据信息
 	 */
-	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_ONE_DIMENSIONAL_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_ONE_DIMENSIONAL_DATA)", nativeQuery = true)
-	public ServerOneDimensionalDataPO findLastDataByServerId(Long serverId);
+	@Query(value = "SELECT * FROM TETRIS_OMMS_SERVER_ONE_DIMENSIONAL_DATA WHERE SERVER_ID=?1 and UPDATE_TIME = (SELECT MAX(UPDATE_TIME) FROM TETRIS_OMMS_SERVER_ONE_DIMENSIONAL_DATA WHERE SERVER_ID=?1)", nativeQuery = true)
+	public List<ServerOneDimensionalDataPO> findLastDataByServerId(Long serverId);
 	
 }

@@ -44,7 +44,7 @@ public class ServiceTypeQuery {
 			}
 		}
 		List<ServicePropertiesPO> propertyEntities = null;
-		if(serviceTypeIds.size() > 0) servicePropertiesDao.findByServiceTypeIdIn(serviceTypeIds);
+		if(serviceTypeIds.size() > 0) propertyEntities = servicePropertiesDao.findByServiceTypeIdIn(serviceTypeIds);
 		
 		GroupType[] values = GroupType.values();
 		List<GroupType> groupTypes = Arrays.asList(values);
