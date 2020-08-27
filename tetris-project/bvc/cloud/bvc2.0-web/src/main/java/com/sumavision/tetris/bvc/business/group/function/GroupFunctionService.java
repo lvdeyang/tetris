@@ -388,6 +388,8 @@ public class GroupFunctionService {
 			group.setStatus(GroupStatus.START);
 			groupDao.save(group);//需要吗？
 			
+			//开启所有只因暂停原因停止的转发，
+			businessCommonService.startGroupForwards(group, true, true);
 			//级联
 			/*GroupType groupType = group.getType();
 			if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -401,38 +403,37 @@ public class GroupFunctionService {
 			}*/
 			
 			//查出所有分页任务，执行状态都置为DONE，查出所有forward，执行状态置为DONE，分页处理
-			List<PageTaskPO> changeTasks = new ArrayList<PageTaskPO>();
-			List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(groupId.toString());
-			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
-			for(CommonForwardPO forward : forwards){
-				forward.setVideoStatus(ExecuteStatus.DONE);
-				forward.setAudioStatus(ExecuteStatus.DONE);
-			}
-			for(PageTaskPO task : tasks){
-				boolean change = false;
-				if(ExecuteStatus.UNDONE.equals(task.getAudioStatus())){
-					task.setAudioStatus(ExecuteStatus.DONE);
-					change = true;
-				}
-				if(ExecuteStatus.UNDONE.equals(task.getVideoStatus())){
-					task.setVideoStatus(ExecuteStatus.DONE);
-					change = true;
-				}
-				if(change){
-					changeTasks.add(task);
-				}
-			}
-			
-			//持久化
-			groupDao.save(group);
-			pageTaskDao.save(tasks);
-			commonForwardDao.save(forwards);
-			
-			
-			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			List<GroupMemberPO> connectMembers = tetrisBvcQueryUtil.queryConnectMembers(members);
-			
-			pageTaskService.reExecute(changeTasks, true);
+//			List<PageTaskPO> changeTasks = new ArrayList<PageTaskPO>();
+//			List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(groupId.toString());
+//			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
+//			for(CommonForwardPO forward : forwards){
+//				forward.setVideoStatus(ExecuteStatus.DONE);
+//				forward.setAudioStatus(ExecuteStatus.DONE);
+//			}
+//			for(PageTaskPO task : tasks){
+//				boolean change = false;
+//				if(ExecuteStatus.UNDONE.equals(task.getAudioStatus())){
+//					task.setAudioStatus(ExecuteStatus.DONE);
+//					change = true;
+//				}
+//				if(ExecuteStatus.UNDONE.equals(task.getVideoStatus())){
+//					task.setVideoStatus(ExecuteStatus.DONE);
+//					change = true;
+//				}
+//				if(change){
+//					changeTasks.add(task);
+//				}
+//			}
+//			
+//			//持久化
+//			groupDao.save(group);
+//			pageTaskDao.save(tasks);
+//			commonForwardDao.save(forwards);
+//			
+//			
+		
+//			
+//			pageTaskService.reExecute(changeTasks, true);
 			
 			//后续：恢复会中的转发
 //			startGroupForwards(group, true, true);
@@ -440,6 +441,8 @@ public class GroupFunctionService {
 			//给成员推送message
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+			List<GroupMemberPO> connectMembers = tetrisBvcQueryUtil.queryConnectMembers(members);
 			JSONObject message = new JSONObject();
 			message.put("businessType", "commandPause");
 			message.put("businessInfo", group.getName() + " 暂停恢复");
@@ -885,7 +888,7 @@ public class GroupFunctionService {
 			
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			GroupMemberPO operateMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
-			//1.组成员取消对上对下静默属性，对应的Pagetask、forwards设置为DONE。
+			//1.组成员取消对上对下静默属性。作用：跳过下面调用方法startGroupForwards对静默导致转发关闭的判断。
 			if(stopSilenceToHigher) operateMember.setSilenceToHigher(false);
 			if(stopSilenceToLower) operateMember.setSilenceToLower(false);
 			
@@ -893,7 +896,7 @@ public class GroupFunctionService {
 			//持久化
 			groupMemberDao.save(operateMember);
 			
-			//2.重新查询会中的转发，并重新发送协议
+			//2.重新查询开始转发，并重新发送协议
 			businessCommonService.startGroupForwards(group, true, true);
 			//级联
 //			if(!OriginType.OUTER.equals(operateMember.getOriginType())){
