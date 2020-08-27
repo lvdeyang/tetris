@@ -33,6 +33,7 @@ import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeIpMissingE
 import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeNotExistException;
 import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissionException;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
+import com.sumavision.tetris.bvc.business.group.record.GroupRecordService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -52,6 +53,9 @@ public class CommandRecordController {
 
 	@Autowired
 	private CommandGroupRecordFragmentDAO commandGroupRecordFragmentDao;
+	
+	@Autowired
+	private GroupRecordService groupRecordService;
 	
 	@Autowired
 	CommandBasicServiceImpl commandBasicServiceImpl;
@@ -92,7 +96,7 @@ public class CommandRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		commandRecordServiceImpl.start(user.getId(), Long.parseLong(id));
+		groupRecordService.start(user.getId(), Long.parseLong(id));
 		
 		return null;
 	}
@@ -117,7 +121,7 @@ public class CommandRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		commandRecordServiceImpl.stop(user.getId(), Long.parseLong(id), true);
+		groupRecordService.stop(user.getId(), Long.parseLong(id), true);
 		return null;
 		
 	}
