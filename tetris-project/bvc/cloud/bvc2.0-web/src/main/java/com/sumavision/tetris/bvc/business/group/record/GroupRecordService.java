@@ -480,7 +480,7 @@ public class GroupRecordService {
 	 */
 	public LogicBO stop(Long userId, Long groupId, boolean doProtocol) throws Exception{
 		
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		if(userId!=null && !group.getUserId().equals(userId)){
 			throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能进行操作");
 		}

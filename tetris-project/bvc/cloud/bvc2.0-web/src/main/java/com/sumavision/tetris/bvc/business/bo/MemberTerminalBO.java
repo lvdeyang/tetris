@@ -11,10 +11,10 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberType;
  */
 public class MemberTerminalBO {
 	
-	/** 成员类型：用户/设备 */
+	/** 成员类型：用户/虚拟设备/设备 */
 	private GroupMemberType groupMemberType;
 	
-	/** 用户id/bundleId */
+	/** 用户id/hallId/bundleId */
 	private String originId;
 	
 	/** 用户对应的终端类型 */
