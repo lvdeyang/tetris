@@ -48,11 +48,8 @@
                                 label="操作"
                                 width="250">
                             <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="发布历史版本" placement="bottom-end">
-                                    <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="generateInstallationPackageHistory(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="查看历史版本" placement="bottom-end">
-                                    <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoInstallationPackageHistory"></el-button>
+                                <el-tooltip class="item" effect="dark" content="参数列表" placement="bottom-end">
+                                    <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoPropertiesList(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
@@ -64,6 +61,38 @@
             </div>
         </el-card>
 
+    </template>
+
+    <template>
+        <el-dialog
+                title="添加版本"
+                :visible.sync="dialog.addPackage.visible"
+                width="500px"
+                :before-close="handleAddPackageClose"
+                :close-on-click-modal="false">
+
+            <el-form label-width="80px">
+                <el-form-item>
+                    <input type="file" id="installation-package-file" style="display:none;" @change="handleFileSelected"/>
+                    <el-button type="text" @click="handleSelectFile">上传文件</el-button>
+                    <div v-if="dialog.addPackage.file">
+                        <span class="el-icon-document" style="font-size:16px;"></span>
+                        <span>{{dialog.addPackage.file.name}}</span>
+                    </div>
+                </el-form-item>
+                <el-form-item label="创建人">
+                    <el-input v-model="dialog.addPackage.creator"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input type="textarea" v-model="dialog.addPackage.remark"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddPackageClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddPackageSubmit" :loading="dialog.addPackage.loading">确定</el-button>
+            </span>
+        </el-dialog>
     </template>
 
 </mi-frame>

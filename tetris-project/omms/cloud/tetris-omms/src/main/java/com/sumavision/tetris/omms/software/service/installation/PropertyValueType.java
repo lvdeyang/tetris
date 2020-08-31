@@ -1,14 +1,13 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum PropertyValueType {
 
 	TEXT("文本"),
-	IP("ip地址"),
-	PORT("端口"),
-	PATH("路径"),
-	URL("url");
+	BOOLEAN("布尔值"),
+	ENUM("枚举"),
+	IP("ip地址");
 	
 	private String name;
 	
