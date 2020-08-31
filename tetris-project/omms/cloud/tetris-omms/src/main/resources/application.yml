@@ -1,9 +1,10 @@
-spring:
+spring: 
   #cache:
     #type: ehcache
     #ehcache:
       #config: classpath:ehcache.xml
-  #activiti:    #check-process-definitions: true
+  #activiti:
+    #check-process-definitions: true
     #database-schema-update: true
     #这里保存全部历史记录
     #history-level: full
@@ -62,6 +63,8 @@ spring:
   http: 
     multipart:
       enabled: true    
+      max-file-size: 4096Mb
+      max-request-size: 4096Mb
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71
