@@ -15,6 +15,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.enumeration.ForwardSourceType;
 import com.sumavision.bvc.device.group.enumeration.ScreenLayout;
 import com.sumavision.bvc.device.group.po.ChannelForwardPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 
 /**
@@ -532,6 +533,47 @@ public class ForwardSetBO {
 		return this;
 	}
 	
+	/** 目前只适用于实时流，不适合文件源 */
+	public ForwardSetBO setByPageTaskAndDstCastDevice(PageTaskPO task, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
+		ForwardSetSrcBO src = new ForwardSetSrcBO();
+		ForwardSetDstBO dst = new ForwardSetDstBO();
+		if(MediaType.VIDEO.equals(mediaType)){
+			//视频转发
+			src.setType("channel")
+			   .setLayerId(task.getSrcVideoLayerId())
+			   .setBundleId(task.getSrcVideoBundleId())
+			   .setChannelId(task.getSrcVideoChannelId());
+			dst.setBase_type("VenusVideoOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstVideoChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}else if(MediaType.AUDIO.equals(mediaType)){
+			//音频转发
+			src.setType("channel")
+			   .setLayerId(task.getSrcAudioLayerId())
+			   .setBundleId(task.getSrcAudioBundleId())
+			   .setChannelId(task.getSrcAudioChannelId());
+			dst.setBase_type("VenusAudioOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstAudioChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}
+		
+		//空源src要发null
+		if(src.getChannelId() != null){
+			this.setSrc(src);
+		}else{
+			this.setSrc(null);
+		} 
+		this.setDst(dst);
+		
+		return this;
+	}
+
 	public ForwardSetBO set(CommonChannelForwardPO forward, CodecParamBO codec){
 		ForwardSetSrcBO src = new ForwardSetSrcBO();
 		ForwardSetDstBO dst = new ForwardSetDstBO();

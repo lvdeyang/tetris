@@ -17,8 +17,6 @@ public class ServiceTypeQuery {
 	@Autowired
 	private ServiceTypeDAO serviceTypeDao;
 	
-	@Autowired
-	private ServicePropertiesDAO servicePropertiesDao;
 	
 	/**
 	 * 查询所有服务类型<br/>
@@ -43,8 +41,6 @@ public class ServiceTypeQuery {
 				serviceTypeIds.add(entity.getId());
 			}
 		}
-		List<ServicePropertiesPO> propertyEntities = null;
-		if(serviceTypeIds.size() > 0) servicePropertiesDao.findByServiceTypeIdIn(serviceTypeIds);
 		
 		GroupType[] values = GroupType.values();
 		List<GroupType> groupTypes = Arrays.asList(values);
@@ -63,15 +59,7 @@ public class ServiceTypeQuery {
 		for(int i=0; i<entities.size(); i++){
 			for(int j=0; j<roots.size(); j++){
 				if(entities.get(i).getGroupType().getName().equals(roots.get(j).getName())){
-					List<ServicePropertiesVO> properties = new ArrayList<ServicePropertiesVO>();
- 					if(propertyEntities!=null && propertyEntities.size()>0){
- 						for(ServicePropertiesPO propertyEntity:propertyEntities){
- 							if(propertyEntity.getServiceTypeId().equals(entities.get(i).getId())){
- 								properties.add(new ServicePropertiesVO().set(propertyEntity));
- 							}
- 						}
- 					}
-					roots.get(j).getChildren().add(new OmmsSoftwareServiceTypeTreeNodeVO().set(entities.get(i), properties));
+					roots.get(j).getChildren().add(new OmmsSoftwareServiceTypeTreeNodeVO().set(entities.get(i)));
 					break;
 				}
 			}

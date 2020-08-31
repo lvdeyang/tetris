@@ -1,10 +1,10 @@
-<mi-frame id="page-omms-software-service-type-wrapper" :menus="menus" :user="user" :groups="groups">
+<mi-frame id="page-omms-software-service-type-wrapper" :menus="menus" :user="user" :groups="groups" active-id="">
 
-    <template slot="title">服务类型</template>
+    <template slot="title">服务管理</template>
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>服务类型</el-breadcrumb-item>
+        <el-breadcrumb-item>服务管理</el-breadcrumb-item>
     </template>
 
     <template>
@@ -41,7 +41,11 @@
                 <el-scrollbar style="height:100%;">
                     <div v-if="tree.current" style="width:100%; padding:10px; box-sizing:border-box;">
                         <el-form label-width="86px" label-position="left">
-                            <el-form-item style="margin-bottom:0;" :label="columns.name.name+':'"><span style="cursor:not-allowed; color:#d3dce6;">{{columns.name.value}}</span></el-form-item>
+                            <el-form-item style="margin-bottom:0;" :label="columns.name.name+':'">
+                                <span style="cursor:not-allowed; font-weight:700; color:#333; font-weight:700;">{{columns.name.value}}</span>
+                                <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackage">版本管理</el-button>
+                                <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackageHistory">历史版本</el-button>
+                            </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.installationDirectory.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('installationDirectory', columns.installationDirectory)"><span class="feather-icon-edit"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
                             </el-form-item>
@@ -51,7 +55,7 @@
                             <el-form-item style="margin-bottom:0;" :label="columns.properties.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="columns.properties.show=!columns.properties.show"><span class="feather-icon-edit"></span>{{columns.properties.show?'收起编辑':'展开编辑'}}</el-button>
                                 <div v-if="columns.properties.show" style="width:100%;">
-                                    <el-button type="primary" size="small" @click=""><span class="icon-plus" style="position:relative; right:1px; margin-bottom:10px;"></span>&nbsp;添加属性</el-button>
+                                    <el-button type="primary" size="small" @click="handleCreateProperty"><span class="icon-plus" style="position:relative; right:1px; margin-bottom:10px;"></span>&nbsp;添加属性</el-button>
                                     <el-table
                                         :data="columns.properties.rows"
                                         style="width:100%">
@@ -65,7 +69,7 @@
                                         </el-table-column>
                                         <el-table-column
                                                 label="属性值类型"
-                                                prop="valueType">
+                                                prop="valueTypeName">
                                         </el-table-column>
                                         <el-table-column
                                                 label="默认值"
@@ -76,10 +80,10 @@
                                                 width="250">
                                             <template slot-scope="scope">
                                                 <el-tooltip class="item" effect="dark" content="修改属性" placement="bottom-end">
-                                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click=""></el-button>
+                                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditProperty(scope)"></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip class="item" effect="dark" content="删除属性" placement="bottom-end">
-                                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click=""></el-button>
+                                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRemoveProperty(scope)"></el-button>
                                                 </el-tooltip>
                                             </template>
                                         </el-table-column>
@@ -135,6 +139,68 @@
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditColumnClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditColumnCommit">确定</el-button>
+            </span>
+        </el-dialog>
+    </template>
+
+    <template>
+        <el-dialog
+                title="添加属性"
+                :visible.sync="dialog.addProperty.visible"
+                width="500px"
+                :before-close="handleCreatePropertyClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="属性key">
+                    <el-input v-model="dialog.addProperty.propertyKey"></el-input>
+                </el-form-item>
+                <el-form-item label="属性名称">
+                    <el-input v-model="dialog.addProperty.propertyName"></el-input>
+                </el-form-item>
+                <el-form-item label="值类型">
+                    <el-select v-model="dialog.addProperty.valueType" style="width:100%;">
+                        <el-option v-for="item in propertyValueTypes" :label="item" :value="item" :key="item"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="默认值">
+                    <el-input v-model="dialog.addProperty.propertyDefaultValue"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreatePropertyClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreatePropertySubmit">确定</el-button>
+            </span>
+        </el-dialog>
+    </template>
+
+    <template>
+        <el-dialog
+                title="修改属性"
+                :visible.sync="dialog.editProperty.visible"
+                width="500px"
+                :before-close="handleEditPropertyClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="属性key">
+                    <el-input v-model="dialog.editProperty.propertyKey"></el-input>
+                </el-form-item>
+                <el-form-item label="属性名称">
+                    <el-input v-model="dialog.editProperty.propertyName"></el-input>
+                </el-form-item>
+                <el-form-item label="值类型">
+                    <el-select v-model="dialog.editProperty.valueType" style="width:100%;">
+                        <el-option v-for="item in propertyValueTypes" :label="item" :value="item" :key="item"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="默认值">
+                    <el-input v-model="dialog.editProperty.propertyDefaultValue"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditPropertyClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditPropertySubmit">确定</el-button>
             </span>
         </el-dialog>
     </template>

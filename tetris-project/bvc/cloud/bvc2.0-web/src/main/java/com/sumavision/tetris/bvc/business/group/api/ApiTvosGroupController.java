@@ -164,7 +164,7 @@ public class ApiTvosGroupController {
 		
 		GroupPO group = null;
 		try {
-			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(),name,name,BusinessType.MEETING_QT, OriginType.INNER, userIdArray,hallIdArray,bundleIdArray,null);
+			group = groupService.saveCommand(user.getId(), user.getName(), "tvosOfUser", null, name, name, BusinessType.MEETING_QT, OriginType.INNER, userIdArray, hallIdArray, bundleIdArray, null);
 		} catch (CommandGroupNameAlreadyExistedException e) {
 			// TODO: handle exception
 			JSONObject info = new JSONObject();

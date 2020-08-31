@@ -49,11 +49,13 @@ public class PageInfoPO extends AbstractBasePO {
 	/** 关联分页任务 */
 	private List<PageTaskPO> pageTasks;
 	
+	@Deprecated
 	@Column(name = "USER_ID")
 	public Long getUserId() {
 		return userId;
 	}
 
+	@Deprecated
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}

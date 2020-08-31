@@ -7,6 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -81,7 +82,11 @@ public class CommandGroupUserPlayerCastDevicePO extends AbstractBasePO {
 	private String dstVenusBundleType;
 	
 	/** 关联播放器 */
+	@Deprecated
 	private CommandGroupUserPlayerPO player;
+	
+	/** 关联播放器 */
+	private PageTaskPO pageTask;
 	
 	/** 关联上屏方案中的分屏 */
 	private CommandGroupDecoderScreenPO screen;
@@ -239,14 +244,26 @@ public class CommandGroupUserPlayerCastDevicePO extends AbstractBasePO {
 		this.dstVenusBundleType = dstVenusBundleType;
 	}
 
+	@Deprecated
 	@ManyToOne
 	@JoinColumn(name = "PLAYER_ID")
 	public CommandGroupUserPlayerPO getPlayer() {
 		return player;
 	}
 
+	@Deprecated
 	public void setPlayer(CommandGroupUserPlayerPO player) {
 		this.player = player;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "PAGE_TASK_ID")
+	public PageTaskPO getPageTask() {
+		return pageTask;
+	}
+
+	public void setPageTask(PageTaskPO pageTask) {
+		this.pageTask = pageTask;
 	}
 
 	@ManyToOne

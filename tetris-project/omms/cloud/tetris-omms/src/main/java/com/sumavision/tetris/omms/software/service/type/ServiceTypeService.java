@@ -60,7 +60,7 @@ public class ServiceTypeService {
 			serviceTypeDao.save(needAdd);
 			List<OmmsSoftwareServiceTypeTreeNodeVO> nodes = new ArrayList<OmmsSoftwareServiceTypeTreeNodeVO>();
 			for(ServiceTypePO serviceType:needAdd){
-				nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceType, null));
+				nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceType));
 			}
 			Collections.sort(nodes, new Comparator<OmmsSoftwareServiceTypeTreeNodeVO>(){
 				@Override

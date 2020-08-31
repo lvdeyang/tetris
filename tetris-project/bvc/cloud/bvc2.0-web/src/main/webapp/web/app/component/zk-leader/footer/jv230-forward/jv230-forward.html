@@ -11,14 +11,13 @@
                         ref="tree"
                         :data="bundles.data"
                         node-key="id"
-                        :props="bundles.props"
-                        @current-change="currentBundleChange">
+                        :props="bundles.props">
                         <div slot-scope="scope">
                             <span v-if="scope.data.type==='FOLDER'">
                                 <span :class="scope.data.icon" :style="scope.data.style"></span>
                                 <span>{{scope.data.name}}</span>
                             </span>
-                            <el-radio v-else v-model="tree.current" :label="scope.data">
+                            <el-radio v-else v-model="bundles.current" :label="scope.data">
                                 <span :class="scope.data.icon" :style="scope.data.style"></span>
                                 <span>{{scope.data.name}}</span>
                             </el-radio>
@@ -28,7 +27,10 @@
             </div>
             <div style="position:absolute; left:350px; top:0; right:0; bottom:0; box-sizing:border-box;">
                 <div style="width:100%; height:100%; position:relative;">
-                    <div style="height:100%; padding-top:38px; box-sizing:border-box;">
+                    <div style="height:47px; padding-top:18px; padding-left:10px;">
+                        <el-button type="primary" size="mini" icon="el-icon-delete" @click="stopForward">停止上屏</el-button>
+                    </div>
+                    <div style="height:100%; padding-top:10px; box-sizing:border-box;">
                         <table :class="'layout-split '+layoutStyle">
                             <tr v-for="(tr, i0) in layout" :key="'tr-'+i0">
                                 <td v-for="(td, i1) in tr" :key="'td-'+i0+'-'+i1"

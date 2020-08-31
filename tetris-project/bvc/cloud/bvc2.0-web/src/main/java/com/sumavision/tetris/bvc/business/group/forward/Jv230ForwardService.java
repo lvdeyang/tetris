@@ -236,15 +236,16 @@ public class Jv230ForwardService {
 																		   .setIs_polling("false")
 																		   .setSrc_mode(0)
 																		   .setDisplay_rect(new PositionBO())
-																		   .setSource(new Jv230SourceBO());
+																		   .setSources(new ArrayList<Jv230SourceBO>());
 					videoForwardProtocol.getChannel_param().getBase_param().getDisplay_rect().setX(forward.getX())
 																							 .setY(forward.getY())
 																							 .setWidth(forward.getW())
 																							 .setHeight(forward.getH())
 																							 .setZ_index(1);
-					videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+					videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																						.setLayer_id(forward.getSourceLayerId())
 																					   .setBundle_id(forward.getSourceBundleId())
-																					   .setChannel_id(forward.getSourceChannelId());
+																					   .setChannel_id(forward.getSourceChannelId()));
 					protocol.getJv230ForwardSet().add(videoForwardProtocol);
 				}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 					//处理音频转发
@@ -645,9 +646,10 @@ public class Jv230ForwardService {
 																						 .setWidth(forward.getW())
 																						 .setHeight(forward.getH())
 																						 .setZ_index(1);
-				videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+				videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																					.setLayer_id(forward.getSourceLayerId())
 																				   .setBundle_id(forward.getSourceBundleId())
-																				   .setChannel_id(forward.getSourceChannelId());
+																				   .setChannel_id(forward.getSourceChannelId()));
 				protocol.getJv230ForwardSet().add(videoForwardProtocol);
 			}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 				//处理音频转发
@@ -856,16 +858,17 @@ public class Jv230ForwardService {
 																	   .setIs_polling("false")
 																	   .setSrc_mode(0)
 																	   .setDisplay_rect(new PositionBO())
-																	   .setSource(new Jv230SourceBO())
+																	   .setSources(new ArrayList<Jv230SourceBO>())
 																	   .setCodec("pcmu");
 				videoForwardProtocol.getChannel_param().getBase_param().getDisplay_rect().setX(forward.getX())
 																						 .setY(forward.getY())
 																						 .setWidth(forward.getW())
 																						 .setHeight(forward.getH())
 																						 .setZ_index(1);
-				videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+				videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																					.setLayer_id(forward.getSourceLayerId())
 																				   .setBundle_id(forward.getSourceBundleId())
-																				   .setChannel_id(forward.getSourceChannelId());
+																				   .setChannel_id(forward.getSourceChannelId()));
 				protocol.getJv230ForwardSet().add(videoForwardProtocol);
 			}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 				//处理音频转发
@@ -1106,8 +1109,8 @@ public class Jv230ForwardService {
 			if(combineVideoForwards.size() > 0){
 				//删除合屏
 			}
-			executeBusiness.execute(protocol, new StringBufferWrapper().append("qt终端jv230停止转发，bundleId：").append(bundleId).toString());
 			jv230ForwardDao.deleteInBatch(forwards);
+			executeBusiness.execute(protocol, new StringBufferWrapper().append("qt终端jv230停止转发，bundleId：").append(bundleId).toString());
 		}else{
 			LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
 											.setCombineAudioDel(new ArrayList<CombineAudioBO>())
@@ -1132,9 +1135,11 @@ public class Jv230ForwardService {
 						qtTerminalCombineVideoSrcDao.deleteInBatch(combineVideoSrcs);
 					}
 				}
+				qtTerminalForwardDao.deleteInBatch(forwards);
 			}
 			protocol.getDisconnectBundle().add(new DisconnectBundleBO().setLayerId(bundle.getAccessNodeUid())
 																	   .setBundleId(bundle.getBundleId()));
+			executeBusiness.execute(protocol, new StringBufferWrapper().append("qt终端停止合屏上屏，bundleId：").append(bundleId).toString());
 		}
 	}
 	
@@ -1163,41 +1168,44 @@ public class Jv230ForwardService {
 		if(terminalEntity == null){
 			throw new TerminalNotFoundException(terminalType);
 		}
-		List<Jv230ForwardPO> forwards = jv230ForwardDao.findByUserIdAndTerminalIdAndBusinessType(String.valueOf(user.getId()), terminalEntity.getId(), ForwardBusinessType.QT_TOTAL_FORWARD);
-		if(forwards==null || forwards.size()<=0) return;
-		List<Jv230ForwardPO> combineAudioForwards = new ArrayList<Jv230ForwardPO>();
-		List<Jv230ForwardPO> combineVideoForwards = new ArrayList<Jv230ForwardPO>();
 		LogicBO protocol = new LogicBO().setUserId(user.getId().toString())
 										.setCombineAudioDel(new ArrayList<CombineAudioBO>())
-				                        .setCombineVideoDel(new ArrayList<CombineVideoBO>())
+						                .setCombineVideoDel(new ArrayList<CombineVideoBO>())
 										.setJv230ForwardDel(new ArrayList<SourceBO>())
 										.setDisconnectBundle(new ArrayList<DisconnectBundleBO>());
-		for(Jv230ForwardPO forward:forwards){
-			if(ForwardSourceType.COMBINE_VIDEO.equals(forward.getSourceType())){
-				combineVideoForwards.add(forward);
-			}else if(ForwardSourceType.COMBINE_AUDIO.equals(forward.getSourceType())){
-				combineAudioForwards.add(forward);
-			}
-			SourceBO deleteJv230ForwardProtocol = new SourceBO();
-			deleteJv230ForwardProtocol.setLayerId(forward.getLayerId());
-			deleteJv230ForwardProtocol.setBundleId(forward.getBundleId());
-			deleteJv230ForwardProtocol.setChannelId(forward.getChannelId());
-			protocol.getJv230ForwardDel().add(deleteJv230ForwardProtocol);
-		}
 		Set<String> combineAudioUuids = new HashSet<String>();
-		if(combineAudioForwards.size() > 0){
-			//删除混音
-			for(Jv230ForwardPO audioForward:combineAudioForwards){
-				combineAudioUuids.add(audioForward.getSourceBundleId());
-				CombineAudioBO combineAudioProtocol = new CombineAudioBO().setUuid(audioForward.getSourceBundleId());
-				protocol.getCombineAudioDel().add(combineAudioProtocol);
+		Set<String> combineVideoUuids = new HashSet<String>();
+		List<Jv230ForwardPO> forwards = jv230ForwardDao.findByUserIdAndTerminalIdAndBusinessType(String.valueOf(user.getId()), terminalEntity.getId(), ForwardBusinessType.QT_TOTAL_FORWARD);
+		if(forwards!=null && forwards.size()>0){
+			List<Jv230ForwardPO> combineAudioForwards = new ArrayList<Jv230ForwardPO>();
+			List<Jv230ForwardPO> combineVideoForwards = new ArrayList<Jv230ForwardPO>();
+			
+			for(Jv230ForwardPO forward:forwards){
+				if(ForwardSourceType.COMBINE_VIDEO.equals(forward.getSourceType())){
+					combineVideoForwards.add(forward);
+				}else if(ForwardSourceType.COMBINE_AUDIO.equals(forward.getSourceType())){
+					combineAudioForwards.add(forward);
+				}
+				SourceBO deleteJv230ForwardProtocol = new SourceBO();
+				deleteJv230ForwardProtocol.setLayerId(forward.getLayerId());
+				deleteJv230ForwardProtocol.setBundleId(forward.getBundleId());
+				deleteJv230ForwardProtocol.setChannelId(forward.getChannelId());
+				protocol.getJv230ForwardDel().add(deleteJv230ForwardProtocol);
 			}
+			if(combineAudioForwards.size() > 0){
+				//删除混音
+				for(Jv230ForwardPO audioForward:combineAudioForwards){
+					combineAudioUuids.add(audioForward.getSourceBundleId());
+					CombineAudioBO combineAudioProtocol = new CombineAudioBO().setUuid(audioForward.getSourceBundleId());
+					protocol.getCombineAudioDel().add(combineAudioProtocol);
+				}
+			}
+			jv230ForwardDao.deleteInBatch(forwards);
 		}
 		
 		List<QtTerminalForwardPO> exceptJv230Forwards = qtTerminalForwardDao.findByUserIdAndTerminalIdAndBusinessType(user.getId().toString(), terminalEntity.getId(), ForwardBusinessType.QT_TOTAL_FORWARD);
 		if(exceptJv230Forwards!=null && exceptJv230Forwards.size()>0){
 			Set<String> bundleIds = new HashSet<String>();
-			Set<String> combineVideoUuids = new HashSet<String>();
 			for(QtTerminalForwardPO exceptJv230Forward:exceptJv230Forwards){
 				bundleIds.add(exceptJv230Forward.getBundleId());
 				if(ForwardSourceType.COMBINE_AUDIO.equals(exceptJv230Forward.getSourceType())){
@@ -1247,9 +1255,9 @@ public class Jv230ForwardService {
 					}
 				}
 			}
+			qtTerminalForwardDao.deleteInBatch(exceptJv230Forwards);
 		}
 		executeBusiness.execute(protocol, "qt终端jv230全部停止转发");
-		jv230ForwardDao.deleteInBatch(forwards);
 	}
 	
 }

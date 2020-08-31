@@ -11,10 +11,10 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberType;
  */
 public class MemberTerminalBO {
 	
-	/** 成员类型：用户/设备 */
+	/** 成员类型：用户/虚拟设备/设备 */
 	private GroupMemberType groupMemberType;
 	
-	/** 用户id/bundleId */
+	/** 用户id/hallId/bundleId */
 	private String originId;
 	
 	/** 用户对应的终端类型 */
@@ -71,8 +71,8 @@ public class MemberTerminalBO {
 			return false;
 		MemberTerminalBO bo = (MemberTerminalBO) obj;
 		if(groupMemberType!=null && groupMemberType.equals(bo.getGroupMemberType())
-				&& originId!=null && originId.equals(bo.getOriginId())
-				&& terminalId!=null && terminalId.equals(bo.getTerminalId())){
+				&& originId!=null && originId.equals(bo.getOriginId())){
+//				&& terminalId!=null && terminalId.equals(bo.getTerminalId())){
 			return true;
 		}
 		return false;

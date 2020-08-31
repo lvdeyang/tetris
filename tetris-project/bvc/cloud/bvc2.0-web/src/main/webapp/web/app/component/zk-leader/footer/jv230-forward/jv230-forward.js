@@ -105,6 +105,25 @@ define([
                     td.data = '';
                 });
             },
+            stopForward:function(){
+                var self = this;
+                if(!self.bundles.current){
+                    self.qt.error('您没有选择上屏设备');
+                    return;
+                }
+                self.qt.confirm('提示', '是否停止当前设备上屏', '确定', function(){
+                    ajax.post('/tetris/bvc/business/jv230/forward/delete/forward/by/bundle/id', {
+                        bundleId:self.bundles.current.id
+                    }, function(data, status, message){
+                        if(status === 200){
+                            self.loadForwardBundles();
+                            self.bundles.current = '';
+                        }else{
+                            self.qt.error(message);
+                        }
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                });
+            },
             currentBundleChange:function(data){
                 var self = this;
                 for(var i=0; i<self.layout.length; i++){
@@ -138,6 +157,17 @@ define([
                         }
                     }
                 });
+            },
+            loadForwardBundles:function(){
+                var self = this;
+                self.bundles.data.splice(0, self.bundles.data.length);
+                ajax.post('/tetris/bvc/business/jv230/forward/query/forward/bundles', null, function(data){
+                    if(data && data.length>0){
+                        for(var i=0; i<data.length; i++){
+                            self.bundles.data.push(data[i]);
+                        }
+                    }
+                });
             }
         },
         mounted: function () {
@@ -166,14 +196,7 @@ define([
                         }
                     }
                 });
-                self.bundles.data.splice(0, self.bundles.data.length);
-                ajax.post('/tetris/bvc/business/jv230/forward/query/forward/bundles', null, function(data){
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.bundles.data.push(data[i]);
-                        }
-                    }
-                });
+                self.loadForwardBundles();
             });
         }
     });

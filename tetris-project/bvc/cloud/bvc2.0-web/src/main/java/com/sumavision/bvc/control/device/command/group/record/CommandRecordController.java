@@ -1,5 +1,7 @@
 package com.sumavision.bvc.control.device.command.group.record;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,12 +16,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordFragmentDAO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
+import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.device.command.group.vo.record.GroupVO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.device.monitor.record.MonitorRecordTaskVO;
@@ -33,6 +37,7 @@ import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeIpMissingE
 import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeNotExistException;
 import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissionException;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
+import com.sumavision.tetris.bvc.business.group.record.GroupRecordService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -43,6 +48,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/record")
 public class CommandRecordController {
+	
+	/** 发起业务时，synchronized锁的前缀 */
+	private static final String lockStartPrefix = "controller-vod-or-call-userId-";
 
 	@Autowired
 	private UserUtils userUtils;
@@ -52,6 +60,9 @@ public class CommandRecordController {
 
 	@Autowired
 	private CommandGroupRecordFragmentDAO commandGroupRecordFragmentDao;
+	
+	@Autowired
+	private GroupRecordService groupRecordService;
 	
 	@Autowired
 	CommandBasicServiceImpl commandBasicServiceImpl;
@@ -92,7 +103,7 @@ public class CommandRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		commandRecordServiceImpl.start(user.getId(), Long.parseLong(id));
+		groupRecordService.start(user.getId(), Long.parseLong(id));
 		
 		return null;
 	}
@@ -117,7 +128,7 @@ public class CommandRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		commandRecordServiceImpl.stop(user.getId(), Long.parseLong(id), true);
+		groupRecordService.stop(user.getId(), Long.parseLong(id), true);
 		return null;
 		
 	}
@@ -188,7 +199,13 @@ public class CommandRecordController {
 			String recordId,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
+		Long userId = userUtils.getUserIdFromSession(request);
+		//是否需要加锁
+		groupRecordService.startPlayGroupRecord(userId,Long.parseLong(recordId));
+		
+		return null;
+		
+//		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
 		
 		/*UserVO user = userUtils.getUserFromSession(request);
 		
@@ -219,17 +236,28 @@ public class CommandRecordController {
 			String fragmentIds,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
-		
-		/*UserVO user = userUtils.getUserFromSession(request);
-		List<Long> fragmentIdsArray = JSONArray.parseArray(fragmentIds, Long.class);
-		
-		List<CommandGroupUserPlayerPO> players = commandRecordServiceImpl.startPlayFragments(user.getId(), fragmentIdsArray);
-		JSONArray result = new JSONArray();
-		for(CommandGroupUserPlayerPO player : players){
-			result.add(new CommandGroupUserPlayerSettingVO().set(player));
+		Long userId = userUtils.getUserIdFromSession(request);
+		//是否需要加锁
+		//可以优化
+		List <String> fragmentIdStrings=Arrays.asList(fragmentIds.replace("[", "").replace("]", "").replace("\"", "").split(","));
+		List<Long> fragmentIdLong=new ArrayList<Long>();
+		for(String fragmentId:fragmentIdStrings){
+			fragmentIdLong.add(Long.parseLong(fragmentId));
 		}
-		return result;*/
+		groupRecordService.startPlayFragments(userId, fragmentIdLong);
+		
+		return null;
+//		throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
+		
+//		UserVO user = userUtils.getUserFromSession(request);
+//		List<Long> fragmentIdsArray = JSONArray.parseArray(fragmentIds, Long.class);
+//		
+//		List<CommandGroupUserPlayerPO> players = groupRecordService.startPlayFragments(user.getId(), fragmentIdsArray);
+//		JSONArray result = new JSONArray();
+//		for(CommandGroupUserPlayerPO player : players){
+//			result.add(new CommandGroupUserPlayerSettingVO().set(player));
+//		}
+//		return result;
 		
 	}
 

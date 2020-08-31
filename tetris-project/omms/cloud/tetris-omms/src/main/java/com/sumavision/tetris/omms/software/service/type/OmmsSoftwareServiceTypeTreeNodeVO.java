@@ -118,7 +118,7 @@ public class OmmsSoftwareServiceTypeTreeNodeVO {
 		return this;
 	}
 	
-	public OmmsSoftwareServiceTypeTreeNodeVO set(ServiceTypePO serviceType, List<ServicePropertiesVO> properties){
+	public OmmsSoftwareServiceTypeTreeNodeVO set(ServiceTypePO serviceType){
 		this.setId(serviceType.getId())
 			.setName(serviceType.getName())
 			.setIsLeaf(true)
@@ -133,7 +133,6 @@ public class OmmsSoftwareServiceTypeTreeNodeVO {
 														   .put("shutdownScript", serviceType.getShutdownScript())
 														   .put("shutdownScriptPath", serviceType.getShutdownScriptPath())
 														   .put("logFile", serviceType.getLogFile())
-														   .put("properties", properties)
 														   .getMap());
 		return this;
 	}

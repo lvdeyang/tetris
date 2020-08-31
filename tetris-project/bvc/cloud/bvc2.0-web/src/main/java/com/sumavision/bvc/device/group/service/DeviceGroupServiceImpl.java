@@ -2518,14 +2518,14 @@ public class DeviceGroupServiceImpl {
 						//从map中取出锁定成功的DeviceGroupMemberPO
 						DeviceGroupMemberPO bundle = uuidMemberMap.get(connectBundleResult.getBundleId());
 						String bundleType = bundle.getBundleType();
-						if("tvos".equals(bundleType) || "jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
+//						if("tvos".equals(bundleType) || "jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
 							bundle.setMemberStatus(MemberStatus.CONNECT);
-						}else{
-							//如果已经CONNECT，则不修改
-							if(!MemberStatus.CONNECT.equals(bundle.getMemberStatus())){
-								bundle.setMemberStatus(MemberStatus.CONNECTING);
-							}
-						}
+//						}else{
+//							//如果已经CONNECT，则不修改
+//							if(!MemberStatus.CONNECT.equals(bundle.getMemberStatus())){
+//								bundle.setMemberStatus(MemberStatus.CONNECTING);
+//							}
+//						}
 					}
 				}catch (Exception e){
 					e.printStackTrace();

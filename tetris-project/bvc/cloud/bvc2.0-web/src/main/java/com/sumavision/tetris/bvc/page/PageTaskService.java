@@ -147,8 +147,15 @@ public class PageTaskService {
 		//获取当前分页下的任务
 		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, currentPage, true);
 		
+		//解绑解码器
+		for(PageTaskPO removeTask : removeTasks){
+			commandCastServiceImpl.setCastDevices(removeTask, new ArrayList<String>());
+		}
+		
 //		removeTask
 		removeTasks(pageInfo, removeTasks);
+		
+		
 		
 //		addTask
 //		List<PageTaskPO> newTaskPOs = new ArrayList<PageTaskPO>();
@@ -697,6 +704,8 @@ public class PageTaskService {
 			ConnectBO connectDecoderVideoChannel = new ConnectBO().setChannelId(openTask.getDstVideoChannelId())
 														          .setChannel_status("Open")
 														          .setBase_type(openTask.getDstVideoBaseType())
+														          .setMode(openTask.getVideoTransmissionMode().getCode())
+														          .setMulti_addr(openTask.getVideoMultiAddr())
 														          .setCodec_param(codec)
 														          .setSource_param(decoderVideoForwardSet);
 			ForwardSetSrcBO decoderAudioForwardSet = null;
@@ -712,6 +721,8 @@ public class PageTaskService {
 			ConnectBO connectDecoderAudioChannel = new ConnectBO().setChannelId(openTask.getDstAudioChannelId())
 																  .setChannel_status("Open")
 																  .setBase_type(openTask.getDstAudioBaseType())
+														          .setMode(openTask.getAudioTransmissionMode().getCode())
+														          .setMulti_addr(openTask.getAudioMultiAddr())
 																  .setCodec_param(codec)
 																  .setSource_param(decoderAudioForwardSet);
 			
