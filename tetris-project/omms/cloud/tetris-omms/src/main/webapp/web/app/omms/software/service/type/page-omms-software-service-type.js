@@ -132,7 +132,7 @@ define([
                 },
                 goToInstallationPackageHistory:function(){
                     var self = this;
-                    window.location.hash = '#/page-omms-software-service-installation-package-history/0/' + self.tree.current.id + '/' + self.tree.current.name;
+                    window.location.hash = '#/page-omms-software-service-installation-package-history/' + self.tree.current.id + '/' + self.tree.current.name;
                 },
                 loadValueTypes:function(){
                     var self = this;
@@ -380,7 +380,7 @@ define([
             },
             mounted:function(){
                 var self = this;
-                self.loadValueTypes();
+                //self.loadValueTypes();
                 self.loadAllServiceTypes();
 
                 self.$nextTick(function(){

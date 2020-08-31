@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServicePropertiesQuery {
+public class PropertiesQuery {
 
 	/**
 	 * 查询服务属性值类型<br/>
