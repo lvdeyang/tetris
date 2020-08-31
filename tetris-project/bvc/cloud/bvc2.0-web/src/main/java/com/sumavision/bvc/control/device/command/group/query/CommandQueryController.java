@@ -81,6 +81,11 @@ import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallRolePermissionDAO;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -113,6 +118,12 @@ public class CommandQueryController {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageInfoDAO pageInfoDao;
 	
 	@Autowired
 	private GroupDAO groupDAO;
@@ -627,7 +638,7 @@ public class CommandQueryController {
 			HttpServletRequest request) throws Exception{
 		
 		//获取userId
-		long userId = userUtils.getUserIdFromSession(request);
+		Long userId = userUtils.getUserIdFromSession(request);
 		
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
@@ -682,13 +693,14 @@ public class CommandQueryController {
 		}
 		
 		//过滤已经被绑定的设备
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-		List<CommandGroupUserPlayerPO> players = userInfo.getPlayers();
-//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(players, serial);
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+//		List<CommandGroupUserPlayerPO> players = userInfo.getPlayers();		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		Set<String> castedBundleIds = new HashSet<String>();
-		for(CommandGroupUserPlayerPO player : players){
-			if(player.getCastDevices() == null) continue;
-			for(CommandGroupUserPlayerCastDevicePO device : player.getCastDevices()){
+		for(PageTaskPO task : pageInfo.getPageTasks()){
+			if(task.getCastDevices() == null) continue;
+			for(CommandGroupUserPlayerCastDevicePO device : task.getCastDevices()){
 				castedBundleIds.add(device.getDstBundleId());
 			}
 		}

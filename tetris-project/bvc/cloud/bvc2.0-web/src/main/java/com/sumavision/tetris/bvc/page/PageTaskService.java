@@ -147,8 +147,15 @@ public class PageTaskService {
 		//获取当前分页下的任务
 		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, currentPage, true);
 		
+		//解绑解码器
+		for(PageTaskPO removeTask : removeTasks){
+			commandCastServiceImpl.setCastDevices(removeTask, new ArrayList<String>());
+		}
+		
 //		removeTask
 		removeTasks(pageInfo, removeTasks);
+		
+		
 		
 //		addTask
 //		List<PageTaskPO> newTaskPOs = new ArrayList<PageTaskPO>();

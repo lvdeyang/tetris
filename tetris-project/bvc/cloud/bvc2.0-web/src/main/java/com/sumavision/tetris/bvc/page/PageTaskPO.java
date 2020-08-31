@@ -1,15 +1,21 @@
 package com.sumavision.tetris.bvc.page;
 
 import java.util.Comparator;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
@@ -214,6 +220,9 @@ public class PageTaskPO extends AbstractBasePO {
 	
 	/** 目标音频通道名称 */
 	private String dstAudioChannelName;
+	
+	/** 绑定的上屏设备 */
+	private List<CommandGroupUserPlayerCastDevicePO> castDevices;
 	
 	/** 关联分页信息 */
 	private PageInfoPO pageInfo;
@@ -674,6 +683,15 @@ public class PageTaskPO extends AbstractBasePO {
 
 	public void setDstAudioChannelName(String dstAudioChannelName) {
 		this.dstAudioChannelName = dstAudioChannelName;
+	}
+
+	@OneToMany(mappedBy = "pageTask", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	public List<CommandGroupUserPlayerCastDevicePO> getCastDevices() {
+		return castDevices;
+	}
+
+	public void setCastDevices(List<CommandGroupUserPlayerCastDevicePO> castDevices) {
+		this.castDevices = castDevices;
 	}
 
 	@ManyToOne
