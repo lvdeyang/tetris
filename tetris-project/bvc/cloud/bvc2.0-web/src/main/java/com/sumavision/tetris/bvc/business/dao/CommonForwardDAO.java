@@ -11,4 +11,6 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 public interface CommonForwardDAO extends MetBaseDAO<CommonForwardPO>{
 
 	public List<CommonForwardPO> findByBusinessId(String businessId);
+	
+	public CommonForwardPO findByUuid(String uuid);
 }

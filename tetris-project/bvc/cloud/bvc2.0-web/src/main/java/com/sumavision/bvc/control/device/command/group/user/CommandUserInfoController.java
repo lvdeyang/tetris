@@ -46,6 +46,8 @@ import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -98,6 +100,9 @@ public class CommandUserInfoController {
 	
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
 	
 	@Autowired
 	private PageTaskService pageTaskService;
@@ -224,9 +229,11 @@ public class CommandUserInfoController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
-		List<CommandGroupUserPlayerCastDevicePO> castDevices = player.getCastDevices();
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		List<CommandGroupUserPlayerCastDevicePO> castDevices = task.getCastDevices();
 		JSONArray result = new JSONArray();
 		for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
 			JSONObject device = new JSONObject();
@@ -258,17 +265,19 @@ public class CommandUserInfoController {
 			String bundleIds,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
-		/*
+//		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		
 		UserVO user = userUtils.getUserFromSession(request);
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
 		List<String> bundleIdsList = JSONArray.parseArray(bundleIds, String.class);
-		commandCastServiceImpl.setCastDevices(player, bundleIdsList);
+		commandCastServiceImpl.setCastDevices(task, bundleIdsList);
 		
-		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(task);
 		
-		return playerVO;*/
+		return playerVO;
 	}
 	
 	/**
@@ -291,16 +300,18 @@ public class CommandUserInfoController {
 			String bundleId,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
-		/*
+//		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		
 		UserVO user = userUtils.getUserFromSession(request);
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
-		commandCastServiceImpl.editCastDevices(player, new ArrayListWrapper<String>().add(bundleId).getList(), null);
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		commandCastServiceImpl.editCastDevices(task, new ArrayListWrapper<String>().add(bundleId).getList(), null);
 		
-		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(task);
 		
-		return playerVO;*/
+		return playerVO;
 	}
 	
 	/**
@@ -323,16 +334,18 @@ public class CommandUserInfoController {
 			String bundleId,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
-		/*
+//		throw new BaseException(StatusCode.FORBIDDEN, "不能在窗口上绑定");
+		
 		UserVO user = userUtils.getUserFromSession(request);
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
-		commandCastServiceImpl.editCastDevices(player, null, new ArrayListWrapper<String>().add(bundleId).getList());
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		commandCastServiceImpl.editCastDevices(task, null, new ArrayListWrapper<String>().add(bundleId).getList());
 		
-		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(task);
 		
-		return playerVO;*/
+		return playerVO;
 	}
 	
 	/**

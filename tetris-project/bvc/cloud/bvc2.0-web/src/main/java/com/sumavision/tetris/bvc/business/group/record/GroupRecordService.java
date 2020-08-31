@@ -23,7 +23,6 @@ import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordFragmentDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
@@ -47,12 +46,15 @@ import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistExce
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO.ResultDstBO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDemandDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
+import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
@@ -68,6 +70,7 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
@@ -114,6 +117,9 @@ public class GroupRecordService {
 	
 	@Autowired
 	private GroupDAO groupDao;
+	
+	@Autowired
+	private CommonForwardDAO commonForwardDAO;
 	
 	@Autowired
 	private GroupMemberDAO groupMemberDao;
@@ -169,9 +175,9 @@ public class GroupRecordService {
 	/**
 	 * 会议开始录制<br/>
 	 * <p>所有录制都不呼叫编码器，停止的时候也不挂断编码器</p>
-	 * <b>作者:</b>zsy<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月22日 上午8:17:59
+	 * <b>日期：</b>2020年8月27日 下午4:26:13
 	 * @param userId 操作人userId
 	 * @param groupId
 	 * @param name
@@ -208,32 +214,64 @@ public class GroupRecordService {
 //			record.setPlayerSplitLayout(userInfo.obtainUsingScheme().getPlayerSplitLayout());
 			record.setFragments(new ArrayList<CommandGroupRecordFragmentPO>());			
 			
+			//开始修改
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(members, groupId.toString(), BusinessInfoType.BASIC_COMMAND);
+			//1.获取PageInfo里边有当前分页页面包含的各种信息（终端类型、用户id、页面规格、用户成员类型）
+			//2.获取Pagetask里边的页面转发相关的关系（需要筛选出指挥对应的     BusinessInfoType.BASIC_COMMAND）
+			TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+			PageInfoPO  pageInfo=pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 			
-			GroupMemberPO thisMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
-			for(GroupMemberPO member : members){
-				
-				if(member.getIsAdministrator()) continue;
-				if(!member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)) continue;
-				
-				List<SourceBO> sources = tetrisBvcQueryUtil.querySourceBOsByMemberIds(sourceBOs, member.getId());
-				for(SourceBO source : sources){
-				
-					CommandGroupRecordFragmentPO fragment = new CommandGroupRecordFragmentPO().setByMemberSource(member, source, startTime);
-					fragment.setInfo(member.getName());
-					//拼预览地址
-					String urlIndex = groupId + "-" + userId + "-" + Integer.toString(record.getUuid().hashCode()).replace("-", "m") + Integer.toString(fragment.getUuid().hashCode()).replace("-", "m") + "/video";
-					String previewUrl = urlIndex + ".m3u8";
-					fragment.setPreviewUrl(previewUrl);
-					
-					fragment.setRecord(record);
-					record.getFragments().add(fragment);
-					
-					logic.merge(startRecord(fragment, codec, adminUserId));
-
+			List<PageTaskPO> pageTasks = null;
+			if(group.getBusinessType().equals(BusinessType.COMMAND)){
+				pageTasks=pageTaskDao.findByBusinessInfoTypeAndPageInfoId(BusinessInfoType.BASIC_COMMAND,pageInfo.getId());
+			}else if(group.getBusinessType().equals(BusinessType.MEETING_QT)){
+				pageTasks=pageTaskDao.findByBusinessInfoTypeAndPageInfoId(BusinessInfoType.BASIC_MEETING,pageInfo.getId());
+			}
+			
+			if(pageTasks!=null){
+				for(PageTaskPO pageTask:pageTasks){
+					//判断的是音频或者视频只要一个是执行状态
+					if(pageTask != null && (pageTask.getAudioStatus().equals(ExecuteStatus.DONE)||pageTask.getVideoStatus().equals(ExecuteStatus.DONE))){
+						CommonForwardPO forward = commonForwardDAO.findByUuid(pageTask.getForwardUuid());
+						CommandGroupRecordFragmentPO fragment = new CommandGroupRecordFragmentPO().setByForwardAndPageTask(forward, pageTask, startTime);
+						GroupMemberPO srcMember = tetrisBvcQueryUtil.queryMemberById(members, forward.getSrcMemberId());
+						fragment.setInfo(srcMember.getName());
+						//拼预览地址
+						String urlIndex = groupId + "-" + userId + "-" + Integer.toString(record.getUuid().hashCode()).replace("-", "m") + Integer.toString(fragment.getUuid().hashCode()).replace("-", "m") + "/video";
+						String previewUrl = urlIndex + ".m3u8";
+						fragment.setPreviewUrl(previewUrl);
+						
+						fragment.setRecord(record);
+						record.getFragments().add(fragment);
+						
+						logic.merge(startRecord(fragment, codec, adminUserId));
+					}
 				}
 			}
+			
+//			GroupMemberPO thisMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
+//			for(GroupMemberPO member : members){
+//				
+//				if(member.getIsAdministrator()) continue;
+//				if(!member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)) continue;
+//				
+//				List<SourceBO> sources = tetrisBvcQueryUtil.querySourceBOsByMemberIds(sourceBOs, member.getId());
+//				for(SourceBO source : sources){
+//				
+//					CommandGroupRecordFragmentPO fragment = new CommandGroupRecordFragmentPO().setByMemberSource(member, source, startTime);
+//					fragment.setInfo(member.getName());
+//					//拼预览地址
+//					String urlIndex = groupId + "-" + userId + "-" + Integer.toString(record.getUuid().hashCode()).replace("-", "m") + Integer.toString(fragment.getUuid().hashCode()).replace("-", "m") + "/video";
+//					String previewUrl = urlIndex + ".m3u8";
+//					fragment.setPreviewUrl(previewUrl);
+//					
+//					fragment.setRecord(record);
+//					record.getFragments().add(fragment);
+//					
+//					logic.merge(startRecord(fragment, codec, adminUserId));
+//
+//				}
+//			}
 			
 			commandGroupRecordDao.save(record);
 			
@@ -331,7 +369,7 @@ public class GroupRecordService {
 			CommandGroupForwardPO forward = commandCommonUtil.queryForwardByDstVideoBundleId(forwards, player.getBundleId());
 			if(forward != null){// && forward.getExecuteStatus().equals(ExecuteStatus.DONE)){
 				
-				ExecuteStatus executeStatus = forward.getExecuteStatus();
+				com.sumavision.bvc.command.group.enumeration.ExecuteStatus executeStatus = forward.getExecuteStatus();
 				CommandGroupRecordFragmentPO fragment;
 				fragment = commandCommonUtil.queryFragmentBySrcMemberId(record, forward.getSrcMemberId());
 				if(fragment == null){
@@ -429,7 +467,7 @@ public class GroupRecordService {
 	}
 
 	/**
-	 * 会议停止录制<br/>
+	 * (待修改)会议停止录制<br/>
 	 * <p>所有录制都不呼叫编码器，停止的时候也不挂断编码器</p>
 	 * <p>该方法不会修改group，只读取groupName，因此不需要处理group的同步</p>
 	 * <b>作者:</b>zsy<br/>
@@ -442,7 +480,7 @@ public class GroupRecordService {
 	 */
 	public LogicBO stop(Long userId, Long groupId, boolean doProtocol) throws Exception{
 		
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		if(userId!=null && !group.getUserId().equals(userId)){
 			throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能进行操作");
 		}

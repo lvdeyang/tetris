@@ -19,7 +19,9 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
+import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -391,6 +393,31 @@ public class CommandGroupRecordFragmentPO extends AbstractBasePO{
 				forward.getAudioLayerId(),
 				forward.getAudioChannelId(),
 				forward.getAudioBaseType()
+				);
+		return this;
+	}
+	
+	/** 无法设置info信息，需要额外设置 */
+	public CommandGroupRecordFragmentPO setByForwardAndPageTask(CommonForwardPO forward, PageTaskPO pageTask, Date date) throws Exception{
+		this.edit(
+				pageTask.getLocationIndex(),
+				PlayerBusinessType.NONE,
+				date,
+				null,//Date endTime,
+				null,//String info,
+				forward.getSrcMemberId(),
+				forward.getSrcBundleId(),
+				forward.getSrcBundleName(),
+				forward.getSrcBundleType(),
+				forward.getSrcLayerId(),
+				forward.getSrcChannelId(),
+				forward.getSrcBaseType(),
+				forward.getSrcAudioBundleId(),
+				forward.getSrcAudioBundleName(),
+				forward.getSrcAudioBundleType(),
+				forward.getSrcAudioLayerId(),
+				forward.getSrcAudioChannelId(),
+				forward.getSrcAudioBaseType()
 				);
 		return this;
 	}
