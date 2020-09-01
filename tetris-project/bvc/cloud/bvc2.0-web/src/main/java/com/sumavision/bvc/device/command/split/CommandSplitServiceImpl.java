@@ -266,6 +266,22 @@ public class CommandSplitServiceImpl {
 
 		synchronized (userId) {
 			
+			/*
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			//当前方案的所有播放器
+			List<CommandGroupUserPlayerPO> players = userInfo.obtainUsingSchemePlayers();
+			for(CommandGroupUserPlayerPO player : players){
+				if(player.getLocationIndex() == oldIndex){
+					player.setLocationIndex(newIndex);
+				}else if(player.getLocationIndex() == newIndex){
+					player.setLocationIndex(oldIndex);
+				}
+			}
+			
+			commandGroupUserInfoDao.save(userInfo);
+			 */
+			
+			/*
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 			CommandGroupUserPlayerPO oldPlayer = null;
 			CommandGroupUserPlayerPO newPlayer = null;
@@ -314,7 +330,7 @@ public class CommandSplitServiceImpl {
 			oldPlayer.setLocationIndex(oldIndex);
 			
 			commandGroupUserInfoDao.save(userInfo);
-			
+			*/
 		}
 	}
 	

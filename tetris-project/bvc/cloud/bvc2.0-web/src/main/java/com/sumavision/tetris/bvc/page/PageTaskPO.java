@@ -1,15 +1,21 @@
 package com.sumavision.tetris.bvc.page;
 
 import java.util.Comparator;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
@@ -34,11 +40,14 @@ public class PageTaskPO extends AbstractBasePO {
 
 	private static final long serialVersionUID = 1L;
 	
-	/** 排序索引 */
+	/** 排序索引从，从0开始 */
 	private int taskIndex;
 	
-	/** 实际界面上的位置索引，qt界面播放器使用 */
+	/** 实际界面上的位置索引，从0开始，qt界面播放器使用 */
 	private Integer locationIndex;
+	
+	/** 固定在固定页的固定位置 */
+	private Boolean fixedAtPageAndLocation = false;
 	
 	/** 业务类型 */
 	private BusinessInfoType businessType = BusinessInfoType.NONE;
@@ -215,6 +224,9 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 目标音频通道名称 */
 	private String dstAudioChannelName;
 	
+	/** 绑定的上屏设备 */
+	private List<CommandGroupUserPlayerCastDevicePO> castDevices;
+	
 	/** 关联分页信息 */
 	private PageInfoPO pageInfo;
 	
@@ -233,6 +245,14 @@ public class PageTaskPO extends AbstractBasePO {
 
 	public void setLocationIndex(Integer locationIndex) {
 		this.locationIndex = locationIndex;
+	}
+
+	public Boolean getFixedAtPageAndLocation() {
+		return fixedAtPageAndLocation;
+	}
+
+	public void setFixedAtPageAndLocation(Boolean fixedAtPageAndLocation) {
+		this.fixedAtPageAndLocation = fixedAtPageAndLocation;
 	}
 
 	@Column(name = "BUSINESS_TYPE")
@@ -674,6 +694,15 @@ public class PageTaskPO extends AbstractBasePO {
 
 	public void setDstAudioChannelName(String dstAudioChannelName) {
 		this.dstAudioChannelName = dstAudioChannelName;
+	}
+
+	@OneToMany(mappedBy = "pageTask", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	public List<CommandGroupUserPlayerCastDevicePO> getCastDevices() {
+		return castDevices;
+	}
+
+	public void setCastDevices(List<CommandGroupUserPlayerCastDevicePO> castDevices) {
+		this.castDevices = castDevices;
 	}
 
 	@ManyToOne

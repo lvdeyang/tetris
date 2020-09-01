@@ -32,6 +32,16 @@ import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
 import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistException;
 import com.sumavision.bvc.feign.ResourceServiceClient;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskDAO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskQueryService;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -49,10 +59,22 @@ public class CommandOsdServiceImpl {
 	private UserQuery userQuery;
 	
 	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageInfoDAO pageInfoDao;
+	
+	@Autowired
+	private PageTaskDAO pageTaskDao;
+	
+	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
 	@Autowired
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
+	
+	@Autowired
+	private PageTaskQueryService pageTaskQueryService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -96,6 +118,25 @@ public class CommandOsdServiceImpl {
 		}
 		return bunldes;
 	}
+	private List<BundleDTO> packBundles(PageTaskPO task){
+		List<BundleDTO> bunldes = new ArrayList<BundleDTO>();
+		bunldes.add(new BundleDTO().setBundleId(task.getDstBundleId())
+								   .setBundleType(task.getDstBundleType())
+								   .setLayerId(task.getDstLayerId())
+								   .setVideoChannelId(task.getDstVideoChannelId())
+								   .setVideoChannelBaseType(task.getDstVideoBaseType()));
+		List<CommandGroupUserPlayerCastDevicePO> castDevices = task.getCastDevices();
+		if(castDevices!=null && castDevices.size()>0){
+			for(CommandGroupUserPlayerCastDevicePO castDevice:castDevices){
+				bunldes.add(new BundleDTO().setBundleId(castDevice.getDstBundleId())
+										   .setBundleType(castDevice.getDstBundleType())
+										   .setLayerId(castDevice.getDstLayerId())
+										   .setVideoChannelId(castDevice.getDstVideoChannelId())
+										   .setVideoChannelBaseType("VenusVideoOut"));
+			}
+		}
+		return bunldes;
+	}
 	
 	/**
 	 * 设置/修改osd<br/>
@@ -107,6 +148,75 @@ public class CommandOsdServiceImpl {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void setOsd(
+			Integer serial, 
+			Long osdId) throws Exception{
+		
+		MonitorOsdPO osd = monitorOsdDao.findOne(osdId);
+		if(osd == null){
+			throw new MonitorOsdNotExistException(osdId);
+		}
+		
+		UserVO user = userQuery.current();
+		
+//		String originId = user.getId().toString();
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+//		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		
+		if(task == null || BusinessInfoType.NONE.equals(task.getBusinessInfoType())) return;
+		
+		task.setOsdId(osd.getId());
+		task.setOsdName(osd.getName());
+		pageTaskDao.save(task);
+		
+		List<BundleDTO> bundles = packBundles(task);
+		
+//		//获取参数模板
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		
+		LogicBO logic = new LogicBO().setUserId("-1")
+	 			 .setPass_by(new ArrayList<PassByBO>());
+		
+		//清除字幕协议
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(task.getSrcVideoCode(), task.getSrcVideoBundleName());
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);			
+		}
+		
+		//先发清除
+//		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
+		
+		logic.getPass_by().clear();
+		
+		//设置字幕协议
+		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, task.getSrcVideoCode(), task.getSrcVideoBundleName());
+		setOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(setOsd);
+			logic.getPass_by().add(passByBO);			
+		}
+		
+		//后发设置
+		executeBusiness.execute(logic, "指控系统：重设播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.coverLianwangPassby(bundle.getBundleId(), bundle.getLayerId(), "osds", JSON.toJSONString(setOsd));
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	public void setOsd_old(
 			Integer serial, 
 			Long osdId) throws Exception{
 		
@@ -185,6 +295,58 @@ public class CommandOsdServiceImpl {
 	public void clearOsd(Integer serial) throws Exception{
 		
 		UserVO user = userQuery.current();
+		
+//		String originId = user.getId().toString();
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+//		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
+		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		
+		if(task == null || BusinessInfoType.NONE.equals(task.getBusinessInfoType())) return;
+		
+		task.setOsdId(null);
+		task.setOsdName(null);
+		pageTaskDao.save(task);
+		
+		List<BundleDTO> bundles = packBundles(task);
+		
+//		//获取参数模板
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		
+		LogicBO logic = new LogicBO().setUserId("-1")
+				.setPass_by(new ArrayList<PassByBO>());
+		
+		//清除字幕协议
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(task.getSrcVideoCode(), task.getSrcVideoBundleName());
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);			
+		}
+		
+		//先发清除
+		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.removeLianwangPassby(bundle.getBundleId());
+		}
+	}
+
+	/**
+	 * 清除osd<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午2:48:39
+	 * @param Integer serial 布局序号
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void clearOsd_old(Integer serial) throws Exception{
+		
+		UserVO user = userQuery.current();
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		
 		CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByLocationIndexAndUserInfoId(serial, userInfo.getId());
@@ -225,7 +387,7 @@ public class CommandOsdServiceImpl {
 			resourceServiceClient.removeLianwangPassby(bundle.getBundleId());
 		}
 	}
-
+	
 	/**
 	 * 获取设备信息<br/>
 	 * <b>作者:</b>zsy<br/>

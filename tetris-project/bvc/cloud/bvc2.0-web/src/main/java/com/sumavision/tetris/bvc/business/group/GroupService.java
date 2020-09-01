@@ -26,9 +26,11 @@ import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
+import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
@@ -40,6 +42,7 @@ import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.command.time.CommandFightTimeServiceImpl;
+import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
@@ -72,6 +75,7 @@ import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandService;
+import com.sumavision.tetris.bvc.business.group.record.GroupRecordService;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
@@ -86,11 +90,13 @@ import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineBusinessType;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
@@ -121,6 +127,12 @@ public class GroupService {
 
 	@Autowired
 	private CombineAudioDAO combineAudioDao;
+	
+	@Autowired
+	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired
+	private PageInfoDAO pageInfoDAO;
 	
 	@Autowired
 	private ConferenceHallDAO conferenceHallDao;
@@ -186,6 +198,9 @@ public class GroupService {
 	private ResourceService resourceService;
 	
 	@Autowired
+	private GroupRecordService groupRecordService;
+	
+	@Autowired
 	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
@@ -205,6 +220,9 @@ public class GroupService {
 	
 	@Autowired
 	private CommandMeetingSpeakServiceImpl commandMeetingSpeakServiceImpl;
+	
+	@Autowired
+	private CommandUserServiceImpl commandUserServiceImpl;
 	
 	@Autowired
 	private CommandVodService commandVodService;
@@ -510,6 +528,27 @@ public class GroupService {
 		
 		List<GroupMemberPO> members = generateMembers(group.getId(), memberTerminalBOs, chairmanBO);
 		groupMemberDao.save(members);
+		
+		//查询所有成员pageInfo是否存在，否为成员创建pageInfo
+		List <PageInfoPO> addPageInfos=new ArrayList<PageInfoPO>();
+		for(MemberTerminalBO memberTerminalBO :memberTerminalBOs){
+			if(null==commandGroupUserInfoDao.findByUserId(Long.parseLong(memberTerminalBO.getOriginId()))){
+				CommandGroupUserInfoPO userInfo=commandUserServiceImpl.generateDefaultUserInfo(Long.parseLong(memberTerminalBO.getOriginId()), "新建", true);
+				commandGroupUserInfoDao.save(userInfo);
+			}
+			if(null==pageInfoDAO.findByOriginIdAndTerminalIdAndGroupMemberType(
+					memberTerminalBO.getOriginId(),
+					memberTerminalBO.getTerminalId(),
+					memberTerminalBO.getGroupMemberType())){
+				PageInfoPO pageInfo=new PageInfoPO(
+						memberTerminalBO.getOriginId(), 
+						memberTerminalBO.getTerminalId(),
+						memberTerminalBO.getGroupMemberType());
+				addPageInfos.add(pageInfo);
+			}
+		}
+		
+		pageInfoDAO.save(addPageInfos);
 		
 		//级联
 		if(!OriginType.OUTER.equals(originType)){
@@ -852,6 +891,7 @@ public class GroupService {
 	 * @param groupIds
 	 * @throws Exception
 	 */
+	@Transactional
 	public void remove(Long userId, List<Long> groupIds) throws Exception{
 		UserVO user = userQuery.current();
 		groupIds.remove(null);
@@ -1275,9 +1315,11 @@ public class GroupService {
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
 			groupMemberRolePermissionDao.deleteInBatch(ps);
 			
-			//关闭编码通道
+			//关闭编码通道,关闭录像
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
+			LogicBO logicStopRecord = groupRecordService.stop(null, groupId, false);
+			logic.merge(logicStopRecord);
 			executeBusiness.execute(logic, group.getName() + " 会议停止");
 			
 			//删除合屏混音
@@ -1946,10 +1988,18 @@ public class GroupService {
 				groupDemandService.stopDemands(group, demands, false);
 				
 				//给退出成员解绑所有的角色。后续改成批量
+//				for(GroupMemberPO member : connectRemoveMembers){
+//					List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
+//					List<Long> removeRoleIds = businessCommonService.obtainGroupMemberRolePermissionPOIds(ps);
+//					agendaExecuteService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds, false);
+//				}
+				
+				//删除成员角色对应关系
 				for(GroupMemberPO member : connectRemoveMembers){
-					List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
-					List<Long> removeRoleIds = businessCommonService.obtainGroupMemberRolePermissionPOIds(ps);
-					agendaExecuteService.modifyMemberRole(groupId, member.getId(), null, removeRoleIds, false);
+//					GroupMemberRolePermissionPO groupMemberRolePermission =groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
+//					List<GroupMemberRolePermissionPO> ps = new ArrayListWrapper().add(groupMemberRolePermission).getList();
+//					List<Long> removeRoleIds = businessCommonService.obtainGroupMemberRolePermissionPOIds(ps);
+					agendaExecuteService.modifySoleMemberRole(groupId, member.getId(),null,true, false);
 				}
 				agendaExecuteService.executeToFinal(groupId);
 			}
@@ -2298,12 +2348,21 @@ public class GroupService {
 		RolePO memberRole = businessCommonService.queryGroupMemberRole(group);
 		List<GroupMemberRolePermissionPO> ps = new ArrayList<GroupMemberRolePermissionPO>();
 		for(GroupMemberPO acceptMember : acceptMembers){
-			List<Long> addRoleIds = new ArrayListWrapper<Long>().add(memberRole.getId()).getList();
+//			List<Long> addRoleIds = new ArrayListWrapper<Long>().add(memberRole.getId()).getList();
+			
+			/*//为主席添加观众角色。角色与成员一对一，就不需要
 			if(acceptMember.getIsAdministrator()){
 				RolePO chairmanRolePO = businessCommonService.queryGroupChairmanRole(group);
 				addRoleIds.add(chairmanRolePO.getId());
+			}*/
+			
+			//主席成员只有主席角色
+			if(acceptMember.getIsAdministrator()){
+				RolePO chairmanRolePO = businessCommonService.queryGroupChairmanRole(group);
+				agendaExecuteService.modifySoleMemberRole(group.getId(), acceptMember.getId(), chairmanRolePO.getId(), false, false);
+			}else{
+				agendaExecuteService.modifySoleMemberRole(group.getId(), acceptMember.getId(), memberRole.getId(), false, false);
 			}
-			agendaExecuteService.modifyMemberRole(group.getId(), acceptMember.getId(), addRoleIds, null, false);
 		}
 		agendaExecuteService.executeToFinal(group.getId());
 		
