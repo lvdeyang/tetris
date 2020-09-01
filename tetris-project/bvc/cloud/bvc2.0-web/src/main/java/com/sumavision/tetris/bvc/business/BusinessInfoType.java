@@ -74,6 +74,7 @@ public enum BusinessInfoType {
 		case BASIC_COMMAND:
 		case CHAIRMAN_BASIC_COMMAND:
 		case COOPERATE_COMMAND:
+		case BASIC_MEETING:
 		case SPEAK_MEETING:
 		case COMMAND_FORWARD_DEVICE:
 		case COMMAND_FORWARD_FILE:
