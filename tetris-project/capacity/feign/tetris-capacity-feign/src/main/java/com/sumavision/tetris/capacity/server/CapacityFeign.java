@@ -55,6 +55,16 @@ public interface CapacityFeign{
 	public JSONObject modifyTranscode(@RequestParam("taskInfo") String taskInfo) throws Exception;
 
 	/**
+	 * 修改流转码输入<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月24日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/put/input")
+	public JSONObject modifyTranscodeInput(@RequestParam("inputInfo") String inputInfo) throws Exception;
+
+	/**
 	 * 获取支持的平台<br/>
 	 * <b>作者:</b>yzx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -350,6 +360,11 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/capacity/package/feign/delete/task")
 	public JSONObject packageDeleteTask(@RequestParam("taskId") String taskId) throws Exception;
 
+	@RequestMapping(value = "/capacity/transcode/feign/streamAnalysis")
+	public JSONObject streamAnalysis(@RequestParam("analysis") String analysis) throws Exception;
 
+
+	@RequestMapping(value = "/capacity/transcode/feign/add/input")
+	public JSONObject addInputs(@RequestParam("inputInfo") String inputInfo) throws Exception;
 
 }

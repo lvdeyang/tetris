@@ -14,7 +14,7 @@ public class AlarmVO {
 	
 	private String status;
 	
-	private String details;
+	private String detail;
 	
 	private JSONObject license_trigger;
 	
@@ -40,12 +40,12 @@ public class AlarmVO {
 		this.status = status;
 	}
 
-	public String getDetails() {
-		return details;
+	public String getDetail() {
+		return detail;
 	}
 
-	public void setDetails(String details) {
-		this.details = details;
+	public void setDetail(String detail) {
+		this.detail = detail;
 	}
 
 	public JSONObject getLicense_trigger() {

@@ -598,8 +598,9 @@ public class ScheduleService {
 
 			String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
 			JSONObject obj = JSONObject.parseObject(params);
-			obj.put("bitrate",3000);
-			obj.put("max_bitrate",3000);
+			obj.put("bitrate",2900);
+			obj.put("max_bitrate",2900);
+			obj.put("rc_mode","cbr");
 			obj.put("ratio","16:9");
 			obj.put("resolution","1280x720");
 
@@ -638,8 +639,10 @@ public class ScheduleService {
 			
 			audioEncode.setProcess_array(new ArrayList<PreProcessingBO>());
 			
-			ResampleBO resample = new ResampleBO().setSample_rate(44100);
-			
+			ResampleBO resample = new ResampleBO().setSample_rate(Float.valueOf(aacObj.getFloat("sample_rate")*1000).intValue())
+													.setChannel_layout(aacObj.getString("channel_layout"))
+													.setFormat(aacObj.getString("sample_fmt"));
+
 			PreProcessingBO audio_decode_processing = new PreProcessingBO().setResample(resample);
 			audioEncode.getProcess_array().add(audio_decode_processing);
 			
@@ -682,6 +685,8 @@ public class ScheduleService {
 				String outputId = new StringBufferWrapper().append("output-")
 														   .append(taskId)
 														   .append("-")
+															.append(outputVO.getLocalIp())
+															.append("-")
 														   .append(outputIp)
 														   .append("-")
 														   .append(outputPort)
@@ -693,7 +698,10 @@ public class ScheduleService {
 				CommonTsOutputBO udp_ts = new CommonTsOutputBO().setUdp_ts()
 																.setIp(outputIp)
 																.setPort(outputPort)
-																.setLocal_ip(push.getDeviceIp())
+																.setRate_ctrl("CBR")//中广电信用的
+																.setBitrate(3500000)//中广电信用的
+																.setPcr_int(30)//中广电信用的
+																.setLocal_ip(outputVO.getLocalIp())
 																.setProgram_array(new ArrayList<OutputProgramBO>());
 
 				//拼媒体

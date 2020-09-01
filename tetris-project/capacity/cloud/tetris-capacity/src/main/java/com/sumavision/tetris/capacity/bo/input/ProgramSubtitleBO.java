@@ -20,6 +20,8 @@ public class ProgramSubtitleBO {
 	/** 解码方式 cpu */
 	private String decode_mode;
 
+
+
 	public Integer getPid() {
 		return pid;
 	}

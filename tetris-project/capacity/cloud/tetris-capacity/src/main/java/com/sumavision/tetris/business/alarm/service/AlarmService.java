@@ -87,29 +87,33 @@ public class AlarmService {
 			e.printStackTrace();
 		}
 		
-		String alarmObj = null;
+		JSONObject alarmObj = new JSONObject();
 		if(alarm.getInput_trigger() != null){
-			alarmObj = JSONObject.toJSONString(alarm.getInput_trigger());
+			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getInput_trigger()));
+			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getTask_trigger() != null){
-			alarmObj = JSONObject.toJSONString(alarm.getTask_trigger());
+			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getTask_trigger()));
+			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getOutput_trigger() != null){
-			alarmObj = JSONObject.toJSONString(alarm.getOutput_trigger());
+			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getOutput_trigger()));
+			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getLicense_trigger() != null){
-			alarmObj = JSONObject.toJSONString(alarm.getLicense_trigger());
+			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getLicense_trigger()));
+			alarmObj.put("details",alarm.getDetail());
 		}
 		
 		try{
 			if(alarm.getStatus().equals("on")){
-				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, false, new Date());
+				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj.toJSONString(), null, false, new Date());
 			}
 			if(alarm.getStatus().equals("off")){
-				alarmFeignClientService.recoverAlarm(alarmCode, capacityIp, alarmObj, null, new Date());
+				alarmFeignClientService.recoverAlarm(alarmCode, capacityIp, alarmObj.toJSONString(), null, new Date());
 			}
 			if(alarm.getStatus().equals("once")){
-				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, true, new Date());
+				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj.toJSONString(), null, true, new Date());
 			}
 		}catch(Exception e){
 			e.printStackTrace();
