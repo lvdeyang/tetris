@@ -1,15 +1,11 @@
 package com.sumavision.tetris.business.common.po;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import javax.persistence.*;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "TETRIS_CAPACITY_TASK_INPUT", uniqueConstraints = {@UniqueConstraint(columnNames={"uniq"})})
@@ -32,6 +28,8 @@ public class TaskInputPO extends AbstractBasePO{
 	private Integer count = 1;
 	
 	private BusinessType type;
+
+	private Date createTime;
 
 	@Version
 	public Long getVersion() {
@@ -91,5 +89,15 @@ public class TaskInputPO extends AbstractBasePO{
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
 	}
-	
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATE_TIME")
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
 }

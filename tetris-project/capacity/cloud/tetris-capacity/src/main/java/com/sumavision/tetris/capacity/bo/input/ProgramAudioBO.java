@@ -22,6 +22,22 @@ public class ProgramAudioBO {
 	
 	private Integer nv_card_idx;
 
+	private Integer sample_rate;
+
+	private String sample_fmt;
+
+	private String channel_num;
+
+	private String channel_layout;
+
+	private String language;
+
+	private Integer bit_depth;
+
+	private String backup_mode;
+
+	private Integer cutoff_time;
+
 	public Integer getPid() {
 		return pid;
 	}
@@ -66,5 +82,69 @@ public class ProgramAudioBO {
 		this.nv_card_idx = nv_card_idx;
 		return this;
 	}
-	
+
+
+	public Integer getSample_rate() {
+		return sample_rate;
+	}
+
+	public void setSample_rate(Integer sample_rate) {
+		this.sample_rate = sample_rate;
+	}
+
+	public String getSample_fmt() {
+		return sample_fmt;
+	}
+
+	public void setSample_fmt(String sample_fmt) {
+		this.sample_fmt = sample_fmt;
+	}
+
+	public String getChannel_num() {
+		return channel_num;
+	}
+
+	public void setChannel_num(String channel_num) {
+		this.channel_num = channel_num;
+	}
+
+	public String getChannel_layout() {
+		return channel_layout;
+	}
+
+	public void setChannel_layout(String channel_layout) {
+		this.channel_layout = channel_layout;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public Integer getBit_depth() {
+		return bit_depth;
+	}
+
+	public void setBit_depth(Integer bit_depth) {
+		this.bit_depth = bit_depth;
+	}
+
+	public String getBackup_mode() {
+		return backup_mode;
+	}
+
+	public void setBackup_mode(String backup_mode) {
+		this.backup_mode = backup_mode;
+	}
+
+	public Integer getCutoff_time() {
+		return cutoff_time;
+	}
+
+	public void setCutoff_time(Integer cutoff_time) {
+		this.cutoff_time = cutoff_time;
+	}
 }

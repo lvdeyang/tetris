@@ -7,7 +7,9 @@ import java.util.ArrayList;
 
 public class TaskSetVO implements Serializable {
     private static final long serialVersionUID = 6230258714652958134L;
+
     private Long task_link_id;
+
     private String device_ip;
 
     private CreateInputsRequest create_input;
@@ -16,15 +18,17 @@ public class TaskSetVO implements Serializable {
     private CreateProgramsRequest create_program;
     private DeleteProgramRequest delete_program;
 
+
     //修改任务源
     private ArrayList<PutTaskSourceRequest> modify_source;
     //修改指定输入参数
     private ArrayList<PutInputsRequest> modify_input_params;
 
+    private ArrayList<PutBackupModeRequest> modify_backup_mode;
     //修改去隔行
     private ArrayList<PutTaskDecodeProcessRequest> modify_decode_process;
     //修改解码方式
-    private PatchDecodeRequest modify_decode_mode;
+    private ArrayList<PatchDecodeRequest> modify_decode_mode;
 
     //修改任务编码
     private ArrayList<PutTaskEncodeRequest> modify_encoders;
@@ -118,11 +122,11 @@ public class TaskSetVO implements Serializable {
         this.modify_decode_process = modify_decode_process;
     }
 
-    public PatchDecodeRequest getModify_decode_mode() {
+    public ArrayList<PatchDecodeRequest> getModify_decode_mode() {
         return modify_decode_mode;
     }
 
-    public void setModify_decode_mode(PatchDecodeRequest modify_decode_mode) {
+    public void setModify_decode_mode(ArrayList<PatchDecodeRequest> modify_decode_mode) {
         this.modify_decode_mode = modify_decode_mode;
     }
 
@@ -188,5 +192,13 @@ public class TaskSetVO implements Serializable {
 
     public void setAdd_task(CreateTaskRequest add_task) {
         this.add_task = add_task;
+    }
+
+    public ArrayList<PutBackupModeRequest> getModify_backup_mode() {
+        return modify_backup_mode;
+    }
+
+    public void setModify_backup_mode(ArrayList<PutBackupModeRequest> modify_backup_mode) {
+        this.modify_backup_mode = modify_backup_mode;
     }
 }

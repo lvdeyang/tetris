@@ -59,6 +59,17 @@ public class CapacityService {
 	}
 
 	/**
+	 * 修改流转码输入<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月24日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	public String modifyTranscodeInput(String inputInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.modifyTranscodeInput(inputInfo), String.class);
+	}
+
+	/**
 	 * 获取支持的平台<br/>
 	 * <b>作者:</b>yzx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -230,5 +241,13 @@ public class CapacityService {
 	public void removeAll(String deviceIp) throws Exception{
 		JsonBodyResponseParser.parseObject(capacityFeign.removeAll(deviceIp), null);
 	}
-	
+
+	public String streamAnalysis(String analysis) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.streamAnalysis(analysis), String.class);
+	}
+
+	public String addInputs(String inputInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addInputs(inputInfo), String.class);
+	}
+
 }

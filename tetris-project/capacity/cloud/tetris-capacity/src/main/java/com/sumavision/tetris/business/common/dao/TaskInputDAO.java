@@ -38,5 +38,9 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public int update(String taskUuid, Integer version, Integer count);
 	
 	public TaskInputPO findByTypeAndTaskUuid(BusinessType type, String taskUuid);
-	
+
+	public List<TaskInputPO> findByType(BusinessType type);
+
+	public List<TaskInputPO> findByTypeAndCapacityIp(BusinessType type, String capacityIp);
+
 }

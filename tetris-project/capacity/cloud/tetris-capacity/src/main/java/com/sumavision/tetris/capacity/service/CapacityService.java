@@ -7,8 +7,11 @@ import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
+import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
 import com.sumavision.tetris.capacity.exception.HttpTimeoutException;
 import com.sumavision.tetris.capacity.util.http.HttpUtil;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -324,6 +327,34 @@ public class CapacityService {
 		return response;
 		
 	}
+
+
+	public void modifyProgramParamToTransform(String ip, PutElementsRequest putElementsRequest) throws Exception{
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(capacityProps.getPort())
+				.append(UrlConstant.URL_INPUT)
+				.append("/")
+				.append(putElementsRequest.getInput_id())
+				.append(UrlConstant.URL_INPUT_PROGRAM)
+				.append("/")
+				.append(putElementsRequest.getProgram_num())
+				.append(UrlConstant.URL_INPUT_PARAM)
+				.toString();
+
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(putElementsRequest));
+
+		LOG.info("[modify-elements] request, url: {} \n body: {}",url, request);
+		JSONObject res = HttpUtil.httpPut(url, request);
+		LOG.info("[modify-elements] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+
+	}
+
+
 	
 	/**
 	 * 创建节目<br/>
@@ -1501,7 +1532,16 @@ public class CapacityService {
 		
 		return HttpUtil.httpGet(url);
 	}
-	
+
+
+	public void changeBackup(String ip, PutBackupModeRequest backup) throws Exception{
+		ResultCodeResponse result = changeBackUp(backup.getInputId(), backup.getSelect_index(),backup.getMode(), ip, capacityProps.getPort());
+
+		if(!result.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
+			throw new BaseException(StatusCode.FORBIDDEN, result.getResult_msg());
+		}
+	}
+
 	/**
 	 * 更改节目备份源<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -1513,7 +1553,7 @@ public class CapacityService {
 	 * @param Long port 能力端口
 	 * @return ResultCodeResponse
 	 */
-	public ResultCodeResponse changeBackUp(String inputId, String index, String ip, Long port) throws Exception{
+	public ResultCodeResponse changeBackUp(String inputId, String index, String mode, String ip, Long port) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		
@@ -1529,10 +1569,11 @@ public class CapacityService {
 		
 		JSONObject post = new JSONObject();
 		post.put("msg_id", msg_id);
+		post.put("mode", mode);
 		post.put("select_index", index);
 
 		LOG.info("[change-backup] request, url: {} \n body: {}",url,post);
-		JSONObject res = HttpUtil.httpPost(url, post);
+		JSONObject res = HttpUtil.httpPut(url, post);
 		LOG.info("[change-backup] response, result: {}",res);
 
 		if(res == null) throw new HttpTimeoutException(ip);
@@ -1723,5 +1764,74 @@ public class CapacityService {
 
 		PlatformResponse response = JSONObject.parseObject(res.toJSONString(), PlatformResponse.class);
 		return response;
+	}
+
+	public String startAnalysisStreamToTransform(String ip,String inputId) throws Exception{
+
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(capacityProps.getPort())
+				.append(UrlConstant.URL_INPUT)
+				.append("/")
+				.append(inputId)
+				.append("/tsana")
+				.append("?msg_id=")
+				.append(msg_id)
+				.toString();
+		LOG.info("[start-analysis-stream] request, url: {}",url);
+		JSONObject res = HttpUtil.httpPost(url);
+		LOG.info("[start-analysis-stream] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+		return res.toJSONString();
+	}
+
+	public String deleteAnalysisStreamToTransform(String ip,String inputId) throws Exception{
+
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(capacityProps.getPort())
+				.append(UrlConstant.URL_INPUT)
+				.append("/")
+				.append(inputId)
+				.append("/tsana")
+				.append("?msg_id=")
+				.append(msg_id)
+				.toString();
+		LOG.info("[delete-analysis-stream] request, url: {}",url);
+		JSONObject res = HttpUtil.httpDelete(url,new JSONObject());
+		LOG.info("[delete-analysis-stream] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+		return res.toJSONString();
+	}
+
+	public String getAnalysisStreamToTransform(String ip,String inputId) throws Exception{
+
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(capacityProps.getPort())
+				.append(UrlConstant.URL_INPUT)
+				.append("/")
+				.append(inputId)
+				.append("/tsana")
+				.append("?msg_id=")
+				.append(msg_id)
+				.toString();
+		LOG.info("[get-analysis-stream] request, url: {}",url);
+		JSONObject res = HttpUtil.httpGet(url);
+		LOG.info("[get-analysis-stream] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+		return res.toJSONString();
 	}
 }

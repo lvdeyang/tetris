@@ -866,19 +866,21 @@ public class DirectorTaskService {
 										   .setEncode_array(new ArrayList<EncodeBO>());
 
 			EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId);
-			
+
+			JSONObject audioObj = new JSONObject();
+
 			if("aac".equals(codec)){
 
 				String aacMap = templateService.getAudioEncodeMap("aac");
-				JSONObject aacObj = JSONObject.parseObject(aacMap);
-				aacObj.put("bitrate",String.valueOf(bitrate/1000));
-				aacObj.put("sample_rate",String.valueOf(sampleRate/1000));
+				audioObj = JSONObject.parseObject(aacMap);
+				audioObj.put("bitrate",String.valueOf(bitrate/1000));
+				audioObj.put("sample_rate",String.valueOf(sampleRate/1000));
 
 //				AacBO aac = new AacBO().setAac()
 //			   			   			   .setBitrate(String.valueOf(bitrate/1000))
 //			   			   			   .setSample_rate(String.valueOf(sampleRate/1000));
 				
-				audioEncode.setAac(aacObj);
+				audioEncode.setAac(audioObj);
 				
 			}else if("pcma".equals(codec)){
 				//TODO:转码不支持
@@ -903,7 +905,12 @@ public class DirectorTaskService {
 			if(audioEncode.getProcess_array() == null) audioEncode.setProcess_array(new ArrayList<PreProcessingBO>());
 			
 			ResampleBO resample = new ResampleBO().setSample_rate(sampleRate);
-			
+
+			if (audioObj!=null && !audioObj.isEmpty()){
+				resample.setChannel_layout(audioObj.getString("channel_layout")) ;
+				resample.setFormat(audioObj.getString("sample_fmt")) ;
+			}
+
 			PreProcessingBO audio_decode_processing = new PreProcessingBO().setResample(resample);
 			audioEncode.getProcess_array().add(audio_decode_processing);
 			
