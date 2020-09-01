@@ -1,9 +1,9 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
-public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, ServicePropertiesPO>{
+public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 
 	/** 配置id */
 	private String propertyKey;
@@ -24,7 +24,7 @@ public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, Ser
 		return propertyKey;
 	}
 
-	public ServicePropertiesVO setPropertyKey(String propertyKey) {
+	public PropertiesVO setPropertyKey(String propertyKey) {
 		this.propertyKey = propertyKey;
 		return this;
 	}
@@ -33,7 +33,7 @@ public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, Ser
 		return propertyName;
 	}
 
-	public ServicePropertiesVO setPropertyName(String propertyName) {
+	public PropertiesVO setPropertyName(String propertyName) {
 		this.propertyName = propertyName;
 		return this;
 	}
@@ -42,7 +42,7 @@ public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, Ser
 		return valueType;
 	}
 
-	public ServicePropertiesVO setValueType(String valueType) {
+	public PropertiesVO setValueType(String valueType) {
 		this.valueType = valueType;
 		return this;
 	}
@@ -51,7 +51,7 @@ public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, Ser
 		return valueTypeName;
 	}
 
-	public ServicePropertiesVO setValueTypeName(String valueTypeName) {
+	public PropertiesVO setValueTypeName(String valueTypeName) {
 		this.valueTypeName = valueTypeName;
 		return this;
 	}
@@ -60,13 +60,13 @@ public class ServicePropertiesVO extends AbstractBaseVO<ServicePropertiesVO, Ser
 		return propertyDefaultValue;
 	}
 
-	public ServicePropertiesVO setPropertyDefaultValue(String propertyDefaultValue) {
+	public PropertiesVO setPropertyDefaultValue(String propertyDefaultValue) {
 		this.propertyDefaultValue = propertyDefaultValue;
 		return this;
 	}
 
 	@Override
-	public ServicePropertiesVO set(ServicePropertiesPO entity) throws Exception {
+	public PropertiesVO set(PropertiesPO entity) throws Exception {
 		this.setId(entity.getId())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setPropertyKey(entity.getPropertyKey())

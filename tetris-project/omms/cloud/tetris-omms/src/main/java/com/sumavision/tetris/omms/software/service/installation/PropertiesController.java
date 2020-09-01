@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
-@RequestMapping(value = "/service/properties")
-public class ServicePropertiesController {
+@RequestMapping(value = "/properties")
+public class PropertiesController {
 
 	@Autowired
-	private ServicePropertiesQuery servicePropertiesQuery;
+	private PropertiesQuery propertiesQuery;
 	
 	@Autowired
-	private ServicePropertiesService servicePropertiesService;
+	private PropertiesService propertiesService;
 	
 	/**
 	 * 查询服务属性值类型<br/>
@@ -30,7 +30,7 @@ public class ServicePropertiesController {
 	@ResponseBody
 	@RequestMapping(value = "/find/value/types")
 	public Object findValueTypes(){
-		return servicePropertiesQuery.findValueTypes();
+		return propertiesQuery.findValueTypes();
 	}
 	
 	/**
@@ -38,7 +38,7 @@ public class ServicePropertiesController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月26日 下午4:50:32
-	 * @param Long serviceTypeId 服务id
+	 * @param Long installationPackageId 安装包id
 	 * @param String propertyKey 属性key
 	 * @param String propertyName 属性名称
 	 * @param String valueType 值类型
@@ -49,14 +49,14 @@ public class ServicePropertiesController {
 	@ResponseBody
 	@RequestMapping(value = "/add")
 	public Object add(
-			Long serviceTypeId,
+			Long installationPackageId,
 			String propertyKey,
 			String propertyName,
 			String valueType,
 			String propertyDefaultValue,
 			HttpServletRequest request) throws Exception{
 		
-		return servicePropertiesService.add(serviceTypeId, propertyKey, propertyName, valueType, propertyDefaultValue);
+		return propertiesService.add(installationPackageId, propertyKey, propertyName, valueType, propertyDefaultValue);
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class ServicePropertiesController {
 			String propertyDefaultValue,
 			HttpServletRequest request) throws Exception{
 		
-		return servicePropertiesService.edit(id, propertyKey, propertyName, valueType, propertyDefaultValue);
+		return propertiesService.edit(id, propertyKey, propertyName, valueType, propertyDefaultValue);
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public class ServicePropertiesController {
 			Long id,
 			HttpServletRequest request) throws Exception{
 		
-		servicePropertiesService.remove(id);
+		propertiesService.remove(id);
 		return null;
 	}
 	

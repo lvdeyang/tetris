@@ -26,7 +26,7 @@ public class InstallationPackagePO extends AbstractBasePO{
 	/** 服务类型id */
 	private Long serviceTypeId;
 	
-	/** 文件路径 */
+	/** 文件相对webapp路径 格式：File.separator packages File.separator serviceTypeName File.separator fileName*/
 	private String filePath;
 	
 	/** 版本号 */

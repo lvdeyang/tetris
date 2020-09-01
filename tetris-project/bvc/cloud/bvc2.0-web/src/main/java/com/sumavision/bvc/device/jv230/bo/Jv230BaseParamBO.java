@@ -35,7 +35,7 @@ public class Jv230BaseParamBO {
 	private PositionBO display_rect;
 	
 	/**
-	 * 视频源列表
+	 * 视频源列表【不可用于音频源】
 	 * */
 	private List<Jv230SourceBO> sources;
 	
@@ -45,6 +45,9 @@ public class Jv230BaseParamBO {
 	/**pcmu/pcma/aac*/
 	private String codec;
 	
+	/**
+	 * 音频源【不可用于视频源】
+	 * */
 	private Jv230SourceBO source;
 
 	public String getCodec_type() {

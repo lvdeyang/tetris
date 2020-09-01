@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import java.util.Date;
 
@@ -6,40 +6,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ServicePropertiesService {
+public class PropertiesService {
 
 	@Autowired
-	private ServicePropertiesDAO servicePropertiesDao;
+	private PropertiesDAO propertiesDao;
 	
 	/**
 	 * 添加服务属性<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月26日 下午4:50:32
-	 * @param Long serviceTypeId 服务id
+	 * @param Long installationPackageId 安装包id
 	 * @param String propertyKey 属性key
 	 * @param String propertyName 属性名称
 	 * @param String valueType 值类型
 	 * @param String propertyDefaultValue 默认值
 	 * @return ServicePropertiesVO 服务属性
 	 */
-	public ServicePropertiesVO add(
-			Long serviceTypeId,
+	public PropertiesVO add(
+			Long installationPackageId,
 			String propertyKey,
 			String propertyName,
 			String valueType,
 			String propertyDefaultValue) throws Exception{
 		
-		ServicePropertiesPO entity = new ServicePropertiesPO();
+		PropertiesPO entity = new PropertiesPO();
 		entity.setUpdateTime(new Date());
-		entity.setServiceTypeId(serviceTypeId);
+		entity.setInstallationPackageId(installationPackageId);
 		entity.setPropertyKey(propertyKey);
 		entity.setPropertyName(propertyName);
 		entity.setValueType(PropertyValueType.fromName(valueType));
 		entity.setPropertyDefaultValue(propertyDefaultValue);
-		servicePropertiesDao.save(entity);
+		propertiesDao.save(entity);
 		
-		return new ServicePropertiesVO().set(entity);
+		return new PropertiesVO().set(entity);
 	}
 	
 	/**
@@ -54,21 +54,21 @@ public class ServicePropertiesService {
 	 * @param String propertyDefaultValue 默认值
 	 * @return ServicePropertiesVO 服务属性
 	 */
-	public ServicePropertiesVO edit(
+	public PropertiesVO edit(
 			Long id,
 			String propertyKey,
 			String propertyName,
 			String valueType,
 			String propertyDefaultValue) throws Exception{
 		
-		ServicePropertiesPO properties = servicePropertiesDao.findOne(id);
+		PropertiesPO properties = propertiesDao.findOne(id);
 		properties.setPropertyKey(propertyKey);
 		properties.setPropertyName(propertyName);
 		properties.setValueType(PropertyValueType.fromName(valueType));
 		properties.setPropertyDefaultValue(propertyDefaultValue);
-		servicePropertiesDao.save(properties);
+		propertiesDao.save(properties);
 		
-		return new ServicePropertiesVO().set(properties);
+		return new PropertiesVO().set(properties);
 	}
 	
 	/**
@@ -79,9 +79,9 @@ public class ServicePropertiesService {
 	 * @param Long id 属性id
 	 */
 	public void remove(Long id) throws Exception{
-		ServicePropertiesPO properties = servicePropertiesDao.findOne(id);
+		PropertiesPO properties = propertiesDao.findOne(id);
 		if(properties != null){
-			servicePropertiesDao.delete(properties);
+			propertiesDao.delete(properties);
 		}
 	}
 	

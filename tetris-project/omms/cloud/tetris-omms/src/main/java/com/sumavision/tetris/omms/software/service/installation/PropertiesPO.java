@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.software.service.type;
+package com.sumavision.tetris.omms.software.service.installation;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,8 +15,8 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2020年8月25日 下午5:36:10
  */
 @Entity
-@Table(name = "TETRIS_OMMS_SERVICE_PROPERTIES")
-public class ServicePropertiesPO extends AbstractBasePO{
+@Table(name = "TETRIS_OMMS_PROPERTIES")
+public class PropertiesPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,11 +29,14 @@ public class ServicePropertiesPO extends AbstractBasePO{
 	/** 值类型 */
 	private PropertyValueType valueType;
 	
+	/** valueType为ENUM时，存enum项格式：[{name:"", value:""}] */
+	private String valueSelect;
+	
 	/** 配置默认值 */
 	private String propertyDefaultValue;
 	
-	/** 服务id */
-	private Long serviceTypeId;
+	/** 安装包id */
+	private Long installationPackageId;
 
 	@Column(name = "PROPERTY_KEY")
 	public String getPropertyKey() {
@@ -63,6 +66,15 @@ public class ServicePropertiesPO extends AbstractBasePO{
 		this.valueType = valueType;
 	}
 
+	@Column(name = "VALUE_SELECT")
+	public String getValueSelect() {
+		return valueSelect;
+	}
+
+	public void setValueSelect(String valueSelect) {
+		this.valueSelect = valueSelect;
+	}
+
 	@Column(name = "PROPERTY_DEFAULT_VALUE")
 	public String getPropertyDefaultValue() {
 		return propertyDefaultValue;
@@ -72,13 +84,13 @@ public class ServicePropertiesPO extends AbstractBasePO{
 		this.propertyDefaultValue = propertyDefaultValue;
 	}
 
-	@Column(name = "SERVICE_TYPE_ID")
-	public Long getServiceTypeId() {
-		return serviceTypeId;
+	@Column(name = "INSTALLATION_PACKAGE_ID")
+	public Long getInstallationPackageId() {
+		return installationPackageId;
 	}
 
-	public void setServiceTypeId(Long serviceTypeId) {
-		this.serviceTypeId = serviceTypeId;
+	public void setInstallationPackageId(Long installationPackageId) {
+		this.installationPackageId = installationPackageId;
 	}
 	
 }

@@ -193,8 +193,8 @@ public class CommandGroupUserPlayerSettingVO {
 			this.setStatus(status.toString().toLowerCase());
 		}*/
 		//上屏设备
-		/*List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
-		this.setCastDevicesByPO(devices);*/
+		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
+		this.setCastDevicesByPO(devices);
 		
 		return this;
 	}

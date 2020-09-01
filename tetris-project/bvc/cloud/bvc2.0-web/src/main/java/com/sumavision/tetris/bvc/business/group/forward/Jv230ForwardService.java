@@ -236,15 +236,16 @@ public class Jv230ForwardService {
 																		   .setIs_polling("false")
 																		   .setSrc_mode(0)
 																		   .setDisplay_rect(new PositionBO())
-																		   .setSource(new Jv230SourceBO());
+																		   .setSources(new ArrayList<Jv230SourceBO>());
 					videoForwardProtocol.getChannel_param().getBase_param().getDisplay_rect().setX(forward.getX())
 																							 .setY(forward.getY())
 																							 .setWidth(forward.getW())
 																							 .setHeight(forward.getH())
 																							 .setZ_index(1);
-					videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+					videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																						.setLayer_id(forward.getSourceLayerId())
 																					   .setBundle_id(forward.getSourceBundleId())
-																					   .setChannel_id(forward.getSourceChannelId());
+																					   .setChannel_id(forward.getSourceChannelId()));
 					protocol.getJv230ForwardSet().add(videoForwardProtocol);
 				}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 					//处理音频转发
@@ -645,9 +646,10 @@ public class Jv230ForwardService {
 																						 .setWidth(forward.getW())
 																						 .setHeight(forward.getH())
 																						 .setZ_index(1);
-				videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+				videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																					.setLayer_id(forward.getSourceLayerId())
 																				   .setBundle_id(forward.getSourceBundleId())
-																				   .setChannel_id(forward.getSourceChannelId());
+																				   .setChannel_id(forward.getSourceChannelId()));
 				protocol.getJv230ForwardSet().add(videoForwardProtocol);
 			}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 				//处理音频转发
@@ -856,16 +858,17 @@ public class Jv230ForwardService {
 																	   .setIs_polling("false")
 																	   .setSrc_mode(0)
 																	   .setDisplay_rect(new PositionBO())
-																	   .setSource(new Jv230SourceBO())
+																	   .setSources(new ArrayList<Jv230SourceBO>())
 																	   .setCodec("pcmu");
 				videoForwardProtocol.getChannel_param().getBase_param().getDisplay_rect().setX(forward.getX())
 																						 .setY(forward.getY())
 																						 .setWidth(forward.getW())
 																						 .setHeight(forward.getH())
 																						 .setZ_index(1);
-				videoForwardProtocol.getChannel_param().getBase_param().getSource().setLayer_id(forward.getSourceLayerId())
+				videoForwardProtocol.getChannel_param().getBase_param().getSources().add(new Jv230SourceBO()
+																					.setLayer_id(forward.getSourceLayerId())
 																				   .setBundle_id(forward.getSourceBundleId())
-																				   .setChannel_id(forward.getSourceChannelId());
+																				   .setChannel_id(forward.getSourceChannelId()));
 				protocol.getJv230ForwardSet().add(videoForwardProtocol);
 			}else if(ForwardSourceType.CHANNEL_AUDIO.equals(forward.getSourceType())){
 				//处理音频转发
