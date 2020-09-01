@@ -75,6 +75,7 @@ import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandService;
+import com.sumavision.tetris.bvc.business.group.record.GroupRecordService;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
@@ -195,6 +196,9 @@ public class GroupService {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private GroupRecordService groupRecordService;
 	
 	@Autowired
 	private AgendaExecuteService agendaExecuteService;
@@ -1311,9 +1315,11 @@ public class GroupService {
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
 			groupMemberRolePermissionDao.deleteInBatch(ps);
 			
-			//关闭编码通道
+			//关闭编码通道,关闭录像
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
+			LogicBO logicStopRecord = groupRecordService.stop(null, groupId, false);
+			logic.merge(logicStopRecord);
 			executeBusiness.execute(logic, group.getName() + " 会议停止");
 			
 			//删除合屏混音

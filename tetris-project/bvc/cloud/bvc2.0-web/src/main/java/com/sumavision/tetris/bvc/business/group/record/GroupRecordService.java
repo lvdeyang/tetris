@@ -45,6 +45,7 @@ import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissio
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO.ResultDstBO;
+import com.sumavision.bvc.meeting.logic.record.mims.MimsService;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
@@ -168,6 +169,9 @@ public class GroupRecordService {
 
 	@Autowired
 	private PageTaskService pageTaskService;
+	
+	@Autowired
+	private MimsService mimsService;
 
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;	
@@ -520,6 +524,8 @@ public class GroupRecordService {
 				//生成协议
 				logic.merge(stopRecord(fragment, adminUserId));
 			}
+			
+			mimsService.generateTetrisMimsResource(record.getFragments());
 		}
 		
 		commandGroupRecordDao.save(records);

@@ -2,6 +2,7 @@ package com.sumavision.bvc.meeting.logic.record.mims;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,11 +18,21 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.command.group.dao.CommandGroupRecordFragmentDAO;
+import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
+import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.communication.http.HttpAsyncClient;
 import com.sumavision.bvc.communication.http.HttpClient;
 import com.sumavision.bvc.device.group.dao.PublishStreamDAO;
+import com.sumavision.bvc.device.group.dao.RecordDAO;
 import com.sumavision.bvc.device.group.po.PublishStreamPO;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeIpMissingException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeNotExistException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissionException;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
@@ -32,6 +43,15 @@ public class MimsService {
 	@Autowired
 	private PublishStreamDAO publishStreamDao;
 
+	@Autowired
+	private CommandGroupRecordFragmentDAO commandGroupRecordFragmentDAO;
+	
+	@Autowired
+	private RecordDAO recordDAO;
+	
+	@Autowired
+	private ResourceService resourceService;
+	
 	/**
 	 * 生成发布媒资<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -183,5 +203,83 @@ public class MimsService {
 												   .append(resources.get(2))
 												   .toString();
 		return encode(unSigned);
+	}
+	
+	/**
+	 * 重构生成发布媒资<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月31日 下午1:50:21
+	 * @param fragments 录制视频片段
+	 * @throws Exception
+	 */
+	public void generateTetrisMimsResource(Collection <CommandGroupRecordFragmentPO> fragments) throws Exception{
+
+		MimsProperties mimsProperties = MimsProperties.getProperties();
+		String appId = mimsProperties.getAppId();
+		String appSecret = mimsProperties.getAppSecret();
+		String url = mimsProperties.getUrl();
+		String useMims = mimsProperties.getUseMims();
+		
+		
+		for(CommandGroupRecordFragmentPO fragment:fragments){
+			//拼接播放地址
+			AccessNodeBO targetLayer = null;
+			List<AccessNodeBO> layers = resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(fragment.getStoreLayerId()).getList());
+			if(layers==null || layers.size()<=0){
+				throw new AccessNodeNotExistException(fragment.getStoreLayerId());
+			}
+			targetLayer = layers.get(0);
+			if(targetLayer.getIp() == null){
+				throw new AccessNodeIpMissingException(fragment.getStoreLayerId());
+			}
+			if(targetLayer.getPort() == null){
+				throw new AccessNodePortMissionException(fragment.getStoreLayerId());
+			}
+			String playUrl = new StringBufferWrapper().append("http://")
+					   .append(targetLayer.getIp())
+					   .append(":")
+					   .append(targetLayer.getPort())
+					   .append("/")
+					   .append(fragment.getPreviewUrl())
+					   .toString();
+			//拼接播放名称
+			String name = new StringBuffer()
+					.append(fragment.getRecord().getGroupName())
+					.append(" "+DateUtil.format(fragment.getUpdateTime()))
+					.append(" "+fragment.getInfo())
+					.toString()
+					.replace(" ", "-");
+			Long publisId = fragment.getId();
+			
+			if("true".equals(useMims)){
+				String timeTamp = String.valueOf(System.currentTimeMillis());
+				String sign = sign(appId, timeTamp, appSecret);
+				
+				List<String> previewUrl = new ArrayList<String>();
+				previewUrl.add(playUrl);
+				
+				JSONObject object = new JSONObject();
+				
+				object.put("httpUrl", JSON.toJSONString(previewUrl));
+				object.put("name", name);
+				object.put("tags", new ArrayList<String>());
+				object.put("keyWords", new ArrayList<String>());
+				object.put("remark", "");
+				
+				List<BasicNameValuePair> postBody = new ArrayList<BasicNameValuePair>();
+				if(object != null){
+					Set<String> keys = object.keySet();
+					for(String key:keys){
+						postBody.add(new BasicNameValuePair(key, object.getString(key)));  
+					}
+				}
+				String path ="http://" + url + "/tetris-mims/api/server/media/video/task/add/remote?appId=" + appId + "&timestamp=" + timeTamp + "&sign=" + sign+"&httpUrl="+playUrl+"&name="+name;
+				System.out.println(path);
+				HttpAsyncClient.getInstance().formPost(path, null, postBody, new MimsResourceCallBack(publisId, commandGroupRecordFragmentDAO));
+			}
+		}
+		
+		
 	}
 }
