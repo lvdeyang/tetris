@@ -967,7 +967,7 @@ define([
                     var row = scope.row;
                     self.showTip('', '是否继续刷新排期单?', function (callback) {
                         var questData = {
-                            id: row.id
+                        	channelId: row.id
                         };
                         ajax.post('/cs/channel/broadcast/modify', questData, function (data, status) {
                             callback();
