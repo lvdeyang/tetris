@@ -1458,6 +1458,7 @@ public class BroadAbilityService {
 		List<AbilityInfoSendPO> abilityInfoSendPOs = abilityInfoSendDAO.findByChannelId(channelId);
 		for (AbilityInfoSendPO abilityInfoSendPO : abilityInfoSendPOs) {
 			//清空所有task排期，下发到转换
+			pushService.clearPushTask(abilityInfoSendPO.getTaskId());
 			previewIdList.add(abilityInfoSendPO.getPreviewId());
 		}
 		if (channelScheduleMap.containsKey(channelId)) {
@@ -1644,7 +1645,13 @@ public class BroadAbilityService {
 								//实际播发的第一个节目
 								broad = true;
 								firstDuration = duration - passed;
-								
+								if (file != null) {
+									file.setDuration(firstDuration).setSeek(passed);
+									file.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+								} else {
+									stream.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+									stream.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern));
+								}
 								requestVO.setInput(new BroadAbilityBroadRequestInputVO().setPrev(inputPrevVO));
 								
 								
@@ -1661,14 +1668,26 @@ public class BroadAbilityService {
 							//第二个节目
 							Long newForwardDealTime = duration > 10000 ? 10000 : (duration / 2);
 							if (firstIndex + 1 == j) {
+								if (file != null) {
+									file.setDuration(firstDuration).setSeek(passed);
+									file.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+								} else {
+									stream.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+									stream.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern));
+								}
 								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
 										.setMediaType(requestVO.getMediaType())
 										.setProgram(inputPrevVO);
 								requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
-								nextDelayTime = nextDelayTime + duration + forwardDealTime - newForwardDealTime;
 								nextDelayTime = nextDelayTime + firstDuration + duration - newForwardDealTime;
 							} else {
-								
+								if (file != null) {
+									file.setDuration(firstDuration).setSeek(passed);
+									file.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+								} else {
+									stream.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+									stream.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern));
+								}
 								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
 										.setMediaType(requestVO.getMediaType())
 										.setProgram(inputPrevVO);
@@ -1681,11 +1700,7 @@ public class BroadAbilityService {
 					} else {
 						if (firstIndex + 1 == j) firstIndex++;
 					}
-					System.out.println(JSONObject.toJSONString(requestVO));
-					//单源节目单
-					if (j == inputVOs.size() - 1 && requestVO.getInput() != null &&  requestVO.getInput().getPrev() != null && requestVO.getInput().getNext() == null) {
-						requestAddTask(channelId, 0l, JSONObject.toJSONString(requestVO), previewId, abilityIp);
-					}
+					
 				}
 			}
 			

@@ -316,7 +316,7 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/modify")
 	public Object broadcastModify(Long channelId, HttpServletRequest request) throws Exception {
-		channelService.stopBroadcast(channelId);
+		channelService.modifyBroadcast(channelId);
 		return "";
 	}
 	
