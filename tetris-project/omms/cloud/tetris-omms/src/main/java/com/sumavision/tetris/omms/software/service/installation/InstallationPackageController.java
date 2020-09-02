@@ -54,7 +54,7 @@ public class InstallationPackageController {
 	@ResponseBody
 	@RequestMapping(value = "/add")
 	public Object add(HttpServletRequest request) throws Exception{
-		MultipartHttpServletRequestWrapper requestWrapper = new MultipartHttpServletRequestWrapper(request);
+		MultipartHttpServletRequestWrapper requestWrapper = new MultipartHttpServletRequestWrapper(request, -1);
 		Long serviceTypeId = requestWrapper.getLong("serviceTypeId");
 		String creator = requestWrapper.getString("creator");
 		String remark = requestWrapper.getString("remark");

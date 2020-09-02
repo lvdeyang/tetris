@@ -63,6 +63,27 @@ define([
                         gadgetPassword:'',
                         creator:'',
                         remark:''
+                    },
+                    selectInstallationPackage:{
+                        visible:false,
+                        server:'',
+                        tree:{
+                            props:{
+                                label:'name',
+                                children:'children',
+                                isLeaf:'isLeaf'
+                            },
+                            data:[],
+                            current:''
+                        },
+                        list:{
+                            data:[],
+                            current:''
+                        }
+                    },
+                    step:{
+                        visible:false,
+                        active:0
                     }
                 }
             },
@@ -141,11 +162,6 @@ define([
                     self.dialog.editServer.creator = row.creator;
                     self.dialog.editServer.remark = row.remark;
                 },
-                gotoStatus:function(scope){
-                	var self = this;
-                	var row = scope.row;
-                	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
-                },
                 handleEditServerClose:function(){
                     var self = this;
                     self.dialog.editServer.visible = false;
@@ -185,6 +201,80 @@ define([
                         }
                         self.handleEditServerClose();
                     });
+                },
+                gotoStatus:function(scope){
+                	var self = this;
+                	var row = scope.row;
+                	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
+                },
+                handleInstall:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.selectInstallationPackage.server = row;
+                    self.dialog.selectInstallationPackage.visible = true;
+                    self.dialog.selectInstallationPackage.tree.data.splice(0, self.dialog.selectInstallationPackage.tree.data.length);
+                    ajax.post('/service/type/find/all', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectInstallationPackage.tree.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectInstallationPackageClose:function(){
+                    var self = this;
+                    self.dialog.selectInstallationPackage.visible = false;
+                },
+                handleSelectInstallationPackageSubmit:function(){
+                    var self = this;
+                    if(self.dialog.selectInstallationPackage.tree.current &&
+                        self.dialog.selectInstallationPackage.list.current){
+                        self.dialog.step.visible = true;
+                    }else if(!self.dialog.selectInstallationPackage.tree.current){
+                        self.$message({
+                            type:'error',
+                            message:'请选择要安装的服务'
+                        });
+                        return;
+                    }else if(!self.dialog.selectInstallationPackage.list.current){
+                        self.$message({
+                            type:'error',
+                            message:'请选择要安装的版本'
+                        });
+                        return;
+                    }
+                },
+                currentTreeNodeChange:function(current){
+                    var self = this;
+                    self.dialog.selectInstallationPackage.tree.current = current;
+                    self.dialog.selectInstallationPackage.list.data.splice(0, self.dialog.selectInstallationPackage.list.data.length);
+                    if(current.type === 'FOLDER') return;
+                    ajax.post('/installation/package/load', {
+                        serviceTypeId:current.id
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectInstallationPackage.list.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectPackage:function(p){
+                    var self = this;
+                    if(p.current === true) return;
+                    for(var i=0; i<self.dialog.selectInstallationPackage.list.data.length; i++){
+                        if(self.dialog.selectInstallationPackage.list.data[i]!==p) Vue.set(self.dialog.selectInstallationPackage.list.data[i], 'current', false);
+                    }
+                    Vue.set(p, 'current', true);
+                    self.dialog.selectInstallationPackage.list.current = p;
+                },
+                handleSelectInstallationPackageClose:function(){
+                    var self = this;
+                    self.dialog.step.visible = false;
+                },
+                handleStepClose:function(){
+                    var self = this;
+                    self.dialog.step.visible = false;
                 },
                 handleRowDelete:function(scope){
                     var self = this;

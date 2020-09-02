@@ -31,8 +31,8 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 	//设置缓冲区大小，这里是40kb
 	private int bufferSize = 1024*40;
 	
-	//设置最大文件尺寸，这里是10MB
-	private long maxSize = 1024*1024*1024;
+	//设置最大文件尺寸，这里是50MB
+	private long maxSize = 1024*1024*50;
 	
 	private Map<String, Object> params;
 	
