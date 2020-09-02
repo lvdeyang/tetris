@@ -327,7 +327,17 @@ public interface CapacityFeign{
 	 */
 	@RequestMapping(value = "/push/task/feign/batch/delete/task")
 	public JSONObject batchDeletePushTask(@RequestParam("taskIds") String taskIds) throws Exception;
-	
+
+	/**
+	 * 请求排期任务
+	 * @param taskId
+	 * @return
+	 * @throws Exception
+	 */
+
+	@RequestMapping(value = "/push/task/feign/clear/task")
+	public JSONObject clearPushTask(@RequestParam("taskId") String taskId) throws Exception;
+
 	/**
 	 * 设置告警列表<br/>
 	 * <b>作者:</b>wjw<br/>

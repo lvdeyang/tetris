@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -49,10 +52,6 @@ import com.sumavision.tetris.capacity.bo.output.CommonTsOutputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputMediaBO;
 import com.sumavision.tetris.capacity.bo.output.OutputProgramBO;
-import com.sumavision.tetris.capacity.bo.request.AllRequest;
-import com.sumavision.tetris.capacity.bo.request.PutScheduleRequest;
-import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
-import com.sumavision.tetris.capacity.bo.request.ScheduleRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.H264BO;
@@ -72,6 +71,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Service
 public class ScheduleService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ScheduleService.class);
 
 	public static final String SCHEDULE = "schedule";
 	
@@ -307,9 +308,9 @@ public class ScheduleService {
 			ProgramBO program = new ProgramBO().setProgram_number(1)
 											   .setVideo_array(new ArrayList<ProgramVideoBO>())
 											   .setAudio_array(new ArrayList<ProgramAudioBO>());
-
-			ProgramVideoBO video = new ProgramVideoBO().setPid(513);
-			ProgramAudioBO audio = new ProgramAudioBO().setPid(514);
+//断流静帧，静音
+			ProgramVideoBO video = new ProgramVideoBO().setPid(513).setBackup_mode("still_picture");
+			ProgramAudioBO audio = new ProgramAudioBO().setPid(514).setBackup_mode("silence");
 
 			program.getVideo_array().add(video);
 			program.getAudio_array().add(audio);
@@ -873,19 +874,17 @@ public class ScheduleService {
 				allRequest.setInput_array(new ArrayList<InputBO>());
 				
 				for(TaskInputPO input: inputs){
-					
-					if(input != null){
-	
-						input.setUpdateTime(new Date());
-						if(input.getCount() >= 1){
-							input.setCount(input.getCount() - 1);
-						}
-						taskInputDao.save(input);
-						
-						if(input.getCount().equals(0) && input.getInput() != null){
-							InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-							allRequest.getInput_array().add(inputBO);
-						}
+					if(input == null) {
+						continue;
+					}
+					input.setUpdateTime(new Date());
+					if(input.getCount() >= 1){
+						input.setCount(input.getCount() - 1);
+					}
+					taskInputDao.save(input);
+					if(input.getCount().equals(0) && input.getInput() != null){
+						InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
+						allRequest.getInput_array().add(inputBO);
 					}
 				}
 				
@@ -917,7 +916,67 @@ public class ScheduleService {
 		
 		taskOutputDao.delete(output);
 	}
-	
+
+
+	@Transactional(rollbackFor = Exception.class)
+	public void clearPushTask(String taskUuid) throws Exception {
+
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
+		TaskInputPO input = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
+
+		if (input == null){
+			//输入不存在
+			return;
+		}
+		if (output == null){
+			//输出不存在
+			return;
+		}
+		InputBO inputBO =  JSONObject.parseObject(input.getInput(),InputBO.class);
+		String inputId = inputBO.getId();
+
+		DeleteScheduleRequest deleteScheduleRequest = new DeleteScheduleRequest();
+		List<InputIdRequest> inputIdRequests = new ArrayList<>();
+		try{
+			List<Long> inputIds = new ArrayList<Long>();
+			if(output.getPrevId() != null){
+				inputIds.add(output.getPrevId());
+				output.setPrevId(null);
+			}
+			if(output.getNextId() != null){
+				inputIds.add(output.getNextId());
+				output.setNextId(null);
+			}
+
+			List<TaskInputPO> inputs = taskInputDao.findByIdIn(inputIds);
+
+			AllRequest allRequest = new AllRequest();
+			allRequest.setInput_array(new ArrayList<InputBO>());
+
+			for(TaskInputPO taskInput: inputs){
+				if(taskInput == null){
+					continue;
+				}
+				taskInput.setUpdateTime(new Date());
+				if(taskInput.getCount() >= 1){
+					taskInput.setCount(taskInput.getCount() - 1);
+				}
+				InputBO curInput = JSONObject.parseObject(taskInput.getInput(),InputBO.class);
+				inputIdRequests.add(new InputIdRequest(curInput.getId()));
+				taskInputDao.save(input);
+			}
+			deleteScheduleRequest.setDelete_inputs(inputIdRequests);
+			capacityService.clearSchedule(output.getCapacityIp(),capacityProps.getPort(),inputId,deleteScheduleRequest);
+			taskOutputDao.save(output);
+		} catch (ObjectOptimisticLockingFailureException e) {
+
+			// 版本不对，version校验
+			System.out.println("delete校验version版本不对");
+			Thread.sleep(300);
+			clearPushTask(taskUuid);
+		}
+
+	}
 	/**
 	 * 追加排期<br/>
 	 * <b>作者:</b>wjw<br/>
