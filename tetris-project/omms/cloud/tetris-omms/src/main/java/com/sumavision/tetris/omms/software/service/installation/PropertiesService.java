@@ -85,4 +85,86 @@ public class PropertiesService {
 		}
 	}
 	
+	/**
+	 *删除安装包版本参数<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月1日 下午1:24:49
+	 * @param Long 属性id
+	 */
+	public void delete(Long id) {
+		PropertiesPO propertiesPO = propertiesDao.findOne(id);
+		if (propertiesPO != null) {
+			propertiesDao.delete(propertiesPO);
+		}
+	}
+	
+	/**
+	 * 编辑安装包版本参数<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月1日 下午6:29:14
+	 * @param id 属性id
+	 * @param String propertyKey 属性key
+	 * @param String propertyName 属性名称
+	 * @param String valueType 值类型
+	 * @param String propertyDefaultValue 默认值
+	 * @param valueSelect 枚举项
+	 * @return PropertiesVO 版本参数
+	 */
+	public PropertiesVO editProperty(
+			Long id,
+			String propertyKey,
+			String propertyName,
+			String valueType,
+			String propertyDefaultValue,
+			String valueSelect) throws Exception{
+		
+		PropertiesPO properties = propertiesDao.findOne(id);
+		properties.setPropertyKey(propertyKey);
+		properties.setPropertyName(propertyName);
+		properties.setValueType(PropertyValueType.fromName(valueType));
+		properties.setPropertyDefaultValue(propertyDefaultValue);
+		properties.setValueSelect(valueSelect);
+		propertiesDao.save(properties);
+		
+		return new PropertiesVO().set(properties);
+	}
+	
+	/**
+	 * 添加安装包版本参数<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月1日 下午6:32:44
+	 * @param installationPackageId 安装包id
+	 * @param String propertyKey 属性key
+	 * @param String propertyName 属性名称
+	 * @param String valueType 值类型
+	 * @param String propertyDefaultValue 默认值
+	 * @param valueSelect 枚举项
+	 * @return PropertiesVO 版本参数
+	 */
+	public PropertiesVO addProperty(
+			Long installationPackageId,
+			String propertyKey,
+			String propertyName,
+			String valueType,
+			String propertyDefaultValue,
+			String valueSelect) throws Exception{
+		
+		PropertiesPO entity = new PropertiesPO();
+		entity.setUpdateTime(new Date());
+		entity.setInstallationPackageId(installationPackageId);
+		entity.setPropertyKey(propertyKey);
+		entity.setPropertyName(propertyName);
+		entity.setValueType(PropertyValueType.fromName(valueType));
+		entity.setPropertyDefaultValue(propertyDefaultValue);
+		entity.setValueSelect(valueSelect);
+		propertiesDao.save(entity);
+		
+		return new PropertiesVO().set(entity);
+	}
+	
 }

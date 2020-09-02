@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -39,6 +40,7 @@ public class InstallationPackageHistoryPO extends AbstractBasePO{
 	private String creator;
 	
 	/** 创建时间 */
+	@JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss",timezone = "GMT+8" )
 	private Date createTime;
 
 	@Column(name = "SERVICE_TYPE_ID")

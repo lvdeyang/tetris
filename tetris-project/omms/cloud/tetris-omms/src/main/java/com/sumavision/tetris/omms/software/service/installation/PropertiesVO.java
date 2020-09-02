@@ -20,6 +20,19 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 	/** 配置默认值 */
 	private String propertyDefaultValue;
 	
+	/** valueType为ENUM时，存enum项格式：[{name:"", value:""}] */
+	private String valueSelect;
+	
+	
+	public String getValueSelect() {
+		return valueSelect;
+	}
+
+	public PropertiesVO setValueSelect(String valueSelect) {
+		this.valueSelect = valueSelect;
+		return this;
+	}
+
 	public String getPropertyKey() {
 		return propertyKey;
 	}
@@ -73,7 +86,8 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 			.setPropertyName(entity.getPropertyName())
 			.setPropertyDefaultValue(entity.getPropertyDefaultValue())
 			.setValueType(entity.getValueType().toString())
-			.setValueTypeName(entity.getValueType().getName());
+			.setValueTypeName(entity.getValueType().getName())
+			.setValueSelect(entity.getValueSelect());
 		return this;
 	}
 
