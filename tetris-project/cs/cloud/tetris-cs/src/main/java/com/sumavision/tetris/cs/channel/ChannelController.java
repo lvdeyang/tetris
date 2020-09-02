@@ -299,6 +299,27 @@ public class ChannelController {
 		return "";
 	}
 	
+	
+	/**
+	 * 刷新播发列表
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月2日 上午10:17:54
+	 * @param channelId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/modify")
+	public Object broadcastModify(Long channelId, HttpServletRequest request) throws Exception {
+		channelService.stopBroadcast(channelId);
+		return "";
+	}
+	
 	/**
 	 * 查询播发状态<br/>
 	 * <b>作者:</b>lzp<br/>

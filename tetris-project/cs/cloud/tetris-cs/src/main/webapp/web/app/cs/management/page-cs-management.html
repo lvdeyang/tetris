@@ -120,6 +120,11 @@
                                                        class="channelManage"
                                                        @click="updateMenuToTerminal(scope)"></el-button>
                                         </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="刷新排期" placement="bottom">
+                                            <el-button type="text" icon="el-icon-refresh"
+                                                       class="channelManage"
+                                                       @click="rowRefresh(scope)"></el-button>
+                                        </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除频道" placement="bottom">
                                             <el-button type="text" icon="el-icon-delete"
                                                        class="channelManage"

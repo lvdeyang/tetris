@@ -481,6 +481,35 @@ public class ChannelService {
 			broadTerminalService.stopTerminalBroadcast(channelId);
 		}
 	}
+	/**
+	 * 排期单修改后刷新
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月2日 上午10:23:25
+	 * @param channelId
+	 * @throws Exception
+	 */
+	public void modifyBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) 
+			return;
+		
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			if (ChannelType.YJGB.toString().equals(channel.getType())) {
+				
+			} else {
+				broadAbilityService.modifyAbilityBroadcast(channelId);
+			}
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			
+		} else {
+			
+		}
+	}
+	
 	
 	public void seekBroadcast(Long channelId, Long duration) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);

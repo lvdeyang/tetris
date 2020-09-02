@@ -962,6 +962,20 @@ define([
                         }, null, ajax.NO_ERROR_CATCH_CODE);
                     });
                 },
+                rowRefresh: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.showTip('', '是否继续刷新排期单?', function (callback) {
+                        var questData = {
+                            id: row.id
+                        };
+                        ajax.post('/cs/channel/broadcast/modify', questData, function (data, status) {
+                            callback();
+                            if (status != 200) return;
+                            
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    });
+                },
                 toggleSelection: function (rows) {
                     if (rows) {
                         for (var i = 0; i < rows.length; i++) {
