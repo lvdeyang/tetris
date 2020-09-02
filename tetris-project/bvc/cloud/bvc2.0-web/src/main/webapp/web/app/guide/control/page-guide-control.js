@@ -28,13 +28,38 @@ define([
                 	menurouter: false,
                     shortCutsRoutes:commons.data,
                     active:"/page-group-list",
+                    dialog: {
+                    	setSource:{
+                    		visible: false,
+                            loading: false,
+                            name:'',
+                            type:'',
+                            device:{},
+                            url:'',
+                            typeOptions:['Stream','Device']
+                    	},
+                    	setOut:{
+                    		visible: false,
+                            loading: false,
+                            type:'',
+                            url:'',
+                            typeOptions:['UDP','HLS']
+                    	}
+                    }
                 }
             },
             computed:{
                 
             },
             methods:{
-
+            	handleSetSource:function(index){
+            		var self=this;
+            		self.dialog.setSource.visible=true;
+            	},
+            	handleSetOut:function(){
+            		var self=this;
+            		self.dialog.setOut.visible=true;
+            	}
                
             }
         });
