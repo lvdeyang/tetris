@@ -135,6 +135,7 @@ public class CommandRecordServiceImpl {
 			record.setGroupInfo(group);
 			record.setRecordUserId(userId);
 			record.setStartTime(startTime);
+			
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 			record.setPlayerSplitLayout(userInfo.obtainUsingScheme().getPlayerSplitLayout());
 			record.setFragments(new ArrayList<CommandGroupRecordFragmentPO>());			
@@ -143,6 +144,7 @@ public class CommandRecordServiceImpl {
 			List<CommandGroupForwardPO> forwards = group.getForwards();
 //			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			
+			//成员找解码器
 			CommandGroupMemberPO thisMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			List<CommandGroupUserPlayerPO> allPlayers = thisMember.getPlayers();
 			for(CommandGroupUserPlayerPO player : allPlayers){

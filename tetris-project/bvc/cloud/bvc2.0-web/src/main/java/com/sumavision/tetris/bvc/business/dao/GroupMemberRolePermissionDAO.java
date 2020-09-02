@@ -10,7 +10,7 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 @RepositoryDefinition(domainClass = GroupMemberRolePermissionPO.class, idClass = long.class)
 public interface GroupMemberRolePermissionDAO extends MetBaseDAO<GroupMemberRolePermissionPO>{
 	
-	public List<GroupMemberRolePermissionPO> findByGroupMemberId(Long groupMemberId);
+	public GroupMemberRolePermissionPO findByGroupMemberId(Long groupMemberId);
 	
 	public List<GroupMemberRolePermissionPO> findByGroupMemberIdIn(List<Long> groupMemberIds);
 	

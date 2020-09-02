@@ -199,11 +199,11 @@ public class GroupCooperateService {
 			}
 			
 			//给这些人授予协同指挥角色。后续改成批量
-			List<Long> addRoleIds = new ArrayList<Long>();
-			addRoleIds.add(cooperateRole.getId());
+//			List<Long> addRoleIds = new ArrayList<Long>();
+//			addRoleIds.add(cooperateRole.getId());
 			
 			for(GroupMemberPO cooperateMember : cooperateMembers){
-				agendaExecuteService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
+				agendaExecuteService.modifySoleMemberRole(groupId, cooperateMember.getId(), cooperateRole.getId(),false, false);
 			}
 			agendaExecuteService.executeToFinal(groupId);
 			
@@ -293,8 +293,9 @@ public class GroupCooperateService {
 			List<Long> removeRoleIds = new ArrayList<Long>();
 			removeRoleIds.add(cooperateRole.getId());
 			
+			Long commandAudienceId=roleDAO.findByInternalRoleType(InternalRoleType.COMMAND_AUDIENCE).getId(); 
 			for(GroupMemberPO revokeMember : revokeMembers){
-				agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
+				agendaExecuteService.modifySoleMemberRole(groupId, revokeMember.getId(),commandAudienceId, false,false);
 			}
 			agendaExecuteService.executeToFinal(groupId);
 			
