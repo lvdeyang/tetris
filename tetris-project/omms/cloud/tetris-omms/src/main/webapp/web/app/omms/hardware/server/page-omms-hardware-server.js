@@ -230,6 +230,12 @@ define([
                     if(self.dialog.selectInstallationPackage.tree.current &&
                         self.dialog.selectInstallationPackage.list.current){
                         self.dialog.step.visible = true;
+                        ajax.post('/service/deployment/upload', {
+                            serverId:self.dialog.selectInstallationPackage.server.id,
+                            installationPackageId:self.dialog.selectInstallationPackage.list.current.id
+                        }, function(data){
+                            console.log(data);
+                        });
                     }else if(!self.dialog.selectInstallationPackage.tree.current){
                         self.$message({
                             type:'error',
