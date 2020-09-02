@@ -65,13 +65,13 @@ public class TranscodeTaskFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/add/input")
 	public Object addInput(
-			String inputs,
+			String inputInfo,
 			HttpServletRequest request) throws Exception{
 
-		LOG.info("[sts]<create-inputs>(req) hash: {}\nbody: {}",inputs.hashCode(),inputs);
-		CreateInputsVO inputsVO = JSONObject.parseObject(inputs, CreateInputsVO.class);
+		LOG.info("[sts]<create-inputs>(req) hash: {}\nbody: {}",inputInfo.hashCode(),inputInfo);
+		CreateInputsVO inputsVO = JSONObject.parseObject(inputInfo, CreateInputsVO.class);
 		String result = transcodeTaskService.addInputs(inputsVO);
-		LOG.info("[sts]<create-inputs>(resp). hash: {}",inputs.hashCode());
+		LOG.info("[sts]<create-inputs>(resp). hash: {}",inputInfo.hashCode());
 		return result;
 	}
 

@@ -1697,6 +1697,38 @@ public class CapacityService {
 		return response;
 		
 	}
+
+	/**
+	 * 清空排期单
+	 * @param ip
+	 * @param port
+	 * @param inputId
+	 * @param scheduleRequest
+	 * @throws Exception
+	 */
+	public void clearSchedule(String ip, Long port, String inputId, DeleteScheduleRequest scheduleRequest) throws Exception{
+
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		scheduleRequest.setMsg_id(msg_id);
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(port)
+				.append(UrlConstant.URL_INPUT)
+				.append("/")
+				.append(inputId)
+				.append(UrlConstant.URL_INPUT_SCHEDULE)
+				.toString();
+
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
+		LOG.info("[clear-schedule] request, url: {} \n body: {}",url,request);
+		JSONObject res = HttpUtil.httpDelete(url, request);
+		LOG.info("[clear-schedule] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+
+	}
 	
 	/**
 	 * 设置告警列表<br/>

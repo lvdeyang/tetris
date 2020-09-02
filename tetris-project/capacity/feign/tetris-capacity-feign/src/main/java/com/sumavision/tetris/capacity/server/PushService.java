@@ -38,6 +38,10 @@ public class PushService {
 	public void deletePushTask(String taskId) throws Exception{
 		JsonBodyResponseParser.parseObject(capacityFeign.deletePushTask(taskId), null);
 	}
+
+	public void clearPushTask(String taskId) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.clearPushTask(taskId), null);
+	}
 	
 	/**
 	 * 切换push节目单<br/>

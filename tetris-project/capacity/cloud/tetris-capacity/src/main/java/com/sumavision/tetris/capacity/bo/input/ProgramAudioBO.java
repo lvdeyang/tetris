@@ -136,15 +136,17 @@ public class ProgramAudioBO {
 		return backup_mode;
 	}
 
-	public void setBackup_mode(String backup_mode) {
+	public ProgramAudioBO setBackup_mode(String backup_mode) {
 		this.backup_mode = backup_mode;
+		return this;
 	}
 
 	public Integer getCutoff_time() {
 		return cutoff_time;
 	}
 
-	public void setCutoff_time(Integer cutoff_time) {
+	public ProgramAudioBO setCutoff_time(Integer cutoff_time) {
 		this.cutoff_time = cutoff_time;
+		return this;
 	}
 }

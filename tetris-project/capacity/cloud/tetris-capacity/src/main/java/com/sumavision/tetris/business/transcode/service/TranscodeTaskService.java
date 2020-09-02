@@ -223,7 +223,7 @@ public class TranscodeTaskService {
 		}
 		CreateInputsRequest createInputsRequest = new CreateInputsRequest();
 		createInputsRequest.setMsg_id(createInputsVO.getMsg_id());
-		createInputsRequest.setInput_array(createInputsRequest.getInput_array());
+		createInputsRequest.setInput_array(createInputsVO.getInput_array());
 		CreateInputsResponse createInputsResponse = capacityService.createInputs(deviceIp, createInputsRequest);
 		return JSON.toJSONString(createInputsResponse);
 	}
