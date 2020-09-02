@@ -4,7 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -26,30 +27,30 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 	/** 服务类型id */
 	private Long serviceTypeId;
 	
-	/** 安装目录 */
-	private String installationDirectory;
+	/** 安装包id */
+	private Long installationPackageId;
 	
-	/** 启动脚本 */
-	private String startupScript;
-	
-	/** 停止脚本 */
-	private String shutdownScript;
-	
-	/** 日志路径 */
-	private String logFile;
+	/** 安装全路径 */
+	private String installFullPath;
 	
 	/** 服务器id */
 	private Long serverId;
 	
-	/** 参数列表 TODO 格式 */
-	private String params;
+	/** 参数列表config.ini {key:value, key1:value1}*/
+	private String config;
 	
 	/** 创建者 */
 	private String creator;
 
 	/** 创建时间 */
 	private Date createTime;
-
+	
+	/** 部署阶段 */
+	private DeploymentStep step;
+	
+	/** 阶段进度 */
+	private Integer progress;
+	
 	@Column(name = "SERVICE_TYPE_ID")
 	public Long getServiceTypeId() {
 		return serviceTypeId;
@@ -59,44 +60,22 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 		this.serviceTypeId = serviceTypeId;
 	}
 
-	@Lob
-	@Column(name = "INSTALLATION_DIRECTORY", columnDefinition = "LONGTEXT")
-	public String getInstallationDirectory() {
-		return installationDirectory;
+	@Column(name = "INSTALLATION_PACKAGE_ID")
+	public Long getInstallationPackageId() {
+		return installationPackageId;
 	}
 
-	public void setInstallationDirectory(String installationDirectory) {
-		this.installationDirectory = installationDirectory;
+	public void setInstallationPackageId(Long installationPackageId) {
+		this.installationPackageId = installationPackageId;
 	}
 
-	@Lob
-	@Column(name = "STARTUP_SCRIPT", columnDefinition = "LONGTEXT")
-	public String getStartupScript() {
-		return startupScript;
+	@Column(name = "INSTALL_FULL_PATH")
+	public String getInstallFullPath() {
+		return installFullPath;
 	}
 
-	public void setStartupScript(String startupScript) {
-		this.startupScript = startupScript;
-	}
-
-	@Lob
-	@Column(name = "SHUTDOWN_SCRIPT", columnDefinition = "LONGTEXT")
-	public String getShutdownScript() {
-		return shutdownScript;
-	}
-
-	public void setShutdownScript(String shutdownScript) {
-		this.shutdownScript = shutdownScript;
-	}
-
-	@Lob
-	@Column(name = "LOG_FILE", columnDefinition = "LONGTEXT")
-	public String getLogFile() {
-		return logFile;
-	}
-
-	public void setLogFile(String logFile) {
-		this.logFile = logFile;
+	public void setInstallFullPath(String installFullPath) {
+		this.installFullPath = installFullPath;
 	}
 
 	@Column(name = "SERVER_ID")
@@ -108,14 +87,13 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 		this.serverId = serverId;
 	}
 
-	@Lob
-	@Column(name = "PARAMS", columnDefinition = "LONGTEXT")
-	public String getParams() {
-		return params;
+	@Column(name = "CONFIG")
+	public String getConfig() {
+		return config;
 	}
 
-	public void setParams(String params) {
-		this.params = params;
+	public void setConfig(String config) {
+		this.config = config;
 	}
 
 	@Column(name = "CREATOR")
@@ -135,6 +113,25 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "STEP")
+	public DeploymentStep getStep() {
+		return step;
+	}
+
+	public void setStep(DeploymentStep step) {
+		this.step = step;
+	}
+
+	@Column(name = "PROGRESS")
+	public Integer getProgress() {
+		return progress;
+	}
+
+	public void setProgress(Integer progress) {
+		this.progress = progress;
 	}
 	
 }

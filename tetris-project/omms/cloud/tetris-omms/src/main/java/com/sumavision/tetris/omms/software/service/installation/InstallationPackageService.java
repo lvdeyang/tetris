@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
@@ -113,6 +112,7 @@ public class InstallationPackageService {
 			packageEntity.setCreator(creator);
 			packageEntity.setRemark(remark);
 			packageEntity.setFilePath(filePath);
+			packageEntity.setFileName(installationPackage.getName());
 			installationPackageDao.save(packageEntity);
 			
 			ZipEntry configDescriptionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("/config.description.json").toString());

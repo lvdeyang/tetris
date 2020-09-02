@@ -63,8 +63,10 @@ spring:
   http: 
     multipart:
       enabled: true    
-      max-file-size: 4096Mb
-      max-request-size: 4096Mb
+      #max-file-size: 4096Mb
+      #max-request-size: 4096Mb
+      max-file-size: -1
+      max-request-size: -1
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71

@@ -68,10 +68,13 @@
                                 width="250">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="状态查看" placement="bottom-end">
                                     <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoStatus(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="部署服务" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="handleInstall(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
@@ -167,6 +170,82 @@
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditServerClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditServerSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="选择安装包"
+                :visible.sync="dialog.selectInstallationPackage.visible"
+                width="740px"
+                :before-close="handleSelectInstallationPackageClose">
+
+            <div style="height:450px; position:relative; border:1px solid #ebeef5;">
+                <div style="width:350px; height:100%; border-right:1px solid #ebeef5;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                :props = "dialog.selectInstallationPackage.tree.props"
+                                :data = "dialog.selectInstallationPackage.tree.data"
+                                node-key="uuid"
+                                :expand-on-click-node="false"
+                                default-expand-all
+                                highlight-current
+                                @current-change="currentTreeNodeChange">
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="scope">
+                                <span style="font-size:14px;">
+                                     <span :class="scope.data.icon"></span>
+                                     <span>{{scope.data.name}}</span>
+                                </span>
+                              </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="position:absolute; left:350px; top:0; right:0; bottom:0;">
+                    <el-scrollbar style="height:100%;">
+                        <div v-for="package in dialog.selectInstallationPackage.list.data"
+                             :class="'package-list '+(package.current===true?'current':'')"
+                             @click="handleSelectPackage(package)">
+                            <span class="el-icon-tickets"></span>
+                            <span>{{package.fileName}}</span>
+                        </div>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectInstallationPackageClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectInstallationPackageSubmit">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                :title="dialog.selectInstallationPackage.tree.current.name+'-'+dialog.selectInstallationPackage.list.current.version"
+                :visible.sync="dialog.step.visible"
+                width="740px"
+                :before-close="handleSelectInstallationPackageClose">
+
+            <el-steps :active="dialog.step.active" finish-status="success">
+                <el-step title="上传安装包"></el-step>
+                <el-step title="设置参数"></el-step>
+                <el-step title="安装"></el-step>
+            </el-steps>
+
+            <div v-if="dialog.step.active===0" style="max-height:426px;">
+
+            </div>
+            <div v-if="dialog.step.active===1" style="max-height:426px;">
+                <el-scrollbar style="height:100%;">
+
+                </el-scrollbar>
+            </div>
+            <div v-if="dialog.step.active===2" style="max-height:426px;">
+
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                 <el-button size="medium" @click="dialog.step.active+=1">下一步</el-button>
+                <el-button size="medium" v-if="dialog.step.active===1">下一步</el-button>
+                <el-button size="medium" v-else disable>下一步</el-button>
             </span>
         </el-dialog>
 
