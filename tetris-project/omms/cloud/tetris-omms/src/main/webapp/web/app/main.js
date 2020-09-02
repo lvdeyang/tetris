@@ -59,8 +59,8 @@ require.config({
         'SingleRateBar':window.APPPATH + 'omms/hardware/monitor/echarts/SingleRateBar',
         'DiskPieChart':window.APPPATH + 'omms/hardware/monitor/echarts/DiskPieChart',
         'page-omms-software-service-installation-package':window.APPPATH + 'omms/software/service/installation-package/page-omms-software-service-installation-package',
-        'page-omms-software-service-installation-package-history':window.APPPATH + 'omms/software/service/installation-package/history/page-omms-software-service-installation-package-history'
-
+        'page-omms-software-service-installation-package-history':window.APPPATH + 'omms/software/service/installation-package/history/page-omms-software-service-installation-package-history',
+        'page-omms-software-service-properties':window.APPPATH + 'omms/software/service/installation-package/page-omms-software-service-properties'
     },
     shim:{
         'vue':{

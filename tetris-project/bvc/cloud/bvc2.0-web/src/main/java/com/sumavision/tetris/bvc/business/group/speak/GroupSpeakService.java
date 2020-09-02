@@ -105,9 +105,6 @@ public class GroupSpeakService {
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
 	
 	@Autowired
-	private AgendaExecuteService agendaExecuteService;
-	
-	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 
 	@Autowired
@@ -124,6 +121,9 @@ public class GroupSpeakService {
 	
 	@Autowired
 	private BusinessCommonService businessCommonService;
+	
+	@Autowired
+	private AgendaExecuteService agendaExecuteService;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -234,9 +234,8 @@ public class GroupSpeakService {
 		}
 		
 		//给这些人授予发言人角色。后续改成批量
-		List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 		for(GroupMemberPO cooperateMember : speakMembers){
-			agendaExecuteService.modifyMemberRole(groupId, cooperateMember.getId(), addRoleIds, null, false);
+			agendaExecuteService.modifySoleMemberRole(groupId, cooperateMember.getId(), speakRole.getId(), false,false);
 		}
 		agendaExecuteService.executeToFinal(groupId);
 		
@@ -459,9 +458,8 @@ public class GroupSpeakService {
 			
 //			speakStart(group, speakMembers, 0);
 			//给这些人授予发言人角色。后续改成批量
-			List<Long> addRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
 			for(GroupMemberPO speakMember : speakMembers){
-				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), addRoleIds, null, false);
+				agendaExecuteService.modifySoleMemberRole(groupId, speakMember.getId(), speakRole.getId(),false,false);
 			}
 			agendaExecuteService.executeToFinal(groupId);
 			
@@ -569,8 +567,8 @@ public class GroupSpeakService {
 				return;
 			}else{
 				//解绑协同指挥角色
-				List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
-				agendaExecuteService.modifyMemberRole(groupId, speakMember.getId(), null, removeRoleIds, false);
+				RolePO audienceRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_AUDIENCE);
+				agendaExecuteService.modifySoleMemberRole(groupId, speakMember.getId(), audienceRole.getId(),false, false);
 			}
 			agendaExecuteService.executeToFinal(groupId);
 			
@@ -618,7 +616,7 @@ public class GroupSpeakService {
 		UserVO user = userQuery.current();
 		
 		if(groupId==null || groupId.equals("")){
-			log.info("停止协同指挥，会议id有误");
+			log.info("停止会议发言，会议id有误");
 			return;
 		}
 		
@@ -640,14 +638,15 @@ public class GroupSpeakService {
 		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 		
 		RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
-		List<GroupMemberPO> revokeMembers = new ArrayList<GroupMemberPO>();//统计本次解除的发言人
+		GroupMemberPO revokeMember =null;//统计本次解除的发言人
 		List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
+		
 		for(GroupMemberPO member : members){
 			if(memberIds.contains(member.getId())){
 				//通过GroupMemberRolePermissionPO查询该成员是否已经是协同成员
 				GroupMemberRolePermissionPO p = tetrisBvcQueryUtil.queryGroupMemberRolePermissionByGroupMemberId(ps, member.getId());
 				if(p != null){
-					revokeMembers.add(member);					
+					revokeMember=member;					
 				}else{
 //						throw new BaseException(StatusCode.FORBIDDEN, member.getName() + " 没有被授权协同");
 				}
@@ -655,10 +654,14 @@ public class GroupSpeakService {
 			}
 		}
 		
-		//给这些人解绑协同指挥角色。后续改成批量
-		List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
-		for(GroupMemberPO revokeMember : revokeMembers){
-			agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
+//		//给这些人解绑协同指挥角色。后续改成批量
+//		List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
+//		for(GroupMemberPO revokeMember : revokeMembers){
+//			agendaExecuteService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds, false);
+//		}
+		RolePO audienceRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_AUDIENCE);
+		if(revokeMember!=null){
+			agendaExecuteService.modifySoleMemberRole(groupId, revokeMember.getId(),audienceRole.getId(),false, false);
 		}
 		agendaExecuteService.executeToFinal(groupId);
 		
@@ -666,7 +669,7 @@ public class GroupSpeakService {
 		JSONObject message = new JSONObject();
 		message.put("businessType", "speakStop");
 		message.put("businessId", group.getId().toString());
-		List<String> names = businessCommonService.obtainMemberNames(revokeMembers);
+		List<String> names = businessCommonService.obtainMemberNames(new ArrayListWrapper().add(revokeMember).getList());
 		message.put("businessInfo", group.getName() + " " + StringUtils.join(names.toArray(), ",") + " 停止发言");
 		message.put("splits", new JSONArray());
 		List<Long> notifyMemberIds = businessCommonService.obtainMemberIds(groupId, true, false);
@@ -722,11 +725,22 @@ public class GroupSpeakService {
 			}
 			
 			//解绑所有发言人角色
-			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
+//			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
+//			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+//			List<Long> memberIds = businessCommonService.obtainMemberIds(members);			
+//			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
+//			groupMemberRolePermissionDao.deleteInBatch(ps);
+			
+			//将除主席之外的所有人都设置为观众
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			List<Long> memberIds = businessCommonService.obtainMemberIds(members);			
-			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
-			groupMemberRolePermissionDao.deleteInBatch(ps);
+			RolePO commandAudienceRole= roleDao.findByInternalRoleType(InternalRoleType.MEETING_AUDIENCE);
+			for(GroupMemberPO member:members){
+				if(member.getIsAdministrator()){
+					continue;
+				}else{
+					agendaExecuteService.modifySoleMemberRole(groupId, member.getId(), commandAudienceRole.getId(), false, false);
+				}
+			}
 			
 			//执行讨论议程，停止会议议程
 			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);

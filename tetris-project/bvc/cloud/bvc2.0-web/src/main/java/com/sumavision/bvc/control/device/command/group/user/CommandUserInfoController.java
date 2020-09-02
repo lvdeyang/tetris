@@ -229,12 +229,13 @@ public class CommandUserInfoController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
+		JSONArray result = new JSONArray();
 //		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 //		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
 		PageTaskPO task = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
+		if(task == null) return result;
 		List<CommandGroupUserPlayerCastDevicePO> castDevices = task.getCastDevices();
-		JSONArray result = new JSONArray();
 		for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
 			JSONObject device = new JSONObject();
 			device.put("bundleId", castDevice.getDstBundleId());

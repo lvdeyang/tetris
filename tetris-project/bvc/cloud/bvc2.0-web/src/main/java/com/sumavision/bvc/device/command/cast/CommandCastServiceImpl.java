@@ -58,10 +58,13 @@ import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 
@@ -230,6 +233,10 @@ public class CommandCastServiceImpl {
 			PageTaskPO task,
 			List<String> bundleIds) throws Exception{
 		
+		if(task == null || BusinessInfoType.NONE.equals(task.getBusinessInfoType())){
+			throw new BaseException(StatusCode.FORBIDDEN, "播放时才能绑定");
+		}
+		
 		if(task.getCastDevices() == null) task.setCastDevices(new ArrayList<CommandGroupUserPlayerCastDevicePO>());
 		List<CommandGroupUserPlayerCastDevicePO> castDevices = task.getCastDevices();
 //		CommandGroupUserInfoPO userInfo = player.getUserInfo();
@@ -347,6 +354,10 @@ public class CommandCastServiceImpl {
 			PageTaskPO task,
 			List<String> addBundleIds,
 			List<String> removeBundleIds) throws Exception{
+		
+		if(task == null || BusinessInfoType.NONE.equals(task.getBusinessInfoType())){
+			throw new BaseException(StatusCode.FORBIDDEN, "播放时才能绑定");
+		}
 		
 		List<String> bundleIds = new ArrayList<String>();
 		for(CommandGroupUserPlayerCastDevicePO device : task.getCastDevices()){

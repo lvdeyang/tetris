@@ -883,6 +883,54 @@ public class AgendaExecuteService {
 		
 	}
 	
+	/**
+	 * （成员与角色1：1）修改保存成员的角色<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月1日 上午11:15:16
+	 * @param groupId
+	 * @param memberId
+	 * @param modifyRoleId 待修改角色的id
+	 * @param isDelete 是否删除成员角色对应关系  true是，false否
+	 * @param executeToFinal 是否执行，通常用false，在对所有成员的绑定都完成之后，统一执行一次，否则executeToFinal会被执行多次，效率低
+	 * @throws Exception
+	 */
+	public void modifySoleMemberRole(Long groupId, Long memberId, Long modifyRoleId,boolean isDelete,boolean executeToFinal) throws Exception{
+		if(!isDelete){
+			if(modifyRoleId == null) {
+				return ;
+			}
+			
+			GroupMemberRolePermissionPO groupMemberRolePermission= groupMemberRolePermissionDao.findByGroupMemberId(memberId);
+			
+			//不为空直接赋值，否则创建赋值。
+			if(groupMemberRolePermission!=null){
+				groupMemberRolePermission.setRoleId(modifyRoleId);
+				groupMemberRolePermissionDao.save(groupMemberRolePermission);
+			}else{
+				groupMemberRolePermission=new GroupMemberRolePermissionPO(modifyRoleId, memberId);
+				groupMemberRolePermissionDao.save(groupMemberRolePermission);
+			}
+			
+			if(executeToFinal){
+				executeToFinal(groupId);
+			}
+		}else{
+			GroupMemberRolePermissionPO groupMemberRolePermission= groupMemberRolePermissionDao.findByGroupMemberId(memberId);
+			
+			if(groupMemberRolePermission!=null){
+				groupMemberRolePermissionDao.delete(groupMemberRolePermission);
+			}
+			
+			
+			if(executeToFinal){
+				executeToFinal(groupId);
+			}
+		}
+		
+		
+	}
+	
 	//TODO:
 	public void modifyMemberRoleBatch(Long groupId, List<ModifyMemberRoleBO> memberRoleBOs) throws Exception{
 		

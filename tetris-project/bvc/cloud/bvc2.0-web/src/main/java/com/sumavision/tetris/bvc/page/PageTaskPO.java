@@ -40,11 +40,14 @@ public class PageTaskPO extends AbstractBasePO {
 
 	private static final long serialVersionUID = 1L;
 	
-	/** 排序索引 */
+	/** 排序索引从，从0开始 */
 	private int taskIndex;
 	
-	/** 实际界面上的位置索引，qt界面播放器使用 */
+	/** 实际界面上的位置索引，从0开始，qt界面播放器使用 */
 	private Integer locationIndex;
+	
+	/** 固定在固定页的固定位置 */
+	private Boolean fixedAtPageAndLocation = false;
 	
 	/** 业务类型 */
 	private BusinessInfoType businessType = BusinessInfoType.NONE;
@@ -242,6 +245,14 @@ public class PageTaskPO extends AbstractBasePO {
 
 	public void setLocationIndex(Integer locationIndex) {
 		this.locationIndex = locationIndex;
+	}
+
+	public Boolean getFixedAtPageAndLocation() {
+		return fixedAtPageAndLocation;
+	}
+
+	public void setFixedAtPageAndLocation(Boolean fixedAtPageAndLocation) {
+		this.fixedAtPageAndLocation = fixedAtPageAndLocation;
 	}
 
 	@Column(name = "BUSINESS_TYPE")

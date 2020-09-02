@@ -314,6 +314,7 @@ public class BusinessCommonService {
 		return ids;
 	}
 
+	/*获取成员名字*/
 	public List<String> obtainMemberNames(List<GroupMemberPO> members) {
 		List<String> memberNames = new ArrayList<String>();
 		for (GroupMemberPO member : members) {
