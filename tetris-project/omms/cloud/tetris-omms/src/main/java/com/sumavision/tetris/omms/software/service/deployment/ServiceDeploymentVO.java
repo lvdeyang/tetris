@@ -5,6 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
+/**
+ * @author lqxuhv
+ *
+ */
 public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, ServiceDeploymentPO>{
 
 	private Long serviceTypeId;
@@ -27,6 +31,80 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 	
 	private Integer progress;
 	
+	/** 服务类型名称 */
+	private String name;
+	
+	/** 安装包目录 */
+	private String installationDirectory;
+	
+	/** 安装脚本路径-服务器路径 */
+	private String installScriptPath;
+	
+	/** 日志路径 */
+	private String logFile;
+	
+	/** 文件名 */
+	private String fileName;
+	
+	/** 版本号 */
+	private String version;
+	
+	
+	
+	public String getName() {
+		return name;
+	}
+
+	public ServiceDeploymentVO setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public String getInstallationDirectory() {
+		return installationDirectory;
+	}
+
+	public ServiceDeploymentVO setInstallationDirectory(String installationDirectory) {
+		this.installationDirectory = installationDirectory;
+		return this;
+	}
+
+	public String getInstallScriptPath() {
+		return installScriptPath;
+	}
+
+	public ServiceDeploymentVO setInstallScriptPath(String installScriptPath) {
+		this.installScriptPath = installScriptPath;
+		return this;
+	}
+
+	public String getLogFile() {
+		return logFile;
+	}
+
+	public ServiceDeploymentVO setLogFile(String logFile) {
+		this.logFile = logFile;
+		return this;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public ServiceDeploymentVO setFileName(String fileName) {
+		this.fileName = fileName;
+		return this;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public ServiceDeploymentVO setVersion(String version) {
+		this.version = version;
+		return this;
+	}
+
 	public Long getServiceTypeId() {
 		return serviceTypeId;
 	}
@@ -130,7 +208,8 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setStep(entity.getStep().toString())
 			.setStepName(entity.getStep().getName())
-			.setProgress(entity.getProgress());
+			.setProgress(entity.getProgress())
+			;
 		return this;
 	}
 

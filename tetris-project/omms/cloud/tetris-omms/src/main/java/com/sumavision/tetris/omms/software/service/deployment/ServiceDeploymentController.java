@@ -57,4 +57,14 @@ public class ServiceDeploymentController {
 		return serviceDeploymentQuery.queryUploadStatus(serviceDeploymentId);
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load")
+	public Object load(
+			Long serverId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request)throws Exception{
+		return serviceDeploymentQuery.load(serverId, currentPage, pageSize);
+	}
 }
