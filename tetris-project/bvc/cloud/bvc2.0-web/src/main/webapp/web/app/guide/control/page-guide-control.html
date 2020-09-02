@@ -24,7 +24,7 @@
 					        <div style="width:100%">
 						        <el-button type="primary" round size="mini">开始直播</el-button>
 						        <el-button type="primary" round size="mini">配置视频源</el-button>
-						        <el-button type="primary" round size="mini">输出设置</el-button>
+						        <el-button @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
 					        </div>
 					        
 					        <div style="width:560px;margin-top:20px;">
@@ -73,7 +73,7 @@
 						            <td><div class="source_show">背包7</div></td>
 					            </tr>
 					            <tr>
-					                <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+					                <td><el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
 						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
 						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
 						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
@@ -90,10 +90,19 @@
 					        </table>
 				       </div>
 				       <div style="width:200px;float:left;">
-				       		<el-button type="primary"  size="mini" style="margin-top:100px;background:#FFF;font-size:18px;color:black;width:50px;height:50px;border:0px;">
-				       			<i class="feather-icon-lock"></i>
-				       		</el-button>
+				       		<div>
+					       		<el-button type="primary"  size="mini" style="margin-top:75px;background:#FFF;font-size:18px;color:black;width:50px;height:50px;border:0px;">
+					       			<i class="feather-icon-lock"></i>
+					       		</el-button>
+				       		</div>
+				       		<div>
+					       		<el-button type="primary"  size="mini" style="margin-top:30px;font-size:18px;width:70px;height:70px;">
+					       			CUT
+					       		</el-button>
+				       		</div>
+				       	    
 				       </div>
+				      
 				      
 				        
 				    </div>
@@ -104,4 +113,74 @@
             </el-main>
         </el-container>
     </div>
+    <el-dialog
+	        title="设置输入源"
+	        :visible.sync="dialog.setSource.visible"
+	        width="500px"
+	        :before-close="handleSetSourceClose">
+	    <el-form ref="form" label-width="100px">
+	        <el-form-item label="源名称">
+	            <el-input v-model="dialog.setSource.name"></el-input>
+	        </el-form-item>
+	        <el-form-item label="源类型">
+	            <el-select
+	                    v-model="dialog.setSource.type"
+	                    placeholder="请选择源类型">
+	                <el-option
+	                        v-for="item in dialog.setSource.typeOptions"
+	                        :value="item">
+	                </el-option>
+	            </el-select>
+	        </el-form-item>
+	        <el-form-item label="源地址">
+	            <el-input v-model="dialog.setSource.url"></el-input>
+	        </el-form-item>
+	        <el-form-item label="选择源设备">
+	             <el-button @click="handleDeviceSelect(dialog.setSource.device)" type="primary" size="small">选择原设备</el-button>
+	         </el-form-item>
+	         <el-form-item v-if="dialog.setSource.device.name" label="设备名">
+	             <span>{{ dialog.setSource.device.name }}</span>
+	         </el-form-item>
+	        
+	    </el-form>
+	    <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" @click="handleSetSourceClose">取 消</el-button>
+	        <el-button size="medium" type="primary" @click="handleSetSourceCommit"
+	                   :loading="dialog.setSource.loading">确 定
+	        </el-button>
+	    </span>
+	</el-dialog>
+	
+	<el-dialog
+	        title="设置输出"
+	        :visible.sync="dialog.setOut.visible"
+	        width="500px"
+	        :before-close="handleSetOutClose">
+	    <el-form ref="form" label-width="100px">
+	
+	        <el-form-item label="输出类型">
+	            <el-select
+	                    v-model="dialog.setOut.type"
+	                    placeholder="请选择输出类型">
+	                <el-option
+	                        v-for="item in dialog.setOut.typeOptions"
+	                        :value="item">
+	                </el-option>
+	            </el-select>
+	        </el-form-item>
+	        <el-form-item label="输出地址">
+	            <el-input v-model="dialog.setOut.url"></el-input>
+	        </el-form-item>
+	 
+	    </el-form>
+	    <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" @click="handleSetOutClose">取 消</el-button>
+	        <el-button size="medium" type="primary" @click="handleSetOutCommit"
+	                   :loading="dialog.setOut.loading">确 定
+	        </el-button>
+	    </span>
+	</el-dialog>
 </div>
+
+
+
