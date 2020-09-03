@@ -178,6 +178,7 @@ public class ServerService {
 				HttpPost httpPost = new HttpPost(url);
 				client.start();
 				client.execute(httpPost, new QueryStatusListener(server.getId()));
+				client.close();
 			}
 		}
 	}

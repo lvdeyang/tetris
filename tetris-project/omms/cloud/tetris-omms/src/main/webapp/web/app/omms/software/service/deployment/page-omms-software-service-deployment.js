@@ -22,7 +22,7 @@ define([
 
     var charts = {};
 
-    var init = function(){
+    var init = function(p){
 
         commons.setTitle(pageId);
 
@@ -36,14 +36,38 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                serverId: p.serverId,
+                serverName: p.serverName,
                 valueTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
                     pageSizes:[5,50, 100, 200, 400],
                     currentPage:0,
-                    total:0,
-                    serverId :2//i.serverId
+                    total:0
+                },
+                dialog:{
+                    selectInstallationPackage:{
+                        visible:false,
+                        server:'',
+                        tree:{
+                            props:{
+                                label:'name',
+                                children:'children',
+                                isLeaf:'isLeaf'
+                            },
+                            data:[],
+                            current:''
+                        },
+                        list:{
+                            data:[],
+                            current:''
+                        }
+                    },
+                    step:{
+                        visible:false,
+                        active:0
+                    }
                 }
             },
             computed:{
@@ -68,10 +92,10 @@ define([
                 load:function(currentPage){
                     var self = this;
                     var param = {
+                        serverId:self.serverId,
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
                     };
-                    if(self.table.serverId) param.serverId = self.table.serverId;
                     self.table.rows.splice(0, self.table.rows.length);
                     ajax.post('/service/deployment/load', param, function(data){
                         var total = data.total;
@@ -86,16 +110,80 @@ define([
                         self.table.currentPage = currentPage;
                     });
                 },
-
-            },
-            created:function(){
-                /*var self = this;
-                 ajax.post('/properties/find/value/types', null, function(data){
-                 for(var i=0; i<data.length; i++){
-                 self.valueTypes.push(data[i]);
-                 }
-                 });
-                 self.load(1);*/
+                handleCreate:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.selectInstallationPackage.visible = true;
+                    self.dialog.selectInstallationPackage.tree.data.splice(0, self.dialog.selectInstallationPackage.tree.data.length);
+                    ajax.post('/service/type/find/all', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectInstallationPackage.tree.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectInstallationPackageClose:function(){
+                    var self = this;
+                    self.dialog.selectInstallationPackage.visible = false;
+                },
+                handleSelectInstallationPackageSubmit:function(){
+                    var self = this;
+                    if(self.dialog.selectInstallationPackage.tree.current &&
+                        self.dialog.selectInstallationPackage.list.current){
+                        self.dialog.step.visible = true;
+                        ajax.post('/service/deployment/upload', {
+                            serverId:self.serverId,
+                            installationPackageId:self.dialog.selectInstallationPackage.list.current.id
+                        }, function(data){
+                            console.log(data);
+                        });
+                    }else if(!self.dialog.selectInstallationPackage.tree.current){
+                        self.$message({
+                            type:'error',
+                            message:'请选择要安装的服务'
+                        });
+                        return;
+                    }else if(!self.dialog.selectInstallationPackage.list.current){
+                        self.$message({
+                            type:'error',
+                            message:'请选择要安装的版本'
+                        });
+                        return;
+                    }
+                },
+                currentTreeNodeChange:function(current){
+                    var self = this;
+                    self.dialog.selectInstallationPackage.tree.current = current;
+                    self.dialog.selectInstallationPackage.list.data.splice(0, self.dialog.selectInstallationPackage.list.data.length);
+                    if(current.type === 'FOLDER') return;
+                    ajax.post('/installation/package/load', {
+                        serviceTypeId:current.id
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.selectInstallationPackage.list.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectPackage:function(p){
+                    var self = this;
+                    if(p.current === true) return;
+                    for(var i=0; i<self.dialog.selectInstallationPackage.list.data.length; i++){
+                        if(self.dialog.selectInstallationPackage.list.data[i]!==p) Vue.set(self.dialog.selectInstallationPackage.list.data[i], 'current', false);
+                    }
+                    Vue.set(p, 'current', true);
+                    self.dialog.selectInstallationPackage.list.current = p;
+                },
+                handleSelectInstallationPackageClose:function(){
+                    var self = this;
+                    self.dialog.step.visible = false;
+                },
+                handleStepClose:function(){
+                    var self = this;
+                    self.dialog.step.visible = false;
+                }
             },
             mounted:function(){
                 var self = this;
@@ -110,7 +198,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId + '/:serverId',
+        path:'/' + pageId + '/:serverId/:serverName',
         component:{
             template:'<div id="' + pageId + '"class="page-wrapper"></div>'
         },
