@@ -19,7 +19,7 @@ public class TerminalScreenPrimaryKeyService {
 	private TerminalScreenPrimaryKeyDAO terminalScreenPrimaryKeyDao;
 	
 	/**
-	 * 自动添加屏幕主键screen_1到screen_16<br/>
+	 * 自动添加屏幕主键rect_1到rect_16<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年6月19日 下午3:15:20
@@ -29,7 +29,7 @@ public class TerminalScreenPrimaryKeyService {
 	public List<TerminalScreenPrimaryKeyVO> autoAdd() throws Exception{
 		List<String> primaryKeys = new ArrayList<String>();
 		for(int i=1; i<=16; i++){
-			primaryKeys.add(new StringBufferWrapper().append("screen_").append(i).toString());
+			primaryKeys.add(new StringBufferWrapper().append("rect_").append(i).toString());
 		}
 		List<TerminalScreenPrimaryKeyPO> existEntities = terminalScreenPrimaryKeyDao.findByScreenPrimaryKeyIn(primaryKeys);
 		if(existEntities!=null && existEntities.size()>0){
@@ -39,7 +39,7 @@ public class TerminalScreenPrimaryKeyService {
 		List<TerminalScreenPrimaryKeyPO> entities = new ArrayList<TerminalScreenPrimaryKeyPO>();
 		for(String primaryKey:primaryKeys){
 			TerminalScreenPrimaryKeyPO entity = new TerminalScreenPrimaryKeyPO();
-			entity.setName(primaryKey.replace("screen_", "屏幕"));
+			entity.setName(primaryKey.replace("rect_", "分屏"));
 			entity.setScreenPrimaryKey(primaryKey);
 			entity.setUpdateTime(new Date());
 			entities.add(entity);
