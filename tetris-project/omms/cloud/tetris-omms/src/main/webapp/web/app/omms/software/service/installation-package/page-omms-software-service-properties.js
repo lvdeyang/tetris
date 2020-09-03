@@ -34,6 +34,10 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 valueTypes:[],
+                installationPackageId: i.installationPackageId,
+                serviceTypeId: i.serviceTypeId,
+                serviceName: i.serviceName,
+                version: i.version,
                 table:{
                     rows:[],
                     pageSize:50,
@@ -80,6 +84,10 @@ define([
 
             },
             methods:{
+                rollback:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package/' + self.serviceTypeId +'/'+self.serviceName;
+                },
                 handleSizeChange:function(size){
                     var self = this;
                     self.table.pageSize = size;
@@ -92,10 +100,10 @@ define([
                 load:function(currentPage){
                     var self = this;
                     var param = {
+                        installationPackageId:self.installationPackageId,
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
                     };
-                    if(self.table.installationPackageId) param.installationPackageId = self.table.installationPackageId;
                     self.table.rows.splice(0, self.table.rows.length);
                      ajax.post('/properties/load', param, function(data){
                          var total = data.total;
@@ -244,7 +252,7 @@ define([
                     var self = this;
                     self.dialog.addProperties.loading = true;
                     var params = {
-                        installationPackageId:self.dialog.addProperties.installationPackageId,
+                        installationPackageId:self.installationPackageId,
                         propertyKey:self.dialog.addProperties.propertyKey,
                         propertyName:self.dialog.addProperties.propertyName,
                         propertyDefaultValue:self.dialog.addProperties.propertyDefaultValue,
@@ -281,7 +289,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId + '/:installationPackageId',
+        path:'/' + pageId + '/:installationPackageId/:serviceTypeId/:serviceName/:version',
         component:{
             template:'<div id="' + pageId + '" class="page-wrapper"></div>'
         },

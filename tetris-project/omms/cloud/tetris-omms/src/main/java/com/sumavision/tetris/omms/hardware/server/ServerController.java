@@ -68,8 +68,11 @@ public class ServerController {
 			String gadgetPassword,
 			String remark,
 			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword,
 			HttpServletRequest request) throws Exception{
-		ServerPO entity = serverService.add(name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator, new Date());
+		ServerPO entity = serverService.add(name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator, new Date(),ftpUsername,ftpPort,ftpPassword);
 		return new ServerVO().set(entity);
 	}
 	
@@ -100,8 +103,11 @@ public class ServerController {
 			String gadgetPassword,
 			String remark,
 			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword,
 			HttpServletRequest request) throws Exception{
-		ServerPO entity = serverService.edit(id, name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator);
+		ServerPO entity = serverService.edit(id, name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator,ftpUsername,ftpPort,ftpPassword);
 		return new ServerVO().set(entity);
 	}
 	

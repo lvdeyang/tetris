@@ -51,6 +51,9 @@ define([
                         gadgetUsername:'',
                         gadgetPassword:'',
                         creator:'',
+                        ftpUsername:'',
+                        ftpPort:'',
+                        ftpPassword:'',
                         remark:''
                     },
                     editServer:{
@@ -62,6 +65,9 @@ define([
                         gadgetUsername:'',
                         gadgetPassword:'',
                         creator:'',
+                        ftpUsername:'',
+                        ftpPort:'',
+                        ftpPassword:'',
                         remark:''
                     }
                 }
@@ -104,6 +110,9 @@ define([
                     self.dialog.addServer.gadgetUsername = '';
                     self.dialog.addServer.gadgetPassword = '';
                     self.dialog.addServer.creator = '';
+                    self.dialog.addServer.ftpUsername = '';
+                    self.dialog.addServer.ftpPort = '';
+                    self.dialog.addServer.ftpPassword = '';
                     self.dialog.addServer.remark = '';
                 },
                 handleAddServerSubmit:function(){
@@ -115,7 +124,10 @@ define([
                         gadgetUsername:self.dialog.addServer.gadgetUsername,
                         gadgetPassword:self.dialog.addServer.gadgetPassword,
                         remark:self.dialog.addServer.remark,
-                        creator:self.dialog.addServer.creator
+                        creator:self.dialog.addServer.creator,
+                        ftpUsername:self.dialog.addServer.ftpUsername,
+                        ftpPort:self.dialog.addServer.ftpPort,
+                        ftpPassword:self.dialog.addServer.ftpPassword
                     }, function(data){
                         self.table.data.splice(0, 0, data);
                         self.table.page.total += 1;
@@ -140,6 +152,9 @@ define([
                     self.dialog.editServer.gadgetPassword = row.gadgetPassword;
                     self.dialog.editServer.creator = row.creator;
                     self.dialog.editServer.remark = row.remark;
+                    self.dialog.editServer.ftpUsername = row.ftpUsername;
+                    self.dialog.editServer.ftpPort = row.ftpPort;
+                    self.dialog.editServer.ftpPassword = row.ftpPassword;
                 },
                 handleEditServerClose:function(){
                     var self = this;
@@ -152,6 +167,9 @@ define([
                     self.dialog.editServer.gadgetPassword = '';
                     self.dialog.editServer.creator = '';
                     self.dialog.editServer.remark = '';
+                    self.dialog.editServer.ftpUsername = '';
+                    self.dialog.editServer.ftpPort = '';
+                    self.dialog.editServer.ftpPassword = '';
                 },
                 handleEditServerSubmit:function(){
                     var self = this;
@@ -163,7 +181,10 @@ define([
                         gadgetUsername:self.dialog.editServer.gadgetUsername,
                         gadgetPassword:self.dialog.editServer.gadgetPassword,
                         remark:self.dialog.editServer.remark,
-                        creator:self.dialog.editServer.creator
+                        creator:self.dialog.editServer.creator,
+                        ftpUsername:self.dialog.editServer.ftpUsername,
+                        ftpPort:self.dialog.editServer.ftpPort,
+                        ftpPassword:self.dialog.editServer.ftpPassword
                     }, function(data){
                         for(var i=0; i<self.table.data.length; i++){
                             if(self.table.data[i].id === data.id){
@@ -175,6 +196,9 @@ define([
                                 self.table.data[i].gadgetPassword = data.gadgetPassword;
                                 self.table.data[i].remark = data.remark;
                                 self.table.data[i].creator = data.creator;
+                                self.table.data[i].ftpUsername = data.ftpUsername;
+                                self.table.data[i].ftpPort = data.ftpPort;
+                                self.table.data[i].ftpPassword = data.ftpPassword;
                                 break;
                             }
                         }
@@ -189,6 +213,7 @@ define([
                 gotoDeployment:function(scope){
                     var self = this;
                     var row = scope.row;
+                    window.location.hash = '#/page-omms-software-service-deployment/' + row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;

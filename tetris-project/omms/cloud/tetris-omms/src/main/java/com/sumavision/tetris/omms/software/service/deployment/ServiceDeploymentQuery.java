@@ -47,6 +47,14 @@ public class ServiceDeploymentQuery {
 		return new ServiceDeploymentVO().set(deploymentEntity);
 	}
 	
+	/**
+	 * 根据服务器查询部署服务<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午10:12:06
+	 * @param serverId 服务器id
+	 * @return Map<String, Object> 部署服务参数
+	 */
 	public Map<String, Object> load(
 			Long serverId,
 			int currentPage,

@@ -61,6 +61,9 @@ public class ServerService {
 	 * @param String remark 备注
 	 * @param String creator 创建者
 	 * @param String createTime 创建时间
+	 * @param String ftpUsername ftp服务名
+	 * @param String ftpPort ftp端口
+	 * @param String ftpPassword ftp密码
 	 * @return ServerPO 服务器
 	 */
 	public ServerPO add(
@@ -71,7 +74,10 @@ public class ServerService {
 			String gadgetPassword,
 			String remark,
 			String creator,
-			Date createTime) throws Exception{
+			Date createTime,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = new ServerPO();
 		entity.setName(name);
 		entity.setIp(ip);
@@ -83,6 +89,9 @@ public class ServerService {
 		entity.setCreateTime(createTime);
 		entity.setUpdateTime(new Date());
 		entity.setStatus(ServerStatus.OFFLINE);
+		entity.setFtpUsername(ftpUsername);
+		entity.setFtpPort(ftpPort);
+		entity.setFtpPassword(ftpPassword);
 		serverDao.save(entity);
 		return entity;
 	}
@@ -110,7 +119,10 @@ public class ServerService {
 			String gadgetUsername,
 			String gadgetPassword,
 			String remark,
-			String creator) throws Exception{
+			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = serverDao.findOne(id);
 		if(entity != null){
 			entity.setName(name);
@@ -121,6 +133,9 @@ public class ServerService {
 			entity.setRemark(remark);
 			entity.setCreator(creator);
 			entity.setUpdateTime(new Date());
+			entity.setFtpUsername(ftpUsername);
+			entity.setFtpPort(ftpPort);
+			entity.setFtpPassword(ftpPassword);
 			serverDao.save(entity);
 		}
 		return entity;
