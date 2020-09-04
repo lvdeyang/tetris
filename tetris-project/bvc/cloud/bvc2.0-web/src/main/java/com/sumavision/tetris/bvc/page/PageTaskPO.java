@@ -747,7 +747,7 @@ public class PageTaskPO extends AbstractBasePO {
 	public boolean equalsTask(PageTaskPO task){
 		if(this.getId().equals(task.getId())) return true;
 		if(this.businessId.equals(task.getBusinessId())
-				&& this.srcVideoId.equals(task.getSrcVideoId())){
+				&& this.srcVideoId.equals(task.getSrcVideoId())&&this.srcVideoChannelId.equals(task.getSrcVideoChannelId())){
 			if(this.srcAudioId==null && task.getSrcAudioId()==null) return true;
 			if(this.srcAudioId!=null && this.srcAudioId.equals(task.getSrcAudioId())) return true;
 			return false;

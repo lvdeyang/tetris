@@ -67,6 +67,9 @@ public class GroupPO extends AbstractBasePO{
 	
 	/** 音视频参数模板id */
 	private Long audioVideoTemplateId;
+	
+	/**   固定位置下表 */
+	private Integer locationIndex;
 
 	@Column(name = "name")
 	public String getName() {
@@ -75,6 +78,14 @@ public class GroupPO extends AbstractBasePO{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getLocationIndex() {
+		return locationIndex;
+	}
+
+	public void setLocationIndex(Integer locationIndex) {
+		this.locationIndex = locationIndex;
 	}
 
 	@Column(name = "SUBJECT")

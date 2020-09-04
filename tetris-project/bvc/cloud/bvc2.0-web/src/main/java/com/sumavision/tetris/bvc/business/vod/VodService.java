@@ -339,7 +339,7 @@ public class VodService {
 	
 	/** 重构点播用户 */
 	@Transactional(rollbackFor = Exception.class)
-	public void userStart(UserBO user, UserBO vodUser) throws Exception{
+	public void userStart(UserBO user, UserBO vodUser,Integer serial) throws Exception{
 		
 		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
 		
@@ -350,6 +350,7 @@ public class VodService {
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
+		if(serial!=null) group.setLocationIndex(serial);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
@@ -516,7 +517,7 @@ public class VodService {
 	
 	/** 重构点播设备 */
 	@Transactional(rollbackFor = Exception.class)
-	public void deviceStart(UserBO user, String bundleId) throws Exception{
+	public void deviceStart(UserBO user, String bundleId,Integer serial) throws Exception{
 		
 		TerminalPO deviceTerminal = terminalDao.findByType(TerminalType.JV210);
 		TerminalPO userTerminal = terminalDao.findByType(TerminalType.QT_ZK);
@@ -532,6 +533,7 @@ public class VodService {
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
+		if(serial!=null)group.setLocationIndex(serial);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
