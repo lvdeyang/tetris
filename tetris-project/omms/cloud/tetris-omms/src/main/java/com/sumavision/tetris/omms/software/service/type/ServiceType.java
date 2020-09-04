@@ -11,7 +11,7 @@ public enum ServiceType {
 			"shutdownScript", 
 			"shutdownScriptPath", 
 			"logFile", 
-			GroupType.SPRING_CLOUD),
+			GroupType.JAVA_SERVER),
 	
 	ZUUL("微服务网关", 
 		  "/home/install", 
@@ -22,7 +22,7 @@ public enum ServiceType {
 		  "shutdownScript", 
 		  "shutdownScriptPath", 
 		  "logFile", 
-		  GroupType.SPRING_CLOUD),
+		  GroupType.JAVA_SERVER),
 	
 	FILE_TRANSCODING("文件转码", 
 		  "/home/install", 
@@ -33,7 +33,7 @@ public enum ServiceType {
 		  "shutdownScript", 
 		  "shutdownScriptPath", 
 		  "logFile", 
-		  GroupType.PROTOCOL_CONVERSION);
+		  GroupType.C_SERVER);
 	
 	private String name;
 	

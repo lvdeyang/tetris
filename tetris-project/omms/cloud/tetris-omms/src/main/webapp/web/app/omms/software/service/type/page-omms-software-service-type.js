@@ -52,6 +52,7 @@ define([
                 },
                 columns:{
                     loading:false,
+                    id:'',
                     name:{
                         name:'当前服务',
                         value:''
@@ -103,6 +104,11 @@ define([
                         visible:false,
                         loading:false,
                         serverName:'',
+                        groupType:'C服务'
+                    },
+                    editServer:{
+                        visible:false,
+                        loading:false,
                         groupType:''
                     }
                 },
@@ -222,7 +228,7 @@ define([
                 handleCreateServerClose:function(){
                     var self = this;
                     self.dialog.addServer.serverName = '';
-                    self.dialog.addServer.groupType = '';
+                    self.dialog.addServer.groupType = 'C服务';
                     self.dialog.addServer.visible = false;
                 },
                 handleCreateServerSubmit:function(){
@@ -292,6 +298,26 @@ define([
                     self.dialog.editColumn.key = '';
                     self.dialog.editColumn.column = '';
                 },
+                editServerType:function(node, data){
+                    var self = this ;
+                    self.dialog.editServer.visible = true;
+                    self.dialog.editServer.groupType = data.groupType;
+                },
+                handleEditServerTypeClose:function(){
+                    var self = this;
+                    self.dialog.editServer.visible = false;
+                    self.dialog.editServer.groupType ='';
+                    self.loadAllServiceTypes();
+                },
+                handleEditServerTypeSubmit:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/edit/server',
+                        {id:self.tree.current.id,
+                        groupType:self.dialog.editServer.groupType},
+                        function(data,status){
+                            self.handleEditServerTypeClose();
+                        },null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 handleEditColumnCommit:function(){
                     var self = this;
                     var param = {
@@ -325,7 +351,6 @@ define([
             mounted:function(){
                 var self = this;
                 self.loadAllServiceTypes();
-
                 ajax.post('/service/type/find/group/types', null, function(data){
                     for(var i=0; i<data.length; i++){
                         self.groupTypes.push(data[i]);

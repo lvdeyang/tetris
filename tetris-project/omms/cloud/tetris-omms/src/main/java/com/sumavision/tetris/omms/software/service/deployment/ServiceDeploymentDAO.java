@@ -24,4 +24,6 @@ public interface ServiceDeploymentDAO extends BaseDAO<ServiceDeploymentPO>{
 	 * @return List<ServiceDeploymentPO> 部署列表
 	 */
 	public List<ServiceDeploymentPO> findByServerId(Long serverId);
+	
+	public List<ServiceDeploymentPO> findByServiceTypeId(Long serviceTypeId);
 }

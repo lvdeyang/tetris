@@ -120,4 +120,23 @@ public class ServiceTypeController {
 			HttpServletRequest request) throws Exception{
 		return serviceTypeService.createServer(name,groupType);
 	}
+	
+	/**
+	 * 更改服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 下午7:08:52
+	 * @param id 服务id
+	 * @param groupType 服务类型
+	 * @return OmmsSoftwareServiceTypeTreeNodeVO 服务
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping (value = "/edit/server")
+	public Object editServer(
+			Long id,
+			String groupType,
+			HttpServletRequest request)throws Exception{
+		return serviceTypeService.editServer(id,groupType);
+	}
 }

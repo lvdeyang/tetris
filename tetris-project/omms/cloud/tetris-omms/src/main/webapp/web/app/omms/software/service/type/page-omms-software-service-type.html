@@ -81,6 +81,7 @@
                             <el-form-item style="margin-bottom:0;" :label="columns.name.name+':'">
                                 <span style="cursor:not-allowed; font-weight:700; color:#333; font-weight:700;">{{columns.name.value}}</span>
                                 <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackage">版本管理</el-button>
+                                <el-button type="text" style="padding:0; margin-left:10px;" @click="editServerType">更改类型</el-button>
                             </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.installationDirectory.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('installationDirectory', columns.installationDirectory)"><span class="feather-icon-edit"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
@@ -138,6 +139,28 @@
                 <el-button size="medium" @click="handleEditColumnClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditColumnCommit">确定</el-button>
             </span>
+        </el-dialog>
+        <el-dialog
+                title="更改类型"
+                :visible.sync="dialog.editServer.visible"
+                width="500px"
+                :before-close="handleEditServerTypeClose">
+            <el-form label-width="80px">
+                <el-form-item label="类型">
+                    <el-select v-model="dialog.editServer.groupType" style="width:100%;">
+                        <el-option
+                                v-for="groupType in groupTypes"
+                                :key="groupType"
+                                :label="groupType"
+                                :value="groupType">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button size="medium" @click="handleEditServerTypeClose">取消</el-button>
+                        <el-button size="medium" type="primary" @click="handleEditServerTypeSubmit">确定</el-button>
+                    </span>
         </el-dialog>
     </template>
 

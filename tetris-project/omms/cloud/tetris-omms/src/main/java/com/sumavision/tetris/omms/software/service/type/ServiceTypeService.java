@@ -10,7 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
+import com.sumavision.tetris.omms.software.service.installation.InstallationPackageDAO;
+import com.sumavision.tetris.omms.software.service.installation.InstallationPackagePO;
+import com.sumavision.tetris.omms.software.service.installation.PropertiesDAO;
 import com.sumavision.tetris.omms.software.service.installation.PropertiesPO;
+import com.sumavision.tetris.omms.software.service.type.exception.NoChoiceServerTypeException;
+import com.sumavision.tetris.omms.software.service.type.exception.NoGroupTyprOrNameException;
 import com.sumavision.tetris.omms.software.service.type.exception.NoServiceTypesToAddException;
 
 @Service
@@ -19,6 +26,15 @@ public class ServiceTypeService {
 
 	@Autowired
 	private ServiceTypeDAO serviceTypeDao;
+	
+	@Autowired
+	private InstallationPackageDAO installationPackageDAO;
+	
+	@Autowired
+	private PropertiesDAO propertiesDAO;
+	
+	@Autowired
+	private ServiceDeploymentDAO serviceDeploymentDAO;
 	
 	/**
 	 * 一键创建服务类型<br/>
@@ -116,6 +132,24 @@ public class ServiceTypeService {
 	 */
 	public void delete(Long id) throws Exception{
 		ServiceTypePO serviceTypePO = serviceTypeDao.findOne(id);
+		List<InstallationPackagePO> installationPackagePOs = installationPackageDAO.findByServiceTypeId(id);
+		for (InstallationPackagePO installationPackagePO : installationPackagePOs) {
+			List<PropertiesPO> propertiesPOs  = propertiesDAO.findByInstallationPackageId(installationPackagePO.getId());
+			for (PropertiesPO propertiesPO : propertiesPOs) {
+				if (propertiesPO != null) {
+					propertiesDAO.delete(propertiesPO);
+				}
+			}
+			if(installationPackagePO != null){
+				installationPackageDAO.delete(installationPackagePO);
+			}
+		}
+		List<ServiceDeploymentPO> serviceDeploymentPOs = serviceDeploymentDAO.findByServiceTypeId(id);
+		for (ServiceDeploymentPO serviceDeploymentPO : serviceDeploymentPOs) {
+			if (serviceDeploymentPO != null) {
+				serviceDeploymentDAO.delete(serviceDeploymentPO);
+			}
+		}
 		if(serviceTypePO != null){
 			serviceTypeDao.delete(serviceTypePO);
 		}
@@ -128,24 +162,55 @@ public class ServiceTypeService {
 	 * <b>日期：</b>2020年9月4日 上午11:14:18
 	 * @param name 服务类型名称
 	 * @param groupType 服务类型枚举
-	 * @return
+	 * @return List<OmmsSoftwareServiceTypeTreeNodeVO> 服务类型数据 
 	 */
 	public List<OmmsSoftwareServiceTypeTreeNodeVO> createServer(
 			String name,
 			String groupType) throws Exception{
-		GroupType[] values = GroupType.values();
-		GroupType groupTypeValue = null;
-		for(GroupType value:values){
-			if(value.getName().equals(groupType)){
-				groupTypeValue = value;
+		if(groupType == null || name.equals("")){
+			throw new NoGroupTyprOrNameException();
+		}else{
+			GroupType[] values = GroupType.values();
+			GroupType groupTypeValue = null;
+			for(GroupType value:values){
+				if(value.getName().equals(groupType)){
+					groupTypeValue = value;
+				}
 			}
+			ServiceTypePO serviceTypePO =new ServiceTypePO();
+			serviceTypePO.setName(name);
+			serviceTypePO.setGroupType(groupTypeValue);
+			serviceTypeDao.save(serviceTypePO);
+			List<OmmsSoftwareServiceTypeTreeNodeVO> nodes = new ArrayList<OmmsSoftwareServiceTypeTreeNodeVO>();
+			nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceTypePO));
+			return nodes;
+		    }
 		}
-		ServiceTypePO serviceTypePO =new ServiceTypePO();
-		serviceTypePO.setName(name);
-		serviceTypePO.setGroupType(groupTypeValue);
-		serviceTypeDao.save(serviceTypePO);
-		List<OmmsSoftwareServiceTypeTreeNodeVO> nodes = new ArrayList<OmmsSoftwareServiceTypeTreeNodeVO>();
-		nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceTypePO));
-		return nodes;
+	/**
+	 * 更改服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 下午7:08:52
+	 * @param id 服务id
+	 * @param groupType 服务类型
+	 * @return OmmsSoftwareServiceTypeTreeNodeVO 服务
+	 */
+	public OmmsSoftwareServiceTypeTreeNodeVO editServer(Long id,String groupType) throws Exception{
+		if(groupType == null || groupType.equals("")){
+			throw new NoChoiceServerTypeException();
+		}else{
+			ServiceTypePO serviceTypePO = serviceTypeDao.findOne(id);
+			GroupType[] values = GroupType.values();
+			GroupType groupTypeValue = null;
+			for (GroupType value : values) {
+				if(value.getName().equals(groupType)){
+					groupTypeValue = value;
+				}
+			}
+			serviceTypePO.setGroupType(groupTypeValue);
+			serviceTypeDao.save(serviceTypePO);
+			return new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceTypePO);
+		}
 	}
+		
 }
