@@ -29,6 +29,9 @@ public class InstallationPackagePO extends AbstractBasePO{
 	/** 文件相对webapp路径 格式：File.separator packages File.separator serviceTypeName File.separator fileName*/
 	private String filePath;
 	
+	/** 文件名 */
+	private String fileName;
+	
 	/** 版本号 */
 	private String version;
 	
@@ -58,6 +61,15 @@ public class InstallationPackagePO extends AbstractBasePO{
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
+	}
+
+	@Column(name = "FILE_NAME")
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 	@Column(name = "VERSION")

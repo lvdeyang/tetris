@@ -1,0 +1,158 @@
+<mi-frame id="page-omms-software-service-deployment-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">部署管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-omms-hardware-server">{{serverName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>部署管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加部署</el-button>
+            <div style="position:absolute; top:60px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="服务名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="版本号"
+                                prop="version">
+                        </el-table-column>
+                        <el-table-column
+                                label="创建时间"
+                                prop="createTime">
+                        </el-table-column>
+                        <el-table-column
+                                label="服务器路径"
+                                prop="installScriptPath">
+                        </el-table-column>
+                        <el-table-column
+                                label="运行状态"
+                                prop="">
+                        </el-table-column>
+                        <el-table-column
+                                label="运行时间"
+                                prop="">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="180">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改部署" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="editDeployment(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="查看状态" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-s-data" style="font-size:20px; padding:0;" @click="checkDeployment(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="卸载部署" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.currentPage"
+                        :page-sizes="table.pageSizes"
+                        :page-size="table.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.total">
+                </el-pagination>
+            </div>
+        </el-card>
+    </template>
+
+    <template>
+
+        <el-dialog
+                title="选择安装包"
+                :visible.sync="dialog.selectInstallationPackage.visible"
+                width="740px"
+                :before-close="handleSelectInstallationPackageClose">
+
+            <div style="height:450px; position:relative; border:1px solid #ebeef5;">
+                <div style="width:350px; height:100%; border-right:1px solid #ebeef5;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                :props = "dialog.selectInstallationPackage.tree.props"
+                                :data = "dialog.selectInstallationPackage.tree.data"
+                                node-key="uuid"
+                                :expand-on-click-node="false"
+                                default-expand-all
+                                highlight-current
+                                @current-change="currentTreeNodeChange">
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="scope">
+                                <span style="font-size:14px;">
+                                     <span :class="scope.data.icon"></span>
+                                     <span>{{scope.data.name}}</span>
+                                </span>
+                              </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="position:absolute; left:350px; top:0; right:0; bottom:0;">
+                    <el-scrollbar style="height:100%;">
+                        <div v-for="package in dialog.selectInstallationPackage.list.data"
+                             :class="'package-list '+(package.current===true?'current':'')"
+                             @click="handleSelectPackage(package)">
+                            <span class="el-icon-tickets"></span>
+                            <span>{{package.fileName}}</span>
+                        </div>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectInstallationPackageClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectInstallationPackageSubmit">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                :title="dialog.selectInstallationPackage.tree.current.name+'-'+dialog.selectInstallationPackage.list.current.version"
+                :visible.sync="dialog.step.visible"
+                width="740px"
+                :before-close="handleSelectInstallationPackageClose">
+
+            <el-steps :active="dialog.step.active" finish-status="success">
+                <el-step title="上传安装包"></el-step>
+                <el-step title="设置参数"></el-step>
+                <el-step title="安装"></el-step>
+            </el-steps>
+
+            <div v-if="dialog.step.active===0" style="max-height:426px;">
+
+            </div>
+            <div v-if="dialog.step.active===1" style="max-height:426px;">
+                <el-scrollbar style="height:100%;">
+
+                </el-scrollbar>
+            </div>
+            <div v-if="dialog.step.active===2" style="max-height:426px;">
+
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                 <el-button size="medium" @click="dialog.step.active+=1">下一步</el-button>
+                <el-button size="medium" v-if="dialog.step.active===1">下一步</el-button>
+                <el-button size="medium" v-else disable>下一步</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

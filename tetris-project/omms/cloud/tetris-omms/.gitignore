@@ -7,4 +7,6 @@
 .project
 /.idea/
 /logs/
+/src/main/webapp/packages/
+/src/main/webapp/upload/
 /LOG_HOME_IS_UNDEFINED/

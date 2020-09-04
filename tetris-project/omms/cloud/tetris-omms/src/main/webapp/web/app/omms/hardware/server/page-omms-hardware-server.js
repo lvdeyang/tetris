@@ -141,11 +141,6 @@ define([
                     self.dialog.editServer.creator = row.creator;
                     self.dialog.editServer.remark = row.remark;
                 },
-                gotoStatus:function(scope){
-                	var self = this;
-                	var row = scope.row;
-                	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
-                },
                 handleEditServerClose:function(){
                     var self = this;
                     self.dialog.editServer.visible = false;
@@ -185,6 +180,15 @@ define([
                         }
                         self.handleEditServerClose();
                     });
+                },
+                gotoStatus:function(scope){
+                	var self = this;
+                	var row = scope.row;
+                	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
+                },
+                gotoDeployment:function(scope){
+                    var self = this;
+                    var row = scope.row;
                 },
                 handleRowDelete:function(scope){
                     var self = this;

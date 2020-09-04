@@ -68,10 +68,13 @@
                                 width="250">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="状态查看" placement="bottom-end">
                                     <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoStatus(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="部署服务" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDeployment(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
