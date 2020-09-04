@@ -215,6 +215,20 @@
             </span>
         </el-dialog>
 
+        <el-dialog
+                title="修改ip"
+                :visible.sync="dialog.modifyIp.visible"
+                width="500px"
+                :before-close="handleModifyIpClose">
+
+            <el-input v-model="dialog.modifyIp.ip"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleModifyIpClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleModifyIpSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+
     </template>
 
 </mi-frame>

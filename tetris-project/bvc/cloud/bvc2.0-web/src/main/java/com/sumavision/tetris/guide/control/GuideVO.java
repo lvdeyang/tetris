@@ -17,7 +17,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class GuideVO extends AbstractBaseVO<GuideVO, GuidePO>{
 
 	/** 导播任务编号 */
-	private Long id;
+	private Long index;
 
 	/** 名称 */
 	private String taskName;
@@ -31,12 +31,12 @@ public class GuideVO extends AbstractBaseVO<GuideVO, GuidePO>{
 	/** 视频参数编号 */
 	private Long parameterNumber;
 	
-	public Long getId() {
-		return id;
+	public Long getIndex() {
+		return index;
 	}
 
-	public GuideVO setId(Long id) {
-		this.id = id;
+	public GuideVO setIndex(Long index) {
+		this.index = index;
 		return this;
 	}
 
@@ -78,11 +78,10 @@ public class GuideVO extends AbstractBaseVO<GuideVO, GuidePO>{
 
 	@Override
 	public GuideVO set(GuidePO entity) throws Exception {
-		this.setId(entity.getId())
+		this.setIndex(entity.getIndex())
 			.setTaskName(entity.getTaskName())
 			.setLiveBroadcastDuration(entity.getLiveBroadcastDuration())
-			.setCreationTime(entity.getCreationTime())
-			.setParameterNumber(entity.getParameterNumber());
+			.setCreationTime(entity.getCreationTime());
 			
 		return this;
 	}

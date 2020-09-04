@@ -5,6 +5,8 @@ package com.sumavision.tetris.guide.control;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -22,36 +24,39 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Table(name = "TETRIS_SOURCE_PO")
 public class SourcePO extends AbstractBasePO{
 
+	private static final long serialVersionUID = 1L;
+
 	/** 源编号 */
-	private Long id;
+	private Long index;
 	
 	/** 源类型 */
-	private String sourceType;
+	private SourceType sourceType;
 	
 	/** 源名称 */
 	private String sourceName;   
 	
-	/** 源地址 */
-	private String sourceAddress;
+	/** 源 sourceType为URL的时候存URL，为5G背包的时候存bundleID */
+	private String source;
 	
-	/** 导播任务编号 */
-	private Long taskNumber;
+	/** 导播任务id */
+	private Long guideId;
 
 	@Column(name = "SOURCE_NUMBER")
-	public Long getId() {
-		return id;
+	public Long getIndex() {
+		return index;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setIndex(Long index) {
+		this.index = index;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
 	@Column(name = "SOURCE_TYPE")
-	public String getSourceType() {
+	public SourceType getSourceType() {
 		return sourceType;
 	}
 
-	public void setSourceType(String sourceType) {
+	public void setSourceType(SourceType sourceType) {
 		this.sourceType = sourceType;
 	}
 
@@ -60,26 +65,28 @@ public class SourcePO extends AbstractBasePO{
 		return sourceName;
 	}
 
+
 	public void setSourceName(String sourceName) {
 		this.sourceName = sourceName;
 	}
 
-	@Column(name = "SOURCE_ADDRESS")
-	public String getSourceAddress() {
-		return sourceAddress;
+	@Column(name = "SOURCE")
+	public String getSource() {
+		return source;
 	}
 
-	public void setSourceAddress(String sourceAddress) {
-		this.sourceAddress = sourceAddress;
+	public void setSource(String source) {
+		this.source = source;
 	}
 	
-	@Column(name = "TASK_NUMBER")
-	public Long getTaskNumber() {
-		return taskNumber;
+	@Column(name = "GUIDE_ID")
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public void setTaskNumber(Long taskNumber) {
-		this.taskNumber = taskNumber;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
 
+	
 }

@@ -21,9 +21,11 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Entity
 @Table(name = "TETRIS_OUTPUT_SETTING_PO")
 public class OutputSettingPO extends AbstractBasePO {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	/** 输出编号 */
-	private Long id;
+	private String name;
 	
 	/** 输出协议 */
 	private String outputProtocol;
@@ -31,16 +33,16 @@ public class OutputSettingPO extends AbstractBasePO {
 	/** 输出地址 */
 	private String outputAddress;
 	
-	/** 导播任务编号 */
-	private Long taskNumber;
+	/** 导播任务id */
+	private Long guideId;
 
-	@Column(name = "OUTPUT_NUMBER")
-	public Long getId() {
-		return id;
+	@Column(name = "NAME")
+	public String getName() {
+		return name;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	@Column(name = "OUTPUT_PROTOCOL")
@@ -61,13 +63,13 @@ public class OutputSettingPO extends AbstractBasePO {
 		this.outputAddress = outputAddress;
 	}
 	
-	@Column(name = "TASK_NUMBER")
-	public Long getTaskNumber() {
-		return taskNumber;
+	@Column(name = "GUIDE_ID")
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public void setTaskNumber(Long taskNumber) {
-		this.taskNumber = taskNumber;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
 
 }

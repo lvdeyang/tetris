@@ -22,9 +22,11 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Table(name = "TETRIS_VIDEO_PARAMTERS_PO")
 public class VideoParametersPO extends AbstractBasePO{
 	
-	/** 视频参数编号 */
-	private Long parameterNumber;
-	
+	private static final long serialVersionUID = 1L;
+
+	/** 导播任务id */
+	private Long guideId;
+
 	/** 视频格式 */
 	private String format;
 	
@@ -55,20 +57,20 @@ public class VideoParametersPO extends AbstractBasePO{
 	/** 码率 */
 	private Long bitRate;
 	
-	@Column(name = "PARAMETER_NUMBER")
-	public Long getParameterNumber() {
-		return parameterNumber;
+	@Column(name = "GUIDE_ID")
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public void setParameterNumber(Long parameterNumber) {
-		this.parameterNumber = parameterNumber;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
-	
+
 	@Column(name = "FORMAT")
 	public String getFormat() {
 		return format;
 	}
-
+	
 	public void setFormat(String format) {
 		this.format = format;
 	}

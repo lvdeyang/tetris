@@ -4,14 +4,30 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
@@ -20,6 +36,8 @@ import com.sumavision.tetris.omms.hardware.server.ServerPO;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpCreateFolderFailException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpLoginFailWhenUploadInstallationPackageException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetInstallException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetUninstallException;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackageDAO;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackagePO;
 import com.sumavision.tetris.omms.software.service.type.ServiceTypeDAO;
@@ -285,10 +303,46 @@ public class ServiceDeploymentService {
 	 * @param Long deploymentId 部署id
 	 * @param JSONString config config.ini json形式
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void install(Long deploymentId, String config) throws Exception{
-		ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-		deployment.setConfig(config);
-		serviceDeploymentDao.save(deployment);
+		CloseableHttpClient client = null;
+		try{
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+			deployment.setConfig(config);
+			serviceDeploymentDao.save(deployment);
+			ServerPO server = serverDao.findOne(deployment.getServerId());
+			
+			StringBufferWrapper configBuffer = new StringBufferWrapper();
+			if(config!=null && !"".equals(config)){
+				JSONObject configJson = JSON.parseObject(config);
+				Set<String> keys = configJson.keySet();
+				for(String key:keys){
+					String value = configJson.getString(key);
+					configBuffer.append(key).append("=").append(value).append("\n");
+				}
+			}
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .build();
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/get_bvc_install").toString();
+			HttpPost httpPost = new HttpPost(url);
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+			formparams.add(new BasicNameValuePair("relative_path", deployment.getInstallFullPath()));  
+			formparams.add(new BasicNameValuePair("config", configBuffer.toString()));  
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			CloseableHttpResponse response = client.execute(httpPost);
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}
+		}finally{
+			if(client != null) client.close();
+		}
 	}
 	
 	/**
@@ -298,8 +352,35 @@ public class ServiceDeploymentService {
 	 * <b>日期：</b>2020年9月4日 上午10:35:27
 	 * @param Long deploymentId 部署id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void uninstall(Long deploymentId) throws Exception{
-		
+		CloseableHttpClient client = null;
+		try{
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+			ServerPO server = serverDao.findOne(deployment.getServerId());
+			serviceDeploymentDao.delete(deployment);
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .build();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/bvc_uninstall").toString();
+			HttpPost httpPost = new HttpPost(url);
+			
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+			formparams.add(new BasicNameValuePair("relative_path", deployment.getInstallFullPath()));  
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			CloseableHttpResponse response = client.execute(httpPost);
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetUninstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}
+		}finally{
+			if(client != null) client.close();
+		}
 	}
 	
 }

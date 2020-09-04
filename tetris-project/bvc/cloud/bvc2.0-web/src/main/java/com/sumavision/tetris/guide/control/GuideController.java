@@ -22,13 +22,13 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "/tetris/guide/control/guide/po")
-public class GuidePOController {
+public class GuideController {
 
 	@Autowired
-	private BroadcastingTaskQuery broadcastingTaskQuery;
+	private GuideQuery broadcastingTaskQuery;
 	
 	@Autowired
-	private BroadcastingTaskService broadcastingTaskService;
+	private GuideService broadcastingTaskService;
 	
 	/**
 	 * 

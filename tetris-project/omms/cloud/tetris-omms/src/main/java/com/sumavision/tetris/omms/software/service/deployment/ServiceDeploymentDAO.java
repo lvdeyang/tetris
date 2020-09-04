@@ -1,8 +1,9 @@
 package com.sumavision.tetris.omms.software.service.deployment;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -14,20 +15,13 @@ public interface ServiceDeploymentDAO extends BaseDAO<ServiceDeploymentPO>{
 	
 	public int countByServerId(Long serverId);
 	
-	/*@Query(value = "SELECT * FROM tetris_omms_service_deployment AS a LEFT JOIN tetris_omms_installation_package AS b ON a.service_type_id = b.service_type_id WHERE a.server_id = ?1",
-			nativeQuery = true)
-	public Page<ServiceDeploymentPO> findByCondition(Long serverId,Pageable page);*/
-	
 	/**
-	 * SELECT
-    A.id AS AID,
-    A.content AS AContent,
-    B.id AS BID,
-    B.content AS BContent
-	FROM
-	    A
-	LEFT JOIN B ON (A.id = B.id);
+	 * 查询服务器上部署的服务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 下午5:33:04
+	 * @param Long serverId 服务器id
+	 * @return List<ServiceDeploymentPO> 部署列表
 	 */
-
-	/*@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1", nativeQuery = true)*/
+	public List<ServiceDeploymentPO> findByServerId(Long serverId);
 }
