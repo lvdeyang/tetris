@@ -39,8 +39,11 @@
                               </span>
                         </el-tree>
                     </el-scrollbar>
+                    <!--<el-tooltip class="item" effect="dark" content="一键创建服务" placement="right-end">
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="oneButtonCreate" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
+                    </el-tooltip>-->
                     <el-tooltip class="item" effect="dark" content="创建服务" placement="right-end">
-                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="CreateServer" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="createServer" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
                     </el-tooltip>
                     <template>
                         <el-dialog

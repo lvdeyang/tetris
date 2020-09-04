@@ -52,6 +52,7 @@ define([
                     table:false
                 },
                 columns:{
+                    loading:false,
                     name:{
                         name:'当前服务',
                         value:''
@@ -345,7 +346,7 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                CreateServer:function(){
+                createServer:function(){
                     var self = this ;
                     self.dialog.addServer.visible = true;
                 },
@@ -394,6 +395,17 @@ define([
                     ajax.post('/service/type/delete/' + data.id, null, function(data, status){
                         if(status !== 200) return;
                         self.loadAllServiceTypes();
+                        self.tree.current = '';
+                        self.columns.name.value = '';
+                        self.columns.installationDirectory.value = '';
+                        self.columns.logFile.value = '';
+                        self.columns.installScript.value = '';
+                        self.columns.installScript.path = '';
+                        self.columns.startupScript.value = '';
+                        self.columns.startupScript.path = '';
+                        self.columns.shutdownScript.value = '';
+                        self.columns.shutdownScript.path = '';
+                        return;
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 editColumn:function(columnKey, column){
