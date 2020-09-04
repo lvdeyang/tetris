@@ -31,7 +31,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="服务器路径"
-                                prop="installScriptPath">
+                                prop="installFullPath">
                         </el-table-column>
                         <el-table-column
                                 label="运行状态"
@@ -81,8 +81,8 @@
                 title="选择安装包"
                 :visible.sync="dialog.selectInstallationPackage.visible"
                 width="740px"
-                :before-close="handleSelectInstallationPackageClose">
-
+                :before-close="handleSelectInstallationPackageClose"
+                :close-on-click-modal="false">
             <div style="height:450px; position:relative; border:1px solid #ebeef5;">
                 <div style="width:350px; height:100%; border-right:1px solid #ebeef5;">
                     <el-scrollbar style="height:100%;">
@@ -126,7 +126,8 @@
                 :title="dialog.selectInstallationPackage.tree.current.name+'-'+dialog.selectInstallationPackage.list.current.version"
                 :visible.sync="dialog.step.visible"
                 width="740px"
-                :before-close="handleSelectInstallationPackageClose">
+                :before-close="handleStepClose"
+                :close-on-click-modal="false">
 
             <el-steps :active="dialog.step.active" finish-status="success">
                 <el-step title="上传安装包"></el-step>
@@ -135,21 +136,57 @@
             </el-steps>
 
             <div v-if="dialog.step.active===0" style="max-height:426px;">
-
+                <div v-if="dialog.step.currentDeployment.error" style="margin-top:20px;">
+                    <div style="margin-bottom:10px;">上传失败!</div>
+                    <div style="margin-bottom:10px;">{{dialog.step.currentDeployment.errorMessage}}</div>
+                    <div style="width:300px;">
+                        <el-progress :percentage="dialog.step.currentDeployment.progress" status="exception"></el-progress>
+                    </div>
+                </div>
+                <div v-else style="margin-top:20px;">
+                    <div style="margin-bottom:10px;">上传中...</div>
+                    <div style="width:300px;">
+                        <el-progress :percentage="dialog.step.currentDeployment.progress" :color="dialog.step.currentDeployment.progress==100?'#67c23a':'#409eff'"></el-progress>
+                    </div>
+                </div>
             </div>
+
             <div v-if="dialog.step.active===1" style="max-height:426px;">
-                <el-scrollbar style="height:100%;">
-
+                <el-scrollbar v-if="dialog.step.properties.length>0" style="height:100%;">
+                    <div style="margin-top:20px; margin-bottom:20px;">
+                        <el-row>
+                            <el-col :span="11" v-for="(property, index) in dialog.step.properties" :offset="index%2==0?0:1" :key="property.id">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item :label="property.propertyName">
+                                        <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
+                                            <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
+                                        </el-select>
+                                        <el-switch v-else-if="property.valueType==='BOOLEAN'" v-model="property.value" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                                        <el-input v-else v-model="property.value"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                        </el-row>
+                    </div>
                 </el-scrollbar>
+                <div v-else style="margin-top:20px; margin-bottom:20px;">
+                    无配置!
+                </div>
             </div>
-            <div v-if="dialog.step.active===2" style="max-height:426px;">
 
+            <div v-if="dialog.step.active===2" style="max-height:426px;">
+                <div style="margin-top:20px;">
+                    <div v-if="dialog.step.properties.length>0" style="margin-bottom:10px;">config.ini</div>
+                    <div v-if="dialog.step.properties.length>0" style="margin-bottom:10px;">
+                        <div v-for="property in dialog.step.properties">{{property.propertyKey}}={{property.value}}</div>
+                    </div>
+                    <div>安装中...</div>
+                </div>
             </div>
 
             <span slot="footer" class="dialog-footer">
-                 <el-button size="medium" @click="dialog.step.active+=1">下一步</el-button>
-                <el-button size="medium" v-if="dialog.step.active===1">下一步</el-button>
-                <el-button size="medium" v-else disable>下一步</el-button>
+                <el-button size="small" v-if="dialog.step.currentDeployment.error || dialog.step.active===3" @click="handleStepClose">关闭</el-button>
+                <el-button size="small" type="primary" v-if="dialog.step.active===1" @click="handleInstall">安装</el-button>
             </span>
         </el-dialog>
 

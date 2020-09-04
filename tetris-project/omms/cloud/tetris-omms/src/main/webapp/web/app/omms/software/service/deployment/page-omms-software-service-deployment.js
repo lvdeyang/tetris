@@ -49,7 +49,6 @@ define([
                 dialog:{
                     selectInstallationPackage:{
                         visible:false,
-                        server:'',
                         tree:{
                             props:{
                                 label:'name',
@@ -66,7 +65,11 @@ define([
                     },
                     step:{
                         visible:false,
-                        active:0
+                        active:0,
+                        interval:'',
+                        currentDeployment:'',
+                        properties:[],
+                        loading:false
                     }
                 }
             },
@@ -126,6 +129,10 @@ define([
                 handleSelectInstallationPackageClose:function(){
                     var self = this;
                     self.dialog.selectInstallationPackage.visible = false;
+                    self.dialog.selectInstallationPackage.tree.data.splice(0, self.dialog.selectInstallationPackage.tree.data.length);
+                    self.dialog.selectInstallationPackage.tree.current = '';
+                    self.dialog.selectInstallationPackage.list.data.splice(0, self.dialog.selectInstallationPackage.list.data.length);
+                    self.dialog.selectInstallationPackage.list.current = '';
                 },
                 handleSelectInstallationPackageSubmit:function(){
                     var self = this;
@@ -136,7 +143,42 @@ define([
                             serverId:self.serverId,
                             installationPackageId:self.dialog.selectInstallationPackage.list.current.id
                         }, function(data){
-                            console.log(data);
+                            self.table.rows.push(data);
+                            self.table.total += 1;
+                            self.dialog.step.currentDeployment = data;
+                            self.dialog.step.interval = setInterval(function(){
+                                ajax.post('/service/deployment/query/upload/status', {
+                                    serviceDeploymentId:self.dialog.step.currentDeployment.id
+                                }, function(data){
+                                    for(var i=0; i<self.table.rows.length; i++){
+                                        if(self.table.rows[i].id == data.id){
+                                            self.table.rows.splice(i, 1, data);
+                                            break;
+                                        }
+                                    }
+                                    self.dialog.step.currentDeployment = data;
+                                    if(self.dialog.step.currentDeployment.error){
+                                        clearInterval(self.dialog.step.interval);
+                                    }else if(self.dialog.step.currentDeployment.step == 'CONFIG'){
+                                        clearInterval(self.dialog.step.interval);
+                                        self.dialog.step.properties.splice(0, self.dialog.step.properties.length);
+                                        ajax.post('/properties/find/by/installation/package/id', {
+                                            installationPackageId:self.dialog.selectInstallationPackage.list.current.id
+                                        }, function(data){
+                                            setTimeout(function(){
+                                                self.dialog.step.active = 1;
+                                            }, 1000);
+                                            if(data && data.length>0){
+                                                for(var i=0; i<data.length; i++){
+                                                    data[i].value = data[i].propertyDefaultValue;
+                                                    if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
+                                                    self.dialog.step.properties.push(data[i]);
+                                                }
+                                            }
+                                        });
+                                    }
+                                })
+                            }, 1000);
                         });
                     }else if(!self.dialog.selectInstallationPackage.tree.current){
                         self.$message({
@@ -162,6 +204,8 @@ define([
                     }, function(data){
                         if(data && data.length>0){
                             for(var i=0; i<data.length; i++){
+                                data[i].value = data[i].propertyDefaultValue;
+                                if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                 self.dialog.selectInstallationPackage.list.data.push(data[i]);
                             }
                         }
@@ -176,13 +220,38 @@ define([
                     Vue.set(p, 'current', true);
                     self.dialog.selectInstallationPackage.list.current = p;
                 },
-                handleSelectInstallationPackageClose:function(){
-                    var self = this;
-                    self.dialog.step.visible = false;
-                },
                 handleStepClose:function(){
                     var self = this;
+                    self.dialog.step.active = 0;
+                    if(self.dialog.step.interval){
+                        clearInterval(self.dialog.step.interval);
+                    }
+                    self.dialog.step.interval = '';
+                    self.dialog.step.currentDeployment = '';
+                    self.dialog.step.properties.splice(0, self.dialog.step.properties.length);
+                    self.dialog.step.loading = false;
                     self.dialog.step.visible = false;
+                },
+                handleInstall:function(){
+                    var self = this;
+                    var config = {};
+                    if(self.dialog.step.properties.length > 0){
+                        for(var i=0; i<self.dialog.step.properties.length; i++){
+                            config[self.dialog.step.properties[i].propertyKey] = self.dialog.step.properties[i].value;
+                        }
+                    }
+                    self.dialog.step.active = 2;
+                    ajax.post('/service/deployment/install', {
+                        deploymentId:self.dialog.step.currentDeployment.id,
+                        config: $.toJSON(config)
+                    }, function(data, status, message){
+                        setTimeout(function(){
+                            self.dialog.step.active = 3;
+                        }, 5000);
+                        if(status !== 200){
+                            return;
+                        }
+                    }, null, ajax.TOTAL_CATCH_CODE);
                 }
             },
             mounted:function(){

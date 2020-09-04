@@ -10,14 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackageDAO;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackagePO;
-import com.sumavision.tetris.omms.software.service.installation.PropertiesPO;
-import com.sumavision.tetris.omms.software.service.installation.PropertiesVO;
-import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryDAO;
-import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryPO;
 import com.sumavision.tetris.omms.software.service.type.ServiceTypeDAO;
 import com.sumavision.tetris.omms.software.service.type.ServiceTypePO;
 
@@ -28,10 +23,10 @@ public class ServiceDeploymentQuery {
 	private ServiceDeploymentDAO serviceDeploymentDao;
 	
 	@Autowired
-	public InstallationPackageDAO InstallationPackageDAO;
+	public InstallationPackageDAO installationPackageDao;
 	
 	@Autowired
-	public ServiceTypeDAO serviceTypeDAO;
+	public ServiceTypeDAO serviceTypeDao;
 	
 	/**
 	 * 查询状态<br/>
@@ -42,11 +37,22 @@ public class ServiceDeploymentQuery {
 	 * @return ServiceDeploymentVO 状态
 	 */
 	public ServiceDeploymentVO queryUploadStatus(Long serviceDeploymentId) throws Exception{
-	
 		ServiceDeploymentPO deploymentEntity = serviceDeploymentDao.findOne(serviceDeploymentId);
-		return new ServiceDeploymentVO().set(deploymentEntity);
+		InstallationPackagePO installPackageEntity = installationPackageDao.findOne(deploymentEntity.getInstallationPackageId());
+		ServiceTypePO serviceTypeEntity = serviceTypeDao.findOne(deploymentEntity.getServiceTypeId());
+		return new ServiceDeploymentVO().set(deploymentEntity)
+										.setVersion(installPackageEntity.getVersion())
+										.setName(serviceTypeEntity.getName());
 	}
 	
+	/**
+	 * 根据服务器查询部署服务<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午10:12:06
+	 * @param serverId 服务器id
+	 * @return Map<String, Object> 部署服务参数
+	 */
 	public Map<String, Object> load(
 			Long serverId,
 			int currentPage,
@@ -59,8 +65,8 @@ public class ServiceDeploymentQuery {
 		List<ServiceDeploymentVO> rows = new ArrayList<ServiceDeploymentVO>();
 		for (ServiceDeploymentPO serviceDeploymentPO : entities) {
 			ServiceDeploymentVO row = new ServiceDeploymentVO(); 
-			InstallationPackagePO installationPackagePO = InstallationPackageDAO.findOne(serviceDeploymentPO.getInstallationPackageId());
-			ServiceTypePO serviceTypePO = serviceTypeDAO.findOne(serviceDeploymentPO.getServiceTypeId());
+			InstallationPackagePO installationPackagePO = installationPackageDao.findOne(serviceDeploymentPO.getInstallationPackageId());
+			ServiceTypePO serviceTypePO = serviceTypeDao.findOne(serviceDeploymentPO.getServiceTypeId());
 			installationPackagePOs.add(installationPackagePO);
 			serviceTypePOs.add(serviceTypePO);
 			row.setServerId(serviceDeploymentPO.getServerId())

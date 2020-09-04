@@ -4,8 +4,8 @@
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item><a href="#/page-omms-software-service-type">服务管理</a></el-breadcrumb-item>
-        <el-breadcrumb-item><a href="#/page-omms-software-service-installation-package">版本管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-omms-software-service-type">{{serviceName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a @click = "rollback">{{version}}</a></el-breadcrumb-item>
         <el-breadcrumb-item>参数列表</el-breadcrumb-item>
     </template>
 
@@ -157,8 +157,7 @@
             :visible.sync="dialog.editProperties.visible"
             width="650px"
             :before-close="handleEditPropertiesClose"
-            :close-on-click-modal="false"
-            >
+            :close-on-click-modal="true">
         <div>
             <el-form label-width="60px">
                 <div style="high:400px">
@@ -235,7 +234,7 @@
         </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.editProperties.visible = false">取消</el-button>
+                <el-button size="medium" @click="handleEditPropertiesClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditPropertiesSubmit" :loading="dialog.editProperties.loading">提交</el-button>
             </span>
 

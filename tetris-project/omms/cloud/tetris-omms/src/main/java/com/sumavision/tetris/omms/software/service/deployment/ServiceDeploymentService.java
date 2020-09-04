@@ -22,6 +22,8 @@ import com.sumavision.tetris.omms.software.service.deployment.exception.FtpCreat
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpLoginFailWhenUploadInstallationPackageException;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackageDAO;
 import com.sumavision.tetris.omms.software.service.installation.InstallationPackagePO;
+import com.sumavision.tetris.omms.software.service.type.ServiceTypeDAO;
+import com.sumavision.tetris.omms.software.service.type.ServiceTypePO;
 
 @Service
 public class ServiceDeploymentService {
@@ -33,6 +35,9 @@ public class ServiceDeploymentService {
 	
 	@Autowired
 	private InstallationPackageDAO installationPackageDao;
+	
+	@Autowired
+	private ServiceTypeDAO serviceTypeDao;
 	
 	@Autowired
 	private ServiceDeploymentDAO serviceDeploymentDao;
@@ -53,21 +58,26 @@ public class ServiceDeploymentService {
 		
 		ServerPO serverEntity = serverDao.findOne(serverId);
 		InstallationPackagePO installationPackageEntity = installationPackageDao.findOne(installationPackageId);
+		ServiceTypePO serviceTypeEntity = serviceTypeDao.findOne(installationPackageEntity.getServiceTypeId());
 		
 		ServiceDeploymentPO serviceDeploymentEntity = new ServiceDeploymentPO();
-		serviceDeploymentEntity.setUpdateTime(new Date());
-		serviceDeploymentEntity.setServiceTypeId(serviceDeploymentEntity.getServiceTypeId());
-		serviceDeploymentEntity.setInstallationPackageId(serviceDeploymentEntity.getId());
+		Date now = new Date();
+		serviceDeploymentEntity.setUpdateTime(now);
+		serviceDeploymentEntity.setServiceTypeId(installationPackageEntity.getServiceTypeId());
+		serviceDeploymentEntity.setInstallationPackageId(installationPackageEntity.getId());
 		serviceDeploymentEntity.setInstallFullPath(new StringBufferWrapper().append(RELATIVE_FOLDER).append("/").append(installationPackageEntity.getFileName()).toString());
 		serviceDeploymentEntity.setServerId(serverEntity.getId());
 		serviceDeploymentEntity.setStep(DeploymentStep.UPLOAD);
 		serviceDeploymentEntity.setProgress(0);
+		serviceDeploymentEntity.setCreateTime(now);
 		serviceDeploymentDao.save(serviceDeploymentEntity);
 		
 		Thread uploadThread = new Thread(new Uploader(serverEntity, installationPackageEntity, serviceDeploymentEntity));
 		uploadThread.start();
 		
-		return new ServiceDeploymentVO().set(serviceDeploymentEntity);
+		return new ServiceDeploymentVO().set(serviceDeploymentEntity)
+										.setVersion(installationPackageEntity.getVersion())
+										.setName(serviceTypeEntity.getName());
 	}
 	
 	/**
@@ -264,6 +274,31 @@ public class ServiceDeploymentService {
 				try{if(ftpClient != null){ftpClient.logout(); ftpClient.disconnect();}}catch(Exception e){e.printStackTrace();}
 			}
 		}
+		
+	}
+	
+	/**
+	 * 执行安装操作<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 下午8:53:07
+	 * @param Long deploymentId 部署id
+	 * @param JSONString config config.ini json形式
+	 */
+	public void install(Long deploymentId, String config) throws Exception{
+		ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+		deployment.setConfig(config);
+		serviceDeploymentDao.save(deployment);
+	}
+	
+	/**
+	 * 执行卸载<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:35:27
+	 * @param Long deploymentId 部署id
+	 */
+	public void uninstall(Long deploymentId) throws Exception{
 		
 	}
 	

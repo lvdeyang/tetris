@@ -53,6 +53,18 @@
                                 prop="createTime">
                         </el-table-column>
                         <el-table-column
+                                label="ftp用户名"
+                                prop="ftpUsername">
+                        </el-table-column>
+                        <el-table-column
+                                label="ftp端口"
+                                prop="ftpPort">
+                        </el-table-column>
+                        <el-table-column
+                                label="ftp密码"
+                                prop="ftpPassword">
+                        </el-table-column>
+                        <el-table-column
                                 label="备注"
                                 prop="remark">
                         </el-table-column>
@@ -129,6 +141,15 @@
                 <el-form-item label="创建者:">
                     <el-input v-model="dialog.addServer.creator"></el-input>
                 </el-form-item>
+                <el-form-item label="ftp用户名:">
+                    <el-input v-model="dialog.addServer.ftpUsername"></el-input>
+                </el-form-item>
+                <el-form-item label="ftp端口:">
+                    <el-input v-model="dialog.addServer.ftpPort"></el-input>
+                </el-form-item>
+                <el-form-item label="ftp密码:">
+                    <el-input v-model="dialog.addServer.ftpPassword"></el-input>
+                </el-form-item>
                 <el-form-item label="备注:">
                     <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
                 </el-form-item>
@@ -162,6 +183,15 @@
                 </el-form-item>
                 <el-form-item label="创建者:">
                     <el-input v-model="dialog.editServer.creator"></el-input>
+                </el-form-item>
+                <el-form-item label="ftp用户名:">
+                    <el-input v-model="dialog.editServer.ftpUsername"></el-input>
+                </el-form-item>
+                <el-form-item label="ftp端口:">
+                    <el-input v-model="dialog.editServer.ftpPort"></el-input>
+                </el-form-item>
+                <el-form-item label="ftp密码:">
+                    <el-input v-model="dialog.editServer.ftpPassword"></el-input>
                 </el-form-item>
                 <el-form-item label="备注:">
                     <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>

@@ -174,7 +174,10 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 			.setRemark(entity.getRemark())
 			.setCreator(entity.getCreator())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
-			.setStatus(entity.getStatus().getName());
+			.setStatus(entity.getStatus().getName())
+			.setFtpUsername(entity.getFtpUsername())
+			.setFtpPort(entity.getFtpPort())
+			.setFtpPassword(entity.getFtpPassword());
 		return this;
 	}
 
