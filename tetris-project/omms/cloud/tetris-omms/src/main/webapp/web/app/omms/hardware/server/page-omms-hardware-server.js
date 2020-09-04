@@ -60,7 +60,6 @@ define([
                         visible:false,
                         id:'',
                         name:'',
-                        ip:'',
                         gadgetPort:'',
                         gadgetUsername:'',
                         gadgetPassword:'',
@@ -146,7 +145,6 @@ define([
                     self.dialog.editServer.visible = true;
                     self.dialog.editServer.id = row.id;
                     self.dialog.editServer.name = row.name;
-                    self.dialog.editServer.ip = row.ip;
                     self.dialog.editServer.gadgetPort = row.gadgetPort;
                     self.dialog.editServer.gadgetUsername = row.gadgetUsername;
                     self.dialog.editServer.gadgetPassword = row.gadgetPassword;
@@ -161,7 +159,6 @@ define([
                     self.dialog.editServer.visible = false;
                     self.dialog.editServer.id = '';
                     self.dialog.editServer.name = '';
-                    self.dialog.editServer.ip = '';
                     self.dialog.editServer.gadgetPort = '';
                     self.dialog.editServer.gadgetUsername = '';
                     self.dialog.editServer.gadgetPassword = '';
@@ -176,7 +173,6 @@ define([
                     ajax.post('/server/edit', {
                         id:self.dialog.editServer.id,
                         name:self.dialog.editServer.name,
-                        ip:self.dialog.editServer.ip,
                         gadgetPort:self.dialog.editServer.gadgetPort,
                         gadgetUsername:self.dialog.editServer.gadgetUsername,
                         gadgetPassword:self.dialog.editServer.gadgetPassword,
@@ -205,6 +201,13 @@ define([
                         self.handleEditServerClose();
                     });
                 },
+
+                handleModifyIp:function(scope){
+                    var self = this;
+                    var row = scope.row;
+
+                },
+
                 gotoStatus:function(scope){
                 	var self = this;
                 	var row = scope.row;

@@ -22,7 +22,6 @@ define([
 
     var init = function(){
 
-        //璁剧疆鏍囬
         commons.setTitle(pageId);
 
         var $page = document.getElementById(pageId);
@@ -64,11 +63,6 @@ define([
                         name:'日志路径',
                         value:''
                     },
-                    properties:{
-                        name:'服务属性',
-                        show:false,
-                        rows:[]
-                    },
                     installScript:{
                         name:'安装脚本',
                         value:'',
@@ -103,24 +97,6 @@ define([
                         visible:false,
                         key:'',
                         column:''
-                    },
-                    addProperty:{
-                        visible:false,
-                        loading:false,
-                        serviceTypeId:'',
-                        propertyKey:'',
-                        propertyName:'',
-                        valueType:'',
-                        propertyDefaultValue:''
-                    },
-                    editProperty:{
-                        visible:false,
-                        loading:false,
-                        id:'',
-                        propertyKey:'',
-                        propertyName:'',
-                        valueType:'',
-                        propertyDefaultValue:''
                     },
                     addServer:{
                         visible:false,
@@ -168,106 +144,6 @@ define([
                         }
                     });
                 },
-                handleCreateProperty:function(){
-                    var self = this;
-                    self.dialog.addProperty.serviceTypeId = self.tree.current.id;
-                    self.dialog.addProperty.visible = true;
-                },
-                handleCreatePropertyClose:function(){
-                    var self = this;
-                    self.dialog.addProperty.visible = false;
-                    self.dialog.addProperty.loading = false;
-                    self.dialog.addProperty.serviceTypeId = '';
-                    self.dialog.addProperty.propertyKey = '';
-                    self.dialog.addProperty.propertyName = '';
-                    self.dialog.addProperty.valueType = '';
-                    self.dialog.addProperty.propertyDefaultValue = '';
-                },
-                handleCreatePropertySubmit:function(){
-                    var self = this;
-                    self.dialog.addProperty.loading = true;
-                    ajax.post('/service/properties/add', {
-                        serviceTypeId:self.dialog.addProperty.serviceTypeId,
-                        propertyKey:self.dialog.addProperty.propertyKey,
-                        propertyName:self.dialog.addProperty.propertyName,
-                        valueType:self.dialog.addProperty.valueType,
-                        propertyDefaultValue:self.dialog.addProperty.propertyDefaultValue
-                    }, function(data, status){
-                        self.dialog.addProperty.loading = false;
-                        if(status !== 200) return;
-                        self.columns.properties.rows.push(data);
-                        if(!self.tree.current.params.properties) self.tree.current.params.properties = [];
-                        self.tree.current.params.properties.push(data);
-                        self.handleCreatePropertyClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleEditProperty:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    self.dialog.editProperty.id = row.id;
-                    self.dialog.editProperty.propertyKey = row.propertyKey;
-                    self.dialog.editProperty.propertyName = row.propertyName;
-                    self.dialog.editProperty.valueType = row.valueTypeName;
-                    self.dialog.editProperty.propertyDefaultValue = row.propertyDefaultValue;
-                    self.dialog.editProperty.visible = true;
-                },
-                handleEditPropertyClose:function(){
-                    var self = this;
-                    self.dialog.editProperty.id = '';
-                    self.dialog.editProperty.propertyKey = '';
-                    self.dialog.editProperty.propertyName = '';
-                    self.dialog.editProperty.valueType = '';
-                    self.dialog.editProperty.propertyDefaultValue = '';
-                    self.dialog.editProperty.visible = false;
-                    self.dialog.editProperty.loading = false;
-                },
-                handleEditPropertySubmit:function(){
-                    var self = this;
-                    self.dialog.editProperty.loading = true;
-                    ajax.post('/service/properties/edit', {
-                        id:self.dialog.editProperty.id,
-                        propertyKey:self.dialog.editProperty.propertyKey,
-                        propertyName:self.dialog.editProperty.propertyName,
-                        valueType:self.dialog.editProperty.valueType,
-                        propertyDefaultValue:self.dialog.editProperty.propertyDefaultValue
-                    }, function(data, status){
-                        self.dialog.editProperty.loading = false;
-                        if(status !== 200) return;
-                        for(var i=0; i<self.columns.properties.rows.length; i++){
-                            if(self.columns.properties.rows[i].id === data.id){
-                                self.columns.properties.rows.splice(i, 1, data);
-                                break;
-                            }
-                        }
-                        for(var i=0; i<self.tree.current.params.properties.length; i++){
-                            if(self.tree.current.params.properties[i].id === data.id){
-                                self.tree.current.params.properties.splice(i, 1, data);
-                                break;
-                            }
-                        }
-                        self.handleEditPropertyClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleRemoveProperty:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    ajax.post('/service/properties/remove', {
-                        id:row.id
-                    }, function(){
-                        for(var i=0; i<self.columns.properties.rows.length; i++){
-                            if(self.columns.properties.rows[i].id === row.id){
-                                self.columns.properties.rows.splice(i, 1);
-                                break;
-                            }
-                        }
-                        for(var i=0; i<data.params.properties.length; i++){
-                            if(data.params.properties[i].id === row.id){
-                                data.params.properties.splice(i, 1);
-                                break;
-                            }
-                        }
-                    });
-                },
                 currentTreeNodeChange:function(data){
                     var self = this;
                     if(data.type === 'FOLDER'){
@@ -288,13 +164,6 @@ define([
                     self.columns.installationDirectory.value = data.params.installationDirectory;
                     self.columns.logFile.value = data.params.logFile;
                     self.columns.installScript.value = data.params.installScript;
-                    var properties = self.tree.current.params.properties;
-                    self.columns.properties.rows.splice(0, self.columns.properties.rows.length);
-                    if(properties && properties.length>0){
-                        for(var i=0; i<properties.length; i++){
-                            self.columns.properties.rows.push(properties[i]);
-                        }
-                    }
 
                     for(var i=0; i<self.editors.length; i++){
                         if(self.editors[i].name === 'installScript'){
@@ -345,7 +214,7 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                CreateServer:function(){
+                createServer:function(){
                     var self = this ;
                     self.dialog.addServer.visible = true;
                 },
@@ -443,7 +312,6 @@ define([
             },
             mounted:function(){
                 var self = this;
-                //self.loadValueTypes();
                 self.loadAllServiceTypes();
 
                 ajax.post('/service/type/find/group/types', null, function(data){

@@ -82,6 +82,9 @@
                                 <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="修改ip" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-cloud" style="font-size:20px; padding:0;" @click="handleModifyIp(scope)"></el-button>
+                                </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="状态查看" placement="bottom-end">
                                     <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoStatus(scope)"></el-button>
                                 </el-tooltip>
@@ -122,38 +125,44 @@
                 :visible.sync="dialog.addServer.visible"
                 width="500px"
                 :before-close="handleAddServerClose">
-            <el-form label-width="100px">
-                <el-form-item label="名称:">
-                    <el-input v-model="dialog.addServer.name"></el-input>
-                </el-form-item>
-                <el-form-item label="ip:">
-                    <el-input v-model="dialog.addServer.ip"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具端口:">
-                    <el-input v-model="dialog.addServer.gadgetPort"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具用户名:">
-                    <el-input v-model="dialog.addServer.gadgetUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具密码:">
-                    <el-input v-model="dialog.addServer.gadgetPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="创建者:">
-                    <el-input v-model="dialog.addServer.creator"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp用户名:">
-                    <el-input v-model="dialog.addServer.ftpUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp端口:">
-                    <el-input v-model="dialog.addServer.ftpPort"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp密码:">
-                    <el-input v-model="dialog.addServer.ftpPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="备注:">
-                    <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
-                </el-form-item>
-            </el-form>
+
+            <div style="height:500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="100px">
+                        <el-form-item label="名称:">
+                            <el-input v-model="dialog.addServer.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ip:">
+                            <el-input v-model="dialog.addServer.ip"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具端口:">
+                            <el-input v-model="dialog.addServer.gadgetPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具用户名:">
+                            <el-input v-model="dialog.addServer.gadgetUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具密码:">
+                            <el-input v-model="dialog.addServer.gadgetPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="创建者:">
+                            <el-input v-model="dialog.addServer.creator"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp用户名:">
+                            <el-input v-model="dialog.addServer.ftpUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp端口:">
+                            <el-input v-model="dialog.addServer.ftpPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp密码:">
+                            <el-input v-model="dialog.addServer.ftpPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备注:">
+                            <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleAddServerClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleAddServerSubmit">确定</el-button>
@@ -165,38 +174,41 @@
                 :visible.sync="dialog.editServer.visible"
                 width="500px"
                 :before-close="handleEditServerClose">
-            <el-form label-width="100px">
-                <el-form-item label="名称:">
-                    <el-input v-model="dialog.editServer.name"></el-input>
-                </el-form-item>
-                <el-form-item label="ip:">
-                    <el-input v-model="dialog.editServer.ip"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具端口:">
-                    <el-input v-model="dialog.editServer.gadgetPort"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具用户名:">
-                    <el-input v-model="dialog.editServer.gadgetUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具密码:">
-                    <el-input v-model="dialog.editServer.gadgetPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="创建者:">
-                    <el-input v-model="dialog.editServer.creator"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp用户名:">
-                    <el-input v-model="dialog.editServer.ftpUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp端口:">
-                    <el-input v-model="dialog.editServer.ftpPort"></el-input>
-                </el-form-item>
-                <el-form-item label="ftp密码:">
-                    <el-input v-model="dialog.editServer.ftpPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="备注:">
-                    <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>
-                </el-form-item>
-            </el-form>
+
+            <div style="height:500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="100px">
+                        <el-form-item label="名称:">
+                            <el-input v-model="dialog.editServer.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具端口:">
+                            <el-input v-model="dialog.editServer.gadgetPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具用户名:">
+                            <el-input v-model="dialog.editServer.gadgetUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具密码:">
+                            <el-input v-model="dialog.editServer.gadgetPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="创建者:">
+                            <el-input v-model="dialog.editServer.creator"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp用户名:">
+                            <el-input v-model="dialog.editServer.ftpUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp端口:">
+                            <el-input v-model="dialog.editServer.ftpPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp密码:">
+                            <el-input v-model="dialog.editServer.ftpPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备注:">
+                            <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditServerClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditServerSubmit">确定</el-button>
