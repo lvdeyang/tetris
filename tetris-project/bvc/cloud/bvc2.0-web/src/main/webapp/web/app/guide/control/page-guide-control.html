@@ -1,0 +1,186 @@
+<div id="page-guide-control-wrapper" class="page-wrapper">
+  
+    <bvc-headerbar :sysusername="user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+    <!--<div class="page-body">-->
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+                <el-tabs type="border-card">
+				  <el-tab-pane label="导播任务">
+				    <div style="width:50%;height:300px;float:left">
+						<div style="float:left;">直播时长: 01:13:14</div>
+						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
+					    <div style="width:100%;margin-top:40px;">
+					        <div style="width:49%;float:left;height:200px;background:black;"></div>
+					        <div style="margin-left:1%;width:49%;float:left;height:200px;background:black;"></div>
+					        <div style="width:49%;float:left;height:30px;background:#339999;color:#FFF;text-align:center;line-height:30px;">PVW</div>
+					        <div style="margin-left:1%;width:49%;float:left;height:30px;background:#cc0033;color:#FFF;text-align:center;line-height:30px;">PGM</div>
+					    </div>
+					
+					</div>
+				    <div style="width:50%;height:300px;float:left">
+				        <div style="width:560px;float:left;">
+					        <div style="width:100%">
+						        <el-button type="primary" round size="mini">开始直播</el-button>
+						        <el-button type="primary" round size="mini">配置视频源</el-button>
+						        <el-button @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
+					        </div>
+					        
+					        <div style="width:560px;margin-top:20px;">
+					            <div style="color:#339999;font-weight:bold;text-align:center;padding-bottom:10px;">PVM</div>
+					            <el-button type="primary"  size="mini" class="tab_btn">1</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">2</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">3</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">4</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">5</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">6</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">7</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">8</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">9</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">10</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">11</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">12</el-button>
+					        </div>
+					        <div style="width:560px;margin-top:20px;">
+					            <div style="color:#cc0033;font-weight:bold;text-align:center;padding-bottom:10px;">PGM</div>
+					            <el-button type="primary"  size="mini" class="tab_btn">1</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">2</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">3</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">4</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">5</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">6</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">7</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">8</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">9</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">10</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">11</el-button>
+					            <el-button type="primary"  size="mini" class="tab_btn">12</el-button>
+					        </div>
+					        <table class="btn_table" style="width:540px;margin-top:10px;">
+					            <tr>
+					                <td><div class="source_show">无</div></td>
+						            <td><div class="source_show">CCT1</div></td>
+						            <td><div class="source_show">CCT2</div></td>
+						            <td><div class="source_show">CCT3</div></td>
+						            <td><div class="source_show">CCT4</div></td>
+						            <td><div class="source_show">背包1</div></td>
+						            <td><div class="source_show">背包2</div></td>
+						            <td><div class="source_show">背包3</div></td>
+						            <td><div class="source_show">背包4</div></td>
+						            <td><div class="source_show">背包5</div></td>
+						            <td><div class="source_show">背包6</div></td>
+						            <td><div class="source_show">背包7</div></td>
+					            </tr>
+					            <tr>
+					                <td><el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+						            <td><el-button type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
+					            
+					            </tr>
+					        </table>
+				       </div>
+				       <div style="width:200px;float:left;">
+				       		<div>
+					       		<el-button type="primary"  size="mini" style="margin-top:75px;background:#FFF;font-size:18px;color:black;width:50px;height:50px;border:0px;">
+					       			<i class="feather-icon-lock"></i>
+					       		</el-button>
+				       		</div>
+				       		<div>
+					       		<el-button type="primary"  size="mini" style="margin-top:30px;font-size:18px;width:70px;height:70px;">
+					       			CUT
+					       		</el-button>
+				       		</div>
+				       	    
+				       </div>
+				      
+				      
+				        
+				    </div>
+				    <div style="width:50%;height:400px;float:left"></div>
+				    <div style="width:50%;height:400px;float:left"></div>
+				  </el-tab-pane>
+				</el-tabs>
+            </el-main>
+        </el-container>
+    </div>
+    <el-dialog
+	        title="设置输入源"
+	        :visible.sync="dialog.setSource.visible"
+	        width="500px"
+	        :before-close="handleSetSourceClose">
+	    <el-form ref="form" label-width="100px">
+	        <el-form-item label="源名称">
+	            <el-input v-model="dialog.setSource.name"></el-input>
+	        </el-form-item>
+	        <el-form-item label="源类型">
+	            <el-select
+	                    v-model="dialog.setSource.type"
+	                    placeholder="请选择源类型">
+	                <el-option
+	                        v-for="item in dialog.setSource.typeOptions"
+	                        :value="item">
+	                </el-option>
+	            </el-select>
+	        </el-form-item>
+	        <el-form-item label="源地址">
+	            <el-input v-model="dialog.setSource.url"></el-input>
+	        </el-form-item>
+	        <el-form-item label="选择源设备">
+	             <el-button @click="handleDeviceSelect(dialog.setSource.device)" type="primary" size="small">选择原设备</el-button>
+	         </el-form-item>
+	         <el-form-item v-if="dialog.setSource.device.name" label="设备名">
+	             <span>{{ dialog.setSource.device.name }}</span>
+	         </el-form-item>
+	        
+	    </el-form>
+	    <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" @click="handleSetSourceClose">取 消</el-button>
+	        <el-button size="medium" type="primary" @click="handleSetSourceCommit"
+	                   :loading="dialog.setSource.loading">确 定
+	        </el-button>
+	    </span>
+	</el-dialog>
+	
+	<el-dialog
+	        title="设置输出"
+	        :visible.sync="dialog.setOut.visible"
+	        width="500px"
+	        :before-close="handleSetOutClose">
+	    <el-form ref="form" label-width="100px">
+	
+	        <el-form-item label="输出类型">
+	            <el-select
+	                    v-model="dialog.setOut.type"
+	                    placeholder="请选择输出类型">
+	                <el-option
+	                        v-for="item in dialog.setOut.typeOptions"
+	                        :value="item">
+	                </el-option>
+	            </el-select>
+	        </el-form-item>
+	        <el-form-item label="输出地址">
+	            <el-input v-model="dialog.setOut.url"></el-input>
+	        </el-form-item>
+	 
+	    </el-form>
+	    <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" @click="handleSetOutClose">取 消</el-button>
+	        <el-button size="medium" type="primary" @click="handleSetOutCommit"
+	                   :loading="dialog.setOut.loading">确 定
+	        </el-button>
+	    </span>
+	</el-dialog>
+</div>
+
+
+

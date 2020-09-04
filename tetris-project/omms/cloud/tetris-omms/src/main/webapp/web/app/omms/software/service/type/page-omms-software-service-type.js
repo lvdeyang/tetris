@@ -36,6 +36,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 propertyValueTypes:[],
+                groupTypes:[],
                 tree:{
                     props:{
                         label:'name',
@@ -44,6 +45,11 @@ define([
                     },
                     data:[],
                     current:''
+                },
+                loading:{
+                    server:false,
+                    addRoot:false,
+                    table:false
                 },
                 columns:{
                     name:{
@@ -115,6 +121,12 @@ define([
                         propertyName:'',
                         valueType:'',
                         propertyDefaultValue:''
+                    },
+                    addServer:{
+                        visible:false,
+                        loading:false,
+                        serverName:'',
+                        groupType:''
                     }
                 },
                 oneButtonCreateLoading:false
@@ -333,6 +345,57 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                CreateServer:function(){
+                    var self = this ;
+                    self.dialog.addServer.visible = true;
+                },
+                handleCreateServerClose:function(){
+                    var self = this;
+                    self.dialog.addServer.serverName = '';
+                    self.dialog.addServer.groupType = '';
+                    self.dialog.addServer.visible = false;
+                },
+                handleCreateServerSubmit:function(){
+                    var self = this;
+                    var params = {
+                        name:self.dialog.addServer.serverName,
+                        groupType:self.dialog.addServer.groupType
+                    }
+                    ajax.post('/service/type/create/server', params, function(data, status){
+                        self.handleCreateServerClose();
+                        if(status !== 200){
+                            return;
+                        }else{
+                            for(var i=0; i<data.length; i++){
+                                for(var j=0; j<self.tree.data.length; j++){
+                                    if(self.tree.data[j].name === data[i].parent){
+                                        self.tree.data[j].children.push(data[i]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                currentNode:function(data){
+                    if(!data) return;
+                    var self = this;
+                    self.$nextTick(function(){
+                        self.$refs.serverTree.setCurrentKey(data.uuid);
+                    });
+                    self.initFormMenu();
+                    self.tree.current = data;
+                    self.form.menu = $.extend(true, self.form.menu, data);
+                    self.form.menu.isGroup += '';
+                    self.loadPermissionRoles(data.id, 1);
+                },
+                treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                        if(status !== 200) return;
+                        self.loadAllServiceTypes();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 editColumn:function(columnKey, column){
                     var self = this;
                     self.dialog.editColumn.visible = true;
@@ -383,6 +446,11 @@ define([
                 //self.loadValueTypes();
                 self.loadAllServiceTypes();
 
+                ajax.post('/service/type/find/group/types', null, function(data){
+                    for(var i=0; i<data.length; i++){
+                        self.groupTypes.push(data[i]);
+                    }
+                });
                 self.$nextTick(function(){
 
                     $('#page-omms-software-service-type-wrapper').on('click.action.show.code', '.action-bar .action-show-code', function(){

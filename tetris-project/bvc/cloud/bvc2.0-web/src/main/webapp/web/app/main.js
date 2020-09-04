@@ -155,7 +155,8 @@ require.config({
         'page-monitor-live-user-list':window.APPPATH + 'monitor/live-user-list/page-monitor-live-user-list',
         'page-monitor-subtitle':window.APPPATH + 'monitor/subtitle/page-monitor-subtitle',
         'page-monitor-osd':window.APPPATH + 'monitor/osd/page-monitor-osd',
-        'page-monitor-external-folder':window.APPPATH + 'monitor/external-folder/page-monitor-external-folder'
+        'page-monitor-external-folder':window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
+        'page-guide-control':window.APPPATH + 'guide/control/page-guide-control'
 
     },
     shim:{

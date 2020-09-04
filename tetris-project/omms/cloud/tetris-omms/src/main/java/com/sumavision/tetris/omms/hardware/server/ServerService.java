@@ -61,6 +61,9 @@ public class ServerService {
 	 * @param String remark 备注
 	 * @param String creator 创建者
 	 * @param String createTime 创建时间
+	 * @param String ftpUsername ftp服务名
+	 * @param String ftpPort ftp端口
+	 * @param String ftpPassword ftp密码
 	 * @return ServerPO 服务器
 	 */
 	public ServerPO add(
@@ -71,7 +74,10 @@ public class ServerService {
 			String gadgetPassword,
 			String remark,
 			String creator,
-			Date createTime) throws Exception{
+			Date createTime,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = new ServerPO();
 		entity.setName(name);
 		entity.setIp(ip);
@@ -83,6 +89,9 @@ public class ServerService {
 		entity.setCreateTime(createTime);
 		entity.setUpdateTime(new Date());
 		entity.setStatus(ServerStatus.OFFLINE);
+		entity.setFtpUsername(ftpUsername);
+		entity.setFtpPort(ftpPort);
+		entity.setFtpPassword(ftpPassword);
 		serverDao.save(entity);
 		return entity;
 	}
@@ -110,7 +119,10 @@ public class ServerService {
 			String gadgetUsername,
 			String gadgetPassword,
 			String remark,
-			String creator) throws Exception{
+			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = serverDao.findOne(id);
 		if(entity != null){
 			entity.setName(name);
@@ -121,6 +133,9 @@ public class ServerService {
 			entity.setRemark(remark);
 			entity.setCreator(creator);
 			entity.setUpdateTime(new Date());
+			entity.setFtpUsername(ftpUsername);
+			entity.setFtpPort(ftpPort);
+			entity.setFtpPassword(ftpPassword);
 			serverDao.save(entity);
 		}
 		return entity;
@@ -178,6 +193,7 @@ public class ServerService {
 				HttpPost httpPost = new HttpPost(url);
 				client.start();
 				client.execute(httpPost, new QueryStatusListener(server.getId()));
+				client.close();
 			}
 		}
 	}
@@ -328,6 +344,23 @@ public class ServerService {
 			serverService.offlineStatus(this.serverId);
 		}
 		
+	}
+	
+	/**
+	 * 修改ip<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:39:43
+	 * @param Long id 服务器id
+	 * @param String ip 修改的ip
+	 * @return ServerVO 服务器
+	 */
+	public ServerVO modifyIp(
+			Long id,
+			String ip) throws Exception{
+		
+		
+		return null;
 	}
 	
 }

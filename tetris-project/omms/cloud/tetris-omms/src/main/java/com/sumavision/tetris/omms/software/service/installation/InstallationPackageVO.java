@@ -11,6 +11,9 @@ public class InstallationPackageVO extends AbstractBaseVO<InstallationPackageVO,
 	/** 文件路径 */
 	private String filePath;
 	
+	/** 文件名称 */
+	private String fileName;
+	
 	/** 版本号 */
 	private String version;
 	
@@ -38,6 +41,15 @@ public class InstallationPackageVO extends AbstractBaseVO<InstallationPackageVO,
 
 	public InstallationPackageVO setFilePath(String filePath) {
 		this.filePath = filePath;
+		return this;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public InstallationPackageVO setFileName(String fileName) {
+		this.fileName = fileName;
 		return this;
 	}
 
@@ -83,6 +95,7 @@ public class InstallationPackageVO extends AbstractBaseVO<InstallationPackageVO,
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setServiceTypeId(entity.getServiceTypeId())
 			.setFilePath(entity.getFilePath())
+			.setFileName(entity.getFileName())
 			.setVersion(entity.getVersion())
 			.setRemark(entity.getRemark())
 			.setCreator(entity.getCreator())

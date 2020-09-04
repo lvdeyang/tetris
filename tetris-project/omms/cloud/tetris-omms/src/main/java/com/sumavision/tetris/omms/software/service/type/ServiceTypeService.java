@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.hibernate.validator.internal.xml.GroupsType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.omms.software.service.installation.PropertiesPO;
 import com.sumavision.tetris.omms.software.service.type.exception.NoServiceTypesToAddException;
 
 @Service
@@ -39,7 +41,7 @@ public class ServiceTypeService {
 			}
 			if(!exist){
 				ServiceTypePO serviceType = new ServiceTypePO();
-				serviceType.setName(value.getName());
+				serviceType.setName(value.getName());  //前端传name
 				serviceType.setServiceType(value);
 				serviceType.setInstallationDirectory(value.getInstallationDirectory());
 				serviceType.setInstallScript(value.getInstallScript());
@@ -105,4 +107,45 @@ public class ServiceTypeService {
 		serviceTypeDao.save(entity);
 	}
 	
+	/**
+	 * 删除服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:13:36
+	 * @param id 服务类型id
+	 */
+	public void delete(Long id) throws Exception{
+		ServiceTypePO serviceTypePO = serviceTypeDao.findOne(id);
+		if(serviceTypePO != null){
+			serviceTypeDao.delete(serviceTypePO);
+		}
+	}	
+	
+	/**
+	 * 添加服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:14:18
+	 * @param name 服务类型名称
+	 * @param groupType 服务类型枚举
+	 * @return
+	 */
+	public List<OmmsSoftwareServiceTypeTreeNodeVO> createServer(
+			String name,
+			String groupType) throws Exception{
+		GroupType[] values = GroupType.values();
+		GroupType groupTypeValue = null;
+		for(GroupType value:values){
+			if(value.getName().equals(groupType)){
+				groupTypeValue = value;
+			}
+		}
+		ServiceTypePO serviceTypePO =new ServiceTypePO();
+		serviceTypePO.setName(name);
+		serviceTypePO.setGroupType(groupTypeValue);
+		serviceTypeDao.save(serviceTypePO);
+		List<OmmsSoftwareServiceTypeTreeNodeVO> nodes = new ArrayList<OmmsSoftwareServiceTypeTreeNodeVO>();
+		nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceTypePO));
+		return nodes;
+	}
 }
