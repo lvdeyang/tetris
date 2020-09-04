@@ -3,6 +3,8 @@
  */
 package com.sumavision.tetris.guide.control;
 
+import java.util.List;
+
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -17,5 +19,7 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = VideoParametersPO.class, idClass = Long.class)
 public interface OutputSettingDAO extends BaseDAO<OutputSettingPO>{
 	
-	public OutputSettingPO findByTaskNumber(Long taskNumber);
+	public List<OutputSettingPO> findByGuidePO(Long guidePO);
+	
+	public void deleteByGuidePO(Long guidePO);
 }

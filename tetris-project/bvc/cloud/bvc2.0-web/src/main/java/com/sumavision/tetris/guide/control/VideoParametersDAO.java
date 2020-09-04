@@ -16,5 +16,5 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
  */
 @RepositoryDefinition(domainClass = VideoParametersPO.class, idClass = Long.class)
 public interface VideoParametersDAO extends BaseDAO<VideoParametersPO>{
-
+	public void deleteByGuidePO(Long guidePO);
 }

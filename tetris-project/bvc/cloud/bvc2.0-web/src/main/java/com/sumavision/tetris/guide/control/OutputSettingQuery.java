@@ -19,9 +19,8 @@ public class OutputSettingQuery {
 	@Autowired
 	OutputSettingDAO outputSettingDAO;
 	
-	public List<OutputSettingVO> query() throws Exception{
-		List<OutputSettingPO> list = outputSettingDAO.findAll();
-		return OutputSettingVO.getConverter(OutputSettingVO.class).convert(list, OutputSettingVO.class);
+	public List<OutputSettingVO> query(Long guidePO) throws Exception{
+		List<OutputSettingPO> list = outputSettingDAO.findByGuidePO(guidePO);
 	}
 
 }

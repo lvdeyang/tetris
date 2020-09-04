@@ -15,7 +15,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	
 	/** 源编号 */
-	private Long id;
+	private Long index;
 	
 	/** 源类型 */
 	private String sourceType;
@@ -27,14 +27,14 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	private String sourceAddress;
 	
 	/** 导播任务编号 */
-	private Long taskNumber;
+	private Long guidePO;
 
-	public Long getId() {
-		return id;
+	public Long getIndex() {
+		return index;
 	}
 
-	public SourceVO setId(Long id) {
-		this.id = id;
+	public SourceVO setIndex(Long index) {
+		this.index = index;
 		return this;
 	}
 
@@ -65,12 +65,12 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
-	public Long getTaskNumber() {
-		return taskNumber;
+	public Long getGuidePO() {
+		return guidePO;
 	}
 
-	public SourceVO setTaskNumber(Long taskNumber) {
-		this.taskNumber = taskNumber;
+	public SourceVO setGuidePO(Long guidePO) {
+		this.guidePO = guidePO;
 		return this;
 	}
 
@@ -80,7 +80,7 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setSourceType(entity.getSourceType());
 		this.setSourceName(entity.getSourceName());
 		this.setSourceAddress(entity.getSourceAddress());
-		this.setTaskNumber(entity.getTaskNumber());
+		this.setGuidePO(entity.getGuidePO());
 		return this;
 	}
 
