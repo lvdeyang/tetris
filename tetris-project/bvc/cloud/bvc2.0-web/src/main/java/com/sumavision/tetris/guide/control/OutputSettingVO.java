@@ -15,7 +15,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSettingPO>{
 	
 	/** 输出编号 */
-	private Long index;
+	private String name;
 	
 	/** 输出协议 */
 	private String outputProtocol;
@@ -24,15 +24,14 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	private String outputAddress;
 	
 	/** 导播任务编号 */
-	private Long guidePO;
+	private Long guideId;
 
-	public Long getIndex() {
-		return index;
+	public String getName() {
+		return name;
 	}
 
-	public OutputSettingVO setIndex(Long index) {
-		this.index = index;
-		return this;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getOutputProtocol() {
@@ -53,21 +52,19 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		return this;
 	}
 
-	public Long getGuidePO() {
-		return guidePO;
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public OutputSettingVO setGuidePO(Long guidePO) {
-		this.guidePO = guidePO;
-		return this;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
-
 	@Override
 	public OutputSettingVO set(OutputSettingPO entity) throws Exception {
-		this.setIndex(entity.getIndex());
+		this.setName(entity.getName());
 		this.setOutputProtocol(entity.getOutputProtocol());
 		this.setOutputAddress(entity.getOutputAddress());
-		this.setGuidePO(entity.getGuidePO());
+		this.setGuideId(entity.getGuideId());
 		return this;
 	}
 	

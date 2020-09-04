@@ -18,16 +18,16 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	private Long index;
 	
 	/** 源类型 */
-	private String sourceType;
+	private SourceType sourceType;
 	
 	/** 源名称 */
 	private String sourceName;   
 	
-	/** 源地址 */
-	private String sourceAddress;
+	/** 源 sourceType为URL的时候存URL，为5G背包的时候存bundleID */
+	private String source;
 	
-	/** 导播任务编号 */
-	private Long guidePO;
+	/** 导播任务id */
+	private Long guideId;
 
 	public Long getIndex() {
 		return index;
@@ -38,13 +38,12 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
-	public String getSourceType() {
+	public SourceType getSourceType() {
 		return sourceType;
 	}
 
-	public SourceVO setSourceType(String sourceType) {
+	public void setSourceType(SourceType sourceType) {
 		this.sourceType = sourceType;
-		return this;
 	}
 
 	public String getSourceName() {
@@ -56,22 +55,21 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
-	public String getSourceAddress() {
-		return sourceAddress;
+	public String getSource() {
+		return source;
 	}
 
-	public SourceVO setSourceAddress(String sourceAddress) {
-		this.sourceAddress = sourceAddress;
+	public SourceVO setSource(String source) {
+		this.source = source;
 		return this;
 	}
 
-	public Long getGuidePO() {
-		return guidePO;
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public SourceVO setGuidePO(Long guidePO) {
-		this.guidePO = guidePO;
-		return this;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
 
 	@Override
@@ -79,8 +77,8 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setId(entity.getId());
 		this.setSourceType(entity.getSourceType());
 		this.setSourceName(entity.getSourceName());
-		this.setSourceAddress(entity.getSourceAddress());
-		this.setGuidePO(entity.getGuidePO());
+		this.setSource(entity.getSource());
+		this.setId(entity.getId());
 		return this;
 	}
 

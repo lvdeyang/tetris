@@ -21,11 +21,11 @@ public class SourceService {
 			Long id,
 			SourceType sourceType,
 			String sourceName,
-			String sourceAddress){
+			String source){
 		SourcePO sourcePO = sourceDAO.findOne(id);
 		sourcePO.setSourceType(sourceType);
 		sourcePO.setSourceName(sourceName);
-		sourcePO.setSourceAddress(sourceAddress);
+		sourcePO.setSource(source);
 		return sourceDAO.save(sourcePO);
 	}
 	

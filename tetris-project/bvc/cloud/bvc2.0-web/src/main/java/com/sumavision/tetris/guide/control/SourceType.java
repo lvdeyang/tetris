@@ -28,7 +28,7 @@ public enum SourceType {
 	
 	public static SourceType fromName(String name) throws Exception{
 		SourceType[] values = SourceType.values();
-		for(int i = 0;i < values.length; i++){
+		for(int i = 0; i < values.length; i++){
 			if(values[i].getName().equals(name)){
 				return values[i];
 			}
