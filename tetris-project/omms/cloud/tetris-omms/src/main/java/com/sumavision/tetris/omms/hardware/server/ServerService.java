@@ -103,7 +103,6 @@ public class ServerService {
 	 * <b>日期：</b>2020年2月14日 下午1:57:32
 	 * @param Long id 服务器id
 	 * @param String name 名称
-	 * @param String ip ip地址
 	 * @param String gadgetPort 小工具端口
 	 * @param String gadgetUsername 小工具用户名
 	 * @param String gadgetPassword 小工具密码
@@ -114,7 +113,6 @@ public class ServerService {
 	public ServerPO edit(
 			Long id,
 			String name,
-			String ip,
 			String gadgetPort,
 			String gadgetUsername,
 			String gadgetPassword,
@@ -126,7 +124,6 @@ public class ServerService {
 		ServerPO entity = serverDao.findOne(id);
 		if(entity != null){
 			entity.setName(name);
-			entity.setIp(ip);
 			entity.setGadgetPort(gadgetPort);
 			entity.setGadgetUsername(gadgetUsername);
 			entity.setGadgetPassword(gadgetPassword);

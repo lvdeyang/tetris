@@ -240,7 +240,7 @@ public class CommandVodController {
 //			CommandGroupUserPlayerPO player = commandVodService.seeOneselfUserStart(user, admin, true);
 //			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
-			vodService.userStart(user, user);
+			vodService.userStart(user, user,null);
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
@@ -273,7 +273,7 @@ public class CommandVodController {
 			
 //			vodService.userStop(153L);//test
 			
-			vodService.userStart(user, vodUser);
+			vodService.userStart(user, vodUser,null);
 			
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
@@ -299,7 +299,21 @@ public class CommandVodController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+		Long id = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		
+			UserBO user = userUtils.queryUserById(id);
+			UserBO vodUser = userUtils.queryUserById(userId);
+			
+//			vodService.userStop(153L);//test
+			
+			vodService.userStart(user, vodUser,serial);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
+			return _player;
+		}
 		/*
 		Long id = userUtils.getUserIdFromSession(request);
 		
@@ -348,7 +362,7 @@ public class CommandVodController {
 			for(Long userId : userIdList){
 				UserBO vodUser = userUtils.queryUserById(userId);
 				try{
-					vodService.userStart(user, vodUser);
+					vodService.userStart(user, vodUser,null);
 //					CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
 //					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 //					playerVOs.add(_player);
@@ -417,7 +431,7 @@ public class CommandVodController {
 //			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
 //			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
-			vodService.deviceStart(user, deviceId);
+			vodService.deviceStart(user, deviceId,null);
 			
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
@@ -445,7 +459,26 @@ public class CommandVodController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+		
+		Long id = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+			UserBO user = userUtils.queryUserById(id);
+		
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = new UserBO(); admin.setId(-1L);
+//			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			vodService.deviceStart(user, deviceId,serial);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
+			
+			return _player;
+		}
+			
 		/*
 		Long id = userUtils.getUserIdFromSession(request);
 		
@@ -492,7 +525,7 @@ public class CommandVodController {
 			
 			for(String deviceId : deviceIdList){
 				try{
-					vodService.deviceStart(user, deviceId);
+					vodService.deviceStart(user, deviceId,null);
 //					CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
 //					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 //					playerVOs.add(_player);

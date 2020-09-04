@@ -1,10 +1,13 @@
 package com.sumavision.tetris.bvc.page;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -32,7 +35,9 @@ import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
@@ -111,6 +116,9 @@ public class PageTaskService {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
+	@Autowired
+	private GroupDAO groupDao;
+	
 	//重构
 	public MessageSendCacheBO notifyUser(CommandGroupUserInfoPO userInfo, PageInfoPO pageInfo, boolean doWebsocket) throws Exception{
 		
@@ -140,9 +148,26 @@ public class PageTaskService {
 	public void addAndRemoveTasks(PageInfoPO pageInfo, List<PageTaskPO> newTasks, List<PageTaskPO> removeTasks) throws Exception{
 		
 		if(newTasks == null) newTasks = new ArrayList<PageTaskPO>();
+		
 		if(removeTasks == null) removeTasks = new ArrayList<PageTaskPO>();
 		
 		Integer currentPage = pageInfo.getCurrentPage();
+		
+		//新添加的应该是同一个groupPO下的任务。
+		if(newTasks.size()>0){
+			String businessId=newTasks.get(0).getBusinessId();
+			if(businessId.matches("\\d+")){
+				Long groupId=Long.parseLong(businessId);
+				GroupPO group=groupDao.findOne(groupId);
+				if(group!=null&&group.getLocationIndex()!=null){
+					int taskIndex=(pageInfo.getCurrentPage()-1)*pageInfo.getPageSize()+group.getLocationIndex();
+					for(PageTaskPO newTask:newTasks){
+						newTask.setTaskIndex(taskIndex++);
+						newTask.setFixedAtPageAndLocation(true);
+					}
+				}
+			}
+		}
 		
 		//获取当前分页下的任务
 		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, currentPage, true);
@@ -153,8 +178,7 @@ public class PageTaskService {
 		}
 		
 //		removeTask
-		removeTasks(pageInfo, removeTasks);
-		
+		newRemoveTasks(pageInfo, removeTasks);
 		
 		
 //		addTask
@@ -162,7 +186,11 @@ public class PageTaskService {
 //		for(PageTaskBO newTaskBO : newTasks){
 //			newTaskPOs.add(new PageTaskPO().set(newTaskBO));
 //		}
-		PageTaskPO jumpTo = addTask(pageInfo, newTasks);
+		PageTaskPO jumpTo=null;
+		
+		jumpTo = newAddTask(pageInfo, newTasks);
+		
+		
 		
 		//总页数
 		int newPageCount = pageInfo.obtainTotalPageCount();
@@ -239,9 +267,30 @@ public class PageTaskService {
 		
 	}
 	
-	/** 总页数 */
+	/**
+	 * 找到最后一个任务的索引号，如果没有任务则返回-1<br/>
+	 * <p>最后一个任务的索引（任务索引号从0开始）</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月31日 下午3:25:47
+	 * @param pageInfo
+	 * @return
+	 */
+	private int getLastIndex(PageInfoPO pageInfo){
+		int lastIndex = -1;
+		List<PageTaskPO> tasks =  pageInfo.getPageTasks();
+		for(PageTaskPO task : tasks){
+			if(task.getTaskIndex() > lastIndex){
+				lastIndex = task.getTaskIndex();
+			}
+		}
+		return lastIndex;
+	}
+	
+	/** 总页数，如果没有任务，则总页数为1 */
 	public int getTotalPageNumber(PageInfoPO pageInfo){
-		int lastIndex = pageInfo.getPageTasks().size() - 1;
+//		int lastIndex = pageInfo.getPageTasks().size() - 1;
+		int lastIndex = getLastIndex(pageInfo);
 		if(lastIndex < 0) return 1;
 		return getPageNumberByIndex(pageInfo, lastIndex);
 	}
@@ -275,8 +324,13 @@ public class PageTaskService {
 		List<PageTaskPO> tasks = pageInfo.getPageTasks();//new ArrayList<CommandPlayerTaskPO>();//userInfo.getxxx
 		Collections.sort(tasks, new PageTaskPO.TaskComparatorFromIndex());
 		int pageSize = pageInfo.getPageSize();
-		int totalPageCount = tasks.size()/pageSize;
-		int m = tasks.size()%pageSize;
+		
+		int lastIndex = getLastIndex(pageInfo);
+		//这是实际上的总页数，可能为0
+		int totalPageCount = (lastIndex+1)/pageSize;
+//		int totalPageCount = tasks.size()/pageSize;
+//		int m = tasks.size()%pageSize;
+		int m = (lastIndex+1)%pageSize;
 		if(m > 0) totalPageCount++;
 		
 
@@ -293,7 +347,18 @@ public class PageTaskService {
 			}
 		}
 		
-		if(pageNumber < totalPageCount){
+		int startIndex = pageSize * (pageNumber - 1);
+		int endIndex = pageSize * pageNumber - 1;
+		List<PageTaskPO> result = new ArrayList<PageTaskPO>();
+		for(PageTaskPO task : tasks){
+			if(task.getTaskIndex() >= startIndex && task.getTaskIndex() <= endIndex){
+				result.add(task);
+			}
+		}
+		
+		return result;
+		
+		/*if(pageNumber < totalPageCount){
 //			return tasks.subList((pageNumber-1)*pageSize, pageNumber*pageSize);
 			List<PageTaskPO> subTasks = tasks.subList((pageNumber-1)*pageSize, pageNumber*pageSize);
 			List<PageTaskPO> result = new ArrayList<PageTaskPO>(subTasks);
@@ -303,9 +368,10 @@ public class PageTaskService {
 			List<PageTaskPO> subTasks = tasks.subList((pageNumber-1)*pageSize, tasks.size());
 			List<PageTaskPO> result = new ArrayList<PageTaskPO>(subTasks);
 			return result;
-		}		
+		}*/
 	}
 	
+	/*可以优化，有问题*/
 	private PageTaskPO addTask(PageInfoPO pageInfo, List<PageTaskPO> newTasks){
 		
 		PageTaskPO jumpTo = null;
@@ -315,18 +381,25 @@ public class PageTaskService {
 		
 		for(PageTaskPO newTask : newTasks){
 			newTask.setPageInfo(pageInfo);
+			
+			//如果是固定位置的任务，则直接加在最后，这里不校验index是否有问题
+			if(newTask.getFixedAtPageAndLocation()){
+				tasks.add(newTask);
+				continue;
+			}
+			
 			BusinessInfoType type = newTask.getBusinessInfoType();
 			
 			if(type==null || PlayerBusinessType.NONE.equals(type)){
 				//不处理
 			}else if(type.isCommandOrMeeting()){
 				//TODO:查找同一个指挥/会议的，加在后边
-				String commandId = "";//newTask.getBusinessId().split("-")[0];
+				String commandId = newTask.getBusinessId().split("-")[0];
 				int index = -1;
 				for(int i=tasks.size()-1; i>=0; i--){
 					PageTaskPO task = tasks.get(i);
 					if(task.getBusinessInfoType().isCommandOrMeeting()){
-						String taskCommandId = "";//task.getBusinessId().split("-")[0];
+						String taskCommandId = task.getBusinessId().split("-")[0];
 						if(taskCommandId.equals(commandId)){
 							index = i;
 							break;
@@ -336,20 +409,57 @@ public class PageTaskService {
 				}
 				if(index < 0){
 					index = tasks.size();
+				}else{
+					boolean found = false;//
+					for(int i=index; i<tasks.size(); i++){
+						PageTaskPO task = tasks.get(i);
+						if(!Boolean.TRUE.equals(task.getFixedAtPageAndLocation())){
+							//找到了放新任务的位置
+							index = i;
+							found = true;
+							break;
+						}else{
+							//这里是固定任务，新任务要往后放
+						}
+					}
+					if(!found){
+						//没找到放新任务的位置，放在最后
+						index = tasks.size();
+					}
 				}
 				tasks.add(index, newTask);
+				markIndex(tasks);
 //				tasks.add(newTask);
 			}else{
-				//直接加在最后
+				/*//直接加在最后
 				tasks.add(newTask);
+				if(jumpTo == null) jumpTo = newTask;*/
+				//加在第一个空缺的taskIndex位置
+				boolean done = false;
+				int previousIndex = -1;
+				for(int i=0; i<tasks.size(); i++){
+					PageTaskPO task = tasks.get(i);
+					if(task.getTaskIndex() - 1 != previousIndex){
+						//说明这前边出现了空缺，把新任务插入到此处，标号
+						tasks.add(i, newTask);
+						markIndex(tasks);
+						break;
+					}else{
+						previousIndex = task.getTaskIndex();
+					}
+				}
+				if(!done){
+					tasks.add(newTask);
+					markIndex(tasks);
+				}
 				if(jumpTo == null) jumpTo = newTask;
 			}
 		}
 		
-		markIndex(tasks);
+//		markIndex(tasks);//去掉？
 		
 		//持久化
-		pageTaskDao.save(tasks);
+		//pageTaskDao.save(tasks);
 		pageInfoDao.save(pageInfo);
 		
 		return jumpTo;
@@ -372,7 +482,7 @@ public class PageTaskService {
 				}
 			}
 		}
-		
+//		tasks.removeAll(removeTasks);
 		markIndex(tasks);
 		
 		//持久化
@@ -400,12 +510,13 @@ public class PageTaskService {
 		
 		synchronized (pageInfo.getOriginId()) {//TODO:这个锁需要再考虑
 			
-			List<PageTaskPO> remainTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> remainTasks = new ArrayList<PageTaskPO>();//新老一样的pageTask
 			List<PageTaskPO> addTasks = new ArrayList<PageTaskPO>();
-			List<PageTaskPO> closeTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> closeTasks = new ArrayList<PageTaskPO>();//需要关闭的pageTask
 			List<PageTaskPO> needCloseTasks = new ArrayList<PageTaskPO>();//需要挂断的播放器
 			LogicBO logic = null;
 			
+			//将原来的pageTasks遍历到新的集合
 			List<PageTaskPO> oldPageTasks = new ArrayList<PageTaskPO>();//(_oldPageTasks);
 			List<PageTaskPO> showingPageTasks = new ArrayList<PageTaskPO>();
 			for(PageTaskPO _oldPageTask : _oldPageTasks){
@@ -413,8 +524,15 @@ public class PageTaskService {
 				showingPageTasks.add(_oldPageTask);
 			}
 			
+			//对将要显示的设置参数
 			int index=0;
 			for(PageTaskPO newPageTask : newPageTasks){
+				if(newPageTask.getFixedAtPageAndLocation()){
+					index++;
+					newPageTask.setLocationIndex(newPageTask.getTaskIndex()%pageInfo.getPageSize());
+					newPageTask.setShowing(true);
+					continue;
+				}
 				newPageTask.setShowing(true);
 				newPageTask.setLocationIndex(index++);
 			}
@@ -435,11 +553,12 @@ public class PageTaskService {
 					}
 				}
 				if(!has){
-					addTasks.add(newPageTask);
+					addTasks.add(newPageTask);//需要添加的
 				}
 			}
-			
+//			oldPageTasks.removeAll(newPageTasks);
 			closeTasks.addAll(oldPageTasks);
+			
 			
 			//老播放器，一部分用来做新业务，剩余的挂断
 			List<String> oldBundleIds = new ArrayList<String>();
@@ -452,7 +571,7 @@ public class PageTaskService {
 				//TODO:这个查询再优化一下条件
 				List<TerminalBundleConferenceHallPermissionPO> closeDecoders = terminalBundleConferenceHallPermissionDao.findByBundleIdIn(oldBundleIds);
 				
-				//TODO: 空闲的解码器
+				//空闲的解码器
 				List<TerminalBundleConferenceHallPermissionPO> decoderPs = new ArrayList<TerminalBundleConferenceHallPermissionPO>();
 				List<TerminalBundleConferenceHallPermissionPO> allTerminalBundlePs = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(Long.parseLong(pageInfo.getOriginId()));
 				List<Long> allTerminalBundleIds = new ArrayList<Long>();//用于从TerminalBundle里边判断type:DECODER/ENCODER
@@ -509,7 +628,7 @@ public class PageTaskService {
 				//TODO:这个查询再优化一下条件
 				List<TerminalBundleUserPermissionPO> closePlayers = terminalBundleUserPermissionDao.findByBundleIdIn(oldBundleIds);
 				
-				//TODO: 空闲的播放器
+				//空闲的播放器
 				List<TerminalBundleUserPermissionPO> idlePlayers = new ArrayList<TerminalBundleUserPermissionPO>();
 				List<TerminalBundleUserPermissionPO> allTerminalBundles = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(pageInfo.getOriginId(), pageInfo.getTerminalId());
 	//			List<PageTaskPO> tasks = pageInfo.getPageTasks();
@@ -651,10 +770,27 @@ public class PageTaskService {
 		}
 		
 		List<BundlePO> bundles = resourceBundleDao.findByBundleIds(idleBundleIds);
-		int i = pageTasks.size();
-		for(BundlePO bundle : bundles){
-			vo.getPlayers().add(new CommandGroupUserPlayerSettingVO().setIdlePlayer(i++, bundle));
+		List<Integer> localIndexs=new ArrayList<Integer>();
+		for(int i=0;i<pageInfo.getPageSize();i++){
+			boolean notExit=true;
+			for(PageTaskPO pageTask:pageTasks){
+				if(pageTask.getLocationIndex()==i){
+					notExit=false;
+					break;
+				}
+				
+			}
+			if(notExit){
+				localIndexs.add(i);
+			}
 		}
+		for(int i= 0;i<bundles.size();i++){
+			vo.getPlayers().add(new CommandGroupUserPlayerSettingVO().setIdlePlayer(localIndexs.get(i), bundles.get(i)));
+		}
+//		int i = pageTasks.size();
+//		for(BundlePO bundle : bundles){
+//			vo.getPlayers().add(new CommandGroupUserPlayerSettingVO().setIdlePlayer(i++, bundle));
+//		}
 		
 		return vo;
 	}
@@ -662,7 +798,11 @@ public class PageTaskService {
 	private void markIndex(List<PageTaskPO> tasks){
 		int i = 0;
 		for(PageTaskPO task : tasks){
-			task.setTaskIndex(i++);
+			if(Boolean.TRUE.equals(task.getFixedAtPageAndLocation())){
+				i = task.getTaskIndex() + 1;
+			}else{
+				task.setTaskIndex(i++);
+			}
 		}
 	}
 	
@@ -742,4 +882,201 @@ public class PageTaskService {
 		return logic;
 	}
 	
+	/**
+	 * 获取固定的任务集合br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午8:58:35
+	 * @param pageTasks 
+	 * @return
+	 */
+	public List<PageTaskPO> getFixedPageTasks(Collection<PageTaskPO> pageTasks){
+		
+		List<PageTaskPO> fixedPageTasks=new ArrayList<PageTaskPO>();
+		for(PageTaskPO pageTask:pageTasks){
+			if(pageTask.getFixedAtPageAndLocation()){
+				fixedPageTasks.add(pageTask);
+			}
+		}
+		return fixedPageTasks;
+	}
+	
+	/**
+	 * 添加新任务并重新排序task_index<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午9:14:27
+	 * @param pageInfo
+	 * @param newTasks
+	 * @return
+	 */
+	private PageTaskPO newAddTask(PageInfoPO pageInfo, List<PageTaskPO> newTasks ){
+
+		PageTaskPO jumpTo = null;
+		List<PageTaskPO> pageTasks=pageInfo.getPageTasks();
+		if(pageTasks==null) pageTasks=new ArrayList<PageTaskPO>();
+		List<PageTaskPO> fixedPageTasks = getFixedPageTasks(pageTasks);
+		if(fixedPageTasks==null) fixedPageTasks=new ArrayList<PageTaskPO>();
+		List<PageTaskPO>  ordinaryPageTasks= new ArrayList<PageTaskPO>(pageTasks);
+		ordinaryPageTasks.removeAll(fixedPageTasks);
+		Collections.sort(fixedPageTasks, new PageTaskPO.TaskComparatorFromIndex());
+		Collections.sort(ordinaryPageTasks, new PageTaskPO.TaskComparatorFromIndex());
+		
+//		List<PageTaskPO> tasks = pageInfo.getPageTasks();//new ArrayList<CommandPlayerTaskPO>();//userInfo.getxxx
+//		Collections.sort(tasks, new PageTaskPO.TaskComparatorFromIndex());
+		
+		for(PageTaskPO newTask : newTasks){
+			newTask.setPageInfo(pageInfo);
+			
+			//将固定任务加入fixedPageTask中
+			if(newTask.getFixedAtPageAndLocation()){
+				
+				boolean addFixed=true;
+				
+				for(int i=0;i<fixedPageTasks.size();i++){
+					//固定任务的task_index冲突的解决
+					if(newTask.getTaskIndex()==fixedPageTasks.get(i).getTaskIndex()){
+						PageTaskPO oldTask=fixedPageTasks.get(i);
+						resolveConflict(oldTask,fixedPageTasks,i);
+						oldTask=newTask;
+						addFixed=false;
+						continue;
+					}
+					if(newTask.getTaskIndex()<fixedPageTasks.get(i).getTaskIndex()){
+						fixedPageTasks.add(i, newTask);
+						addFixed=false;
+						break;
+					}
+				}
+				if(addFixed) fixedPageTasks.add(newTask);
+				continue;
+			}
+			
+			BusinessInfoType type = newTask.getBusinessInfoType();
+			
+			if(type==null || PlayerBusinessType.NONE.equals(type)){
+				//不处理
+			}else if(type.isCommandOrMeeting()){
+				//查找同一个指挥/会议的，加在后边
+				String commandId = newTask.getBusinessId().split("-")[0];
+				int index = -1;
+				for(int i=ordinaryPageTasks.size()-1; i>=0; i--){
+					PageTaskPO task = ordinaryPageTasks.get(i);
+					if(task.getBusinessInfoType().isCommandOrMeeting()){
+						String taskCommandId = task.getBusinessId().split("-")[0];
+						if(taskCommandId.equals(commandId)){
+							index = i+1;
+							break;
+						}
+					}
+				}
+				if(index<0){
+					index=ordinaryPageTasks.size();
+				}
+				ordinaryPageTasks.add(index, newTask);
+			}else{
+				//直接加在末尾
+				ordinaryPageTasks.add(ordinaryPageTasks.size(), newTask);
+				if(jumpTo == null) jumpTo = newTask;
+			}
+		}
+		
+		//对比两个集合合并为一个集合并进行赋值task_index再全部传给pageInfo
+		pageTasks.clear();
+		pageTasks.addAll(newmarkIndex(ordinaryPageTasks,fixedPageTasks));
+		
+		//持久化
+		pageInfoDao.save(pageInfo);
+		
+		return jumpTo;
+	}
+	
+	/**
+	 * 重新排序task_index<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午10:28:10
+	 * @param ordinaryPageTasks 非固定
+	 * @param fixedPageTasks 固定
+	 * @param pageTasks 真正的pageTask集合
+	 */
+	private List<PageTaskPO> newmarkIndex(List<PageTaskPO> ordinaryPageTasks,List<PageTaskPO> fixedPageTasks){
+		
+		int i = 0;
+		List<PageTaskPO> pageTasks=new ArrayList<PageTaskPO>();
+		if(fixedPageTasks.size()<=0){
+			for(PageTaskPO pageTask:ordinaryPageTasks){
+				pageTask.setTaskIndex(i);
+				i++;
+				pageTasks.add(pageTask);
+			}
+			return pageTasks;
+		}else if(ordinaryPageTasks.size()<=0){
+			return fixedPageTasks;
+		}else{
+			for(PageTaskPO ordinaeyPageTask:ordinaryPageTasks){
+				for(PageTaskPO fixedPageTask:fixedPageTasks){
+					if(fixedPageTask.getTaskIndex()==i){
+						i++;
+					}
+				}
+				ordinaeyPageTask.setTaskIndex(i);
+				i++;
+				pageTasks.add(ordinaeyPageTask);
+			}
+			for(PageTaskPO fixedPageTask:fixedPageTasks){
+				pageTasks.add(fixedPageTask);
+			}
+			return pageTasks;
+		}
+	}
+	
+	/**
+	 * 去除要删除的pageTask<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 下午5:15:31
+	 * @param pageInfo
+	 * @param _removeTasks
+	 */
+	private void newRemoveTasks(PageInfoPO pageInfo, List<PageTaskPO> _removeTasks){
+		
+		List<PageTaskPO> removeTasks = new ArrayList<PageTaskPO>(_removeTasks);
+		List<PageTaskPO> tasks = pageInfo.getPageTasks();
+
+		tasks.removeAll(removeTasks);
+		
+		//持久化
+		pageInfoDao.save(pageInfo);
+	}
+	
+	/**
+	 * 冲突解决：查找后边是否有空位，添加进空位，否则添加尾部<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午9:37:14
+	 * @param oldTask 发生冲突的原pageTask
+	 * @param fixedPageTasks 
+	 * @param index 发生冲突的集合中的位置
+	 */
+	public void resolveConflict(PageTaskPO oldTask,List<PageTaskPO> fixedPageTasks,int index){
+		
+		boolean addSuccess=false;
+		for(int i=index;i<fixedPageTasks.size()-1;i++){
+			int taskIndex=fixedPageTasks.get(i).getTaskIndex();
+			int nextTaskIndex=fixedPageTasks.get(i+1).getTaskIndex();
+			if(taskIndex+1<nextTaskIndex){
+				oldTask.setTaskIndex(taskIndex+1);
+				fixedPageTasks.add(i+1,oldTask);
+				addSuccess=true;
+				break;
+			}
+		}
+		
+		if(!addSuccess){
+			int taskIndex=fixedPageTasks.get(fixedPageTasks.size()-1).getTaskIndex()+1;
+			oldTask.setTaskIndex(taskIndex);;
+			fixedPageTasks.add(oldTask);
+		}
+	}
 }
