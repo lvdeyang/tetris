@@ -5,10 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
-/**
- * @author lqxuhv
- *
- */
 public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, ServiceDeploymentPO>{
 
 	private Long serviceTypeId;
@@ -31,25 +27,21 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 	
 	private Integer progress;
 	
-	/** 服务类型名称 */
+	private Boolean error;
+	
+	private String errorMessage;	
+	
 	private String name;
 	
-	/** 安装包目录 */
 	private String installationDirectory;
 	
-	/** 安装脚本路径-服务器路径 */
 	private String installScriptPath;
 	
-	/** 日志路径 */
 	private String logFile;
 	
-	/** 文件名 */
 	private String fileName;
 	
-	/** 版本号 */
 	private String version;
-	
-	
 	
 	public String getName() {
 		return name;
@@ -195,6 +187,24 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 		return this;
 	}
 
+	public Boolean getError() {
+		return error;
+	}
+
+	public ServiceDeploymentVO setError(Boolean error) {
+		this.error = error;
+		return this;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public ServiceDeploymentVO setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+		return this;
+	}
+
 	@Override
 	public ServiceDeploymentVO set(ServiceDeploymentPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -209,7 +219,8 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 			.setStep(entity.getStep().toString())
 			.setStepName(entity.getStep().getName())
 			.setProgress(entity.getProgress())
-			;
+			.setError(entity.getError())
+			.setErrorMessage(entity.getErrorMessage());
 		return this;
 	}
 

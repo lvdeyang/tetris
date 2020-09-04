@@ -346,4 +346,21 @@ public class ServerService {
 		
 	}
 	
+	/**
+	 * 修改ip<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:39:43
+	 * @param Long id 服务器id
+	 * @param String ip 修改的ip
+	 * @return ServerVO 服务器
+	 */
+	public ServerVO modifyIp(
+			Long id,
+			String ip) throws Exception{
+		
+		
+		return null;
+	}
+	
 }

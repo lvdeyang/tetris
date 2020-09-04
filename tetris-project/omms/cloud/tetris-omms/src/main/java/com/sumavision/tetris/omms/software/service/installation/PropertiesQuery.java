@@ -60,4 +60,17 @@ public class PropertiesQuery {
 												  .getMap();
 	}
 	
+	/**
+	 * 根据安装包查询参数<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 下午7:18:38
+	 * @param Long installationPackageId 安装包id
+	 * @return List<PropertiesVO> 参数列表
+	 */
+	public List<PropertiesVO> findByInstallationPackageId(Long installationPackageId) throws Exception{
+		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
+		return PropertiesVO.getConverter(PropertiesVO.class).convert(propertyEntities, PropertiesVO.class);
+	}
+	
 }
