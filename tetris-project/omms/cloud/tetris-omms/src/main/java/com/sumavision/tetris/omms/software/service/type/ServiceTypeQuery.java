@@ -11,6 +11,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.omms.software.service.installation.PropertyValueType;
+
 @Component
 public class ServiceTypeQuery {
 
@@ -65,6 +67,23 @@ public class ServiceTypeQuery {
 			}
 		}
 		return roots;
+	}
+	
+	/**
+	 * 查询服务类型枚举<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:16:10
+	 * @return Set<String> 查询服务类型枚举
+	 */
+	public Set<String> findGroupTypes(){
+		Set<String> values = new HashSet<String>();
+		GroupType[] types = GroupType.values();
+		for(GroupType type:types){
+			values.add(type.getName());
+		}
+		return values;
 	}
 	
 }

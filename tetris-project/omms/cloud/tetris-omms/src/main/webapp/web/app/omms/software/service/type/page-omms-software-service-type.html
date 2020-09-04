@@ -14,6 +14,8 @@
                 <div style="width:100%; height:100%; position:relative">
                     <el-scrollbar style="height:100%;">
                         <el-tree
+                                v-loading="loading.server"
+                                ref="serverTree"
                                 :props = "tree.props"
                                 :data = "tree.data"
                                 node-key="uuid"
@@ -29,12 +31,44 @@
                                      <span :class="data.icon"></span>
                                      <span>{{data.name}}</span>
                                 </span>
+                                <span>
+                                    <el-button v-if="data.type ==='SERVICE' " type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="treeNodeDeleteServer(node, data)">
+                                        <span style="font-size:16px;" class="icon-trash"></span>
+                                    </el-button>
+                                </span>
                               </span>
                         </el-tree>
                     </el-scrollbar>
-                    <el-tooltip class="item" effect="dark" content="一键创建" placement="right-end">
-                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="oneButtonCreate" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
+                    <el-tooltip class="item" effect="dark" content="创建服务" placement="right-end">
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="CreateServer" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
                     </el-tooltip>
+                    <template>
+                        <el-dialog
+                                title="创建服务"
+                                :visible.sync="dialog.addServer.visible"
+                                width="500px"
+                                :before-close="handleCreateServerClose">
+                            <el-form label-width="80px">
+                                <el-form-item label="服务名称">
+                                    <el-input v-model="dialog.addServer.serverName"></el-input>
+                                </el-form-item>
+                                <el-form-item label="类型">
+                                    <el-select v-model="dialog.addServer.groupType" style="width:100%;">
+                                        <el-option
+                                                v-for="groupType in groupTypes"
+                                                :key="groupType"
+                                                :label="groupType"
+                                                :value="groupType">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                            <span slot="footer" class="dialog-footer">
+                                <el-button size="medium" @click="handleCreateServerClose">取消</el-button>
+                                <el-button size="medium" type="primary" @click="handleCreateServerSubmit">确定</el-button>
+                            </span>
+                        </el-dialog>
+                    </template>
                 </div>
             </div>
             <div style="position:absolute; left:420px; top:0; right:0; bottom:0;">
@@ -45,7 +79,6 @@
                                 <span style="cursor:not-allowed; font-weight:700; color:#333; font-weight:700;">{{columns.name.value}}</span>
                                 <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackage">版本管理</el-button>
                                 <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackageHistory">历史版本</el-button>
-                            </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.installationDirectory.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('installationDirectory', columns.installationDirectory)"><span class="feather-icon-edit"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
                             </el-form-item>
@@ -149,7 +182,6 @@
                 :visible.sync="dialog.addProperty.visible"
                 width="500px"
                 :before-close="handleCreatePropertyClose">
-
             <el-form label-width="80px">
                 <el-form-item label="属性key">
                     <el-input v-model="dialog.addProperty.propertyKey"></el-input>

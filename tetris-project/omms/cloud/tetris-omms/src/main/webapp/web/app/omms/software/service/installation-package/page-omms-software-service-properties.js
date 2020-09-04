@@ -55,8 +55,7 @@ define([
                         propertyName:'',
                         valueType:'文本',
                         propertyDefaultValue:'',
-                        valueSelect:[],
-                        loading:false
+                        valueSelect:[]
                     },
                     addEnum:{
                         visible:false,
@@ -131,14 +130,14 @@ define([
                 },
                 handleEditPropertiesClose:function(){
                     var self = this;
+                    self.dialog.addEnum.visible = false;
+                    self.dialog.editProperties.visible = false;
                     self.dialog.editProperties.id = '';
                     self.dialog.editProperties.propertyKey = '';
                     self.dialog.editProperties.propertyName = '';
                     self.dialog.editProperties.valueType = '';
                     self.dialog.editProperties.propertyDefaultValue = '';
                     self.dialog.addEnum.valueSelect.splice(0,self.dialog.addEnum.valueSelect.length);
-                    self.dialog.addEnum.visible = false;
-                    self.dialog.editProperties.visible = false;
                 },
                 handleEditPropertiesSubmit:function(){
                     var self = this ;
@@ -169,13 +168,13 @@ define([
                 editPropertiesList:function(scope){
                     var self = this;
                     var row = scope.row;
+                    self.dialog.editProperties.visible = true;
                     self.dialog.editProperties.id = row.id
                     self.dialog.editProperties.propertyKey = row.propertyKey;
                     self.dialog.editProperties.propertyName = row.propertyName;
                     self.dialog.editProperties.valueType = row.valueTypeName;
                     self.dialog.editProperties.propertyDefaultValue = row.propertyDefaultValue;
                     self.dialog.addEnum.valueSelect = JSON.parse(row.valueSelect);
-                    self.dialog.editProperties.visible = true;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
