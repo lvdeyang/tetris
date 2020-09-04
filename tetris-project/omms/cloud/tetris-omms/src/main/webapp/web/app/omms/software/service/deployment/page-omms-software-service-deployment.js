@@ -245,13 +245,71 @@ define([
                         deploymentId:self.dialog.step.currentDeployment.id,
                         config: $.toJSON(config)
                     }, function(data, status, message){
+                        if(status !== 200){
+                            self.$message({
+                                type:'error',
+                                message:message
+                            });
+                            return;
+                        }
                         setTimeout(function(){
                             self.dialog.step.active = 3;
-                        }, 5000);
+                        }, 1000);
                         if(status !== 200){
                             return;
                         }
                     }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                editDeployment:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                },
+                deploymentStatus:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                },
+                handleRowDelete:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将卸载改服务，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/service/deployment/uninstall', {
+                                    deploymentId:row.id
+                                }, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    for(var i=0; i<self.table.data.length; i++){
+                                        if(self.table.data[i].id === row.id){
+                                            self.table.data.splice(i, 1);
+                                            break;
+                                        }
+                                    }
+                                    self.table.page.total -= 1;
+                                    if(self.table.total>0 && self.table.data.length===0){
+                                        self.load(self.table.page.currentPage - 1);
+                                    }
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
                 }
             },
             mounted:function(){
