@@ -979,7 +979,14 @@ public class DirectorTaskService {
 		return tasks;
 
 	}
-	
+
+	public String getEncodeTemplateParamByEncodeType(String encodeType){
+		 String param = "";
+
+
+		return param;
+	}
+
 	/**
 	 * 导播参数生成outputBO<br/>
 	 * <b>作者:</b>wjw<br/>

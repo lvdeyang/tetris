@@ -21,7 +21,8 @@
 					"scenecut",
 					"mbtree",
 					"entropy_type",
-					"encoding_type"
+					"encoding_type",
+					"motion_detector"
 				]
 			}
 		},
@@ -260,6 +261,18 @@
 						"progressive",
 						"interlace",
 						"mbaff"
+					]
+				}
+			},
+			"motion_detector": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"off",
+						"on"
 					]
 				}
 			}

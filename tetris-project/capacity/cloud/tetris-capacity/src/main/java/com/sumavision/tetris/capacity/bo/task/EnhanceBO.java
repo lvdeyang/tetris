@@ -27,6 +27,16 @@ public class EnhanceBO {
 	/** Gamma变换 */
 	private Integer gamma;
 
+	private Integer x;
+
+	private Integer y;
+
+	private Integer width;
+
+	private Integer height;
+
+	private String localEngance;
+
 	public String getPlat() {
 		return plat;
 	}
@@ -89,5 +99,49 @@ public class EnhanceBO {
 		this.gamma = gamma;
 		return this;
 	}
-	
+
+	public Integer getX() {
+		return x;
+	}
+
+	public EnhanceBO setX(Integer x) {
+		this.x = x;
+		return this;
+	}
+
+	public Integer getY() {
+		return y;
+	}
+
+	public EnhanceBO setY(Integer y) {
+		this.y = y;
+		return this;
+	}
+
+	public Integer getWidth() {
+		return width;
+	}
+
+	public EnhanceBO setWidth(Integer width) {
+		this.width = width;
+		return this;
+	}
+
+	public Integer getHeight() {
+		return height;
+	}
+
+	public EnhanceBO setHeight(Integer height) {
+		this.height = height;
+		return this;
+	}
+
+	public String getLocalEngance() {
+		return localEngance;
+	}
+
+	public EnhanceBO setLocalEngance(String localEngance) {
+		this.localEngance = localEngance;
+		return this;
+	}
 }

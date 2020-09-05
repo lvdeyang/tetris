@@ -16,7 +16,8 @@
 					"profile",
 					"level",
 					"ref_frames",
-					"encoding_type"
+					"encoding_type",
+					"motion_detector"
 				]
 			}
 		},
@@ -199,6 +200,18 @@
 					"values": [
 						"progressive",
 						"interlace"
+					]
+				}
+			},
+			"motion_detector": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"off",
+						"on"
 					]
 				}
 			}

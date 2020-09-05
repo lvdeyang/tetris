@@ -30,12 +30,12 @@
 					]
 				}
 			},
-			"refine": {
+			"enc_mode": {
 				"type": "num",
 				"require": false,
 				"forbidden":false,
 				"constraint": {
-					"default_value": 5,
+					"default_value": 7,
 					"min_value": 0,
 					"max_value": 11,
 					"step": 1

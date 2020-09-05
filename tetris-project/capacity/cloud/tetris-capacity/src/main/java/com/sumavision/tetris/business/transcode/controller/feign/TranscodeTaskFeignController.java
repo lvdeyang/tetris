@@ -75,6 +75,21 @@ public class TranscodeTaskFeignController {
 		return result;
 	}
 
+    @JsonBody
+    @ResponseBody
+    @RequestMapping(value = "/preview/input")
+    public Object previewInput(
+            String inputInfo,
+            HttpServletRequest request) throws Exception{
+
+        LOG.info("[sts]<preview-input>(req) hash: {}, body: {}",inputInfo.hashCode(),inputInfo);
+        CreateInputPreviewVO inputVO = JSONObject.parseObject(inputInfo, CreateInputPreviewVO.class);
+        transcodeTaskService.previewInput(inputVO);
+        LOG.info("[sts]<preview-input>(resp). hash: {}",inputInfo.hashCode());
+        return null;
+    }
+
+
 	/**
 	 * 删除流转码任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -410,5 +425,8 @@ public class TranscodeTaskFeignController {
 		LOG.info("[sts]<analysis-stream>(resp) hash:{}, result:{}",analysis.hashCode(),response);
 		return response;
 	}
+
+
+
 
 }

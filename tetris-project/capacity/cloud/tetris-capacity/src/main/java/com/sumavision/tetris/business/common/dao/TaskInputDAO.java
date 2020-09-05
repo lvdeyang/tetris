@@ -15,8 +15,8 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = TaskInputPO.class, idClass = Long.class)
 public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 
-	public TaskInputPO findByTaskUuidAndType(String taskUuid, BusinessType type);
-	
+	public List<TaskInputPO> findByTaskUuidAndType(String taskUuid, BusinessType type);
+
 	public TaskInputPO findByUniq(String uniq);
 	
 	public TaskInputPO findTopByUniq(String uniq);

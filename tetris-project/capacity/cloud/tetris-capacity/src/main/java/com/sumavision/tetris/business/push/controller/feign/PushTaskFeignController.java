@@ -52,7 +52,7 @@ public class PushTaskFeignController {
 		LOG.info("[push]<add-schedule>(req) hash:{} \n task: {}",task.hashCode(),task);
 		ScheduleTaskVO pushTask = JSONObject.parseObject(task, ScheduleTaskVO.class);
 		String result = addPushTaskTrascation(pushTask);
-		LOG.info("[push]<add-schedule>(resp) hash:{} \n taskId: {}",task.hashCode());
+		LOG.info("[push]<add-schedule>(resp) hash:{}",task.hashCode());
 		return result;
 	}
 	

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * sdi参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -16,6 +18,8 @@ public class SdiBO {
 	
 	/** 卡上的端口号 */
 	private Integer card_port;
+
+	private JSONObject blackmagic;
 
 	public String getCard_type() {
 		return card_type;
@@ -43,5 +47,12 @@ public class SdiBO {
 		this.card_port = card_port;
 		return this;
 	}
-	
+
+	public JSONObject getBlackmagic() {
+		return blackmagic;
+	}
+
+	public void setBlackmagic(JSONObject blackmagic) {
+		this.blackmagic = blackmagic;
+	}
 }

@@ -19,7 +19,8 @@
 					"mbtree",
 					"ref_frames",
 					"lookahead",
-					"bframe_adaptive"
+					"bframe_adaptive",
+					"motion_detector"
 				]
 			}
 		},
@@ -231,6 +232,18 @@
 				"forbidden":false,
 				"constraint": {
 					"default_value": true
+				}
+			},
+			"motion_detector": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"off",
+						"on"
+					]
 				}
 			}
 		}
