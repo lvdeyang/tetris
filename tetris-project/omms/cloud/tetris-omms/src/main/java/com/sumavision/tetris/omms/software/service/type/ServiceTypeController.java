@@ -88,7 +88,7 @@ public class ServiceTypeController {
 	}
 	
 	/**
-	 * 删除服务类型<br/>
+	 * 删除服务类型(已部署服务情况下不可删除)<br/>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月4日 上午11:13:36

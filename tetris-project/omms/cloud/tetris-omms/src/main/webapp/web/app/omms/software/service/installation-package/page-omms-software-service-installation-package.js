@@ -125,6 +125,7 @@ define([
                     var row = scope.row;
                     window.location.hash = '#/page-omms-software-service-properties/' + row.id +'/'+self.serviceTypeId+'/'+self.serviceName +'/' + row.version;
                 },
+//                self.loading.menu = true;
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;

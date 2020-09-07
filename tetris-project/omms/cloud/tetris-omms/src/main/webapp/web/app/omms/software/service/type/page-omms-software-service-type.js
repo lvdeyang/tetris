@@ -265,7 +265,7 @@ define([
                     self.form.menu.isGroup += '';
                     self.loadPermissionRoles(data.id, 1);
                 },
-                treeNodeDeleteServer:function(node, data){
+                /*treeNodeDeleteServer:function(node, data){
                     var self = this;
                     ajax.post('/service/type/delete/' + data.id, null, function(data, status){
                         if(status !== 200) return;
@@ -282,6 +282,47 @@ define([
                         self.columns.shutdownScript.path = '';
                         return;
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },*/
+                treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除该服务，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    self.loadAllServiceTypes();
+                                    self.tree.current = '';
+                                    self.columns.name.value = '';
+                                    self.columns.installationDirectory.value = '';
+                                    self.columns.logFile.value = '';
+                                    self.columns.installScript.value = '';
+                                    self.columns.installScript.path = '';
+                                    self.columns.startupScript.value = '';
+                                    self.columns.startupScript.path = '';
+                                    self.columns.shutdownScript.value = '';
+                                    self.columns.shutdownScript.path = '';
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
                 },
                 editColumn:function(columnKey, column){
                     var self = this;

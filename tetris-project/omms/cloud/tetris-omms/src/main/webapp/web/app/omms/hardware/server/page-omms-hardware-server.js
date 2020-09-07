@@ -37,8 +37,8 @@ define([
                     data:[],
                     page:{
                         currentPage:0,
-                        pageSize:50,
-                        pageSizes:[50, 100, 500, 1000],
+                        pageSize:10,
+                        pageSizes:[10,50, 100, 500, 1000],
                         total:0
                     }
                 },

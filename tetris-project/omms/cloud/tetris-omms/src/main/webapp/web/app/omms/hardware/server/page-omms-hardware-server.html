@@ -11,7 +11,7 @@
 
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加服务器</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务器</el-button>
+            <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务器</el-button>-->
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -19,10 +19,10 @@
                             :data="table.data"
                             :row-key="rowKey"
                             style="width:100%">
-                        <el-table-column
+                        <!--<el-table-column
                                 type="selection"
                                 width="55">
-                        </el-table-column>
+                        </el-table-column>-->
                         <el-table-column
                                 label="名称"
                                 prop="name">
@@ -106,11 +106,11 @@
                         background
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
-                        :current-page="table.currentPage"
-                        :page-sizes="table.pageSizes"
-                        :page-size="table.pageSize"
+                        :current-page="table.page.currentPage"
+                        :page-sizes="table.page.pageSizes"
+                        :page-size="table.page.pageSize"
                         layout="total, sizes, prev, pager, next, jumper"
-                        :total="table.total">
+                        :total="table.page.total">
                 </el-pagination>
             </div>
 
