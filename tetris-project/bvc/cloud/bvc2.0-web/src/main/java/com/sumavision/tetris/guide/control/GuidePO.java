@@ -22,8 +22,10 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Table(name = "TETRIS_GUIDE_PO")
 public class GuidePO extends AbstractBasePO{
 
+	private static final long serialVersionUID = 1L;
+
 	/** 导播任务编号 */
-	private Long id;
+	private Long index;
 
 	/** 名称 */
 	private String taskName;
@@ -34,16 +36,13 @@ public class GuidePO extends AbstractBasePO{
 	/** 创建时间 */
 	private Date creationTime;
 
-	/** 视频参数编号 */
-	private Long parameterNumber;
-
-	@Column(name = "TASK_NUMBER")
-	public Long getId() {
-		return id;
+	@Column(name = "INDEX")
+	public Long getIndex() {
+		return index;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setIndex(Long index) {
+		this.index = index;
 	}
 	
 	@Column(name = "TASK_NAME")
@@ -72,13 +71,5 @@ public class GuidePO extends AbstractBasePO{
 	public void setCreationTime(Date creationTime) {
 		this.creationTime = creationTime;
 	}
-	
-	@Column(name = "PARAMETER_NUMBER")
-	public Long getParameterNumber() {
-		return parameterNumber;
-	}
 
-	public void setParameterNumber(Long parameterNumber) {
-		this.parameterNumber = parameterNumber;
-	}
 }

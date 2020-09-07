@@ -17,18 +17,17 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
  * <p>详细描述</p>
  * <b>作者:</b>Administrator<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年9月3日 下午2:51:38
+ * <b>日期：</b>2020年9月4日 上午10:09:04
  */
-
 @Controller
-@RequestMapping(value = "/tetris/guide/control/source/po")
-public class SourcePOController {
-
-	@Autowired
-	private SourceQuery sourceQuery;
+@RequestMapping(value = "/tetris/guide/control/output/setting/po")
+public class OutputSettingController {
 	
 	@Autowired
-	private SourceService sourceService;
+	private OutputSettingQuery outputSettingQuery;
+	
+	@Autowired
+	private OutputSettingService outputSettingService;
 	
 	/**
 	 * 
@@ -36,7 +35,8 @@ public class SourcePOController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月3日 下午8:24:16
+	 * <b>日期：</b>2020年9月4日 下午1:59:45
+	 * @param taskNumber
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -44,9 +44,9 @@ public class SourcePOController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query")
-	public Object querySource(HttpServletRequest request) throws Exception{
+	public Object queryOutputSetting(Long taskNumber, HttpServletRequest request) throws Exception{
 		
-		return sourceQuery.query();
+		return outputSettingQuery.query(taskNumber);
 	}
 	
 	/**
@@ -55,11 +55,10 @@ public class SourcePOController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月3日 下午8:24:24
-	 * @param sourceNumber
-	 * @param sourceType
-	 * @param sourceName
-	 * @param sourceAddress
+	 * <b>日期：</b>2020年9月4日 下午1:59:53
+	 * @param id
+	 * @param outputProtocol
+	 * @param outputAddress
 	 * @param taskNumber
 	 * @param request
 	 * @return
@@ -70,27 +69,23 @@ public class SourcePOController {
 	@RequestMapping(value = "/edit")
 	public Object edit(
 			Long id,
-			String sourceType,
-			String sourceName,
-			String sourceAddress,
-			Long taskNumber,
+			String outputProtocol,
+			String outputAddress,
 			HttpServletRequest request) throws Exception{
-		return sourceService.edit(
+		return outputSettingService.edit(
 				id,
-				sourceType,
-				sourceName,
-				sourceAddress,
-				taskNumber);
+				outputProtocol,
+				outputAddress
+				);
 	}
-	
 	/**
 	 * 
 	 * 方法概述<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月3日 下午8:24:33
-	 * @param sourceNumber
+	 * <b>日期：</b>2020年9月4日 下午2:01:16
+	 * @param id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -101,7 +96,8 @@ public class SourcePOController {
 	public Object delete(
 			Long id,
 			HttpServletRequest request) throws Exception{
-		sourceService.delete(id);
+		outputSettingService.delete(id);
 		return null;
 	}
+
 }

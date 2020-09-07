@@ -20,14 +20,17 @@ public class OutputSettingService {
 	public OutputSettingPO edit(
 			Long id,
 			String outputProtocol,
-			String outputAddress,
-			Long taskNumber
+			String outputAddress
 			){
-		return null;
+		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
+		outputSettingPO.setId(id);
+		outputSettingPO.setOutputProtocol(outputProtocol);
+		outputSettingPO.setOutputAddress(outputAddress);
+		return outputSettingDAO.save(outputSettingPO);
 	}
 	
-	public Object delete(Long id){
-		return null;
+	public void delete(Long id){
+		outputSettingDAO.delete(id);
 	}
 
 }

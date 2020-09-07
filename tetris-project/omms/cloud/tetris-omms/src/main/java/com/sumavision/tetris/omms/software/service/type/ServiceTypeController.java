@@ -4,14 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.omms.graph.ServerType;
 
 @Controller
 @RequestMapping(value = "/service/type")
@@ -91,7 +88,7 @@ public class ServiceTypeController {
 	}
 	
 	/**
-	 * 删除服务类型<br/>
+	 * 删除服务类型(已部署服务情况下不可删除)<br/>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月4日 上午11:13:36
@@ -122,5 +119,24 @@ public class ServiceTypeController {
 			String groupType,
 			HttpServletRequest request) throws Exception{
 		return serviceTypeService.createServer(name,groupType);
+	}
+	
+	/**
+	 * 更改服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 下午7:08:52
+	 * @param id 服务id
+	 * @param groupType 服务类型
+	 * @return OmmsSoftwareServiceTypeTreeNodeVO 服务
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping (value = "/edit/server")
+	public Object editServer(
+			Long id,
+			String groupType,
+			HttpServletRequest request)throws Exception{
+		return serviceTypeService.editServer(id,groupType);
 	}
 }

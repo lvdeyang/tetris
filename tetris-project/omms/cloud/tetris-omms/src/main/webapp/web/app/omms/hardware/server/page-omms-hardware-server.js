@@ -37,8 +37,8 @@ define([
                     data:[],
                     page:{
                         currentPage:0,
-                        pageSize:50,
-                        pageSizes:[50, 100, 500, 1000],
+                        pageSize:10,
+                        pageSizes:[10,50, 100, 500, 1000],
                         total:0
                     }
                 },
@@ -60,7 +60,6 @@ define([
                         visible:false,
                         id:'',
                         name:'',
-                        ip:'',
                         gadgetPort:'',
                         gadgetUsername:'',
                         gadgetPassword:'',
@@ -69,6 +68,12 @@ define([
                         ftpPort:'',
                         ftpPassword:'',
                         remark:''
+                    },
+                    modifyIp:{
+                        visible:false,
+                        loading:false,
+                        id:'',
+                        ip:''
                     }
                 }
             },
@@ -146,7 +151,6 @@ define([
                     self.dialog.editServer.visible = true;
                     self.dialog.editServer.id = row.id;
                     self.dialog.editServer.name = row.name;
-                    self.dialog.editServer.ip = row.ip;
                     self.dialog.editServer.gadgetPort = row.gadgetPort;
                     self.dialog.editServer.gadgetUsername = row.gadgetUsername;
                     self.dialog.editServer.gadgetPassword = row.gadgetPassword;
@@ -161,7 +165,6 @@ define([
                     self.dialog.editServer.visible = false;
                     self.dialog.editServer.id = '';
                     self.dialog.editServer.name = '';
-                    self.dialog.editServer.ip = '';
                     self.dialog.editServer.gadgetPort = '';
                     self.dialog.editServer.gadgetUsername = '';
                     self.dialog.editServer.gadgetPassword = '';
@@ -176,7 +179,6 @@ define([
                     ajax.post('/server/edit', {
                         id:self.dialog.editServer.id,
                         name:self.dialog.editServer.name,
-                        ip:self.dialog.editServer.ip,
                         gadgetPort:self.dialog.editServer.gadgetPort,
                         gadgetUsername:self.dialog.editServer.gadgetUsername,
                         gadgetPassword:self.dialog.editServer.gadgetPassword,
@@ -205,6 +207,65 @@ define([
                         self.handleEditServerClose();
                     });
                 },
+
+                handleModifyIp:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'操作提示',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['执行此操作需要先在小工具中修改目标服务器ip，否则将修改失败，若修改成功，则会修改当前服务器上所有部署服务的ip配置'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            if(action === 'confirm'){
+                                self.dialog.modifyIp.visible = true;
+                                self.dialog.modifyIp.id = row.id;
+                                self.dialog.modifyIp.ip = row.ip;
+                                done();
+                            }else{
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
+                handleModifyIpClose:function(){
+                    var self = this;
+                    self.dialog.modifyIp.visible = false;
+                    self.dialog.modifyIp.loading = false;
+                    self.dialog.modifyIp.id = '';
+                    self.dialog.modifyIp.ip = '';
+                },
+                handleModifyIpSubmit:function(){
+                    var self = this;
+                    self.dialog.modifyIp.loading = true;
+                    ajax.post('/server/modify/ip', {
+                        id:self.dialog.modifyIp.id,
+                        ip:self.dialog.modifyIp.ip
+                    }, function(data, status, message){
+                        if(status !== 200){
+                            self.$message({
+                                type:'error',
+                                message:message
+                            });
+                            return null;
+                        }
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleModifyIpClose();
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
                 gotoStatus:function(scope){
                 	var self = this;
                 	var row = scope.row;
@@ -218,7 +279,6 @@ define([
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
-
                     var h = self.$createElement;
                     self.$msgbox({
                         title:'危险操作',

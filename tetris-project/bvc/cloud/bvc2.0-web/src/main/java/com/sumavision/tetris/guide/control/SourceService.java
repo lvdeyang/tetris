@@ -19,15 +19,13 @@ public class SourceService {
 	
 	public SourcePO edit(
 			Long id,
-			String sourceType,
+			SourceType sourceType,
 			String sourceName,
-			String sourceAddress,
-			Long taskNumber){
+			String source){
 		SourcePO sourcePO = sourceDAO.findOne(id);
 		sourcePO.setSourceType(sourceType);
 		sourcePO.setSourceName(sourceName);
-		sourcePO.setSourceAddress(sourceAddress);
-		sourcePO.setTaskNumber(taskNumber);
+		sourcePO.setSource(source);
 		return sourceDAO.save(sourcePO);
 	}
 	

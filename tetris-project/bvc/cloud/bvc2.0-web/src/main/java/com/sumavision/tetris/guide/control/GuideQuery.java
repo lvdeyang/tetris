@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年9月3日 下午4:32:29
  */
-public class BroadcastingTaskQuery {
+public class GuideQuery {
 	
 	@Autowired
 	GuideDAO guideDAO;

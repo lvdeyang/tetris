@@ -3,6 +3,8 @@
  */
 package com.sumavision.tetris.guide.control;
 
+import java.util.List;
+
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -17,4 +19,8 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = SourcePO.class, idClass = Long.class)
 public interface SourceDAO extends BaseDAO<SourcePO>{
 
+	public List<SourcePO> findByGuidePO(Long guidePO);
+	
+	public void deleteByGuidePO(Long guidePO);
+	
 }

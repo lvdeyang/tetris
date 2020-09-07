@@ -83,7 +83,6 @@ public class ServerController {
 	 * <b>日期：</b>2020年2月14日 下午1:57:32
 	 * @param Long id 服务器id
 	 * @param String name 名称
-	 * @param String ip ip地址
 	 * @param String gadgetPort 小工具端口
 	 * @param String gadgetUsername 小工具用户名
 	 * @param String gadgetPassword 小工具密码
@@ -97,7 +96,6 @@ public class ServerController {
 	public Object edit(
 			Long id,
 			String name,
-			String ip,
 			String gadgetPort,
 			String gadgetUsername,
 			String gadgetPassword,
@@ -107,7 +105,7 @@ public class ServerController {
 			String ftpPort,
 			String ftpPassword,
 			HttpServletRequest request) throws Exception{
-		ServerPO entity = serverService.edit(id, name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator,ftpUsername,ftpPort,ftpPassword);
+		ServerPO entity = serverService.edit(id, name, gadgetPort, gadgetUsername, gadgetPassword, remark, creator,ftpUsername,ftpPort,ftpPassword);
 		return new ServerVO().set(entity);
 	}
 	

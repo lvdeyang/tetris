@@ -15,36 +15,35 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	
 	/** 源编号 */
-	private Long id;
+	private Long index;
 	
 	/** 源类型 */
-	private String sourceType;
+	private SourceType sourceType;
 	
 	/** 源名称 */
 	private String sourceName;   
 	
-	/** 源地址 */
-	private String sourceAddress;
+	/** 源 sourceType为URL的时候存URL，为5G背包的时候存bundleID */
+	private String source;
 	
-	/** 导播任务编号 */
-	private Long taskNumber;
+	/** 导播任务id */
+	private Long guideId;
 
-	public Long getId() {
-		return id;
+	public Long getIndex() {
+		return index;
 	}
 
-	public SourceVO setId(Long id) {
-		this.id = id;
+	public SourceVO setIndex(Long index) {
+		this.index = index;
 		return this;
 	}
 
-	public String getSourceType() {
+	public SourceType getSourceType() {
 		return sourceType;
 	}
 
-	public SourceVO setSourceType(String sourceType) {
+	public void setSourceType(SourceType sourceType) {
 		this.sourceType = sourceType;
-		return this;
 	}
 
 	public String getSourceName() {
@@ -56,22 +55,21 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
-	public String getSourceAddress() {
-		return sourceAddress;
+	public String getSource() {
+		return source;
 	}
 
-	public SourceVO setSourceAddress(String sourceAddress) {
-		this.sourceAddress = sourceAddress;
+	public SourceVO setSource(String source) {
+		this.source = source;
 		return this;
 	}
 
-	public Long getTaskNumber() {
-		return taskNumber;
+	public Long getGuideId() {
+		return guideId;
 	}
 
-	public SourceVO setTaskNumber(Long taskNumber) {
-		this.taskNumber = taskNumber;
-		return this;
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
 	}
 
 	@Override
@@ -79,8 +77,8 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setId(entity.getId());
 		this.setSourceType(entity.getSourceType());
 		this.setSourceName(entity.getSourceName());
-		this.setSourceAddress(entity.getSourceAddress());
-		this.setTaskNumber(entity.getTaskNumber());
+		this.setSource(entity.getSource());
+		this.setId(entity.getId());
 		return this;
 	}
 
