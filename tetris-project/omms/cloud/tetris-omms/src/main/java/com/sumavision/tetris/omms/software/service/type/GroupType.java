@@ -4,8 +4,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum GroupType {
 
-	SPRING_CLOUD("微服务"),
-	PROTOCOL_CONVERSION("协议转换服务");
+	JAVA_SERVER("Java服务"),
+	C_SERVER("C服务");
 	
 	private String name;
 	

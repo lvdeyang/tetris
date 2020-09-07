@@ -1,7 +1,5 @@
 package com.sumavision.tetris.omms.software.service.installation;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +121,24 @@ public class PropertiesController {
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		return propertiesQuery.load(installationPackageId,currentPage,pageSize);
+	}
+	
+	/**
+	 * 根据安装包查询参数<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 下午7:18:38
+	 * @param Long installationPackageId 安装包id
+	 * @return List<PropertiesVO> 参数列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/installation/package/id")
+	public Object findByInstallationPackageId(
+			Long installationPackageId,
+			HttpServletRequest request) throws Exception{
+		
+		return propertiesQuery.findByInstallationPackageId(installationPackageId);
 	}
 	
 	/**

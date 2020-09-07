@@ -37,8 +37,8 @@ define([
                     data:[],
                     page:{
                         currentPage:0,
-                        pageSize:50,
-                        pageSizes:[50, 100, 500, 1000],
+                        pageSize:10,
+                        pageSizes:[10,50, 100, 500, 1000],
                         total:0
                     }
                 },
@@ -51,39 +51,29 @@ define([
                         gadgetUsername:'',
                         gadgetPassword:'',
                         creator:'',
+                        ftpUsername:'',
+                        ftpPort:'',
+                        ftpPassword:'',
                         remark:''
                     },
                     editServer:{
                         visible:false,
                         id:'',
                         name:'',
-                        ip:'',
                         gadgetPort:'',
                         gadgetUsername:'',
                         gadgetPassword:'',
                         creator:'',
+                        ftpUsername:'',
+                        ftpPort:'',
+                        ftpPassword:'',
                         remark:''
                     },
-                    selectInstallationPackage:{
+                    modifyIp:{
                         visible:false,
-                        server:'',
-                        tree:{
-                            props:{
-                                label:'name',
-                                children:'children',
-                                isLeaf:'isLeaf'
-                            },
-                            data:[],
-                            current:''
-                        },
-                        list:{
-                            data:[],
-                            current:''
-                        }
-                    },
-                    step:{
-                        visible:false,
-                        active:0
+                        loading:false,
+                        id:'',
+                        ip:''
                     }
                 }
             },
@@ -125,6 +115,9 @@ define([
                     self.dialog.addServer.gadgetUsername = '';
                     self.dialog.addServer.gadgetPassword = '';
                     self.dialog.addServer.creator = '';
+                    self.dialog.addServer.ftpUsername = '';
+                    self.dialog.addServer.ftpPort = '';
+                    self.dialog.addServer.ftpPassword = '';
                     self.dialog.addServer.remark = '';
                 },
                 handleAddServerSubmit:function(){
@@ -136,7 +129,10 @@ define([
                         gadgetUsername:self.dialog.addServer.gadgetUsername,
                         gadgetPassword:self.dialog.addServer.gadgetPassword,
                         remark:self.dialog.addServer.remark,
-                        creator:self.dialog.addServer.creator
+                        creator:self.dialog.addServer.creator,
+                        ftpUsername:self.dialog.addServer.ftpUsername,
+                        ftpPort:self.dialog.addServer.ftpPort,
+                        ftpPassword:self.dialog.addServer.ftpPassword
                     }, function(data){
                         self.table.data.splice(0, 0, data);
                         self.table.page.total += 1;
@@ -155,36 +151,42 @@ define([
                     self.dialog.editServer.visible = true;
                     self.dialog.editServer.id = row.id;
                     self.dialog.editServer.name = row.name;
-                    self.dialog.editServer.ip = row.ip;
                     self.dialog.editServer.gadgetPort = row.gadgetPort;
                     self.dialog.editServer.gadgetUsername = row.gadgetUsername;
                     self.dialog.editServer.gadgetPassword = row.gadgetPassword;
                     self.dialog.editServer.creator = row.creator;
                     self.dialog.editServer.remark = row.remark;
+                    self.dialog.editServer.ftpUsername = row.ftpUsername;
+                    self.dialog.editServer.ftpPort = row.ftpPort;
+                    self.dialog.editServer.ftpPassword = row.ftpPassword;
                 },
                 handleEditServerClose:function(){
                     var self = this;
                     self.dialog.editServer.visible = false;
                     self.dialog.editServer.id = '';
                     self.dialog.editServer.name = '';
-                    self.dialog.editServer.ip = '';
                     self.dialog.editServer.gadgetPort = '';
                     self.dialog.editServer.gadgetUsername = '';
                     self.dialog.editServer.gadgetPassword = '';
                     self.dialog.editServer.creator = '';
                     self.dialog.editServer.remark = '';
+                    self.dialog.editServer.ftpUsername = '';
+                    self.dialog.editServer.ftpPort = '';
+                    self.dialog.editServer.ftpPassword = '';
                 },
                 handleEditServerSubmit:function(){
                     var self = this;
                     ajax.post('/server/edit', {
                         id:self.dialog.editServer.id,
                         name:self.dialog.editServer.name,
-                        ip:self.dialog.editServer.ip,
                         gadgetPort:self.dialog.editServer.gadgetPort,
                         gadgetUsername:self.dialog.editServer.gadgetUsername,
                         gadgetPassword:self.dialog.editServer.gadgetPassword,
                         remark:self.dialog.editServer.remark,
-                        creator:self.dialog.editServer.creator
+                        creator:self.dialog.editServer.creator,
+                        ftpUsername:self.dialog.editServer.ftpUsername,
+                        ftpPort:self.dialog.editServer.ftpPort,
+                        ftpPassword:self.dialog.editServer.ftpPassword
                     }, function(data){
                         for(var i=0; i<self.table.data.length; i++){
                             if(self.table.data[i].id === data.id){
@@ -196,90 +198,87 @@ define([
                                 self.table.data[i].gadgetPassword = data.gadgetPassword;
                                 self.table.data[i].remark = data.remark;
                                 self.table.data[i].creator = data.creator;
+                                self.table.data[i].ftpUsername = data.ftpUsername;
+                                self.table.data[i].ftpPort = data.ftpPort;
+                                self.table.data[i].ftpPassword = data.ftpPassword;
                                 break;
                             }
                         }
                         self.handleEditServerClose();
                     });
                 },
+
+                handleModifyIp:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'操作提示',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['执行此操作需要先在小工具中修改目标服务器ip，否则将修改失败，若修改成功，则会修改当前服务器上所有部署服务的ip配置'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            if(action === 'confirm'){
+                                self.dialog.modifyIp.visible = true;
+                                self.dialog.modifyIp.id = row.id;
+                                self.dialog.modifyIp.ip = row.ip;
+                                done();
+                            }else{
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
+                handleModifyIpClose:function(){
+                    var self = this;
+                    self.dialog.modifyIp.visible = false;
+                    self.dialog.modifyIp.loading = false;
+                    self.dialog.modifyIp.id = '';
+                    self.dialog.modifyIp.ip = '';
+                },
+                handleModifyIpSubmit:function(){
+                    var self = this;
+                    self.dialog.modifyIp.loading = true;
+                    ajax.post('/server/modify/ip', {
+                        id:self.dialog.modifyIp.id,
+                        ip:self.dialog.modifyIp.ip
+                    }, function(data, status, message){
+                        if(status !== 200){
+                            self.$message({
+                                type:'error',
+                                message:message
+                            });
+                            return null;
+                        }
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleModifyIpClose();
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
                 gotoStatus:function(scope){
                 	var self = this;
                 	var row = scope.row;
                 	window.location.hash = '#/page-omms-hardware-server-monitor/' + row.id + '/' + row.name;
                 },
-                handleInstall:function(scope){
+                gotoDeployment:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.selectInstallationPackage.server = row;
-                    self.dialog.selectInstallationPackage.visible = true;
-                    self.dialog.selectInstallationPackage.tree.data.splice(0, self.dialog.selectInstallationPackage.tree.data.length);
-                    ajax.post('/service/type/find/all', null, function(data){
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.dialog.selectInstallationPackage.tree.data.push(data[i]);
-                            }
-                        }
-                    });
-                },
-                handleSelectInstallationPackageClose:function(){
-                    var self = this;
-                    self.dialog.selectInstallationPackage.visible = false;
-                },
-                handleSelectInstallationPackageSubmit:function(){
-                    var self = this;
-                    if(self.dialog.selectInstallationPackage.tree.current &&
-                        self.dialog.selectInstallationPackage.list.current){
-                        self.dialog.step.visible = true;
-                    }else if(!self.dialog.selectInstallationPackage.tree.current){
-                        self.$message({
-                            type:'error',
-                            message:'请选择要安装的服务'
-                        });
-                        return;
-                    }else if(!self.dialog.selectInstallationPackage.list.current){
-                        self.$message({
-                            type:'error',
-                            message:'请选择要安装的版本'
-                        });
-                        return;
-                    }
-                },
-                currentTreeNodeChange:function(current){
-                    var self = this;
-                    self.dialog.selectInstallationPackage.tree.current = current;
-                    self.dialog.selectInstallationPackage.list.data.splice(0, self.dialog.selectInstallationPackage.list.data.length);
-                    if(current.type === 'FOLDER') return;
-                    ajax.post('/installation/package/load', {
-                        serviceTypeId:current.id
-                    }, function(data){
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.dialog.selectInstallationPackage.list.data.push(data[i]);
-                            }
-                        }
-                    });
-                },
-                handleSelectPackage:function(p){
-                    var self = this;
-                    if(p.current === true) return;
-                    for(var i=0; i<self.dialog.selectInstallationPackage.list.data.length; i++){
-                        if(self.dialog.selectInstallationPackage.list.data[i]!==p) Vue.set(self.dialog.selectInstallationPackage.list.data[i], 'current', false);
-                    }
-                    Vue.set(p, 'current', true);
-                    self.dialog.selectInstallationPackage.list.current = p;
-                },
-                handleSelectInstallationPackageClose:function(){
-                    var self = this;
-                    self.dialog.step.visible = false;
-                },
-                handleStepClose:function(){
-                    var self = this;
-                    self.dialog.step.visible = false;
+                    window.location.hash = '#/page-omms-software-service-deployment/' + row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
-
                     var h = self.$createElement;
                     self.$msgbox({
                         title:'危险操作',

@@ -68,8 +68,11 @@ public class ServerController {
 			String gadgetPassword,
 			String remark,
 			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword,
 			HttpServletRequest request) throws Exception{
-		ServerPO entity = serverService.add(name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator, new Date());
+		ServerPO entity = serverService.add(name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator, new Date(),ftpUsername,ftpPort,ftpPassword);
 		return new ServerVO().set(entity);
 	}
 	
@@ -80,7 +83,6 @@ public class ServerController {
 	 * <b>日期：</b>2020年2月14日 下午1:57:32
 	 * @param Long id 服务器id
 	 * @param String name 名称
-	 * @param String ip ip地址
 	 * @param String gadgetPort 小工具端口
 	 * @param String gadgetUsername 小工具用户名
 	 * @param String gadgetPassword 小工具密码
@@ -94,14 +96,16 @@ public class ServerController {
 	public Object edit(
 			Long id,
 			String name,
-			String ip,
 			String gadgetPort,
 			String gadgetUsername,
 			String gadgetPassword,
 			String remark,
 			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword,
 			HttpServletRequest request) throws Exception{
-		ServerPO entity = serverService.edit(id, name, ip, gadgetPort, gadgetUsername, gadgetPassword, remark, creator);
+		ServerPO entity = serverService.edit(id, name, gadgetPort, gadgetUsername, gadgetPassword, remark, creator,ftpUsername,ftpPort,ftpPassword);
 		return new ServerVO().set(entity);
 	}
 	
@@ -141,6 +145,26 @@ public class ServerController {
 			HttpServletRequest request) throws Exception{
 		
 		return serverQuery.queryStatus(id);
+	}
+	
+	/**
+	 * 修改ip<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:39:43
+	 * @param Long id 服务器id
+	 * @param String ip 修改的ip
+	 * @return ServerVO 服务器
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modify/ip")
+	public Object modifyIp(
+			Long id,
+			String ip,
+			HttpServletRequest request) throws Exception{
+		
+		return serverService.modifyIp(id, ip);
 	}
 	
 }

@@ -27,6 +27,76 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 	
 	private Integer progress;
 	
+	private Boolean error;
+	
+	private String errorMessage;	
+	
+	private String name;
+	
+	private String installationDirectory;
+	
+	private String installScriptPath;
+	
+	private String logFile;
+	
+	private String fileName;
+	
+	private String version;
+	
+	public String getName() {
+		return name;
+	}
+
+	public ServiceDeploymentVO setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public String getInstallationDirectory() {
+		return installationDirectory;
+	}
+
+	public ServiceDeploymentVO setInstallationDirectory(String installationDirectory) {
+		this.installationDirectory = installationDirectory;
+		return this;
+	}
+
+	public String getInstallScriptPath() {
+		return installScriptPath;
+	}
+
+	public ServiceDeploymentVO setInstallScriptPath(String installScriptPath) {
+		this.installScriptPath = installScriptPath;
+		return this;
+	}
+
+	public String getLogFile() {
+		return logFile;
+	}
+
+	public ServiceDeploymentVO setLogFile(String logFile) {
+		this.logFile = logFile;
+		return this;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public ServiceDeploymentVO setFileName(String fileName) {
+		this.fileName = fileName;
+		return this;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public ServiceDeploymentVO setVersion(String version) {
+		this.version = version;
+		return this;
+	}
+
 	public Long getServiceTypeId() {
 		return serviceTypeId;
 	}
@@ -117,6 +187,24 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 		return this;
 	}
 
+	public Boolean getError() {
+		return error;
+	}
+
+	public ServiceDeploymentVO setError(Boolean error) {
+		this.error = error;
+		return this;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public ServiceDeploymentVO setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+		return this;
+	}
+
 	@Override
 	public ServiceDeploymentVO set(ServiceDeploymentPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -130,7 +218,9 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setStep(entity.getStep().toString())
 			.setStepName(entity.getStep().getName())
-			.setProgress(entity.getProgress());
+			.setProgress(entity.getProgress())
+			.setError(entity.getError())
+			.setErrorMessage(entity.getErrorMessage());
 		return this;
 	}
 

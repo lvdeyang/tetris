@@ -14,6 +14,8 @@
                 <div style="width:100%; height:100%; position:relative">
                     <el-scrollbar style="height:100%;">
                         <el-tree
+                                v-loading="loading.server"
+                                ref="serverTree"
                                 :props = "tree.props"
                                 :data = "tree.data"
                                 node-key="uuid"
@@ -29,12 +31,47 @@
                                      <span :class="data.icon"></span>
                                      <span>{{data.name}}</span>
                                 </span>
+                                <span>
+                                    <el-button v-if="data.type ==='SERVICE' " type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="treeNodeDeleteServer(node, data)">
+                                        <span style="font-size:16px;" class="icon-trash"></span>
+                                    </el-button>
+                                </span>
                               </span>
                         </el-tree>
                     </el-scrollbar>
-                    <el-tooltip class="item" effect="dark" content="一键创建" placement="right-end">
+                    <!--<el-tooltip class="item" effect="dark" content="一键创建服务" placement="right-end">
                         <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="oneButtonCreate" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
+                    </el-tooltip>-->
+                    <el-tooltip class="item" effect="dark" content="创建服务" placement="right-end">
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="createServer" icon="el-icon-plus" :loading="oneButtonCreateLoading"></el-button>
                     </el-tooltip>
+                    <template>
+                        <el-dialog
+                                title="创建服务"
+                                :visible.sync="dialog.addServer.visible"
+                                width="500px"
+                                :before-close="handleCreateServerClose">
+                            <el-form label-width="80px">
+                                <el-form-item label="服务名称">
+                                    <el-input v-model="dialog.addServer.serverName"></el-input>
+                                </el-form-item>
+                                <el-form-item label="类型">
+                                    <el-select v-model="dialog.addServer.groupType" style="width:100%;">
+                                        <el-option
+                                                v-for="groupType in groupTypes"
+                                                :key="groupType"
+                                                :label="groupType"
+                                                :value="groupType">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                            <span slot="footer" class="dialog-footer">
+                                <el-button size="medium" @click="handleCreateServerClose">取消</el-button>
+                                <el-button size="medium" type="primary" @click="handleCreateServerSubmit">确定</el-button>
+                            </span>
+                        </el-dialog>
+                    </template>
                 </div>
             </div>
             <div style="position:absolute; left:420px; top:0; right:0; bottom:0;">
@@ -44,51 +81,13 @@
                             <el-form-item style="margin-bottom:0;" :label="columns.name.name+':'">
                                 <span style="cursor:not-allowed; font-weight:700; color:#333; font-weight:700;">{{columns.name.value}}</span>
                                 <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackage">版本管理</el-button>
-                                <el-button type="text" style="padding:0; margin-left:10px;" @click="goToInstallationPackageHistory">历史版本</el-button>
+                                <el-button type="text" style="padding:0; margin-left:10px;" @click="editServerType">更改类型</el-button>
                             </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.installationDirectory.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('installationDirectory', columns.installationDirectory)"><span class="feather-icon-edit"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
                             </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.logFile.name+':'">
                                 <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('logFile', columns.logFile)"><span class="feather-icon-edit"></span>{{columns.logFile.value || '设置内容'}}</el-button>
-                            </el-form-item>
-                            <el-form-item style="margin-bottom:0;" :label="columns.properties.name+':'">
-                                <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="columns.properties.show=!columns.properties.show"><span class="feather-icon-edit"></span>{{columns.properties.show?'收起编辑':'展开编辑'}}</el-button>
-                                <div v-if="columns.properties.show" style="width:100%;">
-                                    <el-button type="primary" size="small" @click="handleCreateProperty"><span class="icon-plus" style="position:relative; right:1px; margin-bottom:10px;"></span>&nbsp;添加属性</el-button>
-                                    <el-table
-                                        :data="columns.properties.rows"
-                                        style="width:100%">
-                                        <el-table-column
-                                                label="属性key"
-                                                prop="propertyKey">
-                                        </el-table-column>
-                                        <el-table-column
-                                                label="属性名称"
-                                                prop="propertyName">
-                                        </el-table-column>
-                                        <el-table-column
-                                                label="属性值类型"
-                                                prop="valueTypeName">
-                                        </el-table-column>
-                                        <el-table-column
-                                                label="默认值"
-                                                prop="propertyDefaultValue">
-                                        </el-table-column>
-                                        <el-table-column
-                                                label="操作"
-                                                width="250">
-                                            <template slot-scope="scope">
-                                                <el-tooltip class="item" effect="dark" content="修改属性" placement="bottom-end">
-                                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditProperty(scope)"></el-button>
-                                                </el-tooltip>
-                                                <el-tooltip class="item" effect="dark" content="删除属性" placement="bottom-end">
-                                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRemoveProperty(scope)"></el-button>
-                                                </el-tooltip>
-                                            </template>
-                                        </el-table-column>
-                                    </el-table>
-                                </div>
                             </el-form-item>
                         </el-form>
                         <div v-for="editor in editors" :class="'code-scope '+editor.name">
@@ -141,67 +140,27 @@
                 <el-button size="medium" type="primary" @click="handleEditColumnCommit">确定</el-button>
             </span>
         </el-dialog>
-    </template>
-
-    <template>
         <el-dialog
-                title="添加属性"
-                :visible.sync="dialog.addProperty.visible"
+                title="更改类型"
+                :visible.sync="dialog.editServer.visible"
                 width="500px"
-                :before-close="handleCreatePropertyClose">
-
+                :before-close="handleEditServerTypeClose">
             <el-form label-width="80px">
-                <el-form-item label="属性key">
-                    <el-input v-model="dialog.addProperty.propertyKey"></el-input>
-                </el-form-item>
-                <el-form-item label="属性名称">
-                    <el-input v-model="dialog.addProperty.propertyName"></el-input>
-                </el-form-item>
-                <el-form-item label="值类型">
-                    <el-select v-model="dialog.addProperty.valueType" style="width:100%;">
-                        <el-option v-for="item in propertyValueTypes" :label="item" :value="item" :key="item"></el-option>
+                <el-form-item label="类型">
+                    <el-select v-model="dialog.editServer.groupType" style="width:100%;">
+                        <el-option
+                                v-for="groupType in groupTypes"
+                                :key="groupType"
+                                :label="groupType"
+                                :value="groupType">
+                        </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="默认值">
-                    <el-input v-model="dialog.addProperty.propertyDefaultValue"></el-input>
-                </el-form-item>
             </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleCreatePropertyClose">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleCreatePropertySubmit">确定</el-button>
-            </span>
-        </el-dialog>
-    </template>
-
-    <template>
-        <el-dialog
-                title="修改属性"
-                :visible.sync="dialog.editProperty.visible"
-                width="500px"
-                :before-close="handleEditPropertyClose">
-
-            <el-form label-width="80px">
-                <el-form-item label="属性key">
-                    <el-input v-model="dialog.editProperty.propertyKey"></el-input>
-                </el-form-item>
-                <el-form-item label="属性名称">
-                    <el-input v-model="dialog.editProperty.propertyName"></el-input>
-                </el-form-item>
-                <el-form-item label="值类型">
-                    <el-select v-model="dialog.editProperty.valueType" style="width:100%;">
-                        <el-option v-for="item in propertyValueTypes" :label="item" :value="item" :key="item"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="默认值">
-                    <el-input v-model="dialog.editProperty.propertyDefaultValue"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleEditPropertyClose">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditPropertySubmit">确定</el-button>
-            </span>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button size="medium" @click="handleEditServerTypeClose">取消</el-button>
+                        <el-button size="medium" type="primary" @click="handleEditServerTypeSubmit">确定</el-button>
+                    </span>
         </el-dialog>
     </template>
 

@@ -1,0 +1,92 @@
+/**
+ * 
+ */
+package com.sumavision.tetris.guide.control;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
+
+import com.sumavision.tetris.orm.po.AbstractBasePO;
+
+/**
+ * 类型概述<br/>
+ * <p>
+ * 详细描述
+ * </p>
+ * <b>作者:</b>Administrator<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年9月2日 下午7:35:14
+ */
+@Entity
+@Table(name = "TETRIS_SOURCE_PO")
+public class SourcePO extends AbstractBasePO{
+
+	private static final long serialVersionUID = 1L;
+
+	/** 源编号 */
+	private Long index;
+	
+	/** 源类型 */
+	private SourceType sourceType;
+	
+	/** 源名称 */
+	private String sourceName;   
+	
+	/** 源 sourceType为URL的时候存URL，为5G背包的时候存bundleID */
+	private String source;
+	
+	/** 导播任务id */
+	private Long guideId;
+
+	@Column(name = "SOURCE_NUMBER")
+	public Long getIndex() {
+		return index;
+	}
+
+	public void setIndex(Long index) {
+		this.index = index;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SOURCE_TYPE")
+	public SourceType getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(SourceType sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	@Column(name = "SOURCE_NAME")
+	public String getSourceName() {
+		return sourceName;
+	}
+
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	@Column(name = "SOURCE")
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+	
+	@Column(name = "GUIDE_ID")
+	public Long getGuideId() {
+		return guideId;
+	}
+
+	public void setGuideId(Long guideId) {
+		this.guideId = guideId;
+	}
+
+	
+}

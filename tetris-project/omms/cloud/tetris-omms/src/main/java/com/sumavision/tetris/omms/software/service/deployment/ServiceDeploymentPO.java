@@ -51,6 +51,12 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 	/** 阶段进度 */
 	private Integer progress;
 	
+	/** 是否发生异常 */
+	private Boolean error;
+	
+	/** 异常信息 */
+	private String errorMessage;
+	
 	@Column(name = "SERVICE_TYPE_ID")
 	public Long getServiceTypeId() {
 		return serviceTypeId;
@@ -132,6 +138,24 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 
 	public void setProgress(Integer progress) {
 		this.progress = progress;
+	}
+
+	@Column(name = "ERROR")
+	public Boolean getError() {
+		return error;
+	}
+
+	public void setError(Boolean error) {
+		this.error = error;
+	}
+
+	@Column(name = "ERROR_MESSAGE")
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 	
 }

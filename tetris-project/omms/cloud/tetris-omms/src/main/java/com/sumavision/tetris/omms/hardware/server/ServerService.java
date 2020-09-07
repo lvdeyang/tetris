@@ -3,17 +3,24 @@ package com.sumavision.tetris.omms.hardware.server;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +38,9 @@ import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficD
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetModifyIniException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -48,6 +58,9 @@ public class ServerService {
 	@Autowired
 	private ServerNetworkCardTrafficDataDAO serverNetworkCardTrafficDataDao;
 	
+	@Autowired
+	private ServiceDeploymentDAO serviceDeploymentDao;
+	
 	/**
 	 * 添加一个服务器<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -61,6 +74,9 @@ public class ServerService {
 	 * @param String remark 备注
 	 * @param String creator 创建者
 	 * @param String createTime 创建时间
+	 * @param String ftpUsername ftp服务名
+	 * @param String ftpPort ftp端口
+	 * @param String ftpPassword ftp密码
 	 * @return ServerPO 服务器
 	 */
 	public ServerPO add(
@@ -71,7 +87,10 @@ public class ServerService {
 			String gadgetPassword,
 			String remark,
 			String creator,
-			Date createTime) throws Exception{
+			Date createTime,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = new ServerPO();
 		entity.setName(name);
 		entity.setIp(ip);
@@ -83,6 +102,9 @@ public class ServerService {
 		entity.setCreateTime(createTime);
 		entity.setUpdateTime(new Date());
 		entity.setStatus(ServerStatus.OFFLINE);
+		entity.setFtpUsername(ftpUsername);
+		entity.setFtpPort(ftpPort);
+		entity.setFtpPassword(ftpPassword);
 		serverDao.save(entity);
 		return entity;
 	}
@@ -94,7 +116,6 @@ public class ServerService {
 	 * <b>日期：</b>2020年2月14日 下午1:57:32
 	 * @param Long id 服务器id
 	 * @param String name 名称
-	 * @param String ip ip地址
 	 * @param String gadgetPort 小工具端口
 	 * @param String gadgetUsername 小工具用户名
 	 * @param String gadgetPassword 小工具密码
@@ -105,22 +126,26 @@ public class ServerService {
 	public ServerPO edit(
 			Long id,
 			String name,
-			String ip,
 			String gadgetPort,
 			String gadgetUsername,
 			String gadgetPassword,
 			String remark,
-			String creator) throws Exception{
+			String creator,
+			String ftpUsername,
+			String ftpPort,
+			String ftpPassword) throws Exception{
 		ServerPO entity = serverDao.findOne(id);
 		if(entity != null){
 			entity.setName(name);
-			entity.setIp(ip);
 			entity.setGadgetPort(gadgetPort);
 			entity.setGadgetUsername(gadgetUsername);
 			entity.setGadgetPassword(gadgetPassword);
 			entity.setRemark(remark);
 			entity.setCreator(creator);
 			entity.setUpdateTime(new Date());
+			entity.setFtpUsername(ftpUsername);
+			entity.setFtpPort(ftpPort);
+			entity.setFtpPassword(ftpPassword);
 			serverDao.save(entity);
 		}
 		return entity;
@@ -170,7 +195,7 @@ public class ServerService {
 			for(ServerPO server:needLoopServers){
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
 				AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
-		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials("Admin", "sumavisionrd"));
+		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
 				CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 																  .setDefaultCredentialsProvider(credsProvider)
 																  .build();
@@ -178,6 +203,7 @@ public class ServerService {
 				HttpPost httpPost = new HttpPost(url);
 				client.start();
 				client.execute(httpPost, new QueryStatusListener(server.getId()));
+				client.close();
 			}
 		}
 	}
@@ -328,6 +354,80 @@ public class ServerService {
 			serverService.offlineStatus(this.serverId);
 		}
 		
+	}
+	
+	/**
+	 * 修改ip<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:39:43
+	 * @param Long id 服务器id
+	 * @param String ip 修改的ip
+	 * @return ServerVO 服务器
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServerVO modifyIp(
+			Long id,
+			String ip) throws Exception{
+		CloseableHttpClient client = null;
+		try{
+			ServerPO serverEntity = serverDao.findOne(id);
+			String oldIp = serverEntity.getIp();
+			serverEntity.setIp(ip);
+			serverDao.save(serverEntity);
+			ServerVO server = new ServerVO().set(serverEntity);
+			
+			List<ServiceDeploymentPO> deployments = serviceDeploymentDao.findByServerId(server.getId());
+			if(deployments==null || deployments.size()<=0) return server;
+			List<ServiceDeploymentPO> needModifyIpDeployments = new ArrayList<ServiceDeploymentPO>();
+			for(ServiceDeploymentPO deployment:deployments){
+				if(deployment.getConfig()!=null && deployment.getConfig().indexOf(oldIp)>=0){
+					needModifyIpDeployments.add(deployment);
+				}
+			}
+			if(needModifyIpDeployments.size() <= 0) return server;
+			
+			JSONArray params = new JSONArray();
+			for(ServiceDeploymentPO deployment:needModifyIpDeployments){
+				//替换部署配置中的ip
+				deployment.setConfig(deployment.getConfig().replaceAll(oldIp, ip));
+				JSONObject param = new JSONObject();
+				param.put("relative_path", deployment.getInstallFullPath());
+				//将部署中存储的config json形式转换为config.ini形式
+				StringBufferWrapper configBuffer = new StringBufferWrapper();
+				JSONObject configJson = JSON.parseObject(deployment.getConfig());
+				Set<String> keys = configJson.keySet();
+				for(String key:keys){
+					String value = configJson.getString(key);
+					configBuffer.append(key).append("=").append(value).append("\n");
+				}
+				param.put("config", configBuffer.toString());
+				params.add(param);
+			}
+			serviceDeploymentDao.save(needModifyIpDeployments);
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .build();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/ini_modify").toString();
+			HttpPost httpPost = new HttpPost(url);
+			
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+			formparams.add(new BasicNameValuePair("params", params.toJSONString()));  
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			CloseableHttpResponse response = client.execute(httpPost);
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetModifyIniException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}
+			return server;
+		}finally{
+			if(client != null) client.close();
+		}
 	}
 	
 }

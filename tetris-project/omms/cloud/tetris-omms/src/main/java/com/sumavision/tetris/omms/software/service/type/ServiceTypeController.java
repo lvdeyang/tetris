@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -71,4 +72,71 @@ public class ServiceTypeController {
 		return null;
 	}
 	
+	/**
+	 * 查询服务类型枚举<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:16:10
+	 * @return Set<String> 查询服务类型枚举
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/group/types")
+	public Object findValueTypes(){
+		return serviceTypeQuery.findGroupTypes();
+	}
+	
+	/**
+	 * 删除服务类型(已部署服务情况下不可删除)<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:13:36
+	 * @param id 服务类型id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/{id}")
+	public Object delete(@PathVariable Long id,HttpServletRequest request) throws Exception {
+		serviceTypeService.delete(id);
+		return null;
+	}
+	
+	/**
+	 * 添加服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午11:14:18
+	 * @param name 服务类型名称
+	 * @param groupType 服务类型枚举
+	 * @return
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/create/server")
+	public Object createServer(
+			String name,
+			String groupType,
+			HttpServletRequest request) throws Exception{
+		return serviceTypeService.createServer(name,groupType);
+	}
+	
+	/**
+	 * 更改服务类型<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 下午7:08:52
+	 * @param id 服务id
+	 * @param groupType 服务类型
+	 * @return OmmsSoftwareServiceTypeTreeNodeVO 服务
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping (value = "/edit/server")
+	public Object editServer(
+			Long id,
+			String groupType,
+			HttpServletRequest request)throws Exception{
+		return serviceTypeService.editServer(id,groupType);
+	}
 }

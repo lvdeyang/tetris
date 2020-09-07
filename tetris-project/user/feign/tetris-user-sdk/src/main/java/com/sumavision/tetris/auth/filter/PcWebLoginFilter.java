@@ -176,6 +176,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/eb-resource-web/*")
 												   .add("/eb-screendisplay-web/*")
 												   .add("/eb-statistics-web/*")
+												   .add("/device/group/record/download/file")
 												   .getList();
 	}
 	

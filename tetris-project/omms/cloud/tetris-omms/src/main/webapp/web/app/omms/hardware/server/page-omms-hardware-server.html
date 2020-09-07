@@ -11,7 +11,7 @@
 
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加服务器</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务器</el-button>
+            <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务器</el-button>-->
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -19,10 +19,10 @@
                             :data="table.data"
                             :row-key="rowKey"
                             style="width:100%">
-                        <el-table-column
+                        <!--<el-table-column
                                 type="selection"
                                 width="55">
-                        </el-table-column>
+                        </el-table-column>-->
                         <el-table-column
                                 label="名称"
                                 prop="name">
@@ -53,6 +53,18 @@
                                 prop="createTime">
                         </el-table-column>
                         <el-table-column
+                                label="ftp用户名"
+                                prop="ftpUsername">
+                        </el-table-column>
+                        <el-table-column
+                                label="ftp端口"
+                                prop="ftpPort">
+                        </el-table-column>
+                        <el-table-column
+                                label="ftp密码"
+                                prop="ftpPassword">
+                        </el-table-column>
+                        <el-table-column
                                 label="备注"
                                 prop="remark">
                         </el-table-column>
@@ -70,11 +82,14 @@
                                 <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="修改ip" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-cloud" style="font-size:20px; padding:0;" @click="handleModifyIp(scope)"></el-button>
+                                </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="状态查看" placement="bottom-end">
                                     <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoStatus(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="部署服务" placement="bottom-end">
-                                    <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="handleInstall(scope)"></el-button>
+                                    <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDeployment(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
@@ -91,11 +106,11 @@
                         background
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
-                        :current-page="table.currentPage"
-                        :page-sizes="table.pageSizes"
-                        :page-size="table.pageSize"
+                        :current-page="table.page.currentPage"
+                        :page-sizes="table.page.pageSizes"
+                        :page-size="table.page.pageSize"
                         layout="total, sizes, prev, pager, next, jumper"
-                        :total="table.total">
+                        :total="table.page.total">
                 </el-pagination>
             </div>
 
@@ -110,29 +125,44 @@
                 :visible.sync="dialog.addServer.visible"
                 width="500px"
                 :before-close="handleAddServerClose">
-            <el-form label-width="100px">
-                <el-form-item label="名称:">
-                    <el-input v-model="dialog.addServer.name"></el-input>
-                </el-form-item>
-                <el-form-item label="ip:">
-                    <el-input v-model="dialog.addServer.ip"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具端口:">
-                    <el-input v-model="dialog.addServer.gadgetPort"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具用户名:">
-                    <el-input v-model="dialog.addServer.gadgetUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具密码:">
-                    <el-input v-model="dialog.addServer.gadgetPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="创建者:">
-                    <el-input v-model="dialog.addServer.creator"></el-input>
-                </el-form-item>
-                <el-form-item label="备注:">
-                    <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
-                </el-form-item>
-            </el-form>
+
+            <div style="height:500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="100px">
+                        <el-form-item label="名称:">
+                            <el-input v-model="dialog.addServer.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ip:">
+                            <el-input v-model="dialog.addServer.ip"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具端口:">
+                            <el-input v-model="dialog.addServer.gadgetPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具用户名:">
+                            <el-input v-model="dialog.addServer.gadgetUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具密码:">
+                            <el-input v-model="dialog.addServer.gadgetPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="创建者:">
+                            <el-input v-model="dialog.addServer.creator"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp用户名:">
+                            <el-input v-model="dialog.addServer.ftpUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp端口:">
+                            <el-input v-model="dialog.addServer.ftpPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp密码:">
+                            <el-input v-model="dialog.addServer.ftpPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备注:">
+                            <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleAddServerClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleAddServerSubmit">确定</el-button>
@@ -144,29 +174,41 @@
                 :visible.sync="dialog.editServer.visible"
                 width="500px"
                 :before-close="handleEditServerClose">
-            <el-form label-width="100px">
-                <el-form-item label="名称:">
-                    <el-input v-model="dialog.editServer.name"></el-input>
-                </el-form-item>
-                <el-form-item label="ip:">
-                    <el-input v-model="dialog.editServer.ip"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具端口:">
-                    <el-input v-model="dialog.editServer.gadgetPort"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具用户名:">
-                    <el-input v-model="dialog.editServer.gadgetUsername"></el-input>
-                </el-form-item>
-                <el-form-item label="小工具密码:">
-                    <el-input v-model="dialog.editServer.gadgetPassword"></el-input>
-                </el-form-item>
-                <el-form-item label="创建者:">
-                    <el-input v-model="dialog.editServer.creator"></el-input>
-                </el-form-item>
-                <el-form-item label="备注:">
-                    <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>
-                </el-form-item>
-            </el-form>
+
+            <div style="height:500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="100px">
+                        <el-form-item label="名称:">
+                            <el-input v-model="dialog.editServer.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具端口:">
+                            <el-input v-model="dialog.editServer.gadgetPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具用户名:">
+                            <el-input v-model="dialog.editServer.gadgetUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="小工具密码:">
+                            <el-input v-model="dialog.editServer.gadgetPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="创建者:">
+                            <el-input v-model="dialog.editServer.creator"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp用户名:">
+                            <el-input v-model="dialog.editServer.ftpUsername"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp端口:">
+                            <el-input v-model="dialog.editServer.ftpPort"></el-input>
+                        </el-form-item>
+                        <el-form-item label="ftp密码:">
+                            <el-input v-model="dialog.editServer.ftpPassword"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备注:">
+                            <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditServerClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditServerSubmit">确定</el-button>
@@ -174,78 +216,16 @@
         </el-dialog>
 
         <el-dialog
-                title="选择安装包"
-                :visible.sync="dialog.selectInstallationPackage.visible"
-                width="740px"
-                :before-close="handleSelectInstallationPackageClose">
+                title="修改ip"
+                :visible.sync="dialog.modifyIp.visible"
+                width="500px"
+                :before-close="handleModifyIpClose">
 
-            <div style="height:450px; position:relative; border:1px solid #ebeef5;">
-                <div style="width:350px; height:100%; border-right:1px solid #ebeef5;">
-                    <el-scrollbar style="height:100%;">
-                        <el-tree
-                                :props = "dialog.selectInstallationPackage.tree.props"
-                                :data = "dialog.selectInstallationPackage.tree.data"
-                                node-key="uuid"
-                                :expand-on-click-node="false"
-                                default-expand-all
-                                highlight-current
-                                @current-change="currentTreeNodeChange">
-                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="scope">
-                                <span style="font-size:14px;">
-                                     <span :class="scope.data.icon"></span>
-                                     <span>{{scope.data.name}}</span>
-                                </span>
-                              </span>
-                        </el-tree>
-                    </el-scrollbar>
-                </div>
-                <div style="position:absolute; left:350px; top:0; right:0; bottom:0;">
-                    <el-scrollbar style="height:100%;">
-                        <div v-for="package in dialog.selectInstallationPackage.list.data"
-                             :class="'package-list '+(package.current===true?'current':'')"
-                             @click="handleSelectPackage(package)">
-                            <span class="el-icon-tickets"></span>
-                            <span>{{package.fileName}}</span>
-                        </div>
-                    </el-scrollbar>
-                </div>
-            </div>
+            <el-input v-model="dialog.modifyIp.ip"></el-input>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleSelectInstallationPackageClose">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleSelectInstallationPackageSubmit">确定</el-button>
-            </span>
-
-        </el-dialog>
-
-        <el-dialog
-                :title="dialog.selectInstallationPackage.tree.current.name+'-'+dialog.selectInstallationPackage.list.current.version"
-                :visible.sync="dialog.step.visible"
-                width="740px"
-                :before-close="handleSelectInstallationPackageClose">
-
-            <el-steps :active="dialog.step.active" finish-status="success">
-                <el-step title="上传安装包"></el-step>
-                <el-step title="设置参数"></el-step>
-                <el-step title="安装"></el-step>
-            </el-steps>
-
-            <div v-if="dialog.step.active===0" style="max-height:426px;">
-
-            </div>
-            <div v-if="dialog.step.active===1" style="max-height:426px;">
-                <el-scrollbar style="height:100%;">
-
-                </el-scrollbar>
-            </div>
-            <div v-if="dialog.step.active===2" style="max-height:426px;">
-
-            </div>
-
-            <span slot="footer" class="dialog-footer">
-                 <el-button size="medium" @click="dialog.step.active+=1">下一步</el-button>
-                <el-button size="medium" v-if="dialog.step.active===1">下一步</el-button>
-                <el-button size="medium" v-else disable>下一步</el-button>
+                <el-button size="medium" @click="handleModifyIpClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleModifyIpSubmit">确定</el-button>
             </span>
         </el-dialog>
 

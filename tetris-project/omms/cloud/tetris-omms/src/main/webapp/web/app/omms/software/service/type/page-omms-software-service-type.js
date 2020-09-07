@@ -22,7 +22,6 @@ define([
 
     var init = function(){
 
-        //璁剧疆鏍囬
         commons.setTitle(pageId);
 
         var $page = document.getElementById(pageId);
@@ -36,6 +35,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 propertyValueTypes:[],
+                groupTypes:[],
                 tree:{
                     props:{
                         label:'name',
@@ -45,7 +45,14 @@ define([
                     data:[],
                     current:''
                 },
+                loading:{
+                    server:false,
+                    addRoot:false,
+                    table:false
+                },
                 columns:{
+                    loading:false,
+                    id:'',
                     name:{
                         name:'当前服务',
                         value:''
@@ -57,11 +64,6 @@ define([
                     logFile:{
                         name:'日志路径',
                         value:''
-                    },
-                    properties:{
-                        name:'服务属性',
-                        show:false,
-                        rows:[]
                     },
                     installScript:{
                         name:'安装脚本',
@@ -98,23 +100,16 @@ define([
                         key:'',
                         column:''
                     },
-                    addProperty:{
+                    addServer:{
                         visible:false,
                         loading:false,
-                        serviceTypeId:'',
-                        propertyKey:'',
-                        propertyName:'',
-                        valueType:'',
-                        propertyDefaultValue:''
+                        serverName:'',
+                        groupType:'C服务'
                     },
-                    editProperty:{
+                    editServer:{
                         visible:false,
                         loading:false,
-                        id:'',
-                        propertyKey:'',
-                        propertyName:'',
-                        valueType:'',
-                        propertyDefaultValue:''
+                        groupType:''
                     }
                 },
                 oneButtonCreateLoading:false
@@ -156,106 +151,6 @@ define([
                         }
                     });
                 },
-                handleCreateProperty:function(){
-                    var self = this;
-                    self.dialog.addProperty.serviceTypeId = self.tree.current.id;
-                    self.dialog.addProperty.visible = true;
-                },
-                handleCreatePropertyClose:function(){
-                    var self = this;
-                    self.dialog.addProperty.visible = false;
-                    self.dialog.addProperty.loading = false;
-                    self.dialog.addProperty.serviceTypeId = '';
-                    self.dialog.addProperty.propertyKey = '';
-                    self.dialog.addProperty.propertyName = '';
-                    self.dialog.addProperty.valueType = '';
-                    self.dialog.addProperty.propertyDefaultValue = '';
-                },
-                handleCreatePropertySubmit:function(){
-                    var self = this;
-                    self.dialog.addProperty.loading = true;
-                    ajax.post('/service/properties/add', {
-                        serviceTypeId:self.dialog.addProperty.serviceTypeId,
-                        propertyKey:self.dialog.addProperty.propertyKey,
-                        propertyName:self.dialog.addProperty.propertyName,
-                        valueType:self.dialog.addProperty.valueType,
-                        propertyDefaultValue:self.dialog.addProperty.propertyDefaultValue
-                    }, function(data, status){
-                        self.dialog.addProperty.loading = false;
-                        if(status !== 200) return;
-                        self.columns.properties.rows.push(data);
-                        if(!self.tree.current.params.properties) self.tree.current.params.properties = [];
-                        self.tree.current.params.properties.push(data);
-                        self.handleCreatePropertyClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleEditProperty:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    self.dialog.editProperty.id = row.id;
-                    self.dialog.editProperty.propertyKey = row.propertyKey;
-                    self.dialog.editProperty.propertyName = row.propertyName;
-                    self.dialog.editProperty.valueType = row.valueTypeName;
-                    self.dialog.editProperty.propertyDefaultValue = row.propertyDefaultValue;
-                    self.dialog.editProperty.visible = true;
-                },
-                handleEditPropertyClose:function(){
-                    var self = this;
-                    self.dialog.editProperty.id = '';
-                    self.dialog.editProperty.propertyKey = '';
-                    self.dialog.editProperty.propertyName = '';
-                    self.dialog.editProperty.valueType = '';
-                    self.dialog.editProperty.propertyDefaultValue = '';
-                    self.dialog.editProperty.visible = false;
-                    self.dialog.editProperty.loading = false;
-                },
-                handleEditPropertySubmit:function(){
-                    var self = this;
-                    self.dialog.editProperty.loading = true;
-                    ajax.post('/service/properties/edit', {
-                        id:self.dialog.editProperty.id,
-                        propertyKey:self.dialog.editProperty.propertyKey,
-                        propertyName:self.dialog.editProperty.propertyName,
-                        valueType:self.dialog.editProperty.valueType,
-                        propertyDefaultValue:self.dialog.editProperty.propertyDefaultValue
-                    }, function(data, status){
-                        self.dialog.editProperty.loading = false;
-                        if(status !== 200) return;
-                        for(var i=0; i<self.columns.properties.rows.length; i++){
-                            if(self.columns.properties.rows[i].id === data.id){
-                                self.columns.properties.rows.splice(i, 1, data);
-                                break;
-                            }
-                        }
-                        for(var i=0; i<self.tree.current.params.properties.length; i++){
-                            if(self.tree.current.params.properties[i].id === data.id){
-                                self.tree.current.params.properties.splice(i, 1, data);
-                                break;
-                            }
-                        }
-                        self.handleEditPropertyClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleRemoveProperty:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    ajax.post('/service/properties/remove', {
-                        id:row.id
-                    }, function(){
-                        for(var i=0; i<self.columns.properties.rows.length; i++){
-                            if(self.columns.properties.rows[i].id === row.id){
-                                self.columns.properties.rows.splice(i, 1);
-                                break;
-                            }
-                        }
-                        for(var i=0; i<data.params.properties.length; i++){
-                            if(data.params.properties[i].id === row.id){
-                                data.params.properties.splice(i, 1);
-                                break;
-                            }
-                        }
-                    });
-                },
                 currentTreeNodeChange:function(data){
                     var self = this;
                     if(data.type === 'FOLDER'){
@@ -276,13 +171,6 @@ define([
                     self.columns.installationDirectory.value = data.params.installationDirectory;
                     self.columns.logFile.value = data.params.logFile;
                     self.columns.installScript.value = data.params.installScript;
-                    var properties = self.tree.current.params.properties;
-                    self.columns.properties.rows.splice(0, self.columns.properties.rows.length);
-                    if(properties && properties.length>0){
-                        for(var i=0; i<properties.length; i++){
-                            self.columns.properties.rows.push(properties[i]);
-                        }
-                    }
 
                     for(var i=0; i<self.editors.length; i++){
                         if(self.editors[i].name === 'installScript'){
@@ -333,6 +221,109 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                createServer:function(){
+                    var self = this ;
+                    self.dialog.addServer.visible = true;
+                },
+                handleCreateServerClose:function(){
+                    var self = this;
+                    self.dialog.addServer.serverName = '';
+                    self.dialog.addServer.groupType = 'C服务';
+                    self.dialog.addServer.visible = false;
+                },
+                handleCreateServerSubmit:function(){
+                    var self = this;
+                    var params = {
+                        name:self.dialog.addServer.serverName,
+                        groupType:self.dialog.addServer.groupType
+                    }
+                    ajax.post('/service/type/create/server', params, function(data, status){
+                        self.handleCreateServerClose();
+                        if(status !== 200){
+                            return;
+                        }else{
+                            for(var i=0; i<data.length; i++){
+                                for(var j=0; j<self.tree.data.length; j++){
+                                    if(self.tree.data[j].name === data[i].parent){
+                                        self.tree.data[j].children.push(data[i]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                currentNode:function(data){
+                    if(!data) return;
+                    var self = this;
+                    self.$nextTick(function(){
+                        self.$refs.serverTree.setCurrentKey(data.uuid);
+                    });
+                    self.initFormMenu();
+                    self.tree.current = data;
+                    self.form.menu = $.extend(true, self.form.menu, data);
+                    self.form.menu.isGroup += '';
+                    self.loadPermissionRoles(data.id, 1);
+                },
+                /*treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                        if(status !== 200) return;
+                        self.loadAllServiceTypes();
+                        self.tree.current = '';
+                        self.columns.name.value = '';
+                        self.columns.installationDirectory.value = '';
+                        self.columns.logFile.value = '';
+                        self.columns.installScript.value = '';
+                        self.columns.installScript.path = '';
+                        self.columns.startupScript.value = '';
+                        self.columns.startupScript.path = '';
+                        self.columns.shutdownScript.value = '';
+                        self.columns.shutdownScript.path = '';
+                        return;
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },*/
+                treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除该服务，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    self.loadAllServiceTypes();
+                                    self.tree.current = '';
+                                    self.columns.name.value = '';
+                                    self.columns.installationDirectory.value = '';
+                                    self.columns.logFile.value = '';
+                                    self.columns.installScript.value = '';
+                                    self.columns.installScript.path = '';
+                                    self.columns.startupScript.value = '';
+                                    self.columns.startupScript.path = '';
+                                    self.columns.shutdownScript.value = '';
+                                    self.columns.shutdownScript.path = '';
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
                 editColumn:function(columnKey, column){
                     var self = this;
                     self.dialog.editColumn.visible = true;
@@ -347,6 +338,26 @@ define([
                     self.dialog.editColumn.visible = false;
                     self.dialog.editColumn.key = '';
                     self.dialog.editColumn.column = '';
+                },
+                editServerType:function(node, data){
+                    var self = this ;
+                    self.dialog.editServer.visible = true;
+                    self.dialog.editServer.groupType = data.groupType;
+                },
+                handleEditServerTypeClose:function(){
+                    var self = this;
+                    self.dialog.editServer.visible = false;
+                    self.dialog.editServer.groupType ='';
+                    self.loadAllServiceTypes();
+                },
+                handleEditServerTypeSubmit:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/edit/server',
+                        {id:self.tree.current.id,
+                        groupType:self.dialog.editServer.groupType},
+                        function(data,status){
+                            self.handleEditServerTypeClose();
+                        },null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleEditColumnCommit:function(){
                     var self = this;
@@ -380,9 +391,12 @@ define([
             },
             mounted:function(){
                 var self = this;
-                //self.loadValueTypes();
                 self.loadAllServiceTypes();
-
+                ajax.post('/service/type/find/group/types', null, function(data){
+                    for(var i=0; i<data.length; i++){
+                        self.groupTypes.push(data[i]);
+                    }
+                });
                 self.$nextTick(function(){
 
                     $('#page-omms-software-service-type-wrapper').on('click.action.show.code', '.action-bar .action-show-code', function(){

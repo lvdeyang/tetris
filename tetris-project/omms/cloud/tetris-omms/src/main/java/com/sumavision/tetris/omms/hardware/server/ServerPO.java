@@ -39,6 +39,15 @@ public class ServerPO extends AbstractBasePO{
 	/** 小工具密码 */
 	private String gadgetPassword;
 	
+	/** ftp端口 */
+	private String ftpPort;
+	
+	/** ftp用户名 */
+	private String ftpUsername;
+	
+	/** ftp密码 */
+	private String ftpPassword;
+	
 	/** 备注 */
 	private String remark;
 	
@@ -94,6 +103,33 @@ public class ServerPO extends AbstractBasePO{
 
 	public void setGadgetPassword(String gadgetPassword) {
 		this.gadgetPassword = gadgetPassword;
+	}
+
+	@Column(name = "FTP_PORT")
+	public String getFtpPort() {
+		return ftpPort;
+	}
+
+	public void setFtpPort(String ftpPort) {
+		this.ftpPort = ftpPort;
+	}
+
+	@Column(name = "FTP_USERNAME")
+	public String getFtpUsername() {
+		return ftpUsername;
+	}
+
+	public void setFtpUsername(String ftpUsername) {
+		this.ftpUsername = ftpUsername;
+	}
+
+	@Column(name = "FTP_PASSWORD")
+	public String getFtpPassword() {
+		return ftpPassword;
+	}
+
+	public void setFtpPassword(String ftpPassword) {
+		this.ftpPassword = ftpPassword;
 	}
 
 	@Column(name = "REMARK")

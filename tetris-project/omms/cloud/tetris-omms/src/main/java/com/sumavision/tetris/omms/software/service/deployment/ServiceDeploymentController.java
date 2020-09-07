@@ -57,4 +57,61 @@ public class ServiceDeploymentController {
 		return serviceDeploymentQuery.queryUploadStatus(serviceDeploymentId);
 	}
 	
+	/**
+	 * 根据服务器查询部署服务<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午10:12:06
+	 * @param serverId 服务器id
+	 * @return Map<String, Object> 部署服务参数
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load")
+	public Object load(
+			Long serverId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request)throws Exception{
+		return serviceDeploymentQuery.load(serverId, currentPage, pageSize);
+	}
+	
+	/**
+	 * 执行安装操作<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 下午8:53:07
+	 * @param Long deploymentId 部署id
+	 * @param JSONString config config.ini json形式
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/install")
+	public Object install(
+			Long deploymentId,
+			String config,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.install(deploymentId, config);
+		return null;
+	}
+	
+	/**
+	 * 执行卸载<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月4日 上午10:35:27
+	 * @param Long deploymentId 部署id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/uninstall")
+	public Object uninstall(
+			Long deploymentId,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.uninstall(deploymentId);
+		return null;
+	}
+	
 }
