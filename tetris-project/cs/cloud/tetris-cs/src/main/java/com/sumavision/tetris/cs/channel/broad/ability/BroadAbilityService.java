@@ -545,7 +545,7 @@ public class BroadAbilityService {
 			}
 			
 			if (broad && !previewIdList.isEmpty()) {
-				requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
+				//requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
 			}
 		}
 		
@@ -1705,7 +1705,7 @@ public class BroadAbilityService {
 			}
 			
 			if (broad && !previewIdList.isEmpty()) {
-				requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
+				//requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
 			}
 		}
 		
