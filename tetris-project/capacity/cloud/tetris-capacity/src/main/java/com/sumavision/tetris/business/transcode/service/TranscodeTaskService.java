@@ -191,20 +191,44 @@ public class TranscodeTaskService {
 	public void previewInput(CreateInputPreviewVO createInputPreviewVO) throws Exception {
 
 		InputBO inputBO = createInputPreviewVO.getInput_array().get(0);
+
+		if (createInputPreviewVO.getProgram_number() == null){
+			throw new BaseException(StatusCode.ERROR,"param[program number] not exist");
+		}
+
 		String pubName = inputBO.getId();
 		String playName = inputBO.getId();
 		String taskId = inputBO.getId();
 
 		String uniq = generateUniq(inputBO);
 		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-		if (inputPO!=null){ //输入存在的话就将现有输入进行替换下，以免input_id不一致
+		if (inputPO!=null && inputPO.getCount()>0){ //输入存在的话就将现有输入进行替换下，以免input_id不一致
 			inputBO = JSONObject.parseObject(inputPO.getInput(),InputBO.class);
-			createInputPreviewVO.getInput_array().add(0,inputBO);
+			createInputPreviewVO.getInput_array().remove(0);
+			createInputPreviewVO.getInput_array().add(inputBO);
+		}
+		ProgramBO taskProgramBO = inputBO.getProgram_array().stream()
+				.filter(p->createInputPreviewVO.getProgram_number().equals(p.getProgram_number()))
+				.findFirst()
+				.get();
+		if (taskProgramBO == null) {
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+createInputPreviewVO.getProgram_number());
 		}
 
-		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO);
+		taskProgramBO.getAudio_array().get(0).setAudio_column("on");
 
-		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
+		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, createInputPreviewVO.getProgram_number());
+
+//		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
+		String outputUrl = new StringBuilder().append("rtmp://")
+				.append(createInputPreviewVO.getDevice_ip())
+				.append(":1935")
+				.append("/")
+				.append("live")
+				.append("/")
+				.append(playName)
+				.toString();
+		List<OutputBO> outputBOs = trans2RTMPOutputBO(taskId, taskBOs, outputUrl);
 
 		save(taskId, createInputPreviewVO.getDevice_ip(), createInputPreviewVO.getInput_array()  , taskBOs, outputBOs, BusinessType.TRANSCODE);
 
@@ -213,7 +237,8 @@ public class TranscodeTaskService {
 
 	public List<TaskBO> trans2TaskBO(
 			String taskId,
-			InputBO input) throws Exception {
+			InputBO input,
+			Integer programNo) throws Exception {
 
 		String videoTaskId = new StringBufferWrapper().append("task-preview-video-")
 				.append(taskId)
@@ -234,10 +259,16 @@ public class TranscodeTaskService {
 		 * 视频 *
 		 *******/
 
-		//视频转码,,,  todo 只能第0个？
+		ProgramBO taskProgramBO = input.getProgram_array().stream().filter(p->programNo.equals(p.getProgram_number()))
+				 .findFirst()
+				 .get();
+		if (taskProgramBO == null){
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+programNo);
+		}
+		//视频转码,,,
 		TaskSourceBO videoSource = new TaskSourceBO().setInput_id(input.getId())
-				.setProgram_number(input.getProgram_array().get(0).getProgram_number())
-				.setElement_pid(input.getProgram_array().get(0).getVideo_array().get(0).getPid());
+				.setProgram_number(programNo)
+				.setElement_pid(taskProgramBO.getVideo_array().get(0).getPid());
 
 		TaskBO videoTask = new TaskBO().setId(videoTaskId)
 				.setType("video")
@@ -252,8 +283,13 @@ public class TranscodeTaskService {
 				.setWidth(480)
 				.setHeight(272);
 
-		PreProcessingBO preProcessing = new PreProcessingBO().setScale(scale);
-		videoEncode.getProcess_array().add(preProcessing);
+		//音柱
+		AudioColumnBO audioColumnBO = new AudioColumnBO().setPlayflag("on").setPlat("cpu");
+
+		PreProcessingBO scaleProcessing = new PreProcessingBO().setScale(scale);
+		PreProcessingBO audioColumnProcessing = new PreProcessingBO().setAudiocolumn(audioColumnBO);
+		videoEncode.getProcess_array().add(scaleProcessing);
+		videoEncode.getProcess_array().add(audioColumnProcessing);
 
 		String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
 		JSONObject obj = JSONObject.parseObject(params);
@@ -274,8 +310,8 @@ public class TranscodeTaskService {
 		 *******/
 		//音频转码
 		TaskSourceBO audioSource = new TaskSourceBO().setInput_id(input.getId())
-				.setProgram_number(input.getProgram_array().get(0).getProgram_number())
-				.setElement_pid(input.getProgram_array().get(0).getAudio_array().get(0).getPid());
+				.setProgram_number(programNo)
+				.setElement_pid(taskProgramBO.getAudio_array().get(0).getPid());
 
 		TaskBO audioTask = new TaskBO().setId(audioTaskId)
 				.setType("audio")
@@ -373,6 +409,56 @@ public class TranscodeTaskService {
 		return outputs;
 	}
 
+
+	/**
+	 * 生成RTMP输出
+	 * @param taskId
+	 * @param tasks
+	 * @param pubName
+	 * @param playName
+	 * @return
+	 * @throws Exception
+	 */
+	public List<OutputBO> trans2RTMPOutputBO(
+			String taskId,
+			List<TaskBO> tasks,
+			String outputUrl
+	) throws Exception {
+
+		String outputId =  new StringBufferWrapper().append("task-preview-output-")
+				.append(taskId)
+				.toString();
+
+		List<OutputBO> outputs = new ArrayList<OutputBO>();
+
+		OutputBO output = new OutputBO();
+
+		output.setId(outputId);
+
+		//输出rtmp
+
+		List<BaseMediaBO> outputMedias = new ArrayList<>();
+
+		tasks.stream().forEach(t->{
+			BaseMediaBO media = new BaseMediaBO();
+			media.setTask_id(t.getId());
+			media.setEncode_id(t.getEncode_array().get(0).getEncode_id());
+			outputMedias.add(media);
+		});
+		OutputRtmpBO rtmpBO = new OutputRtmpBO()
+				.setMedia_array(outputMedias)
+				.setVid_exist(true)
+				.setAud_exist(true)
+				.setPub_user("")
+				.setPub_password("")
+				.setServer_url(outputUrl);
+
+		output.setRtmp(rtmpBO);
+
+		outputs.add(output);
+
+		return outputs;
+	}
 
 
 
@@ -512,7 +598,7 @@ public class TranscodeTaskService {
 
 		try {
 			List<InputBO> needSendInputArray = new ArrayList<>();
-			List<Long> inputsInDB = new ArrayList<>();
+			Set<Long> inputsInDB = new HashSet<>();
 			for (int i = 0; i < inputBOs.size(); i++) {
 				InputBO inputBO = inputBOs.get(i);
 				String uniq = generateUniq(inputBO);

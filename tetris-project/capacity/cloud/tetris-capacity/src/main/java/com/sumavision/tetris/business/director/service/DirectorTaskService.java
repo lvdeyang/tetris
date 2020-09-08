@@ -1,16 +1,12 @@
 package com.sumavision.tetris.business.director.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import com.sumavision.tetris.capacity.constant.EncodeConstant;
+import com.google.common.collect.Lists;
+import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.capacity.constant.EncodeConstant.*;
 import com.sumavision.tetris.capacity.template.TemplateService;
+import com.sumavision.tetris.sts.transformTemplate.jni.TransformJniLib;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -687,7 +683,7 @@ public class DirectorTaskService {
 			
 			if("h264".equals(codec)){
 
-				String x264Map = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+				String x264Map = templateService.getVideoEncodeMap(TplVideoEncoder.VENCODER_X264);
 				JSONObject x264Obj = JSONObject.parseObject(x264Map);
 				x264Obj.put("bitrate",format_bitrate/1000);
 				x264Obj.put("max_bitrate",format_max_bitrate/1000);
@@ -708,7 +704,7 @@ public class DirectorTaskService {
 				
 			}else if("h265".equals(codec)){
 
-				String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X265);
+				String params = templateService.getVideoEncodeMap(TplVideoEncoder.VENCODER_X265);
 				JSONObject obj = JSONObject.parseObject(params);
 				obj.put("bitrate",format_bitrate/1000);
 				obj.put("max_bitrate",format_max_bitrate/1000);
@@ -980,11 +976,47 @@ public class DirectorTaskService {
 
 	}
 
-	public String getEncodeTemplateParamByEncodeType(String encodeType){
-		 String param = "";
+	public String getEncodeTemplateParamByEncodeType(String encodeType) throws CommonException {
+		 String tpl = "";
+		 List<String> audioEncodeTypes = new ArrayList<>(Arrays.asList(
+		 		"mp2",
+				 "mp3",
+				 "aac",
+				 "heaac",
+				 "heaac_v2",
+				 "mpeg4-aac-lc",
+				 "mpeg4-he-aac-lc",
+				 "mpeg4-he-aac-v2-lc",
+				 "dobly",
+				 "ac3",
+				 "eac3"
+		 ));
 
+		 Map<String, TplVideoEncoder> videoEncodeMap = new HashMap<>();
+		 videoEncodeMap.put("h264",TplVideoEncoder.VENCODER_X264);
+		 videoEncodeMap.put("x264",TplVideoEncoder.VENCODER_X264);
+		 videoEncodeMap.put("h265",TplVideoEncoder.VENCODER_X265);
+		 videoEncodeMap.put("x265",TplVideoEncoder.VENCODER_X265);
+		 videoEncodeMap.put("mpeg2",TplVideoEncoder.VENCODER_CPU_MPEG2);
+		 videoEncodeMap.put("m2v",TplVideoEncoder.VENCODER_CPU_MPEG2);
+		 videoEncodeMap.put("avs2",TplVideoEncoder.VENCODER_AVS2);
 
-		return param;
+		 if (audioEncodeTypes.contains(encodeType)){
+			 TplAudioEncoder audioEncoder = TplAudioEncoder.getTplAudioEncoder(encodeType);
+			 if (audioEncoder.equals(TplAudioEncoder.AENCODER_MP3)) {
+				 tpl = TransformJniLib.getInstance().GetMp3EncParamTemplate("44.1");
+			 }else{
+				 tpl = TransformJniLib.getInstance().GetAudioEncParamTemplate(audioEncoder.ordinal(),0);
+			 }
+		 }
+		 if (videoEncodeMap.containsKey(encodeType)){
+			 TplVideoEncoder tplVideoEncoder = videoEncodeMap.get(encodeType);
+			 tpl = TransformJniLib.getInstance().GetVideoEncParamTemplate(tplVideoEncoder.ordinal(),"main","4",0);
+		 }else{
+			 TplVideoEncoder tplVideoEncoder = TplVideoEncoder.getTplVideoEncoder(encodeType);
+			 tpl = TransformJniLib.getInstance().GetVideoEncParamTemplate(tplVideoEncoder.ordinal(),"main","4",0);
+		 }
+		 return tpl;
 	}
 
 	/**

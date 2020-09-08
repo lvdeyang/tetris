@@ -21,6 +21,7 @@ public class CreateInputPreviewVO {
 
     private String device_ip;
 
+    private Integer program_number;
     /**
      * 其他业务创建输入
      */
@@ -50,4 +51,11 @@ public class CreateInputPreviewVO {
         this.input_array = input_array;
     }
 
+    public Integer getProgram_number() {
+        return program_number;
+    }
+
+    public void setProgram_number(Integer program_number) {
+        this.program_number = program_number;
+    }
 }

@@ -48,6 +48,10 @@ public class PreProcessingBO {
 	/** 缩放 */
 	private ScaleBO scale;
 
+
+	/** 音柱 */
+	private AudioColumnBO audiocolumn;
+
 	public ScaleBO getScale() {
 		return scale;
 	}
@@ -153,6 +157,15 @@ public class PreProcessingBO {
 
 	public PreProcessingBO setAud_gain(AudioGainBO aud_gain) {
 		this.aud_gain = aud_gain;
+		return this;
+	}
+
+	public AudioColumnBO getAudiocolumn() {
+		return audiocolumn;
+	}
+
+	public PreProcessingBO setAudiocolumn(AudioColumnBO audiocolumn) {
+		this.audiocolumn = audiocolumn;
 		return this;
 	}
 }

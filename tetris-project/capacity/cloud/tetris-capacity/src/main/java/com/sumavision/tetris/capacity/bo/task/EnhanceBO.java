@@ -35,7 +35,7 @@ public class EnhanceBO {
 
 	private Integer height;
 
-	private String localEngance;
+	private String localenhance;
 
 	public String getPlat() {
 		return plat;
@@ -136,12 +136,11 @@ public class EnhanceBO {
 		return this;
 	}
 
-	public String getLocalEngance() {
-		return localEngance;
+	public String getLocalenhance() {
+		return localenhance;
 	}
 
-	public EnhanceBO setLocalEngance(String localEngance) {
-		this.localEngance = localEngance;
-		return this;
+	public void setLocalenhance(String localenhance) {
+		this.localenhance = localenhance;
 	}
 }
