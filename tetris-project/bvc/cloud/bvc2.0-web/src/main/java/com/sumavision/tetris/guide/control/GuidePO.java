@@ -24,9 +24,6 @@ public class GuidePO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
-	/** 导播任务编号 */
-	private Long index;
-
 	/** 名称 */
 	private String taskName;
 
@@ -35,16 +32,10 @@ public class GuidePO extends AbstractBasePO{
 
 	/** 创建时间 */
 	private Date creationTime;
-
-	@Column(name = "INDEX")
-	public Long getIndex() {
-		return index;
-	}
-
-	public void setIndex(Long index) {
-		this.index = index;
-	}
 	
+	/** 直播状态 */
+	private Status status;
+
 	@Column(name = "TASK_NAME")
 	public String getTaskName() {
 		return taskName;
@@ -72,4 +63,12 @@ public class GuidePO extends AbstractBasePO{
 		this.creationTime = creationTime;
 	}
 
+	@Column(name = "STATUS")
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 }

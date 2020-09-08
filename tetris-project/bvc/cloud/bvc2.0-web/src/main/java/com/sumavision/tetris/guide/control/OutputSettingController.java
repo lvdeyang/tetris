@@ -99,5 +99,4 @@ public class OutputSettingController {
 		outputSettingService.delete(id);
 		return null;
 	}
-
 }

@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
 import com.sumavision.tetris.guide.control.VideoParametersDAO;
@@ -19,6 +22,8 @@ import com.sumavision.tetris.guide.control.VideoParametersDAO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年9月3日 下午5:30:51
  */
+@Service
+@Transactional(rollbackFor = Exception.class)
 public class GuideService {
 	
 	@Autowired
@@ -41,7 +46,8 @@ public class GuideService {
 		List<SourcePO> list = new ArrayList<SourcePO>();
 		for(Long i = 1L; i <= 12; i++){
 			SourcePO sourcePO = new SourcePO();
-			sourcePO.setId(i);
+			sourcePO.setSourceNumber(i);
+			sourcePO.setGuideId(guidePO.getId());
 			list.add(sourcePO);
 		}
 		sourceDAO.save(list);
@@ -62,8 +68,16 @@ public class GuideService {
 	public void delete(Long id){
 		videoParametersDAO.deleteByGuidePO(id);
 		outputSettingDAO.deleteByGuidePO(id);
-		sourceDAO.deleteByGuidePO(id);
+		sourceDAO.deleteByGuideId(id);
 		guideDAO.delete(id);
+	}
+	
+	public Object start(Long id){
+		return null;
+	}
+	
+	public Object stop(Long id){
+		return null;
 	}
 
 }

@@ -28,6 +28,9 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	
 	/** 导播任务id */
 	private Long guideId;
+	
+	/** 源是否被切换到 */
+	private Boolean current;
 
 	public Long getIndex() {
 		return index;
@@ -72,6 +75,14 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.guideId = guideId;
 	}
 
+	public Boolean getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(Boolean current) {
+		this.current = current;
+	}
+	
 	@Override
 	public SourceVO set(SourcePO entity) throws Exception {
 		this.setId(entity.getId());
@@ -79,6 +90,7 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setSourceName(entity.getSourceName());
 		this.setSource(entity.getSource());
 		this.setId(entity.getId());
+		this.setCurrent(entity.getCurrent());
 		return this;
 	}
 

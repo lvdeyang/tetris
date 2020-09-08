@@ -19,8 +19,8 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = SourcePO.class, idClass = Long.class)
 public interface SourceDAO extends BaseDAO<SourcePO>{
 
-	public List<SourcePO> findByGuidePO(Long guidePO);
+	public List<SourcePO> findByGuideId(Long guideId);
 	
-	public void deleteByGuidePO(Long guidePO);
+	public void deleteByGuideId(Long guideId);
 	
 }
