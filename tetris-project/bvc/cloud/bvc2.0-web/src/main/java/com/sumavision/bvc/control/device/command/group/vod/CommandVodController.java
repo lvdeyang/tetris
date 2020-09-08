@@ -66,28 +66,27 @@ public class CommandVodController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 			
-		/*Long userId = userUtils.getUserIdFromSession(request);
+		Long userId = userUtils.getUserIdFromSession(request);
 		
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			CommandGroupUserPlayerPO player = null;
 			if("file".equals(type)){
-				player = commandVodService.resourceVodStart(user, id, serial);
+				throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
 			}else if("user".equals(type)){
 				UserBO vodUser = userUtils.queryUserById(Long.parseLong(id));
-				player = commandVodService.userStart_Cascade(user, vodUser, admin, serial);
+				vodService.userStart(user, vodUser, serial);
 			}else if("device".equals(type)){
-				player = commandVodService.deviceStart_Cascade(user, id, admin, serial);
+				vodService.deviceStart(user, id, serial);
 			}
 			
-			if(player == null) return null;
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
-		}*/
+		}
 	}
 
 	/**

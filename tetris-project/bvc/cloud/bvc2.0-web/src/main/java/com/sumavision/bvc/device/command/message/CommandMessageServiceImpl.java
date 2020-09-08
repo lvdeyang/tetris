@@ -20,6 +20,12 @@ import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.message.CommandGroupMessagePO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -45,7 +51,13 @@ import lombok.extern.slf4j.Slf4j;
 public class CommandMessageServiceImpl {
 	
 	@Autowired
-	private CommandGroupDAO commandGroupDao;
+	private GroupDAO groupDao;
+	
+	@Autowired
+	private GroupMemberDAO groupMemberDao;
+	
+//	@Autowired
+//	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
 	private CommandGroupMessageDAO commandGroupMessageDao;
@@ -132,7 +144,7 @@ public class CommandMessageServiceImpl {
 	private void sendMessageUtil(CommandGroupMessagePO messagePO) throws Exception{
 		
 		Long groupId = messagePO.getGroupId();
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		List<Long> consumeIds = new ArrayList<Long>();
 		JSONObject message = new JSONObject();
 		message.put("businessType", "commandMessageReceive");
@@ -166,7 +178,7 @@ public class CommandMessageServiceImpl {
 		messagePO.setStatus(MessageStatus.STOP);
 		commandGroupMessageDao.save(messagePO);
 		Long groupId = messagePO.getGroupId();
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		List<Long> consumeIds = new ArrayList<Long>();
 		
 		JSONObject message = new JSONObject();
@@ -194,7 +206,7 @@ public class CommandMessageServiceImpl {
 	public void stopAll(Long groupId) throws Exception{
 		
 		List<CommandGroupMessagePO> messagePOs = commandGroupMessageDao.findByGroupId(groupId);
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		List<Long> consumeIds = new ArrayList<Long>();
 		
 		for(CommandGroupMessagePO messagePO : messagePOs){
@@ -256,29 +268,31 @@ public class CommandMessageServiceImpl {
 			log.warn("发送实时消息，groupId有误");
 			return;
 		}
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		GroupPO group = groupDao.findOne(groupId);
 		if(group == null){
 			log.warn("发送实时消息，没有查到group，groupId：" + groupId);
 			return;
 		}
 		
-		List<CommandGroupMemberPO> members = group.getMembers();
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 		List<Long> userIds = new ArrayList<Long>();
-		for(CommandGroupMemberPO member : members){
-			if(member.getMemberStatus().equals(MemberStatus.CONNECT) && !member.getUserId().equals(userId)){
+		for(GroupMemberPO member : members){
+			if(member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)
+					&& member.getGroupMemberType().equals(GroupMemberType.MEMBER_USER)
+					&& !userId.equals(Long.parseLong(member.getOriginId()))){
 				if(!OriginType.OUTER.equals(member.getOriginType())){
-					userIds.add(member.getUserId());
+					userIds.add(Long.parseLong(member.getOriginId()));
 				}
 			}
 		}
 		websocketMessageService.broadcastMeetingMessage(groupId, userIds, message, userId, name);
 		
 		//级联
-		CommandGroupMemberPO sender = commandCommonUtil.queryMemberByUserId(members, userId);
+		/*CommandGroupMemberPO sender = commandCommonUtil.queryMemberByUserId(members, userId);
 		if(!OriginType.OUTER.equals(sender.getOriginType())){			
 			GroupBO groupBO = commandCascadeUtil.sendInstantMessage(group, sender, message);
 			commandCascadeService.sendInstantMessage(groupBO);
-		}
+		}*/
 		
 	}
 }
