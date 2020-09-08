@@ -24,7 +24,7 @@ public class OutputSettingQuery {
 	OutputSettingDAO outputSettingDAO;
 	
 	public List<OutputSettingVO> query(Long guideId) throws Exception{
-		List<OutputSettingPO> list = outputSettingDAO.findByGuidePO(guideId);
+		List<OutputSettingPO> list = outputSettingDAO.findByGuideId(guideId);
 		return OutputSettingVO.getConverter(OutputSettingVO.class).convert(list, OutputSettingVO.class);
 	}
 

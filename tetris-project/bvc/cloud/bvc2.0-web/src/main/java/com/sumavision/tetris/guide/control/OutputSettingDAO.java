@@ -16,10 +16,10 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年9月4日 上午9:03:17
  */
-@RepositoryDefinition(domainClass = VideoParametersPO.class, idClass = Long.class)
+@RepositoryDefinition(domainClass = OutputSettingPO.class, idClass = Long.class)
 public interface OutputSettingDAO extends BaseDAO<OutputSettingPO>{
 	
-	public List<OutputSettingPO> findByGuidePO(Long guidePO);
+	public List<OutputSettingPO> findByGuideId(Long guideId);
 	
-	public void deleteByGuidePO(Long guidePO);
+	
 }

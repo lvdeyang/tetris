@@ -133,7 +133,8 @@ define([
 					}else{
 						return "background:#CCC"
 					}
-				},switchSource(){
+				},
+				switchSource:function(){
 					var self = this;
 					var questData = {
 						index: self.curPgm

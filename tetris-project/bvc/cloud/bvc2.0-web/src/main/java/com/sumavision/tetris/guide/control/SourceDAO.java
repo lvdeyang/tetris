@@ -21,6 +21,4 @@ public interface SourceDAO extends BaseDAO<SourcePO>{
 
 	public List<SourcePO> findByGuideId(Long guideId);
 	
-	public void deleteByGuideId(Long guideId);
-	
 }

@@ -66,9 +66,9 @@ public class GuideService {
 	}
 	
 	public void delete(Long id){
-		videoParametersDAO.deleteByGuidePO(id);
-		outputSettingDAO.deleteByGuidePO(id);
-		sourceDAO.deleteByGuideId(id);
+		videoParametersDAO.delete(videoParametersDAO.findByGuideId(id));
+		outputSettingDAO.deleteInBatch(outputSettingDAO.findByGuideId(id));
+		sourceDAO.deleteInBatch(sourceDAO.findByGuideId(id));
 		guideDAO.delete(id);
 	}
 	
