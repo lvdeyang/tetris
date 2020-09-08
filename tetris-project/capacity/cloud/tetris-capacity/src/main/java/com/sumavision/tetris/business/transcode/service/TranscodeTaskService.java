@@ -10,18 +10,17 @@ import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.bo.CheckInputBO;
 import com.sumavision.tetris.business.transcode.vo.*;
-import com.sumavision.tetris.business.yjgb.vo.InputParamVO;
 import com.sumavision.tetris.capacity.bo.input.*;
-import com.sumavision.tetris.capacity.bo.output.OutputBO;
+import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.*;
-import com.sumavision.tetris.capacity.bo.task.EncodeBO;
-import com.sumavision.tetris.capacity.bo.task.TaskBO;
-import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.bo.task.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
+import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
+import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -69,7 +68,10 @@ public class TranscodeTaskService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
-	
+
+	@Autowired
+	private TemplateService templateService;
+
 	/**
 	 * 刷源<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -184,6 +186,282 @@ public class TranscodeTaskService {
 		}
 		
 	}
+
+
+	public void previewInput(CreateInputPreviewVO createInputPreviewVO) throws Exception {
+
+		InputBO inputBO = createInputPreviewVO.getInput_array().get(0);
+
+		if (createInputPreviewVO.getProgram_number() == null){
+			throw new BaseException(StatusCode.ERROR,"param[program number] not exist");
+		}
+
+		String pubName = inputBO.getId();
+		String playName = inputBO.getId();
+		String taskId = inputBO.getId();
+
+		String uniq = generateUniq(inputBO);
+		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
+		if (inputPO!=null && inputPO.getCount()>0){ //输入存在的话就将现有输入进行替换下，以免input_id不一致
+			inputBO = JSONObject.parseObject(inputPO.getInput(),InputBO.class);
+			createInputPreviewVO.getInput_array().remove(0);
+			createInputPreviewVO.getInput_array().add(inputBO);
+		}
+		ProgramBO taskProgramBO = inputBO.getProgram_array().stream()
+				.filter(p->createInputPreviewVO.getProgram_number().equals(p.getProgram_number()))
+				.findFirst()
+				.get();
+		if (taskProgramBO == null) {
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+createInputPreviewVO.getProgram_number());
+		}
+
+		taskProgramBO.getAudio_array().get(0).setAudio_column("on");
+
+		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, createInputPreviewVO.getProgram_number());
+
+//		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
+		String outputUrl = new StringBuilder().append("rtmp://")
+				.append(createInputPreviewVO.getDevice_ip())
+				.append(":1935")
+				.append("/")
+				.append("live")
+				.append("/")
+				.append(playName)
+				.toString();
+		List<OutputBO> outputBOs = trans2RTMPOutputBO(taskId, taskBOs, outputUrl);
+
+		save(taskId, createInputPreviewVO.getDevice_ip(), createInputPreviewVO.getInput_array()  , taskBOs, outputBOs, BusinessType.TRANSCODE);
+
+
+	}
+
+	public List<TaskBO> trans2TaskBO(
+			String taskId,
+			InputBO input,
+			Integer programNo) throws Exception {
+
+		String videoTaskId = new StringBufferWrapper().append("task-preview-video-")
+				.append(taskId)
+				.toString();
+		String audioTaskId = new StringBufferWrapper().append("task-preview-audio-")
+				.append(taskId)
+				.toString();
+		String encodeVideoId = new StringBufferWrapper().append("encode-video-")
+				.append(taskId)
+				.toString();
+		String encodeAudioId = new StringBufferWrapper().append("encode-audio-")
+				.append(taskId)
+				.toString();
+
+		List<TaskBO> tasks = new ArrayList<TaskBO>();
+
+		/*******
+		 * 视频 *
+		 *******/
+
+		ProgramBO taskProgramBO = input.getProgram_array().stream().filter(p->programNo.equals(p.getProgram_number()))
+				 .findFirst()
+				 .get();
+		if (taskProgramBO == null){
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+programNo);
+		}
+		//视频转码,,,
+		TaskSourceBO videoSource = new TaskSourceBO().setInput_id(input.getId())
+				.setProgram_number(programNo)
+				.setElement_pid(taskProgramBO.getVideo_array().get(0).getPid());
+
+		TaskBO videoTask = new TaskBO().setId(videoTaskId)
+				.setType("video")
+				.setRaw_source(videoSource)
+				.setEncode_array(new ArrayList<EncodeBO>());
+
+		EncodeBO videoEncode = new EncodeBO().setEncode_id(encodeVideoId)
+				.setProcess_array(new ArrayList<PreProcessingBO>());
+
+		//scale
+		ScaleBO scale = new ScaleBO().setPlat("cpu")
+				.setWidth(480)
+				.setHeight(272);
+
+		//音柱
+		AudioColumnBO audioColumnBO = new AudioColumnBO().setPlayflag("on").setPlat("cpu");
+
+		PreProcessingBO scaleProcessing = new PreProcessingBO().setScale(scale);
+		PreProcessingBO audioColumnProcessing = new PreProcessingBO().setAudiocolumn(audioColumnBO);
+		videoEncode.getProcess_array().add(scaleProcessing);
+		videoEncode.getProcess_array().add(audioColumnProcessing);
+
+		String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+		JSONObject obj = JSONObject.parseObject(params);
+		obj.put("bitrate",1500);
+		obj.put("max_bitrate",2000);
+		obj.put("rc_mode","cbr");
+		obj.put("ratio","4:3");
+		obj.put("resolution","480x272");
+
+		videoEncode.setH264(obj);
+
+		videoTask.getEncode_array().add(videoEncode);
+
+		tasks.add(videoTask);
+
+		/*******
+		 * 音频 *
+		 *******/
+		//音频转码
+		TaskSourceBO audioSource = new TaskSourceBO().setInput_id(input.getId())
+				.setProgram_number(programNo)
+				.setElement_pid(taskProgramBO.getAudio_array().get(0).getPid());
+
+		TaskBO audioTask = new TaskBO().setId(audioTaskId)
+				.setType("audio")
+				.setRaw_source(audioSource)
+				.setEncode_array(new ArrayList<EncodeBO>());
+
+		EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId);
+
+		String aacMap = templateService.getAudioEncodeMap("aac");
+		JSONObject aacObj = JSONObject.parseObject(aacMap);
+
+
+		audioEncode.setAac(aacObj);
+
+		audioEncode.setProcess_array(new ArrayList<PreProcessingBO>());
+
+		ResampleBO resample = new ResampleBO().setSample_rate(Float.valueOf(aacObj.getFloat("sample_rate")*1000).intValue())
+				.setChannel_layout(aacObj.getString("channel_layout"))
+				.setFormat(aacObj.getString("sample_fmt"));
+
+		PreProcessingBO audio_decode_processing = new PreProcessingBO().setResample(resample);
+		audioEncode.getProcess_array().add(audio_decode_processing);
+
+		audioTask.getEncode_array().add(audioEncode);
+
+		tasks.add(audioTask);
+
+		return tasks;
+	}
+
+
+	/**
+	 *
+	 * @param taskId
+	 * @param tasks
+	 * @param pubName 发布文件名
+	 * @param playName m3u8名
+	 * @return
+	 * @throws Exception
+	 */
+	public List<OutputBO> trans2HLSOutputBO(
+			String taskId,
+			List<TaskBO> tasks,
+			String pubName,
+			String playName
+	) throws Exception {
+
+		String outputId =  new StringBufferWrapper().append("task-preview-output-")
+				.append(taskId)
+				.toString();
+
+		List<OutputBO> outputs = new ArrayList<OutputBO>();
+
+		OutputBO output = new OutputBO();
+
+		output.setId(outputId);
+
+		//输出udp
+		OutputStorageBO outputStorageBO = new OutputStorageBO().setUrl("file").setDir_name(pubName).setCan_del("true");
+		List<OutputMediaGroupBO> outputMediaGroupBOS = new ArrayList<>();
+		OutputMediaGroupBO media = new OutputMediaGroupBO();
+		media.setAudio_array(new ArrayList<>());
+		for(TaskBO taskBO: tasks){
+			//视频
+			if(taskBO.getId().contains("video")){
+				media.setVideo_task_id(taskBO.getId())
+						.setVideo_encode_id(taskBO.getEncode_array().get(0).getEncode_id())
+						.setVideo_bitrate(0)
+						.setBandwidth(0);
+
+			}
+			//音频
+			if(taskBO.getId().contains("audio")){
+				OutputAudioBO outputAudioBO = new OutputAudioBO();
+				outputAudioBO.setTask_id(taskBO.getId());
+				outputAudioBO.setEncode_id(taskBO.getEncode_array().get(0).getEncode_id());
+				outputAudioBO.setBitrate(0);
+				media.getAudio_array().add(outputAudioBO);
+			}
+		}
+		outputMediaGroupBOS.add(media);
+		OutputHlsBO hlsBO = new OutputHlsBO()
+				.setMedia_group_array(outputMediaGroupBOS)
+				.setTotal_seg_count(10)
+				.setI_frames_only(false)
+				.setPlaylist_name(playName)
+				.setPlaylist_seg_count(3)
+				.setMax_seg_duration(5)
+				.setStorage(outputStorageBO);
+
+		output.setHls(hlsBO);
+
+		outputs.add(output);
+
+		return outputs;
+	}
+
+
+	/**
+	 * 生成RTMP输出
+	 * @param taskId
+	 * @param tasks
+	 * @param pubName
+	 * @param playName
+	 * @return
+	 * @throws Exception
+	 */
+	public List<OutputBO> trans2RTMPOutputBO(
+			String taskId,
+			List<TaskBO> tasks,
+			String outputUrl
+	) throws Exception {
+
+		String outputId =  new StringBufferWrapper().append("task-preview-output-")
+				.append(taskId)
+				.toString();
+
+		List<OutputBO> outputs = new ArrayList<OutputBO>();
+
+		OutputBO output = new OutputBO();
+
+		output.setId(outputId);
+
+		//输出rtmp
+
+		List<BaseMediaBO> outputMedias = new ArrayList<>();
+
+		tasks.stream().forEach(t->{
+			BaseMediaBO media = new BaseMediaBO();
+			media.setTask_id(t.getId());
+			media.setEncode_id(t.getEncode_array().get(0).getEncode_id());
+			outputMedias.add(media);
+		});
+		OutputRtmpBO rtmpBO = new OutputRtmpBO()
+				.setMedia_array(outputMedias)
+				.setVid_exist(true)
+				.setAud_exist(true)
+				.setPub_user("")
+				.setPub_password("")
+				.setServer_url(outputUrl);
+
+		output.setRtmp(rtmpBO);
+
+		outputs.add(output);
+
+		return outputs;
+	}
+
+
+
 
 
 	public String addInputs(CreateInputsVO createInputsVO) throws Exception {
@@ -320,7 +598,7 @@ public class TranscodeTaskService {
 
 		try {
 			List<InputBO> needSendInputArray = new ArrayList<>();
-			List<Long> inputsInDB = new ArrayList<>();
+			Set<Long> inputsInDB = new HashSet<>();
 			for (int i = 0; i < inputBOs.size(); i++) {
 				InputBO inputBO = inputBOs.get(i);
 				String uniq = generateUniq(inputBO);

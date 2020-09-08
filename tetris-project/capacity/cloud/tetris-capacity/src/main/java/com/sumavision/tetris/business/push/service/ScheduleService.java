@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.alibaba.druid.wall.violation.ErrorCode;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
@@ -307,10 +308,11 @@ public class ScheduleService {
 			
 			ProgramBO program = new ProgramBO().setProgram_number(1)
 											   .setVideo_array(new ArrayList<ProgramVideoBO>())
-											   .setAudio_array(new ArrayList<ProgramAudioBO>());
+											   .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 //断流静帧，静音
-			ProgramVideoBO video = new ProgramVideoBO().setPid(513).setBackup_mode("still_picture");
-			ProgramAudioBO audio = new ProgramAudioBO().setPid(514).setBackup_mode("silence");
+			ProgramVideoBO video = new ProgramVideoBO().setPid(513).setBackup_mode("still_picture").setCutoff_time(400);
+			ProgramAudioBO audio = new ProgramAudioBO().setPid(514).setBackup_mode("silence").setCutoff_time(400);
 
 			program.getVideo_array().add(video);
 			program.getAudio_array().add(audio);
@@ -322,7 +324,8 @@ public class ScheduleService {
 			outPro.getElement_array().add(aelementBO);
 			
 			ProgramBO program = new ProgramBO().setProgram_number(1)
-								   			   .setAudio_array(new ArrayList<ProgramAudioBO>());
+								   			   .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 			
 			ProgramAudioBO audio = new ProgramAudioBO().setPid(514);
 			
@@ -430,7 +433,8 @@ public class ScheduleService {
 		if(mediaType.equals("video")){
 			ProgramBO program = new ProgramBO().setProgram_number(1)
 										       .setVideo_array(new ArrayList<ProgramVideoBO>())
-										       .setAudio_array(new ArrayList<ProgramAudioBO>());
+										       .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 
 			ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 						   							   .setDecode_mode("cpu");
@@ -445,7 +449,8 @@ public class ScheduleService {
 		
 		if(mediaType.equals("audio")){
 			ProgramBO program = new ProgramBO().setProgram_number(1)
-										       .setAudio_array(new ArrayList<ProgramAudioBO>());
+										       .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 
 			ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 													   .setDecode_mode("cpu");
@@ -506,7 +511,8 @@ public class ScheduleService {
 		if(mediaType.equals("video")){
 			ProgramBO program = new ProgramBO().setProgram_number(1)
 										       .setVideo_array(new ArrayList<ProgramVideoBO>())
-										       .setAudio_array(new ArrayList<ProgramAudioBO>());
+										       .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 
 			ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 						   							   .setDecode_mode("cpu");
@@ -521,7 +527,8 @@ public class ScheduleService {
 		
 		if(mediaType.equals("audio")){
 			ProgramBO program = new ProgramBO().setProgram_number(1)
-										       .setAudio_array(new ArrayList<ProgramAudioBO>());
+										       .setAudio_array(new ArrayList<ProgramAudioBO>())
+												.setMedia_type_once_map(new JSONObject());
 
 			ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 													   .setDecode_mode("cpu");
@@ -701,7 +708,7 @@ public class ScheduleService {
 																.setPort(outputPort)
 																.setRate_ctrl("CBR")//中广电信用的
 																.setBitrate(3500000)//中广电信用的
-																.setPcr_int(30)//中广电信用的
+																.setPcr_int(20)//中广电信用的
 																.setLocal_ip(outputVO.getLocalIp())
 																.setProgram_array(new ArrayList<OutputProgramBO>());
 
@@ -922,17 +929,26 @@ public class ScheduleService {
 	public void clearPushTask(String taskUuid) throws Exception {
 
 		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
-		TaskInputPO input = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
+		List<TaskInputPO> inputs = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
+		TaskInputPO scheduleInput = new TaskInputPO();
 
-		if (input == null){
+		if (inputs == null || inputs.isEmpty()){
 			//输入不存在
-			return;
+			throw new BaseException(StatusCode.ERROR,"not find input for task");
+		}else{
+			for (int i = 0; i < inputs.size(); i++) {
+				TaskInputPO inputPO = inputs.get(i);
+				if (inputPO.getUniq().contains("schedule")) {
+					scheduleInput = inputPO;
+					break;
+				}
+			}
 		}
 		if (output == null){
 			//输出不存在
-			return;
+			throw new BaseException(StatusCode.ERROR,"not find output for task");
 		}
-		InputBO inputBO =  JSONObject.parseObject(input.getInput(),InputBO.class);
+		InputBO inputBO =  JSONObject.parseObject(scheduleInput.getInput(),InputBO.class);
 		String inputId = inputBO.getId();
 
 		DeleteScheduleRequest deleteScheduleRequest = new DeleteScheduleRequest();
@@ -948,12 +964,12 @@ public class ScheduleService {
 				output.setNextId(null);
 			}
 
-			List<TaskInputPO> inputs = taskInputDao.findByIdIn(inputIds);
+			List<TaskInputPO> taskInputPOS = taskInputDao.findByIdIn(inputIds);
 
 			AllRequest allRequest = new AllRequest();
 			allRequest.setInput_array(new ArrayList<InputBO>());
 
-			for(TaskInputPO taskInput: inputs){
+			for(TaskInputPO taskInput: taskInputPOS){
 				if(taskInput == null){
 					continue;
 				}
@@ -963,7 +979,7 @@ public class ScheduleService {
 				}
 				InputBO curInput = JSONObject.parseObject(taskInput.getInput(),InputBO.class);
 				inputIdRequests.add(new InputIdRequest(curInput.getId()));
-				taskInputDao.save(input);
+				taskInputDao.save(taskInputPOS);
 			}
 			deleteScheduleRequest.setDelete_inputs(inputIdRequests);
 			capacityService.clearSchedule(output.getCapacityIp(),capacityProps.getPort(),inputId,deleteScheduleRequest);

@@ -38,6 +38,8 @@ public class ProgramAudioBO {
 
 	private Integer cutoff_time;
 
+	private String audio_column;
+
 	public Integer getPid() {
 		return pid;
 	}
@@ -147,6 +149,15 @@ public class ProgramAudioBO {
 
 	public ProgramAudioBO setCutoff_time(Integer cutoff_time) {
 		this.cutoff_time = cutoff_time;
+		return this;
+	}
+
+	public String getAudio_column() {
+		return audio_column;
+	}
+
+	public ProgramAudioBO setAudio_column(String audio_column) {
+		this.audio_column = audio_column;
 		return this;
 	}
 }

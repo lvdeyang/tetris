@@ -250,4 +250,13 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.addInputs(inputInfo), String.class);
 	}
 
+	public String previewInput(String inputInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.previewInput(inputInfo), String.class);
+	}
+
+	public String getEncodeTemplate(String encodeType) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.getEncodeTemplate(encodeType), String.class);
+	}
+
+
 }

@@ -52,13 +52,13 @@ public class LockService {
 	private CapacityProps capacityProps;
 
 	public void test(int ii){
-		TaskInputPO input1 = taskInputDao.findByTaskUuidAndType("123", BusinessType.TEST);
+		List<TaskInputPO> input1 = taskInputDao.findByTaskUuidAndType("123", BusinessType.TEST);
 		try {
 			Thread.sleep(20);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		input1.setCount(ii);
+		input1.get(0).setCount(ii);
 		try{
 			//System.out.println("-------"+ii+"======"+taskInputDao.save(input1).getCount());
 			Thread.sleep(2000);

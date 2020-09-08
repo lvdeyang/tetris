@@ -377,4 +377,10 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/capacity/transcode/feign/add/input")
 	public JSONObject addInputs(@RequestParam("inputInfo") String inputInfo) throws Exception;
 
+	@RequestMapping(value = "/capacity/transcode/feign/preview/input")
+	public JSONObject previewInput(@RequestParam("inputInfo") String inputInfo) throws Exception;
+
+
+	@RequestMapping(value = "/director/task/feign/get/encode/template")
+	public JSONObject getEncodeTemplate(@RequestParam("encodeType") String encodeType) throws Exception;
 }
