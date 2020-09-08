@@ -118,4 +118,34 @@ public class GuideController {
 		broadcastingTaskService.delete(id);
 		return null;
 	}
+	
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月7日 下午5:05:46
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/start")
+	public Object start(
+			Long id, 
+			HttpServletRequest request) throws Exception{
+		return broadcastingTaskService.start(id);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop")
+	public Object stop(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		return broadcastingTaskService.stop(id);
+	}
 }

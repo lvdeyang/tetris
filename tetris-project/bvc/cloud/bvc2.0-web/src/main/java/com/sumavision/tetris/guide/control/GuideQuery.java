@@ -6,6 +6,8 @@ package com.sumavision.tetris.guide.control;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 
 
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年9月3日 下午4:32:29
  */
+@Component
 public class GuideQuery {
 	
 	@Autowired

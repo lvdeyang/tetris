@@ -4,6 +4,8 @@
 package com.sumavision.tetris.guide.control;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 类型概述<br/>
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年9月3日 下午7:21:20
  */
+@Service
+@Transactional(rollbackFor = Exception.class)
 public class SourceService {
 
 	@Autowired
@@ -32,4 +36,11 @@ public class SourceService {
 	public void delete(Long id){
 		sourceDAO.delete(id);
 	}
+	
+	public Object cut(
+			Long id, 
+			Long sourceNumber){
+		return null;
+	}
 }
+

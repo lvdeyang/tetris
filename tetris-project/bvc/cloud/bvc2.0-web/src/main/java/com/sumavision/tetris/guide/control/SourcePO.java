@@ -27,7 +27,7 @@ public class SourcePO extends AbstractBasePO{
 	private static final long serialVersionUID = 1L;
 
 	/** 源编号 */
-	private Long index;
+	private Long sourceNumber;
 	
 	/** 源类型 */
 	private SourceType sourceType;
@@ -40,14 +40,17 @@ public class SourcePO extends AbstractBasePO{
 	
 	/** 导播任务id */
 	private Long guideId;
-
+	
+	/** 源是否被切换到 */
+	private Boolean current;
+	
 	@Column(name = "SOURCE_NUMBER")
-	public Long getIndex() {
-		return index;
+	public Long getSourceNumber() {
+		return sourceNumber;
 	}
 
-	public void setIndex(Long index) {
-		this.index = index;
+	public void setSourceNumber(Long sourceNumber) {
+		this.sourceNumber = sourceNumber;
 	}
 	
 	@Enumerated(value = EnumType.STRING)
@@ -88,5 +91,13 @@ public class SourcePO extends AbstractBasePO{
 		this.guideId = guideId;
 	}
 
-	
+	@Column(name = "CURRENT")
+	public Boolean getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(Boolean current) {
+		this.current = current;
+	}
+
 }

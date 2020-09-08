@@ -10,16 +10,16 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <p>详细描述</p>
  * <b>作者:</b>Administrator<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年9月4日 下午4:38:03
+ * <b>日期：</b>2020年9月7日 下午4:31:40
  */
-public enum SourceType {
+public enum Status {
 	
-	URL("url"),
-	KNAPSACK_5G("5G背包");
+	START("开始"),
+	STOP("停止");
 	
 	private String name;
 	
-	private SourceType(String name){
+	private Status(String name) {
 		this.name = name;
 	}
 
@@ -27,8 +27,8 @@ public enum SourceType {
 		return name;
 	}
 	
-	public static SourceType fromName(String name) throws Exception{
-		SourceType[] values = SourceType.values();
+	public static Status fromName(String name) throws Exception{
+		Status[] values = Status.values();
 		for(int i = 0; i < values.length; i++){
 			if(values[i].getName().equals(name)){
 				return values[i];
@@ -36,4 +36,5 @@ public enum SourceType {
 		}
 		throw new ErrorTypeException("name", name);
 	}
+	
 }
