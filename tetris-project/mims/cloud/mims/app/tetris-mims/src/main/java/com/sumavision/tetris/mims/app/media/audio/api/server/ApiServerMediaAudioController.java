@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
-import com.sumavision.tetris.mims.app.boss.BossService;
 import com.sumavision.tetris.mims.app.boss.MediaType;
+import com.sumavision.tetris.mims.app.boss.QdBossService;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -63,7 +63,7 @@ public class ApiServerMediaAudioController {
 	private MediaAudioDAO mediaAudioDao;
 	
 	@Autowired
-	private BossService bossService;
+	private QdBossService bossService;
 	
 	/**
 	 * 添加上传音频媒资任务<br/>

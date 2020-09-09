@@ -22,7 +22,7 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年8月19日 上午11:46:02
  */
-public class BossService {
+public class QdBossService {
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
 	@Autowired
