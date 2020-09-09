@@ -47,8 +47,8 @@
                                 <el-table-column type="selection" width="55"></el-table-column>
                                 <el-table-column label="频道名称" width="440" prop="name"></el-table-column>
                                 <el-table-column label="播发方式" width="110" prop="broadWay"></el-table-column>
-                                <el-table-column label="优先级" width="110" prop="level"></el-table-column>
-                                <el-table-column label="播发状态" width="110" prop="broadcastStatus"></el-table-column>
+                                <el-table-column label="优先�?" width="110" prop="level"></el-table-column>
+                                <el-table-column label="播发状�??" width="110" prop="broadcastStatus"></el-table-column>
                                 <el-table-column label="备注" width="220" prop="remark"></el-table-column>
                                 <el-table-column label="操作">
                                     <template slot-scope="scope">
@@ -64,13 +64,13 @@
                                                        @click="editMenu(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <!--<el-tooltip class="item" effect="dark" content="节目单编辑" placement="bottom">-->
+                                        <!--<el-tooltip class="item" effect="dark" content="节目单编�?" placement="bottom">-->
                                         <!--<el-button type="text" icon="feather-icon-clipboard"-->
                                         <!--class="channelManage"-->
                                         <!--@click="editProgram(scope)">-->
                                         <!--</el-button>-->
                                         <!--</el-tooltip>-->
-                                        <el-tooltip class="item" effect="dark" content="节目单排期" placement="bottom">
+                                        <el-tooltip class="item" effect="dark" content="节目单排�?" placement="bottom">
                                             <el-button type="text" icon="feather-icon-clipboard"
                                                        class="channelManage"
                                                        @click="editSchedule(scope)">
@@ -83,8 +83,8 @@
                                                        @click="manageBroadcastArea(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom"
-                                                    v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
+                                        <el-tooltip class="item" effect="dark" content="�?始播�?" placement="bottom"
+                                                    v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='未播�?'||scope.row.broadcastStatus=='发�?�完�?' || scope.row.broadcastStatus=='发�?�停�?'">
                                             <el-button v-if="scope.row.channelUuid" type="text" icon="feather-icon-play-circle"
                                                        disabled
                                                        class="channelManage"
@@ -96,7 +96,7 @@
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="停止播发" placement="bottom"
-                                                    v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='发送中'">
+                                                    v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='发�?�中'">
                                             <el-button type="text" icon="feather-icon-stop-circle"
                                                        class="channelManage"
                                                        @click="stopBroadcast(scope)">
@@ -119,6 +119,11 @@
                                             <el-button v-else type="text" icon="el-icon-printer"
                                                        class="channelManage"
                                                        @click="updateMenuToTerminal(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="刷新排期" placement="bottom">
+                                            <el-button type="text" icon="el-icon-refresh"
+                                                       class="channelManage"
+                                                       @click="rowRefresh(scope)"></el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除频道" placement="bottom">
                                             <el-button type="text" icon="el-icon-delete"
@@ -146,7 +151,7 @@
             </el-card>
         </div>
 
-        <!-- 选择QT播发用户对话框 -->
+        <!-- 选择QT播发用户对话�? -->
         <cs-user-dialog ref="selectUserDialog" @on-user-dialog-close="selectedUsers"></cs-user-dialog>
 
         <!-- 预览灯箱 -->
@@ -161,7 +166,7 @@
         <!--地区选择-->
         <cs-area-picker-dialog ref="areaPicker" @on-area-picker-close="handleAreaPickerClose"></cs-area-picker-dialog>
 
-        <!-- 选择图片对话框 -->
+        <!-- 选择图片对话�? -->
         <mi-compress-dialog ref="selectCompress" @selected-compress="selectedCompress"></mi-compress-dialog>
 
 
@@ -173,12 +178,12 @@
             <div style="height:350px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="120px" style="padding-right: 20px">
-                        <el-form-item label="版本号">
+                        <el-form-item label="版本�?">
                             <el-input v-model="dialog.pcversion.version"></el-input>
                         </el-form-item>
                         
-                        <el-form-item label="升级包">
-                            <el-button @click="handleCompressSelect(dialog.pcversion.tarCheck)" type="primary" size="small">选择升级包</el-button>
+                        <el-form-item label="升级�?">
+                            <el-button @click="handleCompressSelect(dialog.pcversion.tarCheck)" type="primary" size="small">选择升级�?</el-button>
                         </el-form-item>
                         <el-form-item v-if="dialog.pcversion.tarCheck.name" label="升级包名">
                             <span>{{ dialog.pcversion.tarCheck.name }}</span>
@@ -188,9 +193,9 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handlePcversionClose">取 消</el-button>
+                <el-button size="medium" @click="handlePcversionClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handlePcversionCommit"
-                           :loading="dialog.upgrade.loading">确 定
+                           :loading="dialog.upgrade.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -203,13 +208,13 @@
             <div style="height:350px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="120px" style="padding-right: 20px">
-                        <el-form-item label="版本号">
+                        <el-form-item label="版本�?">
                             <el-input v-model="dialog.upgrade.version"></el-input>
                         </el-form-item>
                         <el-form-item label="播发方式">
                             <el-select
                                     v-model="dialog.upgrade.way"
-                                    placeholder="请选择播发方式"
+                                    placeholder="请�?�择播发方式"
                                     style="width: 180px">
                                 <el-option
                                         v-for="item in dialog.upgrade.wayOptions"
@@ -217,7 +222,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="升级包">
+                        <el-form-item label="升级�?">
                             <el-button @click="handleCompressSelect(dialog.upgrade.tarCheck)" type="primary" size="small">选择播发媒资</el-button>
                         </el-form-item>
                         <el-form-item v-if="dialog.upgrade.tarCheck.name" label="升级包名">
@@ -231,9 +236,9 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleUpgradeClose">取 消</el-button>
+                <el-button size="medium" @click="handleUpgradeClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleUpgradeCommit"
-                           :loading="dialog.upgrade.loading">确 定
+                           :loading="dialog.upgrade.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -268,10 +273,10 @@
                                 <el-radio v-model="dialog.addProgram.broadWay" label="下载文件">{{ broadWayFile }}</el-radio>
                             </template>
                         </el-form-item>
-                        <el-form-item label="优先级" v-if="dialog.addProgram.broadWay == broadWayTerminal">
+                        <el-form-item label="优先�?" v-if="dialog.addProgram.broadWay == broadWayTerminal">
                             <el-select
                                     v-model="dialog.addProgram.level"
-                                    placeholder="请选择播发优先级"
+                                    placeholder="请�?�择播发优先�?"
                                     @change="handleAddProgramLevelOptionsChange">
                                 <el-option
                                         v-for="item in options.level"
@@ -303,9 +308,9 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.addProgram.visible = false">取 消</el-button>
+                <el-button size="medium" @click="dialog.addProgram.visible = false">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleAddProgramCommit"
-                           :loading="dialog.addProgram.loading">确 定
+                           :loading="dialog.addProgram.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -328,10 +333,10 @@
                         <el-radio v-model="dialog.editChannel.broadWay" label="下载文件" disabled>{{ broadWayFile }}</el-radio>
                     </template>
                 </el-form-item>
-                <el-form-item label="优先级" v-if="dialog.editChannel.broadWay == broadWayTerminal">
+                <el-form-item label="优先�?" v-if="dialog.editChannel.broadWay == broadWayTerminal">
                     <el-select
                             v-model="dialog.editChannel.level"
-                            placeholder="请选择播发优先级"
+                            placeholder="请�?�择播发优先�?"
                             @change="handleEditChannelLevelOptionsChange">
                         <el-option
                                 v-for="item in options.level"
@@ -362,9 +367,9 @@
             </el-scrollbar>
             </div>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleEditChannelClose">取 消</el-button>
+                <el-button size="medium" @click="handleEditChannelClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleEditChannelCommit"
-                           :loading="dialog.editChannel.loading">确 定
+                           :loading="dialog.editChannel.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -385,7 +390,7 @@
                             <el-input v-model="dialog.defaultSchedule.videoPid"></el-input>
                         </el-form-item>
                         <el-form-item label="视频类型">
-                            <el-select v-model="dialog.defaultSchedule.videoType" placeholder="请选择">
+                            <el-select v-model="dialog.defaultSchedule.videoType" placeholder="请�?�择">
                                 <el-option
                                         v-for="item in channel.videoSelection"
                                         :key="item.value"
@@ -398,7 +403,7 @@
                             <el-input v-model="dialog.defaultSchedule.audioPid"></el-input>
                         </el-form-item>
                         <el-form-item label="音频类型">
-                            <el-select v-model="dialog.defaultSchedule.audioType" placeholder="请选择">
+                            <el-select v-model="dialog.defaultSchedule.audioType" placeholder="请�?�择">
                                 <el-option
                                         v-for="item in channel.audioSelection"
                                         :key="item.value"
@@ -411,9 +416,9 @@
                 </el-scrollbar>
             </div>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleDefaultScheduleClose">取 消</el-button>
+                <el-button size="medium" @click="handleDefaultScheduleClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleDefaultScheduleCommit"
-                           :loading="dialog.defaultSchedule.loading">确 定
+                           :loading="dialog.defaultSchedule.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -452,9 +457,9 @@
                 </el-scrollbar>
             </div>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleSetAutoBroadClose">取 消</el-button>
+                <el-button size="medium" @click="handleSetAutoBroadClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleSetAutoBroadCommit"
-                           :loading="dialog.setAutoBroad.loading">确 定
+                           :loading="dialog.setAutoBroad.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -511,8 +516,16 @@
                                 </el-input-number>
                             </el-form-item>
                             <template v-for="i in dialog.setOutput.outputCount">
-                                <el-form-item :label="'流输出地址 ' + i">
+                                <el-form-item :label="'流输出地�? ' + i">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp"></el-input>
+                                </el-form-item>
+                                <el-form-item :label="'本地IP ' + i">
+                                    <el-select v-model="dialog.setOutput.output[i-1].localIp" placeholder="请�?�择本地IP">
+		                                <el-option
+		                                        v-for="item in dialog.setOutput.localIpOptions"
+		                                        :value="item">
+		                                </el-option>
+                            		</el-select>
                                 </el-form-item>
                                 <el-form-item :label="'可用初始端口 ' + i">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort"></el-input>
@@ -526,9 +539,9 @@
                 </el-scrollbar>
             </div>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleSetOutputClose">取 消</el-button>
+                <el-button size="medium" @click="handleSetOutputClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleSetOutputCommit"
-                           :loading="dialog.setOutput.loading">确 定
+                           :loading="dialog.setOutput.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -556,9 +569,9 @@
                 </el-form>
 
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="handleEditNodeClose">取 消</el-button>
+                    <el-button size="medium" @click="handleEditNodeClose">�? �?</el-button>
                     <el-button size="medium" type="primary" @click="handleEditNodeCommit"
-                               :loading="dialog.editMenu.dialog.editNode.loading">确 定
+                               :loading="dialog.editMenu.dialog.editNode.loading">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -590,9 +603,9 @@
                         </span>
                 </el-tree>
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="handleChooseResourceClose">取 消</el-button>
+                    <el-button size="medium" @click="handleChooseResourceClose">�? �?</el-button>
                     <el-button size="medium" type="primary" @click="handleChooseResourceCommit"
-                               :loading="dialog.editMenu.dialog.chooseResource.loading">确 定
+                               :loading="dialog.editMenu.dialog.chooseResource.loading">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -600,7 +613,7 @@
             <el-container style="height:500px">
                 <el-container style="border-right: 1px solid #eee;width: 550px">
                     <el-header height="40px">
-                        <el-button size="medium" type="primary" @click="addRootTreeNode" :disabled="dialog.editMenu.data.autoBroad">添加根节点</el-button>
+                        <el-button size="medium" type="primary" @click="addRootTreeNode" :disabled="dialog.editMenu.data.autoBroad">添加根节�?</el-button>
                     </el-header>
 
                     <el-tree
@@ -706,7 +719,7 @@
             </el-container>
         	
         	<span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleEditMenuClose">关 闭</el-button>
+                <el-button size="medium" @click="handleEditMenuClose">�? �?</el-button>
             </span>
         </el-dialog>
 
@@ -718,7 +731,7 @@
                 :before-close="handleEditSchedulesClose">
 
 			<el-dialog
-                    title="周期结束时间："
+                    title="周期结束时间�?"
                     :visible.sync="dialog.editSchedules.dialog.cycle.visible"
                     width="550px"
                     append-to-body
@@ -740,10 +753,10 @@
                 </div>
 
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="handleSetCycleClose">取 消
+                    <el-button size="medium" @click="handleSetCycleClose">�? �?
                     </el-button>
                     <el-button size="medium" type="primary" @click="handleSetCycleCommit"
-                               :loading="dialog.editSchedules.dialog.cycle.loading">确 定
+                               :loading="dialog.editSchedules.dialog.cycle.loading">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -761,7 +774,7 @@
                             <el-form-item label="默认排期" v-if="dialog.editSchedules.data.broadWay==broadWayTerminal">
                                 <el-switch v-model="dialog.editSchedules.dialog.addSchedule.mono"></el-switch>
                             </el-form-item>
-                            <el-form-item label="开始时间">
+                            <el-form-item label="�?始时�?">
                                 <el-date-picker
                                         style="width:100%;"
                                         v-model="dialog.editSchedules.dialog.addSchedule.broadDate"
@@ -794,10 +807,10 @@
                 </div>
 
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="dialog.editSchedules.dialog.addSchedule.visible = false">取 消
+                    <el-button size="medium" @click="dialog.editSchedules.dialog.addSchedule.visible = false">�? �?
                     </el-button>
                     <el-button size="medium" type="primary" @click="handleAddScheduleCommit"
-                               :loading="dialog.editSchedules.dialog.addSchedule.loading">确 定
+                               :loading="dialog.editSchedules.dialog.addSchedule.loading">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -814,7 +827,7 @@
                             <el-form-item label="默认排期" v-if="dialog.editSchedules.data.broadWay==broadWayTerminal">
                                 <el-switch v-model="dialog.editSchedules.dialog.editSchedule.mono"></el-switch>
                             </el-form-item>
-                            <el-form-item label="开始时间">
+                            <el-form-item label="�?始时�?">
                                 <el-date-picker
                                         style="width:100%;"
                                         v-model="dialog.editSchedules.dialog.editSchedule.broadDate"
@@ -847,11 +860,11 @@
                 </div>
 
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="dialog.editSchedules.dialog.editSchedule.visible = false">取 消
+                    <el-button size="medium" @click="dialog.editSchedules.dialog.editSchedule.visible = false">�? �?
                     </el-button>
                     <el-button size="medium" type="primary" @click="handleEditScheduleCommit"
                                :loading="dialog.editSchedules.dialog.editSchedule.loading"
-                               :disabled="dialog.editSchedules.data.autoBroad">确 定
+                               :disabled="dialog.editSchedules.data.autoBroad">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -872,7 +885,7 @@
                         删除
                     </el-button>
 					<div v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" style="position: absolute; right: 60px; top: 50%">
-						<span style="font-size: 16px; font-weight: bold">周期结束时间：{{ dialog.editSchedules.data.endDate || '未设定' }}</span>
+						<span style="font-size: 16px; font-weight: bold">周期结束时间：{{ dialog.editSchedules.data.endDate || '未设�?' }}</span>
 						<el-tooltip class="item" effect="dark" content="修改" placement="bottom">
 							<el-button type="text" icon="feather-icon-edit"
 									   class="channelManage"
@@ -889,7 +902,7 @@
                             tooltip-effect="dark"
                             style="width: 100%;">
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column label="开始时间" width="220" prop="broadDate"></el-table-column>
+                        <el-table-column label="�?始时�?" width="220" prop="broadDate"></el-table-column>
 						<el-table-column v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间" width="220" prop="endDate"></el-table-column>
                         <el-table-column label="备注" width="220" prop="remark"></el-table-column>
                         <el-table-column label="操作">
@@ -967,9 +980,9 @@
                 </el-tree>
 
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="handleAddBroadClose">取 消</el-button>
+                    <el-button size="medium" @click="handleAddBroadClose">�? �?</el-button>
                     <el-button size="medium" type="primary" @click="handleAddBroadCommit"
-                               :loading="dialog.manageBroad.dialog.addBroad.loading">确 定
+                               :loading="dialog.manageBroad.dialog.addBroad.loading">�? �?
                     </el-button>
                 </span>
             </el-dialog>
@@ -996,10 +1009,10 @@
                     <el-table-column type="selection" width="42"></el-table-column>
                     <el-table-column label="媒资名称" width="220" prop="name"></el-table-column>
                     <el-table-column label="大小" width="110" prop="size"></el-table-column>
-                    <el-table-column label="状态" width="110" prop="status"></el-table-column>
+                    <el-table-column label="状�??" width="110" prop="status"></el-table-column>
                     <el-table-column label="操作">
                         <template slot-scope="scope">
-                            <el-tooltip class="item" effect="dark" content="开始" placement="bottom">
+                            <el-tooltip class="item" effect="dark" content="�?�?" placement="bottom">
                                 <el-button type="text" icon="feather-icon-play"
                                            style="margin:0; font-size:18px; padding:0; margin-right:24px; position:relative; top:1px;"
                                            @click="startBroad(scope)"></el-button>
@@ -1044,9 +1057,9 @@
             </el-tree>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleManageBroadcastAreaClose">取 消</el-button>
+                <el-button size="medium" @click="handleManageBroadcastAreaClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleManageBroadcastAreaCommit"
-                           :loading="dialog.manageBroad.loading">确 定
+                           :loading="dialog.manageBroad.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
@@ -1057,20 +1070,20 @@
                 width="500px"
                 :before-close="handleSeekBroadcastClose">
             <el-form ref="form" label-width="80px">
-                <el-form-item label="跳转量(秒)">
+                <el-form-item label="跳转�?(�?)">
                     <el-input v-model="dialog.seekBroadcast.duration" type="number"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleSeekBroadcastClose">取 消</el-button>
+                <el-button size="medium" @click="handleSeekBroadcastClose">�? �?</el-button>
                 <el-button size="medium" type="primary" @click="handleSeekBroadcastCommit"
-                           :loading="dialog.seekBroadcast.loading">确 定
+                           :loading="dialog.seekBroadcast.loading">�? �?
                 </el-button>
             </span>
         </el-dialog>
 
         <el-dialog
-                title="请选择资源播发方式"
+                title="请�?�择资源播发方式"
                 :visible.sync="dialog.chooseBroadMedia.visible"
                 :before-close="chooseBroadMediaClose"
                 width = 500px>

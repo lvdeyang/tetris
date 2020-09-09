@@ -887,7 +887,11 @@ public class TransformService {
 			if (codecParam.getAsample() != null) {
 				mp2Obj.put("sample_rate",String.valueOf(codecParam.getAsample().intValue()/1000));
 			}
-
+			if (codecParam.getChLayout() != null) {
+				mp2Obj.put("channel_layout",codecParam.getChLayout());
+			}else{
+				mp2Obj.put("channel_layout","mono");
+			}
 //			MpegBO mp2 = new MpegBO().setMpeg()
 //									 .setBitrate(codecParam.getAbitrate() == null? "192":String.valueOf(codecParam.getAbitrate().intValue()/1000))
 //									 .setSample_rate(codecParam.getAsample() == null? "44.1": String.valueOf(codecParam.getAsample().intValue()/1000));
@@ -908,7 +912,11 @@ public class TransformService {
             if (codecParam.getAsample() != null) {
                 mp3Obj.put("sample_rate",String.valueOf(codecParam.getAsample().intValue()/1000));
             }
-
+			if (codecParam.getChLayout() != null) {
+				mp3Obj.put("channel_layout", codecParam.getChLayout());
+			}else{
+				mp3Obj.put("channel_layout", "mono");
+			}
             audioEncode.setMp3(mp3Obj);
 
 //			MpegBO mp3 = new MpegBO().setMpeg()
@@ -927,7 +935,11 @@ public class TransformService {
             if (codecParam.getAsample() != null) {
                 aacObj.put("sample_rate",String.valueOf(codecParam.getAsample().intValue()/1000));
             }
-
+			if (codecParam.getChLayout() != null) {
+				aacObj.put("channel_layout",codecParam.getChLayout());
+			}else{
+				aacObj.put("channel_layout","mono");
+			}
             audioEncode.setAac(aacObj);
 
 //			AacBO aac = new AacBO().setAac()

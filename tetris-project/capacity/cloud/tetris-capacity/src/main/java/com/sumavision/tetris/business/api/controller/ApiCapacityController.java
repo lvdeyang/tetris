@@ -3,6 +3,8 @@ package com.sumavision.tetris.business.api.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,9 @@ import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 @Controller
 @RequestMapping(value = "/api/thirdpart/capacity")
 public class ApiCapacityController {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(ApiCapacityController.class);
+
 	@Autowired
 	private AlarmService alarmService;
 	
@@ -33,7 +37,7 @@ public class ApiCapacityController {
 	@ResponseBody
 	@RequestMapping(value = "/alarm/notify")
 	public Object alarmNotify(HttpServletRequest request) throws Exception{
-		
+		LOG.info("Transform<alarm> req: {}",request.getRequestURL().toString());
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		
 		String remoteIp = request.getParameter("bundle_ip");
@@ -41,7 +45,7 @@ public class ApiCapacityController {
 		AlarmVO alarm = JSONObject.parseObject(requestWrapper.getString("alarm"), AlarmVO.class);
 		
 		alarmService.alarmNotify(remoteIp, alarm);
-		
+		LOG.info("Alarm<alarm> resp: {},{}", remoteIp, JSONObject.toJSONString(alarm));
 		return new HashMapWrapper<String, Object>().put("msg_id", requestWrapper.getString("msg_id")).getMap();
 	}
 	

@@ -35,7 +35,10 @@ public class PreProcessingBO {
 	
 	/** 图像滤波 */
 	private ImageFilterBO imageFilter;
-	
+
+	/** 音频增益 */
+	private AudioGainBO aud_gain;
+
 	/** 重采样 */
 	private ResampleBO resample;
 	
@@ -44,6 +47,10 @@ public class PreProcessingBO {
 	
 	/** 缩放 */
 	private ScaleBO scale;
+
+
+	/** 音柱 */
+	private AudioColumnBO audiocolumn;
 
 	public ScaleBO getScale() {
 		return scale;
@@ -143,5 +150,22 @@ public class PreProcessingBO {
 		this.imageFilter = imageFilter;
 		return this;
 	}
-	
+
+	public AudioGainBO getAud_gain() {
+		return aud_gain;
+	}
+
+	public PreProcessingBO setAud_gain(AudioGainBO aud_gain) {
+		this.aud_gain = aud_gain;
+		return this;
+	}
+
+	public AudioColumnBO getAudiocolumn() {
+		return audiocolumn;
+	}
+
+	public PreProcessingBO setAudiocolumn(AudioColumnBO audiocolumn) {
+		this.audiocolumn = audiocolumn;
+		return this;
+	}
 }

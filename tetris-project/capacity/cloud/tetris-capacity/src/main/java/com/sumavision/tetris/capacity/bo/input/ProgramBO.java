@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.List;
 
 /**
@@ -9,6 +11,19 @@ import java.util.List;
  * <b>日期：</b>2019年10月28日 下午3:20:54
  */
 public class ProgramBO {
+
+	//新加节目映射参数
+	/** 不做节目映射，由集群指定节目参数 */
+	private JSONObject normal_map;
+
+	/** 各种类型媒体最多一个，靠媒体类型自动映射 */
+	private JSONObject media_type_once_map;
+
+	/** 输入切换时 */
+	private JSONObject program_number_map;
+
+	private JSONObject pid_map;
+
 
 	/** 节目号 [1,65535] */
 	private Integer program_number;
@@ -110,5 +125,41 @@ public class ProgramBO {
 
 	public void setInput_id(String input_id) {
 		this.input_id = input_id;
+	}
+
+	public JSONObject getNormal_map() {
+		return normal_map;
+	}
+
+	public ProgramBO setNormal_map(JSONObject normal_map) {
+		this.normal_map = normal_map;
+		return this;
+	}
+
+	public JSONObject getMedia_type_once_map() {
+		return media_type_once_map;
+	}
+
+	public ProgramBO setMedia_type_once_map(JSONObject media_type_once_map) {
+		this.media_type_once_map = media_type_once_map;
+		return this;
+	}
+
+	public JSONObject getProgram_number_map() {
+		return program_number_map;
+	}
+
+	public ProgramBO setProgram_number_map(JSONObject program_number_map) {
+		this.program_number_map = program_number_map;
+		return this;
+	}
+
+	public JSONObject getPid_map() {
+		return pid_map;
+	}
+
+	public ProgramBO setPid_map(JSONObject pid_map) {
+		this.pid_map = pid_map;
+		return this;
 	}
 }

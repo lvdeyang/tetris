@@ -18,7 +18,8 @@
 					"ref_frames",
 					"bframe_adaptive",
 					"bframe_reference",
-					"refine"
+					"refine",
+					"motion_detector"
 				]
 			}
 		},
@@ -198,6 +199,18 @@
 					"values": [
 						"none",
 						"strict"
+					]
+				}
+			},
+			"motion_detector": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"off",
+						"on"
 					]
 				}
 			}

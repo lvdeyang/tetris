@@ -146,7 +146,8 @@ define([
                         outputUserPort: '',
                         outputUserEndPort: '',
                         outputCount: 1,
-                        output: []
+                        output: [],
+                        localIpOptions:[]
                     },
                     pcversion: {
                         visible: false,
@@ -427,6 +428,14 @@ define([
                     //    });
                     //}
                 },
+                initNetcard:function(){
+                	var self = this;
+                	ajax.post('/cs/channel/netcard/get', null, function (data, status) {
+                         if (status == 200) {
+                        	 self.dialog.setOutput.localIpOptions=data;
+                         }
+                    });
+                },
                 handleResetZoneUrl: function () {
                     var self = this;
                     self.showTip('', '此操作将重置所有终端补包地址，是否继续?', function (callback) {
@@ -452,6 +461,7 @@ define([
                     self.dialog.addProgram.date = t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate() + " " + t.getHours() + ":" + t.getMinutes() + ":" + t.getSeconds();
                     var output = {
                         previewUrlIp: '',
+                        localIp:'',
                         previewUrlPort: '',
                         previewUrlEndPort: ''
                     };
@@ -863,6 +873,7 @@ define([
                         for (var i = 0; i < currentValue - self.dialog.setOutput.output.length; i++) {
                             var output = {
                                 previewUrlIp: '',
+                                localIp:'',
                                 previewUrlPort: '',
                                 previewUrlEndPort: ''
                             };
@@ -948,6 +959,20 @@ define([
                             callback();
                             if (status != 200) return;
                             self.getChannelList();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    });
+                },
+                rowRefresh: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.showTip('', '是否继续刷新排期单?', function (callback) {
+                        var questData = {
+                        	channelId: row.id
+                        };
+                        ajax.post('/cs/channel/broadcast/modify', questData, function (data, status) {
+                            callback();
+                            if (status != 200) return;
+                            
                         }, null, ajax.NO_ERROR_CATCH_CODE);
                     });
                 },
@@ -2063,6 +2088,7 @@ define([
             },
             created: function () {
                 var self = this;
+                self.initNetcard();
                 self.getServerTime();
                 self.getChannelList();
             },

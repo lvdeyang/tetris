@@ -104,7 +104,7 @@
 			<groupId>com.sumavision.tetris</groupId>
 		  	<artifactId>tetris-capacity-feign</artifactId>
 		  	<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency> 
 		
 		<!-- tetris-alarm-feign -->
 		<dependency>

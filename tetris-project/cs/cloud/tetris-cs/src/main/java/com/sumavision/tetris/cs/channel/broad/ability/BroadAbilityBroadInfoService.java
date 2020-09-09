@@ -38,10 +38,10 @@ public class BroadAbilityBroadInfoService {
 	
 	/**
 	 * 预播发用户VO转换<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月27日 下午1:45:37
-	 * @param List<UserVO> users 预播发用户列表
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?11�?27�? 下午1:45:37
+	 * @param List<UserVO> users 预播发用户列�?
 	 * @param String port 播发端口
 	 * @return
 	 */
@@ -63,10 +63,10 @@ public class BroadAbilityBroadInfoService {
 	}
 	
 	/**
-	 * 保存频道的下发信息设置<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午3:49:25
+	 * 保存频道的下发信息设�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午3:49:25
 	 * @param channelId 频道id
 	 * @param infoVOs 下发设置列表
 	 */
@@ -87,12 +87,12 @@ public class BroadAbilityBroadInfoService {
 				}
 			}
 			broadAbilityBroadInfoDAO.deleteInBatch(removePos);
-//			/** 从视频流媒资中删除 */
+//			/** 从视频流媒资中删�? */
 //			List<Long> mediaIds = removePos.stream().map(BroadAbilityBroadInfoPO::getMediaId).collect(Collectors.toList());
 //			if (mediaIds != null && !mediaIds.isEmpty()) while (mediaIds.remove(null));
 //			if (mediaIds != null && !mediaIds.isEmpty()) mediaVideoStreamService.remove(mediaIds);
 			
-			/** 获取需保存的ip和端口对 */
+			/** 获取�?保存的ip和端口对 */
 			List<BroadAbilityBroadInfoVO> aliveInfoVOs = BroadAbilityBroadInfoVO.getConverter(BroadAbilityBroadInfoVO.class)
 					.convert(aliveInfoPOs, BroadAbilityBroadInfoVO.class);
 			for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : infoVOs) {
@@ -116,6 +116,7 @@ public class BroadAbilityBroadInfoService {
 				if (previewIp.isEmpty() || previewPort.isEmpty()) continue;
 				infoPO.setPreviewUrlIp(previewIp);
 				infoPO.setPreviewUrlPort(previewPort);
+				infoPO.setLocalIp(broadAbilityBroadInfoVO.getLocalIp());
 //				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewIp, previewPort), channelPO.getName());
 //				infoPO.setMediaId(mediaVideoStream.getId());
 			} else {
@@ -130,10 +131,10 @@ public class BroadAbilityBroadInfoService {
 	}
 	
 	/**
-	 * 删除所有频道下发信息<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午3:47:22
+	 * 删除�?有频道下发信�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午3:47:22
 	 * @param channelId
 	 * @throws Exception
 	 */
@@ -150,9 +151,9 @@ public class BroadAbilityBroadInfoService {
 	
 	/**
 	 * 根据频道id获取下发信息<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午3:46:29
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午3:46:29
 	 * @param channelId 频道id
 	 */
 	public List<BroadAbilityBroadInfoVO> queryFromChannelId(Long channelId) throws Exception {
@@ -162,9 +163,9 @@ public class BroadAbilityBroadInfoService {
 	
 	/**
 	 * 根据用户id获取下发信息<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年1月6日 下午5:10:59
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?1�?6�? 下午5:10:59
 	 * @param List<Long> userIds 用户id数组
 	 * @return List<BroadAbilityBroadInfoVO> 下发信息
 	 */
@@ -174,11 +175,11 @@ public class BroadAbilityBroadInfoService {
 	}
 	
 	/**
-	 * 查询ip和端口对是否被占用<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午3:44:39
-	 * @param channelId 频道id(可为空)
+	 * 查询ip和端口对是否被占�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午3:44:39
+	 * @param channelId 频道id(可为�?)
 	 * @param abilityBroadInfoVOs 待检测新设置
 	 */
 	public void checkIpAndPortExists(Long channelId, List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
@@ -199,11 +200,11 @@ public class BroadAbilityBroadInfoService {
 	
 	/**
 	 * 查询预播发终端用户是否被占用<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午3:45:38
-	 * @param channelId 频道id(可为空)
-	 * @param userVOs 待检测用户列表
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午3:45:38
+	 * @param channelId 频道id(可为�?)
+	 * @param userVOs 待检测用户列�?
 	 */
 	public void checkUserUse(Long channelId, List<UserVO> userVOs) throws Exception {
 		if (userVOs == null || userVOs.isEmpty()) return;
@@ -224,13 +225,13 @@ public class BroadAbilityBroadInfoService {
 	}
 	
 	/**
-	 * 根据ip查询可用端口(给文件转流提供)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月28日 上午10:27:05
+	 * 根据ip查询可用端口(给文件转流提�?)<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?11�?28�? 上午10:27:05
 	 * @param String searchIp 查询的ip
-	 * @param Long startPort 查询的端口
-	 * @param String 可用的首个端口
+	 * @param Long startPort 查询的端�?
+	 * @param String 可用的首个端�?
 	 */
 	public Long queryLocalPort(String searchIp, Long startPort) throws Exception{
 		if (searchIp == null || searchIp.isEmpty()) searchIp = serverProps.getIp();

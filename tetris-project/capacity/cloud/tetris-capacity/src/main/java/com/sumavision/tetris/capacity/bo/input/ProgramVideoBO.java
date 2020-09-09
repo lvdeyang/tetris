@@ -37,6 +37,21 @@ public class ProgramVideoBO {
 	
 	private String pattern_path;
 
+
+	//todo 待测
+	private String color_range;
+
+	private String color_transfer;
+
+	private String color_matrix;
+
+	private String color_primaries;
+
+	private String csp;
+
+	private String ratio;
+
+
 	public Integer getPid() {
 		return pid;
 	}
@@ -143,5 +158,53 @@ public class ProgramVideoBO {
 	public ProgramVideoBO setPattern_path(String pattern_path) {
 		this.pattern_path = pattern_path;
 		return this;
+	}
+
+	public String getColor_range() {
+		return color_range;
+	}
+
+	public void setColor_range(String color_range) {
+		this.color_range = color_range;
+	}
+
+	public String getColor_transfer() {
+		return color_transfer;
+	}
+
+	public void setColor_transfer(String color_transfer) {
+		this.color_transfer = color_transfer;
+	}
+
+	public String getColor_matrix() {
+		return color_matrix;
+	}
+
+	public void setColor_matrix(String color_matrix) {
+		this.color_matrix = color_matrix;
+	}
+
+	public String getColor_primaries() {
+		return color_primaries;
+	}
+
+	public void setColor_primaries(String color_primaries) {
+		this.color_primaries = color_primaries;
+	}
+
+	public String getCsp() {
+		return csp;
+	}
+
+	public void setCsp(String csp) {
+		this.csp = csp;
+	}
+
+	public String getRatio() {
+		return ratio;
+	}
+
+	public void setRatio(String ratio) {
+		this.ratio = ratio;
 	}
 }

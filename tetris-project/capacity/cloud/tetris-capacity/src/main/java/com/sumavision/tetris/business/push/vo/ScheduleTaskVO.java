@@ -5,7 +5,7 @@ import java.util.List;
 public class ScheduleTaskVO {
 
 	private String deviceIp;
-	
+
 	private String mediaType;
 	
 	private ScheduleInputVO input;

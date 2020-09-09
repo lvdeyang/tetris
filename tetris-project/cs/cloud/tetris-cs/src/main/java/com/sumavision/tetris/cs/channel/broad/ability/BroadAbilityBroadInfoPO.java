@@ -11,17 +11,19 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 
 	/**
-	 * 能力播发信息（channel频道--页面轮播推流补充信息）
+	 * 能力播发信息（channel频道--页面轮播推流补充信息�?
 	 */
 	private static final long serialVersionUID = 1L;
 	
 	/** 频道id */
 	private Long channelId;
-	/** 预播发地址 */
+	/** 预播发地�? */
 	private String previewUrlIp;
-	/** 预播发可用起始端口 */
+	/** 本地Ip */
+	private String localIp;
+	/** 预播发可用起始端�? */
 	private String previewUrlPort;
-	/** 预播发可用终止端口 */
+	/** 预播发可用终止端�? */
 	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;
@@ -80,5 +82,13 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public void setLocalIp(String localIp) {
+		this.localIp = localIp;
 	}
 }

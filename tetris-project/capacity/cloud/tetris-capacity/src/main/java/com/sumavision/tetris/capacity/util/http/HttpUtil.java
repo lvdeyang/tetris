@@ -35,6 +35,10 @@ public class HttpUtil {
     public static JSONObject httpPost(String url,JSONObject jsonParam){
         return httpPost(url, jsonParam, false);
     }
+
+    public static JSONObject httpPost(String url){
+        return httpPost(url, new JSONObject(), false);
+    }
  
     /**
      * post请求

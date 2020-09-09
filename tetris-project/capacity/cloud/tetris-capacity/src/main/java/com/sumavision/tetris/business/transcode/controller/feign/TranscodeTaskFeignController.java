@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.sumavision.tetris.business.transcode.vo.TaskSetVO;
+import com.sumavision.tetris.business.transcode.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
-import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
-import com.sumavision.tetris.business.transcode.vo.TaskVO;
-import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -63,7 +60,36 @@ public class TranscodeTaskFeignController {
 		LOG.info("[sts]<add-task>(resp). hash: {}",transcodeInfo.hashCode());
 		return null;
 	}
-	
+
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/input")
+	public Object addInput(
+			String inputInfo,
+			HttpServletRequest request) throws Exception{
+
+		LOG.info("[sts]<create-inputs>(req) hash: {}\nbody: {}",inputInfo.hashCode(),inputInfo);
+		CreateInputsVO inputsVO = JSONObject.parseObject(inputInfo, CreateInputsVO.class);
+		String result = transcodeTaskService.addInputs(inputsVO);
+		LOG.info("[sts]<create-inputs>(resp). hash: {}",inputInfo.hashCode());
+		return result;
+	}
+
+    @JsonBody
+    @ResponseBody
+    @RequestMapping(value = "/preview/input")
+    public Object previewInput(
+            String inputInfo,
+            HttpServletRequest request) throws Exception{
+
+        LOG.info("[sts]<preview-input>(req) hash: {}, body: {}",inputInfo.hashCode(),inputInfo);
+        CreateInputPreviewVO inputVO = JSONObject.parseObject(inputInfo, CreateInputPreviewVO.class);
+        transcodeTaskService.previewInput(inputVO);
+        LOG.info("[sts]<preview-input>(resp). hash: {}",inputInfo.hashCode());
+        return null;
+    }
+
+
 	/**
 	 * 删除流转码任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -125,10 +151,11 @@ public class TranscodeTaskFeignController {
 	public Object changeBackup(
 			String inputId,
 			String index,
+			String mode,
 			String capacityIp,
 			HttpServletRequest request) throws Exception{
 		LOG.info("[sts]<change-backup>(req) \n inputId: {}, index: {}", inputId,index);
-		transcodeTaskService.changeBackUp(inputId, index, capacityIp);
+		transcodeTaskService.changeBackUp(inputId, index,mode, capacityIp);
 		LOG.info("[sts]<change-backup>(resp) \n inputId: {}, index: {}", inputId,index);
 
 		return null;
@@ -354,6 +381,19 @@ public class TranscodeTaskFeignController {
         return null;
     }
 
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/put/input")
+	public Object modifyInput(
+			String inputInfo,
+			HttpServletRequest request) throws Exception{
+		LOG.info("[sts]<modify-input>(req) hash:{} \n task: {}",inputInfo.hashCode(),inputInfo);
+		InputSetVO inputSetVO = JSONObject.parseObject(inputInfo, InputSetVO.class);
+		transcodeTaskService.modifyTranscodeInput(inputSetVO);
+		LOG.info("[sts]<modify-input>(resp) hash:{}",inputInfo.hashCode());
+		return null;
+	}
+
     /**
      * 获取硬件平台<br/>
      * <b>作者:</b>yzx<br/>
@@ -372,4 +412,21 @@ public class TranscodeTaskFeignController {
 		LOG.info("[sts]<get-platform>(resp) hash:{}",ip.hashCode());
         return response;
     }
+
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/streamAnalysis")
+	public Object streamAnalysis(
+			String analysis,
+			HttpServletRequest request) throws Exception{
+		LOG.info("[sts]<analysis-stream>(req) hash:{} \n analysis: {}",analysis.hashCode(),analysis);
+		AnalysisStreamVO analysisStreamVO = JSONObject.parseObject(analysis, AnalysisStreamVO.class);
+		String response = transcodeTaskService.analysisStream(analysisStreamVO);
+		LOG.info("[sts]<analysis-stream>(resp) hash:{}, result:{}",analysis.hashCode(),response);
+		return response;
+	}
+
+
+
+
 }

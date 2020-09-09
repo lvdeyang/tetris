@@ -11,7 +11,8 @@
 					"refine",
 					"pixel_format",
 					"bframe_reference",
-					"scenecut"
+					"scenecut",
+					"encoding_type"
 				]
 			}
 		},
@@ -78,6 +79,19 @@
 				"forbidden":false,
 				"constraint": {
 					"default_value": true
+				}
+			},
+			"encoding_type": {
+				"type": "enum",
+				"require": false,
+				"forbidden":false,
+				"constraint": {
+					"default_value": 0,
+					"values": [
+						"progressive",
+						"interlace_topfirst",
+						"interlace_botfirst"
+					]
 				}
 			}
 		}

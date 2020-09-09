@@ -1,6 +1,10 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +45,10 @@ public class ChannelController {
 	
 	/**
 	 * 分页获取频道列表<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Integer currentPage 当前页
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
+	 * @param Integer currentPage 当前�?
 	 * @param Integer pageSize 分页大小
 	 * @return List<ChannelVO> channels 频道列表
 	 * @return Long total 频道总数
@@ -55,17 +59,50 @@ public class ChannelController {
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
+	/**
+	 * 获取本地网卡列表
+	 * 方法概述<br/>
+	 * <p>获取本地网卡IP列表</p>
+	 * <b>作�??:</b>Mr.h<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?8�?26�? 上午9:17:54
+	 * @return List<String>
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/netcard/get")
+	public Object getNetCard() throws Exception {
+		List<String> netcards=new ArrayList<String>();
+		 Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+         NetworkInterface networkInterface;
+         Enumeration<InetAddress> inetAddresses;
+         InetAddress inetAddress;
+         String ip;
+         while (networkInterfaces.hasMoreElements()) {
+             networkInterface = networkInterfaces.nextElement();
+             inetAddresses = networkInterface.getInetAddresses();
+             while (inetAddresses.hasMoreElements()) {
+                 inetAddress = inetAddresses.nextElement();
+                 if (inetAddress != null && inetAddress instanceof Inet4Address) { // IPV4
+                     ip = inetAddress.getHostAddress();
+                     netcards.add(ip);
+                 }
+             }
+         }
+		return netcards;
+	}
 
 	/**
 	 * 添加频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param String name 频道名称
 	 * @param String date 日期
-	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String previewUrlIp 能力的输出地址ip(仅限能力播发)
-	 * @param String previewUrlPort 能力的输出地址port(仅限能力播发)
+	 * @param String broadWay 播发方式(参�?�BroadWay枚举)
+	 * @param String previewUrlIp 能力的输出地�?ip(仅限能力播发)
+	 * @param String previewUrlPort 能力的输出地�?port(仅限能力播发)
 	 * @param String remark 备注
 	 * @return ChannelVO 频道
 	 */
@@ -137,14 +174,14 @@ public class ChannelController {
 
 	/**
 	 * 编辑频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long id 频道id
 	 * @param String name 频道名称
-	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String previewUrlIp 能力的输出地址ip(仅限能力播发)
-	 * @param String previewUrlPort 能力的输出地址port(仅限能力播发)
+	 * @param String broadWay 播发方式(参�?�BroadWay枚举)
+	 * @param String previewUrlIp 能力的输出地�?ip(仅限能力播发)
+	 * @param String previewUrlPort 能力的输出地�?port(仅限能力播发)
 	 * @param String remark 备注
 	 * @return ChannelVO 频道
 	 */
@@ -217,9 +254,9 @@ public class ChannelController {
 
 	/**
 	 * 删除频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long id 频道id
 	 */
 	@JsonBody
@@ -233,10 +270,10 @@ public class ChannelController {
 	}
 	
 	/**
-	 * 开始播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * �?始播�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long channelId 频道id
 	 */
 	@JsonBody
@@ -249,9 +286,9 @@ public class ChannelController {
 	
 	/**
 	 * 停止播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long channelId 频道id
 	 */
 	@JsonBody
@@ -262,11 +299,32 @@ public class ChannelController {
 		return "";
 	}
 	
+	
 	/**
-	 * 查询播发状态<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 刷新播发列表
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作�??:</b>Mr.h<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?9�?2�? 上午10:17:54
+	 * @param channelId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/modify")
+	public Object broadcastModify(Long channelId, HttpServletRequest request) throws Exception {
+		channelService.modifyBroadcast(channelId);
+		return "";
+	}
+	
+	/**
+	 * 查询播发状�??<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long channelId 频道id
 	 */
 	@JsonBody
@@ -279,9 +337,9 @@ public class ChannelController {
 	
 	/**
 	 * 重新播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long channelId 频道id
 	 */
 	@JsonBody
@@ -295,10 +353,10 @@ public class ChannelController {
 	}
 	
 	/**
-	 * 同步资源目录到终端<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年1月15日 上午11:34:28
+	 * 同步资源目录到终�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?1�?15�? 上午11:34:28
 	 * @param Long channelId 频道id
 	 * @param request
 	 * @return
@@ -314,9 +372,9 @@ public class ChannelController {
 	
 	/**
 	 * 重置终端补包地址<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 下午4:04:23
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?2�?18�? 下午4:04:23
 	 * @param request
 	 */
 	@JsonBody
@@ -329,11 +387,11 @@ public class ChannelController {
 	
 	/**
 	 * 播发跳转(能力播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long channelId 频道id
-	 * @param Long duration 跳转量(单位s。支持负值)
+	 * @param Long duration 跳转�?(单位s。支持负�?)
 	 */
 	@JsonBody
 	@ResponseBody
@@ -346,9 +404,9 @@ public class ChannelController {
 	
 	/**
 	 * 获取用户列表<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月31日 下午1:47:40
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?31�? 下午1:47:40
 	 * @return List<UserVO> 用户列表
 	 */
 	@JsonBody
@@ -376,9 +434,9 @@ public class ChannelController {
 	
 	/**
 	 * 获取分屏模板<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月11日 下午5:20:27
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?12�?11�? 下午5:20:27
 	 * @param Long id 频道id
 	 */
 	@JsonBody
@@ -390,9 +448,9 @@ public class ChannelController {
 	
 	/**
 	 * 获取系统时间<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年5月9日 上午10:08:40
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?5�?9�? 上午10:08:40
 	 */
 	@JsonBody
 	@ResponseBody

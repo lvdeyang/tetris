@@ -124,6 +124,19 @@ public class TemplateService {
         return map;
     }
 
+    public static void main(String[] args) {
+        TemplateService templateService = new TemplateService();
+        String mp2Map = null;
+        try {
+            mp2Map = templateService.getAudioEncodeMap("aac");
+        } catch (CommonException e) {
+            e.printStackTrace();
+        }
+        JSONObject mp2Obj = JSONObject.parseObject(mp2Map);
+//        mp2Obj.put("bitrate",String.valueOf(1200/1000));
+//        mp2Obj.put("sample_rate",String.valueOf(3400/1000));
 
+        System.out.println(mp2Obj);
+    }
 
 }

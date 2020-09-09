@@ -62,6 +62,18 @@ public class InputBaseBO <V extends InputBaseBO>{
 	/** 各种类型媒体最多一个，靠媒体类型自动映射 */
 	private JSONObject media_type_once_map;
 
+	/**
+	 * 输入切换时
+	 */
+	private JSONObject program_number_map;
+
+	private JSONObject pid_map;
+
+	/**
+	 * 输入延迟参数
+	 */
+	private Integer delay_ms;
+
 	public String getId() {
 		return id;
 	}
@@ -277,5 +289,32 @@ public class InputBaseBO <V extends InputBaseBO>{
 		this.schedule = schedule;
 		return (V)this;
 	}
-	
+
+
+	public Integer getDelay_ms() {
+		return delay_ms;
+	}
+
+	public V setDelay_ms(Integer delay_ms) {
+		this.delay_ms = delay_ms;
+		return (V)this;
+	}
+
+	public JSONObject getProgram_number_map() {
+		return program_number_map;
+	}
+
+	public V setProgram_number_map(JSONObject program_number_map) {
+		this.program_number_map = program_number_map;
+		return (V)this;
+	}
+
+	public JSONObject getPid_map() {
+		return pid_map;
+	}
+
+	public V setPid_map(JSONObject pid_map) {
+		this.pid_map = pid_map;
+		return (V)this;
+	}
 }

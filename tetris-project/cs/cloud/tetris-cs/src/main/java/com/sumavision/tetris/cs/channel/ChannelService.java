@@ -121,23 +121,23 @@ public class ChannelService {
 
 	/**
 	 * 添加频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param String name 频道名称
 	 * @param String date 日期
-	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String level 播发优先级(仅限终端播发)
+	 * @param String broadWay 播发方式(参�?�BroadWay枚举)
+	 * @param String level 播发优先�?(仅限终端播发)
 	 * @param Boolean hasFile 是否携带文件播发(仅限终端播发)
 	 * @param ChannelTyep type 平台添加还是其他服务添加
 	 * @param Boolean encryption 是否加密播发(仅限轮播推流)
 	 * @param Boolean autoBroad 是否智能播发
 	 * @param Boolean autoBroadShuffle 是否乱序(仅限智能播发)
-	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：天)
+	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：�?)
 	 * @param String autoBroadStart 智能播发生效时间(仅限智能播发)
-	 * @param String outputUserPort 能力的输出地址port(仅限轮播推流)
+	 * @param String outputUserPort 能力的输出地�?port(仅限轮播推流)
 	 * @param List<UserVO> outputUserList 预播发的用户列表
-	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port对(仅限轮播推流)
+	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port�?(仅限轮播推流)
 	 * @param String remark 备注
 	 * @return ChannelPO 频道
 	 */
@@ -166,7 +166,7 @@ public class ChannelService {
 		channel.setAutoBroad(autoBroadBO.getAutoBroad());
 		channel.setType(type.toString());
 		
-		//校验用户是否被占用
+		//校验用户是否被占�?
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
 			broadAbilityBroadInfoService.checkUserUse(null, outputBO.getOutputUsers());
 			broadFileBroadInfoService.checkUserUse(null, outputBO.getOutputUsers());
@@ -209,23 +209,23 @@ public class ChannelService {
 	
 	/**
 	 * 添加频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param String name 频道名称
 	 * @param String date 日期
-	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String level 播发优先级(仅限终端播发)
+	 * @param String broadWay 播发方式(参�?�BroadWay枚举)
+	 * @param String level 播发优先�?(仅限终端播发)
 	 * @param Boolean hasFile 是否携带文件播发(仅限终端播发)
 	 * @param ChannelTyep type 平台添加还是其他服务添加
 	 * @param Boolean encryption 是否加密播发(仅限轮播推流)
 	 * @param Boolean autoBroad 是否智能播发
 	 * @param Boolean autoBroadShuffle 是否乱序(仅限智能播发)
-	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：天)
+	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：�?)
 	 * @param String autoBroadStart 智能播发生效时间(仅限智能播发)
-	 * @param String outputUserPort 能力的输出地址port(仅限轮播推流)
+	 * @param String outputUserPort 能力的输出地�?port(仅限轮播推流)
 	 * @param List<UserVO> outputUserList 预播发的用户列表
-	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port对(仅限轮播推流)
+	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port�?(仅限轮播推流)
 	 * @param String remark 备注
 	 * @return ChannelPO 频道
 	 */
@@ -267,9 +267,9 @@ public class ChannelService {
 
 	/**
 	 * 删除频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long id 频道id
 	 */
 	public void remove(Long channelId) throws Exception {
@@ -297,14 +297,14 @@ public class ChannelService {
 
 	/**
 	 * 编辑频道<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 	 * @param Long id 频道id
 	 * @param String name 频道名称
-	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String previewUrlIp 能力的输出地址ip(仅限轮播推流)
-	 * @param String previewUrlPort 能力的输出地址port(仅限轮播推流)
+	 * @param String broadWay 播发方式(参�?�BroadWay枚举)
+	 * @param String previewUrlIp 能力的输出地�?ip(仅限轮播推流)
+	 * @param String previewUrlPort 能力的输出地�?port(仅限轮播推流)
 	 * @param String remark 备注
 	 * @return ChannelVO 频道
 	 */
@@ -371,12 +371,12 @@ public class ChannelService {
 	}
 	
 	/**
-	 * 根据不同播发方式执行开始播发命令<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月21日 下午3:56:48
+	 * 根据不同播发方式执行�?始播发命�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?21�? 下午3:56:48
 	 * @param Long channelId 频道id
-	 * @param Stirng resourceIds 播发手选资源数组 
+	 * @param Stirng resourceIds 播发手�?�资源数�? 
 	 */
 	public void startBroadcast(Long channelId, String resourceIds) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
@@ -397,9 +397,9 @@ public class ChannelService {
 	
 	/**
 	 * 重新播发(当前只终端播发提供该业务)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月27日 下午4:30:47
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?11�?27�? 下午4:30:47
 	 * @param Long channelId 频道id
 	 */
 	@Deprecated
@@ -416,19 +416,19 @@ public class ChannelService {
 	
 	/**
 	 * 重置终端补包地址<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 下午4:04:23
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?2�?18�? 下午4:04:23
 	 */
 	public void resetZonePath() throws Exception {
 		broadTerminalService.resetZonePath();
 	}
 	
 	/**
-	 * 资源目录同步到终端<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年1月15日 上午11:49:20
+	 * 资源目录同步到终�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?1�?15�? 上午11:49:20
 	 * @param Long channelId 频道id
 	 */
 	public void updateToTerminal(Long channelId) throws Exception {
@@ -441,24 +441,24 @@ public class ChannelService {
 	
 	/**
 	 * 根据channelUuid停止终端播发<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年5月14日 下午2:49:14
+	 * <b>作�??:</b>wjw<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?5�?14�? 下午2:49:14
 	 * @param String uuid 终端播发channelUuid
 	 */
 	public void stopBroadcastByUuid(String uuid) throws Exception{
 		
 		ChannelPO channel = channelDao.findByChannelUuid(uuid);
-		if(channel == null) throw new Exception("该终端播发不存在！");
+		if(channel == null) throw new Exception("该终端播发不存在�?");
 		broadTerminalService.stopTerminalBroadcast(channel.getId());
 		
 	}
 	
 	/**
 	 * 根据不同播发方式执行停止播发命令<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月21日 下午3:58:55
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2019�?10�?21�? 下午3:58:55
 	 * @param channelId 频道Id
 	 * @throws Exception
 	 */
@@ -481,6 +481,35 @@ public class ChannelService {
 			broadTerminalService.stopTerminalBroadcast(channelId);
 		}
 	}
+	/**
+	 * 排期单修改后刷新
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作�??:</b>Mr.h<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?9�?2�? 上午10:23:25
+	 * @param channelId
+	 * @throws Exception
+	 */
+	public void modifyBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) 
+			return;
+		
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			if (ChannelType.YJGB.toString().equals(channel.getType())) {
+				
+			} else {
+				broadAbilityService.modifyAbilityBroadcast(channelId);
+			}
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			
+		} else {
+			
+		}
+	}
+	
 	
 	public void seekBroadcast(Long channelId, Long duration) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
@@ -546,9 +575,9 @@ public class ChannelService {
 	
 	/**
 	 * 设置排期表和排期表内容时调用<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年3月5日 下午1:39:25
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?3�?5�? 下午1:39:25
 	 * @param Long channelId 频道id
 	 */
 	public void changeScheduleDeal(Long channelId) throws Exception {
@@ -565,10 +594,10 @@ public class ChannelService {
 	}
 	
 	/**
-	 * 服务器重启调用<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年3月5日 下午1:40:38
+	 * 服务器重启调�?<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?3�?5�? 下午1:40:38
 	 */
 	public void rebootServer(ChannelServerType serverType, String serverIp) throws Exception {
 		switch (serverType) {
@@ -587,18 +616,18 @@ public class ChannelService {
 	}
 	
 	/**
-	 * 根据应急广播下发tar包创建push终端播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年1月19日 下午2:14:48
-	 * @param String name 频道名
-	 * @param String author 作者
+	 * 根据应�?�广播下发tar包创建push终端播发<br/>
+	 * <b>作�??:</b>lzp<br/>
+	 * <b>版本�?</b>1.0<br/>
+	 * <b>日期�?</b>2020�?1�?19�? 下午2:14:48
+	 * @param String name 频道�?
+	 * @param String author 作�??
 	 * @param String publishTime 创建时间
 	 * @param String remark 备注
-	 * @param String keywords 关键字
+	 * @param String keywords 关键�?
 	 * @param String contents 内容
 	 * @param String regions 地区
-	 * @param UsuerVO user 创建者
+	 * @param UsuerVO user 创建�?
 	 */
 	public void generateWithInternalTemplate(
 			String name,
@@ -679,10 +708,10 @@ public class ChannelService {
 		}
 		areaService.setCheckArea(channelId, areaList, true);
 		
-		//开始播发
+		//�?始播�?
 		startBroadcast(channelId, null);
 		
-		//定时停止播发，3s预留给终端开始播发时下载tar包
+		//定时停止播发�?3s预留给终端开始播发时下载tar�?
 		//20200513共识--手动停止播发
 		/*if (duration != 3000l) {
 			if (timerMap.containsKey(channelId)) {
@@ -707,10 +736,10 @@ public class ChannelService {
 	}
 	
 //	/**
-//	 * 一次性下发所有排期<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年10月23日 上午11:50:24
+//	 * �?次�?�下发所有排�?<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?10�?23�? 上午11:50:24
 //	 * @param channelId
 //	 * @throws Exception
 //	 */
@@ -787,9 +816,9 @@ public class ChannelService {
 //	
 //	/**
 //	 * 根据频道id和音频推荐自动生成节目单<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年10月14日 上午11:10:01
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?10�?14�? 上午11:10:01
 //	 * @param user 用户信息
 //	 * @param channelId 频道id
 //	 */
@@ -813,7 +842,7 @@ public class ChannelService {
 //				.append(" ")
 //				.append(autoBroadInfoPO.getStartTime())
 //				.toString();
-//		//生效时间推后一秒防止代码时间导致排期失效
+//		//生效时间推后�?秒防止代码时间导致排期失�?
 //		Long durationDateLong = DateUtil.parse(durationTime, DateUtil.dateTimePattern).getTime() + 1000;
 //		
 //		if (now <= durationDateLong) {
@@ -891,9 +920,9 @@ public class ChannelService {
 //	
 //	/**
 //	 * 停止播发(轮播推流)<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 //	 * @param Long channelId 频道id
 //	 */
 //	public JSONObject stopAbilityBroadcast(Long channelId) throws Exception{
@@ -916,9 +945,9 @@ public class ChannelService {
 //
 //	/**
 //	 * 停止PC播发<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年10月21日 下午4:35:37
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?10�?21�? 下午4:35:37
 //	 * @param channelId 频道id
 //	 */
 //	public JSONObject stopPcBroadcast(Long channelId) throws Exception {
@@ -936,10 +965,10 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始播发(PC播发，根据排期)<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年10月14日 下午2:25:54
+//	 * �?始播�?(PC播发，根据排�?)<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?10�?14�? 下午2:25:54
 //	 * @param Long channelId 频道id
 //	 */
 //	public JSONObject startPcBroadTimer(Long channelId) throws Exception {
@@ -947,10 +976,10 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始PC播发<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年10月14日 下午2:25:54
+//	 * �?始PC播发<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?10�?14�? 下午2:25:54
 //	 * @param channelId 频道id
 //	 * @param scheduleId 排期id
 //	 */
@@ -959,10 +988,10 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始播发(轮播推流，根据排期)<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * �?始播�?(轮播推流，根据排�?)<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 //	 * @param Long channelId 频道id
 //	 */
 //	public JSONObject startAbilityBroadTimer(Long channelId) throws Exception {
@@ -991,7 +1020,7 @@ public class ChannelService {
 //		for (ScheduleVO scheduleVO : scheduleVOs) {
 //			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
 //			Long broadDateLong = broadDate.getTime();
-//			//以防用户选择"此刻"为播发时间的时候，由于手动点击"播发"和程序执行时间导致播发不生效，因此预留5秒。
+//			//以防用户选择"此刻"为播发时间的时�?�，由于手动点击"播发"和程序执行时间导致播发不生效，因此预�?5秒�??
 //			if (broadDateLong + 5000 > now || scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
 //				Timer timer = timerMap.get(channelId);
 //				if (timer != null) {
@@ -1011,7 +1040,7 @@ public class ChannelService {
 //									startPcBroadcast(channelId, scheduleVO.getId());
 //								}
 //								Long nNow = DateUtil.getLongDate();
-//								//如播发时间与此刻间隔小于5s,则延时5秒进入下一个播发，以防排期被二次播发
+//								//如播发时间与此刻间隔小于5s,则延�?5秒进入下�?个播发，以防排期被二次播�?
 //								if (broadDateLong < nNow - 5000) {
 //									Thread.sleep(nNow - broadDateLong);
 //								}
@@ -1042,10 +1071,10 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始播发(轮播推流)<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * �?始播�?(轮播推流)<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 //	 * @param Long channelId 频道id
 //	 * @param Long scheduleId 排期id
 //	 */
@@ -1058,7 +1087,7 @@ public class ChannelService {
 //		List<JSONObject> destList = new ArrayList<JSONObject>();
 //		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
 //		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
-//		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return getReturnJSON(false, "无输出");
+//		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return getReturnJSON(false, "无输�?");
 //		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
 //			JSONObject dest = new JSONObject();
 //			dest.put("local_ip", localIp);
@@ -1093,10 +1122,10 @@ public class ChannelService {
 //	}
 //
 //	/**
-//	 * 播发时媒资排表字段内容(能力播发)<br/>
-//	 * <b>作者:</b>lzp<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * 播发时媒资排表字段内�?(能力播发)<br/>
+//	 * <b>作�??:</b>lzp<br/>
+//	 * <b>版本�?</b>1.0<br/>
+//	 * <b>日期�?</b>2019�?6�?25�? 上午11:06:57
 //	 * @param ProgramVO program 分屏信息
 //	 */
 //	private List<String> abilityProgramText(ProgramVO program) throws Exception{

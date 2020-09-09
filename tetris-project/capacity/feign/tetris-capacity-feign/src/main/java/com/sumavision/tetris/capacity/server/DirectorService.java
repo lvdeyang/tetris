@@ -61,5 +61,11 @@ public class DirectorService {
 	public void deleteOutput(List<OutputsVO> outputs) throws Exception{
 		JsonBodyResponseParser.parseObject(capacityFeign.deleteOutput(JSON.toJSONString(outputs)), null);
 	}
-	
+
+
+	public String getEncodeTemplate(String encodeType) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.getEncodeTemplate(encodeType), String.class);
+	}
+
+
 }

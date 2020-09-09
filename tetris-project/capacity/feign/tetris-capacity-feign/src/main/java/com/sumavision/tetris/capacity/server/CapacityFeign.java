@@ -55,6 +55,16 @@ public interface CapacityFeign{
 	public JSONObject modifyTranscode(@RequestParam("taskInfo") String taskInfo) throws Exception;
 
 	/**
+	 * 修改流转码输入<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月24日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/put/input")
+	public JSONObject modifyTranscodeInput(@RequestParam("inputInfo") String inputInfo) throws Exception;
+
+	/**
 	 * 获取支持的平台<br/>
 	 * <b>作者:</b>yzx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -317,7 +327,17 @@ public interface CapacityFeign{
 	 */
 	@RequestMapping(value = "/push/task/feign/batch/delete/task")
 	public JSONObject batchDeletePushTask(@RequestParam("taskIds") String taskIds) throws Exception;
-	
+
+	/**
+	 * 请求排期任务
+	 * @param taskId
+	 * @return
+	 * @throws Exception
+	 */
+
+	@RequestMapping(value = "/push/task/feign/clear/task")
+	public JSONObject clearPushTask(@RequestParam("taskId") String taskId) throws Exception;
+
 	/**
 	 * 设置告警列表<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -350,6 +370,17 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/capacity/package/feign/delete/task")
 	public JSONObject packageDeleteTask(@RequestParam("taskId") String taskId) throws Exception;
 
+	@RequestMapping(value = "/capacity/transcode/feign/streamAnalysis")
+	public JSONObject streamAnalysis(@RequestParam("analysis") String analysis) throws Exception;
 
 
+	@RequestMapping(value = "/capacity/transcode/feign/add/input")
+	public JSONObject addInputs(@RequestParam("inputInfo") String inputInfo) throws Exception;
+
+	@RequestMapping(value = "/capacity/transcode/feign/preview/input")
+	public JSONObject previewInput(@RequestParam("inputInfo") String inputInfo) throws Exception;
+
+
+	@RequestMapping(value = "/director/task/feign/get/encode/template")
+	public JSONObject getEncodeTemplate(@RequestParam("encodeType") String encodeType) throws Exception;
 }
