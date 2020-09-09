@@ -33,8 +33,8 @@ import com.sumavision.tetris.easy.process.media.editor.MediaEditorService;
 import com.sumavision.tetris.easy.process.media.editor.TranscodeMediaVO;
 import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
 import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeQuery;
-import com.sumavision.tetris.mims.app.boss.BossService;
 import com.sumavision.tetris.mims.app.boss.MediaType;
+import com.sumavision.tetris.mims.app.boss.QdBossService;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -145,8 +145,8 @@ public class MediaAudioService {
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
 	
-	@Autowired
-	private BossService bossService;
+	//@Autowired
+	private QdBossService bossService;
 	
 	/**
 	 * 音频媒资上传审核通过<br/>

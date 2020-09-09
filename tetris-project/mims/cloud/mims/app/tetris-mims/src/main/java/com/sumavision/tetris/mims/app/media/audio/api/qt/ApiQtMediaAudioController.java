@@ -9,8 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.mims.app.boss.BossService;
 import com.sumavision.tetris.mims.app.boss.MediaType;
+import com.sumavision.tetris.mims.app.boss.QdBossService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
@@ -32,7 +32,7 @@ public class ApiQtMediaAudioController {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private BossService bossService;
+	private QdBossService bossService;
 	
 	/**
 	 * 加载所有的音频媒资<br/>
