@@ -1,13 +1,14 @@
 package com.sumavision.bvc.device.command.cloud;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
@@ -16,15 +17,11 @@ import com.sumavision.bvc.device.group.bo.PtzctrlPassByContent;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.point.MonitorPointPO;
 import com.sumavision.bvc.device.monitor.point.MonitorPointService;
-import com.sumavision.bvc.device.monitor.point.exception.MonitorPointNotExistException;
-import com.sumavision.bvc.device.monitor.point.exception.NoUseableIndexException;
-import com.sumavision.bvc.device.monitor.point.exception.UserHasNoPermissionForPointException;
 import com.sumavision.bvc.device.monitor.ptzctrl.ApertureControl;
 import com.sumavision.bvc.device.monitor.ptzctrl.Direction;
 import com.sumavision.bvc.device.monitor.ptzctrl.FocusControl;
 import com.sumavision.bvc.device.monitor.ptzctrl.MonitorPtzctrlService;
 import com.sumavision.bvc.device.monitor.ptzctrl.ZoomControl;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -130,6 +127,7 @@ public class CloudControlService {
 			Long userId) throws Exception{
 		
 		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
+//		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.DIANBO);
 		monitorPtzctrlService.zoom(bundle.getBundleId(), bundle.getNodeUid(), direction, speed, userId);
 	}
 	
@@ -148,7 +146,7 @@ public class CloudControlService {
 			FocusControl direction, 
 			String speed, 
 			Long userId) throws Exception{
-		
+
 		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
 		monitorPtzctrlService.focus(bundle.getBundleId(), bundle.getNodeUid(), direction, speed, userId);
 	}
@@ -209,6 +207,21 @@ public class CloudControlService {
 		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
 		MonitorPointPO point = monitorPointService.add(bundle.getBundleId(), bundle.getName(), bundle.getNodeUid(), name, userId, username);
 		return point;
+	}
+	
+	/**
+	 * 校验权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月9日 下午3:52:21
+	 * @throws Exception 
+	 */
+	public void checkPrivilege(
+			int locationIndex,
+			Long userId,
+			BUSINESS_OPR_TYPE type) throws Exception{
+		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
+//		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.DIANBO);
 	}
 	
 }

@@ -287,4 +287,22 @@ public class CloudControlController {
 		return null;
 	}
 	
+	/**
+	 * 判断是否具有权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月9日 下午3:45:18
+	 * @return
+	 * @throws Exception 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/check/privilege")
+	public Object checkPrivilege(
+			int serial,
+			HttpServletRequest request) throws Exception{
+		Long userId = userUtils.getUserIdFromSession(request);
+		cloudControlService.checkPrivilege(serial, userId, null);
+		return request;
+	}
 }
