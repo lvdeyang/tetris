@@ -2,6 +2,7 @@ package com.sumavision.bvc.control.device.command.group.vod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,31 +29,37 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequestMapping(value = "/command/vod")
 public class CommandVodController {
-	
+
 	/** 发起业务时，synchronized锁的前缀 */
 	private static final String lockStartPrefix = "controller-vod-or-call-userId-";
-	
+
 	/** 响应、停止业务时，synchronized锁的前缀 */
 	private static final String lockProcessPrefix = "controller-vod-or-call-businessId-";
-	
+
 	@Autowired
 	private UserUtils userUtils;
-	
+
 	@Autowired
 	private CommandVodService commandVodService;
-	
+
 	@Autowired
 	private VodService vodService;
-	
+
 	/**
 	 * 通用方法，指定播放器，播放各种类型的资源<br/>
-	 * <p>通常用于从资源树中拖拽到播放器进行点播</p>
+	 * <p>
+	 * 通常用于从资源树中拖拽到播放器进行点播
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年5月26日 上午9:35:20
-	 * @param type 取值为 file/user/device
-	 * @param id 资源id，可能是文件、设备、用户的id
-	 * @param serial 播放器序号
+	 * 
+	 * @param type
+	 *            取值为 file/user/device
+	 * @param id
+	 *            资源id，可能是文件、设备、用户的id
+	 * @param serial
+	 *            播放器序号
 	 * @param request
 	 * @return BusinessPlayerVO 播放器业务信息
 	 * @throws Exception
@@ -60,31 +67,28 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start/from/player")
-	public Object startFromPlayer(
-			String type,
-			String id,
-			int serial,
-			HttpServletRequest request) throws Exception{
-		
-//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
-			
+	public Object startFromPlayer(String type, String id, int serial, HttpServletRequest request) throws Exception {
+
+		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
-			UserBO admin = new UserBO(); admin.setId(-1L);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
 			CommandGroupUserPlayerPO player = null;
-			if("file".equals(type)){
+			if ("file".equals(type)) {
 				throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
-			}else if("user".equals(type)){
+			} else if ("user".equals(type)) {
 				UserBO vodUser = userUtils.queryUserById(Long.parseLong(id));
 				vodService.userStart(user, vodUser, serial);
-			}else if("device".equals(type)){
+			} else if ("device".equals(type)) {
 				vodService.deviceStart(user, id, serial);
 			}
-			
+
 			BusinessPlayerVO _player = new BusinessPlayerVO();
-			
+
 			return _player;
 		}
 	}
@@ -94,36 +98,41 @@ public class CommandVodController {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午10:41:01
-	 * @param String resourceFileId 资源文件id
+	 * 
+	 * @param String
+	 *            resourceFileId 资源文件id
 	 * @return BusinessPlayerVO 播放器业务信息
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/file/start")
-	public Object resourceFileStart(
-			String resourceFileId,
-			HttpServletRequest request) throws Exception{
-			
+	public Object resourceFileStart(String resourceFileId, HttpServletRequest request) throws Exception {
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, -1);
-			
+
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
+
 			return _player;
-		}		
+		}
 	}
-	
+
 	/**
 	 * 指定播放器，点播文件资源<br/>
-	 * <p>详细描述</p>
+	 * <p>
+	 * 详细描述
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 下午2:41:16
-	 * @param resourceFileId 资源文件id
-	 * @param serial 播放器序号
+	 * 
+	 * @param resourceFileId
+	 *            资源文件id
+	 * @param serial
+	 *            播放器序号
 	 * @param request
 	 * @return BusinessPlayerVO 播放器业务信息
 	 * @throws Exception
@@ -131,29 +140,30 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/file/start/player")
-	public Object resourceFileStartSpecifyPlayer(
-			String resourceFileId,
-			int serial,
-			HttpServletRequest request) throws Exception{
-		
+	public Object resourceFileStartSpecifyPlayer(String resourceFileId, int serial, HttpServletRequest request)
+			throws Exception {
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, serial);
-			
+
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
+
 			return _player;
 		}
 	}
 
 	/**
 	 * 批量点播文件<br/>
-	 * <p>详细描述</p>
+	 * <p>
+	 * 详细描述
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月4日 下午5:22:23
+	 * 
 	 * @param resourceFileIds
 	 * @param request
 	 * @return
@@ -162,62 +172,61 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/file/start/batch")
-	public Object resourceFileStartBatch(
-			String resourceFileIds,
-			HttpServletRequest request) throws Exception{
-		
+	public Object resourceFileStartBatch(String resourceFileIds, HttpServletRequest request) throws Exception {
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
-			
+
 			List<String> resourceFileIdList = JSON.parseArray(resourceFileIds, String.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
-			for(String resourceFileId : resourceFileIdList){			
-				try{
+			for (String resourceFileId : resourceFileIdList) {
+				try {
 					CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, -1);
 					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 					playerVOs.add(_player);
-				}catch(Exception e){
-					log.info(user.getName() + "一键点播文件 " + resourceFileIds + " 部分失败，失败resourceFileId: " + resourceFileId);
+				} catch (Exception e) {
+					log.info(
+							user.getName() + "一键点播文件 " + resourceFileIds + " 部分失败，失败resourceFileId: " + resourceFileId);
 					e.printStackTrace();
 				}
 			}
-			
+
 			return playerVOs;
 		}
 	}
-	
+
 	/**
 	 * 停止点播文件资源<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午11:05:18
-	 * @param String businessId 业务id
+	 * 
+	 * @param String
+	 *            businessId 业务id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/file/stop")
-	public Object resourceFileStop(
-			String businessId,
-			HttpServletRequest request) throws Exception{
-		
+	public Object resourceFileStop(String businessId, HttpServletRequest request) throws Exception {
+
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
 			Long userId = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(userId);
-			
+
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStop(user, businessId);
-			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
-					   								   .getMap();
+
+			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex()).getMap();
 		}
 	}
-	
+
 	/**
 	 * 点播用户自己<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年5月7日 上午9:29:16
+	 * 
 	 * @param userId
 	 * @param request
 	 * @return
@@ -226,31 +235,33 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/see/oneself/user/start")
-	public Object seeOneselfUserStart(
-			HttpServletRequest request) throws Exception{		
-		
+	public Object seeOneselfUserStart(HttpServletRequest request) throws Exception {
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
-		
+
 			UserBO user = userUtils.queryUserById(id);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-//			CommandGroupUserPlayerPO player = commandVodService.seeOneselfUserStart(user, admin, true);
-//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
-			vodService.userStart(user, user,null);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+
+			// CommandGroupUserPlayerPO player =
+			// commandVodService.seeOneselfUserStart(user, admin, true);
+			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+
+			vodService.userStart(user, user, null);
 			BusinessPlayerVO _player = new BusinessPlayerVO();
-			
+
 			return _player;
 		}
 	}
-	
+
 	/**
 	 * 点播用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 上午9:29:16
+	 * 
 	 * @param userId
 	 * @param request
 	 * @return
@@ -259,21 +270,19 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/user/start")
-	public Object userStart(
-			Long userId,
-			HttpServletRequest request) throws Exception{		
-		
+	public Object userStart(Long userId, HttpServletRequest request) throws Exception {
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
-		
+
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
-			
-//			vodService.userStop(153L);//test
-			
-			vodService.userStart(user, vodUser,null);
-			
+
+			// vodService.userStop(153L);//test
+
+			vodService.userStart(user, vodUser, null);
+
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
 		}
@@ -284,8 +293,10 @@ public class CommandVodController {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 上午9:29:16
+	 * 
 	 * @param userId
-	 * @param serial 播放器序号
+	 * @param serial
+	 *            播放器序号
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -293,49 +304,52 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/user/start/player")
-	public Object userStartSpecifyPlayer(
-			Long userId,
-			int serial,
-			HttpServletRequest request) throws Exception{
-		
-//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+	public Object userStartSpecifyPlayer(Long userId, int serial, HttpServletRequest request) throws Exception {
+
+		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
-		
+
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
-			
-//			vodService.userStop(153L);//test
-			
-			vodService.userStart(user, vodUser,serial);
-			
+
+			// vodService.userStop(153L);//test
+
+			vodService.userStart(user, vodUser, serial);
+
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
 		}
 		/*
-		Long id = userUtils.getUserIdFromSession(request);
-		
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
-			UserBO user = userUtils.queryUserById(id);
-			UserBO vodUser = userUtils.queryUserById(userId);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-			CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, serial);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
-			return _player;
-		}*/
+		 * Long id = userUtils.getUserIdFromSession(request);
+		 * 
+		 * synchronized (new
+		 * StringBuffer().append(lockStartPrefix).append(id).toString().intern()
+		 * ) { UserBO user = userUtils.queryUserById(id); UserBO vodUser =
+		 * userUtils.queryUserById(userId);
+		 * 
+		 * // UserBO admin =
+		 * resourceService.queryUserInfoByUsername(CommandCommonConstant.
+		 * USER_NAME); UserBO admin = new UserBO(); admin.setId(-1L);
+		 * 
+		 * CommandGroupUserPlayerPO player =
+		 * commandVodService.userStart_Cascade(user, vodUser, admin, serial);
+		 * BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+		 * 
+		 * return _player; }
+		 */
 	}
 
 	/**
 	 * 批量点播用户<br/>
-	 * <p>详细描述</p>
+	 * <p>
+	 * 详细描述
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月4日 下午5:22:48
+	 * 
 	 * @param userIds
 	 * @param request
 	 * @return
@@ -344,108 +358,129 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/user/start/batch")
-	public Object userStartBatch(
-			String userIds,
-			HttpServletRequest request) throws Exception{
-		
+	public Object userStartBatch(String userIds, HttpServletRequest request) throws Exception {
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
-			
+
 			List<Long> userIdList = JSON.parseArray(userIds, Long.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-			for(Long userId : userIdList){
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+	
+			List<UserBO> vodUsers=new ArrayList<UserBO>();
+			for (Long userId : userIdList) {
 				UserBO vodUser = userUtils.queryUserById(userId);
-				try{
-					vodService.userStart(user, vodUser,null);
-//					CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
-//					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-//					playerVOs.add(_player);
-				}catch(Exception e){
-					log.info(user.getName() + "一键点播用户 " + userIds + " 部分失败，失败userId: " + userId);
-					e.printStackTrace();
-				}
+				vodUsers.add(vodUser);
 			}
 			
+			vodService.userStartBatch(user,vodUsers);
+			
+//			for (Long userId : userIdList) {
+//				UserBO vodUser = userUtils.queryUserById(userId);
+//				try {
+//					vodService.userStart(user, vodUser, null);
+//					// CommandGroupUserPlayerPO player =
+//					// commandVodService.userStart_Cascade(user, vodUser, admin,
+//					// -1);
+//					// BusinessPlayerVO _player = new
+//					// BusinessPlayerVO().set(player);
+//					// playerVOs.add(_player);
+//				} catch (Exception e) {
+//					log.info(user.getName() + "一键点播用户 " + userIds + " 部分失败，失败userId: " + userId);
+//					e.printStackTrace();
+//				}
+//			}
+
 			return playerVOs;
 		}
 	}
-	
+
 	/**
 	 * 停止点播用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 下午1:55:25
-	 * @param Long businessId 业务id
+	 * 
+	 * @param Long
+	 *            businessId 业务id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/user/stop")
-	public Object userStop(
-			Long businessId,
-			HttpServletRequest request) throws Exception{
-		
+	public Object userStop(Long businessId, HttpServletRequest request) throws Exception {
+
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
-		
+
 			Long id = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(id);
-			
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-//			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
+
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+
+			// CommandGroupUserPlayerPO player =
+			// commandVodService.userStop(user, businessId, admin);
 			vodService.userStop(businessId);
-			
-			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
-					   								   .getMap();
+
+			return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
+					.getMap();
 		}
-	}	
-	
+	}
+
 	/**
 	 * 点播设备<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 下午4:03:45
-	 * @param String deviceId 设备id
+	 * 
+	 * @param String
+	 *            deviceId 设备id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/start")
-	public Object deviceStart(
-			String deviceId,
-			HttpServletRequest request) throws Exception{
-		
+	public Object deviceStart(String deviceId, HttpServletRequest request) throws Exception {
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-//			UserBO admin = new UserBO(); admin.setId(-1L);
-//			
-//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
-			vodService.deviceStart(user, deviceId,null);
-			
+
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			// UserBO admin = new UserBO(); admin.setId(-1L);
+			//
+			// CommandGroupUserPlayerPO player =
+			// commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+
+			vodService.deviceStart(user, deviceId, null);
+
 			BusinessPlayerVO _player = new BusinessPlayerVO();
-			
+
 			return _player;
 		}
 	}
-	
+
 	/**
 	 * 指定播放器，点播设备<br/>
-	 * <p>详细描述</p>
+	 * <p>
+	 * 详细描述
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 下午2:43:20
-	 * @param deviceId 设备id
-	 * @param serial 播放器序号
+	 * 
+	 * @param deviceId
+	 *            设备id
+	 * @param serial
+	 *            播放器序号
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -453,53 +488,58 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/start/player")
-	public Object deviceStartSpecifyPlayer(
-			String deviceId,
-			int serial,
-			HttpServletRequest request) throws Exception{
-		
-//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
-		
+	public Object deviceStartSpecifyPlayer(String deviceId, int serial, HttpServletRequest request) throws Exception {
+
+		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-//			UserBO admin = new UserBO(); admin.setId(-1L);
-//			
-//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
-			vodService.deviceStart(user, deviceId,serial);
-			
+
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			// UserBO admin = new UserBO(); admin.setId(-1L);
+			//
+			// CommandGroupUserPlayerPO player =
+			// commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+
+			vodService.deviceStart(user, deviceId, serial);
+
 			BusinessPlayerVO _player = new BusinessPlayerVO();
-			
+
 			return _player;
 		}
-			
+
 		/*
-		Long id = userUtils.getUserIdFromSession(request);
-		
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
-			UserBO user = userUtils.queryUserById(id);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, serial);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-			
-			return _player;
-		}*/
+		 * Long id = userUtils.getUserIdFromSession(request);
+		 * 
+		 * synchronized (new
+		 * StringBuffer().append(lockStartPrefix).append(id).toString().intern()
+		 * ) { UserBO user = userUtils.queryUserById(id);
+		 * 
+		 * // UserBO admin =
+		 * resourceService.queryUserInfoByUsername(CommandCommonConstant.
+		 * USER_NAME); UserBO admin = new UserBO(); admin.setId(-1L);
+		 * 
+		 * CommandGroupUserPlayerPO player =
+		 * commandVodService.deviceStart_Cascade(user, deviceId, admin, serial);
+		 * BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+		 * 
+		 * return _player; }
+		 */
 	}
-	
+
 	/**
 	 * 批量点播设备<br/>
-	 * <p>详细描述</p>
+	 * <p>
+	 * 详细描述
+	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月4日 下午5:23:05
+	 * 
 	 * @param deviceIds
 	 * @param request
 	 * @return
@@ -508,111 +548,111 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/start/batch")
-	public Object deviceStartBatch(
-			String deviceIds,
-			HttpServletRequest request) throws Exception{
-		
+	public Object deviceStartBatch(String deviceIds, HttpServletRequest request) throws Exception {
+
 		Long id = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
-			
+
 			List<String> deviceIdList = JSON.parseArray(deviceIds, String.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
-			for(String deviceId : deviceIdList){
-				try{
-					vodService.deviceStart(user, deviceId,null);
-//					CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-//					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-//					playerVOs.add(_player);
-				}catch(Exception e){
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+
+			for (String deviceId : deviceIdList) {
+				try {
+					vodService.deviceStart(user, deviceId, null);
+					// CommandGroupUserPlayerPO player =
+					// commandVodService.deviceStart_Cascade(user, deviceId,
+					// admin, -1);
+					// BusinessPlayerVO _player = new
+					// BusinessPlayerVO().set(player);
+					// playerVOs.add(_player);
+				} catch (Exception e) {
 					log.info(user.getName() + "一键点播设备 " + deviceIds + " 部分失败，失败bundleId: " + deviceId);
 					e.printStackTrace();
 				}
 			}
-			
+
 			return playerVOs;
 		}
 	}
-
 
 	/**
 	 * 停止点播设备<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 下午4:16:21
-	 * @param Long businessId 业务id
+	 * 
+	 * @param Long
+	 *            businessId 业务id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/stop")
-	public Object deviceStop(
-			Long businessId,
-			HttpServletRequest request) throws Exception{
-		
+	public Object deviceStop(Long businessId, HttpServletRequest request) throws Exception {
+
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
-			
+
 			Long id = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(id);
-			
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
-			
+
+			// UserBO admin =
+			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+
 			vodService.deviceStop(businessId);
-			
-			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
-					   								   .getMap();
-			
-//			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
-//			
-////			vodService.userStop(businessId);
-//			
-//			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
-//					   								   .getMap();
+
+			return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
+					.getMap();
+
+			// CommandGroupUserPlayerPO player =
+			// commandVodService.deviceStop(user, businessId, admin);
+			//
+			//// vodService.userStop(businessId);
+			//
+			// return new HashMapWrapper<String, Object>().put("serial",
+			// player.getLocationIndex())
+			// .getMap();
 		}
 	}
-	
+
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/record/file/start")
-	public Object recordFileStart(
-			String businessType,
-			String businessInfo,
-			String url,
-			HttpServletRequest request) throws Exception{
-		
+	public Object recordFileStart(String businessType, String businessInfo, String url, HttpServletRequest request)
+			throws Exception {
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
-			
-			BusinessPlayerVO _player = new BusinessPlayerVO();//.set(player);
-			
+
+			BusinessPlayerVO _player = new BusinessPlayerVO();// .set(player);
+
 			return _player;
 		}
 	}
-	
+
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/record/file/stop")
-	public Object recordFileStop(
-			int serial,
-			HttpServletRequest request) throws Exception{
-		
+	public Object recordFileStop(int serial, HttpServletRequest request) throws Exception {
+
 		Long userId = userUtils.getUserIdFromSession(request);
-		
+
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
-			
+
 			CommandGroupUserPlayerPO player = commandVodService.recordVodStop(user, serial);
-			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
-					   								   .getMap();
+
+			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex()).getMap();
 		}
 	}
-	
+
 }

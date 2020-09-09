@@ -50,6 +50,7 @@ import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.bvc.device.monitor.live.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -337,9 +338,14 @@ public class VodService {
 		
 	}
 	
+	
+	
 	/** 重构点播用户 */
 	@Transactional(rollbackFor = Exception.class)
 	public void userStart(UserBO user, UserBO vodUser,Integer serial) throws Exception{
+		
+		commandCommonServiceImpl.authorizeUser(vodUser.getId(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
+//		commandCommonServiceImpl.authorizeUsers(new ArrayListWrapper<Long>().add(vodUser.getId()).getList(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
 		
 		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
 		
@@ -408,6 +414,42 @@ public class VodService {
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_USER);//TODO
 		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+	}
+	
+	/**
+	 * 批处理点播用户<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月9日 下午2:46:52
+	 * @param user
+	 * @param userIdList
+	 * @throws Exception
+	 */
+	public void userStartBatch(UserBO user,List <UserBO> userIdList) throws Exception{
+		
+		List<String> userBOs=new ArrayList<String>();
+		
+		for(UserBO vodUser : userIdList){
+			boolean success=false;
+			try{
+				userStart(user, vodUser,null);
+				success=true;
+//				CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
+//				BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//				playerVOs.add(_player);
+			}catch(Exception e){
+				log.info(user.getName() + "一键点播用户 "	 + " 部分失败，失败userId: " + vodUser.getId());
+				e.printStackTrace();
+			}finally{
+				if(!success){
+					userBOs.add(vodUser.getName());
+				}
+			}
+		}
+		
+		if(userBOs.size()>0){
+			throw new UserHasNoPermissionForBusinessException(BUSINESS_OPR_TYPE.DIANBO,1, userBOs.toString());
+		}
 	}
 	
 	/** 重构停止点播用户 */
