@@ -12,7 +12,8 @@ public enum TreeNodeType {
 	CHANNEL("通道"),
 	VIRTUAL("虚拟源"),
 	USER("用户"),
-	COMMAND("会议.");
+	COMMAND("会议."),
+	CONFERENCE_HALL("会场");
 	
 	private String name;
 	

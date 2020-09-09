@@ -58,6 +58,7 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.bvc.system.po.ChannelNamePO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -1322,7 +1323,7 @@ public class QueryUtil {
 	 * <b>日期：</b>2019年6月18日 上午8:56:22
 	 * @param DeviceGroupPO group 设备组
 	 * @param Long roleId 角色id
-	 * @param ChannelType type 视频解码通道类型
+	 * @param TerminalBundleChannelType type 视频解码通道类型
 	 * @return ChannelForwardPO 转发
 	 */
 	public ChannelForwardPO queryVirtualRoleChannelForward(DeviceGroupPO group, Long roleId, ChannelType type) throws Exception{
@@ -2011,6 +2012,16 @@ public class QueryUtil {
 		for(UserBO user : users){
 			if(user.getId().equals(id)){
 				return user;
+			}
+		}
+		return null;
+	}
+	
+	public ConferenceHallPO queryHallById(Collection<ConferenceHallPO> halls, Long id){
+		if(halls == null) return null;
+		for(ConferenceHallPO hall : halls){
+			if(hall.getId().equals(id)){
+				return hall;
 			}
 		}
 		return null;

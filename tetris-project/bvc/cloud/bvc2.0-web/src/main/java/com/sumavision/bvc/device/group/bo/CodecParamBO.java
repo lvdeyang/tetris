@@ -43,7 +43,7 @@ public class CodecParamBO {
 	 */
 	public CodecParamBO set(DeviceGroupAvtplPO avtpl, DeviceGroupAvtplGearsPO gear){
 		this.setAudio_param(new AudioParamBO().setCodec(avtpl.getAudioFormat().getName())
-												.setBitrate(gear.getAudioBitRate()))
+												.setBitrate(Integer.parseInt(gear.getAudioBitRate())))
 		    .setVideo_param(new VideoParamBO().setCodec(avtpl.getVideoFormat().getName())
 				   						      .setResolution(gear.getVideoResolution().getName())
 				   						      .setBitrate(gear.getVideoBitRate())
@@ -52,7 +52,7 @@ public class CodecParamBO {
 	}
 	public CodecParamBO set(AvtplPO avtpl, AvtplGearsPO gear){
 		this.setAudio_param(new AudioParamBO().setCodec(avtpl.getAudioFormat().getName())
-												.setBitrate(gear.getAudioBitRate()))
+												.setBitrate(Integer.parseInt(gear.getAudioBitRate())))
 		    .setVideo_param(new VideoParamBO().setCodec(avtpl.getVideoFormat().getName())
 				   						      .setResolution(gear.getVideoResolution().getName())
 				   						      .setBitrate(gear.getVideoBitRate())

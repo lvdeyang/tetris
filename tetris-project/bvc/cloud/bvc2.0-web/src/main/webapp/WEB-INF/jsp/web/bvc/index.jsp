@@ -12,7 +12,7 @@
 	scope = scope==null?"":scope;
 	String sessionId = (String)request.getAttribute("sessionId");
 	sessionId = sessionId==null?"":sessionId;
-	
+
 %>
 <!DOCTYPE HTML>
 <html lang="zh-cmn-Hans">
@@ -74,6 +74,7 @@
     <!-- icons -->
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/Font-Awesome-3.2.1/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="<%=basePath%>web/app/icons/header/style.css"/>
+    <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/feather/style.css"/>
     
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/ui/element-ui/element-ui-2.4.3.min.css"/>
 

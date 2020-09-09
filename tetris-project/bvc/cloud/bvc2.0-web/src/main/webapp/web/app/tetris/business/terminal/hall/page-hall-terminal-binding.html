@@ -1,0 +1,346 @@
+<mi-frame id="page-hall-terminal-binding-wrapper" :menus="menus" :user="userInfo" :groups="groups">
+
+    <template slot="title">虚拟设备管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>虚拟设备管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:0;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="width:33%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; position:relative;">
+                        <div style="width:42%; float:left; padding:10px 5px 10px 10px; box-sizing:border-box;">
+                            <el-input v-model="hall.filter.name" size="small" placeholder="名称"></el-input>
+                        </div>
+                        <div style="width:32%; float:left; box-sizing:border-box; padding:10px 10px 10px 5px;">
+                            <el-button size="small" type="primary" icon="el-icon-search" circle @click="loadHalls(hall.page.currentPage)"></el-button>
+                            <el-button size="small" type="primary" icon="el-icon-plus" circle @click="handleCreateHall"></el-button>
+                            <el-button size="small" type="primary" icon="el-icon-tickets" circle @click="handleCreateHallBatch"></el-button>
+                        </div>
+                        <div style="position:absolute; left:0; top:52px; right:0; bottom:50px; padding:0 10px;">
+                            <el-scrollbar style="height:100%;">
+                                <el-tree
+                                        ref="hallTree"
+                                        :props="hall.props"
+                                        highlight-current
+                                        :data="hall.data"
+                                        @current-change="handleHallCurrentNodeChange">
+                                    <div slot-scope="scope" style="width:100%;">
+                                        <span style="font-size:14px;">{{scope.data.name}}（{{scope.data.terminalName}}）</span>
+                                        <span style="float:right;">
+                                            <el-button type="text" icon="el-icon-edit" style="padding:0; font-size:18px;" @click.stop="handleEditHall(scope)"></el-button>
+                                            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px; margin-left:20px; margin-right:20px;" @click.stop="handleDeleteHall(scope)"></el-button>
+                                        </span>
+                                    </div>
+                                </el-tree>
+                            </el-scrollbar>
+                        </div>
+
+                        <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                            <el-pagination
+                                    style="float:right;"
+                                    background
+                                    @current-change="handleHallCurrentChange"
+                                    :current-page="hall.page.currentPage"
+                                    :page-size="hall.page.pageSize"
+                                    layout="total, prev, next"
+                                    :total="hall.page.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                    <div v-if="hall.current" style="width:33%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; padding:10px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    ref="terminalBundleTree"
+                                    node-key="uuid"
+                                    :props="terminalBundle.props"
+                                    highlight-current
+                                    :data="terminalBundle.data"
+                                    @current-change="handleTerminalBundleCurrentNodeChange">
+                                <span slot-scope="scope" style="font-size:14px;">{{scope.data.name}}-{{scope.data.bundleType}}-{{scope.data.typeName}}</span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                    <div v-if="terminalBundle.current" style="width:34%; height:100%; float:left; box-sizing:border-box; padding:10px; position:relative;">
+                        <el-button type="primary" size="small" @click="handleSelectBundles">绑定设备</el-button>
+                        <el-form label-width="80px">
+                            <el-form-item label="设备名称:">
+                                {{bundle.bundleName}}
+                            </el-form-item>
+                            <el-form-item label="设备id:">
+                                {{bundle.bundleId}}
+                            </el-form-item>
+                            <el-form-item label="设备类型:">
+                                {{bundle.bundleType}}
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="danger" size="small" v-if="bundle.id" @click="clearBundle">清除</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加会场"
+                :visible.sync="dialog.createHall.visible"
+                width="500px"
+                :before-close="handleCreateHallClose">
+
+            <el-dialog
+                append-to-body
+                title="选择终端"
+                :close-on-click-modal="true"
+                :visible.sync="terminal.visible"
+                width="400px"
+                :before-close="handleTerminalClose"
+                class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="terminal.visible"
+                                ref="terminalTree"
+                                :props="terminal.props"
+                                highlight-current
+                                :data="terminal.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <el-dialog
+                    append-to-body
+                    title="选择分组"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectFolder.visible"
+                    width="400px"
+                    :before-close="handelSelectFolderClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectFolder.visible"
+                                ref="createHallFolderTree"
+                                :props="dialog.selectFolder.props"
+                                highlight-current
+                                :data="dialog.selectFolder.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <el-form label-width="40px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.createHall.name"></el-input>
+                </el-form-item>
+                <el-form-item label="终端">
+                    <el-input v-model="dialog.createHall.terminal.name" readonly @click.native="handelSelectTerminal"></el-input>
+                </el-form-item>
+                <el-form-item label="分组">
+                    <el-input v-model="dialog.createHall.folder.name" readonly @click.native="handelSelectFolder">
+                        <i slot="suffix" class="el-input__icon el-icon-error" @click.stop="dialog.createHall.folder='';"></i>
+                    </el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateHallClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateHallSubmit" :loading="dialog.createHall.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="快速添加"
+                :visible.sync="dialog.createHallBatch.visible"
+                width="900px"
+                :before-close="handleCreateHallBatchClose"
+                class="select-bundle">
+
+            <el-dialog
+                    append-to-body
+                    title="选择终端"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectSingleBundleTerminal.visible"
+                    width="400px"
+                    :before-close="handleSelectSingleBundleTerminalClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectSingleBundleTerminal.visible"
+                                ref="singleBundleTerminalTree"
+                                :props="dialog.selectSingleBundleTerminal.props"
+                                highlight-current
+                                :data="dialog.selectSingleBundleTerminal.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <div style="width:100%; height:500px; position:relative;">
+                <div style="float:left; margin-right:20px;">
+                    <el-button type="text" size="small" @click.native="handleSelectSingleBundleTerminal" style="font-size:14px;">选择终端：</el-button>
+                    <span>{{dialog.createHallBatch.terminal.name}}</span>
+                </div>
+                <div style="width:200px; float:left;">
+                    <el-input size="small" placeholder v-model="dialog.selectBundle.filter.bundleName"></el-input>
+                </div>
+                <div style="float:left; margin-left:10px;">
+                    <el-button size="small" type="primary" circle icon="el-icon-search" @click="loadBundles(dialog.selectBundle.page.currentPage)"></el-button>
+                </div>
+                <div style="position:absolute; left:0; top:42px; right:0; bottom:50px; padding:0 10px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                :data="dialog.selectBundle.data"
+                                style="width: 100%"
+                                @selection-change="handleBundleSelected">
+                            <el-table-column
+                                type="selection"
+                                width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleId"
+                                    label="设备id">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleName"
+                                    label="设备名称">
+                            </el-table-column>
+                            <el-table-column
+                                    width="200"
+                                    prop="bundleType"
+                                    label="设备类型">
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+                <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @current-change="handleBundleCurrentChange"
+                            :current-page="dialog.selectBundle.page.currentPage"
+                            :page-size="dialog.selectBundle.page.pageSize"
+                            layout="total, prev, pager, next"
+                            :total="dialog.selectBundle.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateHallBatchClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateHallBatchSubmit" :loading="dialog.createHallBatch.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改会场"
+                :visible.sync="dialog.editHall.visible"
+                width="500px"
+                :before-close="handleEditHallClose">
+
+            <el-dialog
+                    append-to-body
+                    title="选择分组"
+                    :close-on-click-modal="true"
+                    :visible.sync="dialog.selectFolder.visible"
+                    width="400px"
+                    :before-close="handelEditHallSelectFolderClose"
+                    class="dialog-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.selectFolder.visible"
+                                ref="editHallFolderTree"
+                                :props="dialog.selectFolder.props"
+                                highlight-current
+                                :data="dialog.selectFolder.data">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <el-form label-width="40px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editHall.name"></el-input>
+                </el-form-item>
+                <el-form-item label="分组">
+                    <el-input v-model="dialog.editHall.folder.name" readonly @click.native="handelSelectFolder">
+                        <i slot="suffix" class="el-input__icon el-icon-error" @click.stop="dialog.editHall.folder='';"></i>
+                    </el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditHallClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditHallSubmit" :loading="dialog.editHall.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="选择设备"
+                :close-on-click-modal="false"
+                :visible.sync="dialog.selectBundle.visible"
+                :before-close="handleSelectBundleClose"
+                width="800px;"
+                class="select-bundle">
+            <div style="width:100%; height:500px; position:relative;">
+                <div style="width:200px; float:left;">
+                    <el-input size="small" placeholder v-model="dialog.selectBundle.filter.bundleName"></el-input>
+                </div>
+                <div style="float:left; margin-left:10px;">
+                    <el-button size="small" type="primary" circle icon="el-icon-search" @click="loadBundles(dialog.selectBundle.page.currentPage)"></el-button>
+                </div>
+                <div style="position:absolute; left:0; top:42px; right:0; bottom:50px; padding:0 10px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                @current-change="currentBundleChange"
+                                ref="selectBundleTable"
+                                :data="dialog.selectBundle.data"
+                                highlight-current-row
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="bundleId"
+                                    label="设备id">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleName"
+                                    label="设备名称">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="bundleType"
+                                    label="设备类型">
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+                <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @current-change="handleBundleCurrentChange"
+                            :current-page="dialog.selectBundle.page.currentPage"
+                            :page-size="dialog.selectBundle.page.pageSize"
+                            layout="total, prev, pager, next"
+                            :total="dialog.selectBundle.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectBundleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectBundleSubmit" :loading="dialog.selectBundle.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

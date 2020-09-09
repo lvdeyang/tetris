@@ -217,9 +217,10 @@ public class CommandSilenceServiceImpl {
 			
 			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO operateMember = commandCommonUtil.queryMemberByUserId(members, userId);
+			//将成员的对上对下静默取消
 			if(stopSilenceToHigher) operateMember.setSilenceToHigher(false);
 			if(stopSilenceToLower) operateMember.setSilenceToLower(false);
-			commandGroupDao.save(group);//需要吗？
+			commandGroupDao.save(group);
 			
 			//恢复会中的转发
 			commandBasicServiceImpl.startGroupForwards(group, true, true);

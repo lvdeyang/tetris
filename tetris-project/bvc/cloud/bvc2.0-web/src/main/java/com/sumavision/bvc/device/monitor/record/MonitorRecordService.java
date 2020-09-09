@@ -713,7 +713,7 @@ public class MonitorRecordService {
 	 * <b>日期：</b>2019年7月1日 下午1:56:40
 	 * @param MonitorRecordPO task 录制任务
 	 * @param CodecParamBO codec 参数模板
-	 * @param BundlePO bundle xt设备
+	 * @param TerminalBundlePO bundle xt设备
 	 * @return LogicBO 协议
 	 */
 	public LogicBO startDevicePassby(
@@ -877,7 +877,7 @@ public class MonitorRecordService {
 	 * <b>日期：</b>2019年7月1日 下午2:05:30
 	 * @param MonitorRecordPO task 录制任务
 	 * @param CodecParamBO codec 参数模板
-	 * @param BundlePO bundle 设备
+	 * @param TerminalBundlePO bundle 设备
 	 * @return LogicBO 协议
 	 */
 	public LogicBO stopDevicePassby(

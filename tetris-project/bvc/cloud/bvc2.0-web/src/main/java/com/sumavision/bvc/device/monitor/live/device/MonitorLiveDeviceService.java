@@ -943,7 +943,7 @@ public class MonitorLiveDeviceService {
 	 * @param MonitorLiveDevicePO live 点播设备任务
 	 * @param CodecParamBO codec 参数模板
 	 * @param MonitorOsdPO osd 字幕
-	 * @param BundlePO videoBundle 视频源设备
+	 * @param TerminalBundlePO videoBundle 视频源设备
 	 * @param Long userId 业务用户
 	 * @return LogicBO 协议数据
 	 */

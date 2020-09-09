@@ -30,7 +30,7 @@ public class OmmsSoftwareServiceTypeTreeNodeVO {
 	
 	private String type;
 	
-	private Map<String, String> params;
+	private Map<String, Object> params;
 	
 	private List<OmmsSoftwareServiceTypeTreeNodeVO> children;
 	
@@ -81,11 +81,11 @@ public class OmmsSoftwareServiceTypeTreeNodeVO {
 		return this;
 	}
 
-	public Map<String, String> getParams() {
+	public Map<String, Object> getParams() {
 		return params;
 	}
 
-	public OmmsSoftwareServiceTypeTreeNodeVO setParams(Map<String, String> params) {
+	public OmmsSoftwareServiceTypeTreeNodeVO setParams(Map<String, Object> params) {
 		this.params = params;
 		return this;
 	}
@@ -125,7 +125,7 @@ public class OmmsSoftwareServiceTypeTreeNodeVO {
 			.setType(TYPE_SERVICE)
 			.setIcon(ICON_SERVICE)
 			.setParent(serviceType.getGroupType().getName())
-			.setParams(new HashMapWrapper<String, String>().put("installationDirectory", serviceType.getInstallationDirectory())
+			.setParams(new HashMapWrapper<String, Object>().put("installationDirectory", serviceType.getInstallationDirectory())
 														   .put("installScript", serviceType.getInstallScript())
 														   .put("installScriptPath", serviceType.getInstallScriptPath())
 														   .put("startupScript", serviceType.getStartupScript())

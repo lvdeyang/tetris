@@ -16,6 +16,21 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 	/** 小工具端口 */
 	private String gadgetPort;
 	
+	/** 小工具用户名 */
+	private String gadgetUsername;
+	
+	/** 小工具密码 */
+	private String gadgetPassword;
+	
+	/** ftp端口 */
+	private String ftpPort;
+	
+	/** ftp用户名 */
+	private String ftpUsername;
+	
+	/** ftp密码 */
+	private String ftpPassword;
+	
 	/** 备注 */
 	private String remark;
 	
@@ -64,6 +79,51 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 		return this;
 	}
 
+	public String getGadgetUsername() {
+		return gadgetUsername;
+	}
+
+	public ServerVO setGadgetUsername(String gadgetUsername) {
+		this.gadgetUsername = gadgetUsername;
+		return this;
+	}
+
+	public String getGadgetPassword() {
+		return gadgetPassword;
+	}
+
+	public ServerVO setGadgetPassword(String gadgetPassword) {
+		this.gadgetPassword = gadgetPassword;
+		return this;
+	}
+
+	public String getFtpPort() {
+		return ftpPort;
+	}
+
+	public ServerVO setFtpPort(String ftpPort) {
+		this.ftpPort = ftpPort;
+		return this;
+	}
+
+	public String getFtpUsername() {
+		return ftpUsername;
+	}
+
+	public ServerVO setFtpUsername(String ftpUsername) {
+		this.ftpUsername = ftpUsername;
+		return this;
+	}
+
+	public String getFtpPassword() {
+		return ftpPassword;
+	}
+
+	public ServerVO setFtpPassword(String ftpPassword) {
+		this.ftpPassword = ftpPassword;
+		return this;
+	}
+
 	public String getRemark() {
 		return remark;
 	}
@@ -106,10 +166,18 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 			.setName(entity.getName())
 			.setIp(entity.getIp())
 			.setGadgetPort(entity.getGadgetPort())
+			.setGadgetUsername(entity.getGadgetUsername())
+			.setGadgetPassword(entity.getGadgetPassword())
+			.setFtpPort(entity.getFtpPort())
+			.setFtpUsername(entity.getFtpUsername())
+			.setFtpPassword(entity.getFtpPassword())
 			.setRemark(entity.getRemark())
 			.setCreator(entity.getCreator())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
-			.setStatus(entity.getStatus().getName());
+			.setStatus(entity.getStatus().getName())
+			.setFtpUsername(entity.getFtpUsername())
+			.setFtpPort(entity.getFtpPort())
+			.setFtpPassword(entity.getFtpPassword());
 		return this;
 	}
 

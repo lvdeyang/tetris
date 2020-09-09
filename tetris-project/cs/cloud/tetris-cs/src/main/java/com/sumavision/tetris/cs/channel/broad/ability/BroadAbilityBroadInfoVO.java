@@ -6,13 +6,13 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInfoVO, BroadAbilityBroadInfoPO>{
 	/** 频道id */
 	private Long channelId;
-	/** 预播发地址 */
+	/** 预播发地�? */
 	private String previewUrlIp;
 	/** 本地Ip */
 	private String localIp;
-	/** 预播发可用起始端口 */
+	/** 预播发可用起始端�? */
 	private String previewUrlPort;
-	/** 预播发可用终止端口 */
+	/** 预播发可用终止端�? */
 	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;

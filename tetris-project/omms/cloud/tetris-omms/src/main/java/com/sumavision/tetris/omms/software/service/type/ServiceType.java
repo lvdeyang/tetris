@@ -3,7 +3,7 @@ package com.sumavision.tetris.omms.software.service.type;
 public enum ServiceType {
 
 	EUREKA("微服务中心", 
-			"installationDirectory", 
+			"/home/install", 
 			"installScript", 
 			"installScriptPath", 
 			"startupScript", 
@@ -11,10 +11,10 @@ public enum ServiceType {
 			"shutdownScript", 
 			"shutdownScriptPath", 
 			"logFile", 
-			GroupType.SPRING_CLOUD),
+			GroupType.JAVA_SERVER),
 	
 	ZUUL("微服务网关", 
-		  "installationDirectory", 
+		  "/home/install", 
 		  "installScript", 
 		  "installScriptPath", 
 		  "startupScript", 
@@ -22,10 +22,10 @@ public enum ServiceType {
 		  "shutdownScript", 
 		  "shutdownScriptPath", 
 		  "logFile", 
-		  GroupType.SPRING_CLOUD),
+		  GroupType.JAVA_SERVER),
 	
 	FILE_TRANSCODING("文件转码", 
-		  "installationDirectory", 
+		  "/home/install", 
 		  "installScript", 
 		  "installScriptPath", 
 		  "startupScript", 
@@ -33,7 +33,7 @@ public enum ServiceType {
 		  "shutdownScript", 
 		  "shutdownScriptPath", 
 		  "logFile", 
-		  GroupType.PROTOCOL_CONVERSION);
+		  GroupType.C_SERVER);
 	
 	private String name;
 	

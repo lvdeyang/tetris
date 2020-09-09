@@ -1,0 +1,151 @@
+<mi-frame id="page-combine-audio-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">议程混音</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-agenda">{{agendaName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>议程混音</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建混音</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除混音</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="350">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="编辑混音" placement="bottom-end">
+                                    <el-button type="text" icon="icon-music" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditSrc(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除混音" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 新建混音对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建混音"
+                :visible.sync="dialog.createCombineAudio.visible"
+                width="500px"
+                :before-close="handleCreateCombineAudioClose">
+            <el-input v-model="dialog.createCombineAudio.name"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateCombineAudioClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateCombineAudioSubmit" :loading="dialog.createCombineAudio.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改混音名称 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改名称"
+                :visible.sync="dialog.editCombineAudio.visible"
+                width="500px"
+                :before-close="handleEditCombineAudioClose">
+            <el-input v-model="dialog.editCombineAudio.name"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditCombineAudioClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditCombineAudioSubmit" :loading="dialog.editCombineAudio.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改混音源 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改混音源"
+                :visible.sync="dialog.editSrc.visible"
+                width="500px"
+                :before-close="handleEditSrcClose"
+                id="edit-src-tree-outer">
+
+            <el-dialog
+                append-to-body
+                :close-on-click-modal="true"
+                title="选择源"
+                :visible.sync="dialog.editSrc.srcsVisible"
+                width="400px"
+                :before-close="handleEditSrcSrcsClose"
+                id="edit-src-tree">
+                <div style="max-height:400px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                            v-if="dialog.editSrc.srcsVisible && dialog.editSrc.srcType==='ROLE_CHANNEL'"
+                            class="filter-tree"
+                            :data="dialog.editSrc.srcs"
+                            :props="dialog.editSrc.props"
+                            default-expand-all
+                            ref="selectSrcTree">
+                            <span slot-scope="scope">
+                                <el-checkbox v-if="!scope.data.channels" v-model="scope.data.checked">{{scope.data.name}}</el-checkbox>
+                                <span v-else>{{scope.data.roleName}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </el-dialog>
+
+            <el-form label-width="80px">
+                <el-form-item label="源类型">
+                    <el-select v-model="dialog.editSrc.srcType" placeholder="源类型" style="width:100%;">
+                        <el-option label="角色通道" value="ROLE_CHANNEL"></el-option>
+                        <!--<el-option label="设备通道" value="CHANNEL"></el-option>-->
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择源">
+                    <el-button size="mini" type="primary" icon="el-icon-more" @click="handleSelectSrc"></el-button>
+                </el-form-item>
+                <el-form-item>
+                    <div style="width:100%; max-height:200px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tag
+                                v-for="src in dialog.editSrc.selectedSrcs"
+                                :key="src.id"
+                                closable
+                                type="primary"
+                                @close="handleSrcRemove(src)">
+                                <span v-if="src.type==='ROLE_CHANNEL'" class="icon-user"></span>
+                                <span v-if="src.type==='CHANNEL'" class="icon-facetime-video"></span>
+                                {{src.name}}
+                            </el-tag>
+                        </el-scrollbar>
+                    </div>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditSrcClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditSrcSubmit" :loading="dialog.editSrc.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

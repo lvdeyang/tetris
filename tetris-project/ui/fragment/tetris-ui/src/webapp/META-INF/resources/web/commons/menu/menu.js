@@ -5,7 +5,7 @@ define([
     'context'
 ], function(context){
 
-    //½âÎöÄ£°åurl²¢ÉèÖÃÖµ
+    //ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½urlï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
     var setValue = function(url){
         while(true){
             var matched = url.match(/(?=\{context:)/);
@@ -33,12 +33,12 @@ define([
         return url;
     };
 
-    //½âÎö²Ëµ¥Á´½ÓÄ£°å
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
     var parseUrlTemplate = function(menus){
         if(menus && menus.length>0){
             for(var i=0; i<menus.length; i++){
                 var menu = menus[i];
-                //²åÈë±äÁ¿
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 if(menu.link){
                     menu.link = setValue(menu.link);
                 }
@@ -49,7 +49,7 @@ define([
         }
     };
 
-    //»ñÈ¡µ±Ç°²Ëµ¥
+    //ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½Ëµï¿½
     var getActiveUuid = function(menus){
         if(menus && menus.length>0){
             for(var i=0; i<menus.length; i++){
@@ -64,7 +64,7 @@ define([
         }
     };
 
-    //ÉèÖÃÖ÷Ò³
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò³
     var getActiveMenu = function(menus){
         if(menus && menus.length>0){
             for(var i=0; i<menus.length; i++){
@@ -80,22 +80,22 @@ define([
         }
     };
 
-    //ÅÐ¶ÏÊÇ·ñÊÇhash
+    //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½hash
     var isHash = function(test){
         var reg = /^#\//;
         return test.match(reg);
     };
 
-    //´ÓhashÖÐ½âÎöpageId
+    //ï¿½ï¿½hashï¿½Ð½ï¿½ï¿½ï¿½pageId
     var parsePageId = function(href){
         if(isHash(href)){
             href = href.replace('#/', '');
-            return href.split('/')[0];
+            return href.split('/')[0].split('?')[0];
         }else{
             if(href.indexOf('#/') < 0){
                 return href;
             }else{
-                return href.split('#/')[1].split('/')[0];
+                return href.split('#/')[1].split('/')[0].split('?')[0];
             }
         }
     };

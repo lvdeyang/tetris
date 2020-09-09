@@ -24,6 +24,9 @@ require.config({
         'commons':window.APPPATH + 'commons',
         'menu':window.COMMONSPATH + 'menu/menu',
 
+        /* themes */
+        'theme-adapter':window.APPPATH + 'component/frame/theme-adapter',
+
         /* components */
         'bvc2-header':window.APPPATH + 'component/bvc2-header/bvc2-header',
         'bvc2-tab':window.APPPATH + 'component/bvc2-tab/bvc2-tab',
@@ -152,7 +155,8 @@ require.config({
         'page-monitor-live-user-list':window.APPPATH + 'monitor/live-user-list/page-monitor-live-user-list',
         'page-monitor-subtitle':window.APPPATH + 'monitor/subtitle/page-monitor-subtitle',
         'page-monitor-osd':window.APPPATH + 'monitor/osd/page-monitor-osd',
-        'page-monitor-external-folder':window.APPPATH + 'monitor/external-folder/page-monitor-external-folder'
+        'page-monitor-external-folder':window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
+        'page-guide-control':window.APPPATH + 'guide/control/page-guide-control'
 
     },
     shim:{
@@ -205,7 +209,8 @@ require([
     'restfull',
     'commons',
     'element-ui',
-    'bvc2-monitor-call'
+    'bvc2-monitor-call',
+    'theme-adapter'
 ], function(storage, Vue, router, context, config, menuUtil, ajax, commons){
 
     var app = null;

@@ -158,7 +158,7 @@ public class ResourceQueryUtil {
 	 * @throws Exception 
 	 * @return Set<String>
 	 */
-	private Set<String> queryUseableBundleIds(Long userId) throws Exception{
+	public Set<String> queryUseableBundleIds(Long userId) throws Exception{
 		//获取用户权限
 //		ResourceIdListBO bo = userFeign.queryResourceByUserId(userId);
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);

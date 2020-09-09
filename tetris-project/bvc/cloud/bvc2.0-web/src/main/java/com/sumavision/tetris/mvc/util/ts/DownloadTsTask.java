@@ -716,7 +716,7 @@ public class DownloadTsTask {
 					if(line.endsWith(".ts")){
 						tsNames.add(line);
 					}else if(line.startsWith("#EXTINF:")){
-						durations.add(Integer.valueOf((String.valueOf(Float.valueOf(line.replace("#EXTINF:", "").split(",")[0])*1000))));
+						durations.add(Integer.valueOf((String.valueOf(Float.valueOf(line.replace("#EXTINF:", "").split(",")[0])*1000).split("\\.")[0])));
 					}
 				}
 				writer.flush();

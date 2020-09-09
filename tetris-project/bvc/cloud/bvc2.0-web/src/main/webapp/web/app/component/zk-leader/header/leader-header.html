@@ -20,14 +20,16 @@
         </div>
         <div class="right">
             <p style="font-size: 14px;line-height: 44px;margin-left: -10px;color: #b7d0dc">
-                <span style="margin: 0 23px">设置</span>
-                <span style="margin:0px 18px; position:relative; right:5px;">预览</span>
-                <span style="margin: 0 13px">退出</span>
+                <span style="">资源</span>
+                <span style="margin-left:14px;">设置</span>
+                <span style="margin-left:14px;">预览</span>
+                <span style="margin-left:14px;">退出</span>
             </p>
             <p class="images">
-                <img src="../../../../../images/zk-leader/setting.png" @click="showSettings" title="系统设置">
-                <img src="../../../../../images/zk-leader/preview.png" @click="refreshPreview" title="本地预览">
-                <img src="../../../../../images/zk-leader/exit.png" title="退出" @click="closeExit">
+                <span style="display:inline-block; width:22px; height:22px; box-sizing:border-box; border:1px solid #000; margin: 0 3px; position:relative; right:6px; cursor:pointer;" @click="showBvc"></span>
+                <img src="../../../../../images/zk-leader/setting.png" @click="showSettings" title="系统设置" style="position:relative; right:3px;">
+                <img src="../../../../../images/zk-leader/preview.png" @click="refreshPreview" title="本地预览" style="position:relative; right:5px;">
+                <img src="../../../../../images/zk-leader/exit.png" title="退出" @click="closeExit" style="position:relative; right:4px;">
             </p>
         </div>
     </div>

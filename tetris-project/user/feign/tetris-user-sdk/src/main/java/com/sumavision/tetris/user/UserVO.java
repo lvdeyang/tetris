@@ -2,6 +2,8 @@ package com.sumavision.tetris.user;
 
 import java.util.List;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+
 /**
  * 登录用户信息<br/>
  * <p>特殊注明：用uuid字段存储userId</p>
@@ -103,6 +105,9 @@ public class UserVO{
 	/** 异常登录次数 */
 	private int errorLoginTimes;
 
+	/** 终端类型 */
+	private TerminalType terminalType;
+	
 	public Long getId() {
 		return id;
 	}
@@ -387,6 +392,15 @@ public class UserVO{
 
 	public UserVO setErrorLoginTimes(int errorLoginTimes) {
 		this.errorLoginTimes = errorLoginTimes;
+		return this;
+	}
+	
+	public TerminalType getTerminalType() {
+		return terminalType;
+	}
+
+	public UserVO setTerminalType(TerminalType terminalType) {
+		this.terminalType = terminalType;
 		return this;
 	}
 	

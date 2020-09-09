@@ -94,9 +94,10 @@ public class ProcessReceivedMsg {
     
     /**处理收到的响应类消息*/
     private void processRespMsg(String textMessage) {
-    	LOGGER.info("receive msgResp " + JSONObject.toJSONString(textMessage));
+    	//已经注释掉了RequestQueueConsumer和ProcessCallBackRunnable中的打印
+    	//LOGGER.info("receive msgResp " + JSONObject.toJSONString(textMessage));
         ResponseBO responseBo = JSONObject.parseObject(textMessage, ResponseBO.class);
-        LOGGER.info("----------------------processRespMsg message is " + (responseBo==null?null:JSONObject.toJSONString(responseBo)));
+        LOGGER.info("----------------------接收消息 " + (responseBo==null?null:JSONObject.toJSONString(responseBo)));
         String msgUid = responseBo.getMessage().getMessage_header().getSequence_id();
         if(null != msgUid){
             MessageIds.messageInfoMap.put(msgUid, responseBo);
@@ -171,7 +172,7 @@ public class ProcessReceivedMsg {
     		case ResponseBody.BUNDLE_NOT_FOUND:
     		case ResponseBody.BUNDLE_OFFLINE:
     		case ResponseBody.UNKNOWN_FAILED:
-    			LOGGER.info("处理open_bundle_response:" + resp.getResult());
+    			//LOGGER.info("处理open_bundle_response:" + resp.getResult());
     			if(null == bundleId || "".equals(bundleId)){
     				break;
     			}
@@ -230,7 +231,7 @@ public class ProcessReceivedMsg {
     			LOGGER.info("********** bundleId = " + bundleId + ", accept = " + bAccept + " **********");
     			meetingServiceImpl.incomingCallResponse(groupPO, bundleId, bAccept);
     		}else{
-    			LOGGER.info("无需处理异常，groupUuid = " + groupUuid + ", bundleId = " + bundleId);
+    			//LOGGER.info("无需处理异常，groupUuid = " + groupUuid + ", bundleId = " + bundleId);
     		}
     	}catch(Exception e){
     		LOGGER.error("treateOpenBundleResp failed", e);

@@ -264,7 +264,7 @@ define([
                     },
                     enterControl:function(row, e){
                         var instance = this;
-                        window.location.href = "web/app/group/largescreen/html/page-group-largescreen-control.html?" + instance.largescreen.combineJv230Id + "&" + row.id;
+                        window.location.href = "/web/app/group/largescreen/html/page-group-largescreen-control.html?" + instance.largescreen.combineJv230Id + "&" + row.id;
                     }
                 }
 

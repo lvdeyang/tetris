@@ -192,7 +192,8 @@ public class UserQuery {
 			.setToken(tokenEntity.getToken())
 			.setId(userEntity.getId())
 			.setUserno(userEntity.getUserno())
-			.setIp(tokenEntity.getIp());
+			.setIp(tokenEntity.getIp())
+			.setTerminalType(tokenEntity.getType());
 		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
 		
 		List<SystemRolePO> businessRoles = systemRoleDao.findByUserIdAndType(userEntity.getId(), SystemRoleType.BUSINESS.toString());

@@ -1,0 +1,351 @@
+<mi-frame id="page-audio-video-template-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">参数模板</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>参数模板</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建模板</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除模板</el-button>
+
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="视频格式"
+                                prop="videoFormatName">
+                        </el-table-column>
+                        <el-table-column
+                                label="备用视频格式"
+                                prop="videoFormatSpareName">
+                        </el-table-column>
+                        <el-table-column
+                                label="音频格式"
+                                prop="audioFormatName">
+                        </el-table-column>
+                        <el-table-column
+                                label="端口复用">
+                            <template slot-scope="scope">{{scope.row.mux?'是':'否'}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="视频码率"
+                                prop="videoBitRate">
+                        </el-table-column>
+                        <el-table-column
+                                label="备用视频码率"
+                                prop="videoBitRateSpare">
+                        </el-table-column>
+                        <el-table-column
+                                label="分辨率"
+                                prop="videoResolutionName">
+                        </el-table-column>
+                        <el-table-column
+                                label="备用分辨率"
+                                prop="videoResolutionSpareName">
+                        </el-table-column>
+                        <el-table-column
+                                label="帧率"
+                                prop="fps">
+                        </el-table-column>
+                        <el-table-column
+                                label="音频码率"
+                                prop="audioBitRate">
+                        </el-table-column>
+                        <el-table-column
+                                label="业务"
+                                prop="usageTypeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="是否是模板">
+                            <template slot-scope="scope">{{scope.row.isTemplate?'是':'否'}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="150">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="编辑模板" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除终端" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.currentPage"
+                        :page-sizes="table.pageSizes"
+                        :page-size="table.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.total">
+                </el-pagination>
+            </div>
+
+        </el-card>
+
+        <!-- 新建角色对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建模板"
+                :visible.sync="dialog.createTemplate.visible"
+                width="940px"
+                :before-close="handleCreateTemplateClose">
+            
+            <div style="width:100%;">
+                <div style="width:300px; float:left;">
+                    <el-form label-width="80px">
+                        <el-form-item label="名称">
+                            <el-input v-model="dialog.createTemplate.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频格式">
+                            <el-select v-model="dialog.createTemplate.videoFormat" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                    v-for="item in videoFormats"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="视频码率">
+                            <el-input v-model="dialog.createTemplate.videoBitRate"></el-input>
+                        </el-form-item>
+                        <el-form-item label="分辨率">
+                            <el-select v-model="dialog.createTemplate.videoResolution" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in resolutions"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="端口复用">
+                            <el-switch
+                                v-model="dialog.createTemplate.mux"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949">
+                            </el-switch>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="width:300px; float:left;">
+                    <el-form label-width="110px">
+                        <el-form-item label="帧率">
+                            <el-input v-model="dialog.createTemplate.fps"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备用视频格式">
+                            <el-select v-model="dialog.createTemplate.videoFormatSpare" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in videoFormats"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="备用视频码率">
+                            <el-input v-model="dialog.createTemplate.videoBitRateSpare"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备用分辨率">
+                            <el-select v-model="dialog.createTemplate.videoResolutionSpare" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in resolutions"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="是否是模板">
+                            <el-switch
+                                    v-model="dialog.createTemplate.isTemplate"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949">
+                            </el-switch>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="width:300px; float:left;">
+                    <el-form label-width="80px">
+                        <el-form-item label="音频格式">
+                            <el-select v-model="dialog.createTemplate.audioFormat" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in audioFormats"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="音频码率">
+                            <el-input v-model="dialog.createTemplate.audioBitRate"></el-input>
+                        </el-form-item>
+                        <el-form-item label="业务">
+                            <el-select v-model="dialog.createTemplate.usageType" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in usageTypes"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateTemplateClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateTemplateSubmit" :loading="dialog.createTemplate.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改角色对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改模板"
+                :visible.sync="dialog.editTemplate.visible"
+                width="940px"
+                :before-close="handleEditTemplateClose">
+
+            <div style="width:100%;">
+                <div style="width:300px; float:left;">
+                    <el-form label-width="80px">
+                        <el-form-item label="名称">
+                            <el-input v-model="dialog.editTemplate.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频格式">
+                            <el-select v-model="dialog.editTemplate.videoFormat" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in videoFormats"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="视频码率">
+                            <el-input v-model="dialog.editTemplate.videoBitRate"></el-input>
+                        </el-form-item>
+                        <el-form-item label="分辨率">
+                            <el-select v-model="dialog.editTemplate.videoResolution" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in resolutions"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="端口复用">
+                            <el-switch
+                                    v-model="dialog.editTemplate.mux"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949">
+                            </el-switch>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="width:300px; float:left;">
+                    <el-form label-width="110px">
+                        <el-form-item label="帧率">
+                            <el-input v-model="dialog.editTemplate.fps"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备用视频格式">
+                            <el-select v-model="dialog.editTemplate.videoFormatSpare" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in videoFormats"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="备用视频码率">
+                            <el-input v-model="dialog.editTemplate.videoBitRateSpare"></el-input>
+                        </el-form-item>
+                        <el-form-item label="备用分辨率">
+                            <el-select v-model="dialog.editTemplate.videoResolutionSpare" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in resolutions"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="是否是模板">
+                            <el-switch
+                                    v-model="dialog.editTemplate.isTemplate"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949">
+                            </el-switch>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="width:300px; float:left;">
+                    <el-form label-width="80px">
+                        <el-form-item label="音频格式">
+                            <el-select v-model="dialog.editTemplate.audioFormat" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in audioFormats"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="音频码率">
+                            <el-input v-model="dialog.editTemplate.audioBitRate"></el-input>
+                        </el-form-item>
+                        <el-form-item label="业务">
+                            <el-select v-model="dialog.editTemplate.usageType" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="item in usageTypes"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditTemplateClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditTemplateSubmit" :loading="dialog.editTemplate.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

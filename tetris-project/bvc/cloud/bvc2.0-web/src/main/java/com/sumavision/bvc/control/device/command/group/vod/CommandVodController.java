@@ -16,6 +16,9 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.tetris.bvc.business.vod.VodService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -38,6 +41,9 @@ public class CommandVodController {
 	@Autowired
 	private CommandVodService commandVodService;
 	
+	@Autowired
+	private VodService vodService;
+	
 	/**
 	 * 通用方法，指定播放器，播放各种类型的资源<br/>
 	 * <p>通常用于从资源树中拖拽到播放器进行点播</p>
@@ -59,6 +65,8 @@ public class CommandVodController {
 			String id,
 			int serial,
 			HttpServletRequest request) throws Exception{
+		
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 			
 		Long userId = userUtils.getUserIdFromSession(request);
 		
@@ -67,16 +75,15 @@ public class CommandVodController {
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			CommandGroupUserPlayerPO player = null;
 			if("file".equals(type)){
-				player = commandVodService.resourceVodStart(user, id, serial);
+				throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
 			}else if("user".equals(type)){
 				UserBO vodUser = userUtils.queryUserById(Long.parseLong(id));
-				player = commandVodService.userStart_Cascade(user, vodUser, admin, serial);
+				vodService.userStart(user, vodUser, serial);
 			}else if("device".equals(type)){
-				player = commandVodService.deviceStart_Cascade(user, id, admin, serial);
+				vodService.deviceStart(user, id, serial);
 			}
 			
-			if(player == null) return null;
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -229,8 +236,11 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.seeOneselfUserStart(user, admin, true);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//			CommandGroupUserPlayerPO player = commandVodService.seeOneselfUserStart(user, admin, true);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			vodService.userStart(user, user,null);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -259,13 +269,12 @@ public class CommandVodController {
 		
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//			vodService.userStop(153L);//test
 			
+			vodService.userStart(user, vodUser,null);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
 		}
 	}
@@ -289,6 +298,22 @@ public class CommandVodController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+		Long id = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		
+			UserBO user = userUtils.queryUserById(id);
+			UserBO vodUser = userUtils.queryUserById(userId);
+			
+//			vodService.userStop(153L);//test
+			
+			vodService.userStart(user, vodUser,serial);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
+			return _player;
+		}
+		/*
 		Long id = userUtils.getUserIdFromSession(request);
 		
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
@@ -302,7 +327,7 @@ public class CommandVodController {
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
 			return _player;
-		}
+		}*/
 	}
 
 	/**
@@ -336,9 +361,10 @@ public class CommandVodController {
 			for(Long userId : userIdList){
 				UserBO vodUser = userUtils.queryUserById(userId);
 				try{
-					CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
-					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-					playerVOs.add(_player);
+					vodService.userStart(user, vodUser,null);
+//					CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
+//					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//					playerVOs.add(_player);
 				}catch(Exception e){
 					log.info(user.getName() + "一键点播用户 " + userIds + " 部分失败，失败userId: " + userId);
 					e.printStackTrace();
@@ -371,10 +397,11 @@ public class CommandVodController {
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
+//			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
+			vodService.userStop(businessId);
 			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
-					   								   .getMap();		
+			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
+					   								   .getMap();
 		}
 	}	
 	
@@ -398,10 +425,14 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 		
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
+//			UserBO admin = new UserBO(); admin.setId(-1L);
+//			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
-			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			vodService.deviceStart(user, deviceId,null);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -427,6 +458,27 @@ public class CommandVodController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
+//		throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
+		
+		Long id = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+			UserBO user = userUtils.queryUserById(id);
+		
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = new UserBO(); admin.setId(-1L);
+//			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			vodService.deviceStart(user, deviceId,serial);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
+			
+			return _player;
+		}
+			
+		/*
 		Long id = userUtils.getUserIdFromSession(request);
 		
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
@@ -439,7 +491,7 @@ public class CommandVodController {
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
 			return _player;
-		}
+		}*/
 	}
 	
 	/**
@@ -472,9 +524,10 @@ public class CommandVodController {
 			
 			for(String deviceId : deviceIdList){
 				try{
-					CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-					playerVOs.add(_player);
+					vodService.deviceStart(user, deviceId,null);
+//					CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+//					BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//					playerVOs.add(_player);
 				}catch(Exception e){
 					log.info(user.getName() + "一键点播设备 " + deviceIds + " 部分失败，失败bundleId: " + deviceId);
 					e.printStackTrace();
@@ -508,10 +561,17 @@ public class CommandVodController {
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+			vodService.deviceStop(businessId);
 			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
 					   								   .getMap();
+			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+//			
+////			vodService.userStop(businessId);
+//			
+//			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+//					   								   .getMap();
 		}
 	}
 	
@@ -523,14 +583,14 @@ public class CommandVodController {
 			String businessInfo,
 			String url,
 			HttpServletRequest request) throws Exception{
-			
+		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
-			CommandGroupUserPlayerPO player = commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
+			commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
 			
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			BusinessPlayerVO _player = new BusinessPlayerVO();//.set(player);
 			
 			return _player;
 		}

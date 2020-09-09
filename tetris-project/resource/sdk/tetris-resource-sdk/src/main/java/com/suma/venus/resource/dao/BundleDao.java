@@ -19,8 +19,18 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public BundlePO findByBundleId(String bundleId);
 
 	public List<BundlePO> findByBundleIdIn(Collection<String> bundleIds);
+	
+	public List<BundlePO> findByBundleIdInAndDeviceModelIn(Collection<String> bundleIds, Collection<String> deviceModels);
 
 	public List<BundlePO> findByDeviceModel(String deviceModel);
+	
+	public Page<BundlePO> findByDeviceModelAndBundleType(String deviceModel, String bundleType, Pageable page);
+	
+	public Page<BundlePO> findByBundleType(String bundleType, Pageable page);
+	
+	public Page<BundlePO> findByDeviceModelAndBundleTypeAndBundleNameLike(String deviceModel, String bundleType, String bundleName, Pageable page);
+	
+	public Page<BundlePO> findByBundleTypeAndBundleNameLike(String bundleType, String bundleName, Pageable page);
 
 	public List<BundlePO> findByDeviceModelIsNotNull();
 
@@ -178,4 +188,10 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<String> findBundleIdByUsernameIn(Collection<String> usernames);
 	
 	public List<BundlePO> findByDeviceModelAndAccessNodeUid(String deviceModel, String layerId);
+	
+	
+	public List<BundlePO> findBundleByUserIdAndDeviceModel(Long userId,String deviceModel);
+	
+	@Query(value="select * from bundlepo where device_model=?1 and user_id=?2",nativeQuery=true)
+	public List<BundlePO> findByDeviceModelAndUserId(String deviceModel,String userId);
 }

@@ -74,4 +74,6 @@ public interface MenuDAO extends BaseDAO<MenuPO>{
 	 */
 	public List<MenuPO> findByAutoGeneration(boolean autoGeneration);
 	
+	
+	
 }

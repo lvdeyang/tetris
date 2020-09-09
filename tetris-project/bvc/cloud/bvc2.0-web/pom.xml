@@ -226,7 +226,6 @@
 		    <artifactId>freemarker</artifactId>
 		    <version>2.3.29</version>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<finalName>bvc2.0-web</finalName>

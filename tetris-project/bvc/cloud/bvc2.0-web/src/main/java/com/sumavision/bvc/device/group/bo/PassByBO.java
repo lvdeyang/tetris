@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 import com.sumavision.tetris.bvc.business.dispatch.po.TetrisDispatchPO;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 
 /**
  * @ClassName: 透传协议 
@@ -112,6 +113,18 @@ public class PassByBO {
 		return this;
 	}
 	
+	
+	//614
+	public PassByBO setIncomingCall(GroupPO group, String bundle_id, String layer_id){
+		
+		PassByContentBO passByContent = new PassByContentBO().setIncomingCall(group);		
+		this.setBundle_id(bundle_id)
+			.setLayer_id(layer_id)
+			.setType("incoming_call_request")
+			.setPass_by_content(passByContent);
+		
+		return this;
+	}
 	/**
 	 * @Title: 透传HangUp
 	 * @param group
@@ -128,6 +141,18 @@ public class PassByBO {
 		
 		return this;
 	}
+
+//614
+	public PassByBO setHangUp(GroupPO group,String bundle_id,String layer_id){
+			
+			PassByContentBO passByContent = new PassByContentBO().setHangUp(group);		
+			this.setBundle_id(bundle_id)
+				.setLayer_id(layer_id)
+				.setType("hang_up_request")
+				.setPass_by_content(passByContent);
+			
+			return this;
+		}
 	
 	/**
 	 * @Title: 成员变更MemberUpdate 

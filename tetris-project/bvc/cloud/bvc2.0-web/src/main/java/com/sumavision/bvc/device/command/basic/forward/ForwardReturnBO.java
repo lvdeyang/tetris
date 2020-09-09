@@ -1,6 +1,7 @@
 package com.sumavision.bvc.device.command.basic.forward;
 
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
+import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 
 import lombok.Getter;
@@ -31,6 +32,17 @@ public class ForwardReturnBO {
 	private String dstUserInfo = "";
 	
 	private String status = "";
+	
+	public ForwardReturnBO setByGroupDemand(GroupDemandPO demand){
+		this.id = demand.getId().toString();
+		this.time = DateUtil.format(demand.getUpdateTime(), DateUtil.dateTimePattern);
+		this.srcType = demand.getDemandType().getCode();
+		this.srcInfo = demand.getSrcName();
+		this.dstInstitutionInfo = "";
+		this.dstUserInfo = demand.getDstName();
+		this.status = "正常";
+		return this;
+	}
 	
 	public ForwardReturnBO setByUser(CommandGroupForwardDemandPO demand){
 		this.id = demand.getId().toString();

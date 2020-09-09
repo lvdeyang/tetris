@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -113,6 +114,28 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 	
 	/** osd 名称 */
 	private String osdName;
+	
+	/***********
+	 * 源信息（分页完成之后才能使用） *
+	 **********/
+	
+	/** 源视频设备层节点id */
+	private String srcVideoLayerId;
+	
+	/** 源视频设备id */
+	private String srcVideoBundleId;
+	
+	/** 源设备视频通道id */
+	private String srcVideoChannelId;
+	
+	/** 源音频设备层节点id */
+	private String srcAudioLayerId;
+	
+	/** 源音频设备id */
+	private String srcAudioBundleId;
+	
+	/** 源设备音频通道id */
+	private String srcAudioChannelId;
 
 	@Column(name = "LOCATION_INDEX")
 	public int getLocationIndex() {
@@ -333,6 +356,60 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		this.osdName = osdName;
 	}
 
+	@Column(name = "SRC_VIDEO_LAYER_ID")
+	public String getSrcVideoLayerId() {
+		return srcVideoLayerId;
+	}
+
+	public void setSrcVideoLayerId(String srcVideoLayerId) {
+		this.srcVideoLayerId = srcVideoLayerId;
+	}
+
+	@Column(name = "SRC_VIDEO_BUNDLE_ID")
+	public String getSrcVideoBundleId() {
+		return srcVideoBundleId;
+	}
+
+	public void setSrcVideoBundleId(String srcVideoBundleId) {
+		this.srcVideoBundleId = srcVideoBundleId;
+	}
+
+	@Column(name = "SRC_VIDEO_CHANNEL_ID")
+	public String getSrcVideoChannelId() {
+		return srcVideoChannelId;
+	}
+
+	public void setSrcVideoChannelId(String srcVideoChannelId) {
+		this.srcVideoChannelId = srcVideoChannelId;
+	}
+
+	@Column(name = "SRC_AUDIO_LAYER_ID")
+	public String getSrcAudioLayerId() {
+		return srcAudioLayerId;
+	}
+
+	public void setSrcAudioLayerId(String srcAudioLayerId) {
+		this.srcAudioLayerId = srcAudioLayerId;
+	}
+
+	@Column(name = "SRC_AUDIO_BUNDLE_ID")
+	public String getSrcAudioBundleId() {
+		return srcAudioBundleId;
+	}
+
+	public void setSrcAudioBundleId(String srcAudioBundleId) {
+		this.srcAudioBundleId = srcAudioBundleId;
+	}
+
+	@Column(name = "SRC_AUDIO_CHANNEL_ID")
+	public String getSrcAudioChannelId() {
+		return srcAudioChannelId;
+	}
+
+	public void setSrcAudioChannelId(String srcAudioChannelId) {
+		this.srcAudioChannelId = srcAudioChannelId;
+	}
+
 	public CommandGroupUserPlayerPO set(PlayerBundleBO entity){
 		this.setCode(entity.getUsername());
 		this.setUsername(entity.getUsername());
@@ -357,6 +434,24 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		return this;
 	}
 	
+	/** 从任务给播放器设置 */
+	public CommandGroupUserPlayerPO set(CommandPlayerTaskPO task){
+		this.playerBusinessType = task.getPlayerBusinessType();
+		this.locationIndex = task.getLocationIndex();
+		this.businessId = task.getBusinessId();
+		this.businessName = task.getBusinessName();
+		this.osdId = task.getOsdId();
+		this.osdName = task.getOsdName();
+		this.playUrl = task.getPlayUrl();
+		this.srcAudioBundleId = task.getSrcAudioBundleId();
+		this.srcAudioChannelId = task.getSrcAudioChannelId();
+		this.srcAudioLayerId = task.getSrcAudioLayerId();
+		this.srcVideoBundleId = task.getSrcVideoBundleId();
+		this.srcVideoChannelId = task.getSrcVideoChannelId();
+		this.srcVideoLayerId = task.getSrcVideoLayerId();
+		return this;
+	}
+	
 	/**
 	 * 释放播放器<br/>
 	 * <p>仅设置值，还需要额外从member解除对该player的关联，并save操作</p>
@@ -372,6 +467,12 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		this.setPlayUrl(null);
 		this.setOsdId(null);
 		this.setOsdName(null);
+		this.setSrcAudioBundleId(null);
+		this.setSrcAudioChannelId(null);
+		this.setSrcAudioLayerId(null);
+		this.setSrcVideoBundleId(null);
+		this.setSrcVideoChannelId(null);
+		this.setSrcVideoLayerId(null);
 		this.setMember(null);
 		return this;
 	}

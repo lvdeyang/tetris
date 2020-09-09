@@ -32,7 +32,7 @@ public class ProcessCallBackRunnable implements Runnable {
 					return;
 				}
 
-				LOGGER.info("==============ProcessCallBackMessageRunnable textMessage is : " + textMessage);
+				//LOGGER.info("==============ProcessCallBackMessageRunnable textMessage is : " + textMessage);
 
 				receivedMsg.process(textMessage);
 			}

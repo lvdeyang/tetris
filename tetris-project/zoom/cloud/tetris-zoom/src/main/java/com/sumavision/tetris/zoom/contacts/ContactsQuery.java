@@ -53,7 +53,7 @@ public class ContactsQuery {
 		if(entities==null || entities.size()<=0) return groups;
 		List<Long> userIds = new ArrayList<Long>();
 		for(ContactsPO entity:entities){
-			userIds.add(Long.valueOf(entity.getUserId()));
+			userIds.add(Long.valueOf(entity.getContactsUserId()));
 		}
 		
 		List<TokenVO> tokens = new ArrayList<TokenVO>();
@@ -77,7 +77,7 @@ public class ContactsQuery {
 						if(contacts.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
-								onlineTerminalTypes.add(token.getType());
+								onlineTerminalTypes.add(TerminalType.fromName(token.getType()).toString());
 							}
 						}
 					}
@@ -87,30 +87,28 @@ public class ContactsQuery {
 			}
 		}
 		
-		if(groupIds.size() > 0){
-			List<SourceGroupPO> groupEntities = sourceGroupDao.findByIdInOrderByNameAsc(groupIds);
-			for(int i=0; i<groupEntities.size(); i++){
-				ContactsGroupVO contactsGroup = new ContactsGroupVO().set(groupEntities.get(i));
-				groups.add(contactsGroup);
-				for(int j=0; j<entities.size(); j++){
-					if(contactsGroup.getId().equals(entities.get(j).getSourceGroupId())){
-						ContactsVO contacts = new ContactsVO().set(entities.get(j));
-						contactsGroup.getContacts().add(contacts);
-						String status = UserStatus.OFFLINE.toString();
-						List<String> onlineTerminalTypes = new ArrayList<String>();
-						if(tokens!=null && tokens.size()>0){
-							for(TokenVO token:tokens){
-								if(contacts.getUserId().equals(token.getUserId().toString())){
-									if(UserStatus.ONLINE.toString().equals(token.getStatus())){
-										status = UserStatus.ONLINE.toString();
-										onlineTerminalTypes.add(token.getType());
-									}
+		List<SourceGroupPO> groupEntities = sourceGroupDao.findByUserIdAndTypeOrderByNameAsc(user.getId().toString(), SourceGroupType.CONTACTS);
+		for(int i=0; i<groupEntities.size(); i++){
+			ContactsGroupVO contactsGroup = new ContactsGroupVO().set(groupEntities.get(i));
+			groups.add(contactsGroup);
+			for(int j=0; j<entities.size(); j++){
+				if(contactsGroup.getId().equals(entities.get(j).getSourceGroupId())){
+					ContactsVO contacts = new ContactsVO().set(entities.get(j));
+					contactsGroup.getContacts().add(contacts);
+					String status = UserStatus.OFFLINE.toString();
+					List<String> onlineTerminalTypes = new ArrayList<String>();
+					if(tokens!=null && tokens.size()>0){
+						for(TokenVO token:tokens){
+							if(contacts.getUserId().equals(token.getUserId().toString())){
+								if(UserStatus.ONLINE.toString().equals(token.getStatus())){
+									status = UserStatus.ONLINE.toString();
+									onlineTerminalTypes.add(TerminalType.fromName(token.getType()).toString());
 								}
 							}
 						}
-						contacts.setStatus(status);
-						contacts.setOnlineTerminalTypes(onlineTerminalTypes);
 					}
+					contacts.setStatus(status);
+					contacts.setOnlineTerminalTypes(onlineTerminalTypes);
 				}
 			}
 		}
@@ -160,7 +158,7 @@ public class ContactsQuery {
 						if(contacts.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
-								onlineTerminalTypes.add(token.getType());
+								onlineTerminalTypes.add(TerminalType.fromName(token.getType()).toString());
 							}
 						}
 					}
@@ -246,7 +244,7 @@ public class ContactsQuery {
 						if(contact.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
-								onlineTerminalTypes.add(token.getType());
+								onlineTerminalTypes.add(TerminalType.fromName(token.getType()).toString());
 							}
 						}
 					}

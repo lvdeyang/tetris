@@ -7,7 +7,7 @@ import com.sumavision.bvc.BO.ForwardSetBO.SrcBO;
 /**
  * 
  * @ClassName:  Bundle_ChannelBO   
- * @Description:TODO  
+ * @Description: logic协议中，connectBundle里边的channel
  * @author: 
  * @date:   2018年11月12日 上午11:27:49   
  *     
@@ -30,6 +30,16 @@ public class Bundle_ChannelBO {
 	 * channelParam的基本能力参数类型
 	 */
 	private String base_type;
+	
+	/**
+	 * 单播/组播模式
+	 */
+	private String mode;
+	
+	/**
+	 * 组播地址
+	 */
+	private String multi_addr;
 	
 	/**
 	 * 通道的源参数
@@ -68,6 +78,22 @@ public class Bundle_ChannelBO {
 
 	public void setBase_type(String base_type) {
 		this.base_type = base_type;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getMulti_addr() {
+		return multi_addr;
+	}
+
+	public void setMulti_addr(String multi_addr) {
+		this.multi_addr = multi_addr;
 	}
 
 	public SrcBO getSource_param() {

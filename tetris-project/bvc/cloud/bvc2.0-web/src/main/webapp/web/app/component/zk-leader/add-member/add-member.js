@@ -95,12 +95,19 @@ define([
                     return;
                 }
                 var members = [];
+                var hallIds = [];
                 for (var i = 0; i < self.tree.select.length; i++) {
-                    members.push(self.tree.select[i].id);
+                    var node = self.tree.select[i];
+                    if(node.type === 'USER'){
+                        members.push(node.id);
+                    }else if(node.type === 'CONFERENCE_HALL'){
+                        hallIds.push(node.id);
+                    }
                 }
                 ajax.post('/command/basic/add/members', {
                     id: self.groupId,
-                    members: $.toJSON(members)
+                    members: $.toJSON(members),
+                    hallIds: $.toJSON(hallIds)
                 }, function (data) {
                     self.qt.linkedWebview('rightBar', {
                         id: 'commandMemberAdd',

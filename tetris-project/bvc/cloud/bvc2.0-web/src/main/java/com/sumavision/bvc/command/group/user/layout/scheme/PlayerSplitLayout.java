@@ -66,4 +66,14 @@ public enum PlayerSplitLayout {
 		}
 		throw new ErrorTypeException("id", id);
 	}
+	
+	public static PlayerSplitLayout fromPlayerCount(int playerCount) throws Exception{
+		PlayerSplitLayout[] values = PlayerSplitLayout.values();
+		for(PlayerSplitLayout value:values){
+			if(value.getPlayerCount() == playerCount){
+				return value;
+			}
+		}
+		throw new ErrorTypeException("playerCount", playerCount);
+	}
 }

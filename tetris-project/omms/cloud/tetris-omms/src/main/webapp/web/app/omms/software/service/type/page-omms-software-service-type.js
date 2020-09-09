@@ -22,7 +22,6 @@ define([
 
     var init = function(){
 
-        //璁剧疆鏍囬
         commons.setTitle(pageId);
 
         var $page = document.getElementById(pageId);
@@ -35,6 +34,8 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                propertyValueTypes:[],
+                groupTypes:[],
                 tree:{
                     props:{
                         label:'name',
@@ -44,10 +45,17 @@ define([
                     data:[],
                     current:''
                 },
+                loading:{
+                    server:false,
+                    addRoot:false,
+                    table:false
+                },
                 columns:{
+                    loading:false,
+                    id:'',
                     name:{
-                        name:'服务类型',
-                        value:'媒资服务'
+                        name:'当前服务',
+                        value:''
                     },
                     installationDirectory:{
                         name:'安装包路径',
@@ -91,6 +99,17 @@ define([
                         visible:false,
                         key:'',
                         column:''
+                    },
+                    addServer:{
+                        visible:false,
+                        loading:false,
+                        serverName:'',
+                        groupType:'C服务'
+                    },
+                    editServer:{
+                        visible:false,
+                        loading:false,
+                        groupType:''
                     }
                 },
                 oneButtonCreateLoading:false
@@ -102,6 +121,36 @@ define([
 
             },
             methods:{
+                goToInstallationPackage:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package/' + self.tree.current.id + '/' + self.tree.current.name;
+                },
+                goToInstallationPackageHistory:function(){
+                    var self = this;
+                    window.location.hash = '#/page-omms-software-service-installation-package-history/' + self.tree.current.id + '/' + self.tree.current.name;
+                },
+                loadValueTypes:function(){
+                    var self = this;
+                    self.propertyValueTypes.splice(0, self.propertyValueTypes.length);
+                    ajax.post('/service/properties/find/value/types', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.propertyValueTypes.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                loadAllServiceTypes:function(){
+                    var self = this;
+                    self.tree.data.splice(0, self.tree.data.length);
+                    ajax.post('/service/type/find/all', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.tree.data.push(data[i]);
+                            }
+                        }
+                    });
+                },
                 currentTreeNodeChange:function(data){
                     var self = this;
                     if(data.type === 'FOLDER'){
@@ -122,6 +171,7 @@ define([
                     self.columns.installationDirectory.value = data.params.installationDirectory;
                     self.columns.logFile.value = data.params.logFile;
                     self.columns.installScript.value = data.params.installScript;
+
                     for(var i=0; i<self.editors.length; i++){
                         if(self.editors[i].name === 'installScript'){
                             if(self.editors[i].editor){
@@ -171,6 +221,109 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                createServer:function(){
+                    var self = this ;
+                    self.dialog.addServer.visible = true;
+                },
+                handleCreateServerClose:function(){
+                    var self = this;
+                    self.dialog.addServer.serverName = '';
+                    self.dialog.addServer.groupType = 'C服务';
+                    self.dialog.addServer.visible = false;
+                },
+                handleCreateServerSubmit:function(){
+                    var self = this;
+                    var params = {
+                        name:self.dialog.addServer.serverName,
+                        groupType:self.dialog.addServer.groupType
+                    }
+                    ajax.post('/service/type/create/server', params, function(data, status){
+                        self.handleCreateServerClose();
+                        if(status !== 200){
+                            return;
+                        }else{
+                            for(var i=0; i<data.length; i++){
+                                for(var j=0; j<self.tree.data.length; j++){
+                                    if(self.tree.data[j].name === data[i].parent){
+                                        self.tree.data[j].children.push(data[i]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                currentNode:function(data){
+                    if(!data) return;
+                    var self = this;
+                    self.$nextTick(function(){
+                        self.$refs.serverTree.setCurrentKey(data.uuid);
+                    });
+                    self.initFormMenu();
+                    self.tree.current = data;
+                    self.form.menu = $.extend(true, self.form.menu, data);
+                    self.form.menu.isGroup += '';
+                    self.loadPermissionRoles(data.id, 1);
+                },
+                /*treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                        if(status !== 200) return;
+                        self.loadAllServiceTypes();
+                        self.tree.current = '';
+                        self.columns.name.value = '';
+                        self.columns.installationDirectory.value = '';
+                        self.columns.logFile.value = '';
+                        self.columns.installScript.value = '';
+                        self.columns.installScript.path = '';
+                        self.columns.startupScript.value = '';
+                        self.columns.startupScript.path = '';
+                        self.columns.shutdownScript.value = '';
+                        self.columns.shutdownScript.path = '';
+                        return;
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },*/
+                treeNodeDeleteServer:function(node, data){
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除该服务，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/service/type/delete/' + data.id, null, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    self.loadAllServiceTypes();
+                                    self.tree.current = '';
+                                    self.columns.name.value = '';
+                                    self.columns.installationDirectory.value = '';
+                                    self.columns.logFile.value = '';
+                                    self.columns.installScript.value = '';
+                                    self.columns.installScript.path = '';
+                                    self.columns.startupScript.value = '';
+                                    self.columns.startupScript.path = '';
+                                    self.columns.shutdownScript.value = '';
+                                    self.columns.shutdownScript.path = '';
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
                 editColumn:function(columnKey, column){
                     var self = this;
                     self.dialog.editColumn.visible = true;
@@ -185,6 +338,26 @@ define([
                     self.dialog.editColumn.visible = false;
                     self.dialog.editColumn.key = '';
                     self.dialog.editColumn.column = '';
+                },
+                editServerType:function(node, data){
+                    var self = this ;
+                    self.dialog.editServer.visible = true;
+                    self.dialog.editServer.groupType = data.groupType;
+                },
+                handleEditServerTypeClose:function(){
+                    var self = this;
+                    self.dialog.editServer.visible = false;
+                    self.dialog.editServer.groupType ='';
+                    self.loadAllServiceTypes();
+                },
+                handleEditServerTypeSubmit:function(node, data){
+                    var self = this;
+                    ajax.post('/service/type/edit/server',
+                        {id:self.tree.current.id,
+                        groupType:self.dialog.editServer.groupType},
+                        function(data,status){
+                            self.handleEditServerTypeClose();
+                        },null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleEditColumnCommit:function(){
                     var self = this;
@@ -218,16 +391,12 @@ define([
             },
             mounted:function(){
                 var self = this;
-
-                ajax.post('/service/type/find/all', null, function(data){
-                    self.tree.data.splice(0, self.tree.data.length);
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.tree.data.push(data[i]);
-                        }
+                self.loadAllServiceTypes();
+                ajax.post('/service/type/find/group/types', null, function(data){
+                    for(var i=0; i<data.length; i++){
+                        self.groupTypes.push(data[i]);
                     }
                 });
-
                 self.$nextTick(function(){
 
                     $('#page-omms-software-service-type-wrapper').on('click.action.show.code', '.action-bar .action-show-code', function(){

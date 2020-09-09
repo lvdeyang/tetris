@@ -75,7 +75,9 @@ html, body {
     line-height: 30px;
 }
 .images img{
-    margin: 0 20px;
+    position:relative;
+    right:2px;
+    margin: 0 3px 0 14px;
     display: inline-block;
     width: 22px;
     height: 22px;

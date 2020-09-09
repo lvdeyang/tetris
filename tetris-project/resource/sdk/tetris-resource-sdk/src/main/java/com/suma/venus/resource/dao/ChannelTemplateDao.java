@@ -34,4 +34,14 @@ public interface ChannelTemplateDao extends CommonDao<ChannelTemplatePO>{
 	
 	@Query(value="select t.channelName from ChannelTemplatePO t where t.deviceModel = ?1")
 	public Set<String> findChannelNameByDeviceModel(String deviceModel);
+	
+	/**
+	 * 根据类型查询模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月16日 下午4:56:59
+	 * @param Collection<String> bundleTypes 设备类型列表
+	 * @return List<ChannelTemplatePO> 模板列表
+	 */
+	public List<ChannelTemplatePO> findByBundleTypeIn(Collection<String> bundleTypes);
 }

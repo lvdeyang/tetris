@@ -99,7 +99,7 @@ public class LogicTreatCompo{
 //			JSONObject obj = JSONObject.parseObject(cmd);
 //			String realCmd = JSONObject.toJSONString(obj);
 			BusinessOperateBO businessOperateBO = JSONObject.parseObject(cmd, BusinessOperateBO.class);		
-			log.info("JSONObject.parseObject 完成 cost " + (new Date().getTime()-start.getTime()) + " ms");
+			//log.info("JSONObject.parseObject 完成 cost " + (new Date().getTime()-start.getTime()) + " ms");
 			if(businessOperateBO != null){
 				//存储来电通知uuid和返回成功标志对
 				ResultMap incomingCallResultMap = null;
@@ -252,7 +252,7 @@ public class LogicTreatCompo{
 				 */
 				Date incomingStart = new Date();
 				incomingCallResultMap = accessLayer.sendIncomingCalls(businessOperateBO.getIncoming_call_request());
-				log.info("------------------------incoming cost " + (new Date().getTime()-incomingStart.getTime())/1000 + " s");
+				//log.info("------------------------incoming cost " + (new Date().getTime()-incomingStart.getTime())/1000 + " s");
 				/**
 				 * 新建合屏
 				 */
@@ -982,7 +982,7 @@ public class LogicTreatCompo{
 				
 				//呼叫bundle
 				if(businessOperateBO.getConnectBundle() != null && !businessOperateBO.getConnectBundle().isEmpty()){
-					log.info("-----------start treat connectBundle command");
+					//log.info("-----------start treat connectBundle command");
 					for(ConnectBundleBO bundleBO:businessOperateBO.getConnectBundle()){						
 						List<Bundle_ChannelBO> selectChannelBOs = new ArrayList<Bundle_ChannelBO>();
 						/**
@@ -997,7 +997,7 @@ public class LogicTreatCompo{
 								//编码通道无源信息
 								if(channelBO.getSource_param() == null){
 									selectChannelBOs.add(channelBO);
-								}else{//解码通道源信息分为三种channel/combineVideo/combineAudio，后两种需要把uuid转换成layer、bundle、channel
+								}else{//解码通道源信息分为多种channel/combineVideo/combineAudio/mediaPush，channel之外的需要把uuid转换成layer、bundle、channel
 									String uuid = channelBO.getSource_param().getUuid();
 									if("combineVideo".equals(channelBO.getSource_param().getType())){
 										ChannelSchemeBO channelSchemeBO = queryFromChannelMap(uuid,uuid2ChannelSelMap,uuid2ChannelUpdateMap);
@@ -1043,7 +1043,7 @@ public class LogicTreatCompo{
 							
 							connectBundle_channelsToLock = ChannelSchemeBO.transFromBundleChannelBOs(selectChannelBOs, bundleBO.getBundleId());
 							
-							//整理channel_param
+							//整理openBundle中的channelParam，放入ChannelSchemeBO.channelParam进行存放
 							assembleChannelParam(connectBundle_channelsToLock);
 							
 							if(connectBundle_channelsToLock == null || connectBundle_channelsToLock.size() != orgSize){
@@ -1095,15 +1095,15 @@ public class LogicTreatCompo{
 							log.info("--------------lock dstChannels success------------------");
 						}
 						if(!dstBundlesToLock.isEmpty()){
-							log.info("--------------start lock dstBundles------------------");
+							log.info("--------------start batch lock dstBundles------------------");
 							//业务层新添加的参数，指定mustLockAll，批量锁定
 							boolean mustLockAllBundle = businessOperateBO.isMustLockAllBundle();
 //							ResultMap lockBundleMap = resourseLayer.lockBundleResource(dstBundlesToLock, businessOperateBO.getUserId(), true);
-							ResultMap lockBundleMap = resourseLayer.batchLockBundleResource(dstBundlesToLock, businessOperateBO.getUserId(), mustLockAllBundle);
+							ResultMap lockBundleMap = resourseLayer.batchLockBundleResource(dstBundlesToLock, businessOperateBO.getAdminUserId(), mustLockAllBundle);
 							Boolean lockBundleResult = (Boolean)lockBundleMap.get("lockResult");
 							
 							if(lockBundleResult != null && lockBundleResult){//mustLockAll==true表示所有bundle锁定成功；mustLockAll==false表示调用成功
-								log.info("--------------lock dstBundles success------------------");
+								//log.info("--------------lock dstBundles success------------------");
 								//打开通道(open)
 								log.info("--------------start open dstBundles------------------");
 								
@@ -1131,7 +1131,7 @@ public class LogicTreatCompo{
 								if(!dstChannelsToLock.isEmpty()){
 									log.info("--------------rollback all dstChannels------------------");
 								}
-								resourseLayer.rollbackToUnlockChannels(dstChannelsToLock, businessOperateBO.getUserId());
+								resourseLayer.rollbackToUnlockChannels(dstChannelsToLock, businessOperateBO.getAdminUserId());
 								JSONObject jsonObj = new JSONObject();
 								JSONArray failBundleArray = generateBundleLockFailResultJsonArray(lockBundleMap, dstBundlesToLock);
 								if(failBundleArray != null){
@@ -1208,7 +1208,7 @@ public class LogicTreatCompo{
 					 * 释放bundle
 					 */
 					//有可能在停会时，一部分设备已经从资源层删除，所以最后一个参数使用false，不要求全部解锁成功
-					ResultMap disconnect_unlockBundleResultMap = resourseLayer.batchUnlockBundleResource(disconnect_bundlesToUnlock, businessOperateBO.getUserId(), false);
+					ResultMap disconnect_unlockBundleResultMap = resourseLayer.batchUnlockBundleResource(disconnect_bundlesToUnlock, businessOperateBO.getAdminUserId(), false);
 					//获取待关闭通道
 					List<BundleSchemeBO> disconnect_bundlesToClose = new ArrayList<BundleSchemeBO>();
 					List<Integer> operateIndexList = new ArrayList<Integer>();
@@ -2274,7 +2274,7 @@ public class LogicTreatCompo{
 	}
 	
 	/**
-	 * 整理呼叫、转发的channelParam
+	 * 整理呼叫、转发的openBundle中的channelParam，放入ChannelSchemeBO.channelParam进行存放
 	 * @param channels
 	 */
 	private void assembleChannelParam(List<ChannelSchemeBO> channels){
@@ -2314,6 +2314,9 @@ public class LogicTreatCompo{
 				if(channelToOperate.getScreens() != null && !channelToOperate.getScreens().isEmpty()){
 					channel_param.getJSONObject("base_param").put("screens", channelToOperate.getScreens());
 				}
+				//组播
+				channel_param.getJSONObject("base_param").put("mode", channelToOperate.getMode());
+				channel_param.getJSONObject("base_param").put("multi_addr", channelToOperate.getMulti_addr());
 				channelToOperate.setChannelParam(channel_param);
 			}catch(Exception ex){
 				iterator.remove();

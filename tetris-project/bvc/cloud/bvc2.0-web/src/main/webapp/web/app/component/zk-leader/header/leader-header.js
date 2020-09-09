@@ -17,6 +17,7 @@ define([
         template: tpl,
         data: function () {
             return {
+                token:'',
                 user: '',
                 usernameLength: '',
                 cleartimer1: null,
@@ -44,6 +45,11 @@ define([
             showSettings: function () {
                 var self = this;
                 self.qt.window('/router/zk/leader/settings', null, {width: 980, height: 600});
+            },
+            //bvc页面
+            showBvc:function(){
+                var self = this;
+                self.qt.windowWithFrame('/index/'+window.TOKEN+'#/page-monitor-terminal-live', 'qt-terminal', {width: '100%', height: '100%', title:'管理页面'});
             },
             //退出
             closeExit: function () {
@@ -77,6 +83,7 @@ define([
         mounted: function () {
             var self = this;
             self.qt = new QtContext('header', function () {
+
                 var timeInterval = function () {
                     self.fightDate = new Date().format('yyyy-MM-dd');
                     self.date = new Date().format('yyyy-MM-dd');

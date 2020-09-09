@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-ldy
+    name: tetris-bvc-business-mrh
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.64
   profiles:
     active: pro
   datasource:
@@ -14,7 +14,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.15:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.131:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -30,7 +30,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.15:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.131:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -57,7 +57,7 @@ spring:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
 server:
-  port: 8094
+  port: 8099
 #  jsp-servlet: 
 #    init-parameters: 
 #      development: false
@@ -67,7 +67,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.15:8081/eureka/
+      defaultZone: http://192.165.56.131:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

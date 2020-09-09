@@ -30,4 +30,7 @@ public interface DeviceGroupDAO extends MetBaseDAO<DeviceGroupPO>{
 	public int findGroupVolumeByGroupId(Long groupId);	
 
 	public DeviceGroupPO findByName(String name);
+
+	/** 设备呼叫会议，演示使用 */
+	public List<DeviceGroupPO> findByNameLike(String name);
 }

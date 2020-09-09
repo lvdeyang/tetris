@@ -24,6 +24,8 @@ import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.config.Constant;
 import com.sumavision.bvc.device.group.bo.AudioParamBO;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
+import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
+import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.PassByContentBO;
@@ -1781,11 +1783,20 @@ public class DeviceGroupServiceImpl {
 				}	
 			}
 			
+			//首次开会，需要计数+1
+			if(GroupStatus.STOP.equals(group.getStatus())){
+				List<ConnectBundleBO> connectBundleBOs = logic.getConnectBundle();
+				for(ConnectBundleBO connectBundle : connectBundleBOs){
+					connectBundle.setBusinessType("vod");
+					connectBundle.setOperateType("start");
+				}				
+			}
+			
 			//修改会议状态
 			group.setStatus(GroupStatus.START);
 			
 			//保存设备组状态
-			deviceGroupDao.save(group);		
+			deviceGroupDao.save(group);
 			
 			//调用逻辑层
 			executeBusiness.execute(logic, "逻辑层交互：设备组启动");
@@ -1948,6 +1959,15 @@ public class DeviceGroupServiceImpl {
 					 .setCombineAudioDel(combineAudios)
 					 .deleteForward(forwards, codec);
 			
+			}
+			
+			//停会，计数-1
+			if(GroupStatus.START.equals(group.getStatus())){
+				List<DisconnectBundleBO> disconnectBundleBOs = logic.getDisconnectBundle();
+				for(DisconnectBundleBO disconnectBundle : disconnectBundleBOs){
+					disconnectBundle.setBusinessType("vod");
+					disconnectBundle.setOperateType("stop");
+				}
 			}
 			
 			//修改会议状态
@@ -2498,14 +2518,14 @@ public class DeviceGroupServiceImpl {
 						//从map中取出锁定成功的DeviceGroupMemberPO
 						DeviceGroupMemberPO bundle = uuidMemberMap.get(connectBundleResult.getBundleId());
 						String bundleType = bundle.getBundleType();
-						if("jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
+//						if("tvos".equals(bundleType) || "jv210".equals(bundleType) || "sip".equals(bundleType) || "proxy".equals(bundleType) || "jv220".equals(bundleType)){
 							bundle.setMemberStatus(MemberStatus.CONNECT);
-						}else{
-							//如果已经CONNECT，则不修改
-							if(!MemberStatus.CONNECT.equals(bundle.getMemberStatus())){
-								bundle.setMemberStatus(MemberStatus.CONNECTING);
-							}
-						}
+//						}else{
+//							//如果已经CONNECT，则不修改
+//							if(!MemberStatus.CONNECT.equals(bundle.getMemberStatus())){
+//								bundle.setMemberStatus(MemberStatus.CONNECTING);
+//							}
+//						}
 					}
 				}catch (Exception e){
 					e.printStackTrace();

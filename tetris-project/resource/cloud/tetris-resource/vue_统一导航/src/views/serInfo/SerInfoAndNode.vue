@@ -89,6 +89,11 @@
                 v-if="scope.row.sourceType==='SYSTEM'"
                 @click="handleDelSerInfo(scope.$index, scope.row)"
             >删除</el-button>
+            <el-button
+                size="small"
+                v-if="scope.row.sourceType==='SYSTEM'"
+                @click="handleGotoGadgets(scope.$index, scope.row)"
+                >小工具</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -306,6 +311,12 @@
         </span>
 
     </el-dialog>
+      <div v-if="gadgets.visible" style="position:fixed; left:0; top:0; right:0; bottom:0; z-index:5000;">
+          <div style="width:100%; height:100%; position:relative;">
+              <el-button size="mini" type="primary" style="position:absolute; right:10px; top:25px; z-index:100;" icon="el-icon-d-arrow-left" @click="exitGadgets">返回</el-button>
+              <iframe style="width:100%; height:100%;" :src="gadgets.url" frameborder="0"></iframe>
+          </div>
+      </div>
   </section>
 </template>
 
@@ -324,6 +335,7 @@ import {
     syncSerInfoToLdap,
     delSerInfo,
     delSerNode,
+    gotoGadgets,
     queryFatherNodeOptions,
     modifySerNode,
     modifySerInfo,
@@ -334,6 +346,10 @@ import {
 export default {
     data() {
         return {
+            gadgets:{
+                visible:false,
+                url:''
+            },
             filters: {},
             activeTab: 'serInfoTab',
 
@@ -438,7 +454,6 @@ export default {
     },
 
     methods: {
-
 
         //标签页
         handleClick(tab, event) {
@@ -879,6 +894,22 @@ export default {
                     }
                 });
             });
+        },
+
+        handleGotoGadgets:function(index, row){
+            var self = this;
+            if(window.location.protocol.indexOf('https') >= 0){
+                self.gadgets.url = 'https://'+row.serAddr+':8912/';
+            }else{
+                self.gadgets.url = 'http://'+row.serAddr+':8910/';
+            }
+            self.gadgets.visible = true;
+        },
+
+        exitGadgets:function(){
+            var self = this;
+            self.gadgets.url = '';
+            self.gadgets.visible = false;
         },
 
         ////////////////////////////////////////////////////////////////////////////////

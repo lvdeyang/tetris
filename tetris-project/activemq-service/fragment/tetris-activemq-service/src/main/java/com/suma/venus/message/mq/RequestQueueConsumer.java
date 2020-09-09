@@ -160,7 +160,7 @@ public class RequestQueueConsumer implements MessageListener {
 				}
 				LOGGER.info("完成文件接收：" + "recv_" + message.getStringProperty("FILE.NAME"));
 			} else {
-				System.out.println("message come requestQueueConsumer");
+				//System.out.println("message come requestQueueConsumer");
 				String textMessage = ((TextMessage) message).getText();
 				// String textMessage = EncoderUtil.decryptDES(
 				// ((TextMessage) message).getText(), EncoderUtil.KEY);
@@ -176,8 +176,8 @@ public class RequestQueueConsumer implements MessageListener {
 				// message:"+textMessage);
 				// return;
 				// }
-				System.out.println("request接收消息 : " + textMessage + "  JMSMessage" + message.getJMSMessageID());
-				LOGGER.info("request接收消息 : " + textMessage + "  JMSMessage" + message.getJMSMessageID());
+				//System.out.println("request接收消息 : " + textMessage + "  JMSMessage" + message.getJMSMessageID());
+				//LOGGER.info("request接收消息 : " + textMessage + "  JMSMessage" + message.getJMSMessageID());
 
 				Object messageObj = JSONObject.parseObject(textMessage).get("message");
 
@@ -197,7 +197,7 @@ public class RequestQueueConsumer implements MessageListener {
 						break;
 					case "response":
 						
-						System.out.println("***********RequestQueueConsumer onMessage case response setResMap" + message.getJMSCorrelationID()+"**"+textMessage);
+						//System.out.println("***********RequestQueueConsumer onMessage case response setResMap" + message.getJMSCorrelationID()+"**"+textMessage);
 
 						
 						if (null != header.getSequence_id() && !QueueMsgSender.responseFlagMap.isEmpty()

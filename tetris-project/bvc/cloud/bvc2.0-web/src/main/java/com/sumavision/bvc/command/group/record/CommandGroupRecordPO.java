@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -137,6 +138,13 @@ public class CommandGroupRecordPO extends AbstractBasePO {
 	}
 	
 	public CommandGroupRecordPO setGroupInfo(CommandGroupPO group){		
+		this.groupUserId = group.getUserId();		
+		this.groupId = group.getId();
+		this.groupName = group.getName();
+		return this;
+	}
+	
+	public CommandGroupRecordPO setGroupInfo(GroupPO group){		
 		this.groupUserId = group.getUserId();		
 		this.groupId = group.getId();
 		this.groupName = group.getName();

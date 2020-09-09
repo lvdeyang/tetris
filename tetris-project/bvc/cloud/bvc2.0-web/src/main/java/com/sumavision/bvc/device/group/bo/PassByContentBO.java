@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 
 /**
  * @ClassName: 透传信息内容 
@@ -25,6 +26,9 @@ public class PassByContentBO implements BasePassByContent{
 	
 	/** 通知的唯一标识 */
 	private String uuid = "";
+	
+	/** 业务唯一标识 */
+	private String groupId = "";
 	
 	/** 业务唯一标识 */
 	private String groupUuid = "";
@@ -74,6 +78,15 @@ public class PassByContentBO implements BasePassByContent{
 		return this;
 	}
 
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public PassByContentBO setGroupId(String groupId) {
+		this.groupId = groupId;
+		return this;
+	}
+
 	public String getGroupUuid() {
 		return groupUuid;
 	}
@@ -96,8 +109,9 @@ public class PassByContentBO implements BasePassByContent{
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public PassByContentBO setUserId(String userId) {
 		this.userId = userId;
+		return this;
 	}
 
 	public List<BundleBO> getBundles() {
@@ -128,6 +142,17 @@ public class PassByContentBO implements BasePassByContent{
 		return this;
 	}
 	
+//614
+	public PassByContentBO setIncomingCall(GroupPO group){
+		this.setType("1")
+			.setCaller_name(group.getName())
+			.setUuid(group.getUuid())
+			.setGroupUuid(group.getUuid())
+			.setGroupId(group.getId().toString())
+		 	.setUserId(group.getUserId().toString());
+		
+		return this;
+	}
 	/**
 	 * @Title: 透传HangUp
 	 * @param group 设备组信息
@@ -136,6 +161,15 @@ public class PassByContentBO implements BasePassByContent{
 	 */
 	public PassByContentBO setHangUp(DeviceGroupPO group, DeviceGroupMemberPO member){
 		this.setType(group.getType().getProtocalId())
+		   .setCaller_name(group.getName())
+		   .setGroupUuid(group.getUuid());
+		
+		return this;
+	}
+
+//614
+	public PassByContentBO setHangUp(GroupPO group){
+		this.setType("1")
 		   .setCaller_name(group.getName())
 		   .setGroupUuid(group.getUuid());
 		

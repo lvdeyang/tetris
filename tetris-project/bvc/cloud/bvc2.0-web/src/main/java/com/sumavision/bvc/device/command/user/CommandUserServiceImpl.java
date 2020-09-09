@@ -1532,7 +1532,7 @@ public class CommandUserServiceImpl {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 上午9:55:27
-	 * @param UserLiveCallPO call 用户呼叫业务信息
+	 * @param UserCallPO call 用户呼叫业务信息
 	 * @param CodecParamBO codec 参数
 	 * @param Long userId 用户
 	 * @return LogicBO 协议
@@ -1746,7 +1746,7 @@ public class CommandUserServiceImpl {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 下午2:02:19
-	 * @param UserLiveCallPO call 用户呼叫业务信息
+	 * @param UserCallPO call 用户呼叫业务信息
 	 * @param Long userId 用户id
 	 * @return LogicBO 协议
 	 */

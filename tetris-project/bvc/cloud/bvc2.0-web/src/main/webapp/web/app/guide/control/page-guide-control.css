@@ -1,0 +1,7 @@
+.tab_btn{background:#CCC;font-weight:bold;color:black;border:1px solid #CCC;margin-left:0px!important;height:41px;width:41px;}
+.btn_table tr td{
+	width:40px;
+}
+.source_show{background:#FFF;color:black;text-align:center;-webkit-transform:scale(0.7);}
+.source_btn{background:#FFF;font-weight:bold;color:black;border:0;}
+.audioTable tr td{text-align:center}

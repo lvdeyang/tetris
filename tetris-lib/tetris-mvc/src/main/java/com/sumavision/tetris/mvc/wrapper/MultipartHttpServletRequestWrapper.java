@@ -31,7 +31,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 	//设置缓冲区大小，这里是40kb
 	private int bufferSize = 1024*40;
 	
-	//设置最大文件尺寸，这里是10MB
+	//设置最大文件尺寸，这里是50MB
 	private long maxSize = 1024*1024*50;
 	
 	private Map<String, Object> params;
@@ -107,7 +107,11 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		Path path = SpringContext.getBean(Path.class);
 		String webappPath = path.webappPath();
 		File repositroy = new File(new StringBufferWrapper().append(webappPath)
-															.append("\\upload\\buffer")
+															.append(File.separator)
+															.append("upload")
+															.append(File.separator)
+															.append("buffer")
+															//.append("\\upload\\buffer")
 															.toString());
 		if(!repositroy.exists()) repositroy.mkdirs();
 		
@@ -116,7 +120,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
         factory.setSizeThreshold(this.bufferSize); 
         factory.setRepository(repositroy);
         ServletFileUpload upload = new ServletFileUpload(factory);
-        //upload.setSizeMax(this.maxSize); 
+        upload.setSizeMax(this.maxSize); 
         upload.setFileSizeMax(this.maxSize);
         
         //解析http请求

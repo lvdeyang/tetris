@@ -17,7 +17,7 @@ public class DispatchAudioParamPO extends AbstractBasePO {
 
 	private String codec = "";
 
-	private String bitrate = "64000";
+	private int bitrate = 64000;
 	
 	private int sample_rate = 48000;
 	
@@ -40,11 +40,11 @@ public class DispatchAudioParamPO extends AbstractBasePO {
 		return this;
 	}
 
-	public String getBitrate() {
+	public int getBitrate() {
 		return bitrate;
 	}
 
-	public DispatchAudioParamPO setBitrate(String bitrate) {
+	public DispatchAudioParamPO setBitrate(int bitrate) {
 		this.bitrate = bitrate;
 		return this;
 	}

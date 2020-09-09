@@ -65,13 +65,14 @@ public class PcWebLoginFilter implements Filter{
 		JSONObject jsonResult = new JSONObject();
 		
 		String requestUri = request.getRequestURI();
-		if("/".equals(requestUri)){
-			response.sendRedirect("/web/app/login/login.html");
-			return;
-		}
 		
 		if(!shouldFilter(requestUri)){
 			chain.doFilter(request, response);
+			return;
+		}
+		
+		if("/".equals(requestUri)){
+			response.sendRedirect("/web/app/login/login.html");
 			return;
 		}
 		
@@ -124,7 +125,6 @@ public class PcWebLoginFilter implements Filter{
 	}
 
 	private boolean shouldFilter(String uri) {
-		
 		//静态资源
 		if(requestResouceTypeAnalyzer.isStaticResource(uri)) return false;
 		
@@ -142,6 +142,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/do/wechat/login")
 												   .add("/after/login/success")
 												   .add("/index")
+												   .add("/tetris/index/*")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
 												   .add("/api/server/media/upload")
@@ -168,13 +169,14 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/portal/login")
 												   .add("/covid19/register/statistics/*")
 												   .add("/router/*")
-													.add("/taskPreview/queryPreviewUrlList")
-													.add("/tetris-sts/*")
-													.add("/eb-insert-web/*")
-													.add("/eb-monitor-web/*")
-													.add("/eb-resource-web/*")
-													.add("/eb-screendisplay-web/*")
-													.add("/eb-statistics-web/*")													
+												   .add("/taskPreview/queryPreviewUrlList")
+												   .add("/tetris-sts/*")
+												   .add("/eb-insert-web/*")
+												   .add("/eb-monitor-web/*")
+												   .add("/eb-resource-web/*")
+												   .add("/eb-screendisplay-web/*")
+												   .add("/eb-statistics-web/*")
+												   .add("/device/group/record/download/file")
 												   .getList();
 	}
 	

@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -29,6 +30,10 @@ import com.sumavision.bvc.device.group.po.DeviceGroupBusinessRolePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupConfigVideoPO;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.po.AuthorizationMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 /**
@@ -324,6 +329,16 @@ public class TreeNodeVO {
 		return this;
 	}
 	
+	public TreeNodeVO set(ConferenceHallPO conferenceHall){
+		this.setId(conferenceHall.getId().toString())
+			.setName(conferenceHall.getName())
+			.setType(TreeNodeType.CONFERENCE_HALL)
+			.setIcon(TreeNodeIcon.BUNDLE.getName())
+			.setStyle("color:#0dcc19;")
+			.setKey(this.generateKey());
+		return this;
+	}
+	
 	/**
 	 * 从UserBO得到绑定编码器的bundleId<br/>
 	 * <p>如果绑定的外部编码器（如210设备）bundleId有效则返回；</p>
@@ -385,6 +400,28 @@ public class TreeNodeVO {
 			
 		return this;
 	}
+	public TreeNodeVO set(GroupMemberPO member, UserBO userBO){
+		this.setId(member.getId().toString())
+			.setUuid(member.getUuid())
+			.setName(member.getName())
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("id", member.getOriginId())
+																			.put("username", member.getName())
+																			.put("status", "")
+																		    .getMap()))
+			.setType(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeType.USER:GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeType.CONFERENCE_HALL:null)
+			.setIcon(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeIcon.SPOKESMAN.getName():GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeIcon.BUNDLE.getName():null);
+//			.setKey(new StringBufferWrapper().append(this.generateKey()).append("@@").append(user.getCreater()).toString());
+		
+		//查询成员状态，添加样式等
+		if(userBO!=null && userBO.isLogined()){
+			this.setStyle("color:#0dcc19;");
+			this.setBundleStatus("bundle-online");
+		}else{
+			this.setBundleStatus("bundle-offline");
+		}
+			
+		return this;
+	}
 	
 	/**
 	 * 创建指挥成员节点<br/>
@@ -420,6 +457,79 @@ public class TreeNodeVO {
 			this.setBundleStatus("bundle-online");
 		}else{
 			this.setBundleStatus("bundle-offline");
+		}
+			
+		return this;
+	}
+	public TreeNodeVO setWithInfo(GroupMemberPO member, UserBO userBO, FolderPO folder){
+		
+		StringBufferWrapper name = new StringBufferWrapper().append(member.getName());
+		if(member.getIsAdministrator()) name.append(" [主席]");
+		if(folder != null) name.append(" [").append(folder.getName()).append("]");
+		
+		this.setId(member.getOriginId().toString())
+			.setUuid(member.getUuid())
+			.setName(name.toString())
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("id", Long.parseLong(member.getOriginId()))
+																			.put("username", member.getName())
+																			.put("status", "")
+																		    .getMap()))
+			.setType(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeType.USER:GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeType.CONFERENCE_HALL:null)
+			.setIcon(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())?TreeNodeIcon.SPOKESMAN.getName():GroupMemberType.MEMBER_HALL.equals(member.getGroupMemberType())?TreeNodeIcon.BUNDLE.getName():null);
+//			.setKey(new StringBufferWrapper().append(this.generateKey()).append("@@").append(user.getCreater()).toString());
+		
+		//查询成员状态，添加样式等
+		if(userBO!=null && userBO.isLogined()){
+			this.setStyle("color:#0dcc19;");
+			this.setBundleStatus("bundle-online");
+		}else{
+			this.setBundleStatus("bundle-offline");
+		}
+			
+		return this;
+	}
+	
+	/**
+	 * 创建设备节点<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年10月14日 下午2:27:39
+	 * @param bundle 设备
+	 * @return TreeNodeVO 树节点
+	 */
+	public TreeNodeVO set(BundlePO bundle){
+		this.setId(bundle.getBundleId())
+			.setName(bundle.getBundleName())
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("folderId", bundle.getFolderId())
+																			.put("bundleId", bundle.getId())
+																			.put("bundleName", bundle.getBundleName())
+																			.put("bundleType", bundle.getDeviceModel())
+																			.put("nodeUid", bundle.getAccessNodeUid())
+																			.put("venusBundleType", bundle.getBundleType())
+																		    .getMap()))
+			.setType(TreeNodeType.BUNDLE)
+			.setIcon(TreeNodeIcon.BUNDLE.getName())
+			.setKey(this.generateKey());
+		
+		if(LockStatus.BUSY.equals(bundle.getLockStatus())){
+			this.setStyle("color:#E6A23C;");
+		}else{
+			if("ONLINE".equals(bundle.getOnlineStatus())){
+				this.setStyle("color:#0dcc19;");
+			}
+		}
+		
+		if(null != bundle.getOnlineStatus()){
+			switch (bundle.getOnlineStatus().toString()){
+			case "ONLINE":
+				this.setBundleStatus("bundle-online");
+				break;
+			case "OFFLINE":
+				this.setBundleStatus("bundle-offline");
+				break;
+			default:
+				break;
+			}			
 		}
 			
 		return this;
@@ -719,6 +829,27 @@ public class TreeNodeVO {
 	 * @return TreeNodeVO 树节点
 	 */
 	public TreeNodeVO set(CommandGroupPO command, boolean entered){
+		this.setId(command.getId().toString())
+			.setUuid(command.getUuid())
+			.setName(command.getName())
+			.setType(TreeNodeType.COMMAND)
+			.setIcon(TreeNodeIcon.GROUP.getName())
+			.setKey(this.generateKey())
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("creator", command.getUserId().toString())
+																			.put("creatorName", command.getUserName())
+																			.put("entered", entered)
+																			.getMap()));
+		if(GroupStatus.STOP.equals(command.getStatus())){
+			this.setBundleStatus("bundle-offline");
+		}else{
+			this.setStyle("color:#0dcc19;");
+			this.setBundleStatus("bundle-online");
+		}
+		
+		return this;
+	}
+	
+	public TreeNodeVO set(GroupPO command, boolean entered){
 		this.setId(command.getId().toString())
 			.setUuid(command.getUuid())
 			.setName(command.getName())

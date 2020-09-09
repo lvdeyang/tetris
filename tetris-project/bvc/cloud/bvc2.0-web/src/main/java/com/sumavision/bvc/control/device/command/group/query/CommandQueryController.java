@@ -40,7 +40,6 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
@@ -67,12 +66,36 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupStatus;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallDAO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallPO;
+import com.sumavision.tetris.bvc.business.terminal.hall.ConferenceHallRolePermissionDAO;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.role.RoleDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.system.role.SystemRoleQuery;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 @Controller
 @RequestMapping(value = "/command/query")
@@ -95,6 +118,24 @@ public class CommandQueryController {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageInfoDAO pageInfoDao;
+	
+	@Autowired
+	private GroupDAO groupDAO;
+	
+	@Autowired
+	private RoleDAO roleDAO;
+	
+	@Autowired
+	private GroupMemberRolePermissionDAO groupMemberRolePermissionDAO;
+	
+	@Autowired
+	private GroupMemberDAO groupMemberDao;
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -121,7 +162,19 @@ public class CommandQueryController {
 	private CommandCommonUtil commandCommonUtil;
 	
 	@Autowired
+	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
+	
+	@Autowired
 	private CommandFightTimeServiceImpl commandFightTimeServiceImpl;
+	
+	@Autowired
+	private ConferenceHallRolePermissionDAO conferenceHallRolePermissionDao;
+	
+	@Autowired
+	private ConferenceHallDAO conferenceHallDao;
+	
+	@Autowired
+	private SystemRoleQuery systemRoleQuery;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -166,6 +219,24 @@ public class CommandQueryController {
 			}
 		}
 		
+		//查询有权限的会场
+		List<SystemRoleVO> roles = systemRoleQuery.queryUserRoles(userId.toString());
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		List<ConferenceHallPO> conferenceHalls = null;
+		if(roleIds.size() > 0){
+			List<Object> result = conferenceHallRolePermissionDao.findDistinctConferenceHallIdByRoleIdIn(roleIds);
+			List<Long> conferenceHallIds = new ArrayList<Long>();
+			for(Object id:result){
+				conferenceHallIds.add(Long.valueOf(id.toString()));
+			}
+			conferenceHalls = conferenceHallDao.findAll(conferenceHallIds);
+		}
+		
 		//查询所有非点播的文件夹
 		List<FolderPO> totalFolders = resourceService.queryAllFolders();
 		for(FolderPO folder:totalFolders){
@@ -180,7 +251,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, conferenceHalls);
 		}
 		
 		return _roots;
@@ -192,7 +263,7 @@ public class CommandQueryController {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年2月18日 下午6:17:05
-	 * @param id
+	 * @param id business_group对应的id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -209,15 +280,17 @@ public class CommandQueryController {
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
-		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		List<CommandGroupMemberPO> members = group.getMembers();
+//		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		//List<CommandGroupMemberPO> members = group.getMembers();
+//		GroupPO group = groupDao.findOne(Long.valueOf(id));
+		List<GroupMemberPO> members =groupMemberDao.findByGroupId(Long.parseLong(id));
 		
 		//查询有权限的用户
-		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
-		List<Long> userIds = new ArrayList<Long>();
-		for(UserBO user : users){
-			userIds.add(user.getId());
-		}
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);//TODO 应该选出组中所有用户
+//		List<Long> userIds = new ArrayList<Long>();
+//		for(UserBO user : users){
+//			userIds.add(user.getId());
+//		}
 		
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
@@ -225,9 +298,10 @@ public class CommandQueryController {
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
-					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
-					if(member!=null
-							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
+					GroupMemberPO member = tetrisBvcQueryUtil.queryMemberByUserId(members, user.getId());
+					if(member!=null 
+							&& groupMemberRolePermissionDAO.findByRoleIdAndGroupMemberId((roleDAO.findByInternalRoleType(InternalRoleType.COMMAND_COOPERATION)).getId(), member.getId())!=null
+							&& (member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT) || member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECTING))){
 						filteredUsers.add(user);
 					}
 				}
@@ -248,7 +322,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, null);
 		}
 		
 		return _roots;
@@ -363,7 +437,16 @@ public class CommandQueryController {
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 				
-		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
+		List<GroupMemberPO> groupMembers = groupMemberDao.findByGroupId(Long.parseLong(id));
+		List<Long> existUserIds = new ArrayList<Long>();
+		List<Long> existHallIds = new ArrayList<Long>();
+		for(GroupMemberPO groupMember:groupMembers){
+			if(GroupMemberType.MEMBER_USER.equals(groupMember.getGroupMemberType())){
+				existUserIds.add(Long.valueOf(groupMember.getOriginId()));
+			}else if(GroupMemberType.MEMBER_HALL.equals(groupMember.getGroupMemberType())){
+				existHallIds.add(Long.valueOf(groupMember.getOriginId()));
+			}
+		}
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
@@ -379,11 +462,29 @@ public class CommandQueryController {
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null) && !encoderId.equals("")){// && user.getDecoderId()!=null)){
-					if(!memberUserIds.contains(user.getId())){
+					if(!existUserIds.contains(user.getId())){
 						filteredUsers.add(user);
 					}
 				}
 			}
+		}
+		
+		List<SystemRoleVO> roles = systemRoleQuery.queryUserRoles(userId.toString());
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		List<ConferenceHallPO> conferenceHalls = null;
+		if(roleIds.size() > 0){
+			List<Object> result = conferenceHallRolePermissionDao.findDistinctConferenceHallIdByRoleIdIn(roleIds);
+			List<Long> conferenceHallIds = new ArrayList<Long>();
+			for(Object rId:result){
+				Long lId = Long.valueOf(rId.toString());
+				if(!existHallIds.contains(lId)) conferenceHallIds.add(lId);
+			}
+			conferenceHalls = conferenceHallDao.findAll(conferenceHallIds);
 		}
 		
 		//查询所有非点播的文件夹
@@ -400,7 +501,7 @@ public class CommandQueryController {
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, folders, null, null, filteredUsers);
+			recursionFolder(_root, folders, null, null, filteredUsers, conferenceHalls);
 		}
 		
 		return _roots;
@@ -506,9 +607,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -537,7 +638,7 @@ public class CommandQueryController {
 			HttpServletRequest request) throws Exception{
 		
 		//获取userId
-		long userId = userUtils.getUserIdFromSession(request);
+		Long userId = userUtils.getUserIdFromSession(request);
 		
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
@@ -592,13 +693,14 @@ public class CommandQueryController {
 		}
 		
 		//过滤已经被绑定的设备
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-		List<CommandGroupUserPlayerPO> players = userInfo.getPlayers();
-//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(players, serial);
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+//		List<CommandGroupUserPlayerPO> players = userInfo.getPlayers();		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		Set<String> castedBundleIds = new HashSet<String>();
-		for(CommandGroupUserPlayerPO player : players){
-			if(player.getCastDevices() == null) continue;
-			for(CommandGroupUserPlayerCastDevicePO device : player.getCastDevices()){
+		for(PageTaskPO task : pageInfo.getPageTasks()){
+			if(task.getCastDevices() == null) continue;
+			for(CommandGroupUserPlayerCastDevicePO device : task.getCastDevices()){
 				castedBundleIds.add(device.getDstBundleId());
 			}
 		}
@@ -623,9 +725,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -745,9 +847,9 @@ public class CommandQueryController {
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
 			if(withChannel){
-				recursionFolder(_root, folders, filteredBundles, channels, null);
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
 			}else{
-				recursionFolder(_root, folders, filteredBundles, null, null);
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
 		
@@ -773,19 +875,22 @@ public class CommandQueryController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		if(type == null) type = "command";
-		GroupType needType = null;
+//		GroupType needType = null;
+		BusinessType needBusinessType = null;
 		switch (type){
 		case "meeting":
-			needType = GroupType.MEETING;
+//			needType = GroupType.MEETING;
+			needBusinessType = BusinessType.MEETING_QT;
 			break;
 		case "command":
 		default:
-			needType = GroupType.BASIC;
+//			needType = GroupType.BASIC;
+			needBusinessType = BusinessType.COMMAND;
 			break;
 		}
 		
-		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
-		List <CommandGroupPO> enteredCommands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
+		List<GroupPO> commands = groupDAO.findByMemberOriginId(userId.toString());
+		List<GroupPO> enteredCommands = groupDAO.findEnteredGroupByMemberOriginId(userId.toString());
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
@@ -795,9 +900,9 @@ public class CommandQueryController {
 											     .setIcon(TreeNodeIcon.FOLDER.getName())
 											     .setChildren(new ArrayList<TreeNodeVO>());
 		
-		for(CommandGroupPO command: commands){
-			GroupType groupType = command.getType();
-			if(!needType.equals(groupType)){
+		for(GroupPO command: commands){
+			BusinessType groupType = command.getBusinessType();
+			if(!needBusinessType.equals(groupType)){
 				continue;
 			}
 			
@@ -811,7 +916,7 @@ public class CommandQueryController {
 				}
 			}else{
 				//别人的指挥
-				CommandGroupPO enteredCommand = commandCommonUtil.queryGroupById(enteredCommands, command.getId());
+				GroupPO enteredCommand = tetrisBvcQueryUtil.queryGroupById(enteredCommands, command.getId());
 				if(enteredCommand != null){
 					entered = true;
 				}
@@ -847,21 +952,21 @@ public class CommandQueryController {
 		JSONArray groups = new JSONArray();
 		
 		if(type == null) type = "command";
-		GroupType needType = null;
+		BusinessType needType = null;
 		switch (type){
 		case "meeting":
-			needType = GroupType.MEETING;
+			needType = BusinessType.MEETING_QT;
 			break;
 		case "command":
 		default:
-			needType = GroupType.BASIC;
+			needType = BusinessType.COMMAND;
 			break;
 		}
 		
-		List <CommandGroupPO> commands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
+		List <GroupPO> commands = groupDAO.findEnteredGroupByMemberOriginId(userId.toString());
 		
-		for(CommandGroupPO command : commands){
-			GroupType groupType = command.getType();
+		for(GroupPO command : commands){
+			BusinessType groupType = command.getBusinessType();
 			if(!needType.equals(groupType)){
 				continue;
 			}
@@ -869,7 +974,7 @@ public class CommandQueryController {
 			group.put("id", command.getId().toString());
 			group.put("name", command.getName());
 			group.put("creator", command.getUserId().toString());
-			if(groupType.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
+			if(groupType.equals(BusinessType.COMMAND)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
 				group.put("type", "command");
 			}else{
 				group.put("type", "meeting");
@@ -877,12 +982,12 @@ public class CommandQueryController {
 			GroupStatus groupStatus = command.getStatus();
 			group.put("status", groupStatus.getCode());
 			//已经启动的会议，添加作战时间
-			if(!groupStatus.equals(GroupStatus.STOP)){
+			/*if(!groupStatus.equals(GroupStatus.STOP)){
 				Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(command);
 				if(fightTime != null){
 					group.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
 				}
-			}
+			}*/
 			groups.add(group);
 		}
 		
@@ -942,7 +1047,8 @@ public class CommandQueryController {
 			List<FolderBO> folders, 
 			List<BundleBO> bundles, 
 			List<ChannelBO> channels,
-			List<UserBO> users){
+			List<UserBO> users,
+			List<ConferenceHallPO> conferenceHalls){
 		
 		//往里装文件夹
 		for(FolderBO folder:folders){
@@ -950,7 +1056,7 @@ public class CommandQueryController {
 				TreeNodeVO folderNode = new TreeNodeVO().set(folder)
 														.setChildren(new ArrayList<TreeNodeVO>());
 				root.getChildren().add(folderNode);
-				recursionFolder(folderNode, folders, bundles, channels, users);
+				recursionFolder(folderNode, folders, bundles, channels, users, conferenceHalls);
 			}
 		}
 		
@@ -985,6 +1091,16 @@ public class CommandQueryController {
 					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 					TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
 					root.getChildren().add(userNode);
+				}
+			}
+		}
+		
+		//往里装会场
+		if(conferenceHalls!=null && conferenceHalls.size()>0){
+			for(ConferenceHallPO conferenceHall:conferenceHalls){
+				if(conferenceHall.getFolderId()!=null && conferenceHall.getFolderId().toString().equals(root.getId())){
+					TreeNodeVO hallNode = new TreeNodeVO().set(conferenceHall);
+					root.getChildren().add(hallNode);
 				}
 			}
 		}

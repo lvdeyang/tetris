@@ -84,5 +84,9 @@ public class BusinessOperateBO {
 	private List<DstBO> jv230AudioDel;
 	
 	private List<PassByBO> pass_by;
+	
+	public Long getAdminUserId(){
+		return -1L;
+	}
 		
 }
