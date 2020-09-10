@@ -14,6 +14,9 @@ public class UserresPrivilegeBO {
 	//点播权限
 	private boolean hasWritePrivilege = false;
 	
+	//云台权限
+	private boolean hasCloudPrivilege = false;
+	
 	//呼叫权限
 	private boolean hasHJPrivilege = false;
 	
@@ -61,6 +64,14 @@ public class UserresPrivilegeBO {
 
 	public void setHasWritePrivilege(boolean hasWritePrivilege) {
 		this.hasWritePrivilege = hasWritePrivilege;
+	}
+
+	public boolean isHasCloudPrivilege() {
+		return hasCloudPrivilege;
+	}
+
+	public void setHasCloudPrivilege(boolean hasCloudPrivilege) {
+		this.hasCloudPrivilege = hasCloudPrivilege;
 	}
 
 	public boolean isHasHJPrivilege() {

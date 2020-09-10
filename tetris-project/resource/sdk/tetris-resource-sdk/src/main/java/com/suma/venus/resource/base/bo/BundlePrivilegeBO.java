@@ -14,6 +14,8 @@ public class BundlePrivilegeBO {
 	
 	private boolean hasWritePrivilege = false;
 	
+	private boolean hasCloudPrivilege = false;
+	
 	private String username;
 	
 	public Long getId() {
@@ -54,6 +56,14 @@ public class BundlePrivilegeBO {
 
 	public void setHasWritePrivilege(boolean hasWritePrivilege) {
 		this.hasWritePrivilege = hasWritePrivilege;
+	}
+
+	public boolean isHasCloudPrivilege() {
+		return hasCloudPrivilege;
+	}
+
+	public void setHasCloudPrivilege(boolean hasCloudPrivilege) {
+		this.hasCloudPrivilege = hasCloudPrivilege;
 	}
 
 	public String getName() {
