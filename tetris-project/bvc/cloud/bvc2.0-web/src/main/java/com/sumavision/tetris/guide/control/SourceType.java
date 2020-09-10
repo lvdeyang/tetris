@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum SourceType {
 	
-	URL("url"),
+	URL("直播流"),
 	KNAPSACK_5G("5G背包");
 	
 	private String name;
@@ -29,9 +29,9 @@ public enum SourceType {
 	
 	public static SourceType fromName(String name) throws Exception{
 		SourceType[] values = SourceType.values();
-		for(int i = 0; i < values.length; i++){
-			if(values[i].getName().equals(name)){
-				return values[i];
+		for (SourceType sourceType : values) {
+			if(sourceType.getName().equals(sourceType)){
+				return sourceType;
 			}
 		}
 		throw new ErrorTypeException("name", name);

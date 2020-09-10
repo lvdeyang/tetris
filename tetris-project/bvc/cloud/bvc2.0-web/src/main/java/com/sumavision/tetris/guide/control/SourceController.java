@@ -70,15 +70,17 @@ public class SourceController {
 	@RequestMapping(value = "/edit")
 	public Object edit(
 			Long id,
-			SourceType sourceType,
+			String sourceType,
 			String sourceName,
 			String source,
+			String previewOut,
 			HttpServletRequest request) throws Exception{
 		return sourceService.edit(
 				id,
 				sourceType,
 				sourceName,
-				source);
+				source,
+				previewOut);
 	}
 	
 	/**

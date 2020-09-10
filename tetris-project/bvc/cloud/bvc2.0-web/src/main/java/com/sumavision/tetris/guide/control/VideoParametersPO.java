@@ -21,41 +21,29 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Entity
 @Table(name = "TETRIS_VIDEO_PARAMTERS_PO")
 public class VideoParametersPO extends AbstractBasePO{
-	
+
 	private static final long serialVersionUID = 1L;
 
 	/** 导播任务id */
 	private Long guideId;
 
-	/** 视频格式 */
-	private String format;
-	
-	/** 视频库 */
-	private String codingLibrary;
-	
-	/** 编码级别 */
-	private Long codingLevel;
+	/** 编码对象 */
+	private CodingObject codingObject;
 	
 	/** 编码档次 */
-	private String codingGrade;
-	
-	/** 码率控制方式 */
-	private String rateControlMode;
-	
-	/** 分辨率 */
-	private String resolvingPower;
-	
-	/** 分辨率宽高 */
-	private String resolutionWidthAndHeight;
-	
-	/** 宽高比 */
-	private String aspectRatio;
+	private String profile;
 	
 	/** 帧率 */
-	private Long frameRate;
+	private Long fps;
 	
 	/** 码率 */
-	private Long bitRate;
+	private Long bitrate;
+	
+	/** 分辨率 */
+	private String resolution;
+	
+	/** 最大码率 */
+	private Long maxBitrate;
 	
 	@Column(name = "GUIDE_ID")
 	public Long getGuideId() {
@@ -66,95 +54,57 @@ public class VideoParametersPO extends AbstractBasePO{
 		this.guideId = guideId;
 	}
 
-	@Column(name = "FORMAT")
-	public String getFormat() {
-		return format;
-	}
-	
-	public void setFormat(String format) {
-		this.format = format;
-	}
-	
-	@Column(name = "CODING_LIBRARY")
-	public String getCodingLibrary() {
-		return codingLibrary;
+	@Column(name = "CODING_OBJECT")
+	public CodingObject getCodingObject() {
+		return codingObject;
 	}
 
-	public void setCodingLibrary(String codingLibrary) {
-		this.codingLibrary = codingLibrary;
-	}
-	
-	@Column(name = "CODING_LEVEL")
-	public Long getCodingLevel() {
-		return codingLevel;
+	public void setCodingObject(CodingObject codingObject) {
+		this.codingObject = codingObject;
 	}
 
-	public void setCodingLevel(Long codingLevel) {
-		this.codingLevel = codingLevel;
-	}
-	
-	@Column(name = "CODING_GRADE")
-	public String getCodingGrade() {
-		return codingGrade;
+	@Column(name = "PROFILE")
+	public String getProfile() {
+		return profile;
 	}
 
-	public void setCodingGrade(String codingGrade) {
-		this.codingGrade = codingGrade;
-	}
-	
-	@Column(name = "RATE_CONTROL_MODE")
-	public String getRateControlMode() {
-		return rateControlMode;
+	public void setProfile(String profile) {
+		this.profile = profile;
 	}
 
-	public void setRateControlMode(String rateControlMode) {
-		this.rateControlMode = rateControlMode;
-	}
-	
-	
-	@Column(name = "RESOLVING_POWER")
-	public String getResolvingPower() {
-		return resolvingPower;
+	@Column(name = "FPS")
+	public Long getFps() {
+		return fps;
 	}
 
-	public void setResolvingPower(String resolvingPower) {
-		this.resolvingPower = resolvingPower;
-	}
-	
-	@Column(name = "RESOLUTION_WIDTH_AND_HEIGHT")
-	public String getResolutionWidthAndHeight() {
-		return resolutionWidthAndHeight;
+	public void setFps(Long fps) {
+		this.fps = fps;
 	}
 
-	public void setResolutionWidthAndHeight(String resolutionWidthAndHeight) {
-		this.resolutionWidthAndHeight = resolutionWidthAndHeight;
-	}
-	
-	@Column(name = "ASPECT_RATIO")
-	public String getAspectRatio() {
-		return aspectRatio;
+	@Column(name = "BITRATE")
+	public Long getBitrate() {
+		return bitrate;
 	}
 
-	public void setAspectRatio(String aspectRatio) {
-		this.aspectRatio = aspectRatio;
-	}
-	
-	@Column(name = "FRAME_RATE")
-	public Long getFrameRate() {
-		return frameRate;
+	public void setBitrate(Long bitrate) {
+		this.bitrate = bitrate;
 	}
 
-	public void setFrameRate(Long frameRate) {
-		this.frameRate = frameRate;
-	}
-	
-	@Column(name = "BIT_RATE")
-	public Long getBitRate() {
-		return bitRate;
+	@Column(name = "RESOLUTION")
+	public String getResolution() {
+		return resolution;
 	}
 
-	public void setBitRate(Long bitRate) {
-		this.bitRate = bitRate;
+	public void setResolution(String resolution) {
+		this.resolution = resolution;
 	}
 
+	@Column(name = "MAX_BITRATE")
+	public Long getMaxBitrate() {
+		return maxBitrate;
+	}
+
+	public void setMaxBitrate(Long maxBitrate) {
+		this.maxBitrate = maxBitrate;
+	}
 }

@@ -31,6 +31,12 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	
 	/** 源是否被切换到 */
 	private Boolean current;
+	
+	/** 音量 */
+	private Long volume;
+	
+	/** 输出地址 */
+	private String previewOut;
 
 	public Long getIndex() {
 		return index;
@@ -71,8 +77,9 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return guideId;
 	}
 
-	public void setGuideId(Long guideId) {
+	public SourceVO setGuideId(Long guideId) {
 		this.guideId = guideId;
+		return this;
 	}
 
 	public Boolean getCurrent() {
@@ -83,6 +90,24 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.current = current;
 	}
 	
+	public Long getVolume() {
+		return volume;
+	}
+
+	public SourceVO setVolume(Long volume) {
+		this.volume = volume;
+		return this;
+	}
+	
+	public String getPreviewOut() {
+		return previewOut;
+	}
+
+	public SourceVO setPreviewOut(String previewOut) {
+		this.previewOut = previewOut;
+		return this;
+	}
+
 	@Override
 	public SourceVO set(SourcePO entity) throws Exception {
 		this.setId(entity.getId());
@@ -91,6 +116,8 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setSource(entity.getSource());
 		this.setId(entity.getId());
 		this.setCurrent(entity.getCurrent());
+		this.setVolume(entity.getVolume());
+		this.setPreviewOut(entity.getPreviewOut());
 		return this;
 	}
 

@@ -3,6 +3,7 @@
  */
 package com.sumavision.tetris.guide.control;
 
+import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +24,16 @@ public class SourceService {
 	
 	public SourcePO edit(
 			Long id,
-			SourceType sourceType,
+			String sourceType,
 			String sourceName,
-			String source){
+			String source,
+			String previewOut) throws Exception{
 		SourcePO sourcePO = sourceDAO.findOne(id);
-		sourcePO.setSourceType(sourceType);
+		SourceType type = SourceType.fromName(sourceType);
+		sourcePO.setSourceType(type);
 		sourcePO.setSourceName(sourceName);
 		sourcePO.setSource(source);
+		sourcePO.setPreviewOut(previewOut);
 		return sourceDAO.save(sourcePO);
 	}
 	
