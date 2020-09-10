@@ -62,17 +62,24 @@
         <!--</el-table-column>-->
         <el-table-column prop="username" label="设备账号" width="270" >
         </el-table-column>
-        <el-table-column width="150" :render-header="renderCheckReadHeader" >
+        <el-table-column width="100" :render-header="renderCheckReadHeader" >
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
 
-        <el-table-column width="150" :render-header="renderCheckWriteHeader" >
+        <el-table-column width="100" :render-header="renderCheckWriteHeader" >
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
+
+        <el-table-column width="100" :render-header="renderCheckCloudHeader" >
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasCloudPrivilege" @change="handleCheckCloudChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
       </el-table>
 
       <!--用户列表-->
@@ -91,6 +98,12 @@
         <el-table-column width="150" :render-header="renderCheckWriteHeader">
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
+        <el-table-column width="150" :render-header="renderCheckCloudHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasCloudPrivilege" @change="handleCheckCloudChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
 
@@ -178,11 +191,13 @@
       resourceTableLoading: false,
       prevReadChecks: [], // 之前的录制权限
       prevWriteChecks: [], // 之前的点播权限
+      prevCloudChecks: [], // 之前的云台权限
       prevHJChecks: [],
       prevZKChecks: [],
       prevHYChecks: [],
       readChecks: [], // 新的录制权限
       writeChecks: [], // 新的点播权限
+      cloudChecks: [], // 新的云台权限
       HJchecks: [],
       ZKchecks:[],
       HYchecks:[],
@@ -194,6 +209,7 @@
       userTableShow: false,
       checkReadAll: false,
       checkWriteAll: false,
+      checkCloudAll: false,
       checkHJAll: false,
       checkZKAll: false,
       checkHYAll: false
@@ -263,6 +279,11 @@
       <el-checkbox v-model={this.checkWriteAll} onChange={this.handleCheckWriteAllChange}>点播</el-checkbox>
   )
   },
+  renderCheckCloudHeader: function (h, data) { // 自定义特殊表格头单元
+    return (
+      <el-checkbox v-model={this.checkCloudAll} onChange={this.handleCheckCloudAllChange}>云台</el-checkbox>
+  )
+  },
   renderCheckHJHeader: function (h, data) { // 自定义特殊表格头单元
     return (
       <el-checkbox v-model={this.checkHJAll} onChange={this.handleCheckHJAllChange}>呼叫</el-checkbox>
@@ -328,6 +349,33 @@
         this.writeChecks = []
         for (let user of this.users) {
           user.hasWritePrivilege = false
+        }
+      }
+    }
+  },
+  handleCheckCloudAllChange:function (val){
+    if(this.resourceTableShow) {   //设备
+      if(val) {
+        for(let resource of this.resources){
+          this.cloudChecks.push(resource.bundleId)
+          resource.hasCloudPrivilege = true;
+        }
+      }else{
+        this.cloudChecks = []
+        for(let resource of this.resources){
+          resource.hasCloudPrivilege = false
+        }
+      }
+    }else if (this.userTableShow) { // 用户
+      if (val) {
+        for (let user of this.users) {
+          this.cloudChecks.push(user.userNo)
+          user.hasCloudPrivilege = true
+        }
+      } else {
+        this.cloudChecks = []
+        for (let user of this.users) {
+          user.hasCloudPrivilege = false
         }
       }
     }
@@ -423,6 +471,30 @@
       } else {
         this.writeChecks.splice(this.writeChecks.indexOf(row.userNo), 1)
         this.checkWriteAll = false
+      }
+    }
+  },
+  handleCheckCloudChange: function (row) {
+    if (this.resourceTableShow) {
+      if (row.hasCloudPrivilege) {
+        this.cloudChecks.push(row.bundleId)
+        if (this.cloudChecks.length === this.resources.length) {
+          this.checkCloudAll = true
+        }
+      } else {
+        this.cloudChecks.splice(this.cloudChecks.indexOf(row.bundleId), 1)
+        this.checkCloudAll = false
+      }
+    } else if (this.userTableShow) {
+      if (row.hasCloudPrivilege) {
+        this.cloudChecks.push(row.userNo)
+        // 全选判断
+        if (this.cloudChecks.length === this.users.length) {
+          this.checkCloudAll = true
+        }
+      } else {
+        this.cloudChecks.splice(this.cloudChecks.indexOf(row.userNo), 1)
+        this.checkCloudAll = false
       }
     }
   },
@@ -523,10 +595,13 @@
     this.userTableShow = false
     this.prevReadChecks = []
     this.prevWriteChecks = []
+    this.prevCloudChecks = []
     this.readChecks = []
     this.writeChecks = []
+    this.cloudChecks = []
     this.checkReadAll = false
     this.checkWriteAll = false
+    this.checkCloudAll = false
     this.checkHJAll = false
     this.checkZKAll = false
     this.checkHYAll = false
@@ -574,6 +649,10 @@
           this.prevWriteChecks.push(resource.bundleId)
           this.writeChecks.push(resource.bundleId)
         }
+        if (resource.hasCloudPrivilege) {
+          this.prevCloudChecks.push(resource.bundleId)
+          this.cloudChecks.push(resource.bundleId)
+        }
       }
 
       // 全选判断
@@ -582,6 +661,9 @@
       }
       if (this.writeChecks.length === this.resources.length) {
         this.checkWriteAll = true
+      }
+      if (this.cloudChecks.length === this.resources.length) {
+        this.checkCloudAll = true
       }
     }
 
@@ -616,8 +698,10 @@
     this.userTableShow = true
     this.prevReadChecks = []
     this.prevWriteChecks = []
+    this.prevCloiudChecks = []
     this.readChecks = []
     this.writeChecks = []
+    this.cloudChecks = []
     this.prevHJChecks = []
     this.prevZKChecks = []
     this.prevHYChecks = []
@@ -626,6 +710,7 @@
     this.HYchecks = []
     this.checkReadAll = false
     this.checkWriteAll = false
+    this.checkCloudAll = false
     this.checkHJAll = false
     this.checkZKAll = false
     this.checkHYAll = false
@@ -670,6 +755,10 @@
           this.prevWriteChecks.push(user.userNo)
           this.writeChecks.push(user.userNo)
         }
+        if (user.hasCloudPrivilege) {
+          this.prevCloudChecks.push(user.userNo)
+          this.cloudChecks.push(user.userNo)
+        }
         if (user.hasHJPrivilege) {
           this.prevHJChecks.push(user.userNo)
           this.HJchecks.push(user.userNo)
@@ -690,6 +779,9 @@
       }
       if (this.writeChecks.length === this.users.length) {
         this.checkWriteAll = true
+      }
+      if (this.cloudChecks.length === this.users.length) {
+        this.checkCloudAll = true
       }
       if (this.HJchecks.length === this.users.length) {
         this.checkHJAll = true
@@ -712,8 +804,10 @@
         roleId: this.currentRoleRow.id,
         prevReadChecks: this.prevReadChecks.join(','),
         prevWriteChecks: this.prevWriteChecks.join(','),
+        prevCloudChecks: this.prevCloudChecks.join(','),
         readChecks: this.readChecks.join(','),
-        writeChecks: this.writeChecks.join(',')
+        writeChecks: this.writeChecks.join(','),
+        cloudChecks: this.cloudChecks.join(',')
       }
 
       this.resourceTableLoading = true
@@ -731,6 +825,7 @@
         // 更新prevChecks
         this.prevReadChecks = [].concat(this.readChecks)
         this.prevWriteChecks = [].concat(this.writeChecks)
+        this.prevCloudChecks = [].concat(this.cloudChecks)
       }
       this.resourceTableLoading = false
     })
@@ -739,11 +834,13 @@
       roleId: this.currentRoleRow.id,
       prevReadChecks: this.prevReadChecks.join(','),
       prevWriteChecks: this.prevWriteChecks.join(','),
+      prevCloudChecks: this.prevCloudChecks.join(','),
       prevHJChecks: this.prevHJChecks.join(','),
       prevZKChecks: this.prevZKChecks.join(','),
       prevHYChecks: this.prevHYChecks.join(','),
       readChecks: this.readChecks.join(','),
       writeChecks: this.writeChecks.join(','),
+      cloudChecks: this.cloudChecks.join(','),
       hjChecks: this.HJchecks.join(','),
       zkChecks: this.ZKchecks.join(','),
       hyChecks: this.HYchecks.join(',')
@@ -763,6 +860,7 @@
       // 更新prevChecks
       this.prevReadChecks = [].concat(this.readChecks)
       this.prevWriteChecks = [].concat(this.writeChecks)
+      this.prevCloudChecks = [].concat(this.cloudChecks)
       this.prevHJChecks = [].concat(this.HJchecks)
       this.prevZKChecks = [].concat(this.ZKchecks)
       this.prevHYChecks = [].concat(this.HYchecks)
