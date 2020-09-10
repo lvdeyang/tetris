@@ -1,6 +1,7 @@
 package com.suma.venus.resource.bo;
 
 //记录权限状态变化信息的BO
+
 public class PrivilegeStatusBO {
 	
 	public static final String OPR_ADD = "add";
@@ -16,6 +17,9 @@ public class PrivilegeStatusBO {
 	//之前是否具有写（点播）权限
 	private boolean prevCanWrite = false;
 	
+	//之前是否具有云台权限
+	private boolean prevCanCloud = false;
+	
 	//之前是否具有呼叫权限
 	private boolean prevCanHJ = false;
 	
@@ -30,6 +34,9 @@ public class PrivilegeStatusBO {
 	
 	//现在是否有点播权限
 	private boolean nowCanWrite = false;
+	
+	//现在是否有点播权限
+	private boolean nowCanCloud = false;
 	
 	//现在是或否有呼叫权限
 	private boolean nowCanHJ = false;
@@ -50,7 +57,7 @@ public class PrivilegeStatusBO {
 		if(!prevCanRead && !prevCanWrite){
 			//之前的权限为空，则为add
 			return OPR_ADD;
-		}else if(!nowCanRead && !nowCanWrite){
+		}else if(!nowCanRead && !nowCanWrite && !nowCanCloud){
 			return OPR_REMOVE;
 		} else {
 			return OPR_EDIT;
@@ -58,10 +65,10 @@ public class PrivilegeStatusBO {
 	}
 	
 	public String getUserOprType(){
-		if(!prevCanRead && !prevCanWrite && !prevCanHJ && !prevCanZK && !prevCanHY){
+		if(!prevCanRead && !prevCanWrite && !prevCanCloud && !prevCanHJ && !prevCanZK && !prevCanHY){
 			//之前的权限为空，则为add
 			return OPR_ADD;
-		}else if(!nowCanRead && !nowCanWrite && !nowCanHJ && !nowCanZK && !nowCanHY){
+		}else if(!nowCanRead && !nowCanWrite && !nowCanCloud && !nowCanHJ && !nowCanZK && !nowCanHY){
 			return OPR_REMOVE;
 		} else {
 			return OPR_EDIT;
@@ -100,7 +107,12 @@ public class PrivilegeStatusBO {
 		}else{
 			sBuilder.append("0");
 		}
-		sBuilder.append("11100000000");
+		if(nowCanCloud){//云台置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		sBuilder.append("1100000000");
 		
 		return sBuilder.toString();
 	}
@@ -118,7 +130,12 @@ public class PrivilegeStatusBO {
 		}else{
 			sBuilder.append("0");
 		}
-		sBuilder.append("11110000000000");
+		if(nowCanRead){//云台置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		sBuilder.append("1110000000000");
 		
 		return sBuilder.toString();
 	}
@@ -147,6 +164,14 @@ public class PrivilegeStatusBO {
 		this.prevCanWrite = prevCanWrite;
 	}
 
+	public boolean isPrevCanCloud() {
+		return prevCanCloud;
+	}
+
+	public void setPrevCanCloud(boolean prevCanCloud) {
+		this.prevCanCloud = prevCanCloud;
+	}
+
 	public boolean isPrevCanHJ() {
 		return prevCanHJ;
 	}
@@ -169,6 +194,14 @@ public class PrivilegeStatusBO {
 
 	public void setNowCanWrite(boolean nowCanWrite) {
 		this.nowCanWrite = nowCanWrite;
+	}
+	
+	public boolean isNowCanCloud() {
+		return nowCanCloud;
+	}
+
+	public void setNowCanCloud(boolean nowCanCloud) {
+		this.nowCanCloud = nowCanCloud;
 	}
 
 	public boolean isNowCanHJ() {

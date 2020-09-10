@@ -59,6 +59,7 @@ define([
                         visible:false,
                         nickname:'',
                         username:'',
+                        userno:'',
                         password:'',
                         repeat:'',
                         mobile:'',
@@ -175,6 +176,7 @@ define([
                     var self = this;
                     self.dialog.createUser.nickname = '';
                     self.dialog.createUser.username = '';
+                    self.dialog.createUser.userno = '';
                     self.dialog.createUser.password = '';
                     self.dialog.createUser.repeat = '';
                     self.dialog.createUser.mobile = '';
@@ -191,6 +193,7 @@ define([
                     var params = {
                         nickname:self.dialog.createUser.nickname,
                         username:self.dialog.createUser.username,
+                        userno:self.dialog.createUser.userno,
                         password:self.dialog.createUser.password,
                         repeat:self.dialog.createUser.repeat,
                         mobile:self.dialog.createUser.mobile,

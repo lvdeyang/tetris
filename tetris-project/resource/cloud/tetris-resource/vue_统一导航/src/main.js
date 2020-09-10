@@ -32,7 +32,7 @@ new Vue({
       return null;
     }
     var theme = getQueryVariable('params');
-    if(theme.indexOf('qt-terminal')>=0){
+    if(theme && theme.indexOf('qt-terminal')>=0){
       var $head = document.querySelector('head');
       var $style = document.createElement('style');
       $style.type = 'text/css';
