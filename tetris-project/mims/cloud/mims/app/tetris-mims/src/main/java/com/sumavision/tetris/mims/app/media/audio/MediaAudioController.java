@@ -22,8 +22,8 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.mims.app.boss.BossService;
 import com.sumavision.tetris.mims.app.boss.MediaType;
+import com.sumavision.tetris.mims.app.boss.QdBossService;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -78,7 +78,7 @@ public class MediaAudioController {
 	private FileEncodeService fileEncodeService;
 	
 	@Autowired
-	BossService bossService;
+	QdBossService bossService;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
