@@ -230,6 +230,9 @@ public class ResourceService {
 			case RECORD:// 录制
 				code = bundleId + "-r";
 				break;
+			case CLOUD:// 云台
+				code = bundleId + "-c";
+				break;
 			default:
 				return false;
 			}
@@ -262,6 +265,9 @@ public class ResourceService {
 			break;
 		case RECORD:// 录制
 			suffix = "-r";
+			break;
+		case CLOUD:// 云台
+			suffix = "-c";
 			break;
 		default:
 			return false;
