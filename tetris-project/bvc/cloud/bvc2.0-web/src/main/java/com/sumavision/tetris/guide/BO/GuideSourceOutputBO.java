@@ -18,30 +18,35 @@ public class GuideSourceOutputBO {
 	private List<GuideSourcesBO> sources;
 	
 	/**编码任务数组，按不同编码类型区分，分为视频编码，音频编码，字幕编码(可不考虑) */
-	private List<GuideTaskArrayBO> task_Array;
+	private List<GuideTaskArrayBO> task_array;
+	
+	private List<GuideOutputArray> output_array;
 
 	public String getOutput_udp_url() {
 		return output_udp_url;
 	}
 
-	public void setOutput_udp_url(String output_udp_url) {
+	public GuideSourceOutputBO setOutput_udp_url(String output_udp_url) {
 		this.output_udp_url = output_udp_url;
+		return this;
 	}
 
 	public List<GuideSourcesBO> getSources() {
 		return sources;
 	}
 
-	public void setSources(List<GuideSourcesBO> sources) {
+	public GuideSourceOutputBO setSources(List<GuideSourcesBO> sources) {
 		this.sources = sources;
+		return this;
 	}
 
-	public List<GuideTaskArrayBO> getTask_Array() {
-		return task_Array;
+	public List<GuideTaskArrayBO> getTask_array() {
+		return task_array;
 	}
 
-	public void setTask_Array(List<GuideTaskArrayBO> task_Array) {
-		this.task_Array = task_Array;
+	public GuideSourceOutputBO setTask_array(List<GuideTaskArrayBO> task_array) {
+		this.task_array = task_array;
+		return this;
 	}
 	
 }

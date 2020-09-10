@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.dao.BundleDao;
@@ -32,7 +33,8 @@ import com.sumavision.tetris.guide.control.SourceDAO;
 import com.sumavision.tetris.guide.control.SourcePO;
 import com.sumavision.tetris.guide.control.SourceType;
 
-public class GuideService {
+@Service
+public class GuidePlayService {
 	public static String layer_id="tetris-scl";
 	
 	@Autowired
@@ -86,7 +88,6 @@ public class GuideService {
 			passBy.setBundle_id(source.getUuid());
 			passBy.setLayer_id(layer_id);
 			passBy.setType("creatInputSource");
-			
 			JSONObject pass_by_content=new JSONObject();
 			pass_by_content.put("input_udp_url", source.getSource());
 			passBy.setPass_by_content(pass_by_content);
@@ -109,7 +110,10 @@ public class GuideService {
 			passBy.setType("creatBackupSources");
 			
 			JSONObject pass_by_content=new JSONObject();
+			pass_by_content.put("output_udp_url", outputSource.getOutputAddress());
+			pass_by_content.put("sources", null);
 			GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
+			
 			
 			guideSourceOutput.setOutput_udp_url(outputSource.getOutputAddress());
 			

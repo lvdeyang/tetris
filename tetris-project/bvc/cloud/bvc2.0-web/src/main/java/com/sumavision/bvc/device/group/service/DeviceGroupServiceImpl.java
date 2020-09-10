@@ -608,6 +608,8 @@ public class DeviceGroupServiceImpl {
 				ids.add(content.getContentId());
 			}
 		}
+		
+		ids.remove(null);
 		List<ScreenLayoutPO> sys_layouts = sysScreenLayoutDao.findAll(ids);
 		group.setLayouts(new HashSet<com.sumavision.bvc.device.group.po.DeviceGroupScreenLayoutPO>());
 		for(ScreenLayoutPO sys_layout:sys_layouts){

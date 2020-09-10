@@ -27,14 +27,4 @@ public class UserHasNoPermissionForBusinessException extends BaseException{
 															 .toString());
 	}
 
-	public UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE business,int targetType,String names){
-		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("您没有")
-				 .append(business.getName())
-				 .append(names)
-				 .append(targetType==0?"设备":"用户")
-				 .append("的权限")
-				 .toString());
-		System.out.println("sss");
-	}
-	
 }
