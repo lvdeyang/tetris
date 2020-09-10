@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -64,6 +66,7 @@ public class GuidePO extends AbstractBasePO{
 	}
 
 	@Column(name = "STATUS")
+	@Enumerated(EnumType.STRING)
 	public Status getStatus() {
 		return status;
 	}

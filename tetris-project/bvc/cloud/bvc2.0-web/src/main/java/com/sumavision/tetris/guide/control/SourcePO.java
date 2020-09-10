@@ -44,6 +44,12 @@ public class SourcePO extends AbstractBasePO{
 	/** 源是否被切换到 */
 	private Boolean current;
 	
+	/** 音量 */
+	private Long volume;
+	
+	/** 输出地址 */
+	private String previewOut;
+
 	@Column(name = "SOURCE_NUMBER")
 	public Long getSourceNumber() {
 		return sourceNumber;
@@ -98,6 +104,24 @@ public class SourcePO extends AbstractBasePO{
 
 	public void setCurrent(Boolean current) {
 		this.current = current;
+	}
+	
+	@Column(name = "VOLUME")
+	public Long getVolume() {
+		return volume;
+	}
+
+	public void setVolume(Long volume) {
+		this.volume = volume;
+	}
+	
+	@Column(name = "PREVIEWOUT")
+	public String getPreviewOut() {
+		return previewOut;
+	}
+
+	public void setPreviewOut(String previewOut) {
+		this.previewOut = previewOut;
 	}
 
 }

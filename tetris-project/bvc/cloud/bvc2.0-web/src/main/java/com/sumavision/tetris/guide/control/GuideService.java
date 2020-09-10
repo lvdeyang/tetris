@@ -33,10 +33,13 @@ public class GuideService {
 	SourceDAO sourceDAO;
 	
 	@Autowired
+	OutputSettingDAO outputSettingDAO;
+	
+	@Autowired
 	VideoParametersDAO videoParametersDAO;
 	
 	@Autowired
-	OutputSettingDAO outputSettingDAO;
+	AudioParametersDAO audioParametersDAO;
 	
 	public GuidePO add(String taskName){
 		GuidePO guidePO = new GuidePO();
@@ -53,6 +56,10 @@ public class GuideService {
 		sourceDAO.save(list);
 		OutputSettingPO outputSettingPO = new OutputSettingPO();
 		outputSettingDAO.save(outputSettingPO);
+		VideoParametersPO videoParametersPO = new VideoParametersPO();
+		videoParametersDAO.save(videoParametersPO);
+		AudioParametersPO audioParametersPO = new AudioParametersPO();
+		audioParametersDAO.save(audioParametersPO);
 		return guidePO;
 	}
 	
@@ -67,6 +74,7 @@ public class GuideService {
 	
 	public void delete(Long id){
 		videoParametersDAO.delete(videoParametersDAO.findByGuideId(id));
+		audioParametersDAO.delete(audioParametersDAO.findByGuideId(id));
 		outputSettingDAO.deleteInBatch(outputSettingDAO.findByGuideId(id));
 		sourceDAO.deleteInBatch(sourceDAO.findByGuideId(id));
 		guideDAO.delete(id);

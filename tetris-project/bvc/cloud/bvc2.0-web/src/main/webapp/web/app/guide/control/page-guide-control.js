@@ -33,11 +33,10 @@ define([
                     	setSource:{
                     		visible: false,
                             loading: false,
-                            name:'',
-                            type:'',
-                            device:{},
-                            url:'',
-							index:0,
+							id:0,
+                            sourceName:'',
+                            sourceType:'',
+							source:'',
 							previewOut:'',
                             typeOptions:['直播流','5G背包']
                     	},
@@ -54,35 +53,42 @@ define([
 							deviceData:[],
 							
 						}
-                    }
+                    },
+					sources:{
+						list:[]
+					}
                 }
             },
             computed:{
                 
             },
             methods:{
-            	handleSetSource:function(index){
+				handleSelPgm: function () {
+					var self = this;
+				},
+				handleSelDeviceClose:function(){
+
+				},
+            	handleSetSource:function(id){
             		var self=this;
             		self.dialog.setSource.visible=true;
-					self.dialog.setSource.index=index;
-					self.dialog.setSource.type="";
-					self.dialog.setSource.url="";
+					self.dialog.setSource.id=id;
+					self.dialog.setSource.sourceType="";
+					self.dialog.setSource.source="";
 					self.dialog.setSource.previewOut="";
-					self.dialog.setSource.device={};
             	},
 				handleSetSourceCommit:function(){
 					var self = this;
 					self.dialog.setSource.visible=false;
 					var questData = {
-						type: self.dialog.setSource.type,
-						url:self.dialog.setSource.url,
-						deviceId:self.dialog.setSource.device.id,
-						name:self.dialog.setSource.device.name,
-						index:self.dialog.setSource.index,
+						id:self.dialog.setSource.id,
+						sourceName:self.dialog.setSource.sourceName,
+						sourceType: self.dialog.setSource.sourceType,
+						source:self.dialog.setSource.source,
 						previewOut:self.dialog.setSource.previewOut
 					};
-					ajax.post('/guide/control/source/set', questData, function (data, status) {
-						
+					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
+
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetSourceClose:function(){
@@ -117,10 +123,14 @@ define([
 					self.dialog.selDevice.visible=true;
 				},
 				startGuide:function(){
-					
+					ajax.post('/tetris/guide/control/guide/po/start',{id: 1},function(data, status){
+
+					})
 				},
 				stopGuide:function(){
-					
+					ajax.post('/tetris/guide/control/guide/po/stop',{id: 1},function(data, status){
+
+					})
 				},
 				handleSelPgm:function(index){
 					var self=this;
@@ -137,18 +147,34 @@ define([
 				switchSource:function(){
 					var self = this;
 					var questData = {
+						id: 1,
 						index: self.curPgm
 					};
-					ajax.post('/guide/control/source/switch', questData, function (data, status) {
+					ajax.post('/tetris/guide/control/source/po/cut', questData, function (data, status) {
 						
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				}
-               
-            }
-        });
 
-    
-        
+               
+            },
+			created:function(){
+				var self = this;
+/*
+				ajax.post('/tetris/guide/control/guide/po/query', null, function(data){
+
+				});
+*/
+
+				ajax.post('/tetris/guide/control/source/po/query', {id: 1}, function(data, status){
+					console.log(data);
+					for(var i = 0; i < data.length; i++){
+						self.sources.list.push(data[i]);
+					}
+				})
+
+			}
+
+        });
     };
 
     var destroy = function(){
