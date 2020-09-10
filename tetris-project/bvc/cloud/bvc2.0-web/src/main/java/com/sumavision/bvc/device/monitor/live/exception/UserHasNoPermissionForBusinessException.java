@@ -34,6 +34,7 @@ public class UserHasNoPermissionForBusinessException extends BaseException{
 				 .append(targetType==0?"设备":"用户")
 				 .append("的权限")
 				 .toString());
+		System.out.println("sss");
 	}
 	
 }
