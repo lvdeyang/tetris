@@ -127,7 +127,7 @@ public class CloudControlService {
 			Long userId) throws Exception{
 		
 		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
-//		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.DIANBO);
+		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.DIANBO);
 		monitorPtzctrlService.zoom(bundle.getBundleId(), bundle.getNodeUid(), direction, speed, userId);
 	}
 	

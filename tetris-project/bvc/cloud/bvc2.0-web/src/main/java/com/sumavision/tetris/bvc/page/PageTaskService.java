@@ -985,6 +985,8 @@ public class PageTaskService {
 		pageTasks.clear();
 		pageTasks.addAll(newmarkIndex(ordinaryPageTasks,fixedPageTasks));
 		
+		fixedAllTasks(pageTasks);
+		
 		//持久化
 		pageInfoDao.save(pageInfo);
 		
@@ -1077,6 +1079,18 @@ public class PageTaskService {
 			int taskIndex=fixedPageTasks.get(fixedPageTasks.size()-1).getTaskIndex()+1;
 			oldTask.setTaskIndex(taskIndex);;
 			fixedPageTasks.add(oldTask);
+		}
+	}
+	
+	/**
+	 * 将所有的都设置为固定的<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月10日 上午11:17:10
+	 */
+	public void fixedAllTasks(Collection <PageTaskPO> pageTasks){
+		for(PageTaskPO pageTask:pageTasks){
+			pageTask.setFixedAtPageAndLocation(true);
 		}
 	}
 }

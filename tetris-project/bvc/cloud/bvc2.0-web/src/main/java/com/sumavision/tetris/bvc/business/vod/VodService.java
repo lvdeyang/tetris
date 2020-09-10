@@ -448,7 +448,7 @@ public class VodService {
 		}
 		
 		if(userBOs.size()>0){
-			throw new UserHasNoPermissionForBusinessException(BUSINESS_OPR_TYPE.DIANBO,1, userBOs.toString());
+			throw new UserHasNoPermissionForBusinessException(BUSINESS_OPR_TYPE.DIANBO, userBOs.toString(),1);
 		}
 	}
 	
