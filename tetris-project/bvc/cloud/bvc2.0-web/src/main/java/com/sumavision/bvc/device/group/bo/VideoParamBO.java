@@ -17,6 +17,10 @@ public class VideoParamBO {
 	private int bitrate = 0;
 	
 	private String profile = "main";
+	
+	private String input_interface = "COLOR_BAR";
+	
+	private String output_interface = "CTRL";
 
 	public String getResolution() {
 		return resolution;
@@ -85,6 +89,24 @@ public class VideoParamBO {
 		return this;
 	}
 	
+	public String getInput_interface() {
+		return input_interface;
+	}
+
+	public VideoParamBO setInput_interface(String input_interface) {
+		this.input_interface = input_interface;
+		return this;
+	}
+
+	public String getOutput_interface() {
+		return output_interface;
+	}
+
+	public VideoParamBO setOutput_interface(String output_interface) {
+		this.output_interface = output_interface;
+		return this;
+	}
+
 	public VideoParamBO set(DispatchVideoParamPO videoParam){
 		this.bit_depth = videoParam.getBit_depth();
 		this.bitrate = videoParam.getBitrate();
