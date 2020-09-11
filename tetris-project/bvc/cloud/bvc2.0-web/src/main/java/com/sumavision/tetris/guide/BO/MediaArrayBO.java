@@ -1,6 +1,6 @@
 package com.sumavision.tetris.guide.BO;
 
-public class MediaArray {
+public class MediaArrayBO {
 
 	/**与task_array中task_id对应，表示该路输出应该输出哪个任务 */
 	private String task_id;
@@ -15,7 +15,7 @@ public class MediaArray {
 		return task_id;
 	}
 
-	public MediaArray setTask_id(String task_id) {
+	public MediaArrayBO setTask_id(String task_id) {
 		this.task_id = task_id;
 		return this;
 	}
@@ -24,7 +24,7 @@ public class MediaArray {
 		return encode_id;
 	}
 
-	public MediaArray setEncode_id(String encode_id) {
+	public MediaArrayBO setEncode_id(String encode_id) {
 		this.encode_id = encode_id;
 		return this;
 	}
@@ -33,7 +33,7 @@ public class MediaArray {
 		return type;
 	}
 
-	public MediaArray setType(String type) {
+	public MediaArrayBO setType(String type) {
 		this.type = type;
 		return this;
 	}
