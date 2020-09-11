@@ -19,6 +19,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = SourcePO.class, idClass = Long.class)
 public interface SourceDAO extends BaseDAO<SourcePO>{
 
-	public List<SourcePO> findByGuideId(Long guideId);
+	public List<SourcePO> findByGuideIdOrderBySourceNumber(Long guideId);
 	
 }

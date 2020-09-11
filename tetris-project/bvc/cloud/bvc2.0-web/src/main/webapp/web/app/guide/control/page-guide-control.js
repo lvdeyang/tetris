@@ -67,15 +67,24 @@ define([
 					var self = this;
 				},
 				handleSelDeviceClose:function(){
-
+					var self = this;
+					self.dialog.setDevice.visible = false;
 				},
-            	handleSetSource:function(id){
+            	handleSetSource:function(sourceNumber){
             		var self=this;
+					var x;
+					for(var i = 0; i < self.sources.list.length; i++){
+						if(self.sources.list[i].index == sourceNumber){
+							x = self.sources.list[i];
+							break;
+						}
+					}
             		self.dialog.setSource.visible=true;
-					self.dialog.setSource.id=id;
-					self.dialog.setSource.sourceType="";
-					self.dialog.setSource.source="";
-					self.dialog.setSource.previewOut="";
+					self.dialog.setSource.id = x.id;
+
+					self.dialog.setSource.sourceType = x.sourceTypeName;
+					self.dialog.setSource.source = x.source;
+					self.dialog.setSource.previewOut = x.previewOut;
             	},
 				handleSetSourceCommit:function(){
 					var self = this;

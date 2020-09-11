@@ -18,7 +18,9 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	private Long index;
 	
 	/** 源类型 */
-	private SourceType sourceType;
+	private String sourceType;
+	
+	private String sourceTypeName;
 	
 	/** 源名称 */
 	private String sourceName;   
@@ -47,12 +49,22 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
-	public SourceType getSourceType() {
+	public String getSourceType() {
 		return sourceType;
 	}
 
-	public void setSourceType(SourceType sourceType) {
+	public SourceVO setSourceType(String sourceType) {
 		this.sourceType = sourceType;
+		return this;
+	}
+
+	public String getSourceTypeName() {
+		return sourceTypeName;
+	}
+
+	public SourceVO setSourceTypeName(String sourceTypeName) {
+		this.sourceTypeName = sourceTypeName;
+		return this;
 	}
 
 	public String getSourceName() {
@@ -111,10 +123,11 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	@Override
 	public SourceVO set(SourcePO entity) throws Exception {
 		this.setId(entity.getId());
-		this.setSourceType(entity.getSourceType());
+		this.setSourceType(entity.getSourceType()!=null ? entity.getSourceType().toString(): null);
+		this.setSourceTypeName(entity.getSourceType()!=null ? entity.getSourceType().getName(): null);
 		this.setSourceName(entity.getSourceName());
 		this.setSource(entity.getSource());
-		this.setId(entity.getId());
+		this.setIndex(entity.getSourceNumber());
 		this.setCurrent(entity.getCurrent());
 		this.setVolume(entity.getVolume());
 		this.setPreviewOut(entity.getPreviewOut());

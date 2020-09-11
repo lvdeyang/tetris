@@ -25,6 +25,18 @@ public class AudioParametersPO extends AbstractBasePO{
 	/** 导播任务id */
 	private Long guideId;
 
+	/** 编码格式 */
+	private CodingFormat codingFormat = CodingFormat.ACC;
+	
+	/** */
+	private String sampleFmt = "s16";
+	
+	/** 码率 */
+	private String bitrate = "128";
+	
+	/** 编码类型 */
+	private CodingType codingType = CodingType.MPEG4_ACC_LC;
+	
 	@Column(name = "GUIDE_ID")
 	public Long getGuideId() {
 		return guideId;
@@ -33,18 +45,6 @@ public class AudioParametersPO extends AbstractBasePO{
 	public void setGuideId(Long guideId) {
 		this.guideId = guideId;
 	}
-
-	/** 编码格式 */
-	private CodingFormat codingFormat;
-	
-	/** */
-	private String sampleFmt;
-	
-	/** 码率 */
-	private String bitrate;
-	
-	/** 编码类型 */
-	private CodingType codingType;
 
 	@Column(name = "CODING_FORMAT")
 	public CodingFormat getCodingFormat() {

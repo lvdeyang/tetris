@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.guide.business.GuidePlayService;
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
 import com.sumavision.tetris.guide.control.VideoParametersDAO;
 
@@ -76,15 +77,17 @@ public class GuideService {
 		videoParametersDAO.delete(videoParametersDAO.findByGuideId(id));
 		audioParametersDAO.delete(audioParametersDAO.findByGuideId(id));
 		outputSettingDAO.deleteInBatch(outputSettingDAO.findByGuideId(id));
-		sourceDAO.deleteInBatch(sourceDAO.findByGuideId(id));
+		sourceDAO.deleteInBatch(sourceDAO.findByGuideIdOrderBySourceNumber(id));
 		guideDAO.delete(id);
 	}
 	
-	public Object start(Long id){
+	public Object start(Long id) throws Exception{
+		new GuidePlayService().start(id);
 		return null;
 	}
 	
-	public Object stop(Long id){
+	public Object stop(Long id) throws Exception{
+		new GuidePlayService().stop(id);
 		return null;
 	}
 

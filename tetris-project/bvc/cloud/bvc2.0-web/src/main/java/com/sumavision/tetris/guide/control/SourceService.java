@@ -3,10 +3,11 @@
  */
 package com.sumavision.tetris.guide.control;
 
-import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.sumavision.tetris.guide.business.GuidePlayService;
 
 /**
  * 类型概述<br/>
@@ -43,7 +44,8 @@ public class SourceService {
 	
 	public Object cut(
 			Long id, 
-			Long sourceNumber){
+			Long sourceNumber) throws Exception{
+		new GuidePlayService().exchange(id, sourceNumber);
 		return null;
 	}
 }

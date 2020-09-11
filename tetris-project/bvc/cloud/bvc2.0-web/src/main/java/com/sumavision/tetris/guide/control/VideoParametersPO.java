@@ -28,22 +28,22 @@ public class VideoParametersPO extends AbstractBasePO{
 	private Long guideId;
 
 	/** 编码对象 */
-	private CodingObject codingObject;
+	private CodingObject codingObject = CodingObject.H264;
 	
 	/** 编码档次 */
-	private String profile;
+	private String profile = "main";
 	
 	/** 帧率 */
-	private Long fps;
+	private Long fps = 25L;
 	
 	/** 码率 */
-	private Long bitrate;
+	private Long bitrate = 1500l;
 	
 	/** 分辨率 */
-	private String resolution;
+	private String resolution = "1920x1080";
 	
 	/** 最大码率 */
-	private Long maxBitrate;
+	private Long maxBitrate = 1500L;
 	
 	@Column(name = "GUIDE_ID")
 	public Long getGuideId() {

@@ -16,7 +16,7 @@ public class SourceQuery {
 	
 	public List<SourceVO> query(Long guideId) throws Exception{
 		
-		List<SourcePO> list = sourceDao.findByGuideId(guideId);
+		List<SourcePO> list = sourceDao.findByGuideIdOrderBySourceNumber(guideId);
 		return SourceVO.getConverter(SourceVO.class).convert(list, SourceVO.class);
 	}
 }
