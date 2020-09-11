@@ -1,6 +1,7 @@
 package com.sumavision.tetris.guide.business;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +23,16 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.TransmissionMode;
+import com.sumavision.tetris.guide.BO.GuideOutputArrayBO;
 import com.sumavision.tetris.guide.BO.GuideSourceOutputBO;
 import com.sumavision.tetris.guide.BO.GuideSourcesBO;
+import com.sumavision.tetris.guide.BO.GuideTaskArrayBO;
+import com.sumavision.tetris.guide.BO.MediaArrayBO;
+import com.sumavision.tetris.guide.BO.ProgramArrayBO;
+import com.sumavision.tetris.guide.BO.UdpTsBO;
 import com.sumavision.tetris.guide.BO.VideoOrAudioSourceBO;
+import com.sumavision.tetris.guide.control.AudioParametersDAO;
+import com.sumavision.tetris.guide.control.AudioParametersPO;
 import com.sumavision.tetris.guide.control.GuideDAO;
 import com.sumavision.tetris.guide.control.GuidePO;
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
@@ -32,6 +40,8 @@ import com.sumavision.tetris.guide.control.OutputSettingPO;
 import com.sumavision.tetris.guide.control.SourceDAO;
 import com.sumavision.tetris.guide.control.SourcePO;
 import com.sumavision.tetris.guide.control.SourceType;
+import com.sumavision.tetris.guide.control.VideoParametersDAO;
+import com.sumavision.tetris.guide.control.VideoParametersPO;
 
 @Service
 public class GuidePlayService {
@@ -55,7 +65,12 @@ public class GuidePlayService {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
-	//没有添加注释@service
+	@Autowired
+	private VideoParametersDAO videoParametersDao;
+	
+	@Autowired
+	private AudioParametersDAO auidoParametersDao;
+	
 	/**
 	 * 开会<br/>
 	 * <b>作者:</b>lx<br/>
@@ -104,19 +119,115 @@ public class GuidePlayService {
 		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(guideId);
 		List <PassByBO> outputPassBys=outputSources.stream().map(outputSource->{
 			PassByBO passBy=new PassByBO();
-			//缺少参数
+			
 			passBy.setBundle_id(outputSource.getUuid());
 			passBy.setLayer_id(layer_id);
 			passBy.setType("creatBackupSources");
 			
-			JSONObject pass_by_content=new JSONObject();
-			pass_by_content.put("output_udp_url", outputSource.getOutputAddress());
-			pass_by_content.put("sources", null);
+			//sources开始
+			List<SourcePO> sources=sourceDao.findByGuideId(outputSource.getGuideId());
+			List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
+			for(SourcePO sourcePo:sources){
+				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
+				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
+						.setBundle_id(sourcePo.getUuid())
+						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
+						.setLayer_id(layer_id))
+				.setVideo_source(new VideoOrAudioSourceBO()
+						.setBundle_id(sourcePo.getUuid())
+						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
+						.setLayer_id(layer_id));
+				guideSources.add(guideSourcesBo);
+			}
+			//sources结束
+			
+//			task_array开始
+			List<GuideTaskArrayBO> guideTaskArrays=new ArrayList<GuideTaskArrayBO>();
+			//这里应该是一个集合
+			VideoParametersPO videoParametersPO= videoParametersDao.findByGuideId(outputSource.getGuideId());
+			HashMap<String,Object> videoEncodeArray=new HashMap<String,Object>();
+			HashMap<String,Object> videoParameter=new HashMap<String,Object>();
+			AudioParametersPO audioParametersPO =auidoParametersDao.findByGuideId(outputSource.getGuideId());
+			HashMap<String,Object> audioEncodeArray=new HashMap<String,Object>();
+			HashMap<String,Object> audioParameter=new HashMap<String,Object>();
+			/*"type": "audio"                              //音频编码
+				"encode_array": [
+					{
+						"encode_id": "ENCODE_ID_2",          //编码ID
+						"aac": {                             //编码格式aac,"mp2","mp3",dolby,passby
+							"sample_fmt": "s16",             
+							"bitrate": "128",                 //码率
+							"type": "mpeg4-aac-lc"            //编码类型mpeg4-aac-lc,mpeg4-he-aac-lc,mpeg4-he-aac-v2-lc;ac3,eac3
+						},
+					}
+				]*/
+			
+			videoEncodeArray.put("encode_id","ENCODE_ID_1");
+			videoParameter.put("profile", videoParametersPO.getProfile());
+			videoParameter.put("fps", videoParametersPO.getFps());
+			videoParameter.put("bitrate", videoParametersPO.getBitrate());
+			videoParameter.put("resolution", videoParametersPO.getResolution());
+			videoParameter.put("max_bitrate", videoParametersPO.getMaxBitrate());
+			videoEncodeArray.put(videoParametersPO.getCodingObject().getName(),videoParameter);
+			GuideTaskArrayBO videoGuideTaskArrayBO=new GuideTaskArrayBO()
+					.setId("TASK_ID_1")
+					.setType("video")
+					.setEncode_array(videoEncodeArray);
+			
+			audioEncodeArray.put("encode_id", "ENCODE_ID_2");
+			audioParameter.put("sample_fmt", audioParametersPO.getSampleFmt());
+			audioParameter.put("bitrate", audioParametersPO.getBitrate());
+			audioParameter.put("type", audioParametersPO.getCodingType().getName());
+			audioEncodeArray.put(audioParametersPO.getCodingFormat().getName(),audioParameter);
+			
+			GuideTaskArrayBO audieGuideTaskArrayBO=new GuideTaskArrayBO()
+					.setId("TASK_ID_2")
+					.setType("audio")
+					.setEncode_array(audioEncodeArray);
+			
+			guideTaskArrays.add(videoGuideTaskArrayBO);
+			guideTaskArrays.add(audieGuideTaskArrayBO);
+//			task_array结束
+			
+//			oupput_array开始
+			List<GuideOutputArrayBO> GuideOutputArrays=new ArrayList<GuideOutputArrayBO>();
+			List<MediaArrayBO> mediaArrayBOs=new ArrayList<MediaArrayBO>();
+			MediaArrayBO videoMediaArrayBO=new MediaArrayBO()
+					.setEncode_id("ENCODE_ID_1")
+					.setType("video")
+					.setTask_id("TASK_ID_1");
+			MediaArrayBO audioMediaArrayBO=new MediaArrayBO()
+					.setEncode_id("ENCODE_ID_2")
+					.setType("audio")
+					.setTask_id("TASK_ID_2");
+			mediaArrayBOs.add(videoMediaArrayBO);
+			mediaArrayBOs.add(audioMediaArrayBO);
+			
+			List<ProgramArrayBO> programArrayBOs=new ArrayList<ProgramArrayBO>();
+			ProgramArrayBO programArrayBO=new ProgramArrayBO()
+					.setProgram_number(301)
+					.setMedia_array(mediaArrayBOs);
+			programArrayBOs.add(programArrayBO);
+			
+			String[] params=outputSource.getOutputAddress().split(":");
+			String ip=params[1].replace("//", "");
+			String port=params[2];
+			UdpTsBO udpTsBo=new UdpTsBO()
+					.setIp(ip)
+					.setPort(Integer.parseInt(port))
+					.setProgram_array(programArrayBOs);
+			
+			GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
+			guideOutputArray.setId("OUTPUT_ID").setUdp_ts(null);
+//			oupput_array结束
+			
 			GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
-			
-			
 			guideSourceOutput.setOutput_udp_url(outputSource.getOutputAddress());
+			guideSourceOutput.setSources(guideSources);
+			guideSourceOutput.setTask_array(guideTaskArrays);
+			guideSourceOutput.setOutput_array(GuideOutputArrays);
 			
+			passBy.setPass_by_content(guideSourceOutput);
 			return passBy;
 		}).collect(Collectors.toList());
 		LogicBO outputLogic=new LogicBO();

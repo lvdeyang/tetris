@@ -281,7 +281,6 @@ public class CloudControlController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		
 		monitorPointService.remove(Long.parseLong(id), userId);
 		
 		return null;

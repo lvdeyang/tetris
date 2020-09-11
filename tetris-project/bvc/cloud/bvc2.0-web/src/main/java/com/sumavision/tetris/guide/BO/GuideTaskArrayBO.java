@@ -11,29 +11,31 @@ public class GuideTaskArrayBO {
 	private String type;
 	
 	/**编码数组，数组表示编码个数，即多码率个数  */
-	private List<Object> encode_array;
+	private Object encode_array;
 
 	public String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public GuideTaskArrayBO setId(String id) {
 		this.id = id;
+		return this;
 	}
 
 	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public GuideTaskArrayBO setType(String type) {
 		this.type = type;
+		return this;
 	}
 
-	public List<Object> getEncode_array() {
+	public Object getEncode_array() {
 		return encode_array;
 	}
 
-	public GuideTaskArrayBO setEncode_array(List<Object> encode_array) {
+	public GuideTaskArrayBO setEncode_array(Object encode_array) {
 		this.encode_array = encode_array;
 		return this;
 	}

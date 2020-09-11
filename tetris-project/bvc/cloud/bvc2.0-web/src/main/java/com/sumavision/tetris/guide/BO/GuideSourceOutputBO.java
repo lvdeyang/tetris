@@ -20,7 +20,16 @@ public class GuideSourceOutputBO {
 	/**编码任务数组，按不同编码类型区分，分为视频编码，音频编码，字幕编码(可不考虑) */
 	private List<GuideTaskArrayBO> task_array;
 	
-	private List<GuideOutputArray> output_array;
+	private List<GuideOutputArrayBO> output_array;
+
+	public List<GuideOutputArrayBO> getOutput_array() {
+		return output_array;
+	}
+
+	public GuideSourceOutputBO setOutput_array(List<GuideOutputArrayBO> output_array) {
+		this.output_array = output_array;
+		return this;
+	}
 
 	public String getOutput_udp_url() {
 		return output_udp_url;
