@@ -21,8 +21,8 @@
 					</div>
 				    <div style="width:49%;height:300px;float:left;margin-left:1%">
 							<div style="width:100%">
-						        <el-button style="float:right" @onclick="startGuide" type="primary" round size="mini">开始直播</el-button>
-								<el-button style="float:right;margin-right:10px;" @onclick="stopGuide" type="primary" round size="mini">停止直播</el-button>
+						        <el-button style="float:right" @click="startGuide" type="primary" round size="mini">开始直播</el-button>
+								<el-button style="float:right;margin-right:10px;" @click="stopGuide" type="primary" round size="mini">停止直播</el-button>
 						        <!--<el-button type="primary" round size="mini">配置视频源</el-button>-->
 						        <el-button style="float:right" @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
 					        </div>
@@ -66,7 +66,7 @@
 					       		</el-button>
 				       		</div>
 				       		<div>
-					       		<el-button @onclick="switchSource()" type="primary"  size="mini" style="margin-top:30px;font-size:18px;width:70px;height:70px;margin-left:50px;">
+					       		<el-button @click="switchSource()" type="primary"  size="mini" style="margin-top:30px;font-size:18px;width:70px;height:70px;margin-left:50px;">
 					       			CUT
 					       		</el-button>
 				       		</div>
@@ -80,8 +80,8 @@
 					    <el-card class="box-card" style="height:390px;background:#f2f2f2">
 						  <div slot="header" class="clearfix">
 							<span>台标字幕</span>
-							<el-button style="float:right" @onclick="startGuide" type="primary" round size="mini">添加台标</el-button>
-							<el-button style="float:right;margin-right:5px" @onclick="stopGuide" type="primary" round size="mini">添加字幕</el-button>
+							<el-button style="float:right" @click="startGuide" type="primary" round size="mini">添加台标</el-button>
+							<el-button style="float:right;margin-right:5px" @click="stopGuide" type="primary" round size="mini">添加字幕</el-button>
 						  </div>
 						 
 							<div style="width:100%;margin-top:20px;">
@@ -250,10 +250,6 @@
 							
 							</table>
 						</el-card>
-					
-					    
-						
-					
 					</div>
 				  </el-tab-pane>
 				</el-tabs>
@@ -272,19 +268,19 @@
 	                    placeholder="请选择源类型">
 	                <el-option
 	                        v-for="item in dialog.setSource.typeOptions"
-	                        :value="item">
+	                        :value="item" :label="item">
 	                </el-option>
 	            </el-select>
 	        </el-form-item>
-	        <el-form-item label="源地址">
-	            <el-input v-model="dialog.setSource.source"></el-input>
-	        </el-form-item>
-	        <el-form-item label="选择源设备">
-	             <el-button @click="handleDeviceSelect()" type="primary" size="small">选择原设备</el-button>
-	        </el-form-item>
-	        <el-form-item v-if="dialog.setSource.sourceName" label="设备名">
+			<el-form-item v-if = "dialog.setSource.sourceType === '直播流'" label="源地址">
+				<el-input v-model="dialog.setSource.source"></el-input>
+			</el-form-item>
+			<el-form-item v-if = "dialog.setSource.sourceType === '5G背包'" label = "选择源设备">
+				<el-button @click="handleDeviceSelect()" type="primary" size="small">选择原设备</el-button>
+			</el-form-item>
+	        <!--<el-form-item v-if="dialog.setSource.sourceName" label="设备名">
 	             <span>{{ dialog.setSource.sourceName }}</span>
-	        </el-form-item>
+	        </el-form-item>-->
 			<el-form-item label="源名称">
 				<el-input v-model="dialog.setSource.sourceName"></el-input>
 			</el-form-item>
@@ -342,10 +338,7 @@
 			</el-table-column>
 			<el-table-column fixed prop="name" label="设备名称" width="150">
 			</el-table-column>
-			<el-table-column
-			  fixed="right"
-			  label="操作"
-			  width="100">
+			<el-table-column fixed="right" label="操作" width="100">
 			  <template slot-scope="scope">
 				<el-button @click="handleSelDeviceClick(scope.row)" type="text" size="small">选择</el-button>
 			  </template>
