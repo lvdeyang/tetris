@@ -1,5 +1,7 @@
 package com.sumavision.bvc.device.group.bo;
 
+import com.sumavision.tetris.bvc.model.terminal.layout.LayoutPositionPO;
+
 /**
  * @ClassName: 布局参数<br/> 
  * @author lvdeyang
@@ -30,6 +32,13 @@ public class RectBO {
 	
 	/** 屏幕覆盖类型  */
 	private String type = "single";
+
+	//--------迭代三确认的参数
+	/** 通道id，取代channel_id */
+	private String channel;
+	
+	/** 裁切 */
+	private RectBO cut;
 
 	public int getX() {
 		return x;
@@ -100,6 +109,34 @@ public class RectBO {
 
 	public RectBO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public RectBO setChannel(String channel) {
+		this.channel = channel;
+		return this;
+	}
+
+	public RectBO getCut() {
+		return cut;
+	}
+
+	public RectBO setCut(RectBO cut) {
+		this.cut = cut;
+		return this;
+	}
+	
+	public RectBO set(LayoutPositionPO position, String channelId){
+		this.setChannel(channelId)
+			.setRect_id(position.getScreenPrimaryKey())
+			.setX(Integer.parseInt(position.getX()))
+			.setY(Integer.parseInt(position.getY()))
+			.setWidth(Integer.parseInt(position.getWidth()))
+			.setHeight(Integer.parseInt(position.getHeight()));
 		return this;
 	}
 	

@@ -14,6 +14,9 @@ public class ScreenBO {
 
 	/** 屏幕的序号 */
 	private String id;
+
+	/** 迭代三正式使用的屏幕的序号。上边参数在逻辑层也会被转换成screen_id */
+	private String screen_id;
 	
 	private String screen_status = "Open";
 	
@@ -22,6 +25,9 @@ public class ScreenBO {
 	
 	/** 描述屏幕覆盖 */
 	private List<RectBO> overlaps;
+	
+	/** 迭代三正式使用的。上边的2个参数在逻辑层也会被转换成rects */
+	private List<RectBO> rects;
 
 	public String getId() {
 		return id;
@@ -59,6 +65,24 @@ public class ScreenBO {
 		return this;
 	}
 	
+	public String getScreen_id() {
+		return screen_id;
+	}
+
+	public ScreenBO setScreen_id(String screen_id) {
+		this.screen_id = screen_id;
+		return this;
+	}
+
+	public List<RectBO> getRects() {
+		return rects;
+	}
+
+	public ScreenBO setRects(List<RectBO> rects) {
+		this.rects = rects;
+		return this;
+	}
+
 	/**
 	 * @Title: 单屏布局<br/> 
 	 * @return ScreenBO
