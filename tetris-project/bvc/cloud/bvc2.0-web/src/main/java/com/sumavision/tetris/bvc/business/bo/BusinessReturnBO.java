@@ -21,5 +21,14 @@ public class BusinessReturnBO {
 		this.logic = logic;
 		return this;
 	}
+
+	public List<MessageSendCacheBO> getWebsocketCaches() {
+		return websocketCaches;
+	}
+
+	public BusinessReturnBO setWebsocketCaches(List<MessageSendCacheBO> websocketCaches) {
+		this.websocketCaches = websocketCaches;
+		return this;
+	}
 	
 }
