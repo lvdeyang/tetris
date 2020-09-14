@@ -162,6 +162,9 @@ public class CommonForwardPO extends AbstractBasePO{
 	
 	private Long dstMemberId;
 	
+	/** 分屏LayoutPosition的id */
+	private Long positionId;
+	
 	/** 目标设备类型 */
 	private DstDeviceType dstDeviceType;
 	
@@ -253,6 +256,14 @@ public class CommonForwardPO extends AbstractBasePO{
 
 	public void setDstMemberId(Long dstMemberId) {
 		this.dstMemberId = dstMemberId;
+	}
+
+	public Long getPositionId() {
+		return positionId;
+	}
+
+	public void setPositionId(Long positionId) {
+		this.positionId = positionId;
 	}
 
 	@Enumerated(value = EnumType.STRING)

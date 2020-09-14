@@ -19,7 +19,7 @@ import com.suma.venus.resource.service.BundleService;
 public class FifthGenerationKnapsackService {
 	
 	/** 设备模板类型 */
-	private static final String DEVICE_MODEL = "5gpackage";
+	private static final String DEVICE_MODEL = "5G";
 	
 	/** 5G代理服务端口 */
 	private static final String EXTRA_INFO_NAME = "5gProxyPort";

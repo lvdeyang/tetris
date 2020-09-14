@@ -46,6 +46,8 @@ public class ConnectBundleBO {
 	
 	private List<ConnectBO> channels = new ArrayList<ConnectBO>();
 	
+	private List<ScreenBO> screens = new ArrayList<ScreenBO>();
+	
 	private PassByBO pass_by_str;
 
 	public String getTaskId() {
@@ -129,6 +131,15 @@ public class ConnectBundleBO {
 		return this;
 	}
 	
+	public List<ScreenBO> getScreens() {
+		return screens;
+	}
+
+	public ConnectBundleBO setScreens(List<ScreenBO> screens) {
+		this.screens = screens;
+		return this;
+	}
+
 	public PassByBO getPass_by_str() {
 		return pass_by_str;
 	}

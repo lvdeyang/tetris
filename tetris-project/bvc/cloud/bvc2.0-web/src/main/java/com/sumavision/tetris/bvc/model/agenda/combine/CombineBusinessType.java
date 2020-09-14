@@ -5,7 +5,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum CombineBusinessType {
 
 	AGENDA("议程"),
-	GROUP("业务组");
+	GROUP("业务组"),
+	VIRTUAL_SOURCE("虚拟源");
 	
 	private String name;
 	

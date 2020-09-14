@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.RectBO;
+import com.sumavision.bvc.device.group.bo.ScreenBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -46,6 +49,10 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundlePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleType;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelDAO;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelPO;
+import com.sumavision.tetris.bvc.model.terminal.layout.LayoutPositionDAO;
+import com.sumavision.tetris.bvc.model.terminal.layout.LayoutPositionPO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -69,13 +76,16 @@ import lombok.extern.slf4j.Slf4j;
 public class PageTaskService {
 	
 	@Autowired
-	private CommandGroupUserInfoDAO commandGroupUserInfoDao;	
+	private TerminalChannelDAO terminalChannelDao;
+	
+	@Autowired
+	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired
+	private LayoutPositionDAO layoutPositionDao;
 	
 	@Autowired
 	private PageInfoDAO pageInfoDao;
-	
-	@Autowired
-	private PageTaskDAO pageTaskDao;
 	
 	@Autowired
 	private TerminalBundleDAO terminalBundleDao;
@@ -90,28 +100,22 @@ public class PageTaskService {
 	private ResourceBundleDAO resourceBundleDao;
 	
 	@Autowired
-	private BusinessCommonService businessCommonService;
-	
-	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
 	
 	@Autowired
-	private CommandUserServiceImpl commandUserServiceImpl;
-	
-	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
-
-	@Autowired
-	private CommandCommonUtil commandCommonUtil;
 
 	@Autowired
 	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
 
 	@Autowired
 	private QueryUtil queryUtil;
+
+	@Autowired
+	private PageTaskUtil pageTaskUtil;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -213,7 +217,11 @@ public class PageTaskService {
 		pageInfoDao.save(pageInfo);
 		
 //		jumpToPage(pageInfo, newCurrentPage);
-		List<PageTaskPO> newPageTasks = getPageTasks(pageInfo, newCurrentPage, true);
+		//对于非用户，不分页，直接得到所有的task（210设备可能会有2个）
+		List<PageTaskPO> newPageTasks = pageInfo.getPageTasks();
+		if(pageInfo.getGroupMemberType().equals(GroupMemberType.MEMBER_USER)){
+			newPageTasks = getPageTasks(pageInfo, newCurrentPage, true);
+		}
 		comparePage(pageInfo, oldTaskPOs, newPageTasks, true);
 		
 		//notifyUser，后续要改
@@ -372,6 +380,7 @@ public class PageTaskService {
 	}
 	
 	/*可以优化，有问题*/
+	@Deprecated
 	private PageTaskPO addTask(PageInfoPO pageInfo, List<PageTaskPO> newTasks){
 		
 		PageTaskPO jumpTo = null;
@@ -464,7 +473,8 @@ public class PageTaskService {
 		
 		return jumpTo;
 	}
-	
+
+	@Deprecated
 	private void removeTasks(PageInfoPO pageInfo, List<PageTaskPO> _removeTasks){
 		
 		List<PageTaskPO> removeTasks = new ArrayList<PageTaskPO>(_removeTasks);
@@ -502,6 +512,7 @@ public class PageTaskService {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	private LogicBO comparePage(
 			PageInfoPO pageInfo,
 			List<PageTaskPO> _oldPageTasks,
@@ -569,7 +580,7 @@ public class PageTaskService {
 			if(GroupMemberType.MEMBER_HALL.equals(pageInfo.getGroupMemberType())){
 
 				//TODO:这个查询再优化一下条件
-				List<TerminalBundleConferenceHallPermissionPO> closeDecoders = terminalBundleConferenceHallPermissionDao.findByBundleIdIn(oldBundleIds);
+//				List<TerminalBundleConferenceHallPermissionPO> closeDecoders = terminalBundleConferenceHallPermissionDao.findByBundleIdIn(oldBundleIds);
 				
 				//空闲的解码器
 				List<TerminalBundleConferenceHallPermissionPO> decoderPs = new ArrayList<TerminalBundleConferenceHallPermissionPO>();
@@ -604,14 +615,35 @@ public class PageTaskService {
 				for(int i=0; i<addTasks.size(); i++){
 					for(TerminalBundleConferenceHallPermissionPO decoderP : decoderPs){
 						PageTaskPO addTask = addTasks.get(i);
+						
+//						LayoutPositionPO position = layoutPositionDao.findOne(addTask.getPositionId());
+						String videoChannelId = null;
+						Long positionId = addTask.getPositionId();
+						if(positionId != null){
+							LayoutPositionPO position = layoutPositionDao.findOne(positionId);
+							if(position != null){
+								//应该只能查到1个
+								Long terminalId = pageInfo.getTerminalId();
+								String screenPrimaryKey = position.getScreenPrimaryKey();
+								List<TerminalChannelPO> channels = terminalChannelDao.findByTerminalIdAndScreenPrimaryKey(terminalId, screenPrimaryKey);
+								if(channels.size() == 0){
+									log.warn("terminalChannelDao.findByTerminalIdAndScreenPrimaryKey 没有查到通道，terminalId = " + terminalId + ", screenPrimaryKey = " + screenPrimaryKey);
+								}
+								if(channels.size() > 1){
+									log.warn("terminalChannelDao.findByTerminalIdAndScreenPrimaryKey 查到多个" + channels.size() + "个通道，terminalId = " + terminalId + ", screenPrimaryKey = " + screenPrimaryKey);
+								}
+								videoChannelId = channels.get(0).getRealChannelId();
+							}
+						}
+						
 						BundlePO bundle = queryUtil.queryBundlePOByBundleId(bundlePOs, decoderP.getBundleId());						
-						addTask.setDstByHall(decoderP, bundle);
+						addTask.setDstByHall(decoderP, bundle, videoChannelId);
 					}
 				}
 				
 				//呼叫所有的newTaskPlayers，挂断所有的NONE的needClosePlayers；进行相应的上屏处理；字幕下发
 				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();			
-				logic = openAndCloseDecoder(addTasks, needCloseTasks, codec);
+				logic = openAndCloseDecoder_Rect(addTasks, needCloseTasks, codec);
 							
 				for(PageTaskPO closeTask : closeTasks){
 					closeTask.setShowing(false);
@@ -644,8 +676,7 @@ public class PageTaskService {
 				//用来做新业务的所有播放器，可能包含老播放器，以及未使用的播放器
 				List<TerminalBundleUserPermissionPO> newTaskPlayers = new ArrayList<TerminalBundleUserPermissionPO>();
 				
-				//需要挂断的老播放器
-				List<TerminalBundleUserPermissionPO> needClosePlayers = new ArrayList<TerminalBundleUserPermissionPO>();
+				new ArrayList<TerminalBundleUserPermissionPO>();
 				
 				if(addTasks.size() <= closeTasks.size()){
 					//所有的新业务都可以用老播放器来做
@@ -664,8 +695,7 @@ public class PageTaskService {
 						}
 					}				
 					
-					//需要挂断的老播放器
-					needClosePlayers = closePlayers.subList(addTasks.size(), closePlayers.size());//这个变量没有用
+					closePlayers.subList(addTasks.size(), closePlayers.size());
 					needCloseTasks = closeTasks.subList(addTasks.size(), closePlayers.size());
 				}else{
 					//所有老播放器都做新业务
@@ -723,7 +753,7 @@ public class PageTaskService {
 		}
 		
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();			
-		LogicBO logic = openAndCloseDecoder(pageTasks, null, codec);
+		LogicBO logic = openAndCloseDecoder_Rect(pageTasks, null, codec);
 		
 		if(doProtocol){
 			executeBusiness.execute(logic, "改变执行状态后，重呼解码器");
@@ -809,7 +839,8 @@ public class PageTaskService {
 	//TODO:切分屏，参考 CommandSplitServiceImpl.changeLayoutScheme
 	
 	//TODO:特殊跳转，调用jumpToPage	
-	
+
+	@Deprecated
 	private LogicBO openAndCloseDecoder(
 			List<PageTaskPO> openTasks,
 			List<PageTaskPO> closeTasks,
@@ -882,6 +913,118 @@ public class PageTaskService {
 		return logic;
 	}
 	
+	/**
+	 * 对比前后的分页，打开新播放的，关掉不播放的，保留原有的<br/>
+	 * <p>增加对多个rect的支持（支持虚拟源）</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月14日 上午9:32:12
+	 * @param openTasks 刷新分页后的任务
+	 * @param closeTasks 刷新分页前的任务
+	 * @param codec
+	 * @return
+	 */
+	private LogicBO openAndCloseDecoder_Rect(
+			List<PageTaskPO> openTasks,
+			List<PageTaskPO> closeTasks,
+			CodecParamBO codec){
+		
+		if(openTasks == null) openTasks = new ArrayList<PageTaskPO>();
+		if(closeTasks == null) closeTasks = new ArrayList<PageTaskPO>();
+		
+		Map<String, List<PageTaskPO>> map = pageTaskUtil.classifyBundleTasks(openTasks);
+		
+		LogicBO logic = new LogicBO().setUserId("-1")
+		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
+		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
+		 		 .setPass_by(new ArrayList<PassByBO>());
+		
+		for(String bundleId : map.keySet()){
+			List<PageTaskPO> opens = map.get(bundleId);
+			PageTaskPO open = opens.get(0);
+			ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+//				        .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+				        .setLock_type("write")
+				        .setBundleId(open.getDstBundleId())
+				        .setLayerId(open.getDstLayerId())
+				        .setBundle_type(open.getDstBundleType());
+			ScreenBO screen = null;
+			for(PageTaskPO openTask : opens){
+				//TODO:播放文件不需要呼叫
+//				ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+////				  													        .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+//				  													        .setLock_type("write")
+//				  													        .setBundleId(openTask.getDstBundleId())
+//				  													        .setLayerId(openTask.getDstLayerId())
+//				  													        .setBundle_type(openTask.getDstBundleType());
+				ForwardSetSrcBO decoderVideoForwardSet = null;
+				if(AgendaSourceType.COMBINE_VIDEO.equals(openTask.getVideoSourceType())){
+					decoderVideoForwardSet = new ForwardSetSrcBO().setType("combineVideo")
+							.setUuid(openTask.getSrcVideoId());
+				}else if(openTask.getSrcVideoBundleId() != null && ExecuteStatus.DONE.equals(openTask.getVideoStatus())){
+					decoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
+							.setBundleId(openTask.getSrcVideoBundleId())
+							.setLayerId(openTask.getSrcVideoLayerId())
+							.setChannelId(openTask.getSrcVideoChannelId());
+				}
+				ConnectBO connectDecoderVideoChannel = new ConnectBO().setChannelId(openTask.getDstVideoChannelId())
+															          .setChannel_status("Open")
+															          .setBase_type(openTask.getDstVideoBaseType())
+															          .setMode(openTask.getVideoTransmissionMode().getCode())
+															          .setMulti_addr(openTask.getVideoMultiAddr())
+															          .setCodec_param(codec)
+															          .setSource_param(decoderVideoForwardSet);
+				ForwardSetSrcBO decoderAudioForwardSet = null;
+				if(AgendaSourceType.COMBINE_AUDIO.equals(openTask.getAudioSourceType())){
+					decoderAudioForwardSet = new ForwardSetSrcBO().setType("combineAudio")
+							.setUuid(openTask.getSrcAudioId());
+				}else if(openTask.getSrcAudioBundleId() != null && ExecuteStatus.DONE.equals(openTask.getAudioStatus())){
+					decoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
+							.setBundleId(openTask.getSrcAudioBundleId())
+							.setLayerId(openTask.getSrcAudioLayerId())
+							.setChannelId(openTask.getSrcAudioChannelId());
+				}
+				ConnectBO connectDecoderAudioChannel = new ConnectBO().setChannelId(openTask.getDstAudioChannelId())
+																	  .setChannel_status("Open")
+																	  .setBase_type(openTask.getDstAudioBaseType())
+															          .setMode(openTask.getAudioTransmissionMode().getCode())
+															          .setMulti_addr(openTask.getAudioMultiAddr())
+																	  .setCodec_param(codec)
+																	  .setSource_param(decoderAudioForwardSet);
+				
+//				connectDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDecoderVideoChannel).add(connectDecoderAudioChannel).getList());
+				connectDecoderBundle.getChannels().add(connectDecoderVideoChannel);
+				connectDecoderBundle.getChannels().add(connectDecoderAudioChannel);//TODO:虚拟源时可能产生重复的多个音频解码channel，需要去掉
+//				logic.getConnectBundle().add(connectDecoderBundle);
+				
+				Long positionId = openTask.getPositionId();
+				if(positionId != null){
+					LayoutPositionPO position = layoutPositionDao.findOne(positionId);
+					if(position != null){
+						if(screen == null) screen = new ScreenBO().setScreen_id("screen_1").setRects(new ArrayList<RectBO>());
+						RectBO rect = new RectBO().set(position, openTask.getDstVideoChannelId());
+						screen.getRects().add(rect);
+					}
+				}
+			}
+			if(screen != null){
+				connectDecoderBundle.getScreens().add(screen);
+			}
+			logic.getConnectBundle().add(connectDecoderBundle);
+		}
+		
+		for(PageTaskPO closeTask : closeTasks){
+			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+//																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																           	 .setBundleId(closeTask.getDstBundleId())
+																           	 .setBundle_type(closeTask.getDstBundleType())
+																           	 .setLayerId(closeTask.getDstLayerId());
+			logic.getDisconnectBundle().add(disconnectDecoderBundle);
+		}
+		
+		return logic;
+	}
+
 	/**
 	 * 获取固定的任务集合br/>
 	 * <b>作者:</b>lx<br/>

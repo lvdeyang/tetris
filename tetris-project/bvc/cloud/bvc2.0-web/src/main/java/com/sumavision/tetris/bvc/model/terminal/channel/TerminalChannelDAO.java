@@ -32,7 +32,7 @@ public interface TerminalChannelDAO extends BaseDAO<TerminalChannelPO>{
 	public List<TerminalChannelPO> findByTerminalIdAndTypeOrderByTypeAscNameAsc(Long terminalId, TerminalChannelType type);
 	
 	/**
-	 * 根据角色通道id查询终端设备通道<br/>
+	 * 根据角色通道id查询终端通道<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -42,5 +42,18 @@ public interface TerminalChannelDAO extends BaseDAO<TerminalChannelPO>{
 	 */
 	@Query(value = "select * from TETRIS_BVC_MODEL_TERMINAL_CHANNEL channel left join TETRIS_BVC_MODEL_ROLE_CHANNEL_TERMINAL_BUNDLE_CHANNEL m on channel.id = m.terminal_channel_id where m.role_channel_id in ?1", nativeQuery = true)
 	public List<TerminalChannelPO> findByRoleChannelIdIn(List<Long> roleChannelIds);
+	
+	/**
+	 * 根据terminalId和screenPrimaryKey查询终端通道<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月8日 下午1:04:24
+	 * @param terminalId
+	 * @param screenPrimaryKey
+	 * @return
+	 */
+	@Query(value = "select * from TETRIS_BVC_MODEL_TERMINAL_CHANNEL channel left join TETRIS_BVC_MODEL_TERMINAL_SCREEN s on channel.id = s.terminal_channel_id where s.terminal_id = ?1 and s.screen_primary_key = ?2", nativeQuery = true)	
+	public List<TerminalChannelPO> findByTerminalIdAndScreenPrimaryKey(Long terminalId, String screenPrimaryKey);
 	
 }

@@ -20,4 +20,17 @@ public interface AgendaLayoutTemplateDAO extends BaseDAO<AgendaLayoutTemplatePO>
 	 */
 	public List<AgendaLayoutTemplatePO> findByAgendaIdAndRoleId(Long agendaId, Long roleId);
 	
+	/**
+	 * 据议程和角色和终端查询布局信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月3日 上午10:38:27
+	 * @param agendaId
+	 * @param roleId
+	 * @param terminalId
+	 * @return 找不到则返回null
+	 */
+	public AgendaLayoutTemplatePO findByAgendaIdAndRoleIdAndTerminalId(Long agendaId, Long roleId, Long terminalId);
+	
 }

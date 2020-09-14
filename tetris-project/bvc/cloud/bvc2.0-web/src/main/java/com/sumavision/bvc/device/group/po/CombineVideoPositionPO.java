@@ -14,6 +14,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import com.sumavision.bvc.device.group.enumeration.PictureType;
 import com.sumavision.bvc.device.group.enumeration.PollingStatus;
+import com.sumavision.bvc.meeting.logic.dao.OmcRecordDao;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcDAO;
+import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -168,6 +172,35 @@ public class CombineVideoPositionPO extends AbstractBasePO{
 		List<DeviceGroupConfigVideoSrcPO> configSrcs = configPosition.getSrcs();
 		if(configSrcs!=null && configSrcs.size()>0){
 			for(DeviceGroupConfigVideoSrcPO configSrc:configSrcs){
+				CombineVideoSrcPO src = new CombineVideoSrcPO().set(configSrc);
+				src.setPosition(this);
+				this.getSrcs().add(src);
+			}
+		}
+		return this;
+	}
+	public CombineVideoPositionPO set(
+			com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionPO configPosition){
+		this.setSerialnum(configPosition.getSerialnum());
+		this.setX(configPosition.getX());
+		this.setY(configPosition.getY());
+		this.setW(configPosition.getW());
+		this.setH(configPosition.getH());
+		this.setPollingTime(configPosition.getPollingTime());
+		try {
+			this.setPictureType(PictureType.fromName(configPosition.getPictureType().getName()));
+			if(configPosition.getPollingStatus() != null){
+				this.setPollingStatus(PollingStatus.fromName(configPosition.getPollingStatus().getName()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.setSrcs(new ArrayList<CombineVideoSrcPO>());
+		
+		CombineVideoSrcDAO combineVideoSrcDao = SpringContext.getBean(CombineVideoSrcDAO.class);
+		List<com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcPO> configSrcs = combineVideoSrcDao.findByCombineVideoPositionIdIn(new ArrayListWrapper<Long>().add(configPosition.getId()).getList());
+		if(configSrcs!=null && configSrcs.size()>0){
+			for(com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcPO configSrc:configSrcs){
 				CombineVideoSrcPO src = new CombineVideoSrcPO().set(configSrc);
 				src.setPosition(this);
 				this.getSrcs().add(src);

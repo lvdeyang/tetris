@@ -123,6 +123,9 @@ public class GroupService {
 	private static final String lockProcessPrefix = "tetris-group-";
 
 	@Autowired
+	private com.sumavision.bvc.device.group.dao.CombineVideoDAO deviceGroupCombineVideoDao;
+
+	@Autowired
 	private CombineVideoDAO combineVideoDao;
 
 	@Autowired
@@ -532,7 +535,8 @@ public class GroupService {
 		//查询所有成员pageInfo是否存在，否为成员创建pageInfo
 		List <PageInfoPO> addPageInfos=new ArrayList<PageInfoPO>();
 		for(MemberTerminalBO memberTerminalBO :memberTerminalBOs){
-			if(null==commandGroupUserInfoDao.findByUserId(Long.parseLong(memberTerminalBO.getOriginId()))){
+			if(memberTerminalBO.getGroupMemberType().equals(GroupMemberType.MEMBER_USER)
+					&& null==commandGroupUserInfoDao.findByUserId(Long.parseLong(memberTerminalBO.getOriginId()))){
 				CommandGroupUserInfoPO userInfo=commandUserServiceImpl.generateDefaultUserInfo(Long.parseLong(memberTerminalBO.getOriginId()), "新建", true);
 				commandGroupUserInfoDao.save(userInfo);
 			}
@@ -1326,6 +1330,14 @@ public class GroupService {
 			List<CombineVideoPO> combineVideoPOs = combineVideoDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
 			List<CombineAudioPO> combineAudioPOs = combineAudioDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
 			autoCombineService.deleteCombine(combineVideoPOs, combineAudioPOs, true);
+			
+			//删除虚拟源的合屏
+			List<com.sumavision.bvc.device.group.po.CombineVideoPO> vCombineVideoPOs = deviceGroupCombineVideoDao.findByReconGroupId(groupId);
+			LogicBO logicStopVirtualSource = new LogicBO().setCombineVideoDel(vCombineVideoPOs);
+			for(com.sumavision.bvc.device.group.po.CombineVideoPO vCombineVideoPO : vCombineVideoPOs){
+				deviceGroupCombineVideoDao.delete(vCombineVideoPO);//deleteInBatch会报错
+			}
+			executeBusiness.execute(logicStopVirtualSource, group.getName() + " 删除虚拟源的合屏");
 			
 			/*
 			//删除协同会议的forwardPO
