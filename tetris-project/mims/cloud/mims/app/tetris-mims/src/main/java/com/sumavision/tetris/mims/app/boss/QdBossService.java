@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mims.app.boss.util.HttpUtil;
@@ -22,6 +23,7 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年8月19日 上午11:46:02
  */
+@Service
 public class QdBossService {
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
