@@ -5,6 +5,8 @@ package com.sumavision.tetris.guide.control;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -55,6 +57,7 @@ public class VideoParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_OBJECT")
+	@Enumerated(value = EnumType.STRING)
 	public CodingObject getCodingObject() {
 		return codingObject;
 	}
