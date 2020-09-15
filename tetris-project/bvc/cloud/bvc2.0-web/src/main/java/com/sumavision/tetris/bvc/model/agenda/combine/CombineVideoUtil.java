@@ -254,6 +254,15 @@ public class CombineVideoUtil {
 	@Autowired
 	private AgendaDAO agendaDao;
 	
+	/**
+	 * 是否需要合屏<br/>
+	 * <p>判定条件：</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月14日 下午7:00:15
+	 * @param combineVideoPO
+	 * @return
+	 */
 	public boolean needCombineVideo(CombineVideoPO combineVideoPO){
 		List<CombineVideoPositionPO> positions = combineVideoPositionDao.findByCombineVideoId(combineVideoPO.getId());
 		if(positions == null) return false;
@@ -267,41 +276,42 @@ public class CombineVideoUtil {
 			for(CombineVideoSrcPO src : srcs){				
 			}
 		}*/
-		//认为分屏或源的配置多余1个，就需要合屏
-		if(positions.size() > 1 || allSrcs.size() > 1) return true;
+		//判定条件
+		if(positions.size() > 1 && allSrcs.size() >= 1) return true;
+		if(allSrcs.size() >= 2) return true;
 		
 		return false;
 	}
 	
-	 //TODO:
-	public boolean getSingleSource(CombineVideoPO combineVideoPO){
+	/**
+	 * 从单个合屏中找出单个源<br/>
+	 * <p>必须先确认合屏是1*1单个源</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月15日 下午6:42:02
+	 * @param groupId
+	 * @param combineVideoPO
+	 * @return
+	 */
+	public SourceBO getSingleSource(Long groupId, CombineVideoPO combineVideoPO){
 		List<CombineVideoPositionPO> positions = combineVideoPositionDao.findByCombineVideoId(combineVideoPO.getId());
-		if(positions == null) return false;
+		if(positions == null) return null;
 		List<Long> positionIds = new ArrayList<Long>();
 		for(CombineVideoPositionPO position : positions){
 			positionIds.add(position.getId());
 		}
 		List<CombineVideoSrcPO> allSrcs = combineVideoSrcDao.findByCombineVideoPositionIdIn(positionIds);
-		/*for(CombineVideoPositionPO position : positions){
-			List<CombineVideoSrcPO> srcs = tetrisBvcQueryUtil.queryCombineVideoSrcPOByPositionId(allSsrcs, position.getId());
-			for(CombineVideoSrcPO src : srcs){				
-			}
-		}*/
 		//认为只要有源的配置，就需要合屏
-		if(allSrcs.size() > 0) return true;
-		
-		return false;
+		if(allSrcs.size() > 0){
+			CombineVideoSrcPO src = allSrcs.get(0);
+			//TODO:先只考虑角色通道，后续补充其他类型
+			List<SourceBO> sourceBOs = agendaExecuteService.obtainVideoSourceFromRoleChannelId(groupId, Long.parseLong(src.getSrcId()), BusinessInfoType.COMMON, AgendaForwardType.VIDEO);
+			if(sourceBOs!=null && sourceBOs.size()>0){
+				return sourceBOs.get(0);
+			}			
+		}		
+		return null;
 	}
-	/*
-	public void combineVideo(CombineVideoPO combineVideoPO){
-		List<CombineVideoPositionPO> positions = combineVideoPositionDao.findByCombineVideoId(combineVideoPO.getId());
-		List<Long> positionIds = new ArrayList<Long>();
-		for(CombineVideoPositionPO position : positions){
-			positionIds.add(position.getId());
-		}
-		List<CombineVideoSrcPO> allSrcs = combineVideoSrcDao.findByCombineVideoPositionIdIn(positionIds);
-		
-	}*/
 	
 	/**
 	 * 遍历合屏的源，将角色通道替换成设备通道<br/>

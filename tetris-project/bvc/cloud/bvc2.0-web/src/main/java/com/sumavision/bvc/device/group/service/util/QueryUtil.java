@@ -532,6 +532,16 @@ public class QueryUtil {
 		}
 		return null;
 	}
+	public CombineVideoPO queryCombineVideo(Collection<CombineVideoPO> videos, String combineVideoUuid) throws Exception{
+		if(videos != null){
+			for(CombineVideoPO video:videos){
+				if(video.getUuid().equals(combineVideoUuid)){
+					return video;
+				}
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * 查询在合屏中src包括member的video<br/>

@@ -538,6 +538,7 @@ public class TetrisBvcQueryUtil {
 	 * @return
 	 */
 	public GroupMemberPO queryMemberById(Collection<GroupMemberPO> members, Long id){
+		if(id == null) return null;
 		for(GroupMemberPO member : members){
 			if(id.equals(member.getId())){
 				return member;
