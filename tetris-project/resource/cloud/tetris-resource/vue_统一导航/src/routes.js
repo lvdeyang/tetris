@@ -16,11 +16,19 @@ import FolderManage from './views/folder/FolderManage.vue'
 import SerInfoAndNode from './views/serInfo/SerInfoAndNode.vue'
 import UserBindBundle from './views/bind/UserBindBundle.vue'
 
-import BindRoleResource from './views/privilege/BindRoleResource.vue'
-import NetIframe from './views/layernode/NetIframe.vue'
-import EncodeManage from './views/encodeManage/EncodeManage.vue'
-import CurTask from './views/currentTask/CurTask.vue'
-import RecordManage from './views/record/RecordManage.vue'
+// 两五项目页面
+import LwRecordManage from './liangwuPages/record/RecordManage.vue'
+import LwCurTask from './liangwuPages/currentTask/CurTask.vue'
+import LwNetIframe from './liangwuPages/layernode/NetIframe.vue'
+import LwLayerNodeManage from './liangwuPages/layernode/LayerNodeManage.vue'
+import LwAddLayerNode from './liangwuPages/layernode/AddLayerNode.vue'
+import LwModifyLayerNode from './liangwuPages/layernode/ModifyLayerNode.vue'
+import LwLocalBundleManage from './liangwuPages/bundle/LocalBundleManage.vue'
+import LwAddBundle from './liangwuPages/bundle/AddBundle.vue'
+import LwModifyBundle from './liangwuPages/bundle/ModifyBundle.vue'
+import LwConfigBundle from './liangwuPages/bundle/ConfigBundle.vue'
+import LwBindRoleResource from './liangwuPages/privilege/BindRoleResource.vue'
+import LwEncodeManage from './liangwuPages/encodeManage/EncodeManage.vue'
 
 let routes = [{
     path: '/404',
@@ -101,20 +109,6 @@ let routes = [{
         name: '绑定虚拟资源',
         hidden: true
       },
-
-      {
-        path: '/BindRoleResource',
-        component: BindRoleResource,
-        name: '',
-        hidden: true
-      },
-
-      {
-        path: '/NetIframe',
-        component: NetIframe,
-        name: '网管',
-        hidden: true
-      },
       {
         path: '/FolderManage',
         component: FolderManage,
@@ -130,20 +124,78 @@ let routes = [{
         component: UserBindBundle,
         name: '用户绑定设备'
       },
+      // 两五项目单独路由
       {
-        path: '/RecordManage',
-        component: RecordManage,
+        path: '/LwRecordManage',
+        component: LwRecordManage,
         name: '录制管理'
       },
       {
-        path: '/CurTask',
-        component: CurTask,
+        path: '/LwCurTask',
+        component: LwCurTask,
         name: '当前任务'
       },
       {
-        path: '/EncodeManage',
-        component: EncodeManage,
+        path: '/LwNetIframe',
+        component: LwNetIframe,
+        name: '网管',
+        hidden: true
+      },
+      {
+        path: '/LwEncodeManage',
+        component: LwEncodeManage,
         name: '编码解码管理'
+      },
+      {
+        path: '/LwLayerNodeManage',
+        component: LwLayerNodeManage,
+        name: '层节点管理'
+      },
+      {
+        path: '/LwAddLayerNode',
+        component: LwAddLayerNode,
+        name: '添加层节点',
+        hidden: true
+      },
+      // {
+      //   path: '/LwModifyLayernode',
+      //   component: LwModifyLayernode,
+      //   name: '修改层节点',
+      //   hidden: true
+      // },
+      // {
+      //   path: '/LwBundleManage',
+      //   component: LwBundleManage,
+      //   name: '资源管理'
+      // },
+      {
+        path: '/LwLocalBundleManage',
+        component: LwLocalBundleManage,
+        name: '本地资源管理'
+      },
+      {
+        path: '/LwAddBundle',
+        component: LwAddBundle,
+        name: '添加资源',
+        hidden: true
+      },
+      {
+        path: '/LwModifyBundle',
+        component: LwModifyBundle,
+        name: '修改资源',
+        hidden: true
+      },
+      {
+        path: '/LwConfigBundle',
+        component: LwConfigBundle,
+        name: '能力配置',
+        hidden: true
+      },
+      {
+        path: '/LwBindRoleResource',
+        component: LwBindRoleResource,
+        name: '',
+        hidden: true
       },
     ]
   },

@@ -6,7 +6,7 @@
         <div class="search">
           <el-input placeholder="输入录制任务名" v-model="filterText" style="width:300px; border:0;"></el-input>
           <el-select v-model="recordMode" placeholder="请选择">
-            <el-option value="" label="全部"></el-option>
+            <el-option value="" label=""></el-option>
             <el-option value="手动" label="手动录制">手动录制</el-option>
             <el-option value="排期" label="排期录制">排期录制</el-option>
             <el-option value="定时" label="排期录制">定时录制</el-option>
