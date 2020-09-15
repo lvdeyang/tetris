@@ -33,6 +33,7 @@ import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.RectBO;
+import com.sumavision.bvc.device.group.po.CombineVideoPositionPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -534,28 +535,28 @@ public class AgendaExecuteService {
 	}
 
 	public List<SourceBO> obtainVideoSourceFromRoleChannelId(
-				Long groupId,
-				Long roleChannelId,
-				BusinessInfoType businessInfoType,
-				AgendaForwardType agendaForwardType){
-			List<Long> roleChannelIds = new ArrayList<Long>();
-	//		if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.VIDEO.equals(type)){
-				RoleChannelPO sourceRoleVideoChannel = roleChannelDao.findOne(roleChannelId);
-				roleChannelIds.add(sourceRoleVideoChannel.getId());
-	//		}
-	//		if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.AUDIO.equals(type)){
-	//			String audioSourceId = agendaForward.getAudioSourceId();
-	//			RoleChannelPO sourceRoleAudioChannel = roleChannelDao.findOne(Long.valueOf(audioSourceId));
-	//			roleChannelIds.add(sourceRoleAudioChannel.getId());
-	//		}
-	//		List<TerminalBundleChannelPO> channels = terminalBundleChannelDao.findByRoleChannelIdIn(new ArrayListWrapper<Long>().add(sourceRoleChannel.getId()).getList());
-			List<TerminalChannelPO> channels = terminalChannelDao.findByRoleChannelIdIn(roleChannelIds);//只有1或2个？
-			
-			RoleChannelPO sourceRoleChannel = roleChannelDao.findOne(roleChannelId);
-			List<GroupMemberPO> sourceMembers2 = groupMemberDao.findByGroupIdAndRoleId(groupId, sourceRoleChannel.getRoleId());								
-			List<SourceBO> sourceBOs = obtainSourceFromMembersAndChannels(sourceMembers2, channels, groupId.toString(), businessInfoType, agendaForwardType);
-			return sourceBOs;
-		}
+			Long groupId,
+			Long roleChannelId,
+			BusinessInfoType businessInfoType,
+			AgendaForwardType agendaForwardType){
+		List<Long> roleChannelIds = new ArrayList<Long>();
+//		if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.VIDEO.equals(type)){
+			RoleChannelPO sourceRoleVideoChannel = roleChannelDao.findOne(roleChannelId);
+			roleChannelIds.add(sourceRoleVideoChannel.getId());
+//		}
+//		if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.AUDIO.equals(type)){
+//			String audioSourceId = agendaForward.getAudioSourceId();
+//			RoleChannelPO sourceRoleAudioChannel = roleChannelDao.findOne(Long.valueOf(audioSourceId));
+//			roleChannelIds.add(sourceRoleAudioChannel.getId());
+//		}
+//		List<TerminalBundleChannelPO> channels = terminalBundleChannelDao.findByRoleChannelIdIn(new ArrayListWrapper<Long>().add(sourceRoleChannel.getId()).getList());
+		List<TerminalChannelPO> channels = terminalChannelDao.findByRoleChannelIdIn(roleChannelIds);//只有1或2个？
+		
+		RoleChannelPO sourceRoleChannel = roleChannelDao.findOne(roleChannelId);
+		List<GroupMemberPO> sourceMembers2 = groupMemberDao.findByGroupIdAndRoleId(groupId, sourceRoleChannel.getRoleId());								
+		List<SourceBO> sourceBOs = obtainSourceFromMembersAndChannels(sourceMembers2, channels, groupId.toString(), businessInfoType, agendaForwardType);
+		return sourceBOs;
+	}
 
 	/**
 	 * 从源和目的生成成员转发
@@ -685,7 +686,8 @@ public class AgendaExecuteService {
 	 * @throws Exception
 	 */
 	public List<CommonForwardPO> obtainCommonForwards(AgendaPO agenda, Long groupId) throws Exception{
-		
+
+		UserVO user = userQuery.current();
 		GroupPO group = groupDao.findOne(groupId);
 		GroupStatus groupStatus = group.getStatus();
 		
@@ -780,10 +782,18 @@ public class AgendaExecuteService {
 			}
 		}
 		
+		//----------统一合屏管理
+		List<com.sumavision.bvc.device.group.po.CombineVideoPO> allCombineVideos = deviceGroupCombineVideoDao.findByReconGroupId(groupId);
+		List<com.sumavision.bvc.device.group.po.CombineVideoPO> stopCombineVideos = deviceGroupCombineVideoDao.findByReconGroupId(groupId);//要停止和删除
+//		Set<com.sumavision.bvc.device.group.po.CombineVideoPO> deleteCombineVideos = deviceGroupCombineVideoDao.findByReconGroupId(groupId);//仅删除数据库
+		Set<com.sumavision.bvc.device.group.po.CombineVideoPO> deleteCombineVideos = new HashSet<com.sumavision.bvc.device.group.po.CombineVideoPO>();//仅删除数据库
+		Set<com.sumavision.bvc.device.group.po.CombineVideoPO> usingCombineVideos = new HashSet<com.sumavision.bvc.device.group.po.CombineVideoPO>();
+		
 		//----------虚拟源----------
 		Set<CombineVideoPO> needCombineVirtualSources = new HashSet<CombineVideoPO>();
+		Set<CombineVideoPO> needUpdateVirtualSources = new HashSet<CombineVideoPO>();
 		for(GroupMemberPO member : memberSourceMap.keySet()){
-			List<SourceBO> memberSourceBOs = memberSourceMap.get(member);
+//			List<SourceBO> memberSourceBOs = memberSourceMap.get(member);
 			if(!GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
 				GroupMemberRolePermissionPO groupMemberRolePermission = groupMemberRolePermissionDao.findByGroupMemberId(member.getId());
 				if(groupMemberRolePermission != null){
@@ -803,77 +813,44 @@ public class AgendaExecuteService {
 								if(combineVideo == null){
 									//需要新建合屏
 									needCombineVirtualSources.add(virtualSource);
-									
-									//建立转发关系，把虚拟源给对应的通道
-									//TODO:支持视音频
-									SourceBO combineSource = new SourceBO()
-											.setAgendaForwardType(AgendaForwardType.VIDEO)
-											.setVideoSourceType(AgendaSourceType.COMBINE_VIDEO)
-											.setBusinessInfoType(BusinessInfoType.COMMON)
-											.setBusinessId(groupId.toString())
-//											.setBusinessId(UUID.randomUUID().toString().replaceAll("-", ""))
-											.setSrcVideoId(virtualSource.getUuid());
-									List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(
-											new ArrayListWrapper<GroupMemberPO>().add(member).getList(),
-											new ArrayListWrapper<SourceBO>().add(combineSource).getList());
-									for(CommonForwardPO forward : forwards){
-										forward.setPositionId(layoutPosition.getId());
-									}
-									result.addAll(forwards);
 								}else{
-									//TODO:是否更新合屏？
-									
+									//更新合屏
+									needUpdateVirtualSources.add(virtualSource);
+									usingCombineVideos.add(combineVideo);
 								}
+								//建立转发关系，把虚拟源给对应的通道
+								//TODO:支持视音频
+								SourceBO combineSource = new SourceBO()
+										.setAgendaForwardType(AgendaForwardType.VIDEO)
+										.setVideoSourceType(AgendaSourceType.COMBINE_VIDEO)
+										.setBusinessInfoType(BusinessInfoType.COMMON)
+										.setBusinessId(groupId.toString())
+//										.setBusinessId(UUID.randomUUID().toString().replaceAll("-", ""))
+										.setSrcVideoId(virtualSource.getUuid());
+								List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(
+										new ArrayListWrapper<GroupMemberPO>().add(member).getList(),
+										new ArrayListWrapper<SourceBO>().add(combineSource).getList());
+								for(CommonForwardPO forward : forwards){
+									forward.setPositionId(layoutPosition.getId());
+								}
+								result.addAll(forwards);
 							}else{
-								//TODO:查找单个源
-								
+								//查找单个源
+								SourceBO sourceBO = combineVideoUtil.getSingleSource(groupId, virtualSource);
+								List<CommonForwardPO> forwards = obtainCommonForwardsFromSource(new ArrayListWrapper<GroupMemberPO>().add(member).getList(), new ArrayListWrapper<SourceBO>().add(sourceBO).getList());
+								for(CommonForwardPO forward : forwards){
+									forward.setPositionId(layoutPosition.getId());
+								}
+								result.addAll(forwards);
 							}
-							/*
-							//给这个成员的这个分屏rect看这个虚拟源，需要找到分屏对应的通道
-							//通过terminalId、screenPrimaryKey查到TerminalScreenPO，取terminalChannelId							
-							//通过terminalChannelId查到 TerminalChannelPO，取realChannelId
-							String screenPrimaryKey = layoutPosition.getScreenPrimaryKey();
-							//应该只能查到1个
-							List<TerminalChannelPO> channels = terminalChannelDao.findByTerminalIdAndScreenPrimaryKey(terminalId, screenPrimaryKey);
-							if(channels.size() == 0){
-								log.warn("terminalChannelDao.findByTerminalIdAndScreenPrimaryKey 没有查到通道，terminalId = " + terminalId + ", screenPrimaryKey = " + screenPrimaryKey);
-							}
-							if(channels.size() > 1){
-								log.warn("terminalChannelDao.findByTerminalIdAndScreenPrimaryKey 查到多个" + channels.size() + "个通道，terminalId = " + terminalId + ", screenPrimaryKey = " + screenPrimaryKey);
-							}
-							String channelId = channels.get(0).getRealChannelId();
-							RectBO rect = new RectBO().set(layoutPosition, channelId);*/
-							
-							
 						}
 					}
 				}
 			}else{
-				
+				//用户直接看画面
 			}
 		}
-		
-		//给虚拟源建立合屏
-		UserVO user = userQuery.current();
-		LogicBO combineVideoLogic = new LogicBO().setUserId(user.getId().toString());
-		List<com.sumavision.bvc.device.group.po.CombineVideoPO> combineVideos = new ArrayList<com.sumavision.bvc.device.group.po.CombineVideoPO>();
-		if(needCombineVirtualSources.size() > 0){
-			log.info("给虚拟源创建" + needCombineVirtualSources.size() + "个合屏");
-			for(CombineVideoPO virtualSource : needCombineVirtualSources){
-				com.sumavision.bvc.device.group.po.CombineVideoPO combineVideo = new com.sumavision.bvc.device.group.po.CombineVideoPO().set(virtualSource);
-				combineVideo.setReconGroupId(groupId);
-				combineVideoUtil.transferSrcs(groupId, combineVideo);
-				combineVideos.add(combineVideo);
 				
-				//处理合屏协议
-				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();				
-				combineVideoLogic.setCombineVideoSet(new ArrayListWrapper<com.sumavision.bvc.device.group.po.CombineVideoPO>().add(combineVideo).getList(), codec);
-			}
-		}
-		deviceGroupCombineVideoDao.save(combineVideos);
-		executeBusiness.execute(combineVideoLogic, "给虚拟源创建" + needCombineVirtualSources.size() + "个合屏");
-		
-		
 		//----------遍历memberSourceMap，确认是否需要给成员及主席合屏
 		/*List<SourceBO> sourceBOs4Member = null;//用于给成员看的N个源
 		List<SourceBO> sourceBOs4Chairman = null;//用于给主席看的N个源
@@ -948,6 +925,55 @@ public class AgendaExecuteService {
 				autoCombineService.deleteCombine(videos, audios, true);
 			}			
 		}*/
+
+		//给虚拟源建立合屏
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO combineVideoLogic = new LogicBO().setUserId(user.getId().toString());
+		List<com.sumavision.bvc.device.group.po.CombineVideoPO> newAndUpdatecombineVideos = new ArrayList<com.sumavision.bvc.device.group.po.CombineVideoPO>();
+		if(needCombineVirtualSources.size() > 0){
+			log.info("给虚拟源创建" + needCombineVirtualSources.size() + "个合屏");
+			List<com.sumavision.bvc.device.group.po.CombineVideoPO> vs = new ArrayList<com.sumavision.bvc.device.group.po.CombineVideoPO>();
+			for(CombineVideoPO virtualSource : needCombineVirtualSources){
+				com.sumavision.bvc.device.group.po.CombineVideoPO combineVideo = new com.sumavision.bvc.device.group.po.CombineVideoPO().set(virtualSource);
+				combineVideo.setReconGroupId(groupId);
+				combineVideoUtil.transferSrcs(groupId, combineVideo);
+				newAndUpdatecombineVideos.add(combineVideo);
+				vs.add(combineVideo);				
+			}
+			//处理合屏协议
+			combineVideoLogic.setCombineVideoSet(vs, codec);
+		}
+		if(needUpdateVirtualSources.size() > 0){
+			log.info("给虚拟源更新" + needUpdateVirtualSources.size() + "个合屏");
+			List<com.sumavision.bvc.device.group.po.CombineVideoPO> vs = new ArrayList<com.sumavision.bvc.device.group.po.CombineVideoPO>();
+			for(CombineVideoPO virtualSource : needUpdateVirtualSources){
+				
+				com.sumavision.bvc.device.group.po.CombineVideoPO oldCombineVideo = queryUtil.queryCombineVideo(allCombineVideos, virtualSource.getUuid());
+				deleteCombineVideos.add(oldCombineVideo);
+				com.sumavision.bvc.device.group.po.CombineVideoPO combineVideo = new com.sumavision.bvc.device.group.po.CombineVideoPO().set(virtualSource);
+				combineVideo.setReconGroupId(groupId);
+				combineVideoUtil.transferSrcs(groupId, combineVideo);
+				newAndUpdatecombineVideos.add(combineVideo);
+				vs.add(combineVideo);				
+			}
+			//处理合屏协议				
+			combineVideoLogic.setCombineVideoUpdate(vs, codec);
+		}
+		//----------统一删除无用的合屏----------
+		stopCombineVideos.removeAll(usingCombineVideos);
+		if(stopCombineVideos.size() > 0){
+			log.info("给虚拟源删除" + needUpdateVirtualSources.size() + "个合屏");
+			for(com.sumavision.bvc.device.group.po.CombineVideoPO deleteCombineVideo : stopCombineVideos){
+				combineVideoLogic.setCombineVideoDel(new ArrayListWrapper<com.sumavision.bvc.device.group.po.CombineVideoPO>().add(deleteCombineVideo).getList());
+				deviceGroupCombineVideoDao.delete(deleteCombineVideo);
+			}
+		}
+		for(com.sumavision.bvc.device.group.po.CombineVideoPO deleteCombineVideo : deleteCombineVideos){
+			deviceGroupCombineVideoDao.delete(deleteCombineVideo);
+		}
+		deviceGroupCombineVideoDao.save(newAndUpdatecombineVideos);
+		executeBusiness.execute(combineVideoLogic, "给虚拟源创建/更新/停止合屏");
+		
 		
 		//----------再次遍历memberSourceMap，非用户的成员观看合屏，用户看单画面，生成CommonForwardPO
 		for(GroupMemberPO member : memberSourceMap.keySet()){
@@ -1181,6 +1207,7 @@ public class AgendaExecuteService {
 	public void executeToFinal(Long groupId) throws Exception{
 		
 		List<CommonForwardPO> oldForwards = commonForwardDao.findByBusinessId(groupId.toString());
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 		
 		//获取到所有需要执行的议程，通过每个议程获取到最终的转发关系，求并集
 		List<CommonForwardPO> newForwards = new ArrayList<CommonForwardPO>();
@@ -1193,10 +1220,19 @@ public class AgendaExecuteService {
 		}
 		
 		//与原来的转发关系做对比，得到新增addForwards与删除的removeForwards
-		List<CommonForwardPO> addForwards = new ArrayList<CommonForwardPO>(newForwards);
+		Set<CommonForwardPO> addForwards = new HashSet<CommonForwardPO>(newForwards);
 		addForwards.removeAll(oldForwards);
 		List<CommonForwardPO> removeForwards = new ArrayList<CommonForwardPO>(oldForwards);
 		removeForwards.removeAll(newForwards);
+		
+//		（废弃）因为会场的任务会直接清除，所以把会场的转发加回来
+//		for(CommonForwardPO newForward : newForwards){
+//			Long memberId = newForward.getDstMemberId();
+//			GroupMemberPO member = tetrisBvcQueryUtil.queryMemberById(members, memberId);
+//			if(member != null && member.getGroupMemberType().equals(GroupMemberType.MEMBER_HALL)){
+//				addForwards.add(newForward);
+//			}
+//		}
 		
 		//删除的从分页任务中删除
 		List<String> forwardUuids = new ArrayList<String>();
@@ -1208,7 +1244,6 @@ public class AgendaExecuteService {
 		
 		
 		//按照成员来划分分页
-		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 		Map<Long, MemberChangedTaskBO> memberTaskMap = new HashMap<Long, MemberChangedTaskBO>();
 		
 		for(CommonForwardPO addForward : addForwards){
