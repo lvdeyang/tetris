@@ -125,6 +125,17 @@ public class BundlePO extends CommonPO<BundlePO> {
 	/** 是否开启组播解码 */
 	private Boolean multicastDecode;
 	
+	/** 组播源ip */
+	private String multicastSourceIp;
+	
+	public String getMulticastSourceIp() {
+		return multicastSourceIp;
+	}
+
+	public void setMulticastSourceIp(String multicastSourceIp) {
+		this.multicastSourceIp = multicastSourceIp;
+	}
+
 	public static String createBundleId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}

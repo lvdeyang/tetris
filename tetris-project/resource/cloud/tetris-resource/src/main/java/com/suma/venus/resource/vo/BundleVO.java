@@ -60,6 +60,9 @@ public class BundleVO {
 	/** 是否开启组播解码 */
 	private Boolean multicastDecode;
 	
+	/** 组播源ip */
+	private String multicastSourceIp;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -82,6 +85,7 @@ public class BundleVO {
 		po.setMulticastEncode(this.getMulticastEncode());
 		po.setMulticastEncodeAddr(this.getMulticastEncodeAddr());
 		po.setMulticastDecode(this.getMulticastDecode());
+		po.setMulticastSourceIp(this.getMulticastSourceIp());
 		return po;
 	}
 	
@@ -108,6 +112,7 @@ public class BundleVO {
 		vo.setMulticastEncode(po.getMulticastEncode()==null?false:po.getMulticastEncode());
 		vo.setMulticastEncodeAddr(po.getMulticastEncodeAddr()==null?"":po.getMulticastEncodeAddr());
 		vo.setMulticastDecode(po.getMulticastDecode()==null?false:po.getMulticastDecode());
+		vo.setMulticastSourceIp(po.getMulticastSourceIp()==null?"":po.getMulticastSourceIp());
 		return vo;
 	}
 	
@@ -115,6 +120,15 @@ public class BundleVO {
 		DEFAULT,
 		ENCODER,
 		DECODER
+	}
+
+	
+	public String getMulticastSourceIp() {
+		return multicastSourceIp;
+	}
+
+	public void setMulticastSourceIp(String multicastSourceIp) {
+		this.multicastSourceIp = multicastSourceIp;
 	}
 
 	public Long getId() {

@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -304,19 +305,21 @@ public class UserController {
             Integer level,
             String classify,
             Long companyId,
-            String companyName) throws Exception{
+            String companyName,
+            String remark,
+            String loginIp) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, true);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId,remark,loginIp);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName,remark,loginIp);
 			}
 		}
 		return null;
@@ -374,13 +377,15 @@ public class UserController {
             boolean editPassword,
             String oldPassword,
             String newPassword,
-            String repeat) throws Exception{
+            String repeat,
+            String remark,
+            String loginIp) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat,remark,loginIp);
 	}
 	
 	/**
