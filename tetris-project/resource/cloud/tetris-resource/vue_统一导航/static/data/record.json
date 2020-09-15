@@ -1,0 +1,99 @@
+{
+  "rows": [{
+      "id": 1,
+      "fileName": "大华摄像机1的录制",
+      "type": "手动",
+      "videoSource": "大华摄像机1",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    },
+    {
+      "id": 2,
+      "fileName": "大华摄像机1的录制",
+      "type": "排期",
+      "videoSource": "大华摄像机1",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "录制中"
+    },
+    {
+      "id": 3,
+      "fileName": "北清摄像头的录制",
+      "type": "手动",
+      "videoSource": "北清摄像头",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    },
+    {
+      "id": 4,
+      "fileName": "大华摄像头2的录制",
+      "type": "手动",
+      "videoSource": "大华摄像头2",
+      "audioSource": "大华摄像头2",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "录制中"
+    },
+    {
+      "id": 5,
+      "fileName": "北清摄像头的录制",
+      "type": "手动",
+      "videoSource": "北清摄像头",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    },
+    {
+      "id": 6,
+      "fileName": "北清摄像头的录制",
+      "type": "手动",
+      "videoSource": "北清摄像头",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    },
+    {
+      "id": 7,
+      "fileName": "大华摄像机1的录制",
+      "type": "定时",
+      "videoSource": "大华摄像机1",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    }, {
+      "id": 8,
+      "fileName": "大华摄像机1的录制",
+      "type": "循环",
+      "videoSource": "大华摄像机1",
+      "audioSource": "kdsdfks",
+      "startTime": "2020-08-12 23:10:10",
+      "endTime": "2020-08-12 23:30:10",
+      "mode": "dfsdgs",
+      "size": 23,
+      "status": "未开始"
+    }
+  ],
+  "total": 8
+}
