@@ -25,10 +25,10 @@ public class CombineVideoPO extends AbstractBasePO{
 	/** 前端生成布局的json字符串格式：{basic:{column:4, row:4}, cellspan:[{x,y,r,b}]} */
 	private String websiteDraw;
 	
-	/** 隶属业务id */
+	/** 隶属业务id，AGENDA时是议程id，GROUP时是会议id */
 	private Long businessId;
 	
-	/** 业务类型 */
+	/** 业务类型：AGENDA/GROUP */
 	private CombineBusinessType businessType;
 	
 	/** 内容类型，用于自动合屏时标注 */

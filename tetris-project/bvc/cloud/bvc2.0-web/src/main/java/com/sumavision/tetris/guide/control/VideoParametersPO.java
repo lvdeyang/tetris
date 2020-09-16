@@ -57,7 +57,7 @@ public class VideoParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_OBJECT")
-	@Enumerated(EnumType.STRING)
+	@Enumerated(value = EnumType.STRING)
 	public CodingObject getCodingObject() {
 		return codingObject;
 	}

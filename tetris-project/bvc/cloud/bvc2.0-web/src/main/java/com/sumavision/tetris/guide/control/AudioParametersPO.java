@@ -49,7 +49,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_FORMAT")
-	@Enumerated(EnumType.STRING)
+	@Enumerated(value = EnumType.STRING)
 	public CodingFormat getCodingFormat() {
 		return codingFormat;
 	}
@@ -77,7 +77,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_TYPE")
-	@Enumerated(EnumType.STRING)
+	@Enumerated(value = EnumType.STRING)
 	public CodingType getCodingType() {
 		return codingType;
 	}

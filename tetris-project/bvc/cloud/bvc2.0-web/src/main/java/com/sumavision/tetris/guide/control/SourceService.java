@@ -24,7 +24,7 @@ public class SourceService {
 	SourceDAO sourceDAO;
 	
 	@Autowired
-	GuidePlayService guidePlayService;
+	private GuidePlayService guidePlayService;
 	
 	public SourcePO edit(
 			Long id,

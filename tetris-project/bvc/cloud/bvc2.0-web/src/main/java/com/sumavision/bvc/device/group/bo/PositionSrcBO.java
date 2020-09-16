@@ -154,10 +154,10 @@ public class PositionSrcBO {
 			//.setY(transPixel(height, position.getY()))
 			//.setW(transPixel(width, position.getW()))
 			//.setH(transPixel(height, position.getH()))
-			.setX(transTenThousandProportion(position.getX()))
-			.setY(transTenThousandProportion(position.getY()))
-			.setW(transTenThousandProportion(position.getW()))
-			.setH(transTenThousandProportion(position.getH()))
+			.setX(Integer.parseInt(position.getX()))
+			.setY(Integer.parseInt(position.getY()))
+			.setW(Integer.parseInt(position.getW()))
+			.setH(Integer.parseInt(position.getH()))
 			.setSrc(new ArrayList<SourceBO>());
 		
 		if(position.getPictureType().equals(PictureType.POLLING)){

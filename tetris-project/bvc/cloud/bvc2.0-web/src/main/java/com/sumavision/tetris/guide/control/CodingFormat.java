@@ -13,12 +13,12 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <b>日期：</b>2020年9月10日 下午2:28:27
  */
 public enum CodingFormat {
-
-	ACC("ACC"),
-	MP2("MP2"),
-	MP3("MP3"),
-	DOLBY("DOLBY"),
-	PASSBY("PASSBY");
+	
+	ACC("acc"),
+	MP2("mp2"),
+	MP3("mp3"),
+	DOLBY("dolby"),
+	PASSBY("passby");
 	
 	private String name;
 	

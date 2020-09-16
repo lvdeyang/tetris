@@ -57,6 +57,8 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineContentType;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 
 /**
@@ -536,6 +538,7 @@ public class TetrisBvcQueryUtil {
 	 * @return
 	 */
 	public GroupMemberPO queryMemberById(Collection<GroupMemberPO> members, Long id){
+		if(id == null) return null;
 		for(GroupMemberPO member : members){
 			if(id.equals(member.getId())){
 				return member;
@@ -809,6 +812,16 @@ public class TetrisBvcQueryUtil {
 			}
 		}
 		return null;
+	}
+	
+	public List<CombineVideoSrcPO> queryCombineVideoSrcPOByPositionId(Collection<CombineVideoSrcPO> srcs, Long positionId){
+		List<CombineVideoSrcPO> r = new ArrayList<CombineVideoSrcPO>();
+		for(CombineVideoSrcPO src : srcs){
+			if(positionId.equals(src.getCombineVideoPositionId())){
+				r.add(src);
+			}
+		}
+		return r;
 	}
 	
 	public CombineAudioPO queryCombineAudioPOByCombineContentType(Collection<CombineAudioPO> combineAudios, CombineContentType combineContentType){

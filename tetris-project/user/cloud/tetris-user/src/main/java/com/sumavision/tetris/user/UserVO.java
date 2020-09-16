@@ -112,6 +112,41 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 终端类型 */
 	private TerminalType terminalType;
 	
+	/**备注*/
+	private String remark;
+	
+	/**上次登陆时间*/
+	private String lastLoginTime;
+	
+	private String loginIp;
+	
+	public String getLoginIp() {
+		return loginIp;
+	}
+
+	public UserVO setLoginIp(String loginIp) {
+		this.loginIp = loginIp;
+		return this;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public UserVO setRemark(String remark) {
+		this.remark = remark;
+		return this;
+	}
+
+	public String getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public UserVO setLastLoginTime(String lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
+		return this;
+	}
+
 	public String getUsername() {
 		return username;
 	}
@@ -397,8 +432,11 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setClassify(entity.getClassify().toString())
 			//.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			//.setToken(entity.getToken())
-			//.setIp(entity.getIp())
+			.setIp(entity.getIp())
 			//.setEquipType(entity.getEquipType() != null ? entity.getEquipType().toString() : null)
+			.setRemark(entity.getRemark())
+			.setLastLoginTime(entity.getLastLoginTime() == null?"":DateUtil.format(entity.getLastLoginTime(),DateUtil.dateTimePattern))
+			.setLoginIp(entity.getLoginIp())
 			.setAutoGeneration(entity.isAutoGeneration());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(UserPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		this.setErrorLoginTimes(entity.getErrorLoginTimes()==null?0:entity.getErrorLoginTimes());

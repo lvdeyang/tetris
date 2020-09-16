@@ -8,9 +8,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.device.group.enumeration.CombineVideoSrcType;
 import com.sumavision.bvc.device.group.enumeration.ForwardSrcType;
 import com.sumavision.bvc.device.group.enumeration.PollingSourceVisible;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 /**
  * @ClassName: 合屏视频源
@@ -201,6 +204,33 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 		}
 		return this;
 	}
+	public CombineVideoSrcPO set(com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcPO src){
+		if(com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcType.ROLE_CHANNEL.equals(src.getCombineVideoSrcType())){
+			//角色通道配置在外面二次遍历进行设置数据
+			this.setType(CombineVideoSrcType.CHANNEL);
+			this.setName(src.getCombineVideoSrcType().toString());//以name标记源类型
+			this.setBundleId(src.getSrcId());
+//			this.setBundleName(src.getRoleName());
+//			this.setChannelId(src.getRoleChannelType().toString());
+		}else if(com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcType.VIRTUAL.equals(src.getCombineVideoSrcType())){
+			//TODO:虚拟源
+			this.setType(CombineVideoSrcType.VIRTUAL);
+			this.setVirtualUuid(src.getUuid());
+		}else{
+			//TODO:设备通道
+			this.setType(CombineVideoSrcType.CHANNEL);
+//			this.setName(src.getMemberChannelName());
+//			this.setMemberId(src.getMemberId());
+//			this.setMemberChannelId(src.getMemberChannelId());
+//			this.setLayerId(src.getLayerId());
+//			this.setBundleId(src.getBundleId());
+//			this.setBundleName(src.getBundleName());
+//			this.setChannelId(src.getChannelId());
+//			this.setChannelName(src.getChannelName());
+//			this.setVisible(src.getVisible());
+		}
+		return this;
+	}
 	
 	/**
 	 * 从通道数据中复制数据<br/>
@@ -218,6 +248,30 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 		this.setLayerId(channel.getMember().getLayerId());
 		this.setBundleId(channel.getBundleId());
 		this.setBundleName(channel.getBundleName());
+		this.setChannelId(channel.getChannelId());
+		this.setChannelName(channel.getChannelName());
+		return this;
+	}
+	
+	/**
+	 * 从SourceBO复制数据<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月9日 下午8:46:10
+	 * @param sourceBO
+	 * @return
+	 */
+	public CombineVideoSrcPO set(SourceBO sourceBO){
+		BundlePO videoBundle = sourceBO.getVideoBundle();
+		ChannelSchemeDTO channel = sourceBO.getVideoSourceChannel();
+		this.setType(CombineVideoSrcType.CHANNEL);
+		this.setName(channel.getChannelName());
+		this.setMemberId(sourceBO.getSrcVideoMemberId());
+		this.setMemberChannelId(channel.getId());
+		this.setLayerId(sourceBO.getVideoBundle().getAccessNodeUid());
+		this.setBundleId(channel.getBundleId());
+		this.setBundleName(videoBundle.getBundleName());
 		this.setChannelId(channel.getChannelId());
 		this.setChannelName(channel.getChannelName());
 		return this;

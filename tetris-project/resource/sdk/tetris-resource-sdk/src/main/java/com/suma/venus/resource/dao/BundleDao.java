@@ -36,6 +36,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public List<BundlePO> findByAccessNodeUid(String accessNodeUid);
 	
+	public Page<BundlePO> findByAccessNodeUid(String accessNodeUid,Pageable page);
+	
 	public int countByAccessNodeUid(String accessNodeUid);
 	
 	public List<BundlePO> findByAccessNodeUidIn(Collection<String> accessNodeUids);

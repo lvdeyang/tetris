@@ -28,19 +28,22 @@ import com.sumavision.tetris.guide.control.VideoParametersDAO;
 public class GuideService {
 	
 	@Autowired
-	GuideDAO guideDAO;
+	private GuidePlayService guidePlayService;
 	
 	@Autowired
-	SourceDAO sourceDAO;
+	private GuideDAO guideDAO;
 	
 	@Autowired
-	OutputSettingDAO outputSettingDAO;
+	private SourceDAO sourceDAO;
 	
 	@Autowired
-	VideoParametersDAO videoParametersDAO;
+	private OutputSettingDAO outputSettingDAO;
 	
 	@Autowired
-	AudioParametersDAO audioParametersDAO;
+	private VideoParametersDAO videoParametersDAO;
+	
+	@Autowired
+	private AudioParametersDAO audioParametersDAO;
 	
 	@Autowired
 	GuidePlayService guidePlayService;

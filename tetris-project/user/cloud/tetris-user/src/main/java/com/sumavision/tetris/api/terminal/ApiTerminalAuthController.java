@@ -107,6 +107,8 @@ public class ApiTerminalAuthController {
 			String mobile,
 			String verificationCode,
 			String sessionToken,
+			String remark,
+			String ip,
 			HttpServletRequest request) throws Exception{
 		
 		HttpSession session = HttpSessionContext.get(sessionToken);
@@ -124,7 +126,7 @@ public class ApiTerminalAuthController {
 			throw new MobileNotMatchedException(mobile, phone);
 		}
 		
-		userService.add(username, username, "", password, passwordRepeat, mobile, null, null, UserClassify.TERMINAL.getName(), false);
+		userService.add(username, username, "", password, passwordRepeat, mobile, null, null, UserClassify.TERMINAL.getName(), remark,"",false);
 		
 		return null;
 	}

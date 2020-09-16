@@ -1,5 +1,7 @@
 package com.sumavision.bvc.device.group.dao;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +32,16 @@ public interface CombineVideoDAO extends MetBaseDAO<CombineVideoPO> {
 	 */
 	@Query("select cvideo from com.sumavision.bvc.device.group.po.CombineVideoPO cvideo where cvideo.uuid=?1")	
 	public CombineVideoPO findByUuid(String uuid);
+	
+	/**
+	 * 查找group的所有合屏<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月11日 上午10:13:07
+	 * @param reconGroupId
+	 * @return
+	 */
+	@Query("select cvideo from com.sumavision.bvc.device.group.po.CombineVideoPO cvideo where cvideo.reconGroupId=?1")
+	public List<CombineVideoPO> findByReconGroupId(Long reconGroupId);
 }

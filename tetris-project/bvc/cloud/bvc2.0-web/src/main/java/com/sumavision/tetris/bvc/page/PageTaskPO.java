@@ -188,6 +188,9 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 目的成员id */
 	private Long dstMemberId;
 	
+	/** 分屏LayoutPosition的id */
+	private Long positionId;
+	
 	/** TerminalBundleUserPermissionPO的id */
 	private String dstId;
 	
@@ -600,6 +603,14 @@ public class PageTaskPO extends AbstractBasePO {
 		this.dstMemberId = dstMemberId;
 	}
 
+	public Long getPositionId() {
+		return positionId;
+	}
+
+	public void setPositionId(Long positionId) {
+		this.positionId = positionId;
+	}
+
 	public String getDstId() {
 		return dstId;
 	}
@@ -784,7 +795,7 @@ public class PageTaskPO extends AbstractBasePO {
 		return this;
 	}
 	
-	public PageTaskPO setDstByHall(TerminalBundleConferenceHallPermissionPO decoder, BundlePO bundlePO){
+	public PageTaskPO setDstByHall(TerminalBundleConferenceHallPermissionPO decoder, BundlePO bundlePO, String videoChannelId){
 //		this.businessType = player.getPlayerBusinessType();//TODO
 //		this.locationIndex = player.getLocationIndex();
 //		this.businessId = player.getBusinessId();
@@ -799,6 +810,7 @@ public class PageTaskPO extends AbstractBasePO {
 		this.dstLayerId = bundlePO.getAccessNodeUid();
 		this.dstVideoBaseType = "VenusVideoOut";
 		this.dstVideoChannelId = ChannelType.VIDEODECODE1.getChannelId();
+		if(videoChannelId != null) this.dstVideoChannelId = videoChannelId;
 		this.dstVideoChannelName = ChannelType.VIDEOENCODE1.getName();
 		return this;
 	}

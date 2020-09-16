@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -21,7 +23,6 @@ import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
-import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.guide.BO.GuideOutputArrayBO;
 import com.sumavision.tetris.guide.BO.GuideSourceOutputBO;
@@ -71,6 +72,9 @@ public class GuidePlayService {
 	@Autowired
 	private AudioParametersDAO auidoParametersDao;
 	
+	@Autowired
+	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
 	/**
 	 * 开会<br/>
 	 * <b>作者:</b>lx<br/>
@@ -81,7 +85,7 @@ public class GuidePlayService {
 	 */
 	public void start(Long guideId) throws Exception{
 		//1.创建源：呼叫5G背包；打开虚拟源地址
-		GuidePO guidePo=guideDao.findOne(guideId);
+//		GuidePO guidePo=guideDao.findOne(guideId);
 		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
 		//虚拟源相关的集合
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
@@ -95,7 +99,8 @@ public class GuidePlayService {
 		packageSources.removeAll(virtualSources);
 		
 		//对最多12个5G背包生成logic协议，缺少userId,参数模板codec
-		LogicBO sourceLogic = getLogic(null,packageSources,null);
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO sourceLogic = getLogic(-1L,packageSources,codec);
 		
 		//将最多12个虚拟地址源生成协议
 		List <PassByBO> startPassBys=virtualSources.stream().map(source->{
@@ -104,7 +109,9 @@ public class GuidePlayService {
 			passBy.setLayer_id(layer_id);
 			passBy.setType("creatInputSource");
 			JSONObject pass_by_content=new JSONObject();
-			pass_by_content.put("input_udp_url", source.getSource());
+			source.getSource();
+			pass_by_content.put("url", source.getSource());
+			pass_by_content.put("type","udp_ts");
 			passBy.setPass_by_content(pass_by_content);
 			
 			return passBy;
@@ -150,17 +157,8 @@ public class GuidePlayService {
 			AudioParametersPO audioParametersPO =auidoParametersDao.findByGuideId(outputSource.getGuideId());
 			HashMap<String,Object> audioEncodeArray=new HashMap<String,Object>();
 			HashMap<String,Object> audioParameter=new HashMap<String,Object>();
-			/*"type": "audio"                              //音频编码
-				"encode_array": [
-					{
-						"encode_id": "ENCODE_ID_2",          //编码ID
-						"aac": {                             //编码格式aac,"mp2","mp3",dolby,passby
-							"sample_fmt": "s16",             
-							"bitrate": "128",                 //码率
-							"type": "mpeg4-aac-lc"            //编码类型mpeg4-aac-lc,mpeg4-he-aac-lc,mpeg4-he-aac-v2-lc;ac3,eac3
-						},
-					}
-				]*/
+			JSONArray videoEncodeArrays=new JSONArray();
+			JSONArray audioEncodeArrays=new JSONArray();
 			
 			videoEncodeArray.put("encode_id","ENCODE_ID_1");
 			videoParameter.put("profile", videoParametersPO.getProfile());
@@ -169,21 +167,22 @@ public class GuidePlayService {
 			videoParameter.put("resolution", videoParametersPO.getResolution());
 			videoParameter.put("max_bitrate", videoParametersPO.getMaxBitrate());
 			videoEncodeArray.put(videoParametersPO.getCodingObject().getName(),videoParameter);
+			videoEncodeArrays.add(videoEncodeArray);
 			GuideTaskArrayBO videoGuideTaskArrayBO=new GuideTaskArrayBO()
 					.setId("TASK_ID_1")
 					.setType("video")
-					.setEncode_array(videoEncodeArray);
+					.setEncode_array(videoEncodeArrays);
 			
 			audioEncodeArray.put("encode_id", "ENCODE_ID_2");
 			audioParameter.put("sample_fmt", audioParametersPO.getSampleFmt());
 			audioParameter.put("bitrate", audioParametersPO.getBitrate());
 			audioParameter.put("type", audioParametersPO.getCodingType().getName());
 			audioEncodeArray.put(audioParametersPO.getCodingFormat().getName(),audioParameter);
-			
+			audioEncodeArrays.add(audioEncodeArray);
 			GuideTaskArrayBO audieGuideTaskArrayBO=new GuideTaskArrayBO()
 					.setId("TASK_ID_2")
 					.setType("audio")
-					.setEncode_array(audioEncodeArray);
+					.setEncode_array(audioEncodeArrays);
 			
 			guideTaskArrays.add(videoGuideTaskArrayBO);
 			guideTaskArrays.add(audieGuideTaskArrayBO);
@@ -215,10 +214,12 @@ public class GuidePlayService {
 			UdpTsBO udpTsBo=new UdpTsBO()
 					.setIp(ip)
 					.setPort(Integer.parseInt(port))
-					.setProgram_array(programArrayBOs);
+					.setProgram_array(programArrayBOs)
+					.setLocal_ip("192.165.56.18");
 			
 			GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
-			guideOutputArray.setId("OUTPUT_ID").setUdp_ts(null);
+			guideOutputArray.setId("OUTPUT_ID").setUdp_ts(udpTsBo);
+			GuideOutputArrays.add(guideOutputArray);
 //			oupput_array结束
 			
 			GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
@@ -231,8 +232,11 @@ public class GuidePlayService {
 			return passBy;
 		}).collect(Collectors.toList());
 		LogicBO outputLogic=new LogicBO();
+		if(outputLogic.getPass_by()==null){
+			outputLogic.setPass_by(new ArrayList<PassByBO>());
+		}
 		outputLogic.getPass_by().addAll(outputPassBys);
-		executeBusiness.execute(sourceLogic,  "打开输出编码");
+//		executeBusiness.execute(outputLogic,  "打开输出编码");
 	}
 	
 	/**
@@ -244,9 +248,9 @@ public class GuidePlayService {
 	 * @param sourceId
 	 * @throws Exception 
 	 */
-	public void exchange(Long guideId,Long sourceId) throws Exception{
+	public void exchange(Long sourceId,Long guideId) throws Exception{
 		//切换源
-		GuidePO guidePo=guideDao.findOne(guideId);
+		//GuidePO guidePo=guideDao.findOne(guideId);
 		SourcePO source=sourceDao.findOne(sourceId);
 		
 		//不太清楚切换源协议是否同时适用5G背包与虚拟源
@@ -270,6 +274,7 @@ public class GuidePlayService {
 			
 			passBy.setPass_by_content(pass_by_content);
 			LogicBO logic=new LogicBO();
+			logic.setPass_by(new ArrayList<PassByBO>());
 			logic.getPass_by().add(passBy);
 			executeBusiness.execute(logic,  "打开虚拟源编码");
 		}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
@@ -292,6 +297,7 @@ public class GuidePlayService {
 			
 			passBy.setPass_by_content(pass_by_content);
 			LogicBO logic=new LogicBO();
+			logic.setPass_by(new ArrayList<PassByBO>());
 			logic.getPass_by().add(passBy);
 			executeBusiness.execute(logic,  "打开5G背包编码");
 		}
@@ -317,7 +323,7 @@ public class GuidePlayService {
 			}
 			return false;
 		}).collect(Collectors.toList());
-		List<SourcePO> packageSources=new ArrayList<SourcePO>();
+		List<SourcePO> packageSources=new ArrayList<SourcePO>(sourceList);
 		packageSources.removeAll(virtualSources);
 		
 		List <PassByBO> deleteSources=virtualSources.stream().map(source->{
@@ -331,7 +337,8 @@ public class GuidePlayService {
 		}).collect(Collectors.toList());
 		//刪除5G背包中的源
 		//close()
-		LogicBO logic =closeEncoder(null, null, packageSources, null);
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logic =closeEncoder( -1L, packageSources, codec);
 		logic.getPass_by().addAll(deleteSources);
 		
 		//2.删除所有输出源
@@ -352,8 +359,6 @@ public class GuidePlayService {
 		executeBusiness.execute(logic,  "删除虚拟源，输出源与5G背包");
 	}
 	
-	
-	//缺少一个参数codec
 	/**
 	 * 获取logic协议，填充其中ConnectBundle部分<br/>
 	 * <b>作者:</b>lx<br/>
@@ -382,7 +387,7 @@ public class GuidePlayService {
 					            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
 							    .setLock_type("write")
 							    .setBundleId(sourcePO.getSource())
-							    .setLayerId(bundlePO.getAccessNodeUid())
+							    .setLayerId(layer_id)
 							    .setBundle_type(bundlePO.getBundleType());
 			ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(ChannelType.VIDEOENCODE1.getChannelId())
 					      .setChannel_status("Open")
@@ -408,7 +413,7 @@ public class GuidePlayService {
 		return logic;
 	}
 	
-	//缺少group与codec
+	//缺少group
 	/**
 	 * 关闭源<br/>
 	 * <b>作者:</b>lx<br/>
@@ -422,7 +427,6 @@ public class GuidePlayService {
 	 * @throws Exception
 	 */
 	public LogicBO closeEncoder(
-			GroupPO group,
 			Long userId,
 			List<SourcePO> Sources,
 			CodecParamBO codec) throws Exception{
@@ -436,18 +440,14 @@ public class GuidePlayService {
 		for(SourcePO source : Sources){
 //			ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
 			BundlePO bundlePO=bundleDao.findByBundleId(source.getSource());
-			PassByBO passBy = new PassByBO().setHangUp(group, source.getSource() , bundlePO.getAccessNodeUid());
 			DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 					             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 					             .setBundleId(source.getSource())
 					             .setBundle_type(bundlePO.getBundleType())
-					             .setLayerId(bundlePO.getAccessNodeUid())
-					             .setPass_by_str(passBy);
+					             .setLayerId(bundlePO.getAccessNodeUid());
 			logic.getDisconnectBundle().add(disconnectEncoderBundle);
 		}
-		
 		return logic;
-	
 	}
 //	ChannelType.VIDEOENCODE1.getChannelId()
 //	ChannelType.AUDIOENCODE1.getChannelId()

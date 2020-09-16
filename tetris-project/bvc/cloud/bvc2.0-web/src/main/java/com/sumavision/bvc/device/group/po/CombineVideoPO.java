@@ -15,6 +15,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoSrcDAO;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -36,6 +39,9 @@ public class CombineVideoPO extends AbstractBasePO{
 	
 	/** 关联设备组 */
 	private DeviceGroupPO group;
+	
+	/** 关联重构后的group */
+	private Long reconGroupId;
 	
 	@Column(name = "WEBSITEDRAW", length = 1024)
 	public String getWebsiteDraw() {
@@ -65,6 +71,15 @@ public class CombineVideoPO extends AbstractBasePO{
 		this.group = group;
 	}
 	
+	@Column(name = "RECON_GROUP_ID")
+	public Long getReconGroupId() {
+		return reconGroupId;
+	}
+
+	public void setReconGroupId(Long reconGroupId) {
+		this.reconGroupId = reconGroupId;
+	}
+	
 	/**
 	 * @Title: 从配置视频中复制数据 
 	 * @param video 配置视频
@@ -77,6 +92,22 @@ public class CombineVideoPO extends AbstractBasePO{
 		this.setPositions(new HashSet<CombineVideoPositionPO>());
 		Set<DeviceGroupConfigVideoPositionPO> configPositions = video.getPositions();
 		for(DeviceGroupConfigVideoPositionPO configPosition:configPositions){
+			CombineVideoPositionPO position = new CombineVideoPositionPO().set(configPosition);
+			position.setCombineVideo(this);
+			this.getPositions().add(position);
+		}
+		return this;
+	}
+	public CombineVideoPO set(
+			com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO video){
+		this.setUuid(video.getUuid());
+		this.setUpdateTime(new Date());
+		this.setWebsiteDraw(video.getWebsiteDraw());
+		this.setPositions(new HashSet<CombineVideoPositionPO>());
+		
+		CombineVideoPositionDAO combineVideoPositionDao = SpringContext.getBean(CombineVideoPositionDAO.class);
+		List<com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionPO> positions = combineVideoPositionDao.findByCombineVideoId(video.getId());
+		for(com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPositionPO configPosition:positions){
 			CombineVideoPositionPO position = new CombineVideoPositionPO().set(configPosition);
 			position.setCombineVideo(this);
 			this.getPositions().add(position);
@@ -107,7 +138,7 @@ public class CombineVideoPO extends AbstractBasePO{
 		
 		return true;
 	}
-	
+
 	/**
 	 * @ClassName: 时间排序器， 按照时间从大到小排列<br/> 
 	 * @author wjw
