@@ -285,6 +285,9 @@ define([
           self.dialog.editUser.mail = row.mail;
           self.dialog.editUser.level = row.level ? row.level : 1;
           self.dialog.editUser.visible = true;
+          self.dialog.editUser.remark = row.remark;
+          self.dialog.editUser.loginIp = row.loginIp;
+          self.dialog.editUser.bindrole = row.bindrole;
         },
         handleEditUserClose: function () {
           var self = this;
@@ -298,6 +301,9 @@ define([
           self.dialog.editUser.newPassword = '';
           self.dialog.editUser.repeat = '';
           self.dialog.editUser.visible = false;
+          self.dialog.editUser.remark = '';
+          self.dialog.editUser.loginIp = '';
+          self.dialog.editUser.bindrole = '';
         },
         handleEditUserSubmit: function () {
           var self = this;
@@ -310,7 +316,10 @@ define([
             editPassword: self.dialog.editUser.editPassword,
             oldPassword: self.dialog.editUser.oldPassword,
             newPassword: self.dialog.editUser.newPassword,
-            repeat: self.dialog.editUser.repeat
+            repeat: self.dialog.editUser.repeat,
+            remark: self.dialog.editUser.remark,
+            loginIp: self.dialog.editUser.loginIp,
+            bindrole: self.dialog.editUser.bindrole
           }, function (data, status) {
             self.dialog.editUser.loading = false;
             if (status !== 200) return;
@@ -376,6 +385,9 @@ define([
           self.dialog.createUser.level = 1;
           self.dialog.createUser.classify = '企业用户';
           self.dialog.createUser.visible = false;
+          self.dialog.createUser.remark = "",
+            self.dialog.createUser.loginIp = "",
+            self.dialog.createUser.bindrole = ""
         },
         handleCreateUserSubmit: function () {
           var self = this;
@@ -390,7 +402,10 @@ define([
             mail: self.dialog.createUser.mail,
             level: self.dialog.createUser.level,
             classify: self.dialog.createUser.classify,
-            companyId: self.dialog.createUser.company.id
+            companyId: self.dialog.createUser.company.id,
+            remark: self.dialog.createUser.remark,
+            loginIp: self.dialog.createUser.loginIp,
+            bindrole: self.dialog.createUser.bindrole
           };
 
           ajax.post('/user/add', params, function (data, status) {
