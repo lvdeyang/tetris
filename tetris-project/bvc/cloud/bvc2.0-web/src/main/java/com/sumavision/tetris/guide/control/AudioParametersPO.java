@@ -5,6 +5,8 @@ package com.sumavision.tetris.guide.control;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -28,7 +30,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	/** 编码格式 */
 	private CodingFormat codingFormat = CodingFormat.ACC;
 	
-	/** */
+	/** 采样率 */
 	private String sampleFmt = "s16";
 	
 	/** 码率 */
@@ -47,6 +49,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_FORMAT")
+	@Enumerated(EnumType.STRING)
 	public CodingFormat getCodingFormat() {
 		return codingFormat;
 	}
@@ -74,6 +77,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "CODING_TYPE")
+	@Enumerated(EnumType.STRING)
 	public CodingType getCodingType() {
 		return codingType;
 	}

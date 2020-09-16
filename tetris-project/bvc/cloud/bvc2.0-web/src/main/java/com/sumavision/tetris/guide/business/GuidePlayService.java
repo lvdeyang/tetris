@@ -82,7 +82,7 @@ public class GuidePlayService {
 	public void start(Long guideId) throws Exception{
 		//1.创建源：呼叫5G背包；打开虚拟源地址
 		GuidePO guidePo=guideDao.findOne(guideId);
-		List<SourcePO> sourceList=sourceDao.findByGuideId(guideId);
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
 		//虚拟源相关的集合
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
 			if(source.getSourceType().equals(SourceType.URL)){
@@ -125,7 +125,7 @@ public class GuidePlayService {
 			passBy.setType("creatBackupSources");
 			
 			//sources开始
-			List<SourcePO> sources=sourceDao.findByGuideId(outputSource.getGuideId());
+			List<SourcePO> sources=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
 			List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
 			for(SourcePO sourcePo:sources){
 				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
@@ -310,7 +310,7 @@ public class GuidePlayService {
 		//1.删除源
 		//删除虚拟源
 		GuidePO guidePo=guideDao.findOne(guideId);
-		List<SourcePO> sourceList=sourceDao.findByGuideId(guideId);
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
 			if(source.getSourceType().equals(SourceType.URL)){
 				return true;

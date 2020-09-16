@@ -23,6 +23,9 @@ public class SourceService {
 	@Autowired
 	SourceDAO sourceDAO;
 	
+	@Autowired
+	GuidePlayService guidePlayService;
+	
 	public SourcePO edit(
 			Long id,
 			String sourceType,
@@ -45,7 +48,7 @@ public class SourceService {
 	public Object cut(
 			Long id, 
 			Long sourceNumber) throws Exception{
-		new GuidePlayService().exchange(id, sourceNumber);
+		guidePlayService.exchange(id, sourceNumber);
 		return null;
 	}
 }

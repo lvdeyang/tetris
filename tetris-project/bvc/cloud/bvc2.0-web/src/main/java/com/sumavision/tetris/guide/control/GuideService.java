@@ -42,6 +42,9 @@ public class GuideService {
 	@Autowired
 	AudioParametersDAO audioParametersDAO;
 	
+	@Autowired
+	GuidePlayService guidePlayService;
+	
 	public GuidePO add(String taskName){
 		GuidePO guidePO = new GuidePO();
 		guidePO.setTaskName(taskName);
@@ -82,12 +85,12 @@ public class GuideService {
 	}
 	
 	public Object start(Long id) throws Exception{
-		new GuidePlayService().start(id);
+		guidePlayService.start(id);
 		return null;
 	}
 	
 	public Object stop(Long id) throws Exception{
-		new GuidePlayService().stop(id);
+		guidePlayService.stop(id);
 		return null;
 	}
 
