@@ -126,6 +126,7 @@
       </div>
 
     </el-form>
+
     <template>
       <el-dialog title="选择分组" :visible.sync="dialog.changeFolder.visible" width="650px" :before-close="handleChangeFolderClose">
         <div style="height:500px; position:relative;">
@@ -189,8 +190,10 @@
 import {
   getDeviceModels,
   addBundle,
-  queryFolderTree,
-  addFolder} from '../../api/api';
+  // queryFolderTree,
+  initFolderTree,
+  addFolder
+} from '../../api/api';
 
 import selectLayerNode from '../layernode/SelectLayerNode'
 
@@ -478,20 +481,23 @@ export default {
     handleChangeFolder: function () {
       var self = this;
       self.dialog.changeFolder.visible = true;
-      queryFolderTree().then(res => {
-        if (res.status === 200) {
-          self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
-          if (res.data && res.data.length > 0) {
-            for (var i = 0; i < res.data.length; i++) {
-              self.dialog.changeFolder.tree.data.push(res.data[i]);
-            }
-          }
-        } else {
-          self.$message({
-            type: 'error',
-            message: res.message
-          });
-        }
+      initFolderTree().then(res => {
+        console.log(res)
+        self.dialog.changeFolder.tree.data = res.tree
+        // if (res.status === 200) {
+        //   // self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
+        //   // if (res.data.tree && res.data.tree.length > 0) {
+        //   //   for (var i = 0; i < res.data.length; i++) {
+        //   //     self.dialog.changeFolder.tree.data.push(res.data.tree[i]);
+        //   //   }
+        //   // }
+        //   self.dialog.changeFolder.tree.data = res.data.tree
+        // } else {
+        //   self.$message({
+        //     type: 'error',
+        //     message: res.message
+        //   });
+        // }
       });
     },
     handleChangeFolderClose: function () {

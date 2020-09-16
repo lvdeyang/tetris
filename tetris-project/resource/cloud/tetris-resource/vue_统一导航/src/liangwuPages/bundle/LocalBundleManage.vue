@@ -180,8 +180,10 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {  getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
-  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser} from '../../api/api';
+import {
+  getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
+  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser
+} from '../../api/api';
 // let requestIP = document.location.host.split(":")[0];
 
 import selectLayerNode from '../layernode/SelectLayerNode';
@@ -326,16 +328,16 @@ export default {
         } else {
           this.pageNum = pageNum;
           this.total = res.total;
-          var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
-          var A = res.resources;
-          for (var i = 0; i < A.length; i++) {
-            if (addressArr[i]) {
-              A[i].bundleAddress = addressArr[i]
-            } else {
-              A[i].bundleAddress = addressArr[4]
-            }
-          }
-          this.resources = A;
+          // var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
+          // var A = res.resources;
+          // for (var i = 0; i < A.length; i++) {
+          //   if (addressArr[i]) {
+          //     A[i].bundleAddress = addressArr[i]
+          //   } else {
+          //     A[i].bundleAddress = addressArr[4]
+          //   }
+          // }
+          // this.resources = A;
         }
 
         this.resourceTableLoading = false;
@@ -572,7 +574,7 @@ export default {
 
     exportBundle: function () {
 
-      exportBundle (null).then((res) => {
+      exportBundle(null).then((res) => {
         const blob = new Blob([res.data], { type: 'application/octet-stream;charset=utf-8' });
 
         const fileName = 'folder.csv';

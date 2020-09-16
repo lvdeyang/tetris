@@ -2,8 +2,8 @@
  * Created by lzp on 2019/5/29.
  */
 define([
-  'text!' + window.APPPATH + 'liangwu-role/page-business-role.html',
-  window.APPPATH + 'liangwu-role/page-business-role.i18n',
+  'text!' + window.APPPATH + 'liangwu-role/page-liangwu-role.html',
+  window.APPPATH + 'liangwu-role/page-liangwu-role.i18n',
   'config',
   'restfull',
   'jquery',
@@ -12,7 +12,7 @@ define([
   'vue',
   'element-ui',
   'mi-frame',
-  'css!' + window.APPPATH + 'liangwu-role/page-business-role.css'
+  'css!' + window.APPPATH + 'liangwu-role/page-liangwu-role.css'
 ], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
 
   var locale = context.getProp('locale');
@@ -98,9 +98,10 @@ define([
         },
         handleBind: function () {
           var self = this;
-          var LocationOrigin = location.origin;
+          // var LocationOrigin = location.origin;
+          var LocationOrigin = "http://192.165.56.115:8092"
           var token = localStorage.getItem('tetris-001')
-          self.iframeUrl = LocationOrigin + '/index.html#/BindRoleResource?token=' + token
+          self.iframeUrl = LocationOrigin + '/index.html#/LwBindRoleResource?token=' + token
           self.dialog.bindRoleResource.visible = true;
         },
         handelDelete: function () {
