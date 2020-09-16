@@ -1,10 +1,10 @@
 <template>
   <section>
 
-    <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
-      <el-tab-pane label="绑定资源用户" name="BindResource"></el-tab-pane>
-      <el-tab-pane label="绑定虚拟资源" name="BindVirtualResource"></el-tab-pane>
-    </el-tabs>
+    <!-- <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
+      <el-tab-pane label="绑定资源用户" name="BindRoleResource"></el-tab-pane>
+      <el-tab-pane label="绑定虚拟资源" name="BindRoleVirtualResource"></el-tab-pane>
+    </el-tabs> -->
 
     <el-card style="float:left;margin-top:10px;width:20%;font-size: 18px;" body-style="padding:0px">
       <el-table ref="roleTable" :data="roles" highlight-current-row v-loading="roleTableLoading" @current-change="handleRoleTableRowChange" style="width: 100%;">
@@ -48,29 +48,44 @@
         <el-table-column type="index" width="100"></el-table-column>
         <el-table-column prop="name" label="名称" width="200" sortable>
         </el-table-column>
-        <el-table-column prop="deviceModel" label="资源类型" width="200" sortable>
+        <el-table-column prop="deviceModel" label="资源类型" width="150" sortable>
         </el-table-column>
         <!--<el-table-column prop="bundleId" label="资源ID" width="350"  sortable>-->
         <!--</el-table-column>-->
         <el-table-column prop="username" label="设备账号" width="270">
         </el-table-column>
-        <el-table-column width="100" :render-header="renderCheckReadHeader">
+        <el-table-column width="120" :render-header="renderCheckReadHeader">
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
 
-        <el-table-column width="100" :render-header="renderCheckWriteHeader">
+        <el-table-column width="80" :render-header="renderCheckWriteHeader">
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
-
-        <el-table-column width="100" :render-header="renderCheckCloudHeader">
+        <!-- 新增功能 -->
+        <el-table-column width="80" :render-header="renderCheckDownloadHeader">
           <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasCloudPrivilege" @change="handleCheckCloudChange(scope.row)"></el-checkbox>
+            <el-checkbox v-model="scope.row.hasDownloadPrivilege"></el-checkbox>
           </template>
         </el-table-column>
+        <el-table-column width="80" :render-header="renderCheckYTHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasYTHPrivilege"></el-checkbox>
+          </template>
+        </el-table-column>
+        <el-table-column width="120" :render-header="renderCheckBDLZHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasBDLZPrivilege"></el-checkbox>
+          </template>
+        </el-table-column>
+        <!-- <el-table-column width="150" :render-header="renderCheckFWDLZHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasFWDLZPrivilege"></el-checkbox>
+          </template>
+        </el-table-column> -->
 
       </el-table>
 
@@ -90,12 +105,6 @@
         <el-table-column width="150" :render-header="renderCheckWriteHeader">
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckCloudHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasCloudPrivilege" @change="handleCheckCloudChange(scope.row)"></el-checkbox>
           </template>
         </el-table-column>
 
@@ -149,7 +158,7 @@ export default {
       },
       defaultExpandAll: false,
       expandOnClickNode: false,
-      activeTabName: 'BindResource',
+      activeTabName: 'BindRoleResource',
       deviceModelOptions: [],
       roles: [
       ],
@@ -183,13 +192,11 @@ export default {
       resourceTableLoading: false,
       prevReadChecks: [], // 之前的录制权限
       prevWriteChecks: [], // 之前的点播权限
-      prevCloudChecks: [], // 之前的云台权限
       prevHJChecks: [],
       prevZKChecks: [],
       prevHYChecks: [],
       readChecks: [], // 新的录制权限
       writeChecks: [], // 新的点播权限
-      cloudChecks: [], // 新的云台权限
       HJchecks: [],
       ZKchecks: [],
       HYchecks: [],
@@ -201,10 +208,14 @@ export default {
       userTableShow: false,
       checkReadAll: false,
       checkWriteAll: false,
-      checkCloudAll: false,
       checkHJAll: false,
       checkZKAll: false,
-      checkHYAll: false
+      checkHYAll: false,
+
+      checkDownloadAll: false,
+      checkYTAll: false,
+      checkBDLZAll: false,
+      checkFWDLZAll: false,
     }
   },
   methods: {
@@ -248,7 +259,7 @@ export default {
     },
 
     handleTabClick (tab, event) {
-      if (tab.name !== 'BindResource') {
+      if (tab.name !== 'BindRoleResource') {
         this.$router.push('/' + tab.name)
       }
     },
@@ -263,17 +274,12 @@ export default {
     },
     renderCheckReadHeader: function (h, data) { // 自定义特殊表格头单元
       return (
-        <el-checkbox v-model={this.checkReadAll} onChange={this.handleCheckReadAllChange}>录制</el-checkbox>
+        <el-checkbox v-model={this.checkReadAll} onChange={this.handleCheckReadAllChange}>服务端录制</el-checkbox>
       )
     },
     renderCheckWriteHeader: function (h, data) { // 自定义特殊表格头单元
       return (
         <el-checkbox v-model={this.checkWriteAll} onChange={this.handleCheckWriteAllChange}>点播</el-checkbox>
-      )
-    },
-    renderCheckCloudHeader: function (h, data) { // 自定义特殊表格头单元
-      return (
-        <el-checkbox v-model={this.checkCloudAll} onChange={this.handleCheckCloudAllChange}>云台</el-checkbox>
       )
     },
     renderCheckHJHeader: function (h, data) { // 自定义特殊表格头单元
@@ -291,6 +297,27 @@ export default {
         <el-checkbox v-model={this.checkHYAll} onChange={this.handleCheckHYAllChange}>会议</el-checkbox>
       )
     },
+    // 新增演示功能
+    renderCheckDownloadHeader: function (h, data) { // 自定义特殊表格头单元 下载
+      return (
+        <el-checkbox v-model={this.checkDownloadAll} onChange={this.handleCheckDownloadAllChange}>下载</el-checkbox>
+      )
+    },
+    renderCheckYTHeader: function (h, data) { // 自定义特殊表格头单元 云台
+      return (
+        <el-checkbox v-model={this.checkYTAll} onChange={this.handleCheckYTAllChange}>云台</el-checkbox>
+      )
+    },
+    renderCheckBDLZHeader: function (h, data) { // 自定义特殊表格头单元 本地录制
+      return (
+        <el-checkbox v-model={this.checkBDLZAll} onChange={this.handleCheckBDLZAllChange}>本地录制</el-checkbox>
+      )
+    },
+    // renderCheckFWDLZHeader: function (h, data) { // 自定义特殊表格头单元 服务端录制
+    //   return (
+    //     <el-checkbox v-model={this.checkFWDLZAll} onChange={this.handleCheckFWDLZAllChange}>服务端录制</el-checkbox>
+    //   )
+    // },
     handleCheckReadAllChange: function (val) {
       if (this.resourceTableShow) { // 设备
         if (val) {
@@ -341,33 +368,6 @@ export default {
           this.writeChecks = []
           for (let user of this.users) {
             user.hasWritePrivilege = false
-          }
-        }
-      }
-    },
-    handleCheckCloudAllChange: function (val) {
-      if (this.resourceTableShow) {   //设备
-        if (val) {
-          for (let resource of this.resources) {
-            this.cloudChecks.push(resource.bundleId)
-            resource.hasCloudPrivilege = true;
-          }
-        } else {
-          this.cloudChecks = []
-          for (let resource of this.resources) {
-            resource.hasCloudPrivilege = false
-          }
-        }
-      } else if (this.userTableShow) { // 用户
-        if (val) {
-          for (let user of this.users) {
-            this.cloudChecks.push(user.userNo)
-            user.hasCloudPrivilege = true
-          }
-        } else {
-          this.cloudChecks = []
-          for (let user of this.users) {
-            user.hasCloudPrivilege = false
           }
         }
       }
@@ -463,30 +463,6 @@ export default {
         } else {
           this.writeChecks.splice(this.writeChecks.indexOf(row.userNo), 1)
           this.checkWriteAll = false
-        }
-      }
-    },
-    handleCheckCloudChange: function (row) {
-      if (this.resourceTableShow) {
-        if (row.hasCloudPrivilege) {
-          this.cloudChecks.push(row.bundleId)
-          if (this.cloudChecks.length === this.resources.length) {
-            this.checkCloudAll = true
-          }
-        } else {
-          this.cloudChecks.splice(this.cloudChecks.indexOf(row.bundleId), 1)
-          this.checkCloudAll = false
-        }
-      } else if (this.userTableShow) {
-        if (row.hasCloudPrivilege) {
-          this.cloudChecks.push(row.userNo)
-          // 全选判断
-          if (this.cloudChecks.length === this.users.length) {
-            this.checkCloudAll = true
-          }
-        } else {
-          this.cloudChecks.splice(this.cloudChecks.indexOf(row.userNo), 1)
-          this.checkCloudAll = false
         }
       }
     },
@@ -587,13 +563,10 @@ export default {
       this.userTableShow = false
       this.prevReadChecks = []
       this.prevWriteChecks = []
-      this.prevCloudChecks = []
       this.readChecks = []
       this.writeChecks = []
-      this.cloudChecks = []
       this.checkReadAll = false
       this.checkWriteAll = false
-      this.checkCloudAll = false
       this.checkHJAll = false
       this.checkZKAll = false
       this.checkHYAll = false
@@ -641,10 +614,6 @@ export default {
               this.prevWriteChecks.push(resource.bundleId)
               this.writeChecks.push(resource.bundleId)
             }
-            if (resource.hasCloudPrivilege) {
-              this.prevCloudChecks.push(resource.bundleId)
-              this.cloudChecks.push(resource.bundleId)
-            }
           }
 
           // 全选判断
@@ -653,9 +622,6 @@ export default {
           }
           if (this.writeChecks.length === this.resources.length) {
             this.checkWriteAll = true
-          }
-          if (this.cloudChecks.length === this.resources.length) {
-            this.checkCloudAll = true
           }
         }
 
@@ -690,10 +656,8 @@ export default {
       this.userTableShow = true
       this.prevReadChecks = []
       this.prevWriteChecks = []
-      this.prevCloiudChecks = []
       this.readChecks = []
       this.writeChecks = []
-      this.cloudChecks = []
       this.prevHJChecks = []
       this.prevZKChecks = []
       this.prevHYChecks = []
@@ -702,7 +666,12 @@ export default {
       this.HYchecks = []
       this.checkReadAll = false
       this.checkWriteAll = false
-      this.checkCloudAll = false
+      this.checkHJAll = false
+      this.checkZKAll = false
+      this.checkHYAll = false
+
+
+      this.checkWriteAll = false
       this.checkHJAll = false
       this.checkZKAll = false
       this.checkHYAll = false
@@ -747,10 +716,6 @@ export default {
               this.prevWriteChecks.push(user.userNo)
               this.writeChecks.push(user.userNo)
             }
-            if (user.hasCloudPrivilege) {
-              this.prevCloudChecks.push(user.userNo)
-              this.cloudChecks.push(user.userNo)
-            }
             if (user.hasHJPrivilege) {
               this.prevHJChecks.push(user.userNo)
               this.HJchecks.push(user.userNo)
@@ -771,9 +736,6 @@ export default {
           }
           if (this.writeChecks.length === this.users.length) {
             this.checkWriteAll = true
-          }
-          if (this.cloudChecks.length === this.users.length) {
-            this.checkCloudAll = true
           }
           if (this.HJchecks.length === this.users.length) {
             this.checkHJAll = true
@@ -796,10 +758,8 @@ export default {
           roleId: this.currentRoleRow.id,
           prevReadChecks: this.prevReadChecks.join(','),
           prevWriteChecks: this.prevWriteChecks.join(','),
-          prevCloudChecks: this.prevCloudChecks.join(','),
           readChecks: this.readChecks.join(','),
-          writeChecks: this.writeChecks.join(','),
-          cloudChecks: this.cloudChecks.join(',')
+          writeChecks: this.writeChecks.join(',')
         }
 
         this.resourceTableLoading = true
@@ -817,7 +777,6 @@ export default {
             // 更新prevChecks
             this.prevReadChecks = [].concat(this.readChecks)
             this.prevWriteChecks = [].concat(this.writeChecks)
-            this.prevCloudChecks = [].concat(this.cloudChecks)
           }
           this.resourceTableLoading = false
         })
@@ -826,13 +785,11 @@ export default {
           roleId: this.currentRoleRow.id,
           prevReadChecks: this.prevReadChecks.join(','),
           prevWriteChecks: this.prevWriteChecks.join(','),
-          prevCloudChecks: this.prevCloudChecks.join(','),
           prevHJChecks: this.prevHJChecks.join(','),
           prevZKChecks: this.prevZKChecks.join(','),
           prevHYChecks: this.prevHYChecks.join(','),
           readChecks: this.readChecks.join(','),
           writeChecks: this.writeChecks.join(','),
-          cloudChecks: this.cloudChecks.join(','),
           hjChecks: this.HJchecks.join(','),
           zkChecks: this.ZKchecks.join(','),
           hyChecks: this.HYchecks.join(',')
@@ -852,7 +809,6 @@ export default {
             // 更新prevChecks
             this.prevReadChecks = [].concat(this.readChecks)
             this.prevWriteChecks = [].concat(this.writeChecks)
-            this.prevCloudChecks = [].concat(this.cloudChecks)
             this.prevHJChecks = [].concat(this.HJchecks)
             this.prevZKChecks = [].concat(this.ZKchecks)
             this.prevHYChecks = [].concat(this.HYchecks)
@@ -864,9 +820,6 @@ export default {
   },
   mounted () {
     var self = this;
-    self.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/BindResource');
-    });
     self.getRoles();
     self.getDeviceModels();
     // this.getRoles()
