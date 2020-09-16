@@ -29,11 +29,11 @@
           <!-- <el-form-item label="活动地点">
             <el-input v-model="formLabelAlign.address"></el-input>
           </el-form-item> -->
-          <el-form-item>
+          <el-formm-item>
             <el-button type="primary" @click="createTask" v-show="showBtn">创建任务</el-button>
             <el-button type="primary" @click="createTask" v-show="!showBtn">修改任务</el-button>
             <el-button @click="cancel">取消创建</el-button>
-          </el-form-item>
+          </el-formm-item>
         </el-form>
       </el-tab-pane>
     </el-tabs>

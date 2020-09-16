@@ -1,8 +1,9 @@
 <template>
   <section>
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left;width:100%;">
-      <el-tab-pane label="资源列表" name="BundleManage"></el-tab-pane>
-      <el-tab-pane label="添加资源" name="AddBundle"></el-tab-pane>
+      <el-tab-pane label="资源列表" name="LwLocalBundleManage"></el-tab-pane>
+      <!-- <el-tab-pane label="资源列表" name="BundleManage"></el-tab-pane> -->
+      <el-tab-pane label="添加资源" name="LwAddBundle"></el-tab-pane>
     </el-tabs>
 
     <div style="float: left;width: 100%">
@@ -58,13 +59,15 @@
     <!--资源列表-->
     <el-table :data="resources" v-loading="resourceTableLoading" @selection-change="handleSelectionChange" style="float: left;width: 100%;margin-top: 20px;">
       <el-table-column width="50" type="selection"></el-table-column>
-      <el-table-column prop="bundleName" label="名称" width="200" sortable>
+      <el-table-column prop="bundleName" label="名称" width="120" sortable>
+      </el-table-column>
+      <el-table-column prop="bundleAddress" label="地点" width="120" sortable>
       </el-table-column>
       <el-table-column prop="deviceModel" label="类型" width="120" sortable>
       </el-table-column>
       <el-table-column prop="bundleAlias" label="别名" width="130" sortable>
       </el-table-column>
-      <el-table-column prop="username" label="设备账号" width="200">
+      <el-table-column prop="username" label="设备账号" width="120">
       </el-table-column>
       <el-table-column prop="accessNodeUid" label="所属接入层" width="220" sortable>
       </el-table-column>
@@ -84,14 +87,14 @@
 
       <el-table-column width="100" label="来源">
         <template slot-scope="scope">
-          <div v-if="scope.row.sourceType=='EXTERNAL'">LDAP</div>
-          <div v-else>BVC</div>
+          <div v-if="scope.row.sourceType=='EXTERNAL'">外域</div>
+          <div v-else>本域</div>
         </template>
       </el-table-column>
 
       <el-table-column label="操作" width="250">
         <template slot-scope="scope">
-          <el-button type="text" @click="handleDetail(scope.row)" size="small">详情</el-button>
+          <!-- <el-button type="text" @click="handleDetail(scope.row)" size="small">详情</el-button> -->
           <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleModify(scope.row)" size="small">修改</el-button>
           <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleSetLayerId(scope.row)" size="small">设置接入</el-button>
           <!--<el-button type="text" v-if="scope.row.onlineStatus=='ONLINE'" @click="handleLogout(scope.row)" size="small">踢出</el-button>-->
@@ -189,11 +192,11 @@ export default {
   components: { selectLayerNode },
   data () {
     return {
-      activeTabName: "BundleManage",
+      activeTabName: "LwLocalBundleManage",
       resources: [],
       deviceModelOptions: [],
       filters: {
-        deviceModel: '',
+        deviceModel: 'jv210',
         keyword: '',
         userId: '',
         sourceType: '',
@@ -250,7 +253,7 @@ export default {
       done();
     },
     handleTabClick (tab, event) {
-      if ("BundleManage" !== tab.name) {
+      if ("LwLocalBundleManage" !== tab.name) {
         this.$router.push('/' + tab.name);
       }
     }
@@ -323,7 +326,16 @@ export default {
         } else {
           this.pageNum = pageNum;
           this.total = res.total;
-          this.resources = res.resources;
+          var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
+          var A = res.resources;
+          for (var i = 0; i < A.length; i++) {
+            if (addressArr[i]) {
+              A[i].bundleAddress = addressArr[i]
+            } else {
+              A[i].bundleAddress = addressArr[4]
+            }
+          }
+          this.resources = A;
         }
 
         this.resourceTableLoading = false;
@@ -361,18 +373,20 @@ export default {
     }
     ,
     handleModify: function (row) {
-      console.log(JSON.stringify(row));
 
       this.$router.push({
-        path: '/ModifyBundle',
+        path: '/LwModifyBundle',
         query: {
           bundleId: row.bundleId,
           bundleName: row.bundleName,
+          bundleAddress: row.bundleAddress,
           deviceIp: row.deviceAddr.deviceIp,
           devicePort: row.deviceAddr.devicePort,
           multicastEncode: row.multicastEncode,
           multicastEncodeAddr: row.multicastEncodeAddr,
-          multicastDecode: row.multicastDecode
+          multicastDecode: row.multicastDecode,
+
+          bundleFolderId: row.bundleFolderId
         }
       });
     }
@@ -851,7 +865,7 @@ export default {
   mounted () {
     var self = this;
     this.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/BundleManage');
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
     });
     this.getDeviceModels();
     this.getAllUsers();
