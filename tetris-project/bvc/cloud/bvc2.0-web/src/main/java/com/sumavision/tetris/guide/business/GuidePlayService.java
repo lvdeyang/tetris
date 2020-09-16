@@ -24,6 +24,8 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.group.TransmissionMode;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.guide.BO.GuideOutputArrayBO;
 import com.sumavision.tetris.guide.BO.GuideSourceOutputBO;
 import com.sumavision.tetris.guide.BO.GuideSourcesBO;
@@ -120,10 +122,13 @@ public class GuidePlayService {
 		sourceLogic.getPass_by().addAll(startPassBys);
 		
 		//执行logic
-		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
+//		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
 		
-		//2.创建输出源
+		//2.创建输出源   只有一个、判空
 		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(guideId);
+		if(outputSources==null){
+			throw new BaseException(StatusCode.ERROR,"备份源为空"); 
+		}
 		List <PassByBO> outputPassBys=outputSources.stream().map(outputSource->{
 			PassByBO passBy=new PassByBO();
 			
@@ -135,16 +140,30 @@ public class GuidePlayService {
 			List<SourcePO> sources=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
 			List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
 			for(SourcePO sourcePo:sources){
-				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
-				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getUuid())
-						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
-						.setLayer_id(layer_id))
-				.setVideo_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getUuid())
-						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
-						.setLayer_id(layer_id));
-				guideSources.add(guideSourcesBo);
+				
+				if(sourcePo.getSourceType().equals(SourceType.KNAPSACK_5G)){
+					GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
+					guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
+							.setBundle_id(sourcePo.getSource())
+							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
+							.setLayer_id(layer_id))
+					.setVideo_source(new VideoOrAudioSourceBO()
+							.setBundle_id(sourcePo.getSource())
+							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
+							.setLayer_id(layer_id));
+					guideSources.add(guideSourcesBo);
+				}else{
+					GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
+					guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
+							.setBundle_id(sourcePo.getUuid())
+							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
+							.setLayer_id(layer_id))
+					.setVideo_source(new VideoOrAudioSourceBO()
+							.setBundle_id(sourcePo.getUuid())
+							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
+							.setLayer_id(layer_id));
+					guideSources.add(guideSourcesBo);
+				}
 			}
 			//sources结束
 			
@@ -161,8 +180,14 @@ public class GuidePlayService {
 			JSONArray audioEncodeArrays=new JSONArray();
 			
 			videoEncodeArray.put("encode_id","ENCODE_ID_1");
-			videoParameter.put("profile", videoParametersPO.getProfile());
-			videoParameter.put("fps", videoParametersPO.getFps());
+			
+			//需要加
+			videoParameter.put("ratio",videoParametersPO.getRatio().getName());//宽比高
+			//需要改为String
+			videoParameter.put("fps",videoParametersPO.getFps());
+			//需要加
+			videoParameter.put("rc_mode",videoParametersPO.getRcMode());//
+			
 			videoParameter.put("bitrate", videoParametersPO.getBitrate());
 			videoParameter.put("resolution", videoParametersPO.getResolution());
 			videoParameter.put("max_bitrate", videoParametersPO.getMaxBitrate());
@@ -174,8 +199,15 @@ public class GuidePlayService {
 					.setEncode_array(videoEncodeArrays);
 			
 			audioEncodeArray.put("encode_id", "ENCODE_ID_2");
-			audioParameter.put("sample_fmt", audioParametersPO.getSampleFmt());
 			audioParameter.put("bitrate", audioParametersPO.getBitrate());
+			
+			//需要加
+			audioParameter.put("channel_layout", audioParametersPO.getChannelLayout());//声道布局
+			audioParameter.put("sample_rate", audioParametersPO.getSampleRate());//采样率
+			
+			/*1.    aac的时候type可以选  "mpeg4-aac-lc","mpeg4-he-aac-lc","mpeg4-he-aac-v2-lc"
+			2.    dolby的时候type可以选  "ac3","eac3"
+			3.    其他格式没有type*/
 			audioParameter.put("type", audioParametersPO.getCodingType().getName());
 			audioEncodeArray.put(audioParametersPO.getCodingFormat().getName(),audioParameter);
 			audioEncodeArrays.add(audioEncodeArray);
@@ -215,7 +247,9 @@ public class GuidePlayService {
 					.setIp(ip)
 					.setPort(Integer.parseInt(port))
 					.setProgram_array(programArrayBOs)
-					.setLocal_ip("192.165.56.18");
+					.setLocal_ip("10.10.40.103")
+					.setRate_ctrl("VBR")
+					.setBitrate(8000000);
 			
 			GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
 			guideOutputArray.setId("OUTPUT_ID").setUdp_ts(udpTsBo);
@@ -223,7 +257,6 @@ public class GuidePlayService {
 //			oupput_array结束
 			
 			GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
-			guideSourceOutput.setOutput_udp_url(outputSource.getOutputAddress());
 			guideSourceOutput.setSources(guideSources);
 			guideSourceOutput.setTask_array(guideTaskArrays);
 			guideSourceOutput.setOutput_array(GuideOutputArrays);
@@ -236,7 +269,7 @@ public class GuidePlayService {
 			outputLogic.setPass_by(new ArrayList<PassByBO>());
 		}
 		outputLogic.getPass_by().addAll(outputPassBys);
-//		executeBusiness.execute(outputLogic,  "打开输出编码");
+	 	executeBusiness.execute(outputLogic,  "打开输出编码");
 	}
 	
 	/**
@@ -248,26 +281,34 @@ public class GuidePlayService {
 	 * @param sourceId
 	 * @throws Exception 
 	 */
-	public void exchange(Long sourceId,Long guideId) throws Exception{
+	public void exchange(Long guideId,Long sourceId) throws Exception{
 		//切换源
 		//GuidePO guidePo=guideDao.findOne(guideId);
 		SourcePO source=sourceDao.findOne(sourceId);
 		
+		//只有一个、判空、以后有问题
+		OutputSettingPO outputSetting =outputSettingDao.findByGuideId(guideId).get(0);
+		
+		if(outputSetting==null){
+			throw new BaseException(StatusCode.ERROR, "备份源为空");
+		}
+		
+		
 		//不太清楚切换源协议是否同时适用5G背包与虚拟源
 		if(source.getSourceType().equals(SourceType.URL)){
 			PassByBO passBy=new PassByBO();
-			passBy.setBundle_id(source.getSource());
+			passBy.setBundle_id(outputSetting.getUuid());
 			passBy.setLayer_id(layer_id);
 			passBy.setType("switchSource");
 			
 			JSONObject pass_by_content=new JSONObject();
 			pass_by_content.put("source",new GuideSourcesBO()
 					.setAudio_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getSource())
+							.setBundle_id(source.getUuid())
 							.setLayer_id(layer_id)
 							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
 					.setVideo_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getSource())
+							.setBundle_id(source.getUuid())
 							.setLayer_id(layer_id)
 							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
 						);
@@ -279,7 +320,7 @@ public class GuidePlayService {
 			executeBusiness.execute(logic,  "打开虚拟源编码");
 		}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
 			PassByBO passBy=new PassByBO();
-			passBy.setBundle_id(source.getSource());
+			passBy.setBundle_id(outputSetting.getUuid());
 			passBy.setLayer_id(layer_id);
 			passBy.setType("switchSource");
 			
@@ -313,7 +354,7 @@ public class GuidePlayService {
 	 * @throws Exception 
 	 */
 	public void stop(Long guideId) throws Exception{
-		//1.删除源
+		/*//1.删除源
 		//删除虚拟源
 		GuidePO guidePo=guideDao.findOne(guideId);
 		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
@@ -339,7 +380,7 @@ public class GuidePlayService {
 		//close()
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic =closeEncoder( -1L, packageSources, codec);
-		logic.getPass_by().addAll(deleteSources);
+		logic.getPass_by().addAll(deleteSources);*/
 		
 		//2.删除所有输出源
 		//删除所有虚拟输出源
@@ -355,6 +396,8 @@ public class GuidePlayService {
 			
 			return passBy;
 		}).collect(Collectors.toList());
+		LogicBO logic=new LogicBO();
+		logic.setPass_by(new ArrayList<PassByBO>());
 		logic.getPass_by().addAll(deleteOutputs);
 		executeBusiness.execute(logic,  "删除虚拟源，输出源与5G背包");
 	}

@@ -21,8 +21,6 @@ import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserP
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -37,7 +35,7 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
-import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
@@ -123,6 +121,9 @@ public class PageTaskService {
 	@Autowired
 	private GroupDAO groupDao;
 	
+	@Autowired
+	private BusinessReturnService businessReturnService;
+	
 	//重构
 	public MessageSendCacheBO notifyUser(CommandGroupUserInfoPO userInfo, PageInfoPO pageInfo, boolean doWebsocket) throws Exception{
 		
@@ -140,6 +141,9 @@ public class PageTaskService {
 		
 		MessageSendCacheBO cache = new MessageSendCacheBO(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
 	
+//		businessReturnService.add(null, cache);
+		
+		
 		//发送消息
 		if(doWebsocket){
 			WebsocketMessageVO ws = websocketMessageService.send(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
@@ -512,7 +516,6 @@ public class PageTaskService {
 	 * @return
 	 * @throws Exception
 	 */
-	@Deprecated
 	private LogicBO comparePage(
 			PageInfoPO pageInfo,
 			List<PageTaskPO> _oldPageTasks,
@@ -653,6 +656,7 @@ public class PageTaskService {
 				//持久化
 				pageInfoDao.save(pageInfo);
 				
+//				businessReturnService.add(logic, null);
 				if(doProtocal) executeBusiness.execute(logic, "刷新会场分页上屏");
 				
 			}else if(GroupMemberType.MEMBER_USER.equals(pageInfo.getGroupMemberType())){
@@ -732,6 +736,7 @@ public class PageTaskService {
 				//持久化
 				pageInfoDao.save(pageInfo);
 				
+//				businessReturnService.add(logic, null);
 				if(doProtocal) executeBusiness.execute(logic, "刷新用户播放器分页");
 				
 			}
@@ -756,6 +761,7 @@ public class PageTaskService {
 		LogicBO logic = openAndCloseDecoder_Rect(pageTasks, null, codec);
 		
 		if(doProtocol){
+//			businessReturnService.add(logic, null);
 			executeBusiness.execute(logic, "改变执行状态后，重呼解码器");
 		}
 		
@@ -839,8 +845,6 @@ public class PageTaskService {
 	//TODO:切分屏，参考 CommandSplitServiceImpl.changeLayoutScheme
 	
 	//TODO:特殊跳转，调用jumpToPage	
-
-	@Deprecated
 	private LogicBO openAndCloseDecoder(
 			List<PageTaskPO> openTasks,
 			List<PageTaskPO> closeTasks,

@@ -147,6 +147,7 @@ public class CommandVodRecordParser {
 				String videoChannelId = encodeVideo.getChannelId();
 				String videoBaseType = encodeVideo.getBaseType();
 				String videoChannelName = encodeVideo.getName();
+				
 				String audioBundleId = bundle.getBundleId();
 				String audioBundleName = bundle.getBundleName();
 				String audioBundleType = bundle.getBundleType();
