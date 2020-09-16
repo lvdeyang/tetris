@@ -145,6 +145,7 @@ define([
           ajax.post('/user/find/by/company/id/and/condition', param, function (data) {
             var total = data.total;
             var rows = data.rows;
+            self.table.rows = data.rows;
             // var bindipArr = ['10.1.23.244', '10.1.24.202', '10.1.23.224', '10.19.24.202', '10.1.22.244', '10.15.16.255', ]
             // if (rows && rows.length > 0) {
             //   for (var i = 0; i < rows.length; i++) {
@@ -166,10 +167,10 @@ define([
 
             //     rows[i].bindip = bindipArr[Math.floor(Math.random() * 6)];
             //     rows[i].lastlogintime = self.format(new Date())
-            self.table.rows = rows;
+            //     self.table.rows.push(rows[i]);
             //   }
-            self.table.total = total;
             // }
+            self.table.total = total;
             self.table.currentPage = currentPage;
           });
         },
