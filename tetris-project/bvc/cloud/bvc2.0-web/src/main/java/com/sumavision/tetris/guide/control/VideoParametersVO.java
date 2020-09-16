@@ -22,11 +22,8 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 	
 	private String codingObjectName;
 	
-	/** 编码档次 */
-	private String profile;
-	
 	/** 帧率 */
-	private Long fps;
+	private String fps;
 	
 	/** 码率 */
 	private Long bitrate;
@@ -36,8 +33,54 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 	
 	private String resolutionName;
 	
+	/** 宽高比 */
+	private String ratio;
+	
+	private String ratioName;
+	
+	/** 码率控制方式 */
+	private String rcMode;
+	
+	private String rcModeName;
+	
 	/** 最大码率 */
 	private Long maxBitrate;
+
+	public String getRatio() {
+		return ratio;
+	}
+
+	public VideoParametersVO setRatio(String ratio) {
+		this.ratio = ratio;
+		return this;
+	}
+
+	public String getRatioName() {
+		return ratioName;
+	}
+
+	public VideoParametersVO setRatioName(String ratioName) {
+		this.ratioName = ratioName;
+		return this;
+	}
+
+	public String getRcMode() {
+		return rcMode;
+	}
+
+	public VideoParametersVO setRcMode(String rcMode) {
+		this.rcMode = rcMode;
+		return this;
+	}
+
+	public String getRcModeName() {
+		return rcModeName;
+	}
+
+	public VideoParametersVO setRcModeName(String rcModeName) {
+		this.rcModeName = rcModeName;
+		return this;
+	}
 
 	public Long getGuideId() {
 		return guideId;
@@ -66,20 +109,11 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 		return this;
 	}
 
-	public String getProfile() {
-		return profile;
-	}
-
-	public VideoParametersVO setProfile(String profile) {
-		this.profile = profile;
-		return this;
-	}
-
-	public Long getFps() {
+	public String getFps() {
 		return fps;
 	}
 
-	public VideoParametersVO setFps(Long fps) {
+	public VideoParametersVO setFps(String fps) {
 		this.fps = fps;
 		return this;
 	}
@@ -125,11 +159,14 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 		this.setGuideId(entity.getGuideId());
 		this.setCodingObject(entity.getCodingObject()!= null ? entity.getCodingObject().toString(): null);
 		this.setCodingObjectName(entity.getCodingObject()!= null ? entity.getCodingObject().getName(): null);
-		this.setProfile(entity.getProfile());
 		this.setFps(entity.getFps());
 		this.setBitrate(entity.getBitrate());
 		this.setResolution(entity.getResolution()!= null ? entity.getResolution().toString(): null);
 		this.setResolutionName(entity.getResolution()!= null ? entity.getResolution().getName(): null);
+		this.setRatio(entity.getRatio()!= null ? entity.getRatio().toString(): null);
+		this.setRatioName(entity.getRatio()!= null ? entity.getRatio().getName(): null);
+		this.setRcMode(entity.getRcMode()!= null ? entity.getRcMode().toString(): null);
+		this.setRcModeName(entity.getRcMode()!= null ? entity.getRcMode().getName(): null);
 		this.setMaxBitrate(entity.getMaxBitrate());
 		return this;
 	}

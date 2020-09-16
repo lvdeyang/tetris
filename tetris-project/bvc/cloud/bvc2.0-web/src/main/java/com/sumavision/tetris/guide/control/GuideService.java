@@ -45,8 +45,8 @@ public class GuideService {
 	@Autowired
 	private AudioParametersDAO audioParametersDAO;
 	
-	@Autowired
-	GuidePlayService guidePlayService;
+//	@Autowired
+//	GuidePlayService guidePlayService;
 	
 	public GuidePO add(String taskName){
 		GuidePO guidePO = new GuidePO();
