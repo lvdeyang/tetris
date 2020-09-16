@@ -22,11 +22,16 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 	
 	private String codingFormatName;
 	
-	/** 采样率 */
-	private String sampleFmt;
+	/** 声道布局 */
+	private String channelLayout;
+	
+	private String channelLayoutName;
 	
 	/** 码率 */
 	private String bitrate;
+	
+	/** 采样率 */
+	private String sampleRate;
 	
 	/** 编码类型 */
 	private String codingType;
@@ -59,13 +64,31 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 		this.codingFormatName = codingFormatName;
 		return this;
 	}
-
-	public String getSampleFmt() {
-		return sampleFmt;
+	
+	public String getChannelLayout() {
+		return channelLayout;
 	}
 
-	public AudioParametersVO setSampleFmt(String sampleFmt) {
-		this.sampleFmt = sampleFmt;
+	public AudioParametersVO setChannelLayout(String channelLayout) {
+		this.channelLayout = channelLayout;
+		return this;
+	}
+
+	public String getChannelLayoutName() {
+		return channelLayoutName;
+	}
+
+	public AudioParametersVO setChannelLayoutName(String channelLayoutName) {
+		this.channelLayoutName = channelLayoutName;
+		return this;
+	}
+
+	public String getSampleRate() {
+		return sampleRate;
+	}
+
+	public AudioParametersVO setSampleRate(String sampleRate) {
+		this.sampleRate = sampleRate;
 		return this;
 	}
 
@@ -102,8 +125,10 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 		this.setGuideId(entity.getGuideId());
 		this.setCodingFormat(entity.getCodingFormat()!= null ? entity.getCodingFormat().toString(): null);
 		this.setCodingFormatName(entity.getCodingFormat()!= null ? entity.getCodingFormat().getName(): null);
-		this.setSampleFmt(entity.getSampleFmt());
+		this.setChannelLayout(entity.getChannelLayout()!= null ? entity.getChannelLayout().toString(): null);
+		this.setChannelLayoutName(entity.getChannelLayout()!= null ? entity.getChannelLayout().getName(): null);
 		this.setBitrate(entity.getBitrate());
+		this.setSampleRate(entity.getSampleRate());
 		this.setCodingType(entity.getCodingType()!= null ? entity.getCodingType().toString(): null);
 		this.setCodingTypeName(entity.getCodingType()!= null ? entity.getCodingType().getName(): null);
 		return this;

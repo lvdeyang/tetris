@@ -106,19 +106,21 @@ public class OutputSettingController {
 	public Object editVideo(
 			Long id,
 			String codingObject,
-			String profile,
-			Long fps,
+			String fps,
 			Long bitrate,
 			String resolution,
+			String ratio,
+			String rcMode,
 			Long maxBitrate,
 			HttpServletRequest request) throws Exception{
 		return outputSettingService.editVideo(
 				id,
 				codingObject,
-				profile,
 				fps,
 				bitrate,
 				resolution,
+				ratio,
+				rcMode,
 				maxBitrate);
 		
 	}
@@ -145,15 +147,17 @@ public class OutputSettingController {
 	public Object editAudio(
 			Long id,
 			String codingFormat,
-			String sampleFmt,
+			String channelLayout,
 			String bitrate,
+			String sampleRate,
 			String codingType,
 			HttpServletRequest request) throws Exception{
 		return outputSettingService.editAudio(
 				id,
 				codingFormat,
-				sampleFmt,
+				channelLayout,
 				bitrate,
+				sampleRate,
 				codingType);
 		
 	}

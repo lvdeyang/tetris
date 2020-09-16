@@ -46,19 +46,23 @@ public class OutputSettingService {
 	public VideoParametersPO editVideo(
 			Long id,
 			String codingObject,
-			String profile,
-			Long fps,
+			String fps,
 			Long bitrate,
 			String resolution,
+			String ratio,
+			String rcMode,
 			Long maxBitrate) throws Exception{
 		VideoParametersPO videoParametersPO = videoParametersDAO.findOne(id);
 		CodingObject object = CodingObject.fromName(codingObject);
 		videoParametersPO.setCodingObject(object);
-		videoParametersPO.setProfile(profile);
 		videoParametersPO.setFps(fps);
 		videoParametersPO.setBitrate(bitrate);
-		Resolution r = Resolution.fromName(resolution);
-		videoParametersPO.setResolution(r);
+		Resolution re = Resolution.fromName(resolution);
+		videoParametersPO.setResolution(re);
+		Ratio ra = Ratio.fromName(ratio);
+		videoParametersPO.setRatio(ra);
+		RcMode rc = RcMode.fromName(rcMode);
+		videoParametersPO.setRcMode(rc);
 		videoParametersPO.setMaxBitrate(maxBitrate);
 		return videoParametersDAO.save(videoParametersPO);		
 	}
@@ -66,14 +70,17 @@ public class OutputSettingService {
 	public AudioParametersPO editAudio(
 			Long id,
 			String codingFormat,
-			String sampleFmt,
+			String channelLayout,
 			String bitrate,
+			String sampleRate,
 			String codingType) throws Exception{
 		AudioParametersPO audioParametersPO = audioParametersDAO.findOne(id);
 		CodingFormat format = CodingFormat.fromName(codingFormat);
 		audioParametersPO.setCodingFormat(format);
-		audioParametersPO.setSampleFmt(sampleFmt);
+		ChannelLayout channel = ChannelLayout.fromName(channelLayout);
+		audioParametersPO.setChannelLayout(channel);
 		audioParametersPO.setBitrate(bitrate);
+		audioParametersPO.setSampleRate(sampleRate);
 		CodingType type = CodingType.fromName(codingType);
 		audioParametersPO.setCodingType(type);
 		return audioParametersDAO.save(audioParametersPO);

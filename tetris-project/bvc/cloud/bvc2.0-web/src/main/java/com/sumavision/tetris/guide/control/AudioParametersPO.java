@@ -30,11 +30,14 @@ public class AudioParametersPO extends AbstractBasePO{
 	/** 编码格式 */
 	private CodingFormat codingFormat = CodingFormat.ACC;
 	
-	/** 采样率 */
-	private String sampleFmt = "s16";
+	/** 声道布局 */
+	private ChannelLayout channelLayout = ChannelLayout.MONO;
 	
 	/** 码率 */
 	private String bitrate = "128";
+	
+	/** 采样率 */
+	private String sampleRate = "44.1";
 	
 	/** 编码类型 */
 	private CodingType codingType = CodingType.MPEG4_ACC_LC;
@@ -58,13 +61,23 @@ public class AudioParametersPO extends AbstractBasePO{
 		this.codingFormat = codingFormat;
 	}
 
-	@Column(name = "SAMPLE_FMT")
-	public String getSampleFmt() {
-		return sampleFmt;
+	@Column(name = "CHANNEL_LAYOUT")
+	@Enumerated(value = EnumType.STRING)
+	public ChannelLayout getChannelLayout() {
+		return channelLayout;
 	}
 
-	public void setSampleFmt(String sampleFmt) {
-		this.sampleFmt = sampleFmt;
+	public void setChannelLayout(ChannelLayout channelLayout) {
+		this.channelLayout = channelLayout;
+	}
+
+	@Column(name = "SAMPLE_RATE")
+	public String getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(String sampleRate) {
+		this.sampleRate = sampleRate;
 	}
 
 	@Column(name = "BITRATE")
