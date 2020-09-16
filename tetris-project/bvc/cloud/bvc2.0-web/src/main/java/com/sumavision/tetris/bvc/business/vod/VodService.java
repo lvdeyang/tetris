@@ -12,16 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
@@ -30,11 +27,10 @@ import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
+import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.device.command.exception.PlayerIsBeingUsedException;
-import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -44,7 +40,6 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
-import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
@@ -59,9 +54,10 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
-import com.sumavision.tetris.bvc.business.bo.MemberTerminalBO;
+import com.sumavision.tetris.bvc.business.bo.BusinessReturnBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -79,9 +75,7 @@ import com.sumavision.tetris.bvc.business.group.GroupService;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaExecuteService;
-import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
@@ -90,7 +84,6 @@ import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
-import com.sumavision.tetris.bvc.page.PageTaskBO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
@@ -99,7 +92,8 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -209,6 +203,12 @@ public class VodService {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	/** 重构点播文件 */
 	@Transactional(rollbackFor = Exception.class)
@@ -488,6 +488,19 @@ public class VodService {
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(dstMember.getOriginId(), dstMember.getTerminalId(), GroupMemberType.MEMBER_USER);
 			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
 			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
+			
+//			----------------------测试
+//			BusinessReturnBO businessReturnBO=businessReturnService.getAndRemove();
+//			executeBusiness.execute(businessReturnBO.getLogic(), "最终下发命令执行");
+//			
+//			List<Long> consumeIds = new ArrayList<Long>();
+//			List<MessageSendCacheBO> caches=businessReturnBO.getWebsocketCaches();
+//			for(MessageSendCacheBO cache : caches){
+//				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+//				consumeIds.add(ws.getId());
+//				}
+//			websocketMessageService.consumeAll(consumeIds);
+//			----------------------测试结束
 			
 			//删除这些PO
 			groupDao.delete(group);

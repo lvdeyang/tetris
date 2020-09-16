@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum CodingFormat {
 	
-	ACC("acc"),
+	AAC("aac"),
 	MP2("mp2"),
 	MP3("mp3"),
 	DOLBY("dolby"),

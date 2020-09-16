@@ -47,8 +47,8 @@ public class SourceService {
 	
 	public Object cut(
 			Long id, 
-			Long sourceNumber) throws Exception{
-		guidePlayService.exchange(id, sourceNumber);
+			Long index) throws Exception{
+		guidePlayService.exchange(id, index);
 		return null;
 	}
 }
