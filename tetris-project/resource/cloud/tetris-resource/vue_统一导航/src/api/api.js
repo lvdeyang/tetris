@@ -33,9 +33,9 @@ let axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(function (config) {
   var resourceToken = sessionStorage.getItem('token');
   var bvcToken = localStorage.getItem('tetris-001');
-  config.headers['tetris-001'] = resourceToken?resourceToken:bvcToken;
+  config.headers['tetris-001'] = resourceToken ? resourceToken : bvcToken;
   //config.headers['tetris-002'] = '';
-  config.headers.Authorization = resourceToken?resourceToken:bvcToken;
+  config.headers.Authorization = resourceToken ? resourceToken : bvcToken;
   return config
 }, function (err) {
   return Promise.reject(err)
@@ -44,10 +44,10 @@ axiosInstance.interceptors.request.use(function (config) {
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   function (response) {
-    if(response.data.status === 408) {
+    if (response.data.status === 408) {
       alert('超时，请重新登录!');
       window.location.href = `${basePath}/web/app/login/login.html`;
-    }else{
+    } else {
       return response
     }
 
@@ -59,104 +59,279 @@ axiosInstance.interceptors.response.use(
     }
   })
 
-export const getLoginUserName = params => { return axiosInstance.post(`${basePath}/user/getLoginUserName`, qs.stringify(params)).then(res => res.data) }
+export const getLoginUserName = params => {
+  return axiosInstance.post(`${basePath}/user/getLoginUserName`, qs.stringify(params)).then(res => res.data)
+}
 
-export const getDeviceModels = params => { return axiosInstance.post(`${basePath}/template/getDeviceModels`, qs.stringify(params)).then(res => res.data) }
-export const getTemplates = params => { return axiosInstance.post(`${basePath}/template/abilityTemplates`, qs.stringify(params)).then(res => res.data) }
-export const getTemplateTree = params => { return axiosInstance.post(`${basePath}/template/tree`, qs.stringify(params)).then(res => res.data) }
-export const deleteTemplate = params => { return axiosInstance.post(`${basePath}/template/delete`, qs.stringify(params)).then(res => res.data) }
-export const getAllUsers = params => { return axiosInstance.post(`${basePath}/user/getAllUser`, qs.stringify(params)).then(res => res.data) }
-export const getBundles = params => { return axiosInstance.post(`${basePath}/bundle/query`, qs.stringify(params)).then(res => res.data) }
-export const deleteBundle = params => { return axiosInstance.post(`${basePath}/bundle/delete`, qs.stringify(params)).then(res => res.data) }
-export const addBundle = params => { return axiosInstance.post(`${basePath}/bundle/add`, qs.stringify(params)).then(res => res.data) }
-export const queryBundleExtraInfo = params => { return axiosInstance.post(`${basePath}/bundle/queryExtraInfo`, qs.stringify(params)).then(res => res.data) }
-export const modifyBundleExtraInfo = params => { return axiosInstance.post(`${basePath}/bundle/modifyExtraInfo`, qs.stringify(params)).then(res => res.data) }
-export const getBundleChannels = params => { return axiosInstance.post(`${basePath}/bundle/getBundleChannels`, qs.stringify(params)).then(res => res.data) }
-export const getBundleAbility = params => { return axiosInstance.post(`${basePath}/ability/getBundleAbility`, qs.stringify(params)).then(res => res.data) }
-export const configBundle = params => { return axiosInstance.post(`${basePath}/ability/configBundle`, qs.stringify(params)).then(res => res.data) }
+export const getDeviceModels = params => {
+  return axiosInstance.post(`${basePath}/template/getDeviceModels`, qs.stringify(params)).then(res => res.data)
+}
+export const getTemplates = params => {
+  return axiosInstance.post(`${basePath}/template/abilityTemplates`, qs.stringify(params)).then(res => res.data)
+}
+export const getTemplateTree = params => {
+  return axiosInstance.post(`${basePath}/template/tree`, qs.stringify(params)).then(res => res.data)
+}
+export const deleteTemplate = params => {
+  return axiosInstance.post(`${basePath}/template/delete`, qs.stringify(params)).then(res => res.data)
+}
+export const getAllUsers = params => {
+  return axiosInstance.post(`${basePath}/user/getAllUser`, qs.stringify(params)).then(res => res.data)
+}
+export const getBundles = params => {
+  return axiosInstance.post(`${basePath}/bundle/query`, qs.stringify(params)).then(res => res.data)
+}
+export const deleteBundle = params => {
+  return axiosInstance.post(`${basePath}/bundle/delete`, qs.stringify(params)).then(res => res.data)
+}
+export const addBundle = params => {
+  return axiosInstance.post(`${basePath}/bundle/add`, qs.stringify(params)).then(res => res.data)
+}
+export const queryBundleExtraInfo = params => {
+  return axiosInstance.post(`${basePath}/bundle/queryExtraInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const modifyBundleExtraInfo = params => {
+  return axiosInstance.post(`${basePath}/bundle/modifyExtraInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const getBundleChannels = params => {
+  return axiosInstance.post(`${basePath}/bundle/getBundleChannels`, qs.stringify(params)).then(res => res.data)
+}
+export const getBundleAbility = params => {
+  return axiosInstance.post(`${basePath}/ability/getBundleAbility`, qs.stringify(params)).then(res => res.data)
+}
+export const configBundle = params => {
+  return axiosInstance.post(`${basePath}/ability/configBundle`, qs.stringify(params)).then(res => res.data)
+}
 
-export const getBundlesOfRole = params => { return axiosInstance.post(`${basePath}/resource/queryBundlesOfRole`, qs.stringify(params)).then(res => res.data) }
-export const getUsersOfRole = params => { return axiosInstance.post(`${basePath}/resource/queryUsersOfRole`, qs.stringify(params)).then(res => res.data) }
-export const getVirtualResourcesOfRole = params => { return axiosInstance.post(`${basePath}/resource/queryVirtualResourcesOfRole`, qs.stringify(params)).then(res => res.data) }
-export const submitBundlePrivilege = params => { return axiosInstance.post(`${basePath}/resource/submitBundlePrivilege`, qs.stringify(params)).then(res => res.data) }
-export const submitUserresPrivilege = params => { return axiosInstance.post(`${basePath}/resource/submitUserresPrivilege`, qs.stringify(params)).then(res => res.data) }
-export const submitVirtualResourcePrivilege = params => { return axiosInstance.post(`${basePath}/resource/submitVirtualResourcePrivilege`, qs.stringify(params)).then(res => res.data) }
-export const getBundleDetailInfo = params => { return axiosInstance.post(`${basePath}/bundle/queryExtraInfo`, qs.stringify(params)).then(res => res.data) }
-export const getAllRoles = params => { return axiosInstance.post(`${basePath}/user/getAllRoles`, qs.stringify(params)).then(res => res.data) }
-export const getVirtualResourceDetailInfo = params => { return axiosInstance.post(`${basePath}/resource/queryVirtualResourceInfo`, qs.stringify(params)).then(res => res.data) }
+export const getBundlesOfRole = params => {
+  return axiosInstance.post(`${basePath}/resource/queryBundlesOfRole`, qs.stringify(params)).then(res => res.data)
+}
+export const getUsersOfRole = params => {
+  return axiosInstance.post(`${basePath}/resource/queryUsersOfRole`, qs.stringify(params)).then(res => res.data)
+}
+export const getVirtualResourcesOfRole = params => {
+  return axiosInstance.post(`${basePath}/resource/queryVirtualResourcesOfRole`, qs.stringify(params)).then(res => res.data)
+}
+export const submitBundlePrivilege = params => {
+  return axiosInstance.post(`${basePath}/resource/submitBundlePrivilege`, qs.stringify(params)).then(res => res.data)
+}
+export const submitUserresPrivilege = params => {
+  return axiosInstance.post(`${basePath}/resource/submitUserresPrivilege`, qs.stringify(params)).then(res => res.data)
+}
+export const submitVirtualResourcePrivilege = params => {
+  return axiosInstance.post(`${basePath}/resource/submitVirtualResourcePrivilege`, qs.stringify(params)).then(res => res.data)
+}
+export const getBundleDetailInfo = params => {
+  return axiosInstance.post(`${basePath}/bundle/queryExtraInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const getAllRoles = params => {
+  return axiosInstance.post(`${basePath}/user/getAllRoles`, qs.stringify(params)).then(res => res.data)
+}
+export const getVirtualResourceDetailInfo = params => {
+  return axiosInstance.post(`${basePath}/resource/queryVirtualResourceInfo`, qs.stringify(params)).then(res => res.data)
+}
 
-export const getNodes = params => { return axiosInstance.post(`${basePath}/layernode/query`, qs.stringify(params)).then(res => res.data) }
-export const deleteNodes = params => { return axiosInstance.post(`${basePath}/layernode/delete`, qs.stringify(params)).then(res => res.data) }
-export const saveNode = params => { return axiosInstance.post(`${basePath}/layernode/save`, qs.stringify(params)).then(res => res.data) }
-export const updateNode = params => { return axiosInstance.post(`${basePath}/layernode/update`, qs.stringify(params)).then(res => res.data) }
-export const getNodeById = params => { return axiosInstance.post(`${basePath}/layernode/getNode`, qs.stringify(params)).then(res => res.data) }
+export const getNodes = params => {
+  return axiosInstance.post(`${basePath}/layernode/query`, qs.stringify(params)).then(res => res.data)
+}
+export const deleteNodes = params => {
+  return axiosInstance.post(`${basePath}/layernode/delete`, qs.stringify(params)).then(res => res.data)
+}
+export const saveNode = params => {
+  return axiosInstance.post(`${basePath}/layernode/save`, qs.stringify(params)).then(res => res.data)
+}
+export const updateNode = params => {
+  return axiosInstance.post(`${basePath}/layernode/update`, qs.stringify(params)).then(res => res.data)
+}
+export const getNodeById = params => {
+  return axiosInstance.post(`${basePath}/layernode/getNode`, qs.stringify(params)).then(res => res.data)
+}
 
-export const queryFolderTree = params => {return axiosInstance.post(`${basePath}/folder/query/tree`, qs.stringify(params)).then(res => res.data)}
-export const addFolder = params => { return axiosInstance.post(`${basePath}/folder/add`, qs.stringify(params)).then(res => res.data) }
-export const deleteFolder = params => { return axiosInstance.post(`${basePath}/folder/delete`, qs.stringify(params)).then(res => res.data) }
-export const initFolderTree = params => { return axiosInstance.post(`${basePath}/folder/initTree`, qs.stringify(params)).then(res => res.data) }
-export const changeFolderIndex = params => { return axiosInstance.post(`${basePath}/folder/changeFolderIndex`, qs.stringify(params)).then(res => res.data) }
-export const queryTreeChildren = params => { return axiosInstance.post(`${basePath}/folder/queryTreeChildrenByParentId`, qs.stringify(params)).then(res => res.data) }
-export const initFolderTreeWithOutMember = params => { return axiosInstance.post(`${basePath}/folder/initTreeWithOutMember`, qs.stringify(params)).then(res => res.data) }
-export const modifyFolder = params => { return axiosInstance.post(`${basePath}/folder/modify`, qs.stringify(params)).then(res => res.data) }
-export const setFolderOfBundles = params => { return axiosInstance.post(`${basePath}/folder/setFolderOfBundles`, qs.stringify(params)).then(res => res.data) }
-export const resetFolderOfBundles = params => { return axiosInstance.post(`${basePath}/folder/resetFolderOfBundles`, qs.stringify(params)).then(res => res.data) }
-export const queryBundlesWithoutFolder = params => { return axiosInstance.post(`${basePath}/folder/queryBundlesWithoutFolder`, qs.stringify(params)).then(res => res.data) }
-export const queryUsersWithoutFolder = params => { return axiosInstance.post(`${basePath}/folder/queryUsersWithoutFolder`, qs.stringify(params)).then(res => res.data) }
-export const setFolderToUsers = params => { return axiosInstance.post(`${basePath}/folder/setFolderToUsers`, qs.stringify(params)).then(res => res.data) }
-export const resetFolderOfUsers = params => { return axiosInstance.post(`${basePath}/folder/resetFolderOfUsers`, qs.stringify(params)).then(res => res.data) }
-export const queryRootOptions = params => { return axiosInstance.post(`${basePath}/folder/queryRootOptions`, qs.stringify(params)).then(res => res.data) }
-export const setRoot = params => { return axiosInstance.post(`${basePath}/folder/setRoot`, qs.stringify(params)).then(res => res.data) }
-export const resetRootNode = params => { return axiosInstance.post(`${basePath}/folder/resetRootNode`, qs.stringify(params)).then(res => res.data) }
-export const releaseRoot=params=>{return axiosInstance.post(`${basePath}/folder/releaseRootNode`, qs.stringify(params)).then(res => res.data)}
-export const changeNodePosition = params => { return axiosInstance.post(`${basePath}/folder/changeNodePosition`, qs.stringify(params)).then(res => res.data) }
+export const queryFolderTree = params => {
+  return axiosInstance.post(`${basePath}/folder/query/tree`, qs.stringify(params)).then(res => res.data)
+}
+export const addFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/add`, qs.stringify(params)).then(res => res.data)
+}
+export const deleteFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/delete`, qs.stringify(params)).then(res => res.data)
+}
+export const initFolderTree = params => {
+  return axiosInstance.post(`${basePath}/folder/initTree`, qs.stringify(params)).then(res => res.data)
+}
+export const changeFolderIndex = params => {
+  return axiosInstance.post(`${basePath}/folder/changeFolderIndex`, qs.stringify(params)).then(res => res.data)
+}
+export const queryTreeChildren = params => {
+  return axiosInstance.post(`${basePath}/folder/queryTreeChildrenByParentId`, qs.stringify(params)).then(res => res.data)
+}
+export const initFolderTreeWithOutMember = params => {
+  return axiosInstance.post(`${basePath}/folder/initTreeWithOutMember`, qs.stringify(params)).then(res => res.data)
+}
+export const modifyFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/modify`, qs.stringify(params)).then(res => res.data)
+}
+export const setFolderOfBundles = params => {
+  return axiosInstance.post(`${basePath}/folder/setFolderOfBundles`, qs.stringify(params)).then(res => res.data)
+}
+export const resetFolderOfBundles = params => {
+  return axiosInstance.post(`${basePath}/folder/resetFolderOfBundles`, qs.stringify(params)).then(res => res.data)
+}
+export const queryBundlesWithoutFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/queryBundlesWithoutFolder`, qs.stringify(params)).then(res => res.data)
+}
+export const queryUsersWithoutFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/queryUsersWithoutFolder`, qs.stringify(params)).then(res => res.data)
+}
+export const setFolderToUsers = params => {
+  return axiosInstance.post(`${basePath}/folder/setFolderToUsers`, qs.stringify(params)).then(res => res.data)
+}
+export const resetFolderOfUsers = params => {
+  return axiosInstance.post(`${basePath}/folder/resetFolderOfUsers`, qs.stringify(params)).then(res => res.data)
+}
+export const queryRootOptions = params => {
+  return axiosInstance.post(`${basePath}/folder/queryRootOptions`, qs.stringify(params)).then(res => res.data)
+}
+export const setRoot = params => {
+  return axiosInstance.post(`${basePath}/folder/setRoot`, qs.stringify(params)).then(res => res.data)
+}
+export const resetRootNode = params => {
+  return axiosInstance.post(`${basePath}/folder/resetRootNode`, qs.stringify(params)).then(res => res.data)
+}
+export const releaseRoot = params => {
+  return axiosInstance.post(`${basePath}/folder/releaseRootNode`, qs.stringify(params)).then(res => res.data)
+}
+export const changeNodePosition = params => {
+  return axiosInstance.post(`${basePath}/folder/changeNodePosition`, qs.stringify(params)).then(res => res.data)
+}
 
-export const logoutBundle = params => { return axiosInstance.post(`${basePath}/bundle/logout`, qs.stringify(params)).then(res => res.data) }
-export const clearBundle = params => { return axiosInstance.post(`${basePath}/bundle/clear`, qs.stringify(params)).then(res => res.data) }
-export const setAccessLayer = params => { return axiosInstance.post(`${basePath}/bundle/setAccessLayer`, qs.stringify(params)).then(res => res.data) }
+export const logoutBundle = params => {
+  return axiosInstance.post(`${basePath}/bundle/logout`, qs.stringify(params)).then(res => res.data)
+}
+export const clearBundle = params => {
+  return axiosInstance.post(`${basePath}/bundle/clear`, qs.stringify(params)).then(res => res.data)
+}
+export const setAccessLayer = params => {
+  return axiosInstance.post(`${basePath}/bundle/setAccessLayer`, qs.stringify(params)).then(res => res.data)
+}
 
-export const syncLdap = params => { return axiosInstance.post(`${basePath}/bundle/ldapSync`, qs.stringify(params)).then(res => res.data) }
+export const syncLdap = params => {
+  return axiosInstance.post(`${basePath}/bundle/ldapSync`, qs.stringify(params)).then(res => res.data)
+}
 
-export const syncFolderToLdap = params => { return axiosInstance.post(`${basePath}/folder/syncToLdap`, qs.stringify(params)).then(res => res.data) }
-export const syncFolderFromLdap = params => { return axiosInstance.post(`${basePath}/folder/syncFromLdap`, qs.stringify(params)).then(res => res.data) }
-export const cleanupFolderLdap = params => { return axiosInstance.post(`${basePath}/folder/cleanUpLdap`, qs.stringify(params)).then(res => res.data) }
+export const syncFolderToLdap = params => {
+  return axiosInstance.post(`${basePath}/folder/syncToLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const syncFolderFromLdap = params => {
+  return axiosInstance.post(`${basePath}/folder/syncFromLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const cleanupFolderLdap = params => {
+  return axiosInstance.post(`${basePath}/folder/cleanUpLdap`, qs.stringify(params)).then(res => res.data)
+}
 
-export const querySerInfo = params => { return axiosInstance.post(`${basePath}/serInfo/querySerInfo`, qs.stringify(params)).then(res => res.data) }
-export const querySerNode = params => { return axiosInstance.post(`${basePath}/serInfo/querySerNode`, qs.stringify(params)).then(res => res.data) }
-export const addSerInfo = params => { return axiosInstance.post(`${basePath}/serInfo/addSerInfo`, qs.stringify(params)).then(res => res.data) }
-export const addSerNode = params => { return axiosInstance.post(`${basePath}/serInfo/addSerNode`, qs.stringify(params)).then(res => res.data) }
-export const modifySerInfo = params => { return axiosInstance.post(`${basePath}/serInfo/modifySerInfo`, qs.stringify(params)).then(res => res.data) }
-export const modifySerNode = params => { return axiosInstance.post(`${basePath}/serInfo/modifySerNode`, qs.stringify(params)).then(res => res.data) }
-export const delSerInfo = params => { return axiosInstance.post(`${basePath}/serInfo/delSerInfo`, qs.stringify(params)).then(res => res.data) }
-export const delSerNode = params => { return axiosInstance.post(`${basePath}/serInfo/delSerNode`, qs.stringify(params)).then(res => res.data) }
-export const cleanUpSerInfo = params => { return axiosInstance.post(`${basePath}/serInfo/cleanUpSerInfo`, qs.stringify(params)).then(res => res.data) }
-export const cleanUpSerNode = params => { return axiosInstance.post(`${basePath}/serInfo/cleanUpSerNode`, qs.stringify(params)).then(res => res.data) }
+export const querySerInfo = params => {
+  return axiosInstance.post(`${basePath}/serInfo/querySerInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const querySerNode = params => {
+  return axiosInstance.post(`${basePath}/serInfo/querySerNode`, qs.stringify(params)).then(res => res.data)
+}
+export const addSerInfo = params => {
+  return axiosInstance.post(`${basePath}/serInfo/addSerInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const addSerNode = params => {
+  return axiosInstance.post(`${basePath}/serInfo/addSerNode`, qs.stringify(params)).then(res => res.data)
+}
+export const modifySerInfo = params => {
+  return axiosInstance.post(`${basePath}/serInfo/modifySerInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const modifySerNode = params => {
+  return axiosInstance.post(`${basePath}/serInfo/modifySerNode`, qs.stringify(params)).then(res => res.data)
+}
+export const delSerInfo = params => {
+  return axiosInstance.post(`${basePath}/serInfo/delSerInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const delSerNode = params => {
+  return axiosInstance.post(`${basePath}/serInfo/delSerNode`, qs.stringify(params)).then(res => res.data)
+}
+export const cleanUpSerInfo = params => {
+  return axiosInstance.post(`${basePath}/serInfo/cleanUpSerInfo`, qs.stringify(params)).then(res => res.data)
+}
+export const cleanUpSerNode = params => {
+  return axiosInstance.post(`${basePath}/serInfo/cleanUpSerNode`, qs.stringify(params)).then(res => res.data)
+}
 
-export const syncSerNodeFromLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerNodeFromLdap`, qs.stringify(params)).then(res => res.data) }
-export const syncSerNodeToLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerNodeToLdap`, qs.stringify(params)).then(res => res.data) }
-export const syncSerInfoFromLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoFromLdap`, qs.stringify(params)).then(res => res.data) }
-export const syncSerInfoToLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoToLdap`, qs.stringify(params)).then(res => res.data) }
-export const queryFatherNodeOptions = params => { return axiosInstance.post(`${basePath}/serInfo/queryFatherNodeOptions`, qs.stringify(params)).then(res => res.data) }
-export const ldapBackUp = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/backup`, qs.stringify(params)).then(res => res.data) }
-export const ldapResume = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/resume`, qs.stringify(params)).then(res => res.data) }
+export const syncSerNodeFromLdap = params => {
+  return axiosInstance.post(`${basePath}/serInfo/syncSerNodeFromLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const syncSerNodeToLdap = params => {
+  return axiosInstance.post(`${basePath}/serInfo/syncSerNodeToLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const syncSerInfoFromLdap = params => {
+  return axiosInstance.post(`${basePath}/serInfo/syncSerInfoFromLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const syncSerInfoToLdap = params => {
+  return axiosInstance.post(`${basePath}/serInfo/syncSerInfoToLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const queryFatherNodeOptions = params => {
+  return axiosInstance.post(`${basePath}/serInfo/queryFatherNodeOptions`, qs.stringify(params)).then(res => res.data)
+}
+export const ldapBackUp = params => {
+  return axiosInstance.post(`${basePath}/serInfo/ldap/backup`, qs.stringify(params)).then(res => res.data)
+}
+export const ldapResume = params => {
+  return axiosInstance.post(`${basePath}/serInfo/ldap/resume`, qs.stringify(params)).then(res => res.data)
+}
 
-export const syncEquipInfoFromLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncFromLdap`, qs.stringify(params)).then(res => res.data) }
-export const syncEquipInfToLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncToLdap`, qs.stringify(params)).then(res => res.data) }
-export const cleanUpEquipInfo = params => { return axiosInstance.post(`${basePath}/bundle/cleanUpLdap`, qs.stringify(params)).then(res => res.data) }
+export const syncEquipInfoFromLdap = params => {
+  return axiosInstance.post(`${basePath}/bundle/syncFromLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const syncEquipInfToLdap = params => {
+  return axiosInstance.post(`${basePath}/bundle/syncToLdap`, qs.stringify(params)).then(res => res.data)
+}
+export const cleanUpEquipInfo = params => {
+  return axiosInstance.post(`${basePath}/bundle/cleanUpLdap`, qs.stringify(params)).then(res => res.data)
+}
 
-export const queryUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query`, qs.stringify(params)).then(res => res.data) }
-export const setUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/bind`, qs.stringify(params)).then(res => res.data) }
-export const queryEncoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/encoders`, qs.stringify(params)).then(res => res.data) }
-export const queryDecoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/decoders`, qs.stringify(params)).then(res => res.data) }
-export const unbindUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/unbind`, qs.stringify(params)).then(res => res.data) }
+export const queryUserBindBundles = params => {
+  return axiosInstance.post(`${basePath}/user/bind/bundle/query`, qs.stringify(params)).then(res => res.data)
+}
+export const setUserBindBundles = params => {
+  return axiosInstance.post(`${basePath}/user/bind/bundle/bind`, qs.stringify(params)).then(res => res.data)
+}
+export const queryEncoders = params => {
+  return axiosInstance.post(`${basePath}/user/bind/bundle/query/encoders`, qs.stringify(params)).then(res => res.data)
+}
+export const queryDecoders = params => {
+  return axiosInstance.post(`${basePath}/user/bind/bundle/query/decoders`, qs.stringify(params)).then(res => res.data)
+}
+export const unbindUserBindBundles = params => {
+  return axiosInstance.post(`${basePath}/user/bind/bundle/unbind`, qs.stringify(params)).then(res => res.data)
+}
 
-export const logout = params => { return axiosInstance.post(`${basePath}/do/logout`, qs.stringify(params)).then(res => res.data) }
+export const logout = params => {
+  return axiosInstance.post(`${basePath}/do/logout`, qs.stringify(params)).then(res => res.data)
+}
 
-export const exportFolder = params => {return axiosInstance.post(`${basePath}/folder/export`, params,{responseType:'blob'}); };
-export const exportBundle = params => {return axiosInstance.post(`${basePath}/bundle/export`, params,{responseType:'blob'}); };
-export const exportUser = params => {return axiosInstance.post(`${basePath}/folder/user/export`, params,{responseType:'blob'}); };
+export const exportFolder = params => {
+  return axiosInstance.post(`${basePath}/folder/export`, params, {
+    responseType: 'blob'
+  });
+};
+export const exportBundle = params => {
+  return axiosInstance.post(`${basePath}/bundle/export`, params, {
+    responseType: 'blob'
+  });
+};
+export const exportUser = params => {
+  return axiosInstance.post(`${basePath}/folder/user/export`, params, {
+    responseType: 'blob'
+  });
+};
 
-export const syncUser = params => { return axiosInstance.post(`${basePath}/bundle/syncUser`, qs.stringify(params)).then(res => res.data) }
+export const syncUser = params => {
+  return axiosInstance.post(`${basePath}/bundle/syncUser`, qs.stringify(params)).then(res => res.data)
+}
 
-
-
+export const getRecordDatas = params => {
+  return axiosInstance.get('../../static/data/record.json', qs.stringify(params)).then(res => res.data)
+}
