@@ -62,8 +62,8 @@ require.config({
     'page-personal': window.APPPATH + 'personal/page-personal',
     'page-data-warehouse': window.APPPATH + 'data-warehouse/page-data-warehouse',
 
-    'page-liangwu-user': window.APPPATH + 'liangwu-user/page-business-user',
-    'page-liangwu-role': window.APPPATH + 'liangwu-role/page-business-role',
+    'page-liangwu-user': window.APPPATH + 'liangwu-user/page-liangwu-user',
+    'page-liangwu-role': window.APPPATH + 'liangwu-role/page-liangwu-role',
   },
   shim: {
     'vue': {

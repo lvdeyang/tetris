@@ -2,8 +2,8 @@
  * Created by lzp on 2019/5/29.
  */
 define([
-  'text!' + window.APPPATH + 'liangwu-user/page-business-user.html',
-  window.APPPATH + 'liangwu-user/page-business-user.i18n',
+  'text!' + window.APPPATH + 'liangwu-user/page-liangwu-user.html',
+  window.APPPATH + 'liangwu-user/page-liangwu-user.i18n',
   'config',
   'restfull',
   'jquery',
@@ -15,7 +15,7 @@ define([
   'mi-sub-title',
   'mi-user-dialog',
   'mi-upload-dialog',
-  'css!' + window.APPPATH + 'liangwu-user/page-business-user.css'
+  'css!' + window.APPPATH + 'liangwu-user/page-liangwu-user.css'
 ], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
 
   var locale = context.getProp('locale');
@@ -131,7 +131,7 @@ define([
         gotoBindBusinessRole: function (scope) {
           var slef = this;
           var row = scope.row;
-          window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/liangwu';
+          window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
         },
         load: function (currentPage) {
           var self = this;
