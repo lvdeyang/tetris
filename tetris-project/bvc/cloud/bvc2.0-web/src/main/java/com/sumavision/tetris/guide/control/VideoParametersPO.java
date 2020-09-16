@@ -39,10 +39,10 @@ public class VideoParametersPO extends AbstractBasePO{
 	private Long fps = 25L;
 	
 	/** 码率 */
-	private Long bitrate = 1500l;
+	private Long bitrate = 1500L;
 	
 	/** 分辨率 */
-	private String resolution = "1920x1080";
+	private Resolution resolution = Resolution._1920_1080;
 	
 	/** 最大码率 */
 	private Long maxBitrate = 1500L;
@@ -94,11 +94,12 @@ public class VideoParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "RESOLUTION")
-	public String getResolution() {
+	@Enumerated(EnumType.STRING)
+	public Resolution getResolution() {
 		return resolution;
 	}
 
-	public void setResolution(String resolution) {
+	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
 	}
 

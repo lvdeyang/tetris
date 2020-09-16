@@ -71,12 +71,91 @@ public class OutputSettingController {
 			Long id,
 			String outputProtocol,
 			String outputAddress,
+			String rateCtrl,
+			Long bitrate,
 			HttpServletRequest request) throws Exception{
 		return outputSettingService.edit(
 				id,
 				outputProtocol,
-				outputAddress
+				outputAddress,
+				rateCtrl,
+				bitrate
 				);
+	}
+
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月15日 下午2:09:00
+	 * @param id
+	 * @param codingObject
+	 * @param profile
+	 * @param fps
+	 * @param bitrate
+	 * @param resolution
+	 * @param maxBitrate
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editVideo")
+	public Object editVideo(
+			Long id,
+			String codingObject,
+			String profile,
+			Long fps,
+			Long bitrate,
+			String resolution,
+			Long maxBitrate,
+			HttpServletRequest request) throws Exception{
+		return outputSettingService.editVideo(
+				id,
+				codingObject,
+				profile,
+				fps,
+				bitrate,
+				resolution,
+				maxBitrate);
+		
+	}
+	
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月15日 下午2:19:32
+	 * @param id
+	 * @param codingFormat
+	 * @param sampleFmt
+	 * @param bitrate
+	 * @param codingType
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editAudio")
+	public Object editAudio(
+			Long id,
+			String codingFormat,
+			String sampleFmt,
+			String bitrate,
+			String codingType,
+			HttpServletRequest request) throws Exception{
+		return outputSettingService.editAudio(
+				id,
+				codingFormat,
+				sampleFmt,
+				bitrate,
+				codingType);
+		
 	}
 	/**
 	 * 

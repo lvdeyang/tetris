@@ -30,7 +30,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	/** 编码格式 */
 	private CodingFormat codingFormat = CodingFormat.ACC;
 	
-	/** */
+	/** 采样率 */
 	private String sampleFmt = "s16";
 	
 	/** 码率 */
