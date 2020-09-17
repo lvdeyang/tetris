@@ -34,7 +34,7 @@ public class CombineVideoPositionPO extends AbstractBasePO{
 	/** 屏幕序号 */
 	private int serialnum;
 	
-	/** 左偏移 */
+	/** 左偏移，重构前存储分数，重构后存储万分比的分子 */
 	private String x;
 	
 	/** 上偏移 */

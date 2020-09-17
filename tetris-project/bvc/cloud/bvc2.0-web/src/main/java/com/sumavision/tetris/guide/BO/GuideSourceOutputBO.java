@@ -10,9 +10,7 @@ import java.util.List;
  * <b>日期：</b>2020年9月8日 下午2:37:31
  */
 public class GuideSourceOutputBO {
-	
-	/**虚拟源URL */
-	private String output_udp_url;
+
 	
 	/**绑定视频音频对应的 参数*/
 	private List<GuideSourcesBO> sources;
@@ -28,15 +26,6 @@ public class GuideSourceOutputBO {
 
 	public GuideSourceOutputBO setOutput_array(List<GuideOutputArrayBO> output_array) {
 		this.output_array = output_array;
-		return this;
-	}
-
-	public String getOutput_udp_url() {
-		return output_udp_url;
-	}
-
-	public GuideSourceOutputBO setOutput_udp_url(String output_udp_url) {
-		this.output_udp_url = output_udp_url;
 		return this;
 	}
 

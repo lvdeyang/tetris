@@ -33,6 +33,12 @@ public class OutputSettingPO extends AbstractBasePO {
 	/** 输出地址 */
 	private String outputAddress;
 	
+	/** 码率控制方式 */
+	private String rateCtrl;
+	
+	/** 系统码率 */
+	private Long bitrate;
+
 	/** 导播任务id */
 	private Long guideId;
 
@@ -61,6 +67,24 @@ public class OutputSettingPO extends AbstractBasePO {
 
 	public void setOutputAddress(String outputAddress) {
 		this.outputAddress = outputAddress;
+	}
+	
+	@Column(name = "RATE_CTRL")
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	@Column(name = "BITRATE")
+	public Long getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(Long bitrate) {
+		this.bitrate = bitrate;
 	}
 	
 	@Column(name = "GUIDE_ID")

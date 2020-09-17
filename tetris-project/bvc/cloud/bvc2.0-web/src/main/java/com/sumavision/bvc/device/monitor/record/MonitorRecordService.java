@@ -128,6 +128,7 @@ public class MonitorRecordService {
 			String fileName, 
 			String startTime, 
 			String endTime,
+			
 			String videoBundleId,
 			String videoBundleName,
 			String videoBundleType,
@@ -135,6 +136,7 @@ public class MonitorRecordService {
 			String videoChannelId,
 			String videoBaseType,
 			String videoChannelName,
+			
 			String audioBundleId,
 			String audioBundleName,
 			String audioBundleType,
@@ -180,6 +182,8 @@ public class MonitorRecordService {
 		task.setAudioChannelName(audioChannelName);
 		
 		MonitorRecordStatus status = null;
+		
+		//录制模式选择
 		if(MonitorRecordMode.MANUAL.equals(parsedMode)){
 			status = MonitorRecordStatus.RUN;
 		}else if(MonitorRecordMode.SCHEDULING.equals(parsedMode)){
@@ -1266,6 +1270,8 @@ public class MonitorRecordService {
 			List<AvtplPO> avtpls = avtplDao.findAll(avtplIds);
 			List<AvtplGearsPO> gears = avtplGearsDao.findAll(gearIds);
 			for(MonitorRecordPO record:needStartRecords){
+				
+				//logic的添加
 				LogicBO targetLogic = logics.get(record.getUserId());
 				if(targetLogic == null){
 					targetLogic = new LogicBO().setUserId(record.getUserId().toString())
@@ -1276,6 +1282,8 @@ public class MonitorRecordService {
 					logics.put(record.getUserId().toString(), targetLogic);						   
 				}
 				
+				
+				//参数模板
 				AvtplPO targetAvtpl = null;
 				for(AvtplPO avtpl:avtpls){
 					if(avtpl.getId().equals(record.getAvTplId())){
@@ -1291,6 +1299,7 @@ public class MonitorRecordService {
 					}
 				}
 				CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+				//参数模板结束
 				
 				if(MonitorRecordType.LOCAL_DEVICE.equals(record.getType())){
 					targetLogic.merge(openBundle(record, codec));
@@ -1306,6 +1315,7 @@ public class MonitorRecordService {
 					targetLogic.merge(startUserPassby(record, codec));
 					targetLogic.merge(startRecord(record, codec));
 				}
+				//logic结束
 				
 				//修改任务状态
 				record.setStatus(MonitorRecordStatus.RUN);
@@ -1316,6 +1326,8 @@ public class MonitorRecordService {
 		List<MonitorRecordPO> needStopRecords = monitorRecordDao.findNeedStopSchedulingRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.SCHEDULING_INTERVAL));
 		if(needStopRecords!=null && needStopRecords.size()>0){
 			for(MonitorRecordPO record:needStopRecords){
+				
+				//logic协议
 				LogicBO targetLogic = logics.get(record.getUserId());
 				if(targetLogic == null){
 					targetLogic = new LogicBO().setUserId(record.getUserId().toString())
@@ -1346,6 +1358,7 @@ public class MonitorRecordService {
 					targetLogic.merge(stopRecord(record));
 					targetLogic.merge(stopUserPassby(record, codec));
 				}
+				//logic结束
 				
 				//修改任务状态
 				record.setStatus(MonitorRecordStatus.STOP);

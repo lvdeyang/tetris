@@ -33,26 +33,49 @@ define([
                     	setSource:{
                     		visible: false,
                             loading: false,
-							id:0,
+							id: 0,
                             sourceName:'',
                             sourceType:'',
 							source:'',
 							previewOut:'',
-                            typeOptions:['直播流','5G背包']
+                            typeOptions:['5G背包','直播流']
                     	},
                     	setOut:{
                     		visible: false,
                             loading: false,
-                            type:'',
-                            url:'',
-                            typeOptions:['UDP','HLS']
+
+							video:{
+								codingObject: '',
+								profile: 'main',
+								fps: 25,
+								bitrate: 1500,
+								resolution: '',
+								maxBitrate: 1500,
+							},
+
+							audio:{
+								codingFormat:'',
+								sampleFmt:'s16',
+								bitrate:'128',
+								codingType:'',
+							},
+
+							out:{
+								outputProtocol: '',
+								outputAddress: '',
+								rateCtrl: 'VBR',
+								bitrate: 8000000
+							}
+
+                            /*url:'',
+                            typeOptions:['UDP','HLS']*/
                     	},
-						selDevice:{
+						setDevice:{
 							visible: false,
                             loading: false,
-							deviceData:[],
-							
+							deviceData:[]
 						}
+
                     },
 					sources:{
 						list:[]
@@ -66,12 +89,12 @@ define([
 				handleSelPgm: function () {
 					var self = this;
 				},
-				handleSelDeviceClose:function(){
+				handleSetDeviceClose:function(){
 					var self = this;
 					self.dialog.setDevice.visible = false;
 				},
             	handleSetSource:function(sourceNumber){
-            		var self=this;
+            		var self = this;
 					var x;
 					for(var i = 0; i < self.sources.list.length; i++){
 						if(self.sources.list[i].index == sourceNumber){
@@ -79,7 +102,7 @@ define([
 							break;
 						}
 					}
-            		self.dialog.setSource.visible=true;
+            		self.dialog.setSource.visible = true;
 					self.dialog.setSource.id = x.id;
 
 					self.dialog.setSource.sourceType = x.sourceTypeName;
@@ -91,13 +114,18 @@ define([
 					self.dialog.setSource.visible=false;
 					var questData = {
 						id:self.dialog.setSource.id,
-						sourceName:self.dialog.setSource.sourceName,
 						sourceType: self.dialog.setSource.sourceType,
 						source:self.dialog.setSource.source,
+						sourceName:self.dialog.setSource.sourceName,
 						previewOut:self.dialog.setSource.previewOut
 					};
 					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
-
+						for(var i = 0; i < self.sources.list.length; i++){
+							list[i].sourceType = self.dialog.setSource.sourceType;
+							list[i].source = self.dialog.setSource.source;
+							list[i].sourceName = self.dialog.setSource.sourceName;
+							list[i].previewOut = self.dialog.setSource.previewOut;
+						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetSourceClose:function(){
@@ -113,12 +141,41 @@ define([
 				handleSetOutCommit:function(){
 					var self = this;
 					self.dialog.setOut.visible=false;
-					var questData = {
-						type: self.dialog.setOut.type,
-						url:self.dialog.setOut.url
+					var questDataVideo = {
+						id: 3,
+						codingObject: self.dialog.setOut.video.codingObject,
+						profile:self.dialog.setOut.video.profile,
+						fps:self.dialog.setOut.video.fps,
+						bitrate:self.dialog.setOut.video.bitrate,
+						resolution:self.dialog.setOut.video.resolution,
+						maxBitrate:self.dialog.setOut.video.maxBitrate,
 					};
-					ajax.post('/guide/control/output/set', questData, function (data, status) {
+
+					var questDataAudio = {
+						id: 3,
+						codingFormat: self.dialog.setOut.audio.codingFormat,
+						sampleFmt: self.dialog.setOut.audio.sampleFmt,
+						bitrate:self.dialog.setOut.audio.bitrate,
+						codingType:self.dialog.setOut.audio.codingType,
+					};
+
+					var questDataOut = {
+						id: 3,
+						outputProtocal: self.dialog.setOut.out.outputProtocol,
+						outputAddress: self.dialog.setOut.out.outputAddress,
+						rateCtrl: self.dialog.setOut.out.rateCtrl,
+						bitrate: self.dialog.setOut.out.bitrate,
+					}
+					ajax.post('/tetris/guide/control/output/setting/po/editVideo', questDataVideo, function (data, status) {
 						
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					ajax.post('/tetris/guide/control/output/setting/po/editAudio', questDataAudio, function (data, status) {
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					ajax.post('/tetris/guide/control/output/setting/po/edit', questDataOut, function (data, status) {
+
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
 				},
@@ -129,7 +186,7 @@ define([
 				handleDeviceSelect:function(){
 					var self=this;
 					self.dialog.setSource.visible=false;
-					self.dialog.selDevice.visible=true;
+					self.dialog.setDevice.visible=true;
 				},
 				startGuide:function(){
 					ajax.post('/tetris/guide/control/guide/po/start',{id: 1},function(data, status){
@@ -162,6 +219,10 @@ define([
 					ajax.post('/tetris/guide/control/source/po/cut', questData, function (data, status) {
 						
 					}, null, ajax.NO_ERROR_CATCH_CODE);
+				},
+				handleSetDeviceClick:function(){
+					var self = this;
+					self.dialog.setSource.visible = true;
 				}
 
                
@@ -174,10 +235,13 @@ define([
 				});
 */
 
-				ajax.post('/tetris/guide/control/source/po/query', {id: 1}, function(data, status){
+				ajax.post('/tetris/guide/control/source/po/query', {id: 2}, function(data, status){
 					console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);
+						if(data[i].sourceTypeName == '5G背包'){
+							self.dialog.setDevice.deviceData.push(data[i]);
+						}
 					}
 				})
 
