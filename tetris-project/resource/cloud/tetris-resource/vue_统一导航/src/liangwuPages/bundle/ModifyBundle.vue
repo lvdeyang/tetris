@@ -16,7 +16,7 @@
       </el-form-item>
 
       <el-form-item size="small" label="地点" prop="bundleAlias">
-        <el-input v-model="bundleAddress" style="width: 200px;"></el-input>
+        <el-input v-model="location" style="width: 200px;"></el-input>
       </el-form-item>
       <el-form-item size="small" label="设备端口" prop="devicePort">
         <el-input v-model="devicePort" style="width: 200px;" placeholder="输入新的设备端口"></el-input>
@@ -123,7 +123,7 @@ export default {
       activeTabName: "LwModifyBundle",
       bundleId: this.$route.query.bundleId,
       bundleName: this.$route.query.bundleName,
-      bundleAddress: this.$route.query.bundleAddress,
+      location: this.$route.query.location,
       deviceIp: this.$route.query.deviceIp,
       devicePort: this.$route.query.devicePort,
       multicastEncode: this.$route.query.multicastEncode,
@@ -131,7 +131,7 @@ export default {
       multicastDecode: this.$route.query.multicastDecode,
       extraInfos: [],
       bundleFolderId: this.$route.query.bundleFolderId,
-      bundleFolderName: '根目录',
+      bundleFolderName: this.$route.query.bundleFolderName,
       extraInfos: [],
       dialog: {
         changeFolder: {
@@ -195,6 +195,8 @@ export default {
       let param = {
         bundleId: this.bundleId,
         bundleName: this.bundleName,
+        location: this.location,
+        bundleFolderId: this.bundleFolderId,
         deviceIp: this.deviceIp,
         devicePort: this.devicePort,
         multicastEncode: this.multicastEncode,
@@ -307,6 +309,7 @@ export default {
   },
   mounted () {
     this.queryBundleExtraInfo();
+    this.row = JSON.parse(sessionStorage.getItem('row'))
   }
 }
 </script>

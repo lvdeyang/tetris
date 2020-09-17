@@ -61,7 +61,7 @@
       <el-table-column width="50" type="selection"></el-table-column>
       <el-table-column prop="bundleName" label="名称" width="120" sortable>
       </el-table-column>
-      <el-table-column prop="bundleAddress" label="地点" width="120" sortable>
+      <el-table-column prop="location" label="地点" width="120" sortable>
       </el-table-column>
       <el-table-column prop="deviceModel" label="类型" width="120" sortable>
       </el-table-column>
@@ -180,8 +180,10 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {  getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
-  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser} from '../../api/api';
+import {
+  getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
+  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser
+} from '../../api/api';
 // let requestIP = document.location.host.split(":")[0];
 
 import selectLayerNode from '../layernode/SelectLayerNode';
@@ -229,11 +231,11 @@ export default {
         },
         {
           value: "SYSTEM",
-          label: "BVC"
+          label: "本域"  //BVC
         },
         {
           value: "EXTERNAL",
-          label: "LDAP"
+          label: "外域" //LDAP
         }
       ],
       multipleSelection: []
@@ -326,16 +328,16 @@ export default {
         } else {
           this.pageNum = pageNum;
           this.total = res.total;
-          var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
-          var A = res.resources;
-          for (var i = 0; i < A.length; i++) {
-            if (addressArr[i]) {
-              A[i].bundleAddress = addressArr[i]
-            } else {
-              A[i].bundleAddress = addressArr[4]
-            }
-          }
-          this.resources = A;
+          // var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
+
+          // for (var i = 0; i < A.length; i++) {
+          //   if (addressArr[i]) {
+          //     A[i].location = addressArr[i]
+          //   } else {
+          //     A[i].location = addressArr[4]
+          //   }
+          // }
+          this.resources = res.resources;
         }
 
         this.resourceTableLoading = false;
@@ -373,19 +375,19 @@ export default {
     }
     ,
     handleModify: function (row) {
-
+      sessionStorage.setItem('row', JSON.stringify(row))
       this.$router.push({
         path: '/LwModifyBundle',
         query: {
           bundleId: row.bundleId,
           bundleName: row.bundleName,
-          bundleAddress: row.bundleAddress,
+          location: row.location,
           deviceIp: row.deviceAddr.deviceIp,
           devicePort: row.deviceAddr.devicePort,
           multicastEncode: row.multicastEncode,
           multicastEncodeAddr: row.multicastEncodeAddr,
           multicastDecode: row.multicastDecode,
-
+          bundleFolderName: row.bundleFolderName,
           bundleFolderId: row.bundleFolderId
         }
       });
@@ -572,7 +574,7 @@ export default {
 
     exportBundle: function () {
 
-      exportBundle (null).then((res) => {
+      exportBundle(null).then((res) => {
         const blob = new Blob([res.data], { type: 'application/octet-stream;charset=utf-8' });
 
         const fileName = 'folder.csv';
