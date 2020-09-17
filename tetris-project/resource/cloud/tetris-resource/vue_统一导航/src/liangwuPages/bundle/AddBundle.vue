@@ -47,7 +47,7 @@
       </el-form-item>
 
       <el-form-item size="small" label="地点" prop="bundleAlias">
-        <el-input v-model="bundleForm.bundleAddress" style="width: 200px;"></el-input>
+        <el-input v-model="bundleForm.location" style="width: 200px;"></el-input>
       </el-form-item>
 
       <el-form-item size="small" label="设备名称" prop="bundleName">
@@ -190,7 +190,7 @@
 import {
   getDeviceModels,
   addBundle,
-  // queryFolderTree,
+  queryFolderTree,
   initFolderTree,
   addFolder
 } from '../../api/api';
@@ -221,14 +221,14 @@ export default {
       }
     };
     return {
-      activeTabName: "AddBundle",
+      activeTabName: "LwAddBundle",
       extraInfos: [],
       bundleForm: {
         deviceDomain: "",
         deviceModel: "",
         bundleType: "",
         bundleName: "",
-        bundleAddress: "",
+        location: "",
         username: "",
         onlinePassword: "",
         checkPass: "",
@@ -481,23 +481,16 @@ export default {
     handleChangeFolder: function () {
       var self = this;
       self.dialog.changeFolder.visible = true;
-      initFolderTree().then(res => {
+      queryFolderTree().then(res => {
         console.log(res)
-        self.dialog.changeFolder.tree.data = res.tree
-        // if (res.status === 200) {
-        //   // self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
-        //   // if (res.data.tree && res.data.tree.length > 0) {
-        //   //   for (var i = 0; i < res.data.length; i++) {
-        //   //     self.dialog.changeFolder.tree.data.push(res.data.tree[i]);
-        //   //   }
-        //   // }
-        //   self.dialog.changeFolder.tree.data = res.data.tree
-        // } else {
-        //   self.$message({
-        //     type: 'error',
-        //     message: res.message
-        //   });
-        // }
+        if (res.status === 200) {
+          self.dialog.changeFolder.tree.data = res.data
+        } else {
+          self.$message({
+            type: 'error',
+            message: res.message
+          });
+        }
       });
     },
     handleChangeFolderClose: function () {

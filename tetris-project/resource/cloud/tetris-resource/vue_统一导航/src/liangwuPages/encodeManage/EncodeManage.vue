@@ -330,8 +330,8 @@ export default {
           });
           this.treeLoading = false;
         } else {
-          // this.tree = res.tree;
-          // this.tree1 = JSON.parse(JSON.stringify(this.tree))
+          this.tree = res.tree;
+          this.tree1 = JSON.parse(JSON.stringify(this.tree))
           this.treeLoading = false;
           // this.filterText = "摄像头"
 
@@ -417,6 +417,8 @@ export default {
   float: left;
   min-height: 100px;
   margin-right: 30px;
+  max-height: 780px;
+  overflow: auto;
 }
 .col + .col {
   margin-left: 10px;

@@ -9,8 +9,8 @@
             <el-option value="" label=""></el-option>
             <el-option value="手动" label="手动录制">手动录制</el-option>
             <el-option value="排期" label="排期录制">排期录制</el-option>
-            <el-option value="定时" label="排期录制">定时录制</el-option>
-            <el-option value="循环" label="循环录制">排期录制</el-option>
+            <el-option value="定时" label="定时录制">定时录制</el-option>
+            <el-option value="循环" label="循环录制">循环录制</el-option>
           </el-select>
           <el-date-picker v-model="date" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-if="recordMode!='手动'">
           </el-date-picker>
@@ -69,7 +69,7 @@
         <el-input v-model="inputName" placeholder="请输入录制任务名" style="margin:10px 0"></el-input>
         <el-input v-model="inputBit" placeholder="请输入磁盘大小" style="margin:10px 0" v-if="Mode==='循环'"></el-input>
 
-        <el-date-picker v-if="Mode==='排期'" v-model="date" type="datetimerange" :picker-options='pickerBeginDateBefore' range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+        <el-date-picker v-if="Mode==='排期'" v-model="date" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
         </el-date-picker>
 
         <div v-if="Mode=='定时' || Mode==='循环'">
