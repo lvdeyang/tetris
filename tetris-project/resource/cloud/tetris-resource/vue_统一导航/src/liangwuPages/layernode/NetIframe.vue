@@ -1,8 +1,8 @@
 <template>
   <section>
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
-      <el-tab-pane label="层节点列表" name="LayernodeManage"></el-tab-pane>
-      <el-tab-pane label="网管" name="NetIframe"></el-tab-pane>
+      <el-tab-pane label="层节点列表" name="LwLayernodeManage"></el-tab-pane>
+      <el-tab-pane label="网管" name="LwNetIframe"></el-tab-pane>
     </el-tabs>
     <iframe :src="netUrl" frameborder="0" width="100%" height="100%"></iframe>
   </section>
@@ -13,7 +13,7 @@ export default {
   data () {
     return {
       netUrl: '',
-      activeTabName: "NetIframe",
+      activeTabName: "LwNetIframe",
     }
   },
   created () {
@@ -29,7 +29,7 @@ export default {
   mounted () {
     var self = this;
     this.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LayernodeManage');
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLayernodeManage');
     });
   }
 }
