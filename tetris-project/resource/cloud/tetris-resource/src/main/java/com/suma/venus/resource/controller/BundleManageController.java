@@ -292,9 +292,11 @@ public class BundleManageController extends ControllerBase {
 			int to = (pageNum * countPerPage > bundlePOs.size()) ? bundlePOs.size() : pageNum * countPerPage;
 			for (int i = from; i < to; i++) {
 				BundlePO bundlePO = bundlePOs.get(i);
-				FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
 				BundleVO vo = BundleVO.fromPO(bundlePO);
-				vo.setBundleFolderName(folderPO.getName());
+				if(bundlePO.getFolderId()!= null){
+					FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
+					vo.setBundleFolderName(folderPO.getName());
+				}
 				if (!"VenusTerminal".equals(bundlePO.getBundleType()) && !"VenusProxy".equals(bundlePO.getBundleType())
 						&& !lockChannelParamDao.findByBundleId(bundlePO.getBundleId()).isEmpty()) {
 					// 针对channel级锁定的bundle，如果它下面有channel被锁定，则认为bundle整体处于锁定状态
