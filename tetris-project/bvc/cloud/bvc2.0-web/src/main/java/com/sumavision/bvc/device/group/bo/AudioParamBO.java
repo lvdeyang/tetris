@@ -80,4 +80,14 @@ public class AudioParamBO {
 		this.sample_rate = auidoParam.getSample_rate();
 		return this;
 	}
+	
+	public AudioParamBO copy(AudioParamBO auidoParam){
+		this.bit_width = auidoParam.getBit_width();
+		this.bitrate = auidoParam.getBitrate();
+		this.channel_cnt = auidoParam.getChannel_cnt();
+		this.codec = auidoParam.getCodec();
+		this.gain = auidoParam.getGain();
+		this.sample_rate = auidoParam.getSample_rate();
+		return this;
+	}
 }

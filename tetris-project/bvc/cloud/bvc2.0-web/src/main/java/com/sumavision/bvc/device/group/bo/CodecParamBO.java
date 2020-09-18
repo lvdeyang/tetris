@@ -87,4 +87,10 @@ public class CodecParamBO {
 		return this;
 	}
 	
+	public CodecParamBO copy(CodecParamBO codecParam){
+		this.setAudio_param(new AudioParamBO().copy(codecParam.getAudio_param()))
+			.setVideo_param(new VideoParamBO().copy(codecParam.getVideo_param()));
+		return this;
+	}
+	
 }
