@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -262,7 +263,7 @@ public class UserFeignController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), null, tags, false, "", "", "");
+		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), null, tags, false, "", "", "","","");
 	}
 	
 	/**
@@ -621,4 +622,10 @@ public class UserFeignController {
 		return userQuery.findByCompanyIdAndCondition(Long.valueOf(user.getGroupId()), nickname, userno, currentPage, pageSize);
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/online")
+	public Object queryUserOnline() throws Exception{
+		return userQuery.queryUserOnline();
+	}
 }

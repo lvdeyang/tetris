@@ -10,6 +10,10 @@ public class UdpTsBO {
 	
 	private String local_ip;
 	
+	private String rate_ctrl;
+	
+	private int bitrate;
+	
 	private List<ProgramArrayBO> program_array;
 
 	public String getIp() {
@@ -45,6 +49,24 @@ public class UdpTsBO {
 
 	public UdpTsBO setProgram_array(List<ProgramArrayBO> program_array) {
 		this.program_array = program_array;
+		return this;
+	}
+
+	public String getRate_ctrl() {
+		return rate_ctrl;
+	}
+
+	public UdpTsBO setRate_ctrl(String rate_ctrl) {
+		this.rate_ctrl = rate_ctrl;
+		return this;
+	}
+
+	public int getBitrate() {
+		return bitrate;
+	}
+
+	public UdpTsBO setBitrate(int bitrate) {
+		this.bitrate = bitrate;
 		return this;
 	}
 	

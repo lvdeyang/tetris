@@ -32,18 +32,21 @@ public class VideoParametersPO extends AbstractBasePO{
 	/** 编码对象 */
 	private CodingObject codingObject = CodingObject.H264;
 	
-	/** 编码档次 */
-	private String profile = "main";
-	
 	/** 帧率 */
-	private Long fps = 25L;
+	private String fps = "25";
 	
 	/** 码率 */
-	private Long bitrate = 1500l;
+	private Long bitrate = 1500L;
 	
 	/** 分辨率 */
-	private String resolution = "1920x1080";
+	private Resolution resolution = Resolution._1920_1080;
 	
+	/** 宽高比 */
+	private Ratio ratio = Ratio._16_9;
+	
+	/** 码率控制方式 */
+	private RcMode rcMode = RcMode.VBR;
+
 	/** 最大码率 */
 	private Long maxBitrate = 1500L;
 	
@@ -66,21 +69,12 @@ public class VideoParametersPO extends AbstractBasePO{
 		this.codingObject = codingObject;
 	}
 
-	@Column(name = "PROFILE")
-	public String getProfile() {
-		return profile;
-	}
-
-	public void setProfile(String profile) {
-		this.profile = profile;
-	}
-
 	@Column(name = "FPS")
-	public Long getFps() {
+	public String getFps() {
 		return fps;
 	}
 
-	public void setFps(Long fps) {
+	public void setFps(String fps) {
 		this.fps = fps;
 	}
 
@@ -94,12 +88,34 @@ public class VideoParametersPO extends AbstractBasePO{
 	}
 
 	@Column(name = "RESOLUTION")
-	public String getResolution() {
+	@Enumerated(EnumType.STRING)
+	public Resolution getResolution() {
 		return resolution;
 	}
 
-	public void setResolution(String resolution) {
+	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
+	}
+	
+	@Column(name = "RATIO")
+	@Enumerated(EnumType.STRING)
+	public Ratio getRatio() {
+		return ratio;
+	}
+
+	public void setRatio(Ratio ratio) {
+		this.ratio = ratio;
+	}
+
+	
+	@Column(name = "RCMODE")
+	@Enumerated(EnumType.STRING)
+	public RcMode getRcMode() {
+		return rcMode;
+	}
+
+	public void setRcMode(RcMode rcMode) {
+		this.rcMode = rcMode;
 	}
 
 	@Column(name = "MAX_BITRATE")

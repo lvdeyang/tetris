@@ -244,9 +244,11 @@ public class UserService{
             String mail,
             Integer level,
             String classify,
+            String remark,
+            String loginIp,
             boolean emit) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp);
 		
 		if(emit){
 			//发布用户注册事件
@@ -283,9 +285,11 @@ public class UserService{
             String mail,
             Integer level,
             String classify,
-            String companyName) throws Exception{
+            String companyName,
+            String remark,
+            String loginIp) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName());
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(),remark,loginIp);
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -339,7 +343,9 @@ public class UserService{
             String mail,
             Integer level,
             String classify,
-            Long companyId) throws Exception{
+            Long companyId,
+            String remark,
+            String loginIp) throws Exception{
 		
 		CompanyPO company = companyDao.findOne(companyId);
 		
@@ -347,7 +353,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -387,7 +393,9 @@ public class UserService{
             String mobile,
             String mail,
             Integer level,
-            String classify) throws Exception{
+            String classify,
+            String remark,
+            String loginIp) throws Exception{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
 		
@@ -438,6 +446,8 @@ public class UserService{
 		user.setAutoGeneration(false);
 		user.setClassify(UserClassify.fromName(classify));
 		user.setUpdateTime(new Date());
+		user.setRemark(remark);
+		user.setLoginIp(loginIp);
 		userDao.save(user);
 		
 		//创建私有角色
@@ -595,7 +605,9 @@ public class UserService{
             boolean editPassword,
             String oldPassword,
             String newPassword,
-            String repeat) throws Exception{
+            String repeat,
+            String remark,
+            String loginIp) throws Exception{
 		
 		UserPO user = userDao.findOne(id);
 		
@@ -633,6 +645,8 @@ public class UserService{
 		user.setMail(mail);
 		user.setLevel(level);
 		user.setUpdateTime(new Date());
+		user.setRemark(remark);
+		user.setLoginIp(loginIp);;
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
 		

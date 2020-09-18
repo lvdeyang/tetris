@@ -23,7 +23,7 @@ public class CombineVideoPositionPO extends AbstractBasePO{
 	/** 屏幕序号 */
 	private int serialnum;
 	
-	/** 横坐标 */
+	/** 横坐标，整数，10000的分子，如7500 */
 	private String x;
 	
 	/** 纵坐标 */

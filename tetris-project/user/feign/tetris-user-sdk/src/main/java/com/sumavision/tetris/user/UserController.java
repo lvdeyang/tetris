@@ -101,4 +101,10 @@ public class UserController {
 		
 		response.sendRedirect(redirectUrl.toString());
 	}
+	
+	@RequestMapping(value = "/query/user/online")
+	public Object queryUserOnline()throws Exception{
+		return userQuery.queryUserOnline();
+	}
+	
 }

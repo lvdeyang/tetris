@@ -13,7 +13,7 @@ public class BusinessReturnService {
 	
 	private static ThreadLocal<BusinessReturnBO> bussinessReturnThreadLocal=new ThreadLocal<BusinessReturnBO>(){
 		/**
-         * ThreadLocal没有被当前线程赋值时或当前线程刚调用remove方法后调用get方法，返回此方法值
+         * ThreadLocal中没有值的时候初始化方法。
          */
         @Override
         protected BusinessReturnBO initialValue()
@@ -26,12 +26,12 @@ public class BusinessReturnService {
 	};
 	
 	/**
-	 * 修改BusinessReturnBO中的内容<br/>
+	 * 添加BusinessReturnBO中的内容<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月11日 上午11:30:24
 	 */
-	public void resetBusinessReturnBO(LogicBO logic,MessageSendCacheBO messageSendCacheBO){
+	public void add(LogicBO logic,MessageSendCacheBO messageSendCacheBO){
 		if(logic!=null){
 			LogicBO mergedLogic=bussinessReturnThreadLocal.get().getLogic().merge(logic);
 			bussinessReturnThreadLocal.get().setLogic(mergedLogic);
@@ -48,7 +48,7 @@ public class BusinessReturnService {
 	 * <b>日期：</b>2020年9月11日 上午11:39:16
 	 * @return
 	 */
-	public BusinessReturnBO getBusinessReturnBO(){
+	public BusinessReturnBO getAndRemove(){
 		BusinessReturnBO temp = bussinessReturnThreadLocal.get();
 		bussinessReturnThreadLocal.remove();
 		return temp;

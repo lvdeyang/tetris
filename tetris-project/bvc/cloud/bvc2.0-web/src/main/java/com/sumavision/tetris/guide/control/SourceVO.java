@@ -123,8 +123,8 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	@Override
 	public SourceVO set(SourcePO entity) throws Exception {
 		this.setId(entity.getId());
-		this.setSourceType(entity.getSourceType()!=null ? entity.getSourceType().toString(): null);
-		this.setSourceTypeName(entity.getSourceType()!=null ? entity.getSourceType().getName(): null);
+		this.setSourceType(entity.getSourceType()!= null ? entity.getSourceType().toString(): null);
+		this.setSourceTypeName(entity.getSourceType()!= null ? entity.getSourceType().getName(): null);
 		this.setSourceName(entity.getSourceName());
 		this.setSource(entity.getSource());
 		this.setIndex(entity.getSourceNumber());

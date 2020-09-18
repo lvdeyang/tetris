@@ -125,6 +125,41 @@ public class BundlePO extends CommonPO<BundlePO> {
 	/** 是否开启组播解码 */
 	private Boolean multicastDecode;
 	
+	/** 组播源ip */
+	private String multicastSourceIp;
+	
+	/**地点*/
+	private String location;
+	
+	/**是否转码*/
+	private Boolean transcod;
+	
+	@Column(name = "transcod")
+	public Boolean getTranscod() {
+		return transcod;
+	}
+
+	public void setTranscod(Boolean transcod) {
+		this.transcod = transcod;
+	}
+
+	@Column(name = "location")
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getMulticastSourceIp() {
+		return multicastSourceIp;
+	}
+
+	public void setMulticastSourceIp(String multicastSourceIp) {
+		this.multicastSourceIp = multicastSourceIp;
+	}
+
 	public static String createBundleId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}

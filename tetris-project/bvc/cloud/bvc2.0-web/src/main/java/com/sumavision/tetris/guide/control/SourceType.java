@@ -30,7 +30,7 @@ public enum SourceType {
 	public static SourceType fromName(String name) throws Exception{
 		SourceType[] values = SourceType.values();
 		for (SourceType sourceType : values) {
-			if(sourceType.getName().equals(sourceType)){
+			if(sourceType.getName().equals(name)){
 				return sourceType;
 			}
 		}

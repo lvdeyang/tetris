@@ -1095,6 +1095,29 @@ public class UserQuery {
 	public List<UserVO> find(Collection<String> userIds, Integer pageSize, Integer currentPage){
 		return find(userIds);
 	}
+
+	/**
+	 * 查询在线的用户
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月17日 下午2:07:03
+	 * @return
+	 * @throws Exception
+	 */
+	public List<UserVO> queryUserOnline() throws Exception{
+		List<UserPO> userPOs = userDao.findAll();
+		List<UserPO> userOnline = new ArrayList<UserPO>();
+		for (UserPO userPO : userPOs) {
+			List<TokenPO> tokenPOs = tokenDao.findByUserId(userPO.getId());
+			for (TokenPO tokenPO : tokenPOs) {
+				if(tokenPO.getStatus().toString().equals("ONLINE")){
+					userOnline.add(userPO);
+				}
+			}
+		}
+		List<UserVO> userVOs = UserVO.getConverter(UserVO.class).convert(userOnline, UserVO.class);
+		return userVOs;
+	}
 	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")

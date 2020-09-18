@@ -1,10 +1,14 @@
 package com.sumavision.tetris.user;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -67,7 +71,7 @@ public class UserPO extends AbstractBasePO{
 	private Integer level;
 	
 	/** 用户当前ip */
-	//private String ip;
+	private String ip;
 	
 	/** 用户当前设备类型 */
 	//private UserEquipType equipType;
@@ -75,6 +79,43 @@ public class UserPO extends AbstractBasePO{
 	/** 异常登录次数 */
 	private Integer errorLoginTimes;
 	
+	/**备注*/
+	private String remark;
+	
+	/**上次登陆时间*/
+	private Date lastLoginTime;
+	
+	/**限制登陆ip*/
+	private String loginIp;
+	
+	@Column(name = "LOGINIP")
+	public String getLoginIp() {
+		return loginIp;
+	}
+
+	public void setLoginIp(String loginIp) {
+		this.loginIp = loginIp;
+	}
+
+	@Column(name = "REMARK")
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_LOGIN_TIME")
+	public Date getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public void setLastLoginTime(Date lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
+	}
+
 	@Column(name = "USERNAME")
 	public String getUsername() {
 		return username;
@@ -195,14 +236,14 @@ public class UserPO extends AbstractBasePO{
 		this.classify = classify;
 	}
 
-	/*@Column(name = "ip")
+	@Column(name = "ip")
 	public String getIp() {
 		return ip;
 	}
 
 	public void setIp(String ip) {
 		this.ip = ip;
-	}*/
+	}
 
 	/*@Enumerated(value = EnumType.STRING)
 	@Column(name = "EQUIP_TYPE")
