@@ -37,7 +37,7 @@ public class MonitorRecordManyTimesPO extends AbstractBasePO{
 	private Long relationId;
 	
 	/** 存储相关序号*/
-	private int indexNumber;
+	private Integer indexNumber;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "START_TIME")
@@ -87,11 +87,11 @@ public class MonitorRecordManyTimesPO extends AbstractBasePO{
 	}
 
 	@Column(name="INDEX_NUMBER")
-	public int getIndexNumber() {
+	public Integer getIndexNumber() {
 		return indexNumber;
 	}
 
-	public MonitorRecordManyTimesPO setIndexNumber(int indexNumber) {
+	public MonitorRecordManyTimesPO setIndexNumber(Integer indexNumber) {
 		this.indexNumber = indexNumber;
 		return this;
 	}
