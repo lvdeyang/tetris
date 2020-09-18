@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.AccessToken;
 import com.suma.venus.resource.base.bo.BatchLockBundleParam;
 import com.suma.venus.resource.base.bo.BatchLockBundleRespBody;
@@ -77,6 +81,7 @@ import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.VirtualResourceDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceToResource;
 import com.suma.venus.resource.feign.TokenFeign;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -109,6 +114,8 @@ import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.WorkNodeService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.suma.venus.resource.vo.BundleVO;
+import com.suma.venus.resource.vo.WorkNodeVO;
 import com.suma.venus.resource.vo.WsVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
@@ -193,6 +200,9 @@ public class HttpInterfaceController {
 	
 	@Autowired
 	private LianwangPassbyService lianwangPassbyService;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -1213,6 +1223,24 @@ public class HttpInterfaceController {
 		return result;
 	}
 
+	/*public Map<String,Object> queryBundle(
+			@RequestParam (name = "id") Long id,
+			@RequestParam(name = "pageNum") Integer pageNum,
+			@RequestParam(name = "countPerPage") Integer countPerPage,
+//			int currentPage,
+//			int pageSize,
+			HttpServletRequest request){
+//		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Map<String, Object> data = makeAjaxData();
+		WorkNodePO workNodePO = workNodeDao.findOne(id);
+		List<BundlePO> bundlePOs = bundleDao.findByAccessNodeUid(workNodePO.getNodeUid());
+//		List<BundlePO> entBundlePOs = bundlePOs.getContent();
+		List<BundleVO> bundleVOs = new  ArrayList<BundleVO>();
+		int from = (pageNum -1)*countPerPage;
+		int to = (pageNum * countPerPage > bundlePOs.size()) ? bundlePOs.size() : pageNum * countPerPage;
+ 		
+		return data;
+	}*/
 	/** 接入层心跳 */
 	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
@@ -1242,6 +1270,35 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
+	/**
+	 * 接入上线后获取层节点和设备列表<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月11日 下午8:58:20
+	 * @param id 接入层节点id
+	 * Map<String, Object> 层节点和设备列表
+	 */
+	public Map<String, Object> onlineNodeBundle(@RequestParam Long id){
+		Map<String, Object> data =new HashMap<String, Object>(); 
+//		Map<String, Object> data = makeAjaxData();
+		WorkNodePO workNodePO = workNodeDao.findOne(id);
+		List<BundlePO> bundlePOs = bundleDao.findByAccessNodeUid(workNodePO.getNodeUid());
+		WorkNodeVO workNodeVO = new WorkNodeVO();
+		BeanUtils.copyProperties(workNodePO, workNodeVO,"type","onlineStatus");
+		workNodeVO.setType(workNodePO.getType().toString());
+		if(null != workNodePO.getOnlineStatus()){
+			workNodeVO.setOnlineStatus(workNodePO.getOnlineStatus().toString());
+		}
+		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+		for (BundlePO bundlePO : bundlePOs) {
+			BundleVO vo = BundleVO.fromPO(bundlePO);
+			bundleVOs.add(vo);
+		}
+		data.put("workNode", workNodeVO);
+		data.put("bundleList", bundleVOs);
+		return data;
+	}
 	/**
 	 * 通过用户名和密码请求获取token
 	 * 

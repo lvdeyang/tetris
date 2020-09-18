@@ -14,7 +14,9 @@ public class BusinessConstants {
 		CLOUD("云台"),//云台
 		CALL("呼叫"),//呼叫
 		ZK("指挥"),//指挥
-		HY("会议");//会议
+		HY("会议"),//会议
+		LR("本地录制"),//本地录制
+		DOWNLOAD("下载");//下载
 		
 		private String name;
 		

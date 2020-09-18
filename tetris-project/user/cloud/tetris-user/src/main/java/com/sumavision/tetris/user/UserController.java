@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -601,6 +602,13 @@ public class UserController {
 			status.put("importTimes", userImportInfo==null?0:userImportInfo.getTimes());
 		}
 		return status;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user.online")
+	public Object queryUserOnlin() throws Exception{
+		return userQuery.queryUserOnline();
 	}
 
 }

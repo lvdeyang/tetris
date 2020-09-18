@@ -275,6 +275,8 @@ public class BindResourceController extends ControllerBase {
 				boolean hasReadPrivilege = privilegeCodes.contains(bundleId + "-r");
 				boolean hasWritePrivilege = privilegeCodes.contains(bundleId + "-w");
 				boolean hasCloudPrivilege = privilegeCodes.contains(bundleId + "-c");
+				boolean hasLocalReadPrivilege = privilegeCodes.contains(bundleId + "-lr");
+				boolean hasDownloadPrivilege = privilegeCodes.contains(bundleId + "-d");
 				if (!hasReadPrivilege && !hasWritePrivilege) {
 					continue;
 				}
@@ -288,6 +290,12 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasCloudPrivilege) {
 					bundlePrivilege.setHasCloudPrivilege(true);
+				}
+				if (hasLocalReadPrivilege) {
+					bundlePrivilege.setHasLocalReadPrivilege(true);
+				}
+				if (hasDownloadPrivilege) {
+					bundlePrivilege.setHasDownloadPrivilege(true);
 				}
 				bundlePrivileges.add(bundlePrivilege);
 			}
@@ -316,6 +324,8 @@ public class BindResourceController extends ControllerBase {
 				boolean hasReadPrivilege = privilegeCodes.contains(bundleId + "-r");
 				boolean hasWritePrivilege = privilegeCodes.contains(bundleId + "-w");
 				boolean hasCloudPrivilege = privilegeCodes.contains(bundleId + "-c");
+				boolean hasLocalReadPrivilege = privilegeCodes.contains(bundleId + "-lr");
+				boolean hasDownloadPrivilege = privilegeCodes.contains(bundleId + "-d");
 				BundlePO po = bundleService.findByBundleId(bundleId);
 				BundlePrivilegeBO bundlePrivilege = getBundlePrivilegefromPO(po);
 				if (hasReadPrivilege) {
@@ -326,6 +336,12 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasCloudPrivilege) {
 					bundlePrivilege.setHasCloudPrivilege(true);
+				}
+				if (hasLocalReadPrivilege) {
+					bundlePrivilege.setHasLocalReadPrivilege(true);
+				}
+				if (hasDownloadPrivilege) {
+					bundlePrivilege.setHasDownloadPrivilege(true);
 				}
 				bundlePrivileges.add(bundlePrivilege);
 			}
@@ -414,6 +430,8 @@ public class BindResourceController extends ControllerBase {
 				boolean hasReadPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-r");
 				boolean hasWritePrivilege = privilegeCodes.contains(userBO.getUserNo() + "-w");
 				boolean hasCloudPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-c");
+				boolean hasLocalReadPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-c");
+				boolean hasDownloadPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-c");
 				boolean hasHJPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hj");
 				boolean hasZKPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-zk");
 				boolean hasHYPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hy");
@@ -426,6 +444,12 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasCloudPrivilege) {
 					userresPrivilege.setHasCloudPrivilege(true);
+				}
+				if (hasLocalReadPrivilege) {
+					userresPrivilege.setHasLocalReadPrivilege(true);
+				}
+				if (hasDownloadPrivilege) {
+					userresPrivilege.setHasDownloadPrivilege(true);
 				}
 				if (hasHJPrivilege) {
 					userresPrivilege.setHasHJPrivilege(true);
@@ -612,19 +636,29 @@ public class BindResourceController extends ControllerBase {
 			@RequestParam(value = "roleId") Long roleId, 
 			@RequestParam(value = "prevReadChecks") String prevReadChecks,
 			@RequestParam(value = "prevWriteChecks") String prevWriteChecks,
-			@RequestParam(value = "prevCloudChecks") String prevCloudChecks, 
+			@RequestParam(value = "prevCloudChecks") String prevCloudChecks,
+			@RequestParam(value = "prevLocalReadChecks") String prevLocalReadChecks, 
+			@RequestParam(value = "prevDownloadChecks") String prevDownloadChecks, 
 			@RequestParam(value = "readChecks") String readChecks,
 			@RequestParam(value = "writeChecks") String writeChecks, 
-			@RequestParam(value = "cloudChecks") String cloudChecks,Principal principal) {
+			@RequestParam(value = "cloudChecks") String cloudChecks,
+			@RequestParam(value = "localReadChecks") String localReadChecks,
+			@RequestParam(value = "downloadChecks") String downloadChecks,
+			Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
 		try {
 			List<String> preReadCheckList = new ArrayList<String>();
 			List<String> prevWriteCheckList = new ArrayList<String>();
 			List<String> prevCloudCheckList = new ArrayList<String>();
+			List<String> prevLocalReadCheckList = new ArrayList<String>();
+			List<String> prevDownloadCheckList = new ArrayList<String>();
 			List<String> readCheckList = new ArrayList<String>();
 			List<String> writeCheckList = new ArrayList<String>();
 			List<String> cloudCheckList = new ArrayList<String>();
+			List<String> localReadCheckList = new ArrayList<String>();
+			List<String> downloadCheckList = new ArrayList<String>();
+			
 			if (null != prevReadChecks && !prevReadChecks.isEmpty()) {
 				preReadCheckList = Arrays.asList(prevReadChecks.split(","));
 			}
@@ -633,6 +667,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (null != prevCloudChecks && !prevCloudChecks.isEmpty()) {
 				prevCloudCheckList = Arrays.asList(prevCloudChecks.split(","));
+			}
+			if (null != prevLocalReadChecks && !prevLocalReadChecks.isEmpty()) {
+				prevLocalReadCheckList = Arrays.asList(prevLocalReadChecks.split(","));
+			}
+			if (null != prevDownloadChecks && !prevDownloadChecks.isEmpty()) {
+				prevDownloadCheckList = Arrays.asList(prevDownloadChecks.split(","));
 			}
 			if (null != readChecks && !readChecks.isEmpty()) {
 				readCheckList = Arrays.asList(readChecks.split(","));
@@ -643,10 +683,18 @@ public class BindResourceController extends ControllerBase {
 			if (null != cloudChecks && !cloudChecks.isEmpty()) {
 				cloudCheckList = Arrays.asList(cloudChecks.split(","));
 			}
+			if (null != localReadChecks && !localReadChecks.isEmpty()) {
+				localReadCheckList = Arrays.asList(localReadChecks.split(","));
+			}
+			if (null != downloadChecks && !downloadChecks.isEmpty()) {
+				downloadCheckList = Arrays.asList(downloadChecks.split(","));
+			}
 
 			List<String> toBindReadCheckList = getToBindPrivileges(preReadCheckList, readCheckList);
 			List<String> toBindWriteCheckList = getToBindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toBindCloudCheckList = getToBindPrivileges(prevCloudCheckList, cloudCheckList);
+			List<String> toBindLocalReadCheckList = getToBindPrivileges(prevLocalReadCheckList, localReadCheckList);
+			List<String> toBindDownloadCheckList = getToBindPrivileges(prevDownloadCheckList, downloadCheckList);
 			List<String> toBindChecks = new ArrayList<String>();
 			for (String readCheck : toBindReadCheckList) {
 				toBindChecks.add(readCheck + "-r");
@@ -657,6 +705,12 @@ public class BindResourceController extends ControllerBase {
 			for (String cloudCheck : toBindCloudCheckList) {
 				toBindChecks.add(cloudCheck + "-c");
 			}
+			for (String localReadCheck : toBindLocalReadCheckList) {
+				toBindChecks.add(localReadCheck + "-lr");
+			}
+			for (String downloadCheck : toBindDownloadCheckList) {
+				toBindChecks.add(downloadCheck + "-d");
+			}
 			if (!bindResourceCodes(roleId, toBindChecks)) {
 				data.put(ERRMSG, "绑定失败");
 				return data;
@@ -665,6 +719,8 @@ public class BindResourceController extends ControllerBase {
 			List<String> toUnbindReadCheckList = getToUnbindPrivileges(preReadCheckList, readCheckList);
 			List<String> toUnbindWriteCheList = getToUnbindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toUnbindCloudCheList = getToUnbindPrivileges(prevCloudCheckList, cloudCheckList);
+			List<String> toUnbindLocalReadListCheckList = getToUnbindPrivileges(prevLocalReadCheckList, localReadCheckList);
+			List<String> toUnbindDownloadCheList = getToUnbindPrivileges(prevDownloadCheckList, downloadCheckList);
 			List<String> toUnbindChecks = new ArrayList<String>();
 			for (String readCheck : toUnbindReadCheckList) {
 				toUnbindChecks.add(readCheck + "-r");
@@ -674,6 +730,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String cloudCheck : toUnbindCloudCheList) {
 				toUnbindChecks.add(cloudCheck + "-c");
+			}
+			for (String localReadCheck : toUnbindLocalReadListCheckList) {
+				toUnbindChecks.add(localReadCheck + "-lr");
+			}
+			for (String downloadCheck : toUnbindDownloadCheList) {
+				toUnbindChecks.add(downloadCheck + "-c");
 			}
 			if (!unbindResourceCodes(roleId, toUnbindChecks)) {
 				data.put(ERRMSG, "解绑失败");
@@ -689,8 +751,8 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList,prevCloudCheckList, new ArrayList<String>(), new ArrayList<String>(),new ArrayList<String>(),
-							readCheckList, writeCheckList,cloudCheckList, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>());
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList,prevCloudCheckList,prevLocalReadCheckList,prevDownloadCheckList, new ArrayList<String>(), new ArrayList<String>(),new ArrayList<String>(),
+							readCheckList, writeCheckList,cloudCheckList,localReadCheckList,downloadCheckList, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>());
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
@@ -742,12 +804,16 @@ public class BindResourceController extends ControllerBase {
 			@RequestParam(value = "prevReadChecks") String prevReadChecks,
 			@RequestParam(value = "prevWriteChecks") String prevWriteChecks, 
 			@RequestParam(value = "prevCloudChecks") String prevCloudChecks,
+			@RequestParam(value = "prevLocalReadChecks") String prevLocalReadChecks,
+			@RequestParam(value = "prevDownloadChecks") String prevDownloadChecks,
 			@RequestParam(value = "prevHJChecks") String prevHJChecks,
 			@RequestParam(value = "prevZKChecks") String prevZKChecks,
 			@RequestParam(value = "prevHYChecks") String prevHYChecks, 
 			@RequestParam(value = "readChecks") String readChecks, 
 			@RequestParam(value = "writeChecks") String writeChecks,
 			@RequestParam(value = "cloudChecks") String cloudChecks,
+			@RequestParam(value = "localReadChecks") String localReadChecks,
+			@RequestParam(value = "downloadChecks") String downloadChecks,
 			@RequestParam(value = "hjChecks") String hjChecks, 
 			@RequestParam(value = "zkChecks") String zkChecks, 
 			@RequestParam(value = "hyChecks") String hyChecks, Principal principal) {
@@ -757,12 +823,16 @@ public class BindResourceController extends ControllerBase {
 			List<String> preReadCheckList = new ArrayList<String>();
 			List<String> prevWriteCheckList = new ArrayList<String>();
 			List<String> prevCloudCheckList = new ArrayList<String>();
+			List<String> prevLocalReadCheckList = new ArrayList<String>();
+			List<String> prevDownloadCheckList = new ArrayList<String>();
 			List<String> prevHJCheckeList = new ArrayList<String>();
 			List<String> prevZKCheckeList = new ArrayList<String>();
 			List<String> prevHYCheckeList = new ArrayList<String>();
 			List<String> readCheckList = new ArrayList<String>();
 			List<String> writeCheckList = new ArrayList<String>();
 			List<String> cloudCheckList = new ArrayList<String>();
+			List<String> localReadCheckList = new ArrayList<String>();
+			List<String> downloadCheckList = new ArrayList<String>();
 			List<String> hjCheckList = new ArrayList<String>();
 			List<String> zkCheckList = new ArrayList<String>();
 			List<String> hyCheckList = new ArrayList<String>();
@@ -774,6 +844,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (null != prevCloudChecks && !prevCloudChecks.isEmpty()) {
 				prevCloudCheckList = Arrays.asList(prevCloudChecks.split(","));
+			}
+			if (null != prevLocalReadChecks && !prevLocalReadChecks.isEmpty()) {
+				prevLocalReadCheckList = Arrays.asList(prevLocalReadChecks.split(","));
+			}
+			if (null != prevDownloadChecks && !prevDownloadChecks.isEmpty()) {
+				prevDownloadCheckList = Arrays.asList(prevDownloadChecks.split(","));
 			}
 			if (null != prevHJChecks && !prevHJChecks.isEmpty()) {
 				prevHJCheckeList = Arrays.asList(prevHJChecks.split(","));
@@ -793,6 +869,12 @@ public class BindResourceController extends ControllerBase {
 			if (null != cloudChecks && !cloudChecks.isEmpty()) {
 				cloudCheckList = Arrays.asList(cloudChecks.split(","));
 			}
+			if (null != localReadChecks && !localReadChecks.isEmpty()) {
+				localReadCheckList = Arrays.asList(localReadChecks.split(","));
+			}
+			if (null != downloadChecks && !downloadChecks.isEmpty()) {
+				downloadCheckList = Arrays.asList(downloadChecks.split(","));
+			}
 			if (null != hjChecks && !hjChecks.isEmpty()) {
 				hjCheckList = Arrays.asList(hjChecks.split(","));
 			}
@@ -806,6 +888,8 @@ public class BindResourceController extends ControllerBase {
 			List<String> toBindReadCheckList = getToBindPrivileges(preReadCheckList, readCheckList);
 			List<String> toBindWriteCheckList = getToBindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toBindCloudCheckList = getToBindPrivileges(prevCloudCheckList, cloudCheckList);
+			List<String> toBindLocalReadCheckList = getToBindPrivileges(prevLocalReadCheckList, localReadCheckList);
+			List<String> toBindDownloadCheckList = getToBindPrivileges(prevDownloadCheckList, downloadCheckList);
 			List<String> toBindHJCheckList = getToBindPrivileges(prevHJCheckeList, hjCheckList);
 			List<String> toBindZKCheckList = getToBindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toBindHYCheckList = getToBindPrivileges(prevHYCheckeList, hyCheckList);
@@ -818,6 +902,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String cloudCheck : toBindCloudCheckList) {
 				toBindChecks.add(cloudCheck + "-c");
+			}
+			for (String localReadCheck : toBindLocalReadCheckList) {
+				toBindChecks.add(localReadCheck + "-lr");
+			}
+			for (String downloadCheck : toBindDownloadCheckList) {
+				toBindChecks.add(downloadCheck + "-d");
 			}
 			for (String hjCheck : toBindHJCheckList) {
 				toBindChecks.add(hjCheck + "-hj");
@@ -836,6 +926,8 @@ public class BindResourceController extends ControllerBase {
 			List<String> toUnbindReadCheckList = getToUnbindPrivileges(preReadCheckList, readCheckList);
 			List<String> toUnbindWriteCheList = getToUnbindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toUnbindCloudCheList = getToUnbindPrivileges(prevCloudCheckList, cloudCheckList);
+			List<String> toUnbindLocalReadCheList = getToUnbindPrivileges(prevLocalReadCheckList, localReadCheckList);
+			List<String> toUnbindDownloadCheList = getToUnbindPrivileges(prevDownloadCheckList, downloadCheckList);
 			List<String> toUnbindHJCheckList = getToUnbindPrivileges(prevHJCheckeList, hjCheckList);
 			List<String> toUnbindZKCheckList = getToUnbindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toUnbindHYCheckList = getToUnbindPrivileges(prevHYCheckeList, hyCheckList);
@@ -848,6 +940,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String cloudCheck : toUnbindCloudCheList) {
 				toUnbindChecks.add(cloudCheck + "-c");
+			}
+			for (String localReadCheck : toUnbindLocalReadCheList) {
+				toUnbindChecks.add(localReadCheck + "-lr");
+			}
+			for (String downloadCheck : toUnbindDownloadCheList) {
+				toUnbindChecks.add(downloadCheck + "-d");
 			}
 			for (String hjCheck : toUnbindHJCheckList) {
 				toUnbindChecks.add(hjCheck + "-hj");
@@ -872,8 +970,8 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList,prevCloudCheckList, prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
-							readCheckList, writeCheckList, cloudCheckList,hjCheckList, zkCheckList, hyCheckList);
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList,prevCloudCheckList, prevLocalReadCheckList,prevDownloadCheckList,prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
+							readCheckList, writeCheckList, cloudCheckList,localReadCheckList,downloadCheckList,hjCheckList, zkCheckList, hyCheckList);
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
@@ -915,12 +1013,12 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(
-			List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevCloudCheckList, 
+			List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevCloudCheckList,List<String> prevLocalReadCheckList,List<String> prevDownloadCheckList, 
 			List<String> prevHJCheckeList, List<String> prevZKCheckeList, List<String> prevHYCheckeList,
-			List<String> readCheckList, List<String> writeCheckList,List<String> cloudCheckList,
+			List<String> readCheckList, List<String> writeCheckList,List<String> cloudCheckList,List<String> localReadCheckList,List<String> downloadCheckList,
 			List<String> hjCheckList, List<String> zkCheckList, List<String> hyCheckList) {
-		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevCloudCheckList,prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
-				readCheckList, writeCheckList, cloudCheckList,hjCheckList, zkCheckList, hyCheckList);
+		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevCloudCheckList,prevLocalReadCheckList,prevDownloadCheckList,prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
+				readCheckList, writeCheckList, cloudCheckList,localReadCheckList,downloadCheckList,hjCheckList, zkCheckList, hyCheckList);
 		for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 			if (preReadCheckList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanRead(true);
@@ -930,6 +1028,12 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (prevCloudCheckList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanCloud(true);
+			}
+			if (prevLocalReadCheckList.contains(entry.getKey())) {
+				entry.getValue().setPrevCanLocalRead(true);
+			}
+			if (prevDownloadCheckList.contains(entry.getKey())) {
+				entry.getValue().setPrevCanDownload(true);
 			}
 			if (prevHJCheckeList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanHJ(true);
@@ -946,6 +1050,12 @@ public class BindResourceController extends ControllerBase {
 			if (cloudCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanCloud(true);
 			}
+			if (localReadCheckList.contains(entry.getKey())) {
+				entry.getValue().setNowCanLocalRead(true);
+			}
+			if (downloadCheckList.contains(entry.getKey())) {
+				entry.getValue().setNowCanDownload(true);
+			}
 			if (hjCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanHJ(true);
 			}
@@ -957,9 +1067,9 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(
-			List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevCloudCheckList,
+			List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevCloudCheckList,List<String> prevLocalReadCheckList,List<String> prevDownloadCheckList,
 			List<String> prevHJCheckeList, List<String> prevZKCheckeList, List<String> prevHYCheckeList,
-			List<String> readCheckList, List<String> writeCheckList,List<String> cloudCheckList, 
+			List<String> readCheckList, List<String> writeCheckList,List<String> cloudCheckList,List<String> localReadCheckList,List<String> downloadCheckList, 
 			List<String> hjCheckList, List<String> zkCheckList, List<String> hyCheckList) {
 		Map<String, PrivilegeStatusBO> privilegeStatusMap = new HashMap<>();
 		for (String code : preReadCheckList) {
@@ -969,6 +1079,12 @@ public class BindResourceController extends ControllerBase {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : prevCloudCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : prevLocalReadCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : prevDownloadCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : prevHJCheckeList) {
@@ -987,6 +1103,12 @@ public class BindResourceController extends ControllerBase {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : cloudCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : localReadCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : downloadCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : hjCheckList) {

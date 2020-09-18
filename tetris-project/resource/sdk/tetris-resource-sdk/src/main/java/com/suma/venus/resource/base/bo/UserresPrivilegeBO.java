@@ -17,6 +17,10 @@ public class UserresPrivilegeBO {
 	//云台权限
 	private boolean hasCloudPrivilege = false;
 	
+	private boolean hasDownloadPrivilege = false;
+	
+	private boolean hasLocalReadPrivilege = false;
+	
 	//呼叫权限
 	private boolean hasHJPrivilege = false;
 	
@@ -97,5 +101,22 @@ public class UserresPrivilegeBO {
 	public void setHasHYPrivilege(boolean hasHYPrivilege) {
 		this.hasHYPrivilege = hasHYPrivilege;
 	}
+
+	public boolean isHasDownloadPrivilege() {
+		return hasDownloadPrivilege;
+	}
+
+	public void setHasDownloadPrivilege(boolean hasDownloadPrivilege) {
+		this.hasDownloadPrivilege = hasDownloadPrivilege;
+	}
+
+	public boolean isHasLocalReadPrivilege() {
+		return hasLocalReadPrivilege;
+	}
+
+	public void setHasLocalReadPrivilege(boolean hasLocalReadPrivilege) {
+		this.hasLocalReadPrivilege = hasLocalReadPrivilege;
+	}
+	
 	
 }
