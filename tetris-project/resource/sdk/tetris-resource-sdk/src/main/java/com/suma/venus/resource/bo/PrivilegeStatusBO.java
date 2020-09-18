@@ -20,6 +20,12 @@ public class PrivilegeStatusBO {
 	//之前是否具有云台权限
 	private boolean prevCanCloud = false;
 	
+	//之前是否具有本地录制权限
+	private boolean prevCanLocalRead = false;
+		
+	//之前是否具有下载权限
+	private boolean prevCanDownload = false;
+	
 	//之前是否具有呼叫权限
 	private boolean prevCanHJ = false;
 	
@@ -35,8 +41,14 @@ public class PrivilegeStatusBO {
 	//现在是否有点播权限
 	private boolean nowCanWrite = false;
 	
-	//现在是否有点播权限
+	//现在是否有云台权限
 	private boolean nowCanCloud = false;
+	
+	//现在是否有本地录制权限
+	private boolean nowCanLocalRead = false;
+	
+	//现在是否有下载权限
+	private boolean nowCanDownload = false;
 	
 	//现在是或否有呼叫权限
 	private boolean nowCanHJ = false;
@@ -112,7 +124,17 @@ public class PrivilegeStatusBO {
 		}else{
 			sBuilder.append("0");
 		}
-		sBuilder.append("1100000000");
+		if(nowCanCloud){//本地录制置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		if(nowCanCloud){//下载置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		sBuilder.append("00000000");
 		
 		return sBuilder.toString();
 	}
@@ -135,7 +157,17 @@ public class PrivilegeStatusBO {
 		}else{
 			sBuilder.append("0");
 		}
-		sBuilder.append("1110000000000");
+		if(nowCanRead){//本地录制置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		if(nowCanRead){//下载置位
+			sBuilder.append("1");
+		}else{
+			sBuilder.append("0");
+		}
+		sBuilder.append("10000000000");
 		
 		return sBuilder.toString();
 	}
@@ -172,6 +204,22 @@ public class PrivilegeStatusBO {
 		this.prevCanCloud = prevCanCloud;
 	}
 
+	public boolean isPrevCanLocalRead() {
+		return prevCanLocalRead;
+	}
+
+	public void setPrevCanLocalRead(boolean prevCanLocalRead) {
+		this.prevCanLocalRead = prevCanLocalRead;
+	}
+
+	public boolean isPrevCanDownload() {
+		return prevCanDownload;
+	}
+
+	public void setPrevCanDownload(boolean prevCanDownload) {
+		this.prevCanDownload = prevCanDownload;
+	}
+
 	public boolean isPrevCanHJ() {
 		return prevCanHJ;
 	}
@@ -202,6 +250,22 @@ public class PrivilegeStatusBO {
 
 	public void setNowCanCloud(boolean nowCanCloud) {
 		this.nowCanCloud = nowCanCloud;
+	}
+
+	public boolean isNowCanLocalRead() {
+		return nowCanLocalRead;
+	}
+
+	public void setNowCanLocalRead(boolean nowCanLocalRead) {
+		this.nowCanLocalRead = nowCanLocalRead;
+	}
+
+	public boolean isNowCanDownload() {
+		return nowCanDownload;
+	}
+
+	public void setNowCanDownload(boolean nowCanDownload) {
+		this.nowCanDownload = nowCanDownload;
 	}
 
 	public boolean isNowCanHJ() {

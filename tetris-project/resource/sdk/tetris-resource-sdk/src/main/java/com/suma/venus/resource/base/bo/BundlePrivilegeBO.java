@@ -16,6 +16,10 @@ public class BundlePrivilegeBO {
 	
 	private boolean hasCloudPrivilege = false;
 	
+	private boolean hasDownloadPrivilege = false;
+	
+	private boolean hasLocalReadPrivilege = false;
+	
 	private String username;
 	
 	public Long getId() {
@@ -64,6 +68,22 @@ public class BundlePrivilegeBO {
 
 	public void setHasCloudPrivilege(boolean hasCloudPrivilege) {
 		this.hasCloudPrivilege = hasCloudPrivilege;
+	}
+
+	public boolean isHasDownloadPrivilege() {
+		return hasDownloadPrivilege;
+	}
+
+	public void setHasDownloadPrivilege(boolean hasDownloadPrivilege) {
+		this.hasDownloadPrivilege = hasDownloadPrivilege;
+	}
+
+	public boolean isHasLocalReadPrivilege() {
+		return hasLocalReadPrivilege;
+	}
+
+	public void setHasLocalReadPrivilege(boolean hasLocalReadPrivilege) {
+		this.hasLocalReadPrivilege = hasLocalReadPrivilege;
 	}
 
 	public String getName() {

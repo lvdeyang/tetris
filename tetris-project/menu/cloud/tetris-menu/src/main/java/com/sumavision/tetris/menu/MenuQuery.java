@@ -69,7 +69,9 @@ public class MenuQuery {
 			List<MenuPO> menus = menuDao.findByRoleIdIn(roleIds);
 			String xmlString = memoryQuery.findAll();
 			for (MenuPO menuPO : menus) {
+				if(menuPO.getLink() == null) continue;
 				String appName = menuPO.getLink().split("//")[1].split("/")[0].toLowerCase();
+				
 				XMLReader reader = new XMLReader(xmlString);
 				List<Node> nodes = reader.readNodeList("applications.application");
 				for (Node node : nodes) {
@@ -92,7 +94,7 @@ public class MenuQuery {
 						break;
 					}
 				}
-			}
+			} 
 			
 			List<MenuPO> parentMenus = null;
 			if(menus!=null && menus.size()>0) parentMenus = queryParentMenus(menus);

@@ -1,6 +1,10 @@
 package com.sumavision.tetris.auth.login;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionEvent;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -164,8 +168,8 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
-		if(user.getIp() != null && user.getIp().equals("")){
-			if(! loginIp.equals(user.getIp())) throw new UserIpNotAllowLoginException(loginIp);
+		if(user.getLoginIp() != null && user.getLoginIp().length() != 0){
+			if(! loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
 		}
 		if(UserClassify.LDAP.equals(user.getClassify())){
 			throw new DonotSupportRoamLoginException();
@@ -185,6 +189,9 @@ public class LoginService {
 			userDao.saveAndFlush(user);
 			throw new PasswordErrorException(username, password);
 		} 
+		Date date = new Date();
+		user.setLastLoginTime(date);
+		userDao.save(user);
 		if(TerminalType.QT_ZK.equals(terminalType)){
 			//指控终端重复登录校验
 			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
@@ -291,6 +298,14 @@ public class LoginService {
 		tokenDao.save(token);
 	}
 	
+	/**
+	 * 获取登录时的ip地址<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月17日 下午4:42:09
+	 * @param request
+	 * @return ip IP地址
+	 */
 	public String loginIp(HttpServletRequest request) throws Exception{
 		String ip = request.getHeader("x-forwarded-for");
 	    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
