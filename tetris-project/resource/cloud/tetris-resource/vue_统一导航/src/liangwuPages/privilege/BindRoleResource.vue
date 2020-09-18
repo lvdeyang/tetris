@@ -1,20 +1,16 @@
 <template>
   <section>
-
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
       <el-tab-pane label="绑定资源用户" name="BindRoleResource"></el-tab-pane>
       <!-- <el-tab-pane label="绑定虚拟资源" name="BindVirtualResource"></el-tab-pane> -->
     </el-tabs>
-
     <el-card style="float:left;margin-top:10px;width:20%;font-size: 18px;" body-style="padding:0px">
       <el-table ref="roleTable" :data="roles" highlight-current-row v-loading="roleTableLoading" @current-change="handleRoleTableRowChange" style="width: 100%;">
         <el-table-column prop="name" label="角色名" sortable>
         </el-table-column>
       </el-table>
     </el-card>
-
     <el-card style="float:left;margin-left:50px;margin-top:10px;width:70%;" body-style="padding:0px">
-
       <div slot="header" class="clearfix">
         <!--
         <span style="float: left;font-size: 18px;">设备资源</span>
@@ -22,20 +18,17 @@
           <el-option v-for="item in bindTypeOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
-
-                -->
+        -->
         <span style="float: left;font-size: 14px; height: 34px;line-height: 34px;">选择分组：</span>
         <el-select v-model="folderTreeSelected.label" size="medium" placeholder="选择分组" style="float: left; width: 200px" filterable :filter-method="dataFilter" clearable @clear="clearHandle" ref="selectTree">
           <el-option class="tree-select" :value="folderTreeSelected.value" :label="folderTreeSelected.label" style="width: 200px;height: auto;overflow: hidden;">
             <el-tree ref="tree" :data="treeData" :props="defaultProps" :default-expand-all="defaultExpandAll" :filter-node-method="filterNode" :expand-on-click-node="expandOnClickNode" @node-click="handleNodeClick"></el-tree>
           </el-option>
         </el-select>
-
         <el-select v-model="filters.deviceModel" size="medium" placeholder="选择资源类型" style="float: left;margin-left:10px;width:120px;">
           <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
-
         <el-input size="medium" v-model="filters.keyword" style="float: left;margin-left: 10px;width:200px;" placeholder="关键字"></el-input>
         <el-button size="small" type="info" @click="getResources" style="float: left;margin-left: 10px">查询设备</el-button>
         <!-- <el-button size="small" type="info" @click="getUsers" style="float: left;">查询用户</el-button> -->
@@ -1029,9 +1022,9 @@ export default {
   },
   mounted () {
     var self = this;
-    self.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/BindResource');
-    });
+    // self.$nextTick(function () {
+    //   self.$parent.$parent.$parent.$parent.$parent.setActive('/BindResource');
+    // });
     self.getRoles();
     self.getDeviceModels();
     // this.getRoles()
