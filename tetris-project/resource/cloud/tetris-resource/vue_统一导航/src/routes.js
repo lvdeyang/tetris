@@ -29,10 +29,18 @@ import LwModifyBundle from './liangwuPages/bundle/ModifyBundle.vue'
 import LwConfigBundle from './liangwuPages/bundle/ConfigBundle.vue'
 import LwBindRoleResource from './liangwuPages/privilege/BindRoleResource.vue'
 import LwEncodeManage from './liangwuPages/encodeManage/EncodeManage.vue'
+import LwCapacity from './liangwuPages/capacity/capacity.vue'
 
 let routes = [{
     path: '/404',
     component: NotFound,
+    name: '',
+    hidden: true
+  },
+
+  {
+    path: '/LwBindRoleResource',
+    component: LwBindRoleResource,
     name: '',
     hidden: true
   },
@@ -194,6 +202,12 @@ let routes = [{
       {
         path: '/LwBindRoleResource',
         component: LwBindRoleResource,
+        name: '',
+        hidden: true
+      },
+      {
+        path: '/LwCapacity',
+        component: LwCapacity,
         name: '',
         hidden: true
       },
