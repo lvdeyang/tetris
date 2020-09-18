@@ -4,6 +4,7 @@ import com.sumavision.bvc.device.group.enumeration.GroupType;
 import com.sumavision.bvc.device.group.enumeration.RecordType;
 import com.sumavision.bvc.device.group.enumeration.SourceType;
 import com.sumavision.bvc.device.group.po.RecordPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordMode;
 
 public class RecordSetBO {
 
@@ -40,6 +41,27 @@ public class RecordSetBO {
 	private RecordSourceBO video_source = new RecordSourceBO();
 	
 	private RecordSourceBO audio_source = new RecordSourceBO();
+	
+	//定死
+	private String multi_video_addr="224.1.1.4:2000";
+	
+	private String multi_audio_addr="224.1.1.4:2002";
+	
+	//mode:multicast, //single, multicast
+	//先写为String 写死
+	private String mode="single";
+	
+	/** 录制模式*/
+	private String store_mode;
+	
+	/** 定时起止时间*/
+	private RecordDateTimeBO datetime;
+	
+	/** 排期起始时间*/
+	private RecordTimeSegmentBO time_segment;
+	
+	/** 循环录制*/
+	private RecordCycleBO cycle;
 
 	public String getTaskId() {
 		return taskId;
@@ -176,6 +198,69 @@ public class RecordSetBO {
 		return this;
 	}
 	
+	public String getMode() {
+		return mode;
+	}
+
+	public RecordSetBO setMode(String mode) {
+		this.mode = mode;
+		return this;
+	}
+
+	public String getStore_mode() {
+		return store_mode;
+	}
+
+	public RecordSetBO setStore_mode(String store_mode) {
+		this.store_mode = store_mode;
+		return this;
+	}
+
+	public RecordDateTimeBO getDatetime() {
+		return datetime;
+	}
+
+	public RecordSetBO setDatetime(RecordDateTimeBO datetime) {
+		this.datetime = datetime;
+		return this;
+	}
+
+	public RecordTimeSegmentBO getTime_segment() {
+		return time_segment;
+	}
+
+	public RecordSetBO setTime_segment(RecordTimeSegmentBO time_segment) {
+		this.time_segment = time_segment;
+		return this;
+	}
+
+	public RecordCycleBO getCycle() {
+		return cycle;
+	}
+
+	public RecordSetBO setCycle(RecordCycleBO cycle) {
+		this.cycle = cycle;
+		return this;
+	}
+
+	public String getMulti_video_addr() {
+		return multi_video_addr;
+	}
+
+	public RecordSetBO setMulti_video_addr(String multi_video_addr) {
+		this.multi_video_addr = multi_video_addr;
+		return this;
+	}
+
+	public String getMulti_audio_addr() {
+		return multi_audio_addr;
+	}
+
+	public RecordSetBO setMulti_audio_addr(String multi_audio_addr) {
+		this.multi_audio_addr = multi_audio_addr;
+		return this;
+	}
+
 	/**
 	 * @Title: 从业务数据中复制数据<br/> 
 	 * @param record 业务录制数据

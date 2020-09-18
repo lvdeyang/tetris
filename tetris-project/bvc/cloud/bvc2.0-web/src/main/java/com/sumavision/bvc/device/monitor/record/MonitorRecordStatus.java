@@ -6,6 +6,7 @@ public enum MonitorRecordStatus{
 
 	WAITING("等待"),
 	RUN("进行中"),
+	WAITINGTORESTART("等待重新开始"),
 	STOP("已完成");
 	
 	private String name;
