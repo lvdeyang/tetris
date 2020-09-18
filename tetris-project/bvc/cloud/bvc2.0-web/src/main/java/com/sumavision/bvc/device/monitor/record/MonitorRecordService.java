@@ -26,8 +26,11 @@ import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.RecordCycleBO;
+import com.sumavision.bvc.device.group.bo.RecordDateTimeBO;
 import com.sumavision.bvc.device.group.bo.RecordSetBO;
 import com.sumavision.bvc.device.group.bo.RecordSourceBO;
+import com.sumavision.bvc.device.group.bo.RecordTimeSegmentBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
@@ -162,7 +165,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname
+			String nickname,int totalSizeMb
 
 	) throws Exception {
 
@@ -199,7 +202,7 @@ public class MonitorRecordService {
 		task.setAudioChannelId(audioChannelId);
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
-
+		task.setTotalSizeMb(totalSizeMb);
 		MonitorRecordStatus status = null;
 
 		// 录制模式选择
@@ -226,12 +229,12 @@ public class MonitorRecordService {
 		task.setPreviewUrl(previewUrl);
 		monitorRecordDao.save(task);
 
-		// 处理排期录制
+		// 处理排期录制   直接下命令
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
 			now = DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
 			if (task.getStartTime().after(now)) {
-				return task;
+//				return task;
 			} else {
 				task.setStatus(MonitorRecordStatus.RUN);
 			}
@@ -309,15 +312,15 @@ public class MonitorRecordService {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		MonitorRecordMode parsedMode = MonitorRecordMode.valueOf(mode);
-		Date parsedStartTime = startTime==null?new Date():DateUtil.parse(startTime, DateUtil.dateTimePattern);
-		Date parsedEndTime = endTime==null?null:DateUtil.parse(endTime, DateUtil.dateTimePattern);
+//		Date parsedStartTime = startTime==null?new Date():DateUtil.parse(startTime, DateUtil.dateTimePattern);
+//		Date parsedEndTime = endTime==null?null:DateUtil.parse(endTime, DateUtil.dateTimePattern);
 		
 		MonitorRecordPO task = new MonitorRecordPO();
 		task.setMode(parsedMode);
 		task.setFileName(fileName);
 		
-		task.setStartTime(parsedStartTime);
-		task.setEndTime(parsedEndTime);
+		task.setStartTime(new Date());
+//		task.setEndTime(parsedEndTime); //不需要结束时间
 		task.setVideoType(MonitorRecordSourceType.DEVICE);
 		task.setVideoBundleId(videoBundleId);
 		task.setVideoBundleName(videoBundleName);
@@ -351,17 +354,6 @@ public class MonitorRecordService {
 		String previewUrl = urlIndex + ".m3u8";
 		task.setPreviewUrl(previewUrl);
 		monitorRecordDao.save(task);
-		
-		//处理排期录制
-		if(MonitorRecordMode.SCHEDULING.equals(parsedMode)){
-			Date now = new Date();
-			now = DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
-			if(task.getStartTime().after(now)){
-				return task;
-			}else{
-				task.setStatus(MonitorRecordStatus.RUN);
-			}
-		}
 		
 		//录制规则表以及关联实例表
 		String dayStart="";
@@ -478,8 +470,7 @@ public class MonitorRecordService {
 			if(shouldRecord){
 				monitorRecordManyTimes.setStartTime(shouldStart)
 									.setEndTime(shouldEnd)
-									.setStatus(MonitorRecordStatus.WAITING)
-									//待定
+									.setStatus(MonitorRecordStatus.RUN)
 									.setRelationId(relation.getId())
 									.setIndexNumber(relation.getIndexNumber()+1);
 				relation.setIndexNumber(relation.getIndexNumber()+1);
@@ -489,8 +480,9 @@ public class MonitorRecordService {
 		}
 		//录制规则表以及关联实例表结束
 		
+		//下命令
 		LogicBO logic = openBundle(task, codec);
-		logic.merge(startRecord(task, codec));
+		logic.merge(startManyTimesRecord(task,relation,codec));
 		sendProtocol(task, logic, "点播系统：开始录制本地设备");
 		
 		return task;
@@ -1111,6 +1103,52 @@ public class MonitorRecordService {
 		RecordSourceBO videoSource = new RecordSourceBO().setType("channel").setBundle_id(task.getVideoBundleId())
 				.setLayer_id(task.getVideoLayerId()).setChannel_id(task.getVideoChannelId());
 		recordSet.setVideo_source(videoSource);
+		
+		//定时，循环额外添加
+		if(MonitorRecordMode.SCHEDULING.equals(task.getMode())){
+			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattenWithoutSecind))
+														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)));
+		}else if(MonitorRecordMode.CYCLE.equals(task.getMode())){
+			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb()));
+		}
+		//额外添加结束
+		
+		if (task.getAudioBundleId() != null) {
+			RecordSourceBO audioSource = new RecordSourceBO().setType("channel").setBundle_id(task.getAudioBundleId())
+					.setLayer_id(task.getAudioLayerId()).setChannel_id(task.getAudioChannelId());
+			recordSet.setAudio_source(audioSource);
+		}
+		logic.setRecordSet(new ArrayListWrapper<RecordSetBO>().add(recordSet).getList());
+
+		return logic;
+	}
+	
+	/**
+	 * 处理开始排期录制协议<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月18日 上午11:29:59
+	 * @param task
+	 * @param codec
+	 * @return
+	 * @throws Exception
+	 */
+	private LogicBO startManyTimesRecord(MonitorRecordPO task,MonitorRecordManyTimesRelationPO relation, CodecParamBO codec) throws Exception {
+
+		LogicBO logic = new LogicBO().setUserId(task.getUserId().toString());
+
+		RecordSetBO recordSet = new RecordSetBO().setGroupUuid(task.getUuid()).setUuid(task.getUuid()).setVideoType("2")
+				.setVideoName(task.getFileName()).setUrl(task.getPreviewUrl().replace(".m3u8", ""))
+				.setPlayUrl(task.getPreviewUrl()).setCodec_param(codec);
+		RecordSourceBO videoSource = new RecordSourceBO().setType("channel").setBundle_id(task.getVideoBundleId())
+				.setLayer_id(task.getVideoLayerId()).setChannel_id(task.getVideoChannelId());
+		recordSet.setVideo_source(videoSource);
+		
+		//处理排期额外添加开始
+		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
+		recordSet.setTime_segment(timeSegment);
+		//添加结束
+		
 		if (task.getAudioBundleId() != null) {
 			RecordSourceBO audioSource = new RecordSourceBO().setType("channel").setBundle_id(task.getAudioBundleId())
 					.setLayer_id(task.getAudioLayerId()).setChannel_id(task.getAudioChannelId());
@@ -1690,16 +1728,14 @@ public class MonitorRecordService {
 
 		Map<String, LogicBO> logics = new HashMap<String, LogicBO>();
 		
-		//找出需要录制的规则表
-		List<MonitorRecordManyTimesRelationPO> relations=monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
-		List<Long> monitorRecordIds=new ArrayList<Long>();
+		//找出需要录制的规则表 早录一会
+		List<MonitorRecordManyTimesRelationPO> startRelations=monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
+		List<Long> monitorRecordStartIds=new ArrayList<Long>();
 		
-		for(MonitorRecordManyTimesRelationPO relation:relations){
-			monitorRecordIds.add(relation.getBusinessId());
+		for(MonitorRecordManyTimesRelationPO relation:startRelations){
+			monitorRecordStartIds.add(relation.getBusinessId());
 		}
-		
-		// 早录一会
-		List<MonitorRecordPO> needStartRecords = monitorRecordDao.findByIdIn(monitorRecordIds);
+		List<MonitorRecordPO> needStartRecords = monitorRecordDao.findByIdIn(monitorRecordStartIds);
 		if (needStartRecords != null && needStartRecords.size() > 0) {
 			Set<Long> avtplIds = new HashSet<Long>();
 			Set<Long> gearIds = new HashSet<Long>();
@@ -1711,7 +1747,7 @@ public class MonitorRecordService {
 			List<AvtplGearsPO> gears = avtplGearsDao.findAll(gearIds);
 			for (MonitorRecordPO record : needStartRecords) {
 
-				// logic的添加
+			/*	// logic的添加
 				LogicBO targetLogic = logics.get(record.getUserId());
 				if (targetLogic == null) {
 					targetLogic = new LogicBO().setUserId(record.getUserId().toString())
@@ -1755,26 +1791,41 @@ public class MonitorRecordService {
 					targetLogic.merge(startRecord(record, codec));
 				}
 				// logic结束
-
+*/
 				// 修改任务状态
 				record.setStatus(MonitorRecordStatus.RUN);
 			}
+			
+			//更新录制规则表中的下次开始停止时间,MonitorRecordManyTimesPO中添加一些数据
+			List<MonitorRecordManyTimesPO> monitorRecordStartManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
+			
+			for(MonitorRecordManyTimesRelationPO relation:startRelations){
+				MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
+				monitorRecordManyTimesPO.setStartTime(relation.getNextStartTime())
+										.setEndTime(relation.getNextEndTime())
+										.setIndexNumber(relation.getIndexNumber())
+										.setStatus(MonitorRecordStatus.RUN);
+				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
+				monitorRecordManyTimesRelationService.updateNextTime(relation);
+			}
+			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
+			//更新添加结束
 		}
 		
-		List<MonitorRecordManyTimesPO> MonitorRecordManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
 		
-		//更新录制规则表中的下次开始停止时间,MonitorRecordManyTimesPO中添加一些数据
-		for(MonitorRecordManyTimesRelationPO relation:relations){
-			MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
-//			monitorRecordManyTimesPO.setEndTime(endTime);
-			monitorRecordManyTimesRelationService.updateNextTime(relation);
-		}
 
-		// 晚停一会
-		List<MonitorRecordPO> needStopRecords = monitorRecordDao
-				.findNeedStopSchedulingRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.SCHEDULING_INTERVAL));
+		//找出需要停止录制的规则表   晚停一会
+		
+		List<MonitorRecordManyTimesRelationPO> stopRelations=monitorRecordManyTimesRelationDao.findNeedStopRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.SCHEDULING_INTERVAL));
+		List<Long> monitorRecordStopIds=new ArrayList<Long>();
+		
+		for(MonitorRecordManyTimesRelationPO relation:stopRelations){
+			monitorRecordStopIds.add(relation.getBusinessId());
+		}
+		
+		List<MonitorRecordPO> needStopRecords = monitorRecordDao.findByIdIn(monitorRecordStopIds);
 		if (needStopRecords != null && needStopRecords.size() > 0) {
-			for (MonitorRecordPO record : needStopRecords) {
+			/*for (MonitorRecordPO record : needStopRecords) {
 
 				// logic协议
 				LogicBO targetLogic = logics.get(record.getUserId());
@@ -1810,9 +1861,22 @@ public class MonitorRecordService {
 				}
 				// logic结束
 
-				// 修改任务状态
-				record.setStatus(MonitorRecordStatus.STOP);
+			}*/
+			
+			//停止排期录制
+			//通过排期规则表找到在运行的排期，停止录制
+			List<Long> monitorRecordEndManyTimesIds=new ArrayList<Long>();
+			
+			for(MonitorRecordManyTimesRelationPO relation:startRelations){
+				monitorRecordEndManyTimesIds.add(relation.getId());
 			}
+			List<MonitorRecordManyTimesPO> monitorRecordEndManyTimes=monitorRecordManyTimesDao.findNeedStop(monitorRecordEndManyTimesIds);
+			if(monitorRecordEndManyTimes!=null&&monitorRecordEndManyTimes.size()>0){
+				for(MonitorRecordManyTimesPO monitorRecordManyTimesPo:monitorRecordEndManyTimes){
+					monitorRecordManyTimesPo.setStatus(MonitorRecordStatus.STOP);
+				}
+			}
+			//停止结束
 		}
 
 		if (needStartRecords != null && needStartRecords.size() > 0) {
