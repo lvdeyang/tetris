@@ -446,7 +446,7 @@ public class GuidePlayService {
 				      .setCodec_param(codec);
 			if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
 				String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
-				connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr);
+				connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_addr(bundlePO.getMulticastSourceIp());
 			}
 			connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);
 			
