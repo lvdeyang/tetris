@@ -5,7 +5,9 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum MonitorRecordMode {
 
 	MANUAL("手动"),
-	SCHEDULING("排期");
+	SCHEDULING("定时"),
+	TIMESEGMENT("排期"),
+	CYCLE("循环");
 	
 	private String name;
 	
