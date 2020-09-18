@@ -61,7 +61,7 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 	private MonitorRecordStatus status;
 	
 	/** 记录序号，用于拼接存储地址*/
-	private int indexNumber;
+	private Integer indexNumber;
 
 	@Column(name="BUSINESSID")
 	public Long getBusinessId() {
@@ -187,11 +187,11 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 	}
 
 	@Column(name="INDEX_NUMBER")
-	public int getIndexNumber() {
+	public Integer getIndexNumber() {
 		return indexNumber;
 	}
 
-	public MonitorRecordManyTimesRelationPO setIndexNumber(int indexNumber) {
+	public MonitorRecordManyTimesRelationPO setIndexNumber(Integer indexNumber) {
 		this.indexNumber = indexNumber;
 		return this;
 	}
