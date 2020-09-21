@@ -94,7 +94,8 @@ public class CommandVodRecordParser {
 			String mode, 
 			String fileName, 
 			String startTime, 
-			String endTime) throws Exception{
+			String endTime
+			) throws Exception{
 		
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);		
 		PageTaskPO pageTask = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), locationIndex);
@@ -147,6 +148,7 @@ public class CommandVodRecordParser {
 				String videoChannelId = encodeVideo.getChannelId();
 				String videoBaseType = encodeVideo.getBaseType();
 				String videoChannelName = encodeVideo.getName();
+				
 				String audioBundleId = bundle.getBundleId();
 				String audioBundleName = bundle.getBundleName();
 				String audioBundleType = bundle.getBundleType();
@@ -159,7 +161,7 @@ public class CommandVodRecordParser {
 						mode, fileName, startTime, endTime, 
 						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-						user.getId(), user.getUserno(), user.getName());
+						user.getId(), user.getUserno(), user.getName(),10240);
 
 				return task;
 			}else{

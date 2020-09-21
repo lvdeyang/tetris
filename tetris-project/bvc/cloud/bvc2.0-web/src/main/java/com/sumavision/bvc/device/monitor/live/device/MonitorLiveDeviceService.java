@@ -15,8 +15,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.device.group.bo.AudioParamBO;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -24,6 +28,7 @@ import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.VideoParamBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
@@ -52,6 +57,8 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.common.MulticastService;
+import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -88,6 +95,9 @@ public class MonitorLiveDeviceService {
 	private MonitorOsdService monitorOsdService;
 	
 	@Autowired
+	private ExtraInfoService extraInfoService;
+	
+	@Autowired
 	private BundleDao bundleDao;
 	
 	@Autowired
@@ -98,6 +108,9 @@ public class MonitorLiveDeviceService {
 	
 	@Autowired
 	private MonitorLiveCommons commons;
+	
+	@Autowired
+	private MulticastService multicastService;
 	
 	@Autowired
 	private ResourceService resourceService;
@@ -1012,6 +1025,13 @@ public class MonitorLiveDeviceService {
 														   .setChannel_status("Open")
 														   .setBase_type(live.getVideoBaseType())
 														   .setCodec_param(encodeCodec);
+			//发组播视频
+			if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+				connectVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
+									.setMulti_addr(videoAddr)
+									.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+			}
 			connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
 			
 			logic.getConnectBundle().add(connectVideoBundle);
@@ -1022,6 +1042,13 @@ public class MonitorLiveDeviceService {
 																   .setChannel_status("Open")
 																   .setBase_type(live.getAudioBaseType())
 																   .setCodec_param(encodeCodec);
+					//发组播音频
+					if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+						String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 4);
+						connectAudioChannel.setMode(TransmissionMode.MULTICAST.getCode())
+											.setMulti_addr(audioAddr)
+											.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+					}
 					connectVideoBundle.getChannels().add(connectAudioChannel);
 				}else{
 					ConnectBundleBO connectAudioBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
@@ -1051,6 +1078,26 @@ public class MonitorLiveDeviceService {
 																	     .setLayerId(live.getDstVideoLayerId())
 																	     .setBundle_type(live.getDstVideoBundleType())
 																	     .setDevice_model(live.getDstVideoDeviceModel());
+			//接收转码
+			CodecParamBO thisCodec = null;
+			if(Boolean.TRUE.equals(dstVideoBundle.getTranscod())){
+				List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(dstVideoBundle.getBundleId());
+				String dst_codec = extraInfoService.queryExtraInfoValueByName(extraInfos, "dst_codec");
+				String resolution = extraInfoService.queryExtraInfoValueByName(extraInfos, "resolution");
+				String fps = extraInfoService.queryExtraInfoValueByName(extraInfos, "fps");
+				String gop_size = extraInfoService.queryExtraInfoValueByName(extraInfos, "gop_size");
+				String video_bitrate = extraInfoService.queryExtraInfoValueByName(extraInfos, "video_bitrate");
+				thisCodec = new CodecParamBO().copy(decodeCodec);
+				VideoParamBO videoParam = thisCodec.getVideo_param();
+				videoParam.setTranscode(true);
+				if(dst_codec != null) videoParam.setCodec(dst_codec);
+				if(resolution != null) videoParam.setResolution(resolution);
+				if(fps != null) videoParam.setFps(fps);
+				if(gop_size != null) videoParam.setGop_size(gop_size);
+				if(video_bitrate != null) videoParam.setBitrate(video_bitrate);
+			}
+			if(thisCodec == null) thisCodec = decodeCodec;
+			
 			//对转码预览任务，添加udp_decode类型的passby。对210接入层不能带passby，否则会异常
 			if(transcord){
 				JSONObject pass_by_content = new JSONObject();
@@ -1070,7 +1117,14 @@ public class MonitorLiveDeviceService {
 			ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(live.getDstVideoChannelId())
 														      .setChannel_status("Open")
 														      .setBase_type(live.getDstVideoBaseType())
-														      .setCodec_param(decodeCodec);
+														      .setCodec_param(thisCodec);
+			//收组播视频
+			if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+				connectDstVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
+									.setMulti_addr(videoAddr)
+									.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+			}
 			ForwardSetSrcBO videoForwardSetSrc = new ForwardSetSrcBO().setType("channel")
 																 	  .setBundleId(live.getVideoBundleId())
 																 	  .setLayerId(live.getVideoLayerId())
@@ -1087,7 +1141,14 @@ public class MonitorLiveDeviceService {
 					ConnectBO connectDstAudioChannel = new ConnectBO().setChannelId(live.getDstAudioChannelId())
 																      .setChannel_status("Open")
 																      .setBase_type(live.getDstAudioBaseType())
-																      .setCodec_param(decodeCodec);
+																      .setCodec_param(thisCodec);
+					//收组播音频
+					if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+						String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 4);
+						connectDstAudioChannel.setMode(TransmissionMode.MULTICAST.getCode())
+											.setMulti_addr(audioAddr)
+											.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+					}
 					ForwardSetSrcBO audioForwardSetSrc = new ForwardSetSrcBO().setType("channel")
 						 	  												  .setBundleId(live.getAudioBundleId())
 						 	  												  .setLayerId(live.getAudioLayerId())

@@ -1,20 +1,22 @@
 <template>
   <div class="header">
     <el-col :span="6" class="header-col">
-      <!-- <div class="logo-wrapper">
-        <img class="logo-img" src="~assets/logo.png" />
-      </div> -->
       <div class="collapsed-icon-wrapper" @click="collapseMenu()">
         <img v-if="!isCollapsed" class="collapsed-icon" src="~assets/un-collapse.png" />
         <img v-if="isCollapsed" class="collapsed-icon" src="~assets/collapsed.png" />
       </div>
+
+      <div class="logo-wrapper">
+        <img class="logo-img" src="~assets/bvclogo.png" />
+      </div>
     </el-col>
     <el-col :span="12" class="header-col">
-      <el-menu class="el-menu-demo" mode="horizontal" :default-active="active" unique-opened router background-color="#37404f" text-color="#bfcfd9" active-text-color="#ffffff">
-        <template v-for="(item, index) in routes" v-if="!item.hidden">
-          <el-menu-item style="height:50px" :index="item.path" :key="item.path" v-if="!item.hidden">{{item.name}}</el-menu-item>
-        </template>
-      </el-menu>
+      <!-- <el-menu class="el-menu-demo" mode="horizontal"  :default-active="active"
+					 unique-opened router background-color="#37404f" text-color="#bfcfd9" active-text-color="#ffffff">
+					<template v-for="(item, index) in routes" v-if="!item.hidden">
+						<el-menu-item style="height:50px" :index="item.path" :key="item.path" v-if="!item.hidden">{{item.name}}</el-menu-item>
+					</template>
+				</el-menu> -->
     </el-col>
     <el-col :span="6" class="header-col">
       <div style="float:right; margin-right:10px">
@@ -120,33 +122,28 @@ export default {
   color: #bfcfd9;
   .header-col {
     height: 50px;
-    .el-menu-demo {
-      border-bottom: none !important;
-    }
+
     .collapsed-icon-wrapper {
-      width: 26px;
+      width: 56px;
       padding-top: 5px;
-      height: 45px;
+      height: 100%;
       float: left;
-      margin-left: 29px;
       //background-color: #07aaff;
-      display: none;
+
       .collapsed-icon {
-        margin-left: 3px;
+        margin-left: 18px;
       }
     }
     .collapsed-icon-wrapper:hover {
-      background-color: rgb(44, 51, 63);
+      background-color: #07aaff;
     }
 
     .logo-wrapper {
-      width: 200px;
-      height: 50px;
+      margin-left: 10px;
+      height: 100%;
       float: left;
-      text-align: center;
       .logo-img {
         margin-top: 5px;
-        width: 80%;
       }
     }
     .notice-wrapper {

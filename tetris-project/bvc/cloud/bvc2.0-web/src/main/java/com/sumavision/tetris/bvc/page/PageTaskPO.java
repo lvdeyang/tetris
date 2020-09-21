@@ -84,6 +84,9 @@ public class PageTaskPO extends AbstractBasePO {
 
 	/** 组播地址 */
 	private String videoMultiAddr;
+
+	/** 源组播地址 */
+	private String videoMultiSrcAddr;
 	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineVideoUuid;
@@ -134,6 +137,9 @@ public class PageTaskPO extends AbstractBasePO {
 	
 	/** 音频组播地址 */
 	private String audioMultiAddr;
+
+	/** 音频源组播地址 */
+	private String audioMultiSrcAddr;
 	
 	/** 转发类型为合屏【|混音】：存合屏【|混音】uuid */
 	private String combineAudioUuid;
@@ -340,6 +346,14 @@ public class PageTaskPO extends AbstractBasePO {
 		this.videoMultiAddr = videoMultiAddr;
 	}
 
+	public String getVideoMultiSrcAddr() {
+		return videoMultiSrcAddr;
+	}
+
+	public void setVideoMultiSrcAddr(String videoMultiSrcAddr) {
+		this.videoMultiSrcAddr = videoMultiSrcAddr;
+	}
+
 	public String getCombineVideoUuid() {
 		return combineVideoUuid;
 	}
@@ -473,6 +487,14 @@ public class PageTaskPO extends AbstractBasePO {
 		this.audioMultiAddr = audioMultiAddr;
 	}
 	
+	public String getAudioMultiSrcAddr() {
+		return audioMultiSrcAddr;
+	}
+
+	public void setAudioMultiSrcAddr(String audioMultiSrcAddr) {
+		this.audioMultiSrcAddr = audioMultiSrcAddr;
+	}
+
 	public String getCombineAudioUuid() {
 		return combineAudioUuid;
 	}

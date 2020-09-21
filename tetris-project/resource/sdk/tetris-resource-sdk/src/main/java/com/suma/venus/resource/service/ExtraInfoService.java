@@ -1,5 +1,6 @@
 package com.suma.venus.resource.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -42,5 +43,21 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 	
 	public int deleteByBundleId(String bundleId){
 		return extraInfoDao.deleteByBundleId(bundleId);
+	}
+	
+	public ExtraInfoPO queryExtraInfoByName(Collection<ExtraInfoPO> extraInfos, String name){
+		if(name == null) return null;
+		for(ExtraInfoPO extraInfo : extraInfos){
+			if(name.equals(extraInfo.getName())){
+				return extraInfo;
+			}
+		}
+		return null;
+	}
+	
+	public String queryExtraInfoValueByName(Collection<ExtraInfoPO> extraInfos, String name){
+		ExtraInfoPO extraInfo = queryExtraInfoByName(extraInfos, name);
+		if(extraInfo != null) return extraInfo.getValue();
+		return null;
 	}
 }

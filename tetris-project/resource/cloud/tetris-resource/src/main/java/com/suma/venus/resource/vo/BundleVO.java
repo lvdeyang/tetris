@@ -63,6 +63,15 @@ public class BundleVO {
 	/** 组播源ip */
 	private String multicastSourceIp;
 	
+	/**地点*/
+	private String location;
+	
+	/**设备folderName*/
+	private String bundleFolderName;
+	
+	/**是否转码*/
+	private Boolean transcod;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -86,6 +95,8 @@ public class BundleVO {
 		po.setMulticastEncodeAddr(this.getMulticastEncodeAddr());
 		po.setMulticastDecode(this.getMulticastDecode());
 		po.setMulticastSourceIp(this.getMulticastSourceIp());
+		po.setLocation(this.getLocation());
+		po.setTranscod(this.getTranscod());
 		return po;
 	}
 	
@@ -113,6 +124,8 @@ public class BundleVO {
 		vo.setMulticastEncodeAddr(po.getMulticastEncodeAddr()==null?"":po.getMulticastEncodeAddr());
 		vo.setMulticastDecode(po.getMulticastDecode()==null?false:po.getMulticastDecode());
 		vo.setMulticastSourceIp(po.getMulticastSourceIp()==null?"":po.getMulticastSourceIp());
+		vo.setLocation(po.getLocation()==null?"":po.getLocation());
+		vo.setTranscod(po.getTranscod()==null?false:po.getTranscod());
 		return vo;
 	}
 	
@@ -123,6 +136,22 @@ public class BundleVO {
 	}
 
 	
+	public String getBundleFolderName() {
+		return bundleFolderName;
+	}
+
+	public void setBundleFolderName(String bundleFolderName) {
+		this.bundleFolderName = bundleFolderName;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	public String getMulticastSourceIp() {
 		return multicastSourceIp;
 	}
@@ -321,6 +350,14 @@ public class BundleVO {
 
 	public void setMulticastDecode(Boolean multicastDecode) {
 		this.multicastDecode = multicastDecode;
+	}
+
+	public Boolean getTranscod() {
+		return transcod;
+	}
+
+	public void setTranscod(Boolean transcod) {
+		this.transcod = transcod;
 	}
 	
 }

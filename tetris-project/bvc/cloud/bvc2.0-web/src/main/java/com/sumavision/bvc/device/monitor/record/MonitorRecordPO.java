@@ -132,7 +132,9 @@ public class MonitorRecordPO extends AbstractBasePO{
 	
 	/** 文件存储位置 */
 	private String storeLayerId;
-
+	
+	private Integer totalSizeMb;
+	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "VIDEO_TYPE")
 	public MonitorRecordSourceType getVideoType() {
@@ -466,6 +468,14 @@ public class MonitorRecordPO extends AbstractBasePO{
 
 	public void setStoreLayerId(String storeLayerId) {
 		this.storeLayerId = storeLayerId;
+	}
+	@Column(name = "TOTAL_SIZE_MB")
+	public Integer getTotalSizeMb() {
+		return totalSizeMb;
+	}
+
+	public void setTotalSizeMb(Integer totalSizeMb) {
+		this.totalSizeMb = totalSizeMb;
 	}
 	
 }

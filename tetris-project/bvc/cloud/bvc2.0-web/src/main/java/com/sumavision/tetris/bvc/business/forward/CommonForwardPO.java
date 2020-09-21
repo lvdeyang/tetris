@@ -64,6 +64,9 @@ public class CommonForwardPO extends AbstractBasePO{
 
 	/** 组播地址 */
 	private String videoMultiAddr;
+
+	/** 源组播地址 */
+	private String videoMultiSrcAddr;
 	
 //	private ForwardDstType forwardDstType;
 
@@ -113,6 +116,9 @@ public class CommonForwardPO extends AbstractBasePO{
 	
 	/** 音频组播地址 */
 	private String audioMultiAddr;
+
+	/** 音频源组播地址 */
+	private String audioMultiSrcAddr;
 	
 	/** 用户名/设备名/文件名 */
 	private String srcAudioName;
@@ -185,6 +191,14 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.videoMultiAddr = videoMultiAddr;
 	}
 	
+	public String getVideoMultiSrcAddr() {
+		return videoMultiSrcAddr;
+	}
+
+	public void setVideoMultiSrcAddr(String videoMultiSrcAddr) {
+		this.videoMultiSrcAddr = videoMultiSrcAddr;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	public TransmissionMode getAudioTransmissionMode() {
 		return audioTransmissionMode;
@@ -200,6 +214,14 @@ public class CommonForwardPO extends AbstractBasePO{
 
 	public void setAudioMultiAddr(String audioMultiAddr) {
 		this.audioMultiAddr = audioMultiAddr;
+	}
+
+	public String getAudioMultiSrcAddr() {
+		return audioMultiSrcAddr;
+	}
+
+	public void setAudioMultiSrcAddr(String audioMultiSrcAddr) {
+		this.audioMultiSrcAddr = audioMultiSrcAddr;
 	}
 
 	@Enumerated(value = EnumType.STRING)

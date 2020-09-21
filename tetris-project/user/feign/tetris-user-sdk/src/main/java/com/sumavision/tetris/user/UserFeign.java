@@ -351,4 +351,8 @@ public interface UserFeign {
 			@RequestParam("userno") String userno, 
 			@RequestParam("currentPage") int currentPage, 
 			@RequestParam("pageSize") int pageSize);
+	
+	
+	@RequestMapping(value = "/user/feign/query/user/online")
+	public JSONObject queryUserOnline();
 }
