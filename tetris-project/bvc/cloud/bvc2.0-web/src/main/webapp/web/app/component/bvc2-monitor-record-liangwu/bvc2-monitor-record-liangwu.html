@@ -7,8 +7,8 @@
       <el-select size="small" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
         <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
         <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
-        <el-option key="timeSegment" label="时间段录制" value="TIMING"></el-option>
-        <el-option key="CIRCULATE" label="循环录制" value="CIRCULATE"></el-option>
+        <el-option key="TIMESEGMENT" label="时间段录制" value="TIMESEGMENT"></el-option>
+        <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
       </el-select>
       <el-input size="small" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true"
         style="width:150px; margin-left:10px;" @click.native="handleSelectDevice"></el-input>
@@ -38,6 +38,10 @@
               <el-button type="text" icon="el-icon-delete"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
             </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="导出" placement="bottom">
+              <el-button type="text" icon="el-icon-download"
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)"></el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -61,27 +65,27 @@
               <el-scrollbar style="height:100%;">
                 <el-tree :data="dialog.addRecord.tree.data" :props="dialog.addRecord.tree.props">
                   <span class="custom-tree-node" slot-scope="{node, data}">
-                    <el-radio v-if="data.type==='CHANNEL' && data.id.indexOf('Video')>=0"
-                      v-model="dialog.addRecord.tree.currentVideo" :label="data.param">
+                    <el-radio v-if="data.type==='BUNDLE'&&data.type !== 'USER'" v-model="dialog.addRecord.bundleId"
+                      :label="data.id">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
                     </el-radio>
-                    <el-radio v-else-if="data.type==='CHANNEL' && data.id.indexOf('Audio')>=0"
+                    <!-- <el-radio v-else-if="data.type==='CHANNEL' && data.id.indexOf('Audio')>=0"
                       v-model="dialog.addRecord.tree.currentAudio" :label="data.param">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
-                    </el-radio>
-                    <el-radio v-else-if="data.type==='BUNDLE' && data.param.indexOf('XT')>=0"
+                    </el-radio> -->
+                    <!-- <el-radio v-else-if="data.type==='BUNDLE' && data.param.indexOf('XT')>=0"
                       v-model="dialog.addRecord.tree.currentXtDevice" :label="data.param">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
-                    </el-radio>
-                    <el-radio v-else-if="data.type==='USER'" v-model="dialog.addRecord.tree.currentUser"
+                    </el-radio> -->
+                    <!-- <el-radio v-else-if="data.type!=='USER'" v-model="dialog.addRecord.tree.currentUser"
                       :label="data.param">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
-                    </el-radio>
-                    <span v-else>
+                    </el-radio> -->
+                    <span v-else-if="data.type!=='BUNDLE'&&data.type!=='USER'">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
                     </span>
@@ -92,36 +96,53 @@
             <div class="monitor92-top10"
               style="position:absolute; left:420px; right:10px; top:0; bottom:0; border:1px solid #ebebeb;">
               <div style="width:100%; height:100%; position:relative; padding:10px 15px;">
-                <el-form label-width="80">
-                  <el-form-item lable="录制模式" style="margin-bottom:10px;">
+                <el-form label-width="0" ref="addRecordForm">
+                  <el-form-item style="margin-bottom:10px;">
                     <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式"
-                      @change="addRecordModeChange" style="width:150px;">
+                      @change="addRecordModeChange" style="width:400px;">
                       <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
                       <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
-                      <el-option key="timeSegment" label="时间段录制" value="timeSegment"></el-option>
-                      <el-option key="CIRCULATE" label="循环录制" value="CIRCULATE"></el-option>
+                      <el-option key="TIMESEGMENT" label="时间段录制" value="TIMESEGMENT"></el-option>
+                      <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item style="margin-bottom:10px;width:400px" lable="任务名">
+                  <el-form-item style="margin-bottom:10px;width: 400px;" prop="fileName">
                     <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入任务名称"></el-input>
                   </el-form-item>
-                  <el-form-item v-if="dialog.addRecord.mode==='CIRCULATE'||dialog.addRecord.mode==='timeSegment'"
-                    style="margin-bottom:10px;width:400px" lable="磁盘大小">
+                  <el-form-item v-if="dialog.addRecord.mode==='CYCLE'||dialog.addRecord.mode==='TIMESEGMENT'"
+                    style="margin-bottom:10px;width:400px">
                     <el-input size="medium" v-model="dialog.addRecord.totalSizeMb" placeholder="请输入磁盘大小"></el-input>
                   </el-form-item>
-                  <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;" lable="时间">
+                  <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px">
                     <el-date-picker size="medium" v-model="dialog.addRecord.timeScope" type="datetimerange"
                       start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
                     </el-date-picker>
                   </el-form-item>
-                  <div>
-                    <el-form-item label="时间段类型">
-                      <el-select size="medium" v-model="dialog.addRecord.timeSegmentmode" @change="addRecordModeChange"
-                        style="width:150px;">
-                        <el-option key="month" label="每月" value="month"></el-option>
-                        <el-option key="year" label="每周" value="year"></el-option>
-                        <el-option key="day" label="每日" value="day"></el-option>
-                      </el-select>
+                  <div v-if="dialog.addRecord.mode==='TIMESEGMENT'">
+                    <el-form-item>
+                      <el-input :disabled="dialog.addRecord.startTimeDisabled"
+                        v-model="dialog.addRecord.timeSegmentmodeStartDay" style="width: 230px;">
+                        <el-select slot="prepend" size="medium" v-model="dialog.addRecord.timeSegmentmode"
+                          @change="timeModeChange" style="width:100px;" placeholder="时间段">
+                          <el-option key="month" label="每月" value="month"></el-option>
+                          <el-option key="year" label="每周" value="week"></el-option>
+                          <el-option key="day" label="每日" value="day"></el-option>
+                        </el-select>
+                        <el-button slot="append">{{dialog.addRecord.timeModeChangeText}}</el-button>
+                      </el-input>
+                      <el-time-picker style="width: 180px;" v-model="dialog.addRecord.timeSegmentmodeStartTime"
+                        placeholder="任意时间点" value-format="HH:mm:ss">
+                      </el-time-picker>
+                    </el-form-item>
+                    <el-form-item>
+                      <el-input :disabled="dialog.addRecord.startTimeDisabled"
+                        v-model="dialog.addRecord.timeSegmentmodeEndDay" style="width: 230px;">
+                        <el-button slot="prepend" style="width:100px;">至</el-button>
+                        <el-button slot="append">{{dialog.addRecord.timeModeChangeText}}</el-button>
+                      </el-input>
+                      <el-time-picker style="width: 180px;" v-model="dialog.addRecord.timeSegmentmodeEndTime"
+                        placeholder="任意时间点" value-format="HH:mm:ss">
+                      </el-time-picker>
                     </el-form-item>
                   </div>
                 </el-form>
@@ -138,7 +159,7 @@
       </span>
     </el-dialog>
 
-    <el-dialog title="筛选设备" :visible.sync="dialog.selectDevice.visible" width="420px"
+    <el-dialog title="筛选设备" :visible.sync="dialog.selectDevice.visible" width="380px"
       :before-close="handleSelectDeviceClose">
 
       <div style="width:100%; height:400px; position:relative;">
@@ -148,8 +169,8 @@
             <el-scrollbar style="height:100%;">
               <el-tree :data="dialog.selectDevice.tree.data" :props="dialog.selectDevice.tree.props">
                 <span class="custom-tree-node" slot-scope="{node, data}">
-                  <el-radio v-if="data.type==='BUNDLE' || data.type==='USER'"
-                    v-model="dialog.selectDevice.tree.currentDevice" :label="data.param">
+                  <el-radio v-if="data.type==='BUNDLE'" v-model="dialog.selectDevice.tree.currentDevice"
+                    :label="data.param">
                     <span :class="data.icon" :style="data.style"></span>
                     <span>{{node.label}}</span>
                   </el-radio>
@@ -169,6 +190,29 @@
         <el-button size="medium" type="primary" @click="handleSelectDeviceCommit"
           :loading="dialog.selectDevice.loading">确定</el-button>
       </span>
+    </el-dialog>
+
+    <el-dialog title="导出列表" :visible.sync="dialog.download.visible" width="872px" :before-close="handleDownloadClose">
+      <el-table height="100%" :data="table.data" stripe style="width: 100%">
+        <!-- <el-table-column type="selection" width="55">
+        </el-table-column> -->
+        <el-table-column fixed prop="fileName" label="录制任务名">
+        </el-table-column>
+        <el-table-column prop="mode" label="录制模式" width="100">
+        </el-table-column>
+        <el-table-column prop="startTime" label="开始时间" width="200">
+        </el-table-column>
+        <el-table-column prop="endTime" label="结束时间" width="200">
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="100">
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" content="下载" placement="bottom">
+              <el-button type="text" icon="el-icon-download"
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDownload(scope)"></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-dialog>
   </template>
 </div>

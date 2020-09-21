@@ -7,7 +7,8 @@ require.config({
     'vue': window.LIBPATH + 'frame/vue/vue-2.5.16',
     'jquery': window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
     'json': window.LIBPATH + 'frame/jQuery/jquery.json',
-    'element-ui': window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+    // 'element-ui': window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+    'sortable': window.LIBPATH + 'frame/draggable/sortable',
 
     /* commons */
     'date': window.COMMONSPATH + 'date/date.ext',
@@ -17,10 +18,6 @@ require.config({
 
     'config': window.APPPATH + 'config',
 
-    /* components */
-    // 'bvc2-monitor-user-called-message': window.APPPATH + 'component/bvc2-monitor-message/user-called/bvc2-monitor-user-called-message',
-    // 'bvc2-monitor-call': window.APPPATH + 'component/bvc2-monitor-call/bvc2-monitor-call',
-    'bvc2-monitor-record-liangwu': window.APPPATH + 'component/bvc2-monitor-record-liangwu/bvc2-monitor-record-liangwu'
 
   },
   shim: {
@@ -44,15 +41,12 @@ require([
   'vue',
   'config',
   'restfull',
+  'sortable',
   'element-ui',
-  'bvc2-monitor-record-liangwu',
-  // 'bvc2-monitor-user-called-message',
-  // 'bvc2-monitor-call'
 ], function (storage, Vue, config, ajax) {
 
   var app = null;
 
-  console.log(window.LIBPATH, "path");
   //缓存token
   storage.setItem(config.ajax.authname, window.TOKEN);
 

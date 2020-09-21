@@ -46,14 +46,24 @@ define([
               currentUser: '',
               currentXtDevice: '',
               currentVideo: '',
-              currentAudio: ''
+              currentAudio: '',
+              currentBundle: '',
+
             },
             mode: 'MANUAL',
             fileName: '',
             timeScope: '',
             timing: '',
             totalSizeMb: '',
-            loading: false
+            timeSegmentmode: 'month',
+            timeSegmentmodeStartDay: '',
+            timeSegmentmodeEndDay: '',
+            timeSegmentmodeStartTime: '00:00:00',
+            timeSegmentmodeEndTime: '23:59:59',
+            loading: false,
+            timeModeChangeText: '日',
+            startTimeDisabled: false,
+            bundleId: ''
           },
           selectDevice: {
             visible: false,
@@ -66,6 +76,16 @@ define([
               currentDevice: ''
             },
             loading: false
+          },
+          download: {
+            visible: false,
+          }
+        },
+        rules: {
+          fileName: {
+            required: true,
+            message: '请输入活动名称',
+            trigger: 'blur'
           }
         }
       }
@@ -178,6 +198,21 @@ define([
           self.table.prependRow = '';
         });
       },
+      timeModeChange: function (val) {
+        console.log(val)
+        if (val == "month") {
+          this.dialog.addRecord.timeModeChangeText = "日"
+          this.dialog.addRecord.startTimeDisabled = false;
+        } else if (val == "week") {
+          this.dialog.addRecord.timeModeChangeText = "星期"
+          this.dialog.addRecord.startTimeDisabled = false;
+        } else {
+          this.dialog.addRecord.timeModeChangeText = ""
+          this.dialog.addRecord.timeSegmentmodeStartDay = ""
+          this.dialog.addRecord.timeSegmentmodeEndDay = ""
+          this.dialog.addRecord.startTimeDisabled = true;
+        }
+      },
       rowDelete: function (scope) {
         var self = this;
         var row = scope.row;
@@ -248,7 +283,8 @@ define([
         var self = this;
         self.dialog.addRecord.visible = true;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
-        ajax.post('/monitor/device/find/institution/tree/0/true', null, function (data) {
+        // ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.addRecord.tree.data.push(data[i]);
@@ -263,99 +299,127 @@ define([
       },
       handleAddRecordCommit: function () {
         var self = this;
-        if (!self.dialog.addRecord.tree.currentVideo && !self.dialog.addRecord.tree.currentAudio && !self.dialog.addRecord.tree.currentUser && !self.dialog.addRecord.tree.currentXtDevice) {
+        var addRecord = self.dialog.addRecord;
+        var timeSegmentStr = '';
+        var task = {
+          mode: self.dialog.addRecord.mode,
+          fileName: self.dialog.addRecord.fileName,
+          bundleId: self.dialog.addRecord.bundleId
+        };
+        if (!self.dialog.addRecord.bundleId) {
           self.$message({
             type: 'warning',
-            message: '请选择录制内容！'
+            message: '请选择录制设备！'
           });
           return;
         }
         if (!self.dialog.addRecord.fileName) {
           self.$message({
             type: 'warning',
-            message: '请输入文件名！'
+            message: '请输入任务名！'
           });
           return;
         }
-        var task = {
-          mode: self.dialog.addRecord.mode,
-          fileName: self.dialog.addRecord.fileName
-        };
+        if (addRecord.mode == 'TIMESEGMENT') {
+          if (!addRecord.totalSizeMb) {
+            self.$message({
+              type: 'warning',
+              message: '磁盘大小不能为空！'
+            });
+            return;
+          }
+          if (addRecord.timeSegmentmode == "month") {
+            if (addRecord.timeSegmentmodeStartDay > addRecord.timeSegmentmodeEndDay) {
+              self.$message({
+                type: 'warning',
+                message: '起始日期不能大于结束日期！'
+              });
+              return;
+            } else if (addRecord.timeSegmentmodeStartDay == '' ||
+              addRecord.timeSegmentmodeEndDay == '') {
+              self.$message({
+                type: 'warning',
+                message: '日期不能为空！'
+              });
+              return;
+            } else if (addRecord.timeSegmentmodeStartDay < 1 ||
+              addRecord.timeSegmentmodeStartDay > 31 ||
+              addRecord.timeSegmentmodeEndDay < 1 ||
+              addRecord.timeSegmentmodeEndDay > 31 ||
+              !(/\d/.test(addRecord.timeSegmentmodeStartDay)) ||
+              !(/\d/.test(addRecord.timeSegmentmodeEndDay))
+            ) {
+              self.$message({
+                type: 'warning',
+                message: '日期格式不正确'
+              });
+              return;
+            }
+            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}]`
+
+          } else if (addRecord.timeSegmentmode == "week") {
+            if (addRecord.timeSegmentmodeStartDay > addRecord.timeSegmentmodeEndDay) {
+              self.$message({
+                type: 'warning',
+                message: '起始星期不能大于结束星期！'
+              });
+              return;
+            } else if (addRecord.timeSegmentmodeStartDay == '' ||
+              addRecord.timeSegmentmodeEndDay == '') {
+              self.$message({
+                type: 'warning',
+                message: '星期不能为空！'
+              });
+              return;
+            } else if (addRecord.timeSegmentmodeStartDay < 1 ||
+              addRecord.timeSegmentmodeStartDay > 7 ||
+              addRecord.timeSegmentmodeEndDay < 1 ||
+              addRecord.timeSegmentmodeEndDay > 7 ||
+              !(/\d/.test(addRecord.timeSegmentmodeStartDay)) ||
+              !(/\d/.test(addRecord.timeSegmentmodeEndDay))
+            ) {
+              self.$message({
+                type: 'warning',
+                message: '星期格式不正确'
+              });
+              return;
+            }
+            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}]`
+          } else {
+            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndTime}]`
+
+          }
+          task.timeQuantum = timeSegmentObj;
+          task.totalSizeMb = addRecord.totalSizeMb;
+        } else if (addRecord.mode == 'CYCLE') {
+          if (!addRecord.totalSizeMb) {
+            self.$message({
+              type: 'warning',
+              message: '磁盘大小不能为空！'
+            });
+            return;
+          }
+          task.totalSizeMb = addRecord.totalSizeMb;
+        }
         if (self.dialog.addRecord.timeScope && self.dialog.addRecord.timeScope.length > 0) {
           var datetimePatten = 'yyyy-MM-dd HH:mm:ss';
           task.startTime = self.dialog.addRecord.timeScope[0].format(datetimePatten);
           task.endTime = self.dialog.addRecord.timeScope[1].format(datetimePatten);
         }
+        self.dialog.addRecord.loading = true;
 
-        if (self.dialog.addRecord.tree.currentUser) {
-          //录制用户
-          var currentUser = $.parseJSON(self.dialog.addRecord.tree.currentUser);
-          task.targetUserId = currentUser.userId;
-          self.dialog.addRecord.loading = true;
-          ajax.post('/monitor/record/add/record/user/task', task, function (data, status) {
-            self.dialog.addRecord.loading = false;
-            if (status !== 200) return;
-            if (self.dialog.addRecord.mode === self.condition.mode) {
-              self.table.data.splice(0, 0, data);
-            } else {
-              self.condition.mode = self.dialog.addRecord.mode;
-              self.table.prependRow = data;
-            }
-            self.handleAddRecordClose();
-          }, null, [403, 404, 409, 500]);
-        } else if (self.dialog.addRecord.tree.currentXtDevice) {
-          //录制xt设备
-          var currentXtDevice = $.parseJSON(self.dialog.addRecord.tree.currentXtDevice);
-          task.bundleId = currentXtDevice.bundleId;
-          self.dialog.addRecord.loading = true;
-          ajax.post('/monitor/record/add/xt/device', task, function (data, status) {
-            self.dialog.addRecord.loading = false;
-            if (status !== 200) return;
-            if (self.dialog.addRecord.mode === self.condition.mode) {
-              self.table.data.splice(0, 0, data);
-            } else {
-              self.condition.mode = self.dialog.addRecord.mode;
-              self.table.prependRow = data;
-            }
-            self.handleAddRecordClose();
-          }, null, [403, 404, 409, 500]);
-        } else {
-          //录制设备
-          if (self.dialog.addRecord.tree.currentVideo) {
-            var currentVideo = $.parseJSON(self.dialog.addRecord.tree.currentVideo);
-            task.videoBundleId = currentVideo.bundleId;
-            task.videoBundleName = currentVideo.bundleName;
-            task.videoBundleType = currentVideo.bundleType;
-            task.videoLayerId = currentVideo.nodeUid;
-            task.videoChannelId = currentVideo.channelId;
-            task.videoBaseType = currentVideo.channelType;
-            task.videoChannelName = currentVideo.channelId;
+        ajax.post('/monitor/record/add', task, function (data, status) {
+          self.dialog.addRecord.loading = false;
+          if (status !== 200) return;
+          if (self.dialog.addRecord.mode === self.condition.mode) {
+            self.table.data.splice(0, 0, data);
+          } else {
+            self.condition.mode = self.dialog.addRecord.mode;
+            self.table.prependRow = data;
           }
-
-          if (self.dialog.addRecord.tree.currentAudio) {
-            var currentAudio = $.parseJSON(self.dialog.addRecord.tree.currentAudio);
-            task.audioBundleId = currentAudio.bundleId;
-            task.audioBundleName = currentAudio.bundleName;
-            task.audioBundleType = currentAudio.bundleType;
-            task.audioLayerId = currentAudio.nodeUid;
-            task.audioChannelId = currentAudio.channelId;
-            task.audioBaseType = currentAudio.channelType;
-            task.audioChannelName = currentAudio.channelId;
-          }
-          self.dialog.addRecord.loading = true;
-
-          ajax.post('/monitor/record/add', task, function (data, status) {
-            self.dialog.addRecord.loading = false;
-            if (status !== 200) return;
-            if (self.dialog.addRecord.mode === self.condition.mode) {
-              self.table.data.splice(0, 0, data);
-            } else {
-              self.condition.mode = self.dialog.addRecord.mode;
-              self.table.prependRow = data;
-            }
-            self.handleAddRecordClose();
-          }, null, [403, 404, 409, 500]);
-        }
+          self.handleAddRecordClose();
+        }, null, [403, 404, 409, 500]);
+        // }
       },
       handleSelectDeviceClose: function () {
         var self = this;
@@ -389,6 +453,15 @@ define([
           self.condition.deviceName = currentDevice.username;
         }
         self.handleSelectDeviceClose();
+      },
+      openDownload(row) {
+        this.dialog.download.visible = true;
+      },
+      handleDownloadClose() {
+        this.dialog.download.visible = false;
+      },
+      rowDownload(row) {
+        console.log(row)
       }
     },
     mounted: function () {

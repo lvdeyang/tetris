@@ -1,5 +1,5 @@
 define([
-  'text!' + window.APPPATH + 'monitor/record-liangwu/page-monitor-record-liangwu.html',
+  'text!' + window.APPPATH + 'monitor/forword/page-monitor-forword.html',
   'restfull',
   'config',
   'commons',
@@ -8,10 +8,10 @@ define([
   'bvc2-header',
   'bvc2-system-nav-side',
   'extral',
-  'bvc2-monitor-record-liangwu'
+  'bvc2-monitor-forword'
 ], function (tpl, ajax, config, commons, Vue) {
 
-  var pageId = 'page-monitor-record-liangwu';
+  var pageId = 'page-monitor-forword';
 
   var vueInstance = null;
 
@@ -28,7 +28,7 @@ define([
       data: {
         menurouter: false,
         shortCutsRoutes: commons.data,
-        active: "/page-monitor-record-liangwu",
+        active: "/page-monitor-forword",
         header: commons.getHeader(0)
       },
       methods: {
@@ -40,7 +40,7 @@ define([
 
   var destroy = function () {
     if (vueInstance) {
-      vueInstance.$refs.bvc2MonitorRecordLiangwu.destroy();
+      vueInstance.$refs.bvc2MonitorForword.destroy();
     }
   };
 
