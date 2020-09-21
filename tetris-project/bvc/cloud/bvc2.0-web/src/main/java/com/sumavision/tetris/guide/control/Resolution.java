@@ -37,6 +37,6 @@ public enum Resolution {
 				return resolution;
 			}
 		}
-		throw new ErrorTypeException("name", name);
+		throw new ErrorTypeException("name", "分辨率错误");
 	}
 }

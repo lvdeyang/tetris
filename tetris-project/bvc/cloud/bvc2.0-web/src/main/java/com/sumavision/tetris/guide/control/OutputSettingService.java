@@ -35,7 +35,6 @@ public class OutputSettingService {
 			Long bitrate
 			){
 		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
-		outputSettingPO.setId(id);
 		outputSettingPO.setOutputProtocol(outputProtocol);
 		outputSettingPO.setOutputAddress(outputAddress);
 		outputSettingPO.setRateCtrl(rateCtrl);
@@ -86,7 +85,6 @@ public class OutputSettingService {
 		return audioParametersDAO.save(audioParametersPO);
 		
 	}
-	
 	
 	public void delete(Long id){
 		outputSettingDAO.delete(id);

@@ -23,6 +23,17 @@ define([
         new Vue({
             el:'#' + pageId + '-wrapper',
             data:function(){
+				//var self = this;
+				//var validatePass = function(rule, value, callback) {
+				//	if (value === '') {
+				//		callback(new Error('请输入密码'));
+				//	} else {
+				//		if (self.dialog.setSource.sourceName !== '') {
+				//			self.$refs.ruleForm.validateField('name');
+				//		}
+				//		callback();
+				//	}
+				//};
                 return {
                 	user:context.getProp('user'),
                 	menurouter: false,
@@ -46,17 +57,19 @@ define([
 
 							video:{
 								codingObject: '',
-								profile: 'main',
-								fps: 25,
+								fps: '25',
 								bitrate: 1500,
 								resolution: '',
+								ratio: '',
+								rcMode: '',
 								maxBitrate: 1500,
 							},
 
 							audio:{
 								codingFormat:'',
-								sampleFmt:'s16',
+								channelLayout:'',
 								bitrate:'128',
+								sampleRate:'44.1',
 								codingType:'',
 							},
 
@@ -66,9 +79,6 @@ define([
 								rateCtrl: 'VBR',
 								bitrate: 8000000
 							}
-
-                            /*url:'',
-                            typeOptions:['UDP','HLS']*/
                     	},
 						setDevice:{
 							visible: false,
@@ -79,6 +89,13 @@ define([
                     },
 					sources:{
 						list:[]
+					},
+					rules: {
+						sourceName: [
+							{ required: true, message: "请输入源名称", trigger: 'blur' }
+							//{ min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+							//{ validator: validatePass, trigger: 'blur'}
+						]
 					}
                 }
             },
@@ -109,27 +126,37 @@ define([
 					self.dialog.setSource.source = x.source;
 					self.dialog.setSource.previewOut = x.previewOut;
             	},
-				handleSetSourceCommit:function(){
-					var self = this;
-					self.dialog.setSource.visible=false;
-					var questData = {
-						id:self.dialog.setSource.id,
-						sourceType: self.dialog.setSource.sourceType,
-						source:self.dialog.setSource.source,
-						sourceName:self.dialog.setSource.sourceName,
-						previewOut:self.dialog.setSource.previewOut
-					};
-					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
-						for(var i = 0; i < self.sources.list.length; i++){
-							list[i].sourceType = self.dialog.setSource.sourceType;
-							list[i].source = self.dialog.setSource.source;
-							list[i].sourceName = self.dialog.setSource.sourceName;
-							list[i].previewOut = self.dialog.setSource.previewOut;
+				handleSetSourceCommit:function(formName){
+					console.log(this.$refs[formName])
+					this.$refs[formName].validate((valid)=>{
+
+						if (valid) {
+							var self = this;
+							self.dialog.setSource.visible=false;
+							var questData = {
+								id:self.dialog.setSource.id,
+								sourceType: self.dialog.setSource.sourceType,
+								source:self.dialog.setSource.source,
+								sourceName:self.dialog.setSource.sourceName,
+								previewOut:self.dialog.setSource.previewOut
+							};
+							ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
+								for(var i = 0; i < self.sources.list.length; i++){
+									list[i].sourceType = self.dialog.setSource.sourceType;
+									list[i].source = self.dialog.setSource.source;
+									list[i].sourceName = self.dialog.setSource.sourceName;
+									list[i].previewOut = self.dialog.setSource.previewOut;
+								}
+							}, null, ajax.NO_ERROR_CATCH_CODE);
+						} else {
+							console.log('error submit!!');
+							return false;
 						}
-					}, null, ajax.NO_ERROR_CATCH_CODE);
+					});
 				},
 				handleSetSourceClose:function(){
 					var self = this;
+					self.$refs['setSource'].resetFields();
 					self.dialog.setSource.visible=false;
 				},
             	handleSetOut:function(){
@@ -144,24 +171,26 @@ define([
 					var questDataVideo = {
 						id: 3,
 						codingObject: self.dialog.setOut.video.codingObject,
-						profile:self.dialog.setOut.video.profile,
 						fps:self.dialog.setOut.video.fps,
 						bitrate:self.dialog.setOut.video.bitrate,
 						resolution:self.dialog.setOut.video.resolution,
+						ratio:self.dialog.setOut.video.ratio,
+						rcMode:self.dialog.setOut.video.rcMode,
 						maxBitrate:self.dialog.setOut.video.maxBitrate,
 					};
 
 					var questDataAudio = {
 						id: 3,
-						codingFormat: self.dialog.setOut.audio.codingFormat,
-						sampleFmt: self.dialog.setOut.audio.sampleFmt,
+						codingFormat:self.dialog.setOut.audio.codingFormat,
+						channelLayout:self.dialog.setOut.audio.channelLayout,
 						bitrate:self.dialog.setOut.audio.bitrate,
+						sampleRate:self.dialog.setOut.audio.sampleRate,
 						codingType:self.dialog.setOut.audio.codingType,
 					};
 
 					var questDataOut = {
 						id: 3,
-						outputProtocal: self.dialog.setOut.out.outputProtocol,
+						outputProtocol: self.dialog.setOut.out.outputProtocol,
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,
 						bitrate: self.dialog.setOut.out.bitrate,
@@ -220,9 +249,11 @@ define([
 						
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
-				handleSetDeviceClick:function(){
+				handleSetDeviceClick:function(row){
 					var self = this;
+					self.dialog.setSource.source = row.sourceName;
 					self.dialog.setSource.visible = true;
+					self.dialog.setDevice.visible = false;
 				}
 
                
@@ -253,15 +284,14 @@ define([
     var destroy = function(){
 
     };
+	var guideList = {
+		path:'/' + pageId,
+		component:{
+			template:'<div id="' + pageId + '" class="page-wrapper"></div>'
+		},
+		init:init,
+		destroy:destroy
+	};
 
-    var guideList = {
-        path:'/' + pageId,
-        component:{
-            template:'<div id="' + pageId + '" class="page-wrapper"></div>'
-        },
-        init:init,
-        destroy:destroy
-    };
-
-    return guideList;
+	return guideList;
 });
