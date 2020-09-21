@@ -388,7 +388,10 @@ export default {
           multicastEncodeAddr: row.multicastEncodeAddr,
           multicastDecode: row.multicastDecode,
           bundleFolderName: row.bundleFolderName,
-          bundleFolderId: row.bundleFolderId
+          bundleFolderId: row.bundleFolderId,
+          transcod: row.transcod,
+          multicastSourceIp: row.multicastSourceIp,
+
         }
       });
     }

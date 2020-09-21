@@ -95,7 +95,12 @@
       <el-form-item size="small" label="解码组播">
         <el-switch v-model="bundleForm.multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
-
+      <el-form-item size="small" label="是否转码">
+        <el-switch v-model="bundleForm.transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+      <el-form-item size="small" label="源组播Ip">
+        <el-input v-model="bundleForm.deviceAddr.multicastSourceIp" style="width: 200px;"></el-input>
+      </el-form-item>
       <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
         <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
       </el-form-item>
@@ -236,6 +241,8 @@ export default {
         accessNodeUid: "",
         bundleFolderId: null,
         bundleFolderName: '根目录',
+        transcod: false,
+        multicastSourceIp: '',
         deviceAddr: {
           deviceIp: "",
           devicePort: 5060

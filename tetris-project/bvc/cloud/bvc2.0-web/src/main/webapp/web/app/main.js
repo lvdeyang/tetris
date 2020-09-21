@@ -9,6 +9,7 @@ require.config({
     'jquery': window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
     'json': window.LIBPATH + 'frame/jQuery/jquery.json',
     'element-ui': window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+    'sortablejs': window.LIBPATH + 'frame/draggable/sortable',
     'vue-draggable': window.LIBPATH + 'frame/draggable/vue-draggable',
     'extral': window.LIBPATH + 'extral/extral',
 
@@ -201,10 +202,6 @@ require.config({
       deps: ['player'],
       exports: 'jQuery'
     },
-    'vue-draggable': {
-      deps: ['vue'],
-      exports: 'vue-draggable'
-    }
   }
 });
 

@@ -389,9 +389,9 @@ define([
             timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndTime}]`
 
           }
-          task.timeSegment = timeSegmentObj;
+          task.timeQuantum = timeSegmentObj;
           task.totalSizeMb = addRecord.totalSizeMb;
-        } else if (addRecord.mode == 'CIRCULATE') {
+        } else if (addRecord.mode == 'CYCLE') {
           if (!addRecord.totalSizeMb) {
             self.$message({
               type: 'warning',

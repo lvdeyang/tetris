@@ -34,6 +34,12 @@
       <el-form-item size="small" label="解码组播">
         <el-switch v-model="multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
+      <el-form-item size="small" label="是否转码">
+        <el-switch v-model="transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+      <el-form-item size="small" label="源组播Ip">
+        <el-input v-model="multicastSourceIp" style="width: 200px;"></el-input>
+      </el-form-item>
       <!--
           <div style="margin-top:10px;">
             <el-input v-model="bundleName" placeholder="输入新的设备名称" style="width: 300px;">
@@ -132,6 +138,8 @@ export default {
       extraInfos: [],
       bundleFolderId: this.$route.query.bundleFolderId,
       bundleFolderName: this.$route.query.bundleFolderName,
+      transcod: this.$route.query.transcod,
+      multicastSourceIp: this.$route.query.multicastSourceIp,
       extraInfos: [],
       dialog: {
         changeFolder: {
@@ -202,6 +210,8 @@ export default {
         multicastEncode: this.multicastEncode,
         multicastEncodeAddr: this.multicastEncodeAddr,
         multicastDecode: this.multicastDecode,
+        transcod: this.transcod,
+        multicastSourceIp: this.multicastSourceIp,
         extraInfos: JSON.stringify(this.extraInfos)
       };
 
