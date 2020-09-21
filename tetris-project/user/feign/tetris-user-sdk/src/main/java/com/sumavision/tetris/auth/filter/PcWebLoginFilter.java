@@ -61,6 +61,17 @@ public class PcWebLoginFilter implements Filter{
 		
 		HttpServletRequest request = (HttpServletRequest)nativeRequest;
 		HttpServletResponse response = (HttpServletResponse)nativeResponse;
+		String method = request.getMethod();
+		if(method.toUpperCase().equals("OPTIONS")){
+			response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+			response.addHeader("Access-Control-Allow-Credentials", "true");
+			response.setHeader("Access-Control-Allow-Methods",
+	                "POST, GET, OPTIONS, DELETE");
+			response.setHeader("Access-Control-Max-Age", "3600");
+			response.setHeader("Access-Control-Allow-Headers",
+	                "Content-Type, x-requested-with, X-Custom-Header, Request-Ajax, tetris-001");
+            return;
+        }
 		
 		JSONObject jsonResult = new JSONObject();
 		
@@ -125,6 +136,7 @@ public class PcWebLoginFilter implements Filter{
 	}
 
 	private boolean shouldFilter(String uri) {
+		
 		//静态资源
 		if(requestResouceTypeAnalyzer.isStaticResource(uri)) return false;
 		
