@@ -330,58 +330,22 @@ define([
             return;
           }
           if (addRecord.timeSegmentmode == "month") {
-            if (addRecord.timeSegmentmodeStartDay > addRecord.timeSegmentmodeEndDay) {
-              self.$message({
-                type: 'warning',
-                message: '起始日期不能大于结束日期！'
-              });
-              return;
-            } else if (addRecord.timeSegmentmodeStartDay == '' ||
+            if (addRecord.timeSegmentmodeStartDay == '' ||
               addRecord.timeSegmentmodeEndDay == '') {
               self.$message({
                 type: 'warning',
                 message: '日期不能为空！'
               });
               return;
-            } else if (addRecord.timeSegmentmodeStartDay < 1 ||
-              addRecord.timeSegmentmodeStartDay > 31 ||
-              addRecord.timeSegmentmodeEndDay < 1 ||
-              addRecord.timeSegmentmodeEndDay > 31 ||
-              !(/\d/.test(addRecord.timeSegmentmodeStartDay)) ||
-              !(/\d/.test(addRecord.timeSegmentmodeEndDay))
-            ) {
-              self.$message({
-                type: 'warning',
-                message: '日期格式不正确'
-              });
-              return;
             }
             timeSegmentObj = `${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}`
 
           } else if (addRecord.timeSegmentmode == "week") {
-            if (addRecord.timeSegmentmodeStartDay > addRecord.timeSegmentmodeEndDay) {
-              self.$message({
-                type: 'warning',
-                message: '起始星期不能大于结束星期！'
-              });
-              return;
-            } else if (addRecord.timeSegmentmodeStartDay == '' ||
+            if (addRecord.timeSegmentmodeStartDay == '' ||
               addRecord.timeSegmentmodeEndDay == '') {
               self.$message({
                 type: 'warning',
                 message: '星期不能为空！'
-              });
-              return;
-            } else if (addRecord.timeSegmentmodeStartDay < 1 ||
-              addRecord.timeSegmentmodeStartDay > 7 ||
-              addRecord.timeSegmentmodeEndDay < 1 ||
-              addRecord.timeSegmentmodeEndDay > 7 ||
-              !(/\d/.test(addRecord.timeSegmentmodeStartDay)) ||
-              !(/\d/.test(addRecord.timeSegmentmodeEndDay))
-            ) {
-              self.$message({
-                type: 'warning',
-                message: '星期格式不正确'
               });
               return;
             }

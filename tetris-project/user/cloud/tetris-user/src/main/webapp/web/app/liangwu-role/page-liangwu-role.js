@@ -98,8 +98,8 @@ define([
         },
         handleBind: function () {
           var self = this;
-          // var LocationOrigin = location.origin;
-          var LocationOrigin = "http://192.165.56.115:8092"
+          var LocationOrigin = 'https://' + location.hostname + ':8213';
+          // var LocationOrigin = "http://192.165.56.115:8092"
           var token = localStorage.getItem('tetris-001')
           self.iframeUrl = LocationOrigin + '/index.html#/LwBindRoleResource?token=' + token
           self.dialog.bindRoleResource.visible = true;
