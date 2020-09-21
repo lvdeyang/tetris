@@ -14,6 +14,8 @@ public class VideoParamBO {
 	
 	private String fps = "25.0";
 	
+	private String gop_size = "25.0";
+	
 	private int bitrate = 0;
 	
 	private String profile = "main";
@@ -21,6 +23,8 @@ public class VideoParamBO {
 	private String input_interface = "COLOR_BAR";
 	
 	private String output_interface = "CTRL";
+	
+	private boolean transcode = false;//解码器是否需要先转码
 
 	public String getResolution() {
 		return resolution;
@@ -67,6 +71,15 @@ public class VideoParamBO {
 		return this;
 	}
 
+	public String getGop_size() {
+		return gop_size;
+	}
+
+	public VideoParamBO setGop_size(String gop_size) {
+		this.gop_size = gop_size;
+		return this;
+	}
+
 	public int getBitrate() {
 		return bitrate;
 	}
@@ -107,6 +120,15 @@ public class VideoParamBO {
 		return this;
 	}
 
+	public boolean isTranscode() {
+		return transcode;
+	}
+
+	public VideoParamBO setTranscode(boolean transcode) {
+		this.transcode = transcode;
+		return this;
+	}
+
 	public VideoParamBO set(DispatchVideoParamPO videoParam){
 		this.bit_depth = videoParam.getBit_depth();
 		this.bitrate = videoParam.getBitrate();
@@ -115,6 +137,20 @@ public class VideoParamBO {
 		this.fps = videoParam.getFps();
 		this.profile = videoParam.getProfile();
 		this.resolution = videoParam.getResolution();
+		return this;
+	}
+
+	public VideoParamBO copy(VideoParamBO videoParam){
+		this.transcode = videoParam.isTranscode();
+		this.bit_depth = videoParam.getBit_depth();
+		this.bitrate = videoParam.getBitrate();
+		this.chroma_subsampling = videoParam.getChroma_subsampling();
+		this.codec = videoParam.getCodec();
+		this.fps = videoParam.getFps();
+		this.profile = videoParam.getProfile();
+		this.resolution = videoParam.getResolution();
+		this.input_interface = videoParam.getInput_interface();
+		this.output_interface = videoParam.getOutput_interface();
 		return this;
 	}
 	

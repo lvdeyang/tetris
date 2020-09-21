@@ -42,6 +42,11 @@ public class Bundle_ChannelBO {
 	private String multi_addr;
 	
 	/**
+	 * 组播源地址
+	 */
+	private String src_multi_ip;
+	
+	/**
 	 * 通道的源参数
 	 */
 	private SrcBO source_param;
@@ -94,6 +99,14 @@ public class Bundle_ChannelBO {
 
 	public void setMulti_addr(String multi_addr) {
 		this.multi_addr = multi_addr;
+	}
+
+	public String getSrc_multi_ip() {
+		return src_multi_ip;
+	}
+
+	public void setSrc_multi_ip(String src_multi_ip) {
+		this.src_multi_ip = src_multi_ip;
 	}
 
 	public SrcBO getSource_param() {

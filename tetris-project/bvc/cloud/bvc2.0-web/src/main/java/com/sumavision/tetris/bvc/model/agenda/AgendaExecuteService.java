@@ -623,6 +623,7 @@ public class AgendaExecuteService {
 							String addr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
 							forward.setVideoTransmissionMode(TransmissionMode.MULTICAST);
 							forward.setVideoMultiAddr(addr);
+							forward.setVideoMultiSrcAddr(bundlePO.getMulticastSourceIp());
 						}
 					}
 				}
@@ -652,6 +653,7 @@ public class AgendaExecuteService {
 								String addr = multicastService.addrAddPort(audioBundlePO.getMulticastEncodeAddr(), 4);
 								forward.setAudioTransmissionMode(TransmissionMode.MULTICAST);
 								forward.setAudioMultiAddr(addr);
+								forward.setAudioMultiSrcAddr(audioBundlePO.getMulticastSourceIp());
 							}
 						}
 					}
@@ -1330,6 +1332,7 @@ public class AgendaExecuteService {
 				task.setVideoStatus(forward.getVideoStatus());
 				task.setVideoTransmissionMode(forward.getVideoTransmissionMode());
 				task.setVideoMultiAddr(forward.getVideoMultiAddr());
+				task.setVideoMultiSrcAddr(forward.getVideoMultiSrcAddr());
 			}			
 			if(AgendaForwardType.AUDIO_VIDEO.equals(type) || AgendaForwardType.AUDIO.equals(type)){
 				task.setAudioSourceType(forward.getAudioSourceType());
@@ -1343,6 +1346,7 @@ public class AgendaExecuteService {
 				task.setAudioStatus(forward.getAudioStatus());
 				task.setAudioTransmissionMode(forward.getAudioTransmissionMode());
 				task.setAudioMultiAddr(forward.getAudioMultiAddr());
+				task.setAudioMultiSrcAddr(forward.getAudioMultiSrcAddr());
 			}
 			pageTaskPOs.add(task);
 		}

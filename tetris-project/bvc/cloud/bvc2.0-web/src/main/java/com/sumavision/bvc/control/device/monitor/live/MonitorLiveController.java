@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.BundleService;
+import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.device.MonitorDeviceController;
 import com.sumavision.bvc.control.device.monitor.osd.MonitorOsdVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveService;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveSplitConfigDAO;
@@ -33,7 +37,9 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -70,6 +76,12 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private MonitorLiveSplitConfigDAO monitorLiveSplitConfigDAO;
+	
+	@Autowired
+	private BundleService bundleService;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@RequestMapping(value = "/terminal/index")
 	public ModelAndView terminalIndex(String token){
@@ -204,6 +216,97 @@ public class MonitorLiveController {
 												   .getMap();
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/vod/device")
+	public Object vodDevice(
+			Long osdId,
+			String srcType,//BUNDLE/CHANNEL BUNDLE则自动选择编码通道（暂不支持CHANNEL）
+			String bundleId,
+			String srcVideoChannelId,
+			String srcAudioChannelId,
+			String dstType,//BUNDLE/CHANNEL BUNDLE则自动选择解码通道（暂不支持CHANNEL）
+			String dstBundleId,
+			String dstVideoChannelId,
+			String dstAudioChannelId,
+			String type,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user =  userUtils.getUserFromSession(request);
+		
+		MonitorLiveDevicePO entity = null;
+		
+		//dst
+		BundlePO dstBundle = bundleService.findByBundleId(bundleId);
+		List<ChannelSchemeDTO> dstQueryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);
+		ChannelVO dstEncodeVideo = null;
+		ChannelVO dstEncodeAudio = null;
+		if(dstQueryChannels!=null && dstQueryChannels.size()>0){
+			for(ChannelSchemeDTO channel:dstQueryChannels){
+				if("VenusVideoIn".equals(channel.getBaseType())){
+					dstEncodeVideo = new ChannelVO().set(channel);
+				}else if("VenusAudioIn".equals(channel.getBaseType())){
+					dstEncodeAudio = new ChannelVO().set(channel);
+				}
+			}
+		}
+		String dstVideoBundleId = dstBundle.getBundleId();
+		String dstVideoBundleName = dstBundle.getBundleName();
+		String dstVideoBundleType = dstBundle.getBundleType();
+		String dstVideoLayerId = dstBundle.getAccessNodeUid();
+		dstVideoChannelId = dstEncodeVideo.getChannelId();
+		String dstVideoBaseType = dstEncodeVideo.getBaseType();
+		String dstVideoChannelName = dstEncodeVideo.getName();
+		String dstAudioBundleId = dstBundle.getBundleId();
+		String dstAudioBundleName = dstBundle.getBundleName();
+		String dstAudioBundleType = dstBundle.getBundleType();
+		String dstAudioLayerId = dstBundle.getAccessNodeUid();
+		dstAudioChannelId = dstEncodeAudio.getChannelId();
+		String dstAudioBaseType = dstEncodeAudio.getBaseType();
+		String dstAudioChannelName = dstEncodeAudio.getName();
+		
+		//src
+		BundlePO bundle = bundleService.findByBundleId(bundleId);
+		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);
+		ChannelVO encodeVideo = null;
+		ChannelVO encodeAudio = null;
+		if(queryChannels!=null && queryChannels.size()>0){
+			for(ChannelSchemeDTO channel:queryChannels){
+				if("VenusVideoIn".equals(channel.getBaseType())){
+					encodeVideo = new ChannelVO().set(channel);
+				}else if("VenusAudioIn".equals(channel.getBaseType())){
+					encodeAudio = new ChannelVO().set(channel);
+				}
+			}
+		}
+		String videoBundleId = bundle.getBundleId();
+		String videoBundleName = bundle.getBundleName();
+		String videoBundleType = bundle.getBundleType();
+		String videoLayerId = bundle.getAccessNodeUid();
+		String videoChannelId = encodeVideo.getChannelId();
+		String videoBaseType = encodeVideo.getBaseType();
+		String videoChannelName = encodeVideo.getName();
+		String audioBundleId = bundle.getBundleId();
+		String audioBundleName = bundle.getBundleName();
+		String audioBundleType = bundle.getBundleType();
+		String audioLayerId = bundle.getAccessNodeUid();
+		String audioChannelId = encodeAudio.getChannelId();
+		String audioBaseType = encodeAudio.getBaseType();
+		String audioChannelName = encodeAudio.getName();
+		
+		
+		entity = monitorLiveDeviceService.startLocalSeeLocal(
+					osdId, 
+					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
+					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
+					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
+					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
+					type, user.getId(), user.getUserno(), 
+					false, null);		
+		
+		return new MonitorLiveDeviceVO().set(entity);
+	}
+	
 	/**
 	 * 添加直播任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -296,7 +399,7 @@ public class MonitorLiveController {
 		
 		return new MonitorLiveDeviceVO().set(entity);
 	}
-	
+
 	/**
 	 * 添加带转码的直播任务。参数与add()方法相同<br/>
 	 * <b>作者:</b>zsy<br/>

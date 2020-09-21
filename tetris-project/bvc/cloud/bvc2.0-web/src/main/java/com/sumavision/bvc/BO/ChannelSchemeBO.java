@@ -85,6 +85,11 @@ public class ChannelSchemeBO {
 	private String multi_addr;
 	
 	/**
+	 * 组播源地址
+	 */
+	private String src_multi_ip;
+	
+	/**
 	 * 源
 	 */
 	private List<SrcBO> src;
@@ -433,6 +438,7 @@ public class ChannelSchemeBO {
 			channel.setBaseType(bundle_Channel.getBase_type());
 			channel.setMode(bundle_Channel.getMode());
 			channel.setMulti_addr(bundle_Channel.getMulti_addr());
+			channel.setSrc_multi_ip(bundle_Channel.getSrc_multi_ip());
 			if(bundle_Channel.getSource_param() != null){
 				channel.setSrc(new ArrayList<ForwardSetBO.SrcBO>());
 				channel.getSrc().add(bundle_Channel.getSource_param());

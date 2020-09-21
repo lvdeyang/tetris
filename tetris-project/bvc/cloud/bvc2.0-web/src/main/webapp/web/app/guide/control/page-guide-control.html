@@ -7,7 +7,7 @@
             <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
             <el-main style="padding:15px;">
                 <el-tabs type="border-card">
-				  <el-tab-pane label="导播任务">
+				  <el-tab-pane label="导播任务1">
 				    <div style="width:49%;height:300px;float:left">
 						<div style="float:left;">直播时长: 01:13:14</div>
 						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
@@ -252,6 +252,7 @@
 						</el-card>
 					</div>
 				  </el-tab-pane>
+					<el-tab-pane label="导播任务2"></el-tab-pane>
 				</el-tabs>
             </el-main>
         </el-container>
@@ -261,7 +262,7 @@
 	        :visible.sync="dialog.setSource.visible"
 	        width="500px"
 	        :before-close="handleSetSourceClose">
-	    <el-form ref="form" label-width="100px">
+	    <el-form :mode="dialog.setSource" ref="setSource" :rules="dialog.rules" label-width="100px">
 	        <el-form-item label="源类型">
 	            <el-select style="width:360px;"
 	                    v-model="dialog.setSource.sourceType"
@@ -278,10 +279,12 @@
 			<el-form-item v-if = "dialog.setSource.sourceType === '5G背包'" label = "选择源设备">
 				<el-button @click="handleDeviceSelect()" type="primary" size="small">选择原设备</el-button>
 			</el-form-item>
-	        <!--<el-form-item v-if="dialog.setSource.sourceName" label="设备名">
-	             <span>{{ dialog.setSource.sourceName }}</span>
-	        </el-form-item>-->
-			<el-form-item label="源名称">
+
+	        <el-form-item v-if="dialog.setSource.sourceType ==='5G背包'" label="设备名">
+				{{ dialog.setSource.source }}
+	        </el-form-item>
+
+			<el-form-item label="源名称" prop="sourceName">
 				<el-input v-model="dialog.setSource.sourceName"></el-input>
 			</el-form-item>
 	        <el-form-item label="预监输出">
@@ -290,7 +293,7 @@
 	    </el-form>
 	    <span slot="footer" class="dialog-footer">
 	        <el-button size="medium" @click="handleSetSourceClose">取 消</el-button>
-	        <el-button size="medium" type="primary" @click="handleSetSourceCommit"
+	        <el-button size="medium" type="primary" @click="handleSetSourceCommit('setSource')"
 	                   :loading="dialog.setSource.loading">确 定
 	        </el-button>
 	    </span>
@@ -302,19 +305,15 @@
 	        width="1300px"
 	        :before-close="handleSetOutClose">
 		<h4>视频编码参数</h4>
-		<el-form :inline="true" ref="form" :model="form" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="编码对象" >
 				<el-select v-model="dialog.setOut.video.codingObject" placeholder="请选择编码对象" style="width:178px">
-					<el-option label="h264" value="H264"></el-option>
-					<el-option label="h265" value="H265"></el-option>
-					<el-option label="mpeg2" value="MPEG2"></el-option>
-					<el-option label="avs+" value="AVS"></el-option>
-					<el-option label="passby" value="PASSBY"></el-option>
+					<el-option label="h264" value="h264"></el-option>
+					<el-option label="h265" value="h265"></el-option>
+					<el-option label="mpeg2" value="mpeg2"></el-option>
+					<el-option label="avs+" value="avs+"></el-option>
+					<el-option label="passby" value="passby"></el-option>
 				</el-select>
-			</el-form-item>
-
-			<el-form-item label="编码档次">
-				<el-input v-model="dialog.setOut.video.profile"></el-input>
 			</el-form-item>
 
 			<el-form-item label="帧率">
@@ -327,11 +326,27 @@
 
 			<el-form-item label="分辨率" >
 				<el-select v-model="dialog.setOut.video.resolution" placeholder="请选择分辨率" style="width:178px">
-					<el-option label="3840*2160" value="_3840_2160"></el-option>
-					<el-option label="1920*1080" value="_1920_1080"></el-option>
-					<el-option label="1280*720" value="_1280_720"></el-option>
-					<el-option label="720*576" value="_720_576"></el-option>
-					<el-option label="640*480" value="_640_480"></el-option>
+					<el-option label="3840*2160" value="3840*2160"></el-option>
+					<el-option label="1920*1080" value="1920*1080"></el-option>
+					<el-option label="1280*720" value="1280*720"></el-option>
+					<el-option label="720*576" value="720*576"></el-option>
+					<el-option label="640*480" value="640*480"></el-option>
+				</el-select>
+			</el-form-item>
+
+			<el-form-item label="宽高比" >
+				<el-select v-model="dialog.setOut.video.ratio" placeholder="请选择宽高比" style="width:178px">
+					<el-option label="16:10" value="16:10"></el-option>
+					<el-option label="16:9" value="16:9"></el-option>
+					<el-option label="5:4" value="5:4"></el-option>
+					<el-option label="4:3" value="4:3"></el-option>
+				</el-select>
+			</el-form-item>
+
+			<el-form-item label="码率控制方式" >
+				<el-select v-model="dialog.setOut.video.rcMode" placeholder="请选择码率控制方式" style="width:178px">
+					<el-option label="vbr" value="vbr"></el-option>
+					<el-option label="cbr" value="cbr"></el-option>
 				</el-select>
 			</el-form-item>
 
@@ -339,47 +354,55 @@
 				<el-input v-model="dialog.setOut.video.maxBitrate"></el-input>
 			</el-form-item>
 
-		</el-form>item
+		</el-form>
 		<h4>音频编码参数</h4>
-		<el-form :inline="true" ref="form" :model="form" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.audio" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="编码格式" >
 				<el-select v-model="dialog.setOut.audio.codingFormat" placeholder="请选择编码格式" style="width:178px">
-					<el-option label="ACC" value="ACC"></el-option>
-					<el-option label="MP2" value="MP2"></el-option>
-					<el-option label="MP3" value="MP3"></el-option>
-					<el-option label="DOLBY" value="DOLBY"></el-option>
-					<el-option label="PASSBY" value="PASSBY"></el-option>
+					<el-option label="aac" value="aac"></el-option>
+					<el-option label="mp2" value="mp2"></el-option>
+					<el-option label="mp3" value="mp3"></el-option>
+					<el-option label="dolby" value="dolby"></el-option>
+					<el-option label="passby" value="passby"></el-option>
 				</el-select>
 			</el-form-item>
 
-			<el-form-item label="采样率">
-				<el-input v-model="dialog.setOut.audio.sampleFmt"></el-input>
+			<el-form-item label="声道布局" >
+				<el-select v-model="dialog.setOut.audio.channelLayout" placeholder="请选择声道布局" style="width:178px">
+					<el-option label="mono" value="mono"></el-option>
+					<el-option label="stereo" value="stereo"></el-option>
+				</el-select>
 			</el-form-item>
 
 			<el-form-item label="码率">
 				<el-input v-model="dialog.setOut.audio.bitrate"></el-input>
 			</el-form-item>
 
+			<el-form-item label="采样率">
+				<el-input v-model="dialog.setOut.audio.sampleRate"></el-input>
+			</el-form-item>
+
 			<el-form-item label="编码类型" >
 				<el-select v-model="dialog.setOut.audio.codingType" placeholder="请选择编码类型" style="width:178px">
-					<el-option label="mpeg4-aac-lc" value="MPEG4_ACC_LC"></el-option>
-					<el-option label="mpeg4-he-aac-lc" value="MPEG4_HE_AAC_LC"></el-option>
-					<el-option label="mpeg4-he-aac-v2-lc" value="MPEG4_HE_AAC_V2_1C"></el-option>
-					<el-option label="AC3" value="ac3"></el-option>
-					<el-option label="EAC3" value="eac3"></el-option>
+					<el-option label="mpeg4-aac-lc" value="mpeg4-aac-lc"></el-option>
+					<el-option label="mpeg4-he-aac-lc" value="mpeg4-he-aac-lc"></el-option>
+					<el-option label="mpeg4-he-aac-v2-lc" value="mpeg4-he-aac-v2-lc"></el-option>
+					<el-option label="ac3" value="ac3"></el-option>
+					<el-option label="eac3" value="eac3"></el-option>
 				</el-select>
 			</el-form-item>
 
 		</el-form>
 
 		<h4>输出参数</h4>
-		<el-form :inline="true" ref="form" :model="form" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.out" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="输出协议">
 				<el-input v-model="dialog.setOut.out.outputProtocol"></el-input>
 			</el-form-item>
 
 			<el-form-item label="输出地址">
-				<el-input v-model="dialog.setOut.out.outputAddress"></el-input>
+				<el-input v-model="dialog.setOut.out.outputAddress">
+				</el-input>
 			</el-form-item>
 
 			<el-form-item label="码率控制方式">
@@ -413,8 +436,8 @@
 			</el-table-column>
 			<el-table-column fixed="right" label="操作" width="100">
 			  <template slot-scope="scope">
-				<el-button @click="handleSetDeviceClick()" type="text" size="small">选择</el-button>
-				  <!--<el-button @click="handleSetDeviceClick(scope.row)" type="text" size="small">选择</el-button>-->
+				<!--<el-button @click="handleSetDeviceClick()" type="text" size="small">选择</el-button>-->
+				  <el-button @click="handleSetDeviceClick(scope.row)" type="text" size="small">选择</el-button>
 			  </template>
 			</el-table-column>
 		  </el-table>
