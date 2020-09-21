@@ -161,7 +161,7 @@ public class GuidePlayService {
 			JSONArray audioEncodeArrays=new JSONArray();
 			
 			videoEncodeArray.put("encode_id","ENCODE_ID_1");
-			videoParameter.put("profile", videoParametersPO.getProfile());
+//			videoParameter.put("profile", videoParametersPO.getProfile());
 			videoParameter.put("fps", videoParametersPO.getFps());
 			videoParameter.put("bitrate", videoParametersPO.getBitrate());
 			videoParameter.put("resolution", videoParametersPO.getResolution());
@@ -174,7 +174,7 @@ public class GuidePlayService {
 					.setEncode_array(videoEncodeArrays);
 			
 			audioEncodeArray.put("encode_id", "ENCODE_ID_2");
-			audioParameter.put("sample_fmt", audioParametersPO.getSampleFmt());
+//			audioParameter.put("sample_fmt", audioParametersPO.getSampleFmt());
 			audioParameter.put("bitrate", audioParametersPO.getBitrate());
 			audioParameter.put("type", audioParametersPO.getCodingType().getName());
 			audioEncodeArray.put(audioParametersPO.getCodingFormat().getName(),audioParameter);

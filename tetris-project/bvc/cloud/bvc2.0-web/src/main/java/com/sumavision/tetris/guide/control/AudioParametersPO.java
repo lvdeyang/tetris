@@ -28,7 +28,7 @@ public class AudioParametersPO extends AbstractBasePO{
 	private Long guideId;
 
 	/** 编码格式 */
-	private CodingFormat codingFormat = CodingFormat.ACC;
+	private CodingFormat codingFormat = CodingFormat.AAC;
 	
 	/** 声道布局 */
 	private ChannelLayout channelLayout = ChannelLayout.MONO;
