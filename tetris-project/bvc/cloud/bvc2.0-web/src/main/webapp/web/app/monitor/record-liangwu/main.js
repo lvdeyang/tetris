@@ -39,7 +39,6 @@ require.config({
     }
   }
 });
-
 require([
   'storage',
   'vue',
@@ -53,6 +52,7 @@ require([
 
   var app = null;
 
+  console.log(window.LIBPATH, "path");
   //缓存token
   storage.setItem(config.ajax.authname, window.TOKEN);
 

@@ -1,3 +1,8 @@
 /* reset */
-.bvc2-monitor-record *{box-sizing:border-box!important;}
-.bvc2-monitor-record .el-scrollbar__wrap{overflow-x: hidden;}
+.bvc2-monitor-record * {
+  box-sizing: border-box !important;
+}
+
+.bvc2-monitor-record .el-scrollbar__wrap {
+  overflow-x: hidden;
+}

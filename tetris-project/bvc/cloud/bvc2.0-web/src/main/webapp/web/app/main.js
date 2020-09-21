@@ -9,6 +9,7 @@ require.config({
     'jquery': window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
     'json': window.LIBPATH + 'frame/jQuery/jquery.json',
     'element-ui': window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+    'vue-draggable': window.LIBPATH + 'frame/draggable/vue-draggable',
     'extral': window.LIBPATH + 'extral/extral',
 
     /* commons */
@@ -52,6 +53,7 @@ require.config({
     'bvc2-preview-layout': window.APPPATH + 'component/bvc2-preview-layout/bvc2-preview-layout',
     'bvc2-monitor-record': window.APPPATH + 'component/bvc2-monitor-record/bvc2-monitor-record',
     'bvc2-monitor-record-liangwu': window.APPPATH + 'component/bvc2-monitor-record-liangwu/bvc2-monitor-record-liangwu',
+    'bvc2-monitor-forword': window.APPPATH + 'component/bvc2-monitor-forword/bvc2-monitor-forword',
     'native-record-player': window.APPPATH + 'component/jQuery/zk_Player/zk_RecordPlayer/js/zk_RecordPlayer',
     'native-sip-player': window.APPPATH + 'component/jQuery/zk_Player/zk_SipPlayer/js/zk_SipPlayer',
     'player': window.APPPATH + 'component/jQuery/player/js/Tetris.player',
@@ -158,6 +160,7 @@ require.config({
     'page-monitor-subtitle': window.APPPATH + 'monitor/subtitle/page-monitor-subtitle',
     'page-monitor-osd': window.APPPATH + 'monitor/osd/page-monitor-osd',
     'page-monitor-external-folder': window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
+    'page-monitor-forword': window.APPPATH + 'monitor/forword/page-monitor-forword',
     'page-guide-control': window.APPPATH + 'guide/control/page-guide-control'
 
   },
@@ -197,6 +200,10 @@ require.config({
     'player-panel': {
       deps: ['player'],
       exports: 'jQuery'
+    },
+    'vue-draggable': {
+      deps: ['vue'],
+      exports: 'vue-draggable'
     }
   }
 });
@@ -212,7 +219,7 @@ require([
   'commons',
   'element-ui',
   'bvc2-monitor-call',
-  'theme-adapter'
+  'theme-adapter',
 ], function (storage, Vue, router, context, config, menuUtil, ajax, commons) {
 
   var app = null;
