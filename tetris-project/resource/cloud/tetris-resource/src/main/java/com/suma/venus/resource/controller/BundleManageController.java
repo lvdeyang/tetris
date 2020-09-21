@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +49,7 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.BundleLoginBlackListDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -150,6 +152,9 @@ public class BundleManageController extends ControllerBase {
 
 	@Value("${zuulPort}")
 	private String zuulPort;
+	
+	@Autowired
+	private FolderDao folderDao;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -263,7 +268,7 @@ public class BundleManageController extends ControllerBase {
 			@RequestParam(name = "sourceType", required = false) String sourceType,
 			@RequestParam(name = "userId", required = false) Long userId, @RequestParam("keyword") String keyword,
 			@RequestParam(name = "pageNum") Integer pageNum,
-			@RequestParam(name = "countPerPage") Integer countPerPage) {
+			@RequestParam(name = "countPerPage") Integer countPerPage) throws Exception{
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel,
@@ -288,6 +293,10 @@ public class BundleManageController extends ControllerBase {
 			for (int i = from; i < to; i++) {
 				BundlePO bundlePO = bundlePOs.get(i);
 				BundleVO vo = BundleVO.fromPO(bundlePO);
+				if(bundlePO.getFolderId()!= null){
+					FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
+					vo.setBundleFolderName(folderPO.getName());
+				}
 				if (!"VenusTerminal".equals(bundlePO.getBundleType()) && !"VenusProxy".equals(bundlePO.getBundleType())
 						&& !lockChannelParamDao.findByBundleId(bundlePO.getBundleId()).isEmpty()) {
 					// 针对channel级锁定的bundle，如果它下面有channel被锁定，则认为bundle整体处于锁定状态
@@ -566,7 +575,8 @@ public class BundleManageController extends ControllerBase {
 			Boolean multicastEncode,
 			String multicastEncodeAddr,
 			Boolean multicastDecode,
-			@RequestParam(value = "extraInfos") String extraInfos) {
+			@RequestParam(value = "extraInfos") String extraInfos,
+			@RequestParam(value = "bundleFolderId")Long folderId) {
 		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
 				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
 
@@ -587,7 +597,8 @@ public class BundleManageController extends ControllerBase {
 			bundle.setMulticastEncode(multicastEncode);
 			bundle.setMulticastEncodeAddr(multicastEncodeAddr);
 			bundle.setMulticastDecode(multicastDecode);
-
+			bundle.setFolderId(folderId);
+			
 			bundle.setSyncStatus(SYNC_STATUS.ASYNC);
 			bundleService.save(bundle);
 

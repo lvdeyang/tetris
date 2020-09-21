@@ -335,3 +335,7 @@ export const syncUser = params => {
 export const getRecordDatas = params => {
   return axiosInstance.get('../../static/data/record.json', qs.stringify(params)).then(res => res.data)
 }
+
+export const queryCapacityDatas = params => {
+  return axiosInstance.post(`${basePath}/vedioCapacity/query`, qs.stringify(params)).then(res => res.data)
+}

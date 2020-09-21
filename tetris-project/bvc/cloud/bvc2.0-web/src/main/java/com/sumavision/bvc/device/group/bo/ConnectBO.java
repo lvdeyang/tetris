@@ -44,7 +44,7 @@ public class ConnectBO {
 	private String base_type = "";
 	
 	/**
-	 * 单播/组播模式
+	 * 单播/组播multicast模式
 	 */
 	private String mode = "single";
 	
@@ -52,6 +52,11 @@ public class ConnectBO {
 	 * 组播地址
 	 */
 	private String multi_addr;
+	
+	/**
+	 * 组播源地址
+	 */
+	private String src_multi_addr;
 	
 	/**
 	 * 编解码参数
@@ -141,6 +146,15 @@ public class ConnectBO {
 
 	public ConnectBO setMulti_addr(String multi_addr) {
 		this.multi_addr = multi_addr;
+		return this;
+	}
+
+	public String getSrc_multi_addr() {
+		return src_multi_addr;
+	}
+
+	public ConnectBO setSrc_multi_addr(String src_multi_addr) {
+		this.src_multi_addr = src_multi_addr;
 		return this;
 	}
 

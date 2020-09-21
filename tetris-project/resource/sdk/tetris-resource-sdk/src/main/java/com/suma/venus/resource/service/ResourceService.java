@@ -233,6 +233,12 @@ public class ResourceService {
 			case CLOUD:// 云台
 				code = bundleId + "-c";
 				break;
+			case LR:// 本地录制
+				code = bundleId + "-lr";
+				break;
+			case DOWNLOAD:// 下载
+				code = bundleId + "-d";
+				break;
 			default:
 				return false;
 			}
@@ -268,6 +274,12 @@ public class ResourceService {
 			break;
 		case CLOUD:// 云台
 			suffix = "-c";
+			break;
+		case LR:// 本地录制
+			suffix = "-lr";
+			break;
+		case DOWNLOAD:// 下载
+			suffix = "-d";
 			break;
 		default:
 			return false;

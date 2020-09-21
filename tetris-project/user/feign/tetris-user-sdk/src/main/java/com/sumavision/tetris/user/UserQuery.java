@@ -470,6 +470,10 @@ public class UserQuery {
 		return find(userIds);
 	}
 	
+	public List<UserVO> queryUserOnline()throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUserOnline(), UserVO.class);
+	}
+	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
 																        .setNickname("用户1")

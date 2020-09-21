@@ -27,6 +27,7 @@ import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordDAO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordMode;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
@@ -259,6 +260,8 @@ public class MonitorRecordController {
 			String audioChannelId,
 			String audioBaseType,
 			String audioChannelName,
+			String storeMode,
+			String timeQuantum,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -316,13 +319,22 @@ public class MonitorRecordController {
 		
 		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
 		
-		MonitorRecordPO task = monitorRecordService.addLocalDevice(
-				mode, fileName, startTime, endTime, 
-				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
-				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-				user.getId(), user.getUserno(), user.getName());
-		
-		return new MonitorRecordTaskVO().set(task);
+		if(MonitorRecordMode.TIMESEGMENT.equals(MonitorRecordMode.valueOf(mode))){
+			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+					mode, fileName, startTime, endTime, 
+					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
+					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
+					user.getId(), user.getUserno(), user.getName(), storeMode,
+					timeQuantum);
+			return new MonitorRecordTaskVO().set(task);
+		}else{
+			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+					mode, fileName, startTime, endTime, 
+					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
+					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
+					user.getId(), user.getUserno(), user.getName(), 10240);
+			return new MonitorRecordTaskVO().set(task);
+		}
 	}
 	
 	/**

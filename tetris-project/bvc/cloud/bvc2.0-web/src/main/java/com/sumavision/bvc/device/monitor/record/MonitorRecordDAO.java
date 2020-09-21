@@ -15,15 +15,26 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 
 	/**
-	 * 查询需要开始的排期录制<br/>
+	 * 查询需要开始的定时录制<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月9日 上午8:54:45
 	 * @param Date time 时间节点
 	 * @return List<MonitorRecordPO> 录制任务列表
 	 */
-	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordPO record where record.mode='SCHEDULING' and record.status='WAITING' and record.startTime<=?1")
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordPO record where record.mode='SCHEDULING' and record.status='WAITING' and record.startTime<=?1 ")
 	public List<MonitorRecordPO> findNeedStartSchedulingRecord(Date time);
+	
+	/**
+	 * 查询需要开始的排期录制<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月17日 下午6:50:50
+	 * @param time
+	 * @return List<MonitorRecordPO> 录制任务id
+	 */
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordPO record where record.mode='TIMESEGMENT' and record.status='WAITING' ")
+	public List<MonitorRecordPO> findNeedStartSheduleRecordId();
 	
 	/**
 	 * 查询需要停止的排期录制<br/>
@@ -292,5 +303,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 			Long recordUserId,
 			String fileNameReg,
 			Pageable pageable);
+	
+	public List<MonitorRecordPO> findByIdIn(Collection<Long> ids);
 	
 }
