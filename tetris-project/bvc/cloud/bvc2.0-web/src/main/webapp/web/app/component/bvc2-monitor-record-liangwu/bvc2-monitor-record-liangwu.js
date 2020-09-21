@@ -304,7 +304,8 @@ define([
         var task = {
           mode: self.dialog.addRecord.mode,
           fileName: self.dialog.addRecord.fileName,
-          bundleId: self.dialog.addRecord.bundleId
+          bundleId: self.dialog.addRecord.bundleId,
+          storeMode: self.dialog.addRecord.timeSegmentmode
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
@@ -355,7 +356,7 @@ define([
               });
               return;
             }
-            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}]`
+            timeSegmentObj = `${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}`
 
           } else if (addRecord.timeSegmentmode == "week") {
             if (addRecord.timeSegmentmodeStartDay > addRecord.timeSegmentmodeEndDay) {
@@ -384,9 +385,9 @@ define([
               });
               return;
             }
-            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}]`
+            timeSegmentObj = `${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}`
           } else {
-            timeSegmentObj = `${addRecord.timeSegmentmode}:[${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndTime}]`
+            timeSegmentObj = `${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndTime}`
 
           }
           task.timeQuantum = timeSegmentObj;
