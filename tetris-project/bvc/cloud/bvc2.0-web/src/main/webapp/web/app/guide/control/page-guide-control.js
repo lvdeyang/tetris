@@ -35,6 +35,18 @@ define([
 				//	}
 				//};
                 return {
+					editableTabsValue: '2',
+					editableTabs: [{
+						title: '导播任务1',
+						name: '1',
+						content: 'Tab 1 content'
+					}, {
+						title: '导播任务2',
+						name: '2',
+						content: 'Tab 2 content'
+					}],
+					tabIndex: 2,
+
                 	user:context.getProp('user'),
                 	menurouter: false,
                     shortCutsRoutes:commons.data,
@@ -49,7 +61,8 @@ define([
                             sourceType:'',
 							source:'',
 							previewOut:'',
-                            typeOptions:['5G背包','直播流']
+                            typeOptions:['5G背包','直播流'],
+							bundleName: ''
                     	},
                     	setOut:{
                     		visible: false,
@@ -62,7 +75,7 @@ define([
 								resolution: '',
 								ratio: '',
 								rcMode: '',
-								maxBitrate: 1500,
+								maxBitrate: 1500
 							},
 
 							audio:{
@@ -70,7 +83,7 @@ define([
 								channelLayout:'',
 								bitrate:'128',
 								sampleRate:'44.1',
-								codingType:'',
+								codingType:''
 							},
 
 							out:{
@@ -106,6 +119,37 @@ define([
 				handleSelPgm: function () {
 					var self = this;
 				},
+				addTab: function(targetName) {
+					var newTabName = ++this.tabIndex + '';
+					this.editableTabs.push({
+						title: '导播任务' + this.tabIndex,
+						name: newTabName,
+						content: 'New Tab content'
+					});
+					this.editableTabsValue = newTabName;
+					newTabName = '导播任务' + newTabName;
+					ajax.post('/tetris/guide/control/guide/po/add', newTabName, function (data, status) {
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+				},
+				removeTab: function(targetName) {
+					var tabs = this.editableTabs;
+					var activeName = this.editableTabsValue;
+					if (activeName === targetName) {
+						tabs.forEach((tab, index) => {
+							if (tab.name === targetName) {
+								var nextTab = tabs[index + 1] || tabs[index - 1];
+								if (nextTab) {
+									activeName = nextTab.name;
+								}
+							}
+						});
+					}
+
+					this.editableTabsValue = activeName;
+					this.editableTabs = tabs.filter(tab => tab.name !== targetName);
+					this.tabIndex--;
+				},
 				handleSetDeviceClose:function(){
 					var self = this;
 					self.dialog.setDevice.visible = false;
@@ -125,34 +169,27 @@ define([
 					self.dialog.setSource.sourceType = x.sourceTypeName;
 					self.dialog.setSource.source = x.source;
 					self.dialog.setSource.previewOut = x.previewOut;
+					self.dialog.setSource.sourceName = x.sourceName;
+					self.dialog.setSource.bundleName = x.sourceName;
             	},
-				handleSetSourceCommit:function(formName){
-					console.log(this.$refs[formName])
-					this.$refs[formName].validate((valid)=>{
-
-						if (valid) {
-							var self = this;
-							self.dialog.setSource.visible=false;
-							var questData = {
-								id:self.dialog.setSource.id,
-								sourceType: self.dialog.setSource.sourceType,
-								source:self.dialog.setSource.source,
-								sourceName:self.dialog.setSource.sourceName,
-								previewOut:self.dialog.setSource.previewOut
-							};
-							ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
-								for(var i = 0; i < self.sources.list.length; i++){
-									list[i].sourceType = self.dialog.setSource.sourceType;
-									list[i].source = self.dialog.setSource.source;
-									list[i].sourceName = self.dialog.setSource.sourceName;
-									list[i].previewOut = self.dialog.setSource.previewOut;
-								}
-							}, null, ajax.NO_ERROR_CATCH_CODE);
-						} else {
-							console.log('error submit!!');
-							return false;
+				handleSetSourceCommit:function(){
+					var self = this;
+					self.dialog.setSource.visible=false;
+					var questData = {
+						id:self.dialog.setSource.id,
+						sourceType: self.dialog.setSource.sourceType,
+						source:self.dialog.setSource.source,
+						sourceName:self.dialog.setSource.sourceName,
+						previewOut:self.dialog.setSource.previewOut
+					};
+					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
+						for(var i = 0; i < self.sources.list.length; i++){
+							if(data.id === self.sources.list[i].id){
+								self.sources.list.splice(i,1,data);
+								break;
+							}
 						}
-					});
+					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetSourceClose:function(){
 					var self = this;
@@ -216,6 +253,12 @@ define([
 					var self=this;
 					self.dialog.setSource.visible=false;
 					self.dialog.setDevice.visible=true;
+					self.dialog.setDevice.deviceData.splice(0, self.dialog.setDevice.deviceData.length);
+					ajax.post('/tetris/guide/control/source/po/queryDevice', null, function(data, status){
+						for(var i = 0; i < data.length; i++){
+							self.dialog.setDevice.deviceData.push(data[i]);
+						}
+					})
 				},
 				startGuide:function(){
 					ajax.post('/tetris/guide/control/guide/po/start',{id: 1},function(data, status){
@@ -231,9 +274,9 @@ define([
 					var self=this;
 					self.curPgm=index;
 				},
-				getBackcolor:function(index){
+				getBackcolor:function(source){
 					var self=this;
-					if(self.curPgm==index){
+					if(source.current===true){
 						return "background:#cc0033"
 					}else{
 						return "background:#CCC"
@@ -242,18 +285,24 @@ define([
 				switchSource:function(){
 					var self = this;
 					var questData = {
-						id: 1,
-						index: self.curPgm
+						id: self.curPgm
 					};
 					ajax.post('/tetris/guide/control/source/po/cut', questData, function (data, status) {
-						
+						for(var i = 0; i < self.sources.list.length; i++){
+							if(self.sources.list[i].id === data.id){
+								self.sources.list[i].current = true;
+							}else{
+								self.sources.list[i].current = false;
+							}
+						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetDeviceClick:function(row){
 					var self = this;
-					self.dialog.setSource.source = row.sourceName;
+					self.dialog.setSource.source = row.bundleId;
 					self.dialog.setSource.visible = true;
 					self.dialog.setDevice.visible = false;
+					self.dialog.setSource.bundleName = row.bundleName;
 				}
 
                
@@ -270,9 +319,9 @@ define([
 					console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);
-						if(data[i].sourceTypeName == '5G背包'){
+						/*if(data[i].sourceTypeName == '5G背包'){
 							self.dialog.setDevice.deviceData.push(data[i]);
-						}
+						}*/
 					}
 				})
 

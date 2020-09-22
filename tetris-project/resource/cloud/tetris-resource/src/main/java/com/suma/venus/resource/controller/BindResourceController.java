@@ -633,17 +633,17 @@ public class BindResourceController extends ControllerBase {
 	@RequestMapping(value = "/submitBundlePrivilege", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> submitBundlePrivilege(
-			@RequestParam(value = "roleId") Long roleId, 
-			@RequestParam(value = "prevReadChecks") String prevReadChecks,
-			@RequestParam(value = "prevWriteChecks") String prevWriteChecks,
-			@RequestParam(value = "prevCloudChecks") String prevCloudChecks,
-			@RequestParam(value = "prevLocalReadChecks") String prevLocalReadChecks, 
-			@RequestParam(value = "prevDownloadChecks") String prevDownloadChecks, 
-			@RequestParam(value = "readChecks") String readChecks,
-			@RequestParam(value = "writeChecks") String writeChecks, 
-			@RequestParam(value = "cloudChecks") String cloudChecks,
-			@RequestParam(value = "localReadChecks") String localReadChecks,
-			@RequestParam(value = "downloadChecks") String downloadChecks,
+			Long roleId, 
+			String prevReadChecks,
+			String prevWriteChecks,
+			String prevCloudChecks,
+			String prevLocalReadChecks, 
+			String prevDownloadChecks, 
+			String readChecks,
+			String writeChecks, 
+			String cloudChecks,
+			String localReadChecks,
+			String downloadChecks,
 			Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
@@ -801,22 +801,22 @@ public class BindResourceController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> submitUserresPrivilege(
 			@RequestParam(value = "roleId") Long roleId,
-			@RequestParam(value = "prevReadChecks") String prevReadChecks,
-			@RequestParam(value = "prevWriteChecks") String prevWriteChecks, 
-			@RequestParam(value = "prevCloudChecks") String prevCloudChecks,
-			@RequestParam(value = "prevLocalReadChecks") String prevLocalReadChecks,
-			@RequestParam(value = "prevDownloadChecks") String prevDownloadChecks,
-			@RequestParam(value = "prevHJChecks") String prevHJChecks,
-			@RequestParam(value = "prevZKChecks") String prevZKChecks,
-			@RequestParam(value = "prevHYChecks") String prevHYChecks, 
-			@RequestParam(value = "readChecks") String readChecks, 
-			@RequestParam(value = "writeChecks") String writeChecks,
-			@RequestParam(value = "cloudChecks") String cloudChecks,
-			@RequestParam(value = "localReadChecks") String localReadChecks,
-			@RequestParam(value = "downloadChecks") String downloadChecks,
-			@RequestParam(value = "hjChecks") String hjChecks, 
-			@RequestParam(value = "zkChecks") String zkChecks, 
-			@RequestParam(value = "hyChecks") String hyChecks, Principal principal) {
+			String prevReadChecks,
+			String prevWriteChecks, 
+			String prevCloudChecks,
+			String prevLocalReadChecks,
+			String prevDownloadChecks,
+			String prevHJChecks,
+			String prevZKChecks,
+			String prevHYChecks, 
+			String readChecks, 
+			String writeChecks,
+			String cloudChecks,
+			String localReadChecks,
+			String downloadChecks,
+			String hjChecks, 
+			String zkChecks, 
+			String hyChecks, Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
 		try {

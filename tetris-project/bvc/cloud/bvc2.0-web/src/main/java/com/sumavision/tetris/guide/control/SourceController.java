@@ -55,6 +55,24 @@ public class SourceController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月21日 下午3:42:43
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryDevice")
+	public Object querySourceDevice() throws Exception{
+		
+		return sourceQuery.queryDevice();
+	}
+	
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月3日 下午8:24:24
 	 * @param sourceNumber
 	 * @param sourceType
@@ -123,8 +141,7 @@ public class SourceController {
 	@RequestMapping(value = "/cut")
 	public Object cut(
 			Long id,
-			Long index,
 			HttpServletRequest request) throws Exception{
-		return sourceService.cut(id, index);
+		return sourceService.cut(id);
 	}
 }
