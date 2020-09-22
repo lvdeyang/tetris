@@ -1,29 +1,27 @@
-<div class="bvc2-monitor-call">
+<div class="bvc2-monitor-call" v-if="!isLiangwu">
 
-    <iframe v-if="!visible" style="width:30px; height:30px; position:fixed; right:0; top:46%; z-index:200000; background-color:#000;" frameborder="no" border="0" allowtransparency="true"></iframe>
-    <iframe class="dialog-show" v-else style="width:820px; height:500px; z-index:200000; background-color:#000;" frameborder="no" border="0" allowtransparency="true"></iframe>
-    <el-button
-            v-if="!visible"
-            size="mini"
-            style="border-radius:0; font-size:18px; width:30px; height:30px; padding:0; text-align:center; line-height:30px; position:fixed; right:0; top:46%; z-index:200001; box-shadow:0 2px 12px 0 rgba(0,0,0,.5);"
-            :icon="id?'el-icon-phone-outline':'el-icon-phone'"
-            :type="id?'success':'info'"
-            @click="handleShow"></el-button>
-    <div
-        v-else
-        style="width:820px; height:500px; z-index:200001; box-shadow:0 2px 12px 0 rgba(0,0,0,.5); background-color:#fff;"
-        class="el-dialog dialog-show">
-        <div style="border-bottom:1px solid #ebeef5;" class="el-dialog__header">
-            <!--<el-button type="text" icon="el-icon-refresh" style="padding:0; font-size:20px;" @click="refreshUsers"></el-button>-->
-            <span class="el-dialog__title">呼叫用户</span>
-            <button type="button" aria-label="Close" class="el-dialog__headerbtn" @click="handleClose">
-                <i class="el-dialog__close el-icon el-icon-close"></i>
-            </button>
-        </div>
-        <div style="width:100%; height:445px; position:relative;">
-            <div style="width:410px; height:100%; border-right:1px solid #ebeef5;">
-                <div style="width:100%; height:100%; position:relative;">
-                    <!--<div style="position:absolute; top:0; left:10px; bottom:50px; right:10px;">
+  <iframe v-if="!visible"
+    style="width:30px; height:30px; position:fixed; right:0; top:46%; z-index:200000; background-color:#000;"
+    frameborder="no" border="0" allowtransparency="true"></iframe>
+  <iframe class="dialog-show" v-else style="width:820px; height:500px; z-index:200000; background-color:#000;"
+    frameborder="no" border="0" allowtransparency="true"></iframe>
+  <el-button v-if="!visible" size="mini"
+    style="border-radius:0; font-size:18px; width:30px; height:30px; padding:0; text-align:center; line-height:30px; position:fixed; right:0; top:46%; z-index:200001; box-shadow:0 2px 12px 0 rgba(0,0,0,.5);"
+    :icon="id?'el-icon-phone-outline':'el-icon-phone'" :type="id?'success':'info'" @click="handleShow"></el-button>
+  <div v-else
+    style="width:820px; height:500px; z-index:200001; box-shadow:0 2px 12px 0 rgba(0,0,0,.5); background-color:#fff;"
+    class="el-dialog dialog-show">
+    <div style="border-bottom:1px solid #ebeef5;" class="el-dialog__header">
+      <!--<el-button type="text" icon="el-icon-refresh" style="padding:0; font-size:20px;" @click="refreshUsers"></el-button>-->
+      <span class="el-dialog__title">呼叫用户</span>
+      <button type="button" aria-label="Close" class="el-dialog__headerbtn" @click="handleClose">
+        <i class="el-dialog__close el-icon el-icon-close"></i>
+      </button>
+    </div>
+    <div style="width:100%; height:445px; position:relative;">
+      <div style="width:410px; height:100%; border-right:1px solid #ebeef5;">
+        <div style="width:100%; height:100%; position:relative;">
+          <!--<div style="position:absolute; top:0; left:10px; bottom:50px; right:10px;">
                         <el-scrollbar style="height:100%;">
                             <el-table
                                     :data="table.data"
@@ -70,46 +68,45 @@
                                 @current-change="handleCurrentChange">
                         </el-pagination>
                     </div>-->
-                    <el-scrollbar style="height:100%;">
-                        <el-tree
-                        		style="position:relative;"
-                                :data="tree.data"
-                                :props="tree.props">
-                                <span class="custom-tree-node" slot-scope="{node, data}">
-                                    <span>
-                                        <span :class="data.icon" :style="data.style"></span>
-                                        <span>{{node.label}}</span>
-                                    </span>
-                                    <span v-if="data.type==='USER'">
-                                        <el-button v-if="id" type="text" icon="el-icon-phone-outline" style="padding:0; font-size:18px; position:relative; top:1px; right:10px;" disabled></el-button>
-                                        <el-button v-else type="text" icon="el-icon-phone-outline" style="padding:0; font-size:18px; position:relative; top:1px; right:10px;" @click="startCall(data, node)"></el-button>
-                                    </span>
-                                </span>
-                        </el-tree>
-                    </el-scrollbar>
-                </div>
-            </div>
-            <div style="width:410px; height:100%; position:absolute; right:0; top:0;">
-                <div :style="!sendCall.loading&&id?'position:relative; width:100%; height:100%; background-color:#222126;':'position:relative; width:100%; height:100%; background-color:#fff;'">
-                    <div v-if="sendCall.loading||id" style="width:100%; height:50px; line-height:50px; text-align:center; font-size:16px; color:#fff; background-color:#000;">
-                        {{message}}
-                    </div>
-                    <div style="width:100%; position:absolute!important; top:50px; bottom:50px;" v-loading="sendCall.loading" :element-loading-text="sendCall.message" element-loading-background="rgba(0,0,0,.8)">
-                        <div style="width:100%; height:100%;" class="embed-container"></div>
-                    </div>
-                    <div style="width:100%; position:absolute; bottom:0; text-align:center; background-color:#000;">
-                        <!--v-if="sendCall.loading||id"-->
-                        <el-button
-                                v-if="id"
-                                type="danger"
-                                style="border-radius:100%; width:50px; height:50px; padding:0; text-align:center; line-height:50px; font-size:24px;"
-                                icon="el-icon-phone"
-                                @click="endCall"
-                                :loading="loading"></el-button>
-                    </div>
-                </div>
-            </div>
+          <el-scrollbar style="height:100%;">
+            <el-tree style="position:relative;" :data="tree.data" :props="tree.props">
+              <span class="custom-tree-node" slot-scope="{node, data}">
+                <span>
+                  <span :class="data.icon" :style="data.style"></span>
+                  <span>{{node.label}}</span>
+                </span>
+                <span v-if="data.type==='USER'">
+                  <el-button v-if="id" type="text" icon="el-icon-phone-outline"
+                    style="padding:0; font-size:18px; position:relative; top:1px; right:10px;" disabled></el-button>
+                  <el-button v-else type="text" icon="el-icon-phone-outline"
+                    style="padding:0; font-size:18px; position:relative; top:1px; right:10px;"
+                    @click="startCall(data, node)"></el-button>
+                </span>
+              </span>
+            </el-tree>
+          </el-scrollbar>
         </div>
+      </div>
+      <div style="width:410px; height:100%; position:absolute; right:0; top:0;">
+        <div
+          :style="!sendCall.loading&&id?'position:relative; width:100%; height:100%; background-color:#222126;':'position:relative; width:100%; height:100%; background-color:#fff;'">
+          <div v-if="sendCall.loading||id"
+            style="width:100%; height:50px; line-height:50px; text-align:center; font-size:16px; color:#fff; background-color:#000;">
+            {{message}}
+          </div>
+          <div style="width:100%; position:absolute!important; top:50px; bottom:50px;" v-loading="sendCall.loading"
+            :element-loading-text="sendCall.message" element-loading-background="rgba(0,0,0,.8)">
+            <div style="width:100%; height:100%;" class="embed-container"></div>
+          </div>
+          <div style="width:100%; position:absolute; bottom:0; text-align:center; background-color:#000;">
+            <!--v-if="sendCall.loading||id"-->
+            <el-button v-if="id" type="danger"
+              style="border-radius:100%; width:50px; height:50px; padding:0; text-align:center; line-height:50px; font-size:24px;"
+              icon="el-icon-phone" @click="endCall" :loading="loading"></el-button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
 </div>

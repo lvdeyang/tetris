@@ -84,7 +84,8 @@ define([
             remark: '',
             loginIp: '',
             lastlogintime: '',
-            bindrole: ''
+            bindrole: '',
+            bindRoles: ''
           },
           editUser: {
             visible: false,
@@ -100,7 +101,8 @@ define([
             loading: false,
             remark: '',
             loginIp: '',
-            bindrole: ''
+            bindrole: '',
+            bindRoles: ''
           },
           import: {
             requireType: ['csv'],
@@ -120,11 +122,14 @@ define([
         },
         handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
-          var bindRoleArr = [];
+          var bindRoleNameArr = [];
+          var bindRoleIdArr = [];
           this.dialogBindRole.bindRoleSelection.map(item => {
-            bindRoleArr.push(item.name)
+            bindRoleNameArr.push(item.name);
+            bindRoleIdArr.push(item.id)
           })
-          this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleArr.join(',');
+          this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
+          this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = bindRoleIdArr.join(',');
           // this.dialogBindRole.bindRoleSelection = [];
           // this.$refs.roleTable.clearSelection()
         },
@@ -146,30 +151,6 @@ define([
             var total = data.total;
             var rows = data.rows;
             self.table.rows = data.rows;
-            // var bindipArr = ['10.1.23.244', '10.1.24.202', '10.1.23.224', '10.19.24.202', '10.1.22.244', '10.15.16.255', ]
-            // if (rows && rows.length > 0) {
-            //   for (var i = 0; i < rows.length; i++) {
-            //     if (rows[i].errorLoginTimes >= 10) {
-            //       rows[i].locked = true;
-            //     } else {
-            //       rows[i].locked = false;
-            //     }
-            //     if (rows[i].id == 2) {
-            //       rows[i].remark = "司令员";
-
-            //     } else if (rows[i].id == 3) {
-            //       rows[i].remark = "军长";
-            //     } else if (rows[i].id == 23) {
-            //       rows[i].remark = "团长";
-            //     } else {
-            //       rows[i].remark = "操作员";
-            //     }
-
-            //     rows[i].bindip = bindipArr[Math.floor(Math.random() * 6)];
-            //     rows[i].lastlogintime = self.format(new Date())
-            //     self.table.rows.push(rows[i]);
-            //   }
-            // }
             self.table.total = total;
             self.table.currentPage = currentPage;
           });
@@ -288,6 +269,7 @@ define([
           self.dialog.editUser.remark = row.remark;
           self.dialog.editUser.loginIp = row.loginIp;
           self.dialog.editUser.bindrole = row.bindrole;
+          self.dialog.editUser.bindRoles = row.bindRoles;
         },
         handleEditUserClose: function () {
           var self = this;
@@ -304,6 +286,7 @@ define([
           self.dialog.editUser.remark = '';
           self.dialog.editUser.loginIp = '';
           self.dialog.editUser.bindrole = '';
+          self.dialog.editUser.bindRoles = ''
         },
         handleEditUserSubmit: function () {
           var self = this;
@@ -319,7 +302,8 @@ define([
             repeat: self.dialog.editUser.repeat,
             remark: self.dialog.editUser.remark,
             loginIp: self.dialog.editUser.loginIp,
-            bindrole: self.dialog.editUser.bindrole
+            bindrole: self.dialog.editUser.bindrole,
+            bindRoles: self.dialog.editUser.bindRoles
           }, function (data, status) {
             self.dialog.editUser.loading = false;
             if (status !== 200) return;
@@ -387,7 +371,8 @@ define([
           self.dialog.createUser.visible = false;
           self.dialog.createUser.remark = "",
             self.dialog.createUser.loginIp = "",
-            self.dialog.createUser.bindrole = ""
+            self.dialog.createUser.bindrole = "",
+            self.dialog.createUser.bindRoles = ""
         },
         handleCreateUserSubmit: function () {
           var self = this;
@@ -405,7 +390,8 @@ define([
             companyId: self.dialog.createUser.company.id,
             remark: self.dialog.createUser.remark,
             loginIp: self.dialog.createUser.loginIp,
-            bindrole: self.dialog.createUser.bindrole
+            bindrole: self.dialog.createUser.bindrole,
+            bindRoles: self.dialog.createUser.bindRoles
           };
 
           ajax.post('/user/add', params, function (data, status) {

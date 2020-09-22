@@ -28,6 +28,16 @@ define([
           },
           prependRow: ''
         },
+        taskId: '',
+        downloadTable: {
+          data: [],
+          page: {
+            currentPage: 1,
+            pageSize: 20,
+            total: 0
+          },
+          prependRow: ''
+        },
         condition: {
           mode: 'MANUAL',
           device: '',
@@ -267,6 +277,16 @@ define([
         var self = this;
         self.load(currentPage);
       },
+      handleSizeChangeByDownloadTable: function (pageSize) {
+        var self = this;
+        self.downloadTable.page.pageSize = pageSize;
+        self.loadByDownload(this.taskId);
+      },
+      handleCurrentChangeByDownloadTable: function (currentPage) {
+        var self = this;
+        self.downloadTable.page.currentPage = currentPage;
+        self.loadByDownload(this.taskId);
+      },
       handleAddRecordClose: function () {
         var self = this;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
@@ -337,6 +357,15 @@ define([
                 message: '日期不能为空！'
               });
               return;
+            } else if (addRecord.timeSegmentmodeStartDay < 0 ||
+              addRecord.timeSegmentmodeStartDay > 31 ||
+              addRecord.timeSegmentmodeEndDay < 0 ||
+              addRecord.timeSegmentmodeEndDay > 31) {
+              self.$message({
+                type: 'warning',
+                message: '日期格式不正确！'
+              });
+              return;
             }
             timeSegmentObj = `${addRecord.timeSegmentmodeStartDay}-${addRecord.timeSegmentmodeStartTime},${addRecord.timeSegmentmodeEndDay}-${addRecord.timeSegmentmodeEndTime}`
 
@@ -346,6 +375,15 @@ define([
               self.$message({
                 type: 'warning',
                 message: '星期不能为空！'
+              });
+              return;
+            } else if (addRecord.timeSegmentmodeStartDay < 0 ||
+              addRecord.timeSegmentmodeStartDay > 7 ||
+              addRecord.timeSegmentmodeEndDay < 0 ||
+              addRecord.timeSegmentmodeEndDay > 7) {
+              self.$message({
+                type: 'warning',
+                message: '星期格式不正确！'
               });
               return;
             }
@@ -398,7 +436,7 @@ define([
         var self = this;
         self.dialog.selectDevice.visible = true;
         self.dialog.selectDevice.tree.data.splice(0, self.dialog.selectDevice.tree.data.length);
-        ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.selectDevice.tree.data.push(data[i]);
@@ -419,14 +457,48 @@ define([
         }
         self.handleSelectDeviceClose();
       },
-      openDownload(row) {
+      openDownload(rows) {
+        this.taskId = rows.row.id;
+        this.loadByDownload(rows.row.id)
         this.dialog.download.visible = true;
+      },
+      loadByDownload(id) {
+        var param = {
+          id: id,
+          currgentPage: this.downloadTable.page.currentPage,
+          pageSize: this.downloadTable.page.pageSize
+        }
+        ajax.post('/monitor/record/load/many/times/record', param, function (data) {
+          var total = data.total;
+          var rows = data.rows;
+          // self.downloadTable.page.currentPage = currentPage;
+          self.downloadTable.page.total = total;
+          this.downloadTable.data = rows;
+        });
       },
       handleDownloadClose() {
         this.dialog.download.visible = false;
       },
       rowDownload(row) {
-        console.log(row)
+        console.log(row.downloadPath)
+        location.href = row.downloadPath;
+      },
+      handleTotalSizeMb() {
+        {
+          this.$prompt('请输入磁盘大小(GB)', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern: /\d/,
+            inputErrorMessage: '磁盘大小只能为数字！'
+          }).then(({
+            value
+          }) => {
+            console.log(value)
+            this.dialog.addRecord.totalSizeMb = value
+          }).catch(() => {
+
+          });
+        }
       }
     },
     mounted: function () {

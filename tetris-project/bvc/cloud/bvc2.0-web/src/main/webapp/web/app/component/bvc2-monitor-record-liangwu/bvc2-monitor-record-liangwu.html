@@ -15,6 +15,7 @@
       <el-date-picker size="small" v-model="condition.timeScope" type="datetimerange" start-placeholder="开始日期"
         end-placeholder="结束日期" :default-time="['12:00:00']" style="margin-left:10px;">
       </el-date-picker>
+      <el-button type="primary" size="small" @click="handleTotalSizeMb">设置磁盘大小</el-button>
     </div>
     <div style="width:100%; position:absolute; left:0; top:50px; bottom:52px; background-color:#fff;">
       <el-table height="100%" :data="table.data" stripe style="width: 100%">
@@ -109,10 +110,7 @@
                   <el-form-item style="margin-bottom:10px;width: 400px;" prop="fileName">
                     <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入任务名称"></el-input>
                   </el-form-item>
-                  <el-form-item v-if="dialog.addRecord.mode==='CYCLE'||dialog.addRecord.mode==='TIMESEGMENT'"
-                    style="margin-bottom:10px;width:400px">
-                    <el-input size="medium" v-model="dialog.addRecord.totalSizeMb" placeholder="请输入磁盘大小"></el-input>
-                  </el-form-item>
+
                   <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px">
                     <el-date-picker size="medium" v-model="dialog.addRecord.timeScope" type="datetimerange"
                       start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
@@ -193,13 +191,8 @@
     </el-dialog>
 
     <el-dialog title="导出列表" :visible.sync="dialog.download.visible" width="872px" :before-close="handleDownloadClose">
-      <el-table height="100%" :data="table.data" stripe style="width: 100%">
-        <!-- <el-table-column type="selection" width="55">
-        </el-table-column> -->
-        <el-table-column fixed prop="fileName" label="录制任务名">
-        </el-table-column>
-        <el-table-column prop="mode" label="录制模式" width="100">
-        </el-table-column>
+      <el-table height="100%" :data="downloadTable.data" stripe style="width: 100%">
+
         <el-table-column prop="startTime" label="开始时间" width="200">
         </el-table-column>
         <el-table-column prop="endTime" label="结束时间" width="200">
@@ -208,11 +201,20 @@
           <template slot-scope="scope">
             <el-tooltip class="item" effect="dark" content="下载" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDownload(scope)"></el-button>
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDownload(row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
+
+      <div
+        style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+        <el-pagination style="float:right;" background @size-change="handleSizeChangeByDownloadTable"
+          @current-change="handleCurrentChangeByDownloadTable" :current-page="downloadTable.page.currentPage"
+          :page-sizes="[20, 50, 100, 500, 1000]" :page-size="downloadTable.page.pageSize"
+          layout="total, sizes, prev, pager, next, jumper" :total="downloadTable.page.total">
+        </el-pagination>
+      </div>
     </el-dialog>
   </template>
 </div>
