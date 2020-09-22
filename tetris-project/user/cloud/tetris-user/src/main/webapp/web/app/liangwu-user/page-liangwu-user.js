@@ -260,6 +260,13 @@ define([
         handleRowEdit: function (scope) {
           var self = this;
           var row = scope.row;
+          var businessRoles = JSON.parse(row.businessRoles),
+            rolesName = [],
+            rolesId = [];
+          for (item in businessRoles) {
+            rolesName.push(item.name)
+            rolesId.push(item.id)
+          }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;
           self.dialog.editUser.mobile = row.mobile;
@@ -268,8 +275,8 @@ define([
           self.dialog.editUser.visible = true;
           self.dialog.editUser.remark = row.remark;
           self.dialog.editUser.loginIp = row.loginIp;
-          self.dialog.editUser.bindrole = row.bindrole;
-          self.dialog.editUser.bindRoles = row.bindRoles;
+          self.dialog.editUser.bindrole = rolesName.join(',');
+          self.dialog.editUser.bindRoles = rolesId.join(',');
         },
         handleEditUserClose: function () {
           var self = this;
@@ -303,7 +310,8 @@ define([
             remark: self.dialog.editUser.remark,
             loginIp: self.dialog.editUser.loginIp,
             bindrole: self.dialog.editUser.bindrole,
-            bindRoles: self.dialog.editUser.bindRoles
+            bindRoles: self.dialog.editUser.bindRoles,
+            resetPermissions: true
           }, function (data, status) {
             self.dialog.editUser.loading = false;
             if (status !== 200) return;
@@ -369,10 +377,10 @@ define([
           self.dialog.createUser.level = 1;
           self.dialog.createUser.classify = '企业用户';
           self.dialog.createUser.visible = false;
-          self.dialog.createUser.remark = "",
-            self.dialog.createUser.loginIp = "",
-            self.dialog.createUser.bindrole = "",
-            self.dialog.createUser.bindRoles = ""
+          self.dialog.createUser.remark = "";
+          self.dialog.createUser.loginIp = "";
+          self.dialog.createUser.bindrole = "";
+          self.dialog.createUser.bindRoles = ""
         },
         handleCreateUserSubmit: function () {
           var self = this;

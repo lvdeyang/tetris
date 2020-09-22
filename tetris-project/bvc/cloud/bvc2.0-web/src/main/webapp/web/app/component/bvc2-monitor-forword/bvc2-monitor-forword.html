@@ -8,8 +8,8 @@
             :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick">
             <div class="custom-tree-node" slot-scope="{ node, data }">
               <span v-if="data.type == 'FOLDER'">{{data.name}}</span>
-              <draggable v-else element="span" :options="{group:{name: 'site',pull:'clone'},sort: true}"
-                animation="300">
+              <draggable v-else element="span" :options="{group:{name: 'site',pull:'clone', put: false},sort: true}"
+                :bundleId="data.id" bundleType="recode" animation="300" @start="onStart" @end="onEnd">
                 <span class="item">{{data.name}}</span>
               </draggable>
             </div>
@@ -25,8 +25,8 @@
             :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick">
             <div class="custom-tree-node" slot-scope="{ node, data }">
               <span v-if="data.type == 'FOLDER'">{{data.name}}</span>
-              <draggable v-else element="span" :options="{group:{name: 'site',pull:'clone'},sort: true}"
-                animation="300">
+              <draggable :bundleId="data.id" bundleType="decode" v-else element="span"
+                :options="{group:{name: 'site',pull:'clone'},sort: true}" @start="onStart" @end="onEnd" animation="300">
                 <span class="item">{{data.name}}</span>
               </draggable>
             </div>

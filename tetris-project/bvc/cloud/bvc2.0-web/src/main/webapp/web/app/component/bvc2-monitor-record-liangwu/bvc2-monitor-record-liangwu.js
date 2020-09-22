@@ -394,15 +394,6 @@ define([
           }
           task.timeQuantum = timeSegmentObj;
           task.totalSizeMb = addRecord.totalSizeMb;
-        } else if (addRecord.mode == 'CYCLE') {
-          if (!addRecord.totalSizeMb) {
-            self.$message({
-              type: 'warning',
-              message: '磁盘大小不能为空！'
-            });
-            return;
-          }
-          task.totalSizeMb = addRecord.totalSizeMb;
         }
         if (self.dialog.addRecord.timeScope && self.dialog.addRecord.timeScope.length > 0) {
           var datetimePatten = 'yyyy-MM-dd HH:mm:ss';
@@ -493,8 +484,23 @@ define([
           }).then(({
             value
           }) => {
-            console.log(value)
             this.dialog.addRecord.totalSizeMb = value
+            ajax.post('/monitor/record/totle/size', {
+              totalSizeMb: value
+            }, function (data) {
+              if (data.status == 200) {
+                self.$message({
+                  type: 'success',
+                  message: '设置成功！'
+                });
+              } else {
+                self.$message({
+                  type: 'warning',
+                  message: data.message
+                });
+              }
+
+            });
           }).catch(() => {
 
           });

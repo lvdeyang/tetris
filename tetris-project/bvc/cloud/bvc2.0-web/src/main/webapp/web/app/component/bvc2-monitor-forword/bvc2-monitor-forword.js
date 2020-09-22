@@ -41,13 +41,12 @@ define([
           self.encodetree = data;
           this.treeLoading = false;
         });
-        ajax.post('/command/query/find/institution/tree/bundle/4/false/1', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
           self.recodetree = data;
           this.treeLoading = false;
         });
       },
       handleNodeClick: function (data) {
-        console.log(data)
         if (data.children) {
           return
         } else {
@@ -58,22 +57,17 @@ define([
         }
       },
       //开始拖拽事件
-      onStart() {
+      onStart(e) {
         this.drag = true;
+        console.log(e, 'start')
 
       },
       //拖拽结束事件
-      onEnd() {
+      onEnd(e) {
         var self = this;
+        console.log(e, 'end')
 
-        function messageFun() {
-          self.$message({
-            type: 'success',
-            message: "配置成功!"
-          })
-        }
-        this.drag = false;
-        // setTimeout(messageFun, 800);
+
       },
       onMove2(e, originalEvent) {
         //false表示阻止拖拽
@@ -87,6 +81,13 @@ define([
         if ("EncodeManage" !== tab.name) {
           this.$router.push('/' + tab.name);
         }
+      },
+      add: function (e) {
+        var from = e.from.childNodes[0].attributes.bundleid.value
+        var to = e.to.childNodes[0].attributes.bundleid.value
+        console.log(from, 'from')
+        console.log(to, 'to')
+        console.log(e)
       }
     },
     mounted: function () {
