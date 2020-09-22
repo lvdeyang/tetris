@@ -29,7 +29,7 @@
   border: solid 1px #eee;
   border-radius: 5px;
   float: left;
-  min-height: 700px;
+  min-height: 500px;
   margin-right: 30px;
   max-height: 780px;
   overflow: auto;
@@ -72,4 +72,17 @@
   justify-content: space-between;
   font-size: 14px;
   padding-right: 8px;
+}
+
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.clear {
+  zoom: 1;
 }
