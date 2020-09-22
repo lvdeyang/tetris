@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.emergent.broadcast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,13 +11,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.bvc.api.controller.EmergentAlarmVO;
+import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastAlarmPO;
 import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastSpeakPO;
+import com.sumavision.bvc.command.group.dao.CommandBroadcastAlarmDAO;
 import com.sumavision.bvc.device.command.emergent.broadcast.CommandEmergentBroadcastServiceImpl;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "/command/emergent/broadcast")
 public class CommandEmergentBroadcastController {
+
+	@Autowired
+	private CommandBroadcastAlarmDAO commandBroadcastAlarmDao;
 
 	@Autowired
 	private CommandEmergentBroadcastServiceImpl commandEmergentBroadcastServiceImpl;
@@ -47,9 +54,9 @@ public class CommandEmergentBroadcastController {
 		
 		List<String> bundleIdsList = JSONArray.parseArray(bundleIds, String.class);
 		
-		CommandBroadcastSpeakPO speak = commandEmergentBroadcastServiceImpl.speakStart(bundleIdsList, eventLevel, eventType, unifiedId);
+		CommandBroadcastSpeakPO speak = commandEmergentBroadcastServiceImpl.speakStart(bundleIdsList, eventLevel, eventType, unifiedId);		
+		//此时列表中应该有新增的喊话任务
 		
-		//TODO:测试一下列表中有没有新增的喊话任务
 		JSONObject list = commandEmergentBroadcastServiceImpl.queryAllSpeakList();
 		JSONObject result = new JSONObject();
 		result.put("id", speak.getId().toString());
@@ -105,6 +112,56 @@ public class CommandEmergentBroadcastController {
 		JSONObject list = commandEmergentBroadcastServiceImpl.queryAllSpeakList();
 		
 		return list;
+	}
+	
+	/**
+	 * 询所有记录的告警信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午4:44:47
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/alarm/list")
+	public Object queryAlarmList(
+			HttpServletRequest request) throws Exception{
+		
+		List<CommandBroadcastAlarmPO> alarms = commandBroadcastAlarmDao.findAll();
+		List<EmergentAlarmVO> alarmVOs = new ArrayList<EmergentAlarmVO>();
+		for(CommandBroadcastAlarmPO alarm : alarms){
+			EmergentAlarmVO alarmVO = new EmergentAlarmVO().set(alarm);
+			alarmVOs.add(alarmVO);
+		}
+		
+		return alarmVOs;
+	}
+	
+	/**
+	 * 批量删除告警记录<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午3:56:39
+	 * @param ids
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/alarms")
+	public Object deleteAlarms(
+			String ids,
+			HttpServletRequest request) throws Exception{
+		
+		List<Long> idArray = JSONArray.parseArray(ids, Long.class);
+		commandEmergentBroadcastServiceImpl.deleteAlarmRecords(idArray);
+		
+		return null;
 	}
 	
 }

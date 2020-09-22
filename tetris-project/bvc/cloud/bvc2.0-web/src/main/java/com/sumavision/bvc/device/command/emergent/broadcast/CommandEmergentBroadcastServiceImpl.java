@@ -15,15 +15,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.api.controller.EmergentBundleVO;
+import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastAlarmBundlePO;
+import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastAlarmPO;
 import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastSpeakPO;
 import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastSpeakerPO;
+import com.sumavision.bvc.command.group.dao.CommandBroadcastAlarmDAO;
 import com.sumavision.bvc.command.group.dao.CommandBroadcastSpeakDAO;
 import com.sumavision.bvc.communication.http.HttpClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-//import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
-//import com.sumavision.tetris.resouce.feign.bundle.BundleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -48,6 +49,9 @@ public class CommandEmergentBroadcastServiceImpl {
 	//应急广播喊话系统的IP端口
 	@Value("${emergent.smartexpressIssueUrl}")
 	private String smartexpressIssueUrl;
+	
+	@Autowired
+	private CommandBroadcastAlarmDAO commandBroadcastAlarmDao;
 	
 	@Autowired
 	private CommandBroadcastSpeakDAO commandBroadcastSpeakDao;
@@ -250,7 +254,7 @@ public class CommandEmergentBroadcastServiceImpl {
 	}
 	
 	/**
-	 * 向用户推送设备信息，并返回设备信息<br/>
+	 * 向用户推送设备信息，并返回设备信息，同时将该信息保存数据库<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -277,6 +281,19 @@ public class CommandEmergentBroadcastServiceImpl {
 //		List<BundleVO> bundleVOs = bundleFeignService.queryVisibleBundle(longitude, latitude, raidus);
 		
 		if(bundleVOs.size() > 0){
+			
+			//保存告警信息
+			CommandBroadcastAlarmPO alarm = new CommandBroadcastAlarmPO();
+			alarm.setCreatetime(new Date());
+			alarm.setUnifiedId(unifiedId);
+			List<CommandBroadcastAlarmBundlePO> alarmBundles = new ArrayList<CommandBroadcastAlarmBundlePO>();
+			for(BundlePO bundlePO : bundlePOs){
+				CommandBroadcastAlarmBundlePO alarmBundle = new CommandBroadcastAlarmBundlePO().set(bundlePO);
+				alarmBundle.setAlarm(alarm);
+				alarmBundles.add(alarmBundle);
+			}
+			alarm.setBundles(alarmBundles);
+			commandBroadcastAlarmDao.save(alarm);			
 		
 			//生成消息
 			JSONObject message = new JSONObject();
@@ -307,6 +324,20 @@ public class CommandEmergentBroadcastServiceImpl {
 		}
 		
 		return bundleVOs;
+	}
+
+	/**
+	 * 批量删除告警记录<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午3:37:37
+	 * @param taskId
+	 * @throws Exception
+	 */
+	public void deleteAlarmRecords(List<Long> ids) throws Exception{
+		
+		commandBroadcastAlarmDao.deleteByIdIn(ids);
 	}
 	
 }
