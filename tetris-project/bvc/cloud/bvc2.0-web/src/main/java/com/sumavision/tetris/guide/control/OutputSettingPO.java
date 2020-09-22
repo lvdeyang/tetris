@@ -5,6 +5,8 @@ package com.sumavision.tetris.guide.control;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -28,7 +30,7 @@ public class OutputSettingPO extends AbstractBasePO {
 	private String name;
 	
 	/** 输出协议 */
-	private String outputProtocol;
+	private OutputProtocol outputProtocol;
 	
 	/** 输出地址 */
 	private String outputAddress;
@@ -51,13 +53,12 @@ public class OutputSettingPO extends AbstractBasePO {
 		this.name = name;
 	}
 	
-	@Column(name = "OUTPUT_PROTOCOL")
-	public String getOutputProtocol() {
-		return outputProtocol;
+	public void setOutputProtocol(OutputProtocol outputProtocol) {
+		this.outputProtocol = outputProtocol;
 	}
 
-	public void setOutputProtocol(String outputProtocol) {
-		this.outputProtocol = outputProtocol;
+	public void setOutputAddress(String outputAddress) {
+		this.outputAddress = outputAddress;
 	}
 	
 	@Column(name = "OUTPUT_ADDRESS")
@@ -65,8 +66,10 @@ public class OutputSettingPO extends AbstractBasePO {
 		return outputAddress;
 	}
 
-	public void setOutputAddress(String outputAddress) {
-		this.outputAddress = outputAddress;
+	@Column(name = "OUTPUT_PROTOCOL")
+	@Enumerated(value = EnumType.STRING)
+	public OutputProtocol getOutputProtocol() {
+		return outputProtocol;
 	}
 	
 	@Column(name = "RATE_CTRL")

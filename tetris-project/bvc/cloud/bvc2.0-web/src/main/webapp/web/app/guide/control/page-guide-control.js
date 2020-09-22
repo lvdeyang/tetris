@@ -103,6 +103,9 @@ define([
 					sources:{
 						list:[]
 					},
+					output:{
+						out:[]
+					},
 					rules: {
 						sourceName: [
 							{ required: true, message: "请输入源名称", trigger: 'blur' }
@@ -197,7 +200,37 @@ define([
 					self.dialog.setSource.visible=false;
 				},
             	handleSetOut:function(){
-            		var self=this;
+					var self = this;
+					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 3}, function(data, status){
+						//console.log(data);
+						for(var i = 0; i < data.length; i++){
+							self.output.out.push(data[i]);
+							self.dialog.setOut.out.outputProtocol = data[i].outputProtocolName;
+							self.dialog.setOut.out.outputAddress = data[i].outputAddress;
+							self.dialog.setOut.out.rateCtrl = data[i].rateCtrl;
+							self.dialog.setOut.out.bitrate = data[i].bitrate;
+						}
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 3}, function(data, status){
+						console.log(data);
+						self.dialog.setOut.video.codingObject = data.codingObjectName;
+						self.dialog.setOut.video.fps = data.fps;
+						self.dialog.setOut.video.bitrate = data.bitrate;
+						self.dialog.setOut.video.resolution = data.resolutionName;
+						self.dialog.setOut.video.ratio = data.ratioName;
+						self.dialog.setOut.video.rcMode = data.rcModeName;
+						self.dialog.setOut.video.maxBitrate = data.maxBitrate;
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 3},function(data, status){
+						self.dialog.setOut.audio.codingFormat = data.codingFormatName;
+						self.dialog.setOut.audio.channelLayout = data.channelLayoutName;
+						self.dialog.setOut.audio.bitrate = data.bitrate;
+						self.dialog.setOut.audio.sampleRate = data.sampleRate;
+						self.dialog.setOut.audio.codingType = data.codingTypeName;
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
             		self.dialog.setOut.visible=true;
 					self.dialog.setOut.type="";
 					self.dialog.setOut.url="";
@@ -316,7 +349,7 @@ define([
 */
 
 				ajax.post('/tetris/guide/control/source/po/query', {id: 2}, function(data, status){
-					console.log(data);
+					//console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);
 						/*if(data[i].sourceTypeName == '5G背包'){

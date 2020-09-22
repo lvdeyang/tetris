@@ -50,7 +50,8 @@
 									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
 								</div>
 								<div style="width:620px;margin-top:10px;">
-									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; white-space:nowrap;">{{source.sourceName}}</div>
+									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; height:28px;float:left; white-space:nowrap;">{{source.sourceName}}</div>
+									<div style="clear:both;"></div>
 								</div>
 								<div style="width:620px; margin-top:10px;">
 									<el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
@@ -406,7 +407,9 @@
 		<h4>输出参数</h4>
 		<el-form :inline="true" ref="form" :model="dialog.setOut.out" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="输出协议">
-				<el-input v-model="dialog.setOut.out.outputProtocol"></el-input>
+				<el-select v-model="dialog.setOut.out.outputProtocol" placeholder="请选择输出协议" style="width:178px">
+					<el-option label="udp" value="udp"></el-option>
+				</el-select>
 			</el-form-item>
 
 			<el-form-item label="输出地址">

@@ -33,9 +33,10 @@ public class OutputSettingService {
 			String outputAddress,
 			String rateCtrl,
 			Long bitrate
-			){
+			) throws Exception{
 		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
-		outputSettingPO.setOutputProtocol(outputProtocol);
+		OutputProtocol protocol = OutputProtocol.fromName(outputProtocol);
+		outputSettingPO.setOutputProtocol(protocol);
 		outputSettingPO.setOutputAddress(outputAddress);
 		outputSettingPO.setRateCtrl(rateCtrl);
 		outputSettingPO.setBitrate(bitrate);
