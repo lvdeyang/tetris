@@ -1,6 +1,7 @@
 package com.sumavision.bvc.api.controller;
 
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastAlarmBundlePO;
 
 /**
  * 用于应急广播查询的bundle参数<br/>
@@ -65,6 +66,15 @@ public class EmergentBundleVO {
 		this.bundleName = bundle.getBundleName();
 		this.deviceModel = bundle.getDeviceModel();
 		this.identify = bundle.getIdentify();
+		this.streamUrl = bundle.getStreamUrl();
+		return this;
+	}
+	
+	public EmergentBundleVO set(CommandBroadcastAlarmBundlePO bundle){
+		this.bundleId = bundle.getBundleId();
+		this.bundleName = bundle.getBundleName();
+		this.deviceModel = bundle.getDeviceModel();
+//		this.identify = bundle.getIdentify();
 		this.streamUrl = bundle.getStreamUrl();
 		return this;
 	}

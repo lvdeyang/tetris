@@ -3,8 +3,10 @@ package com.sumavision.tetris.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
@@ -34,6 +37,9 @@ import com.sumavision.tetris.organization.CompanyPO;
 import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
+import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.PasswordComplexityException;
@@ -58,6 +64,9 @@ public class UserQuery {
 	
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
+	
+	@Autowired
+	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
 	
 	/**
 	 * 检查用户号码<br/>
@@ -364,6 +373,35 @@ public class UserQuery {
 		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
 		
 		int total = userDao.countByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression);
+		
+		if(total > 0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserVO row:rows){
+				userIds.add(row.getId());
+			}
+			List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdInAndRoleTypeAndAutoGeneration(userIds, SystemRoleType.BUSINESS, false);
+			if(permissions!=null && permissions.size()>0){
+				Set<Long> roleIds = new HashSet<Long>();
+				for(UserSystemRolePermissionPO permission:permissions){
+					roleIds.add(permission.getRoleId());
+				}
+				List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+				for(UserVO row:rows){
+					List<SystemRoleVO> bindRoles = new ArrayList<SystemRoleVO>();
+					for(UserSystemRolePermissionPO permission:permissions){
+						if(permission.getUserId().equals(row.getId())){
+							for(SystemRolePO businessRole:businessRoles){
+								if(businessRole.getId().equals(permission.getRoleId())){
+									bindRoles.add(new SystemRoleVO().set(businessRole));
+									break;
+								}
+							}
+						}
+					}
+					row.setBusinessRoles(JSON.toJSONString(bindRoles));
+				}
+			}
+		}
 		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
@@ -1110,6 +1148,9 @@ public class UserQuery {
 		for (UserPO userPO : userPOs) {
 			List<TokenPO> tokenPOs = tokenDao.findByUserId(userPO.getId());
 			for (TokenPO tokenPO : tokenPOs) {
+				if(tokenPO.getStatus() == null || tokenPO.getStatus().equals("")){
+					tokenPO.setStatus(UserStatus.OFFLINE);
+				}
 				if(tokenPO.getStatus().toString().equals("ONLINE")){
 					userOnline.add(userPO);
 				}

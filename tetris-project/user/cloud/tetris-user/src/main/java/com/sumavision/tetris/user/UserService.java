@@ -13,6 +13,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
@@ -231,6 +233,9 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
+	 * @param String remark 备注
+     * @param String loginIp 绑定ip登录
+     * @param JSONString bindRoles 业务角色id列表
 	 * @param boolean emit 是否要发射事件
 	 * @return UserVO 用户
 	 */
@@ -246,9 +251,10 @@ public class UserService{
             String classify,
             String remark,
             String loginIp,
+            String bindRoles,
             boolean emit) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp, bindRoles);
 		
 		if(emit){
 			//发布用户注册事件
@@ -257,7 +263,20 @@ public class UserService{
 		}
 		//boss系统添加一个用户
 		bossService.addUser(user.getId());
-		return new UserVO().set(user);
+		
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -273,6 +292,9 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String companyName 公司名称
+	 * @param String remark 备注
+	 * @param String loginIp 绑定ip登录
+	 * @param JSONString bindRoles 业务角色id列表
 	 * @return UserVO 新建的用户
 	 */
 	public UserVO add(
@@ -287,9 +309,10 @@ public class UserService{
             String classify,
             String companyName,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            String bindRoles) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(),remark,loginIp);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(), remark, loginIp, bindRoles);
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -315,7 +338,19 @@ public class UserService{
 		}
 		applicationEventPublisher.publishEvent(event);
 		
-		return new UserVO().set(user);
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -331,6 +366,9 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String companyId 公司id
+	 * @param String remark 备注
+     * @param String loginIp 绑定ip登录
+     * @param JSONString bindRoles 绑定业务角色
 	 * @return UserVO 新建的用户
 	 */
 	public UserVO add(
@@ -345,7 +383,8 @@ public class UserService{
             String classify,
             Long companyId,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            String bindRoles) throws Exception{
 		
 		CompanyPO company = companyDao.findOne(companyId);
 		
@@ -353,7 +392,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp, bindRoles);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -366,7 +405,19 @@ public class UserService{
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), user.getUserno());
 		applicationEventPublisher.publishEvent(event);
 		
-		return new UserVO().set(user);
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -382,6 +433,9 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
+	 * @param String remark 备注
+	 * @param String loginIp 绑定登录ip
+	 * @param JSONString bindRoles 业务角色id列表
 	 * @return UserPO 用户
 	 */
 	private UserPO addUser(
@@ -395,7 +449,8 @@ public class UserService{
             Integer level,
             String classify,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            String bindRoles) throws Exception{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
 		
@@ -466,6 +521,22 @@ public class UserService{
 		permission.setUserId(user.getId());
 		permission.setUpdateTime(new Date());
 		userSystemRolePermissionDao.save(permission);
+		
+		if(bindRoles != null){
+			List<Long> businessRoleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(businessRoleIds);
+			List<UserSystemRolePermissionPO> businessPermissions = new ArrayList<UserSystemRolePermissionPO>();
+			for(SystemRolePO businessRole:businessRoles){
+				UserSystemRolePermissionPO businessPermission = new UserSystemRolePermissionPO();
+				businessPermission.setAutoGeneration(false);
+				businessPermission.setRoleId(businessRole.getId());
+				businessPermission.setRoleType(SystemRoleType.BUSINESS);
+				businessPermission.setUserId(user.getId());
+				businessPermission.setUpdateTime(new Date());
+				businessPermissions.add(businessPermission);
+			}
+			userSystemRolePermissionDao.save(businessPermissions);
+		}
 		
 		return user;
 	}
@@ -593,6 +664,11 @@ public class UserService{
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
 	 * @param String repeat 新密码确认
+	 * @param String remark 备注
+	 * @param String loginIp 绑定登录ip
+	 * @param Boolean resetPermissions 是否重置旧的业务角色授权
+	 * 
+	 * @param JSONString bindRoles 业务角色id列表
 	 * @return UserVO 修改后的用户
 	 */
 	public UserVO edit(
@@ -607,7 +683,9 @@ public class UserService{
             String newPassword,
             String repeat,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            Boolean resetPermissions,
+            String bindRoles) throws Exception{
 		
 		UserPO user = userDao.findOne(id);
 		
@@ -650,7 +728,33 @@ public class UserService{
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
 		
-		return new UserVO().set(user);
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(resetPermissions != null && resetPermissions){
+			List<UserSystemRolePermissionPO> oldBusinessPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.BUSINESS);
+			if(oldBusinessPermissions!=null && oldBusinessPermissions.size()>0){
+				userSystemRolePermissionDao.deleteInBatch(oldBusinessPermissions);
+			}
+			if(bindRoles != null){
+				List<Long> businessRoleIds = JSON.parseArray(bindRoles, Long.class);
+				List<SystemRolePO> businessRoles = systemRoleDao.findAll(businessRoleIds);
+				List<UserSystemRolePermissionPO> businessPermissions = new ArrayList<UserSystemRolePermissionPO>();
+				for(SystemRolePO businessRole:businessRoles){
+					UserSystemRolePermissionPO businessPermission = new UserSystemRolePermissionPO();
+					businessPermission.setAutoGeneration(false);
+					businessPermission.setRoleId(businessRole.getId());
+					businessPermission.setRoleType(SystemRoleType.BUSINESS);
+					businessPermission.setUserId(user.getId());
+					businessPermission.setUpdateTime(new Date());
+					businessPermissions.add(businessPermission);
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+				userSystemRolePermissionDao.save(businessPermissions);
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		
+		return result;
 	}
 	
 	/**

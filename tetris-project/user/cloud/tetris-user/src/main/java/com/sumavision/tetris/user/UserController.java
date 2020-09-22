@@ -18,9 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -290,6 +288,9 @@ public class UserController {
 	 * @param Integer level 用户级别
 	 * @param Long companyId 公司id
 	 * @param String companyName 公司名称
+	 * @param String remark 备注
+	 * @param String loginIp 绑定ip
+	 * @param JSONString bindRoles 业务角色id列表
 	 * @return UserVO 用户数据
 	 */
 	@JsonBody
@@ -308,19 +309,20 @@ public class UserController {
             Long companyId,
             String companyName,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            String bindRoles) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, bindRoles, true);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId,remark,loginIp);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp, bindRoles);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName,remark,loginIp);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp, bindRoles);
 			}
 		}
 		return null;
@@ -363,6 +365,10 @@ public class UserController {
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
 	 * @param String repeat 重复新密码
+	 * @param String remark 备注
+	 * @param String loginIp 绑定登录ip
+	 * @param Boolean resetPermissions 是否重置旧的业务角色授权
+	 * @param JSONString bindRoles 业务角色id列表
 	 * @return UserVO 修改后的数据
 	 */
 	@JsonBody
@@ -380,13 +386,15 @@ public class UserController {
             String newPassword,
             String repeat,
             String remark,
-            String loginIp) throws Exception{
+            String loginIp,
+            Boolean resetPermissions,
+            String bindRoles) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat,remark,loginIp);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat, remark, loginIp, resetPermissions, bindRoles);
 	}
 	
 	/**
