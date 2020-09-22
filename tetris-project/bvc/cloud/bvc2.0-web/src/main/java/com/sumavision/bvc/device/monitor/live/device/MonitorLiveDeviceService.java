@@ -1030,7 +1030,7 @@ public class MonitorLiveDeviceService {
 				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
 				connectVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
 									.setMulti_addr(videoAddr)
-									.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+									.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
 			}
 			connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
 			
@@ -1047,7 +1047,7 @@ public class MonitorLiveDeviceService {
 						String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 4);
 						connectAudioChannel.setMode(TransmissionMode.MULTICAST.getCode())
 											.setMulti_addr(audioAddr)
-											.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+											.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
 					}
 					connectVideoBundle.getChannels().add(connectAudioChannel);
 				}else{
@@ -1123,7 +1123,7 @@ public class MonitorLiveDeviceService {
 				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
 				connectDstVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
 									.setMulti_addr(videoAddr)
-									.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+									.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
 			}
 			ForwardSetSrcBO videoForwardSetSrc = new ForwardSetSrcBO().setType("channel")
 																 	  .setBundleId(live.getVideoBundleId())
@@ -1147,7 +1147,7 @@ public class MonitorLiveDeviceService {
 						String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 4);
 						connectDstAudioChannel.setMode(TransmissionMode.MULTICAST.getCode())
 											.setMulti_addr(audioAddr)
-											.setSrc_multi_addr(videoBundle.getMulticastSourceIp());
+											.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
 					}
 					ForwardSetSrcBO audioForwardSetSrc = new ForwardSetSrcBO().setType("channel")
 						 	  												  .setBundleId(live.getAudioBundleId())

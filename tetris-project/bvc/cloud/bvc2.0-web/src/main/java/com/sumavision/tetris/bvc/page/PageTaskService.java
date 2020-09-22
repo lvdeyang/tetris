@@ -881,7 +881,7 @@ public class PageTaskService {
 														          .setBase_type(openTask.getDstVideoBaseType())
 														          .setMode(openTask.getVideoTransmissionMode().getCode())
 														          .setMulti_addr(openTask.getVideoMultiAddr())
-														          .setSrc_multi_addr(openTask.getVideoMultiSrcAddr())
+														          .setSrc_multi_ip(openTask.getVideoMultiSrcAddr())
 														          .setCodec_param(codec)
 														          .setSource_param(decoderVideoForwardSet);
 			ForwardSetSrcBO decoderAudioForwardSet = null;
@@ -899,7 +899,7 @@ public class PageTaskService {
 																  .setBase_type(openTask.getDstAudioBaseType())
 														          .setMode(openTask.getAudioTransmissionMode().getCode())
 														          .setMulti_addr(openTask.getAudioMultiAddr())
-														          .setSrc_multi_addr(openTask.getAudioMultiSrcAddr())
+														          .setSrc_multi_ip(openTask.getAudioMultiSrcAddr())
 																  .setCodec_param(codec)
 																  .setSource_param(decoderAudioForwardSet);
 			
@@ -978,7 +978,7 @@ public class PageTaskService {
 															          .setBase_type(openTask.getDstVideoBaseType())
 															          .setMode(openTask.getVideoTransmissionMode().getCode())
 															          .setMulti_addr(openTask.getVideoMultiAddr())
-															          .setSrc_multi_addr(openTask.getVideoMultiSrcAddr())
+															          .setSrc_multi_ip(openTask.getVideoMultiSrcAddr())
 															          .setCodec_param(codec)
 															          .setSource_param(decoderVideoForwardSet);
 				ForwardSetSrcBO decoderAudioForwardSet = null;
@@ -996,7 +996,7 @@ public class PageTaskService {
 																	  .setBase_type(openTask.getDstAudioBaseType())
 															          .setMode(openTask.getAudioTransmissionMode().getCode())
 															          .setMulti_addr(openTask.getAudioMultiAddr())
-															          .setSrc_multi_addr(openTask.getAudioMultiSrcAddr())
+															          .setSrc_multi_ip(openTask.getAudioMultiSrcAddr())
 																	  .setCodec_param(codec)
 																	  .setSource_param(decoderAudioForwardSet);
 				
