@@ -406,7 +406,9 @@
 		<h4>输出参数</h4>
 		<el-form :inline="true" ref="form" :model="dialog.setOut.out" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="输出协议">
-				<el-input v-model="dialog.setOut.out.outputProtocol"></el-input>
+				<el-select v-model="dialog.setOut.out.outputProtocol" placeholder="请选择输出协议" style="width:178px">
+					<el-option label="udp" value="udp"></el-option>
+				</el-select>
 			</el-form-item>
 
 			<el-form-item label="输出地址">

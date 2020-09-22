@@ -55,6 +55,45 @@ public class OutputSettingController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午1:41:22
+	 * @param taskNumber
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryVideo")
+	public Object queryVideoParameter(Long taskNumber, HttpServletRequest request) throws Exception{
+		
+		return outputSettingQuery.queryVideo(taskNumber);
+	}
+	
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午1:46:58
+	 * @param taskNumber
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryAudio")
+	public Object queryAudioParameter(Long taskNumber, HttpServletRequest request) throws Exception{
+		 
+		return outputSettingQuery.queryAudio(taskNumber);
+	}
+	/**
+	 * 
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月4日 下午1:59:53
 	 * @param id
 	 * @param outputProtocol

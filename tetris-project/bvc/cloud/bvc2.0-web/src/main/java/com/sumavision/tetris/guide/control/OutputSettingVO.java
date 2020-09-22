@@ -20,6 +20,8 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	/** 输出协议 */
 	private String outputProtocol;
 	
+	private String outputProtocolName;
+	
 	/** 输出地址 */
 	private String outputAddress;
 	
@@ -76,6 +78,15 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.bitrate = bitrate;
 		return this;
 	}
+	
+	public String getOutputProtocolName() {
+		return outputProtocolName;
+	}
+
+	public OutputSettingVO setOutputProtocolName(String outputProtocolName) {
+		this.outputProtocolName = outputProtocolName;
+		return this;
+	}
 
 	public Long getGuideId() {
 		return guideId;
@@ -89,7 +100,8 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	@Override
 	public OutputSettingVO set(OutputSettingPO entity) throws Exception {
 		this.setName(entity.getName());
-		this.setOutputProtocol(entity.getOutputProtocol());
+		this.setOutputProtocol(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().toString(): null);
+		this.setOutputProtocolName(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().getName(): null);
 		this.setOutputAddress(entity.getOutputAddress());
 		this.setRateCtrl(entity.getRateCtrl());
 		this.setBitrate(entity.getBitrate());
