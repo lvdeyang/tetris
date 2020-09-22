@@ -575,8 +575,11 @@ public class BundleManageController extends ControllerBase {
 			Boolean multicastEncode,
 			String multicastEncodeAddr,
 			Boolean multicastDecode,
-			@RequestParam(value = "extraInfos") String extraInfos,
-			@RequestParam(value = "bundleFolderId")Long folderId) {
+			String extraInfos,
+			Long folderId,
+			String location,
+			String multicastSourceIp,
+			Boolean transcod) {
 		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
 				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
 
@@ -598,6 +601,9 @@ public class BundleManageController extends ControllerBase {
 			bundle.setMulticastEncodeAddr(multicastEncodeAddr);
 			bundle.setMulticastDecode(multicastDecode);
 			bundle.setFolderId(folderId);
+			bundle.setLocation(location);
+			bundle.setMulticastSourceIp(multicastSourceIp);
+			bundle.setTranscod(transcod);
 			
 			bundle.setSyncStatus(SYNC_STATUS.ASYNC);
 			bundleService.save(bundle);

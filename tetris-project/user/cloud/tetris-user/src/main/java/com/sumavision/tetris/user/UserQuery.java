@@ -1148,6 +1148,9 @@ public class UserQuery {
 		for (UserPO userPO : userPOs) {
 			List<TokenPO> tokenPOs = tokenDao.findByUserId(userPO.getId());
 			for (TokenPO tokenPO : tokenPOs) {
+				if(tokenPO.getStatus() == null || tokenPO.getStatus().equals("")){
+					tokenPO.setStatus(UserStatus.OFFLINE);
+				}
 				if(tokenPO.getStatus().toString().equals("ONLINE")){
 					userOnline.add(userPO);
 				}
