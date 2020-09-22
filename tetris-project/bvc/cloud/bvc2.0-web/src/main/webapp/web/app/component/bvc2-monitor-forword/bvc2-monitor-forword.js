@@ -69,8 +69,10 @@ define([
 
 
       },
-      onMove2(e, originalEvent) {
+      onMove(e, originalEvent) {
         //false表示阻止拖拽
+        console.log(e, 'move'),
+          console.log(originalEvent, 'originalEvent')
         return false;
       },
       handleDelete(arr, index) {
