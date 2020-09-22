@@ -342,13 +342,7 @@ define([
           return;
         }
         if (addRecord.mode == 'TIMESEGMENT') {
-          if (!addRecord.totalSizeMb) {
-            self.$message({
-              type: 'warning',
-              message: '磁盘大小不能为空！'
-            });
-            return;
-          }
+
           if (addRecord.timeSegmentmode == "month") {
             if (addRecord.timeSegmentmodeStartDay == '' ||
               addRecord.timeSegmentmodeEndDay == '') {
@@ -485,7 +479,7 @@ define([
             value
           }) => {
             this.dialog.addRecord.totalSizeMb = value
-            ajax.post('/monitor/record/totle/size', {
+            ajax.post('/monitor/record/total/size', {
               totalSizeMb: value
             }, function (data) {
               if (data.status == 200) {
