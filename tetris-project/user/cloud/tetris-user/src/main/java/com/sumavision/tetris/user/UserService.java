@@ -262,7 +262,20 @@ public class UserService{
 		}
 		//boss系统添加一个用户
 		bossService.addUser(user.getId());
-		return new UserVO().set(user);
+		
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -324,7 +337,19 @@ public class UserService{
 		}
 		applicationEventPublisher.publishEvent(event);
 		
-		return new UserVO().set(user);
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -379,7 +404,19 @@ public class UserService{
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), user.getUserno());
 		applicationEventPublisher.publishEvent(event);
 		
-		return new UserVO().set(user);
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(bindRoles!=null && !"".equals(bindRoles)){
+			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			if(businessRoles!=null && businessRoles.size()>0){
+				for(SystemRolePO businessRole:businessRoles){
+					roles.add(new SystemRoleVO().set(businessRole));
+				}
+			}
+		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
+		return result;
 	}
 	
 	/**
@@ -690,6 +727,8 @@ public class UserService{
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
 		
+		UserVO result = new UserVO().set(user);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
 		if(resetPermissions){
 			List<UserSystemRolePermissionPO> oldBusinessPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.BUSINESS);
 			if(oldBusinessPermissions!=null && oldBusinessPermissions.size()>0){
@@ -707,12 +746,14 @@ public class UserService{
 					businessPermission.setUserId(user.getId());
 					businessPermission.setUpdateTime(new Date());
 					businessPermissions.add(businessPermission);
+					roles.add(new SystemRoleVO().set(businessRole));
 				}
 				userSystemRolePermissionDao.save(businessPermissions);
 			}
 		}
+		result.setBusinessRoles(JSON.toJSONString(roles));
 		
-		return new UserVO().set(user);
+		return result;
 	}
 	
 	/**
