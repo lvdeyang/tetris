@@ -17,10 +17,10 @@ public enum MonitorRecordManyTimesMode {
 		return this.name;
 	}
 	
-	public MonitorRecordManyTimesMode forName(String name) throws Exception{
+	public static MonitorRecordManyTimesMode forName(String name) throws Exception{
 		MonitorRecordManyTimesMode [] values=MonitorRecordManyTimesMode.values();
 		for(MonitorRecordManyTimesMode value:values){
-			if(value.equals(name)){
+			if(value.getName().equals(name)){
 				return value;
 			}
 		}

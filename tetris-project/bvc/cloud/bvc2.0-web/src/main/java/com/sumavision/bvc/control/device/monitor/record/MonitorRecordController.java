@@ -1,7 +1,9 @@
 package com.sumavision.bvc.control.device.monitor.record;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,7 +28,15 @@ import com.sumavision.bvc.control.device.monitor.exception.UserHasNoPermissionFo
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeIpMissingException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeNotExistException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissionException;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordDAO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesDAO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesRelationDAO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesRelationPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesVO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordMode;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
@@ -67,6 +77,12 @@ public class MonitorRecordController {
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
 	
+	@Autowired
+	private MonitorRecordManyTimesRelationDAO monitorRecordManyTimesRelationDao;
+	
+	@Autowired
+	private MonitorRecordManyTimesDAO monitorRecordManyTimesDao;
+	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
 		
@@ -99,6 +115,7 @@ public class MonitorRecordController {
 		AccessNodeBO targetLayer = layers.get(0);
 		
 		
+//		.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 		StringBufferWrapper downloadUrl = new StringBufferWrapper();
 		downloadUrl.append("http://")
 				   .append(targetLayer.getIp())
@@ -212,6 +229,151 @@ public class MonitorRecordController {
 	}
 	
 	/**
+	 * 根据条件分页查询录制任务<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 上午9:45:40
+	 * @param Long id monitorRecord的主键
+	 * @param String mode 录制模式
+	 * @param String fileName 文件名称
+	 * @param String deviceType 如果为user device为用户id
+	 * @param String device 设备id
+	 * @param String startTime 开始录制时间下限
+	 * @param String endTime 开始录制时间上限
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return total long 总数据量
+	 * @return rows List<MonitorRecordTaskVO> 任务列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/many/times/record")
+	public Object loadManyTimesRecord(
+			Long id,
+			String mode,
+			String fileName,
+			String deviceType,
+			String device,
+			String startTime,
+			String endTime,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+//		if("".equals(device)) device = null;
+		
+//		String fileNameReg = null;
+//		if(fileName!=null && !"".equals(fileName)){
+//			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
+//		}
+		
+//		com.sumavision.tetris.user.UserVO user = userQuery.current();
+		
+		//获取userId
+//		Long userId = userUtils.getUserIdFromSession(request);
+		
+//		Date parsedStartTime = null;
+//		if(startTime != null){
+//			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
+//		}
+//		
+//		Date parsedEndTime = null;
+//		if(endTime != null){
+//			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
+//		}
+		
+//		long total = 0;
+//		List<MonitorRecordPO> entities = null;
+//		Pageable page = new PageRequest(currentPage-1, pageSize);
+		
+		
+		
+//		if("user".equals(deviceType)){
+//			if(userId.longValue()==1l || user.getIsGroupCreator()){
+//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+//													mode, null, parsedStartTime, parsedEndTime, 
+//													null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+//				total = pagedEntities.getTotalElements();
+//				entities = pagedEntities.getContent();
+//			}else{
+//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+//													mode, null, parsedStartTime, parsedEndTime, 
+//													userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+//				total = pagedEntities.getTotalElements();
+//				entities = pagedEntities.getContent();
+//			}
+//		}else{
+//			if(userId.longValue()==1l || user.getIsGroupCreator()){
+//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+//													mode, device, parsedStartTime, parsedEndTime, 
+//													null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+//				total = pagedEntities.getTotalElements();
+//				entities = pagedEntities.getContent();
+//			}else{
+//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+//													mode, device, parsedStartTime, parsedEndTime, 
+//													userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+//				total = pagedEntities.getTotalElements();
+//				entities = pagedEntities.getContent();
+//			}
+//		}
+		
+		//查询
+		long total = 0;
+		List<MonitorRecordManyTimesPO> entities = null;
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		
+		MonitorRecordPO record=monitorRecordDao.findOne(id);
+		
+		if(record==null||!MonitorRecordMode.TIMESEGMENT.equals(record.getMode())){
+			return null;
+		}
+		
+		MonitorRecordManyTimesRelationPO relation=monitorRecordManyTimesRelationDao.findByBusinessId(id);
+		
+		Page<MonitorRecordManyTimesPO> pagedEntities=monitorRecordManyTimesDao.findByRelation(relation.getId(),page);
+		
+		entities=pagedEntities.getContent();
+		
+		if(entities!=null && entities.size()>0){
+			List<AccessNodeBO> layers =resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(record.getStoreLayerId()).getList());
+			if(layers==null || layers.size()<=0){
+				throw new AccessNodeNotExistException(record.getStoreLayerId());
+			}
+			AccessNodeBO targetLayer = layers.get(0);
+			if(targetLayer.getIp() == null){
+				throw new AccessNodeIpMissingException(record.getStoreLayerId());
+			}
+			if(targetLayer.getPort() == null){
+				throw new AccessNodePortMissionException(record.getStoreLayerId());
+			}
+			
+			//还能优化么？
+			List <MonitorRecordManyTimesVO> rows=entities.stream().map(entity->{
+				String downLoadPath=new StringBufferWrapper().append("http://")
+				   .append(targetLayer.getIp())
+				   .append(":")
+				   .append(targetLayer.getDownloadPort())
+				   .append("/action/download?file=")
+				   .append(record.getPreviewUrl().replace("/", "/"+entity.getIndexNumber()+"/")).toString();
+				String previewPath=new StringBufferWrapper().append("http://")
+						.append(targetLayer==null?"0.0.0.0":targetLayer.getIp())
+						.append(":")
+						.append(targetLayer==null?"0":targetLayer.getPort())
+						.append("/")
+						.append(record.getPreviewUrl().replace("/", "/"+entity.getIndexNumber()+"/")).toString();
+				return new MonitorRecordManyTimesVO().set(entity,record.getFileName(),previewPath,downLoadPath);
+			}).collect(Collectors.toList());
+			
+			return new HashMapWrapper<String, Object>().put("total", total)
+													   .put("rows", rows)
+													   .getMap();
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * 添加录制本地设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -262,6 +424,7 @@ public class MonitorRecordController {
 			String audioChannelName,
 			String storeMode,
 			String timeQuantum,
+			Integer totalSizeMb,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -332,7 +495,7 @@ public class MonitorRecordController {
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-					user.getId(), user.getUserno(), user.getName(), 10240);
+					user.getId(), user.getUserno(), user.getName(), totalSizeMb);
 			return new MonitorRecordTaskVO().set(task);
 		}
 	}
@@ -463,4 +626,81 @@ public class MonitorRecordController {
 		return null;
 	}
 	
+	/*@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/many/times/load")
+	public Object manyTimesLoad(
+			int id,
+			String fileName,
+			String deviceType,
+			String device,
+			String startTime,
+			String endTime,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request){
+		if("".equals(device)) device = null;
+		
+		String fileNameReg = null;
+		if(fileName!=null && !"".equals(fileName)){
+			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
+		}
+		
+		com.sumavision.tetris.user.UserVO user = userQuery.current();
+		
+		//获取userId
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		Date parsedStartTime = null;
+		if(startTime != null){
+			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
+		}
+		
+		Date parsedEndTime = null;
+		if(endTime != null){
+			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
+		}
+		
+		long total = 0;
+		List<MOnitorRrecordManyTimesPO> entities = null;
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		
+		if("user".equals(deviceType)){
+			if(userId.longValue()==1l || user.getIsGroupCreator()){
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, null, parsedStartTime, parsedEndTime, 
+													null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}else{
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, null, parsedStartTime, parsedEndTime, 
+													userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}
+		}else{
+			if(userId.longValue()==1l || user.getIsGroupCreator()){
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, device, parsedStartTime, parsedEndTime, 
+													null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}else{
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, device, parsedStartTime, parsedEndTime, 
+													userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}
+		}
+		
+		
+		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
+	
+	}*/
+
 }

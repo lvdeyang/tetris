@@ -36,9 +36,6 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 	/** 下一次录制结束时间*/
 	private Date nextEndTime;
 	
-	/** 排期规定时间：意义，防止以后扩展改前边代码*/
-	private String timeQuantum;
-	
 	/** 天为单位开始时间*/
 	private String dayStart;
 	
@@ -106,16 +103,6 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 		return this;
 	}
 
-	@Column(name="TIME_QUANTUM")
-	public String getTimeQuantum() {
-		return timeQuantum;
-	}
-
-	public MonitorRecordManyTimesRelationPO setTimeQuantum(String timeQuantum) {
-		this.timeQuantum = timeQuantum;
-		return this;
-	}
-
 	@Column(name="DAY_START")
 	public String getDayStart() {
 		return dayStart;
@@ -177,6 +164,7 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 	}
 
 	@Column(name="STATUS")
+	@Enumerated(value=EnumType.STRING)
 	public MonitorRecordStatus getStatus() {
 		return status;
 	}
