@@ -50,7 +50,8 @@
 									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
 								</div>
 								<div style="width:620px;margin-top:10px;">
-									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; white-space:nowrap;">{{source.sourceName}}</div>
+									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; height:28px;float:left; white-space:nowrap;">{{source.sourceName}}</div>
+									<div style="clear:both;"></div>
 								</div>
 								<div style="width:620px; margin-top:10px;">
 									<el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
