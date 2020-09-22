@@ -193,7 +193,7 @@ export default {
       var self = this;
       // window.open(row.netUrl);
       self.$router.push({
-        path: '/NetIframe',
+        path: '/LwNetIframe',
         query: {
           netUrl: row.netUrl,
         }
