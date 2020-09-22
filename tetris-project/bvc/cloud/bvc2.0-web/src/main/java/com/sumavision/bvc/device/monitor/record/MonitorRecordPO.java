@@ -133,6 +133,7 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 文件存储位置 */
 	private String storeLayerId;
 	
+	/** 循环录制文件大小*/
 	private Integer totalSizeMb;
 	
 	@Enumerated(value = EnumType.STRING)

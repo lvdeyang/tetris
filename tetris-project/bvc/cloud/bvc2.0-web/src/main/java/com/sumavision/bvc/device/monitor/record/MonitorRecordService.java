@@ -165,7 +165,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname,int totalSizeMb
+			String nickname,Integer totalSizeMb
 
 	) throws Exception {
 
@@ -210,6 +210,8 @@ public class MonitorRecordService {
 			status = MonitorRecordStatus.RUN;
 		} else if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			status = MonitorRecordStatus.WAITING;
+		} else if(MonitorRecordMode.CYCLE.equals(parsedMode)){
+			status = MonitorRecordStatus.RUN;
 		} else {
 			throw new ErrorRecordModeException(mode);
 		}
@@ -249,7 +251,7 @@ public class MonitorRecordService {
 
 	/**
 	 * 录制本地设备<br/>
-	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月1日 上午10:18:01
 	 * @param String mode 录制模式
@@ -338,7 +340,6 @@ public class MonitorRecordService {
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
 		
-		//一直等待，停止的时候选择停止stop规则对应表stop，，中断选择关系对应表中的执行状态为stop
 		task.setStatus(MonitorRecordStatus.WAITING);
 		
 		task.setType(MonitorRecordType.LOCAL_DEVICE);
@@ -377,8 +378,8 @@ public class MonitorRecordService {
 			//当天的日期
 			String todayDate=DateUtil.format(new Date(),DateUtil.defaultDatePattern);
 			
-			//整理判断是否在指定时间
-			if(MonitorRecordManyTimesMode.DAY.equals(storeMode)){
+			//整理判断是否在指定时间 
+			if(MonitorRecordManyTimesMode.DAY.equals(MonitorRecordManyTimesMode.forName(storeMode))){
 				
 				dayStart=timeQuantum.split(",")[0];
 				dayEnd=timeQuantum.split(",")[1];
@@ -390,11 +391,15 @@ public class MonitorRecordService {
 					shouldEnd=DateUtil.addDay(shouldEnd, 1);
 				}
 				
-				if(new Date().after(shouldStart)){
+				//
+				if(new Date().after(shouldStart) && new Date().before(shouldEnd)){
 					shouldRecord=true;
-					nextStartTime=DateUtil.addDay(shouldEnd, 1);
+					nextStartTime=DateUtil.addDay(shouldStart, 1);
 					nextEndTime=DateUtil.addDay(shouldEnd, 1);
 					monitorRecordManyTimes.setEndTime(shouldEnd).setStartTime(new Date());
+				}else if(new Date().after(shouldStart) && new Date().after(shouldEnd)){
+					nextStartTime=DateUtil.addDay(shouldStart, 1);
+					nextEndTime=DateUtil.addDay(shouldEnd, 1);
 				}else{
 					nextStartTime=shouldStart;
 					nextEndTime=shouldEnd;
@@ -403,10 +408,10 @@ public class MonitorRecordService {
 				relation.setNextStartTime(nextStartTime);
 				relation.setNextEndTime(nextEndTime);
 				
-			}else if(MonitorRecordManyTimesMode.WEEK.equals(storeMode)){
-				dayStart=timeQuantum.split(",")[0].split("-")[0];
+			}else if(MonitorRecordManyTimesMode.WEEK.equals(MonitorRecordManyTimesMode.forName(storeMode))){
+				dayStart=timeQuantum.split(",")[0].split("-")[1];
 				dayEnd=timeQuantum.split(",")[1].split("-")[1];
-				weekStart=timeQuantum.split(",")[0].split("-")[1];
+				weekStart=timeQuantum.split(",")[0].split("-")[0];
 				weekEnd=timeQuantum.split(",")[1].split("-")[0];
 				
 				//算出本周打开始录制时间
@@ -418,11 +423,14 @@ public class MonitorRecordService {
 					shouldEnd=DateUtil.addDay(shouldEnd, 7);
 				}
 				
-				if(new Date().after(shouldStart)){
+				if(new Date().after(shouldStart) && new Date().before(shouldEnd)){
 					shouldRecord=true;
-					nextStartTime=DateUtil.addDay(shouldEnd, 1);
-					nextEndTime=DateUtil.addDay(shouldEnd, 1);
+					nextStartTime=DateUtil.addDay(shouldStart, 7);
+					nextEndTime=DateUtil.addDay(shouldEnd, 7);
 					monitorRecordManyTimes.setEndTime(shouldEnd).setStartTime(new Date());
+				}else if(new Date().after(shouldStart) && new Date().after(shouldEnd)){
+					nextStartTime=DateUtil.addDay(shouldStart, 7);
+					nextEndTime=DateUtil.addDay(shouldEnd, 7);
 				}else{
 					nextStartTime=shouldStart;
 					nextEndTime=shouldEnd;
@@ -431,24 +439,27 @@ public class MonitorRecordService {
 				relation.setNextStartTime(nextStartTime);
 				relation.setNextEndTime(nextEndTime);
 				
-			}else if(MonitorRecordManyTimesMode.MONTH.equals(storeMode)){
-				dayStart=timeQuantum.split(",")[0].split("-")[0];
+			}else if(MonitorRecordManyTimesMode.MONTH.equals(MonitorRecordManyTimesMode.forName(storeMode))){
+				dayStart=timeQuantum.split(",")[0].split("-")[1];
 				dayEnd=timeQuantum.split(",")[1].split("-")[1];
-				dayOfMonthStart=timeQuantum.split(",")[0].split("-")[1];
+				dayOfMonthStart=timeQuantum.split(",")[0].split("-")[0];
 				dayOfMonthEnd=timeQuantum.split(",")[1].split("-")[0];
 				
 				//算出本月的开始录制时间
-				 shouldStart=getDayOfMonth(Integer.valueOf(dayOfMonthStart),dayStart);
-				 shouldEnd=getDayOfMonth(Integer.valueOf(dayOfMonthEnd),dayEnd);
+				shouldStart=getDayOfMonth(Integer.valueOf(dayOfMonthStart),dayStart);
+				shouldEnd=getDayOfMonth(Integer.valueOf(dayOfMonthEnd),dayEnd);
 				if(shouldStart.after(shouldEnd)){
 					shouldEnd=DateUtil.addMonth(shouldEnd, 1);
 				}
 				
-				if(new Date().after(shouldStart)){
+				if(new Date().after(shouldStart)&&new Date().before(shouldEnd)){
 					shouldRecord=true;
-					nextStartTime=DateUtil.addDay(shouldEnd, 1);
-					nextEndTime=DateUtil.addDay(shouldEnd, 1);
+					nextStartTime=DateUtil.addMonth(shouldStart, 1);
+					nextEndTime=DateUtil.addMonth(shouldEnd, 1);
 					monitorRecordManyTimes.setEndTime(shouldEnd).setStartTime(new Date());
+				}else if(new Date().after(shouldStart) && new Date().after(shouldEnd)){
+					nextStartTime=DateUtil.addMonth(shouldStart, 1);
+					nextEndTime=DateUtil.addMonth(shouldEnd, 1);
 				}else{
 					nextStartTime=shouldStart;
 					nextEndTime=shouldEnd;
@@ -464,15 +475,15 @@ public class MonitorRecordService {
 			.setWeekEnd(weekEnd)
 			.setDayOfMonthStart(dayOfMonthStart)
 			.setDayOfMonthEnd(dayOfMonthEnd)
-			.setIndexNumber(1);
+			.setIndexNumber(1)
+			.setMode(MonitorRecordManyTimesMode.forName(storeMode))
+			.setStatus(MonitorRecordStatus.WAITING);
 			monitorRecordManyTimesRelationDao.save(relation);
 			
 			if(shouldRecord){
-				monitorRecordManyTimes.setStartTime(shouldStart)
-									.setEndTime(shouldEnd)
-									.setStatus(MonitorRecordStatus.RUN)
+				monitorRecordManyTimes.setStatus(MonitorRecordStatus.RUN)
 									.setRelationId(relation.getId())
-									.setIndexNumber(relation.getIndexNumber()+1);
+									.setIndexNumber(relation.getIndexNumber());
 				relation.setIndexNumber(relation.getIndexNumber()+1);
 				monitorRecordManyTimesRelationDao.save(relation);
 				monitorRecordManyTimesDao.save(monitorRecordManyTimes);
@@ -493,7 +504,7 @@ public class MonitorRecordService {
 		Calendar cal = Calendar.getInstance();
 		cal.setFirstDayOfWeek(Calendar.MONDAY);
 		dayWeek=dayWeek+1;
-		cal.add(Calendar.DATE, cal.getFirstDayOfWeek() - dayWeek);
+		cal.add(Calendar.DATE, dayWeek - cal.getFirstDayOfWeek());
 		Date mondayDate = cal.getTime();
 		String dayOfWeek = sdf.format(mondayDate);
 		return dayOfWeek;
@@ -501,7 +512,7 @@ public class MonitorRecordService {
 	
 	public Date getDayOfMonth(int dayNumber,String time) throws ParseException {
 		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MONTH, dayNumber);
+		cal.set(Calendar.DAY_OF_MONTH, dayNumber);
 		Date date = cal.getTime();
 		String dateStr=DateUtil.format(date, DateUtil.defaultDatePattern);
 		dateStr=dateStr+" "+time;

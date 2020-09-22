@@ -161,7 +161,7 @@ public class CommandVodRecordParser {
 						mode, fileName, startTime, endTime, 
 						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-						user.getId(), user.getUserno(), user.getName(),10240);
+						user.getId(), user.getUserno(), user.getName(),null);
 
 				return task;
 			}else{
