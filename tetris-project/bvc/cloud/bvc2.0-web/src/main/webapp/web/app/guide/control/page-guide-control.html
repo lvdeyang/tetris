@@ -40,35 +40,33 @@
 					        </div>
 				        <div style="width:560px;float:left;">
 					        
-					        <div style="width:620px;background:#f2f2f2;padding-left:15px;">
-								<div style="width:620px;margin-top:20px;">
+					        <div style="width:620px;background:#f2f2f2;padding-left:15px; padding-top:10px; padding-bottom:10px; margin-top:10px;">
+								<div style="width:620px;">
 									<div style="color:#339999;font-weight:bold;text-align:center;padding-bottom:10px;">PVM</div>
-									<el-button v-for = "source in sources.list" :key = "source.id" type="primary"  size="mini" class="tab_btn ">{{source.id}}</el-button>
+									<el-button v-for = "source in sources.list" :key = "source.id" type="primary"  size="mini" class="tab_btn ">{{source.index}}</el-button>
 								</div>
-								<div style="width:620px;margin-top:20px;">
+								<div style="width:620px;margin-top:10px;">
 									<div style="color:#cc0033;font-weight:bold;text-align:center;padding-bottom:10px;">PGM</div>
-									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source.id)">{{source.id}}</el-button>
+									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
 								</div>
-								<table class="btn_table" style="width:590px;margin-top:10px;">
-									<tr>
-										<td v-for = "source in sources.list" :key="source.id" class="source_show">{{source.sourceName}}</td>
-									</tr>
-									<tr>
-										<td><el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(2)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(3)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(4)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(5)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(6)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(7)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(8)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(9)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(10)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(11)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-										<td><el-button @click="handleSetSource(12)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button></td>
-									
-									</tr>
-								</table>
+								<div style="width:620px;margin-top:10px;">
+									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; white-space:nowrap;">{{source.sourceName}}</div>
+								</div>
+								<div style="width:620px; margin-top:10px;">
+									<el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(2)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(3)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(4)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(5)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(6)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(7)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(8)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(9)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(10)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(11)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(12)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<div style="clear:both;"></div>
+								</div>
 							</div>
 				       </div>
 				       <div style="width:200px;float:right;">
