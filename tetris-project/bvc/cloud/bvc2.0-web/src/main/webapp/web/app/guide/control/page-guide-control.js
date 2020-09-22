@@ -169,34 +169,27 @@ define([
 					self.dialog.setSource.sourceType = x.sourceTypeName;
 					self.dialog.setSource.source = x.source;
 					self.dialog.setSource.previewOut = x.previewOut;
+					self.dialog.setSource.sourceName = x.sourceName;
+					self.dialog.setSource.bundleName = x.sourceName;
             	},
 				handleSetSourceCommit:function(){
-/*					console.log(this.$refs[formName])
-					this.$refs[formName].validate((valid)=>{
-
-						if (valid) {*/
-							var self = this;
-							self.dialog.setSource.visible=false;
-							var questData = {
-								id:self.dialog.setSource.id,
-								sourceType: self.dialog.setSource.sourceType,
-								source:self.dialog.setSource.source,
-								sourceName:self.dialog.setSource.sourceName,
-								previewOut:self.dialog.setSource.previewOut
-							};
-							ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
-								for(var i = 0; i < self.sources.list.length; i++){
-									list[i].sourceType = self.dialog.setSource.sourceType;
-									list[i].source = self.dialog.setSource.source;
-									list[i].sourceName = self.dialog.setSource.sourceName;
-									list[i].previewOut = self.dialog.setSource.previewOut;
-								}
-							}, null, ajax.NO_ERROR_CATCH_CODE);
-						/*} else {
-							console.log('error submit!!');
-							return false;
+					var self = this;
+					self.dialog.setSource.visible=false;
+					var questData = {
+						id:self.dialog.setSource.id,
+						sourceType: self.dialog.setSource.sourceType,
+						source:self.dialog.setSource.source,
+						sourceName:self.dialog.setSource.sourceName,
+						previewOut:self.dialog.setSource.previewOut
+					};
+					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
+						for(var i = 0; i < self.sources.list.length; i++){
+							if(data.id === self.sources.list[i].id){
+								self.sources.list.splice(i,1,data);
+								break;
+							}
 						}
-					});*/
+					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetSourceClose:function(){
 					var self = this;
@@ -281,9 +274,9 @@ define([
 					var self=this;
 					self.curPgm=index;
 				},
-				getBackcolor:function(index){
+				getBackcolor:function(source){
 					var self=this;
-					if(self.curPgm==index){
+					if(source.current===true){
 						return "background:#cc0033"
 					}else{
 						return "background:#CCC"
@@ -292,11 +285,16 @@ define([
 				switchSource:function(){
 					var self = this;
 					var questData = {
-						id: 1,
-						index: self.curPgm
+						id: self.curPgm
 					};
 					ajax.post('/tetris/guide/control/source/po/cut', questData, function (data, status) {
-						
+						for(var i = 0; i < self.sources.list.length; i++){
+							if(self.sources.list[i].id === data.id){
+								self.sources.list[i].current = true;
+							}else{
+								self.sources.list[i].current = false;
+							}
+						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetDeviceClick:function(row){

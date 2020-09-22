@@ -1,7 +1,11 @@
-.tab_btn{background:#CCC;font-weight:bold;color:black;border:1px solid #CCC;margin-left:0px!important;margin-right:8.5px;height:41px;width:41px;}
+.tab_btn{background:#CCC;font-weight:bold;color:black;border:1px solid #CCC;margin-left:0px!important;margin-right:8.5px;height:41px;width:41px; padding-left:0; padding-right:0; text-align:center;}
 .btn_table tr td{
 	width:40px;
 }
 .source_show{background:#FFF;color:black;text-align:center;-webkit-transform:scale(0.7);}
-.source_btn{background:#FFF;font-weight:bold;color:black;border:0;}
+.source_btn{background:#FFF; font-weight:bold; color:black; border:0; width:41px; margin-right:8.5px; margin-left:0!important; line-height:28px; padding:0; float:left;}
 .audioTable tr td{text-align:center}
+
+.tab_btn.el-button--primary:focus{
+	border-width: 2px;
+}

@@ -141,8 +141,7 @@ public class SourceController {
 	@RequestMapping(value = "/cut")
 	public Object cut(
 			Long id,
-			Long index,
 			HttpServletRequest request) throws Exception{
-		return sourceService.cut(id, index);
+		return sourceService.cut(id);
 	}
 }

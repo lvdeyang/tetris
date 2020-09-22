@@ -3,6 +3,8 @@
  */
 package com.sumavision.tetris.guide.control;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,7 @@ public class SourceService {
 	@Autowired
 	private GuidePlayService guidePlayService;
 	
-	public SourcePO edit(
+	public SourceVO edit(
 			Long id,
 			String sourceType,
 			String sourceName,
@@ -38,18 +40,26 @@ public class SourceService {
 		sourcePO.setSourceName(sourceName);
 		sourcePO.setSource(source);
 		sourcePO.setPreviewOut(previewOut);
-		return sourceDAO.save(sourcePO);
+		sourceDAO.save(sourcePO);
+		return new SourceVO().set(sourcePO); 
 	}
 	
 	public void delete(Long id){
 		sourceDAO.delete(id);
 	}
 	
-	public Object cut(
-			Long id, 
-			Long index) throws Exception{
-		guidePlayService.exchange(id, index);
-		return null;
+	public SourceVO cut(Long id) throws Exception{
+		
+		SourcePO sourcePO = sourceDAO.findOne(id);
+		List<SourcePO> list = sourceDAO.findByGuideIdOrderBySourceNumber(sourcePO.getGuideId());
+		for (SourcePO sourcePO2 : list) {
+			sourcePO2.setCurrent(false);
+		}
+		sourcePO.setCurrent(true);
+		sourceDAO.save(list);
+		sourceDAO.save(sourcePO);
+		guidePlayService.exchange(sourcePO.getGuideId(), id);	
+		return new SourceVO().set(sourcePO);
 	}
 }
 
