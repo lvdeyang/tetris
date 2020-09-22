@@ -448,9 +448,10 @@ define([
         this.dialog.download.visible = true;
       },
       loadByDownload(id) {
+        var self = this;
         var param = {
           id: id,
-          currgentPage: this.downloadTable.page.currentPage,
+          currentPage: this.downloadTable.page.currentPage,
           pageSize: this.downloadTable.page.pageSize
         }
         ajax.post('/monitor/record/load/many/times/record', param, function (data) {
@@ -458,15 +459,14 @@ define([
           var rows = data.rows;
           // self.downloadTable.page.currentPage = currentPage;
           self.downloadTable.page.total = total;
-          this.downloadTable.data = rows;
+          self.downloadTable.data = rows;
         });
       },
       handleDownloadClose() {
         this.dialog.download.visible = false;
       },
       rowDownload(row) {
-        console.log(row.downloadPath)
-        location.href = row.downloadPath;
+        location.href = row.downLoadPath;
       },
       handleTotalSizeMb() {
         {
