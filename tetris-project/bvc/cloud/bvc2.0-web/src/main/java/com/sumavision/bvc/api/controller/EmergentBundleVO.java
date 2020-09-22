@@ -14,7 +14,7 @@ public class EmergentBundleVO {
 	
 	private String bundleName;
 	
-	private String DeviceModel;
+	private String deviceModel;
 	
 	private String streamUrl;
 	
@@ -37,11 +37,11 @@ public class EmergentBundleVO {
 	}
 
 	public String getDeviceModel() {
-		return DeviceModel;
+		return deviceModel;
 	}
 
 	public void setDeviceModel(String deviceModel) {
-		DeviceModel = deviceModel;
+		this.deviceModel = deviceModel;
 	}
 
 	public String getStreamUrl() {
@@ -63,7 +63,7 @@ public class EmergentBundleVO {
 	public EmergentBundleVO set(BundlePO bundle){
 		this.bundleId = bundle.getBundleId();
 		this.bundleName = bundle.getBundleName();
-		this.DeviceModel = bundle.getDeviceModel();
+		this.deviceModel = bundle.getDeviceModel();
 		this.identify = bundle.getIdentify();
 		this.streamUrl = bundle.getStreamUrl();
 		return this;

@@ -56,7 +56,7 @@ public class ConnectBO {
 	/**
 	 * 组播源地址
 	 */
-	private String src_multi_addr;
+	private String src_multi_ip;
 	
 	/**
 	 * 编解码参数
@@ -149,12 +149,12 @@ public class ConnectBO {
 		return this;
 	}
 
-	public String getSrc_multi_addr() {
-		return src_multi_addr;
+	public String getSrc_multi_ip() {
+		return src_multi_ip;
 	}
 
-	public ConnectBO setSrc_multi_addr(String src_multi_addr) {
-		this.src_multi_addr = src_multi_addr;
+	public ConnectBO setSrc_multi_ip(String src_multi_ip) {
+		this.src_multi_ip = src_multi_ip;
 		return this;
 	}
 
