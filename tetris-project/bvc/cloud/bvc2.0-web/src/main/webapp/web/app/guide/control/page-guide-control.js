@@ -209,7 +209,7 @@ define([
 				},
             	handleSetOut:function(){
 					var self = this;
-					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 3}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 2}, function(data, status){
 						//console.log(data);
 						for(var i = 0; i < data.length; i++){
 							self.output.out.push(data[i]);
@@ -220,7 +220,7 @@ define([
 						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 3}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 2}, function(data, status){
 						console.log(data);
 						self.dialog.setOut.video.codingObject = data.codingObjectName;
 						self.dialog.setOut.video.fps = data.fps;
@@ -231,7 +231,7 @@ define([
 						self.dialog.setOut.video.maxBitrate = data.maxBitrate;
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 3},function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 2},function(data, status){
 						self.dialog.setOut.audio.codingFormat = data.codingFormatName;
 						self.dialog.setOut.audio.channelLayout = data.channelLayoutName;
 						self.dialog.setOut.audio.bitrate = data.bitrate;
