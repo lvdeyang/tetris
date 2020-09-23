@@ -1,9 +1,5 @@
 <template>
   <section>
-    <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
-      <el-tab-pane label="绑定资源用户" name="BindRoleResource"></el-tab-pane>
-      <!-- <el-tab-pane label="绑定虚拟资源" name="BindVirtualResource"></el-tab-pane> -->
-    </el-tabs>
     <el-card style="float:left;margin-top:10px;width:20%;font-size: 18px;" body-style="padding:0px">
       <el-table ref="roleTable" :data="roles" highlight-current-row v-loading="roleTableLoading" @current-change="handleRoleTableRowChange" style="width: 100%;">
         <el-table-column prop="name" label="角色名" sortable>
@@ -37,7 +33,7 @@
       </div>
 
       <!--资源列表-->
-      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;">
+      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="480">
         <el-table-column type="index" width="100"></el-table-column>
         <el-table-column prop="name" label="名称" width="200" sortable>
         </el-table-column>

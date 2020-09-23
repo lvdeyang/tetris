@@ -6,8 +6,8 @@
       <!--<el-button size="small" type="danger">停止录制</el-button>-->
       <el-select size="small" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
         <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
-        <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
-        <el-option key="TIMESEGMENT" label="时间段录制" value="TIMESEGMENT"></el-option>
+        <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
+        <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
         <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
       </el-select>
       <el-input size="small" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true"
@@ -39,7 +39,7 @@
               <el-button type="text" icon="el-icon-delete"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="导出" placement="bottom">
+            <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)"></el-button>
             </el-tooltip>
@@ -71,21 +71,6 @@
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
                     </el-radio>
-                    <!-- <el-radio v-else-if="data.type==='CHANNEL' && data.id.indexOf('Audio')>=0"
-                      v-model="dialog.addRecord.tree.currentAudio" :label="data.param">
-                      <span :class="data.icon" :style="data.style"></span>
-                      <span>{{node.label}}</span>
-                    </el-radio> -->
-                    <!-- <el-radio v-else-if="data.type==='BUNDLE' && data.param.indexOf('XT')>=0"
-                      v-model="dialog.addRecord.tree.currentXtDevice" :label="data.param">
-                      <span :class="data.icon" :style="data.style"></span>
-                      <span>{{node.label}}</span>
-                    </el-radio> -->
-                    <!-- <el-radio v-else-if="data.type!=='USER'" v-model="dialog.addRecord.tree.currentUser"
-                      :label="data.param">
-                      <span :class="data.icon" :style="data.style"></span>
-                      <span>{{node.label}}</span>
-                    </el-radio> -->
                     <span v-else-if="data.type!=='BUNDLE'&&data.type!=='USER'">
                       <span :class="data.icon" :style="data.style"></span>
                       <span>{{node.label}}</span>
@@ -102,8 +87,8 @@
                     <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式"
                       @change="addRecordModeChange" style="width:400px;">
                       <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
-                      <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
-                      <el-option key="TIMESEGMENT" label="时间段录制" value="TIMESEGMENT"></el-option>
+                      <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
+                      <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
                       <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
                     </el-select>
                   </el-form-item>
@@ -193,6 +178,8 @@
     <el-dialog title="导出列表" :visible.sync="dialog.download.visible" width="872px" :before-close="handleDownloadClose">
       <el-table height="100%" :data="downloadTable.data" stripe style="width: 100%">
 
+        <el-table-column prop="fileName" label="任务名" width="200">
+        </el-table-column>
         <el-table-column prop="startTime" label="开始时间" width="200">
         </el-table-column>
         <el-table-column prop="endTime" label="结束时间" width="200">
@@ -201,14 +188,14 @@
           <template slot-scope="scope">
             <el-tooltip class="item" effect="dark" content="下载" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDownload(row)"></el-button>
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDownload(scope.row)">
+              </el-button>
             </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
 
-      <div
-        style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+      <div style="width:100%; height:52px;  left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
         <el-pagination style="float:right;" background @size-change="handleSizeChangeByDownloadTable"
           @current-change="handleCurrentChangeByDownloadTable" :current-page="downloadTable.page.currentPage"
           :page-sizes="[20, 50, 100, 500, 1000]" :page-size="downloadTable.page.pageSize"

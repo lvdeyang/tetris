@@ -1,279 +1,240 @@
 <mi-frame id="page-user-wrapper" :menus="menus" :user="user" :groups="groups">
 
-    <template slot="title">{{i18n.title}}</template>
+  <template slot="title">{{i18n.title}}</template>
 
-    <template slot="links">
-        <el-breadcrumb-item><a href="#/page-home">{{i18n.homePage}}</a></el-breadcrumb-item>
-        <el-breadcrumb-item>{{i18n.currentPage}}</el-breadcrumb-item>
-    </template>
+  <template slot="links">
+    <el-breadcrumb-item><a href="#/page-home">{{i18n.homePage}}</a></el-breadcrumb-item>
+    <el-breadcrumb-item>{{i18n.currentPage}}</el-breadcrumb-item>
+  </template>
 
-    <template>
+  <template>
 
-        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+    <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleCreate}}</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleDelete}}</el-button>
+      <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus"
+          style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleCreate}}</el-button>
+      <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash"
+          style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleDelete}}</el-button>
 
-			<div class="condition-item"><el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable size="small"></el-input></div>
-			<div class="condition-item"><el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable size="small"></el-input></div>
-			<el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">{{i18n.load}}</el-button>
+      <div class="condition-item">
+        <el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable
+          size="small"></el-input>
+      </div>
+      <div class="condition-item">
+        <el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable
+          size="small"></el-input>
+      </div>
+      <el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">{{i18n.load}}</el-button>
 
-            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
-                <el-scrollbar style="height:100%;">
-                    <el-table
-                            :data="table.rows"
-                            :row-key="rowKey"
-                            style="width:100%">
-                        <el-table-column
-                                type="selection"
-                                width="55">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnNickname"
-                                prop="nickname">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnUsername"
-                                prop="username">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnUserno"
-                                prop="userno">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnMobile"
-                                prop="mobile">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnMail"
-                                prop="mail">
-                        </el-table-column>
-                        <el-table-column
-                                :label="i18n.columnOperation"
-                                width="250">
-                            <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleTokens" placement="bottom-end">
-                                	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="feather-icon-message-circle" style="font-size:20px; padding:0;" disabled></el-button>
-                                    <el-button v-else type="text" icon="feather-icon-message-circle" style="font-size:20px; padding:0;" @click="handleTokens(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
-                                	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" disabled></el-button>
-                                    <el-button v-else type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindSystemRole" placement="bottom-end">
-                                    <el-button type="text" icon="feather-icon-lock" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoBindSystemRole(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
-                                	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" disabled></el-button>
-                                    <el-button v-else type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
-                                </el-tooltip>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-scrollbar>
-            </div>
+      <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+        <el-scrollbar style="height:100%;">
+          <el-table :data="table.rows" :row-key="rowKey" style="width:100%">
+            <el-table-column type="selection" width="55">
+            </el-table-column>
+            <el-table-column :label="i18n.columnNickname" prop="nickname">
+            </el-table-column>
+            <el-table-column :label="i18n.columnUsername" prop="username">
+            </el-table-column>
+            <el-table-column :label="i18n.columnUserno" prop="userno">
+            </el-table-column>
+            <el-table-column :label="i18n.columnMobile" prop="mobile">
+            </el-table-column>
+            <el-table-column :label="i18n.columnMail" prop="mail">
+            </el-table-column>
+            <el-table-column :label="i18n.columnOperation" width="250">
+              <template slot-scope="scope">
+                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleTokens" placement="bottom-end">
+                  <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="feather-icon-message-circle"
+                    style="font-size:20px; padding:0;" disabled></el-button>
+                  <el-button v-else type="text" icon="feather-icon-message-circle" style="font-size:20px; padding:0;"
+                    @click="handleTokens(scope)"></el-button>
+                </el-tooltip>
+                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
+                  <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit"
+                    style="font-size:20px; padding:0; margin-left:20px;" disabled></el-button>
+                  <el-button v-else type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;"
+                    @click="handleRowEdit(scope)"></el-button>
+                </el-tooltip>
+                <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindSystemRole" placement="bottom-end">
+                  <el-button type="text" icon="feather-icon-lock"
+                    style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;"
+                    @click="gotoBindSystemRole(scope)"></el-button>
+                </el-tooltip>
+                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
+                  <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-delete"
+                    style="font-size:20px; padding:0; margin-left:20px;" disabled></el-button>
+                  <el-button v-else type="text" icon="el-icon-delete"
+                    style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-scrollbar>
+      </div>
 
-            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
-                <el-pagination
-                        style="float:right;"
-                        background
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="table.currentPage"
-                        :page-sizes="table.pageSizes"
-                        :page-size="table.pageSize"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="table.total">
-                </el-pagination>
-            </div>
+      <div
+        style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+        <el-pagination style="float:right;" background @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" :current-page="table.currentPage" :page-sizes="table.pageSizes"
+          :page-size="table.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="table.total">
+        </el-pagination>
+      </div>
 
-        </el-card>
+    </el-card>
 
-        <!-- 新建用户对话框 -->
-        <el-dialog
-                :title="i18n.dialogCreateUserTitle"
-                :visible.sync="dialog.createUser.visible"
-                width="500px"
-                :before-close="handleCreateUserClose">
+    <!-- 新建用户对话框 -->
+    <el-dialog :title="i18n.dialogCreateUserTitle" :visible.sync="dialog.createUser.visible" width="500px"
+      :before-close="handleCreateUserClose">
 
-            <el-dialog
-                    :title="i18n.dialogSelectCompanyTitle"
-                    :visible.sync="dialog.company.visible"
-                    width="600px"
-                    append-to-body
-                    :before-close="handleCompanyClose">
+      <el-dialog :title="i18n.dialogSelectCompanyTitle" :visible.sync="dialog.company.visible" width="600px"
+        append-to-body :before-close="handleCompanyClose">
 
-                <el-table
-                        ref="companyTable"
-                        :data="dialog.company.rows"
-                        :row-key="companyKey"
-                        highlight-current-row
-                        @current-change="companyChange"
-                        style="width:100%">
-                    </el-table-column>
-                    <el-table-column
-                            :label="i18n.tableCompanyColumnName"
-                            prop="name">
-                    </el-table-column>
-                </el-table>
+        <el-table ref="companyTable" :data="dialog.company.rows" :row-key="companyKey" highlight-current-row
+          @current-change="companyChange" style="width:100%">
+          </el-table-column>
+          <el-table-column :label="i18n.tableCompanyColumnName" prop="name">
+          </el-table-column>
+        </el-table>
 
-                <div style="height:50px; width:100%; box-sizing:border-box;">
-                    <el-pagination
-                            style="position:relative; top:9px;"
-                            background
-                            @current-change="handleCurrentChange"
-                            :current-page="dialog.company.currentPage"
-                            :page-size="dialog.company.pageSize"
-                            layout="total, prev, pager, next, jumper"
-                            :total="dialog.company.total">
-                    </el-pagination>
-                </div>
+        <div style="height:50px; width:100%; box-sizing:border-box;">
+          <el-pagination style="position:relative; top:9px;" background @current-change="handleCurrentChange"
+            :current-page="dialog.company.currentPage" :page-size="dialog.company.pageSize"
+            layout="total, prev, pager, next, jumper" :total="dialog.company.total">
+          </el-pagination>
+        </div>
 
-                <div slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="dialog.company.visible = false">{{i18n.cancelCompanySelected}}</el-button>
-                    <el-button size="medium" type="primary" @click="companySelected">{{i18n.handleCompanySelected}}</el-button>
-                </div>
-            </el-dialog>
+        <div slot="footer" class="dialog-footer">
+          <el-button size="medium" @click="dialog.company.visible = false">{{i18n.cancelCompanySelected}}</el-button>
+          <el-button size="medium" type="primary" @click="companySelected">{{i18n.handleCompanySelected}}</el-button>
+        </div>
+      </el-dialog>
 
-            <div style="height:412px;">
-                <el-scrollbar style="height:100%;">
-                    <el-form label-width="80px">
-                        <el-form-item :label="i18n.labelCreateUserNickname">
-                            <el-input v-model="dialog.createUser.nickname"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserUsername">
-                            <el-input v-model="dialog.createUser.username"></el-input>
-                        </el-form-item>
-                        <el-form-item label="号码">
-                            <el-input v-model="dialog.createUser.userno"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserPassword">
-                            <el-input type="password" v-model="dialog.createUser.password"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserRepeat">
-                            <el-input type="password" v-model="dialog.createUser.repeat" :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserMobile">
-                            <el-input v-model="dialog.createUser.mobile"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserMail">
-                            <el-input v-model="dialog.createUser.mail"></el-input>
-                        </el-form-item>
-                        <el-form-item :label="i18n.labelCreateUserClassify">
-                            <el-select v-model="dialog.createUser.classify" :placeholder="i18n.placeholderCreateUserClassify" style="width:100%;">
-                                <el-option
-                                        v-for="classify in classifies"
-                                        :key="classify"
-                                        :label="classify"
-                                        :value="classify">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <div style="margin-bottom:22px; text-align:center;" v-if="dialog.createUser.classify==='企业用户'">
-                            <el-radio-group v-model="dialog.createUser.company.create" @change="companyActionChange" size="mini">
-                                <el-radio-button label="1">{{i18n.radioLabelCreateUserCompany1}}</el-radio-button>
-                                <el-radio-button label="0">{{i18n.radioLabelCreateUserCompany0}}</el-radio-button>
-                            </el-radio-group>
-                        </div>
-                        <el-form-item v-if="dialog.createUser.classify==='企业用户'" :label="i18n.labelCreateUserCompanyName">
-                            <el-input v-if="dialog.createUser.company.create==1" v-model="dialog.createUser.company.name"></el-input>
-                            <el-input v-else v-model="dialog.createUser.company.name" readonly :placeholder="i18n.placeholderCreateUserCompanyName" @focus="selectCompany"></el-input>
-                        </el-form-item>
-                    </el-form>
-                </el-scrollbar>
-            </div>
+      <div style="height:412px;overflow: auto;">
+        <el-form label-width="80px">
+          <el-form-item :label="i18n.labelCreateUserNickname">
+            <el-input v-model="dialog.createUser.nickname"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserUsername">
+            <el-input v-model="dialog.createUser.username"></el-input>
+          </el-form-item>
+          <el-form-item label="号码">
+            <el-input v-model="dialog.createUser.userno"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserPassword">
+            <el-input type="password" v-model="dialog.createUser.password"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserRepeat">
+            <el-input type="password" v-model="dialog.createUser.repeat"
+              :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserMobile">
+            <el-input v-model="dialog.createUser.mobile"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserMail">
+            <el-input v-model="dialog.createUser.mail"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelCreateUserClassify">
+            <el-select v-model="dialog.createUser.classify" :placeholder="i18n.placeholderCreateUserClassify"
+              style="width:100%;">
+              <el-option v-for="classify in classifies" :key="classify" :label="classify" :value="classify">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <div style="margin-bottom:22px; text-align:center;" v-if="dialog.createUser.classify==='企业用户'">
+            <el-radio-group v-model="dialog.createUser.company.create" @change="companyActionChange" size="mini">
+              <el-radio-button label="1">{{i18n.radioLabelCreateUserCompany1}}</el-radio-button>
+              <el-radio-button label="0">{{i18n.radioLabelCreateUserCompany0}}</el-radio-button>
+            </el-radio-group>
+          </div>
+          <el-form-item v-if="dialog.createUser.classify==='企业用户'" :label="i18n.labelCreateUserCompanyName">
+            <el-input v-if="dialog.createUser.company.create==1" v-model="dialog.createUser.company.name"></el-input>
+            <el-input v-else v-model="dialog.createUser.company.name" readonly
+              :placeholder="i18n.placeholderCreateUserCompanyName" @focus="selectCompany"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
 
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.createUser.visible = false">{{i18n.handleCreateUserCancel}}</el-button>
-                <el-button size="medium" type="primary" @click="handleCreateUserSubmit" :loading="dialog.createUser.loading">{{i18n.handleCreateUserSubmit}}</el-button>
-            </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="dialog.createUser.visible = false">{{i18n.handleCreateUserCancel}}</el-button>
+        <el-button size="medium" type="primary" @click="handleCreateUserSubmit" :loading="dialog.createUser.loading">
+          {{i18n.handleCreateUserSubmit}}</el-button>
+      </span>
 
-        </el-dialog>
+    </el-dialog>
 
-        <!-- 修改流程对话框 -->
-        <el-dialog
-                :title="i18n.dialogEditUserTitle"
-                :visible.sync="dialog.editUser.visible"
-                width="500px"
-                :before-close="handleEditUserClose">
+    <!-- 修改流程对话框 -->
+    <el-dialog :title="i18n.dialogEditUserTitle" :visible.sync="dialog.editUser.visible" width="500px"
+      :before-close="handleEditUserClose">
 
-            <div>
-                <el-form label-width="60px">
-                    <el-form-item :label="i18n.labelEditUserNickname">
-                        <el-input v-model="dialog.editUser.nickname"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="i18n.labelEditUserMobile">
-                        <el-input v-model="dialog.editUser.mobile"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="i18n.labelEditUserMail">
-                        <el-input v-model="dialog.editUser.mail"></el-input>
-                    </el-form-item>
-                    <div style="text-align:right; margin-bottom:22px;">
-                        <el-button style="padding:0; margin:0;" type="text" @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">
-                            {{i18n.buttonEditUserEditPassword}}
-                            <span v-if="dialog.editUser.editPassword" class="el-icon-arrow-up"></span>
-                            <span v-else class="el-icon-arrow-down"></span>
-                        </el-button>
-                    </div>
-                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserOldPassword">
-                        <el-input type="password" v-model="dialog.editUser.oldPassword"></el-input>
-                    </el-form-item>
-                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserNewPassword">
-                        <el-input type="password" v-model="dialog.editUser.newPassword"></el-input>
-                    </el-form-item>
-                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserRepeat">
-                        <el-input type="password" v-model="dialog.editUser.repeat" :placeholder="i18n.placeholderEditUserRepeat"></el-input>
-                    </el-form-item>
-                </el-form>
-            </div>
+      <div>
+        <el-form label-width="60px">
+          <el-form-item :label="i18n.labelEditUserNickname">
+            <el-input v-model="dialog.editUser.nickname"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelEditUserMobile">
+            <el-input v-model="dialog.editUser.mobile"></el-input>
+          </el-form-item>
+          <el-form-item :label="i18n.labelEditUserMail">
+            <el-input v-model="dialog.editUser.mail"></el-input>
+          </el-form-item>
+          <div style="text-align:right; margin-bottom:22px;">
+            <el-button style="padding:0; margin:0;" type="text"
+              @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">
+              {{i18n.buttonEditUserEditPassword}}
+              <span v-if="dialog.editUser.editPassword" class="el-icon-arrow-up"></span>
+              <span v-else class="el-icon-arrow-down"></span>
+            </el-button>
+          </div>
+          <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserOldPassword">
+            <el-input type="password" v-model="dialog.editUser.oldPassword"></el-input>
+          </el-form-item>
+          <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserNewPassword">
+            <el-input type="password" v-model="dialog.editUser.newPassword"></el-input>
+          </el-form-item>
+          <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserRepeat">
+            <el-input type="password" v-model="dialog.editUser.repeat" :placeholder="i18n.placeholderEditUserRepeat">
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </div>
 
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.editUser.visible = false">{{i18n.handleEditUserCancel}}</el-button>
-                <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">{{i18n.handleEditUserSubmit}}</el-button>
-            </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="dialog.editUser.visible = false">{{i18n.handleEditUserCancel}}</el-button>
+        <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">
+          {{i18n.handleEditUserSubmit}}</el-button>
+      </span>
 
-        </el-dialog>
+    </el-dialog>
 
-        <!-- token展示 -->
-        <el-dialog
-                :title="dialog.tokens.currentUser.nickname"
-                :visible.sync="dialog.tokens.visible"
-                width="600px"
-                :before-close="handleTokensClose">
+    <!-- token展示 -->
+    <el-dialog :title="dialog.tokens.currentUser.nickname" :visible.sync="dialog.tokens.visible" width="600px"
+      :before-close="handleTokensClose">
 
-            <el-table
-                    :data="dialog.tokens.rows"
-                    :row-key="rowKey"
-                    style="width:100%">
-                <el-table-column
-                        width="50"
-                        prop="status">
-                    <template slot-scope="scope">
-                        <span v-if="scope.row.status === 'ONLINE'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
-                        <span v-if="scope.row.status === 'OFFLINE'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
-                    </template>
-                </el-table-column>
-                <el-table-column
-                        :label="i18n.tableTokensColumnType"
-                        prop="type">
-                </el-table-column>
-                <el-table-column
-                        :label="i18n.tableTokensColumnIp"
-                        prop="ip">
-                </el-table-column>
-                <el-table-column
-                        :label="i18n.tableTokensColumnOperation"
-                        width="80">
-                    <template slot-scope="scope">
-                        <el-tooltip class="item" effect="dark" :content="i18n.tipHandleInvalidToken" placement="bottom-end">
-                            <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;" @click="handleInvalidToken(scope)"></el-button>
-                        </el-tooltip>
-                    </template>
-                </el-table-column>
-            </el-table>
+      <el-table :data="dialog.tokens.rows" :row-key="rowKey" style="width:100%">
+        <el-table-column width="50" prop="status">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status === 'ONLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+            <span v-if="scope.row.status === 'OFFLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnType" prop="type">
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnIp" prop="ip">
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnOperation" width="80">
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" :content="i18n.tipHandleInvalidToken" placement="bottom-end">
+              <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;"
+                @click="handleInvalidToken(scope)"></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
 
-        </el-dialog>
+    </el-dialog>
 
-    </template>
+  </template>
 
 </mi-frame>
