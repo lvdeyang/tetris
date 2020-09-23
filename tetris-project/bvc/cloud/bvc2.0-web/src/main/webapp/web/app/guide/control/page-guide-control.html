@@ -9,17 +9,17 @@
 				<div style="margin-bottom: 20px;">
 					<el-button
 							size="small"
-							@click="addTab(editableTabsValue)"
+							@click="addTab(tabIndex)"
 							>
 						新建导播任务
 					</el-button>
 				</div>
-                <el-tabs v-model="editableTabsValue" type="border-card" closable @tab-remove="removeTab">
-				  <el-tab-pane v-for="(item, index) in editableTabs"
-							   :key="item.name"
-							   :label="item.title"
-							   :name="item.name">
-					  <!--{{item.content}}-->
+                <el-tabs  type="border-card" closable @tab-remove="removeTab" :model="editableTabsValue">
+				  <el-tab-pane v-for="(guide,index) in guides.list"
+							   :key="guide.id"
+							   :label="guide.taskName"
+							   :name="guide.id + ''">
+
 				    <div style="width:49%;height:300px;float:left">
 						<div style="float:left;">直播时长: 01:13:14</div>
 						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
@@ -278,7 +278,8 @@
 	                    v-model="dialog.setSource.sourceType"
 	                    placeholder="请选择源类型">
 	                <el-option
-	                        v-for="item in dialog.setSource.typeOptions"
+	                        v-for="(item, index) in dialog.setSource.typeOptions"
+							:key = "index"
 	                        :value="item" :label="item">
 	                </el-option>
 	            </el-select>
@@ -297,7 +298,16 @@
 			<el-form-item label="源名称" prop="sourceName">
 				<el-input v-model="dialog.setSource.sourceName"></el-input>
 			</el-form-item>
-	        <el-form-item label="预监输出">
+
+			<el-form-item label="设置预监输出">
+				<el-radio-group v-model="dialog.setSource.set">
+					<el-radio label="是"></el-radio>
+					<el-radio label="否"></el-radio>
+				</el-radio-group>
+			</el-form-item>
+
+
+	        <el-form-item label="预监输出" v-if="dialog.setSource.set==='是'">
 	            <el-input v-model="dialog.setSource.previewOut"></el-input>
 	        </el-form-item>
 	    </el-form>
@@ -314,6 +324,19 @@
 	        :visible.sync="dialog.setOut.visible"
 	        width="1300px"
 	        :before-close="handleSetOutClose">
+		<template>
+			<h4>切换方式</h4>
+			<el-select v-model="value" placeholder="请选择切换方式">
+				<el-option
+						v-for="item in options"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value">
+				</el-option>
+			</el-select>
+		</template>
+
+
 		<h4>视频编码参数</h4>
 		<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini">
 			<el-form-item label="编码对象" >

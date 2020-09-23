@@ -157,11 +157,12 @@ public class CommandVodRecordParser {
 				String audioBaseType = encodeAudio.getBaseType();
 				String audioChannelName = encodeAudio.getName();
 				
+				//还没有区分录制模式
 				MonitorRecordPO task = monitorRecordService.addLocalDevice(
 						mode, fileName, startTime, endTime, 
 						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-						user.getId(), user.getUserno(), user.getName(),null);
+						user.getId(), user.getUserno(), user.getName());
 
 				return task;
 			}else{

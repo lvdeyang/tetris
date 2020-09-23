@@ -36,16 +36,11 @@ define([
 				//};
                 return {
 					editableTabsValue: '2',
-					editableTabs: [{
-						title: '导播任务1',
-						name: '1',
-						content: 'Tab 1 content'
-					}, {
-						title: '导播任务2',
-						name: '2',
-						content: 'Tab 2 content'
-					}],
-					tabIndex: 2,
+					guides:{
+						list: []
+					},
+
+					//tabIndex: this.guides.list.length,
 
                 	user:context.getProp('user'),
                 	menurouter: false,
@@ -62,7 +57,8 @@ define([
 							source:'',
 							previewOut:'',
                             typeOptions:['5G背包','直播流'],
-							bundleName: ''
+							bundleName: '',
+							set: ''
                     	},
                     	setOut:{
                     		visible: false,
@@ -112,7 +108,18 @@ define([
 							//{ min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
 							//{ validator: validatePass, trigger: 'blur'}
 						]
-					}
+					},
+					options: [{
+						value: '选项1',
+						label: '转码'
+					}, {
+						value: '选项2',
+						label: '按帧切换'
+					}, {
+						value: '选项3',
+						label: '直接切换'
+					}],
+					value: '',
                 }
             },
             computed:{
@@ -122,36 +129,37 @@ define([
 				handleSelPgm: function () {
 					var self = this;
 				},
-				addTab: function(targetName) {
-					var newTabName = ++this.tabIndex + '';
-					this.editableTabs.push({
-						title: '导播任务' + this.tabIndex,
-						name: newTabName,
-						content: 'New Tab content'
-					});
-					this.editableTabsValue = newTabName;
-					newTabName = '导播任务' + newTabName;
-					ajax.post('/tetris/guide/control/guide/po/add', newTabName, function (data, status) {
+				addTab: function(tabIndex){
+					var listLength = this.guides.list.length +1;
+					this.guides.list.push({
+						id:listLength,
+						taskName:"导播任务"+listLength
+					})
+
+					this.editableTabsValue = listLength;
+					ajax.post('/tetris/guide/control/guide/po/add', {taskName: ("导播任务"+listLength)}, function(data, status){
 
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				removeTab: function(targetName) {
-					var tabs = this.editableTabs;
-					var activeName = this.editableTabsValue;
-					if (activeName === targetName) {
+					let tabs = this.guides.list;
+					let activeName = this.editableTabsValue;
+					if (activeName == targetName) {
 						tabs.forEach((tab, index) => {
-							if (tab.name === targetName) {
-								var nextTab = tabs[index + 1] || tabs[index - 1];
+							if (tab.id == targetName) {
+								let nextTab = tabs[index + 1] || tabs[index - 1];
 								if (nextTab) {
-									activeName = nextTab.name;
+									activeName = nextTab.id;
 								}
 							}
 						});
 					}
 
 					this.editableTabsValue = activeName;
-					this.editableTabs = tabs.filter(tab => tab.name !== targetName);
-					this.tabIndex--;
+					this.guides.list = tabs.filter(tab => tab.id != targetName);
+					ajax.post('/tetris/guide/control/guide/po/delete', {id: targetName}, function (data, status) {
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetDeviceClose:function(){
 					var self = this;
@@ -201,7 +209,7 @@ define([
 				},
             	handleSetOut:function(){
 					var self = this;
-					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 3}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 2}, function(data, status){
 						//console.log(data);
 						for(var i = 0; i < data.length; i++){
 							self.output.out.push(data[i]);
@@ -212,7 +220,7 @@ define([
 						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 3}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 2}, function(data, status){
 						console.log(data);
 						self.dialog.setOut.video.codingObject = data.codingObjectName;
 						self.dialog.setOut.video.fps = data.fps;
@@ -223,7 +231,7 @@ define([
 						self.dialog.setOut.video.maxBitrate = data.maxBitrate;
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 3},function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 2},function(data, status){
 						self.dialog.setOut.audio.codingFormat = data.codingFormatName;
 						self.dialog.setOut.audio.channelLayout = data.channelLayoutName;
 						self.dialog.setOut.audio.bitrate = data.bitrate;
@@ -239,7 +247,7 @@ define([
 					var self = this;
 					self.dialog.setOut.visible=false;
 					var questDataVideo = {
-						id: 3,
+						id: 2,
 						codingObject: self.dialog.setOut.video.codingObject,
 						fps:self.dialog.setOut.video.fps,
 						bitrate:self.dialog.setOut.video.bitrate,
@@ -250,7 +258,7 @@ define([
 					};
 
 					var questDataAudio = {
-						id: 3,
+						id: 2,
 						codingFormat:self.dialog.setOut.audio.codingFormat,
 						channelLayout:self.dialog.setOut.audio.channelLayout,
 						bitrate:self.dialog.setOut.audio.bitrate,
@@ -259,7 +267,7 @@ define([
 					};
 
 					var questDataOut = {
-						id: 3,
+						id: 2,
 						outputProtocol: self.dialog.setOut.out.outputProtocol,
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,
@@ -342,19 +350,17 @@ define([
             },
 			created:function(){
 				var self = this;
-/*
-				ajax.post('/tetris/guide/control/guide/po/query', null, function(data){
-
-				});
-*/
 
 				ajax.post('/tetris/guide/control/source/po/query', {id: 2}, function(data, status){
 					//console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);
-						/*if(data[i].sourceTypeName == '5G背包'){
-							self.dialog.setDevice.deviceData.push(data[i]);
-						}*/
+					}
+				})
+
+				ajax.post('/tetris/guide/control/guide/po/query', null, function(data, status){
+					for(var i = 0; i < data.length; i++){
+						self.guides.list.push(data[i]);
 					}
 				})
 

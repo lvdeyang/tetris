@@ -37,6 +37,9 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	/** 音量 */
 	private Long volume;
 	
+	/** 是否设置预监输出 */
+	private Boolean isPreviewOut;
+	
 	/** 输出地址 */
 	private String previewOut;
 
@@ -111,6 +114,16 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 	
+	public Boolean getIsPreviewOut() {
+		return isPreviewOut;
+	}
+
+	public SourceVO setIsPreviewOut(Boolean isPreviewOut) {
+		this.isPreviewOut = isPreviewOut;
+		return this;
+	}
+
+	
 	public String getPreviewOut() {
 		return previewOut;
 	}
@@ -130,6 +143,7 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setIndex(entity.getSourceNumber());
 		this.setCurrent(entity.getCurrent());
 		this.setVolume(entity.getVolume());
+		this.setIsPreviewOut(entity.getIsPreviewOut());
 		this.setPreviewOut(entity.getPreviewOut());
 		return this;
 	}

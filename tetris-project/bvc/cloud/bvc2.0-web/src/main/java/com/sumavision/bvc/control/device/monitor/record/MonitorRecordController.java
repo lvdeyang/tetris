@@ -43,6 +43,8 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.system.dao.SystemConfigurationDAO;
+import com.sumavision.tetris.bvc.system.po.SystemConfigurationPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -82,6 +84,9 @@ public class MonitorRecordController {
 	
 	@Autowired
 	private MonitorRecordManyTimesDAO monitorRecordManyTimesDao;
+	
+	@Autowired
+	private SystemConfigurationDAO systemConfigurationDao;
 	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
@@ -424,7 +429,6 @@ public class MonitorRecordController {
 			String audioChannelName,
 			String storeMode,
 			String timeQuantum,
-			Integer totalSizeMb,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -483,19 +487,26 @@ public class MonitorRecordController {
 		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
 		
 		if(MonitorRecordMode.TIMESEGMENT.equals(MonitorRecordMode.valueOf(mode))){
+			
+			SystemConfigurationPO configuration=systemConfigurationDao.findByTotalSizeMbNotNull();
+			if(configuration==null){
+				throw new BaseException(StatusCode.FORBIDDEN, "还没有设置磁盘大小");
+			}
+			Integer totalSizeMb =configuration.getTotalSizeMb();
+			
 			MonitorRecordPO task = monitorRecordService.addLocalDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
 					user.getId(), user.getUserno(), user.getName(), storeMode,
-					timeQuantum);
+					timeQuantum, totalSizeMb);
 			return new MonitorRecordTaskVO().set(task);
 		}else{
 			MonitorRecordPO task = monitorRecordService.addLocalDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-					user.getId(), user.getUserno(), user.getName(), totalSizeMb);
+					user.getId(), user.getUserno(), user.getName());
 			return new MonitorRecordTaskVO().set(task);
 		}
 	}
@@ -623,6 +634,24 @@ public class MonitorRecordController {
 		
 		monitorRecordService.removeFile(id, userId);
 	
+		return null;
+	}
+	
+	/**
+	 * 设置磁盘大小<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午4:41:40
+	 * @param total_size_mb磁盘大小
+	 * @return
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/total/size")
+	public Object totalSize(Integer totalSizeMb){
+		
+		monitorRecordService.setTotalSize(totalSizeMb);
+		
 		return null;
 	}
 	

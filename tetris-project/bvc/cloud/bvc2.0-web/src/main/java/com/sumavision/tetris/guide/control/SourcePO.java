@@ -47,6 +47,9 @@ public class SourcePO extends AbstractBasePO{
 	/** 音量 */
 	private Long volume;
 	
+	/** 是否设置预监输出 */
+	private Boolean isPreviewOut;
+	
 	/** 输出地址 */
 	private String previewOut;
 
@@ -114,6 +117,16 @@ public class SourcePO extends AbstractBasePO{
 	public void setVolume(Long volume) {
 		this.volume = volume;
 	}
+	
+	@Column(name = "IS_PREVIEWOUT")
+	public Boolean getIsPreviewOut() {
+		return isPreviewOut;
+	}
+
+	public void setIsPreviewOut(Boolean isPreviewOut) {
+		this.isPreviewOut = isPreviewOut;
+	}
+
 	
 	@Column(name = "PREVIEWOUT")
 	public String getPreviewOut() {
