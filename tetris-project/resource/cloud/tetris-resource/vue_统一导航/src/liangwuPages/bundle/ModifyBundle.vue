@@ -204,7 +204,7 @@ export default {
         bundleId: this.bundleId,
         bundleName: this.bundleName,
         location: this.location,
-        bundleFolderId: this.bundleFolderId,
+        folderId: this.bundleFolderId,
         deviceIp: this.deviceIp,
         devicePort: this.devicePort,
         multicastEncode: this.multicastEncode,
