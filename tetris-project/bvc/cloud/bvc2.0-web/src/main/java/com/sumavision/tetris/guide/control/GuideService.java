@@ -62,10 +62,13 @@ public class GuideService {
 		}
 		sourceDAO.save(list);
 		OutputSettingPO outputSettingPO = new OutputSettingPO();
+		outputSettingPO.setGuideId(guidePO.getId());
 		outputSettingDAO.save(outputSettingPO);
 		VideoParametersPO videoParametersPO = new VideoParametersPO();
+		videoParametersPO.setGuideId(guidePO.getId());
 		videoParametersDAO.save(videoParametersPO);
 		AudioParametersPO audioParametersPO = new AudioParametersPO();
+		audioParametersPO.setGuideId(guidePO.getId());
 		audioParametersDAO.save(audioParametersPO);
 		return guidePO;
 	}
