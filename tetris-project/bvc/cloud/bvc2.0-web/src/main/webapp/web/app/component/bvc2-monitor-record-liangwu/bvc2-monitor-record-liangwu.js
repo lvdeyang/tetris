@@ -466,7 +466,15 @@ define([
         this.dialog.download.visible = false;
       },
       rowDownload(row) {
-        location.href = row.downLoadPath;
+        // location.href = row.downLoadPath;
+        console.log(row.downLoadPath)
+        const elt = document.createElement('a');
+        elt.setAttribute('href', row.downLoadPath);
+        elt.setAttribute('download', row.fileName);
+        elt.style.display = 'none';
+        document.body.appendChild(elt);
+        elt.click();
+        document.body.removeChild(elt);
       },
       handleTotalSizeMb() {
         {

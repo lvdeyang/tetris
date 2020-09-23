@@ -48,7 +48,7 @@
       <el-button type="danger" size="small" @click="syncUser" style="float: left; margin-left: 10px;">
         同步用户
       </el-button>
-
+      <el-tag style="margin-left:10px" type="danger">当前设备数：{{sourcesTotle}}/1024</el-tag>
       <!--
             <el-button type="primary" size="small" v-on:click="handleCleanUpLdap()" style="float: right;margin-right: 10px;">重置LDAP数据</el-button>
             <el-button type="primary" size="small" v-on:click="showHandleSyncToLdapDialog()" style="float: right;margin-right: 10px;">上传到LDAP</el-button>
@@ -196,6 +196,7 @@ export default {
     return {
       activeTabName: "LwLocalBundleManage",
       resources: [],
+      sourcesTotle: '',
       deviceModelOptions: [],
       filters: {
         deviceModel: 'jv210',
@@ -298,6 +299,26 @@ export default {
       });
     }
     ,
+    getResourcesTotle: function (pageNum) {
+      let param = {
+        deviceModel: '',
+        keyword: '',
+        sourceType: '',
+        userId: '',
+        pageNum: pageNum,
+        countPerPage: this.countPerPage
+      };
+      getBundles(param).then((res) => {
+        if (res.errMsg) {
+          this.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
+          this.sourcesTotle = res.total;
+        }
+      });
+    },
     //获取资源列表
     getResources: function (pageNum) {
 
@@ -328,15 +349,6 @@ export default {
         } else {
           this.pageNum = pageNum;
           this.total = res.total;
-          // var addressArr = ["XX厂区东", "XX厂区南", "XX厂区西北", "发射场东侧", "指控中心东侧"];
-
-          // for (var i = 0; i < A.length; i++) {
-          //   if (addressArr[i]) {
-          //     A[i].location = addressArr[i]
-          //   } else {
-          //     A[i].location = addressArr[4]
-          //   }
-          // }
           this.resources = res.resources;
         }
 
@@ -872,6 +884,7 @@ export default {
     this.$nextTick(function () {
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
     });
+    this.getResourcesTotle(1);
     this.getDeviceModels();
     this.getAllUsers();
     this.getResources(1);

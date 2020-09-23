@@ -42,6 +42,7 @@
 
 .div_create {
   height: 412px;
+  overflow: auto;
 }
 
 .div_change_pw {
