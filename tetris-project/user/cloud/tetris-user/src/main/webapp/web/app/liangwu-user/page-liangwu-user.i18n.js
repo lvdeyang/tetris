@@ -44,7 +44,7 @@ define(function () {
     labelCreateUserLevel: '用户级别:',
     labelCreateUserNumber: '用户级别',
     labelCreateUserClassify: '类型:',
-    labelCreateUserCompanyName: '公司名称:',
+    labelCreateUserCompanyName: '组织名称:',
     handleCreateUserCancel: '取消',
     handleCreateUserSubmit: '确定',
     dialogEditUserTitle: '修改用户',
