@@ -118,11 +118,17 @@ public class GuidePlayService {
 			
 			return passBy;
 		}).collect(Collectors.toList());
-		//需要判空么
+		
+		if(sourceLogic.getPass_by()==null){
+			sourceLogic.setPass_by(new ArrayList<PassByBO>());
+		}
 		sourceLogic.getPass_by().addAll(startPassBys);
 		
 		//执行logic
-//		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
+		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
+		
+		Thread.currentThread().sleep(3000L);
+		System.out.println("------------------------------睡三秒--------------------------------------------------------");
 		
 		//2.创建输出源   只有一个、判空
 		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(guideId);

@@ -52,6 +52,10 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.bvc.system.dao.SystemConfigurationDAO;
+import com.sumavision.tetris.bvc.system.po.SystemConfigurationPO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -107,7 +111,10 @@ public class MonitorRecordService {
 	
 	@Autowired
 	private MonitorRecordManyTimesRelationService monitorRecordManyTimesRelationService;
-
+	
+	@Autowired
+	private SystemConfigurationDAO systemConfigurationDao;
+	
 	/**
 	 * 录制本地设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -165,8 +172,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname,Integer totalSizeMb
-
+			String nickname
 	) throws Exception {
 
 		// 参数模板
@@ -202,7 +208,7 @@ public class MonitorRecordService {
 		task.setAudioChannelId(audioChannelId);
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
-		task.setTotalSizeMb(totalSizeMb);
+		
 		MonitorRecordStatus status = null;
 
 		// 录制模式选择
@@ -211,7 +217,14 @@ public class MonitorRecordService {
 		} else if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			status = MonitorRecordStatus.WAITING;
 		} else if(MonitorRecordMode.CYCLE.equals(parsedMode)){
+			SystemConfigurationPO configuration=systemConfigurationDao.findByTotalSizeMbNotNull();
+			if(configuration==null){
+				throw new BaseException(StatusCode.FORBIDDEN, "还没有设置磁盘大小");
+			}
+			Integer totalSizeMb =configuration.getTotalSizeMb();
+			
 			status = MonitorRecordStatus.RUN;
+			task.setTotalSizeMb(totalSizeMb);
 		} else {
 			throw new ErrorRecordModeException(mode);
 		}
@@ -304,7 +317,8 @@ public class MonitorRecordService {
 			String userno,
 			String nickname,
 			String storeMode,
-			String timeQuantum
+			String timeQuantum,
+			Integer totalSizeMb
 			) throws Exception{
 		
 		//参数模板
@@ -348,6 +362,7 @@ public class MonitorRecordService {
 		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
+		task.setTotalSizeMb(totalSizeMb);
 		monitorRecordDao.save(task);
 		
 		//拼预览地址（这里要查找对应的规则表去取到index）
@@ -493,7 +508,7 @@ public class MonitorRecordService {
 		
 		//下命令
 		LogicBO logic = openBundle(task, codec);
-		logic.merge(startManyTimesRecord(task,relation,codec));
+		logic.merge(startManyTimesRecord(task,relation,codec,totalSizeMb));
 		sendProtocol(task, logic, "点播系统：开始录制本地设备");
 		
 		return task;
@@ -891,6 +906,12 @@ public class MonitorRecordService {
 		if (task.getEndTime() == null) {
 			task.setEndTime(new Date());
 		}
+		
+		//如果是排期，做一些其他处理
+		if(MonitorRecordMode.TIMESEGMENT.equals(task.getMode())){
+			stopManyTimesRecord(task);
+		}
+		
 		monitorRecordDao.save(task);
 
 		if (MonitorRecordType.LOCAL_DEVICE.equals(task.getType())) {
@@ -902,6 +923,40 @@ public class MonitorRecordService {
 		} else if (MonitorRecordType.XT_USER.equals(task.getType())) {
 			stopXtUser(task);
 		}
+	}
+	
+	/**
+	 * 排期的停止<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午2:42:07
+	 * @param task 录制任务
+	 */
+	public void stopManyTimesRecord(MonitorRecordPO task){
+		
+		if(!MonitorRecordMode.TIMESEGMENT.equals(task.getMode())){
+			return;
+		}
+		
+		MonitorRecordManyTimesRelationPO relation=monitorRecordManyTimesRelationDao.findByBusinessId(task.getId());
+		
+		if(relation==null){
+			return;
+		}
+		
+		relation.setStatus(MonitorRecordStatus.STOP);
+		monitorRecordManyTimesRelationDao.save(relation);
+		
+		MonitorRecordManyTimesPO manyTimesRecord=monitorRecordManyTimesDao.findByRelationIdAndStatusNot(relation.getId(),MonitorRecordStatus.STOP);
+		
+		if(manyTimesRecord==null){
+			return;
+		}
+		
+		manyTimesRecord.setEndTime(new Date());
+		manyTimesRecord.setStatus(MonitorRecordStatus.STOP);
+		monitorRecordManyTimesDao.save(manyTimesRecord);
+		
 	}
 
 	/**
@@ -1144,7 +1199,7 @@ public class MonitorRecordService {
 	 * @return
 	 * @throws Exception
 	 */
-	private LogicBO startManyTimesRecord(MonitorRecordPO task,MonitorRecordManyTimesRelationPO relation, CodecParamBO codec) throws Exception {
+	private LogicBO startManyTimesRecord(MonitorRecordPO task,MonitorRecordManyTimesRelationPO relation, CodecParamBO codec,Integer totalSizeMb) throws Exception {
 
 		LogicBO logic = new LogicBO().setUserId(task.getUserId().toString());
 
@@ -1158,6 +1213,7 @@ public class MonitorRecordService {
 		//处理排期额外添加开始
 		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
 		recordSet.setTime_segment(timeSegment);
+		recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(totalSizeMb));
 		//添加结束
 		
 		if (task.getAudioBundleId() != null) {
@@ -1959,4 +2015,22 @@ public class MonitorRecordService {
 		}
 	}
 
+	/**
+	 * 设置全局磁盘大小<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月22日 下午5:13:02
+	 * @param totalSizeMb 磁盘大小
+	 */
+	public void setTotalSize(Integer totalSizeMb){
+		
+		SystemConfigurationPO congfiguration = systemConfigurationDao.findByTotalSizeMbNotNull();
+		if(congfiguration==null){
+			systemConfigurationDao.save(new SystemConfigurationPO().setTotalSizeMb(totalSizeMb));
+			return;
+		}
+		congfiguration.setTotalSizeMb(totalSizeMb);
+		systemConfigurationDao.save(congfiguration);
+		
+	}
 }
