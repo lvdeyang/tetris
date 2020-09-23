@@ -36,16 +36,11 @@ define([
 				//};
                 return {
 					editableTabsValue: '2',
-					editableTabs: [{
-						title: '导播任务1',
-						name: '1',
-						content: 'Tab 1 content'
-					}, {
-						title: '导播任务2',
-						name: '2',
-						content: 'Tab 2 content'
-					}],
-					tabIndex: 2,
+					guides:{
+						list: []
+					},
+
+					//tabIndex: this.guides.list.length,
 
                 	user:context.getProp('user'),
                 	menurouter: false,
@@ -62,11 +57,24 @@ define([
 							source:'',
 							previewOut:'',
                             typeOptions:['5G背包','直播流'],
-							bundleName: ''
+							bundleName: '',
+							set: ''
                     	},
                     	setOut:{
                     		visible: false,
                             loading: false,
+
+							options: [{
+								value: '选项1',
+								label: '转码'
+							}, {
+								value: '选项2',
+								label: '按帧切换'
+							}, {
+								value: '选项3',
+								label: '直接切换'
+							}],
+							value: '',
 
 							video:{
 								codingObject: '',
@@ -122,25 +130,37 @@ define([
 				handleSelPgm: function () {
 					var self = this;
 				},
-				addTab: function(targetName) {
-					var newTabName = ++this.tabIndex + '';
-					this.editableTabs.push({
-						title: '导播任务' + this.tabIndex,
-						name: newTabName,
-						content: 'New Tab content'
-					});
-					this.editableTabsValue = newTabName;
-					newTabName = '导播任务' + newTabName;
-					ajax.post('/tetris/guide/control/guide/po/add', newTabName, function (data, status) {
+				addTab: function(tabIndex){
+					var listLength = this.guides.list.length +1;
+					this.guides.list.push({
+						id:listLength,
+						taskName:"导播任务"+listLength
+					})
+
+					this.editableTabsValue = listLength;
+					ajax.post('/tetris/guide/control/guide/po/add', {taskName: ("导播任务"+listLength)}, function(data, status){
 
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
+				/*addTab: function(targetName) {
+					var newTabIndex = ++this.tabIndex + '';
+					this.editableTabs.push({
+						title: '导播任务' + this.tabIndex,
+						name: newTabIndex,
+						content: 'New Tab content'
+					});
+					this.editableTabsValue = newTabIndex;
+					var newTabName = '导播任务' + newTabIndex;
+					ajax.post('/tetris/guide/control/guide/po/add', {taskName: newTabName}, function (data, status) {
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+				},*/
 				removeTab: function(targetName) {
-					var tabs = this.editableTabs;
+					var tabs = this.guides.list;
 					var activeName = this.editableTabsValue;
 					if (activeName === targetName) {
 						tabs.forEach((tab, index) => {
-							if (tab.name === targetName) {
+							if (index == targetName) {
 								var nextTab = tabs[index + 1] || tabs[index - 1];
 								if (nextTab) {
 									activeName = nextTab.name;
@@ -150,8 +170,11 @@ define([
 					}
 
 					this.editableTabsValue = activeName;
-					this.editableTabs = tabs.filter(tab => tab.name !== targetName);
-					this.tabIndex--;
+					this.editableTabs = tabs.filter((tab,index) => index !== targetName);
+					//ajax.post('/tetris/guide/control/guide/po/delete', {id: this.tabIndex}, function (data, status) {
+                    //
+					//}, null, ajax.NO_ERROR_CATCH_CODE);
+					//this.tabIndex--;
 				},
 				handleSetDeviceClose:function(){
 					var self = this;
@@ -342,19 +365,17 @@ define([
             },
 			created:function(){
 				var self = this;
-/*
-				ajax.post('/tetris/guide/control/guide/po/query', null, function(data){
-
-				});
-*/
 
 				ajax.post('/tetris/guide/control/source/po/query', {id: 2}, function(data, status){
 					//console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);
-						/*if(data[i].sourceTypeName == '5G背包'){
-							self.dialog.setDevice.deviceData.push(data[i]);
-						}*/
+					}
+				})
+
+				ajax.post('/tetris/guide/control/guide/po/query', null, function(data, status){
+					for(var i = 0; i < data.length; i++){
+						self.guides.list.push(data[i]);
 					}
 				})
 
