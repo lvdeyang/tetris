@@ -14,11 +14,12 @@
 						新建导播任务
 					</el-button>
 				</div>
-                <el-tabs  type="border-card" closable @tab-remove="removeTab">
+                <el-tabs  type="border-card" closable @tab-remove="removeTab" :model="editableTabsValue">
 				  <el-tab-pane v-for="(guide,index) in guides.list"
-							   :key="index"
+							   :key="guide.id"
 							   :label="guide.taskName"
-							   :name="index+''">
+							   :name="guide.id + ''">
+
 				    <div style="width:49%;height:300px;float:left">
 						<div style="float:left;">直播时长: 01:13:14</div>
 						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
@@ -326,7 +327,7 @@
 			<h4>切换方式</h4>
 			<el-select v-model="value" placeholder="请选择切换方式">
 				<el-option
-						v-for="item in dialog.setOut.options"
+						v-for="item in options"
 						:key="item.value"
 						:label="item.label"
 						:value="item.value">

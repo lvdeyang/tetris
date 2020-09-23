@@ -64,18 +64,6 @@ define([
                     		visible: false,
                             loading: false,
 
-							options: [{
-								value: '选项1',
-								label: '转码'
-							}, {
-								value: '选项2',
-								label: '按帧切换'
-							}, {
-								value: '选项3',
-								label: '直接切换'
-							}],
-							value: '',
-
 							video:{
 								codingObject: '',
 								fps: '25',
@@ -120,7 +108,18 @@ define([
 							//{ min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
 							//{ validator: validatePass, trigger: 'blur'}
 						]
-					}
+					},
+					options: [{
+						value: '选项1',
+						label: '转码'
+					}, {
+						value: '选项2',
+						label: '按帧切换'
+					}, {
+						value: '选项3',
+						label: '直接切换'
+					}],
+					value: '',
                 }
             },
             computed:{
@@ -142,39 +141,25 @@ define([
 
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
-				/*addTab: function(targetName) {
-					var newTabIndex = ++this.tabIndex + '';
-					this.editableTabs.push({
-						title: '导播任务' + this.tabIndex,
-						name: newTabIndex,
-						content: 'New Tab content'
-					});
-					this.editableTabsValue = newTabIndex;
-					var newTabName = '导播任务' + newTabIndex;
-					ajax.post('/tetris/guide/control/guide/po/add', {taskName: newTabName}, function (data, status) {
-
-					}, null, ajax.NO_ERROR_CATCH_CODE);
-				},*/
 				removeTab: function(targetName) {
-					var tabs = this.guides.list;
-					var activeName = this.editableTabsValue;
-					if (activeName === targetName) {
+					let tabs = this.guides.list;
+					let activeName = this.editableTabsValue;
+					if (activeName == targetName) {
 						tabs.forEach((tab, index) => {
-							if (index == targetName) {
-								var nextTab = tabs[index + 1] || tabs[index - 1];
+							if (tab.id == targetName) {
+								let nextTab = tabs[index + 1] || tabs[index - 1];
 								if (nextTab) {
-									activeName = nextTab.name;
+									activeName = nextTab.id;
 								}
 							}
 						});
 					}
 
 					this.editableTabsValue = activeName;
-					this.editableTabs = tabs.filter((tab,index) => index !== targetName);
-					//ajax.post('/tetris/guide/control/guide/po/delete', {id: this.tabIndex}, function (data, status) {
-                    //
-					//}, null, ajax.NO_ERROR_CATCH_CODE);
-					//this.tabIndex--;
+					this.guides.list = tabs.filter(tab => tab.id != targetName);
+					ajax.post('/tetris/guide/control/guide/po/delete', {id: targetName}, function (data, status) {
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetDeviceClose:function(){
 					var self = this;
@@ -262,7 +247,7 @@ define([
 					var self = this;
 					self.dialog.setOut.visible=false;
 					var questDataVideo = {
-						id: 3,
+						id: 2,
 						codingObject: self.dialog.setOut.video.codingObject,
 						fps:self.dialog.setOut.video.fps,
 						bitrate:self.dialog.setOut.video.bitrate,
@@ -273,7 +258,7 @@ define([
 					};
 
 					var questDataAudio = {
-						id: 3,
+						id: 2,
 						codingFormat:self.dialog.setOut.audio.codingFormat,
 						channelLayout:self.dialog.setOut.audio.channelLayout,
 						bitrate:self.dialog.setOut.audio.bitrate,
@@ -282,7 +267,7 @@ define([
 					};
 
 					var questDataOut = {
-						id: 3,
+						id: 2,
 						outputProtocol: self.dialog.setOut.out.outputProtocol,
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,

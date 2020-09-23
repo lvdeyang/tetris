@@ -79,6 +79,7 @@ public class GuideVO extends AbstractBaseVO<GuideVO, GuidePO>{
 	@Override
 	public GuideVO set(GuidePO entity) throws Exception {
 		this.setTaskName(entity.getTaskName())
+			.setId(entity.getId())
 			.setLiveBroadcastDuration(entity.getLiveBroadcastDuration())
 			.setCreationTime(entity.getCreationTime())
 			.setStatus(entity.getStatus());
