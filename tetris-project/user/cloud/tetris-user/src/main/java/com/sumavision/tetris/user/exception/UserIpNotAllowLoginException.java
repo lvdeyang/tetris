@@ -14,11 +14,11 @@ public class UserIpNotAllowLoginException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public UserIpNotAllowLoginException(String loginIp) {
-		super(StatusCode.FORBIDDEN, "ip地址不允许！");
+		super(StatusCode.FORBIDDEN, "ip地址不允许！", "/web/app/login/login.html");
 		LOG.error(new StringBufferWrapper().append("当前ip ： ")
-				.append(loginIp)
-				.append(" 无法登陆该用户")
-				.toString());
+										   .append(loginIp)
+										   .append(" 无法登陆该用户")
+										   .toString());
 	}
 
 }

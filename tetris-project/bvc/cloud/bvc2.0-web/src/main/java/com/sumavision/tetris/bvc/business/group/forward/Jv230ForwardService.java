@@ -1102,7 +1102,7 @@ public class Jv230ForwardService {
 			if(combineAudioForwards.size() > 0){
 				//删除混音
 				for(Jv230ForwardPO audioForward:combineAudioForwards){
-					CombineAudioBO combineAudioProtocol = new CombineAudioBO().setUuid(audioForward.getUuid());
+					CombineAudioBO combineAudioProtocol = new CombineAudioBO().setUuid(audioForward.getSourceBundleId());
 					protocol.getCombineAudioDel().add(combineAudioProtocol);
 				}
 			}
