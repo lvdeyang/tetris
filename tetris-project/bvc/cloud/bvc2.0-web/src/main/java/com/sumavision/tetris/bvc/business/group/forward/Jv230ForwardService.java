@@ -148,7 +148,7 @@ public class Jv230ForwardService {
 			for(PageTaskPO bundleTask:bundleTasks){
 				//从0开始
 				Integer serialNum = bundleTask.getLocationIndex();
-				String screenPrimaryKey = new StringBufferWrapper().append("screen_").append(serialNum + 1).toString();
+				String screenPrimaryKey = new StringBufferWrapper().append("rect_").append(serialNum + 1).toString();
 				String jv230VideoChannelId =  new StringBufferWrapper().append("VenusVideoOut_").append(serialNum + 1).toString();
 				Jv230ForwardPO videoForward = new Jv230ForwardPO();
 				videoForward.setLayerId(bundle.getAccessNodeUid());
@@ -279,7 +279,7 @@ public class Jv230ForwardService {
 				for(PageTaskPO bundleTask:bundleTasks){
 					QtTerminalCombineVideoSrcPO terminalCombineVideoSrc = new QtTerminalCombineVideoSrcPO();
 					Integer serialNum = bundleTask.getLocationIndex();
-					String screenPrimaryKey = new StringBufferWrapper().append("screen_").append(serialNum + 1).toString();
+					String screenPrimaryKey = new StringBufferWrapper().append("rect_").append(serialNum + 1).toString();
 					terminalCombineVideoSrc.setSourceLayerId(bundleTask.getSrcVideoLayerId());
 					terminalCombineVideoSrc.setSourceBundleId(bundleTask.getSrcVideoBundleId());
 					terminalCombineVideoSrc.setSourceChannelId(bundleTask.getSrcVideoChannelId());
@@ -464,7 +464,7 @@ public class Jv230ForwardService {
 		for(BundlePO bundle:bundles){
 			if(!"jv230".equals(bundle.getDeviceModel())) exceptJv230 = true;
 			//从0开始
-			String screenPrimaryKey = new StringBufferWrapper().append("screen_").append(serialNum + 1).toString();
+			String screenPrimaryKey = new StringBufferWrapper().append("rect_").append(serialNum + 1).toString();
 			String jv230VideoChannelId =  new StringBufferWrapper().append("VenusVideoOut_").append(serialNum + 1).toString();
 			Jv230ForwardPO videoForward = new Jv230ForwardPO();
 			videoForward.setLayerId(bundle.getAccessNodeUid());
@@ -518,7 +518,7 @@ public class Jv230ForwardService {
 				}
 			}
 			QtTerminalCombineVideoSrcPO combineVideoSrc = new QtTerminalCombineVideoSrcPO();
-			String screenPrimaryKey = new StringBufferWrapper().append("screen_").append(serialNum + 1).toString();
+			String screenPrimaryKey = new StringBufferWrapper().append("rect_").append(serialNum + 1).toString();
 			combineVideoSrc.setSourceLayerId(bundleTask.getSrcVideoLayerId());
 			combineVideoSrc.setSourceBundleId(bundleTask.getSrcVideoBundleId());
 			combineVideoSrc.setSourceChannelId(bundleTask.getSrcVideoChannelId());
@@ -697,7 +697,7 @@ public class Jv230ForwardService {
 										.setJv230ForwardSet(new ArrayList<Jv230ForwardBO>());
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		//从0开始
-		String screenPrimaryKey = new StringBufferWrapper().append("screen_").append(serialNum + 1).toString();
+		String screenPrimaryKey = new StringBufferWrapper().append("rect_").append(serialNum + 1).toString();
 		String jv230VideoChannelId =  new StringBufferWrapper().append("VenusVideoOut_").append(serialNum + 1).toString();
 		Jv230ForwardPO videoForward = new Jv230ForwardPO();
 		videoForward.setLayerId(bundle.getAccessNodeUid());
