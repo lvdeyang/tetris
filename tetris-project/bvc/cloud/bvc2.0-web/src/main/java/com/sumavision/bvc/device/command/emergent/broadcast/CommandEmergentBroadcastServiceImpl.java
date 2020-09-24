@@ -25,6 +25,7 @@ import com.sumavision.bvc.communication.http.HttpClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -300,6 +301,8 @@ public class CommandEmergentBroadcastServiceImpl {
 			message.put("businessType", "emergentBroadcastRelativeDevices");
 			message.put("businessInfo", "应急广播推送设备");
 			message.put("unifiedId", unifiedId);
+			message.put("id", alarm.getId().toString());
+			message.put("creatTime", DateUtil.format(alarm.getCreatetime(), DateUtil.dateTimePattern));
 			message.put("bundles", bundleVOs);
 			
 			//websocket给所有用户推送
