@@ -168,8 +168,8 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
-		if(user.getLoginIp() != null && user.getLoginIp().length() != 0){
-			if(! loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
+		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
+			if(!loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
 		}
 		if(UserClassify.LDAP.equals(user.getClassify())){
 			throw new DonotSupportRoamLoginException();
@@ -321,9 +321,11 @@ public class LoginService {
 	        ip = request.getHeader("HTTP_X_FORWARDED_FOR");
 	    }
 	    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getHeader("X-Real-IP");
+	    }
+	    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
 	        ip = request.getRemoteAddr();
 	    }
-	    
 	    return ip;
 	}
 	

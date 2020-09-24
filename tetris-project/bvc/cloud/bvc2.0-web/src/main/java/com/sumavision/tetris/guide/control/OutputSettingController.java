@@ -112,13 +112,15 @@ public class OutputSettingController {
 			String outputAddress,
 			String rateCtrl,
 			Long bitrate,
+			String switchingMode,
 			HttpServletRequest request) throws Exception{
 		return outputSettingService.edit(
 				id,
 				outputProtocol,
 				outputAddress,
 				rateCtrl,
-				bitrate
+				bitrate,
+				switchingMode
 				);
 	}
 

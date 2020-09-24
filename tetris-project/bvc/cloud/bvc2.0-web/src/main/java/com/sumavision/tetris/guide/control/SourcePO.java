@@ -52,7 +52,7 @@ public class SourcePO extends AbstractBasePO{
 	
 	/** 输出地址 */
 	private String previewOut;
-
+	
 	@Column(name = "SOURCE_NUMBER")
 	public Long getSourceNumber() {
 		return sourceNumber;

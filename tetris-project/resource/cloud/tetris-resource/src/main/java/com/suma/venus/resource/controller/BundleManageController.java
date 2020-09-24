@@ -569,9 +569,10 @@ public class BundleManageController extends ControllerBase {
 
 	@RequestMapping("/modifyExtraInfo")
 	@ResponseBody
-	public Map<String, Object> modifyExtraInfo(@RequestParam(value = "bundleId") String bundleId,
-			@RequestParam(value = "bundleName") String bundleName, @RequestParam(value = "deviceIp") String deviceIp,
-			@RequestParam(value = "devicePort") Integer devicePort,
+	public Map<String, Object> modifyExtraInfo(
+			String bundleId,
+			String bundleName, String deviceIp,
+			Integer devicePort,
 			Boolean multicastEncode,
 			String multicastEncodeAddr,
 			Boolean multicastDecode,

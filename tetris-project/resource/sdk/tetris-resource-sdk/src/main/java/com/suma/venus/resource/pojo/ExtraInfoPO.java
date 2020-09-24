@@ -1,6 +1,8 @@
 package com.suma.venus.resource.pojo;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * 附加信息表
@@ -8,6 +10,7 @@ import javax.persistence.Entity;
  *
  */
 @Entity
+@Table(name = "extra_infopo", uniqueConstraints = {@UniqueConstraint(columnNames={"bundleId", "name"})})
 public class ExtraInfoPO extends CommonPO<ExtraInfoPO>{
 
 	private String name;

@@ -6,19 +6,14 @@
         <el-container style="width:100%; height:100%">
             <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
             <el-main style="padding:15px;">
-				<div style="margin-bottom: 20px;">
-					<el-button
-							size="small"
-							@click="addTab(tabIndex)"
-							>
-						新建导播任务
-					</el-button>
-				</div>
-                <el-tabs  type="border-card" closable @tab-remove="removeTab" :model="editableTabsValue">
+				<el-button type="warning" size="small" @click="addTab" style="position: absolute; z-index:10; right:19px; top:19px;">
+					新建导播任务
+				</el-button>
+                <el-tabs  type="border-card" closable @tab-remove="removeTab" v-model="editableTabsValue" @tab-click="handleClick">
 				  <el-tab-pane v-for="(guide,index) in guides.list"
 							   :key="guide.id"
 							   :label="guide.taskName"
-							   :name="guide.id + ''">
+							   :name="guide.id+''">
 
 				    <div style="width:49%;height:300px;float:left">
 						<div style="float:left;">直播时长: 01:13:14</div>
@@ -300,14 +295,12 @@
 			</el-form-item>
 
 			<el-form-item label="设置预监输出">
-				<el-radio-group v-model="dialog.setSource.set">
-					<el-radio label="是"></el-radio>
-					<el-radio label="否"></el-radio>
-				</el-radio-group>
+				<el-radio v-model="dialog.setSource.isPreviewOut" :label="true">是</el-radio>
+				<el-radio v-model="dialog.setSource.isPreviewOut" :label="false">否</el-radio>
 			</el-form-item>
 
 
-	        <el-form-item label="预监输出" v-if="dialog.setSource.set==='是'">
+	        <el-form-item label="预监输出" v-if="dialog.setSource.isPreviewOut===true">
 	            <el-input v-model="dialog.setSource.previewOut"></el-input>
 	        </el-form-item>
 	    </el-form>
@@ -324,21 +317,16 @@
 	        :visible.sync="dialog.setOut.visible"
 	        width="1300px"
 	        :before-close="handleSetOutClose">
-		<template>
-			<h4>切换方式</h4>
-			<el-select v-model="value" placeholder="请选择切换方式">
-				<el-option
-						v-for="item in options"
-						:key="item.value"
-						:label="item.label"
-						:value="item.value">
-				</el-option>
-			</el-select>
-		</template>
 
+		<h4>切换方式</h4>
+		<el-select v-model="dialog.setOut.out.switchingMode" placeholder="请选择切换方式">
+			<el-option label="转码" value="转码"></el-option>
+			<el-option label="按帧切换" value="按帧切换"></el-option>
+			<el-option label="直接切换" value="直接切换"></el-option>
+		</el-select>
 
 		<h4>视频编码参数</h4>
-		<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini" v-if="dialog.setOut.out.switchingMode==='转码'">
 			<el-form-item label="编码对象" >
 				<el-select v-model="dialog.setOut.video.codingObject" placeholder="请选择编码对象" style="width:178px">
 					<el-option label="h264" value="h264"></el-option>
@@ -389,7 +377,7 @@
 
 		</el-form>
 		<h4>音频编码参数</h4>
-		<el-form :inline="true" ref="form" :model="dialog.setOut.audio" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.audio" label-width="100px" class="demo-form-inline" size="mini" v-if="dialog.setOut.out.switchingMode==='转码'">
 			<el-form-item label="编码格式" >
 				<el-select v-model="dialog.setOut.audio.codingFormat" placeholder="请选择编码格式" style="width:178px">
 					<el-option label="aac" value="aac"></el-option>
@@ -428,7 +416,8 @@
 		</el-form>
 
 		<h4>输出参数</h4>
-		<el-form :inline="true" ref="form" :model="dialog.setOut.out" label-width="100px" class="demo-form-inline" size="mini">
+		<el-form :inline="true" ref="form" :model="dialog.setOut.out" label-width="100px" class="demo-form-inline" size="mini" v-if="dialog.setOut.out.switchingMode==='转码'">
+
 			<el-form-item label="输出协议">
 				<el-select v-model="dialog.setOut.out.outputProtocol" placeholder="请选择输出协议" style="width:178px">
 					<el-option label="udp" value="udp"></el-option>
@@ -479,18 +468,6 @@
 
 
 	</el-dialog>
-	
-	 
-	
 </div>
-<style>
-	.demo-form-inline{
-		border:1px solid #dcdfe6;
-		padding-top:20px;
-	}
-	.el-input__inner{
-		width:132px !improtent;
-	}
-</style>
 
 

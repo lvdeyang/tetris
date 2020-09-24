@@ -27,12 +27,13 @@ public class OutputSettingService {
 	@Autowired
 	AudioParametersDAO audioParametersDAO;
 	
-	public OutputSettingPO edit(
+	public OutputSettingVO edit(
 			Long id,
 			String outputProtocol,
 			String outputAddress,
 			String rateCtrl,
-			Long bitrate
+			Long bitrate,
+			String switchingMode
 			) throws Exception{
 		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
 		OutputProtocol protocol = OutputProtocol.fromName(outputProtocol);
@@ -40,10 +41,13 @@ public class OutputSettingService {
 		outputSettingPO.setOutputAddress(outputAddress);
 		outputSettingPO.setRateCtrl(rateCtrl);
 		outputSettingPO.setBitrate(bitrate);
-		return outputSettingDAO.save(outputSettingPO);
+		SwitchingMode mode = SwitchingMode.fromName(switchingMode);
+		outputSettingPO.setSwitchingMode(mode);
+		outputSettingDAO.save(outputSettingPO);
+		return new OutputSettingVO().set(outputSettingPO);
 	}
 	
-	public VideoParametersPO editVideo(
+	public VideoParametersVO editVideo(
 			Long id,
 			String codingObject,
 			String fps,
@@ -64,10 +68,11 @@ public class OutputSettingService {
 		RcMode rc = RcMode.fromName(rcMode);
 		videoParametersPO.setRcMode(rc);
 		videoParametersPO.setMaxBitrate(maxBitrate);
-		return videoParametersDAO.save(videoParametersPO);		
+		videoParametersDAO.save(videoParametersPO);		
+		return new VideoParametersVO().set(videoParametersPO);
 	}
 	
-	public AudioParametersPO editAudio(
+	public AudioParametersVO editAudio(
 			Long id,
 			String codingFormat,
 			String channelLayout,
@@ -83,7 +88,8 @@ public class OutputSettingService {
 		audioParametersPO.setSampleRate(sampleRate);
 		CodingType type = CodingType.fromName(codingType);
 		audioParametersPO.setCodingType(type);
-		return audioParametersDAO.save(audioParametersPO);
+		audioParametersDAO.save(audioParametersPO);
+		return new AudioParametersVO().set(audioParametersPO);
 		
 	}
 	

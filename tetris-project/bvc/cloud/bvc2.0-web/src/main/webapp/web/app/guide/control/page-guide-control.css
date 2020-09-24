@@ -9,3 +9,11 @@
 .tab_btn.el-button--primary:focus{
 	border-width: 2px;
 }
+#page-guide-control-wrapper .demo-form-inline{
+	border:1px solid #dcdfe6;
+	padding-top:20px;
+}
+/*
+#page-guide-control-wrapper .el-input__inner{
+	width:132px !important;
+}*/

@@ -33,6 +33,27 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	
 	/** 导播任务id */
 	private Long guideId;
+	
+	/** 切换方式 */
+	private String switchingMode;
+	
+	private String switchingModeName;
+	
+	public String getSwitchingMode() {
+		return switchingMode;
+	}
+
+	public void setSwitchingMode(String switchingMode) {
+		this.switchingMode = switchingMode;
+	}
+	
+	public String getSwitchingModeName() {
+		return switchingModeName;
+	}
+
+	public void setSwitchingModeName(String switchingModeName) {
+		this.switchingModeName = switchingModeName;
+	}
 
 	public String getName() {
 		return name;
@@ -106,6 +127,8 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.setRateCtrl(entity.getRateCtrl());
 		this.setBitrate(entity.getBitrate());
 		this.setGuideId(entity.getGuideId());
+		this.setSwitchingMode(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().toString(): null);
+		this.setSwitchingModeName(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().getName(): null);
 		return this;
 	}
 	

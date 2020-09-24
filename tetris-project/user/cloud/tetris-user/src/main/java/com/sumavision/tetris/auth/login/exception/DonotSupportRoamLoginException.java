@@ -8,7 +8,7 @@ public class DonotSupportRoamLoginException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public DonotSupportRoamLoginException() {
-		super(StatusCode.FORBIDDEN, "暂时不支持漫游登录");
+		super(StatusCode.FORBIDDEN, "暂时不支持漫游登录", "/web/app/login/login.html");
 	}
 
 }
