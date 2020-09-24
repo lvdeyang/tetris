@@ -3,5 +3,6 @@
 	"terminalBroadPort": "8180",
 	"abilityBroadIp": "192.165.56.190",
 	"abilityBroadPort": "9000",
-	"ifLocal": false
+	"ifLocal": false,
+	"division":"340111"
  }
