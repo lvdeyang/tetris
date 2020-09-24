@@ -33,13 +33,15 @@ public class SourceService {
 			String sourceType,
 			String sourceName,
 			String source,
-			String previewOut) throws Exception{
+			String previewOut,
+			Boolean isPreviewOut) throws Exception{
 		SourcePO sourcePO = sourceDAO.findOne(id);
 		SourceType type = SourceType.fromName(sourceType);
 		sourcePO.setSourceType(type);
 		sourcePO.setSourceName(sourceName);
 		sourcePO.setSource(source);
 		sourcePO.setPreviewOut(previewOut);
+		sourcePO.setIsPreviewOut(isPreviewOut);
 		sourceDAO.save(sourcePO);
 		return new SourceVO().set(sourcePO); 
 	}
