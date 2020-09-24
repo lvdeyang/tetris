@@ -26,6 +26,7 @@ define([
             total: 0
           }
         },
+        totleForword: '0',
         dialog: {
           forword: {
             visible: false
@@ -48,6 +49,7 @@ define([
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
+          self.totleForword = total;
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
               self.table.data.push(rows[i]);

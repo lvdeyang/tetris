@@ -56,6 +56,7 @@ require.config({
     'bvc2-monitor-record-liangwu': window.APPPATH + 'component/bvc2-monitor-record-liangwu/bvc2-monitor-record-liangwu',
     'bvc2-monitor-forword': window.APPPATH + 'component/bvc2-monitor-forword/bvc2-monitor-forword',
     'bvc2-monitor-forword-list': window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list',
+    'bvc2-monitor-currenttask': window.APPPATH + 'component/bvc2-monitor-currenttask/bvc2-monitor-currenttask',
     'native-record-player': window.APPPATH + 'component/jQuery/zk_Player/zk_RecordPlayer/js/zk_RecordPlayer',
     'native-sip-player': window.APPPATH + 'component/jQuery/zk_Player/zk_SipPlayer/js/zk_SipPlayer',
     'player': window.APPPATH + 'component/jQuery/player/js/Tetris.player',
@@ -162,7 +163,7 @@ require.config({
     'page-monitor-subtitle': window.APPPATH + 'monitor/subtitle/page-monitor-subtitle',
     'page-monitor-osd': window.APPPATH + 'monitor/osd/page-monitor-osd',
     'page-monitor-external-folder': window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
-    'page-monitor-forword': window.APPPATH + 'monitor/forword/page-monitor-forword',
+    'page-monitor-currenttask': window.APPPATH + 'monitor/currenttask/page-monitor-currenttask',
     'page-monitor-forword-list': window.APPPATH + 'monitor/forword-list/page-monitor-forword-list',
     'page-guide-control': window.APPPATH + 'guide/control/page-guide-control'
 

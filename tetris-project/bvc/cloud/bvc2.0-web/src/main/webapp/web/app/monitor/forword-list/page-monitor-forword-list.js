@@ -26,7 +26,7 @@ define([
       data: {
         menurouter: false,
         shortCutsRoutes: commons.data,
-        active: "/page-monitor-live-list",
+        active: "/page-monitor-forword-list",
         header: commons.getHeader(0)
       },
       methods: {

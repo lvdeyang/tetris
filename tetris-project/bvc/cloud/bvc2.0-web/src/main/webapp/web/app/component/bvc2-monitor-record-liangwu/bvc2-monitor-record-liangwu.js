@@ -29,6 +29,7 @@ define([
           prependRow: ''
         },
         taskId: '',
+        totleRecord: '0',
         downloadTable: {
           data: [],
           page: {
@@ -177,6 +178,18 @@ define([
     methods: {
       destroy: function () {
 
+      },
+      getTotle: function (params) {
+        var self = this;
+        var condition = {
+          mode: '',
+          device: '',
+          currentPage: 1,
+          pageSize: self.table.page.pageSize
+        };
+        ajax.post('/monitor/record/load', condition, function (data) {
+          self.totleRecord = data.total;
+        });
       },
       load: function (currentPage) {
         var self = this;
@@ -466,15 +479,24 @@ define([
         this.dialog.download.visible = false;
       },
       rowDownload(row) {
-        // location.href = row.downLoadPath;
-        console.log(row.downLoadPath)
-        const elt = document.createElement('a');
-        elt.setAttribute('href', row.downLoadPath);
-        elt.setAttribute('download', row.fileName);
-        elt.style.display = 'none';
-        document.body.appendChild(elt);
-        elt.click();
-        document.body.removeChild(elt);
+        var self = this;
+        var downloadUrl = row.downloadUrl;
+        var name = row.name;
+        var startTime = 0;
+        var endTime = row.duration;
+        downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
+        window.open(downloadUrl);
+      },
+      handleDownload(row) {
+        var self = this;
+        ajax.post('/monitor/record/download/url/' + row.id, null, function (data) {
+          // console.log(data)
+          // this.rowDownload({
+          //   downLoadPath: data.downloadUrl,
+          //   duration: data.duration,
+          //   name: row.name
+          // })
+        });
       },
       handleTotalSizeMb() {
         {
@@ -512,6 +534,7 @@ define([
     mounted: function () {
       var self = this;
       self.load(1);
+      self.getTotle(1);
     }
   });
 
