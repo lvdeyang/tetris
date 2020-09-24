@@ -222,7 +222,7 @@ public class MonitorLiveController {
 	public Object vodDevice(
 			Long osdId,
 			String srcType,//BUNDLE/CHANNEL BUNDLE则自动选择编码通道（暂不支持CHANNEL）
-			String bundleId,
+			String srcBundleId,
 			String srcVideoChannelId,
 			String srcAudioChannelId,
 			String dstType,//BUNDLE/CHANNEL BUNDLE则自动选择解码通道（暂不支持CHANNEL）
@@ -237,15 +237,15 @@ public class MonitorLiveController {
 		MonitorLiveDevicePO entity = null;
 		
 		//dst
-		BundlePO dstBundle = bundleService.findByBundleId(bundleId);
-		List<ChannelSchemeDTO> dstQueryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);
+		BundlePO dstBundle = bundleService.findByBundleId(dstBundleId);
+		List<ChannelSchemeDTO> dstQueryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(dstBundleId).getList(), 1);
 		ChannelVO dstEncodeVideo = null;
 		ChannelVO dstEncodeAudio = null;
 		if(dstQueryChannels!=null && dstQueryChannels.size()>0){
 			for(ChannelSchemeDTO channel:dstQueryChannels){
-				if("VenusVideoIn".equals(channel.getBaseType())){
+				if("VenusVideoOut".equals(channel.getBaseType())){
 					dstEncodeVideo = new ChannelVO().set(channel);
-				}else if("VenusAudioIn".equals(channel.getBaseType())){
+				}else if("VenusAudioOut".equals(channel.getBaseType())){
 					dstEncodeAudio = new ChannelVO().set(channel);
 				}
 			}
@@ -266,8 +266,8 @@ public class MonitorLiveController {
 		String dstAudioChannelName = dstEncodeAudio.getName();
 		
 		//src
-		BundlePO bundle = bundleService.findByBundleId(bundleId);
-		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);
+		BundlePO bundle = bundleService.findByBundleId(srcBundleId);
+		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleId).getList(), 0);
 		ChannelVO encodeVideo = null;
 		ChannelVO encodeAudio = null;
 		if(queryChannels!=null && queryChannels.size()>0){
