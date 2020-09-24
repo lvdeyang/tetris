@@ -10,7 +10,7 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "extra_infopo", uniqueConstraints = {@UniqueConstraint(columnNames={"bundle_id", "name"})})
+@Table(name = "extra_infopo", uniqueConstraints = {@UniqueConstraint(columnNames={"bundleId", "name"})})
 public class ExtraInfoPO extends CommonPO<ExtraInfoPO>{
 
 	private String name;
