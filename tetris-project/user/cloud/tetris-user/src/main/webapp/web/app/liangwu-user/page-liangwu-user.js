@@ -118,7 +118,21 @@ define([
           return 'role-' + row.id;
         },
         handleChangeFolder: function () {
-          this.dialogBindRole.bindRoleDialogTableVisible = true;
+          var self = this;
+          self.dialogBindRole.bindRoleDialogTableVisible = true;
+          // self.$refs.roleTable.clearSelection()
+          self.$nextTick(function () {
+            var role = JSON.parse(self.dialog.editUser.bindRoles)
+            self.roleOption.forEach(item => {
+              if (role.includes(item.id)) {
+                self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, true)
+              } else {
+                self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, false)
+              }
+            })
+          })
+
+
         },
         handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
@@ -129,9 +143,9 @@ define([
             bindRoleIdArr.push(item.id)
           })
           this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
-          this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = bindRoleIdArr.join(',');
+          this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
           // this.dialogBindRole.bindRoleSelection = [];
-          // this.$refs.roleTable.clearSelection()
+          this.$refs.roleTable.clearSelection()
         },
         gotoBindBusinessRole: function (scope) {
           var slef = this;
@@ -160,20 +174,20 @@ define([
           var self = this;
           self.table.rows.splice(0, self.table.rows.length);
           ajax.post('/business/role/list', {
-            currentPage: currentPage,
-            pageSize: self.table.pageSize
+            currentPage: 1,
+            pageSize: 10000,
           }, function (data) {
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
                 self.roleOption.push(rows[i]);
               }
+              console.log(self.roleOption)
             }
           });
         },
 
         handleSelectionChange(val) {
-          console.log(val);
           this.dialogBindRole.bindRoleSelection = val;
         },
         loadCompany: function () {
@@ -263,9 +277,9 @@ define([
           var businessRoles = JSON.parse(row.businessRoles),
             rolesName = [],
             rolesId = [];
-          for (item in businessRoles) {
-            rolesName.push(item.name)
-            rolesId.push(item.id)
+          for (var i = 0; i < businessRoles.length; i++) {
+            rolesName.push(businessRoles[i].name)
+            rolesId.push(businessRoles[i].id)
           }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;
@@ -276,7 +290,7 @@ define([
           self.dialog.editUser.remark = row.remark;
           self.dialog.editUser.loginIp = row.loginIp;
           self.dialog.editUser.bindrole = rolesName.join(',');
-          self.dialog.editUser.bindRoles = rolesId.join(',');
+          self.dialog.editUser.bindRoles = JSON.stringify(rolesId);
         },
         handleEditUserClose: function () {
           var self = this;
@@ -379,8 +393,8 @@ define([
           self.dialog.createUser.visible = false;
           self.dialog.createUser.remark = "";
           self.dialog.createUser.loginIp = "";
-          self.dialog.createUser.bindrole = "";
-          self.dialog.createUser.bindRoles = ""
+          self.dialog.createUser.bindrole = [];
+          self.dialog.createUser.bindRoles = []
         },
         handleCreateUserSubmit: function () {
           var self = this;
