@@ -86,7 +86,8 @@ define([
 								outputProtocol: '',
 								outputAddress: '',
 								rateCtrl: 'VBR',
-								bitrate: 8000000
+								bitrate: 8000000,
+								switchingMode: ''
 							}
                     	},
 						setDevice:{
@@ -109,17 +110,6 @@ define([
 							//{ validator: validatePass, trigger: 'blur'}
 						]
 					},
-					options: [{
-						value: '选项1',
-						label: '转码'
-					}, {
-						value: '选项2',
-						label: '按帧切换'
-					}, {
-						value: '选项3',
-						label: '直接切换'
-					}],
-					value: '',
                 }
             },
             computed:{
@@ -131,15 +121,13 @@ define([
 				},
 				addTab: function(tabIndex){
 					var listLength = this.guides.list.length +1;
-					this.guides.list.push({
-						id:listLength,
-						taskName:"导播任务"+listLength
-					})
-
-					this.editableTabsValue = listLength;
 					ajax.post('/tetris/guide/control/guide/po/add', {taskName: ("导播任务"+listLength)}, function(data, status){
-
+						self.guides.list.push({
+							id:data.id,
+							taskName:data.taskName
+						})
 					}, null, ajax.NO_ERROR_CATCH_CODE);
+					self.editableTabsValue = data.id;
 				},
 				removeTab: function(targetName) {
 					let tabs = this.guides.list;
@@ -160,6 +148,9 @@ define([
 					ajax.post('/tetris/guide/control/guide/po/delete', {id: targetName}, function (data, status) {
 
 					}, null, ajax.NO_ERROR_CATCH_CODE);
+				},
+				handleClick:function(tab, event){
+					console.log(this.editableTabsValue)
 				},
 				handleSetDeviceClose:function(){
 					var self = this;
@@ -217,6 +208,7 @@ define([
 							self.dialog.setOut.out.outputAddress = data[i].outputAddress;
 							self.dialog.setOut.out.rateCtrl = data[i].rateCtrl;
 							self.dialog.setOut.out.bitrate = data[i].bitrate;
+							self.dialog.setOut.out.switchingMode = data[i].switchingModeName
 						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
@@ -272,6 +264,7 @@ define([
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,
 						bitrate: self.dialog.setOut.out.bitrate,
+						switchingMode: dialog.setOut.out.switchingMode
 					}
 					ajax.post('/tetris/guide/control/output/setting/po/editVideo', questDataVideo, function (data, status) {
 						

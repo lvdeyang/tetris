@@ -32,7 +32,8 @@ public class OutputSettingService {
 			String outputProtocol,
 			String outputAddress,
 			String rateCtrl,
-			Long bitrate
+			Long bitrate,
+			String switchingMode
 			) throws Exception{
 		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
 		OutputProtocol protocol = OutputProtocol.fromName(outputProtocol);
@@ -40,6 +41,8 @@ public class OutputSettingService {
 		outputSettingPO.setOutputAddress(outputAddress);
 		outputSettingPO.setRateCtrl(rateCtrl);
 		outputSettingPO.setBitrate(bitrate);
+		SwitchingMode mode = SwitchingMode.fromName(switchingMode);
+		outputSettingPO.setSwitchingMode(mode);
 		return outputSettingDAO.save(outputSettingPO);
 	}
 	

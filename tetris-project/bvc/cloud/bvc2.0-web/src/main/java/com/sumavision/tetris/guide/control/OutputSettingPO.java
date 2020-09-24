@@ -43,6 +43,19 @@ public class OutputSettingPO extends AbstractBasePO {
 
 	/** 导播任务id */
 	private Long guideId;
+	
+	/** 切换方式 */
+	private SwitchingMode switchingMode;
+
+	@Column(name = "SWITCHINGMODE")
+	@Enumerated(value = EnumType.STRING)
+	public SwitchingMode getSwitchingMode() {
+		return switchingMode;
+	}
+
+	public void setSwitchingMode(SwitchingMode switchingMode) {
+		this.switchingMode = switchingMode;
+	}
 
 	@Column(name = "NAME")
 	public String getName() {
