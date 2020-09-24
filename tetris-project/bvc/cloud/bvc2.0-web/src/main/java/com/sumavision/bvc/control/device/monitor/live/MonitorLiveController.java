@@ -42,6 +42,7 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/monitor/live")
@@ -79,6 +80,9 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private BundleService bundleService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
@@ -138,12 +142,13 @@ public class MonitorLiveController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
+		com.sumavision.tetris.user.UserVO user = userQuery.current();
 		
 		long total = 0;
 		
 		List<MonitorLiveDevicePO> entities = null;
 		
-		if(userId.longValue() == 1l){
+		if(userId.longValue() == 1l || user.getIsGroupCreator()){
 			total = monitorLiveDeviceDao.count();
 			entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
 		}else{
@@ -196,12 +201,13 @@ public class MonitorLiveController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
+		com.sumavision.tetris.user.UserVO user = userQuery.current();
 		
 		long total = 0;
 		
 		List<MonitorLiveUserPO> entities = null;
 		
-		if(userId.longValue() == 1l){
+		if(userId.longValue() == 1l || user.getIsGroupCreator()){
 			total = monitorLiveUserDao.count();
 			entities = monitorLiveUserQuery.findAll(currentPage, pageSize);
 		}else{

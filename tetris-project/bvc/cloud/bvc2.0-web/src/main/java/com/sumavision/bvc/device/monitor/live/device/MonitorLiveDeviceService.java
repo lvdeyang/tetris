@@ -62,6 +62,8 @@ import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 点播设备业务<br/>
@@ -114,6 +116,9 @@ public class MonitorLiveDeviceService {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -553,7 +558,8 @@ public class MonitorLiveDeviceService {
 	public void stop(Long liveId, Long userId, String userno) throws Exception{
 		MonitorLiveDevicePO live = monitorLiveDeviceDao.findOne(liveId);
 		if(live == null) return;
-		if(userId.longValue() == 1l){
+		UserVO userVO = userQuery.current();
+		if(userId.longValue() == 1l || userVO.getIsGroupCreator()){
 			//admin操作转换
 			userId = live.getUserId();
 			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
