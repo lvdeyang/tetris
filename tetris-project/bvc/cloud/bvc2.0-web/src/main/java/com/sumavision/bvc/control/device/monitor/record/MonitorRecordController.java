@@ -265,66 +265,8 @@ public class MonitorRecordController {
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		
-//		if("".equals(device)) device = null;
-		
-//		String fileNameReg = null;
-//		if(fileName!=null && !"".equals(fileName)){
-//			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
-//		}
-		
-//		com.sumavision.tetris.user.UserVO user = userQuery.current();
-		
-		//获取userId
-//		Long userId = userUtils.getUserIdFromSession(request);
-		
-//		Date parsedStartTime = null;
-//		if(startTime != null){
-//			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
-//		}
-//		
-//		Date parsedEndTime = null;
-//		if(endTime != null){
-//			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
-//		}
-		
-//		long total = 0;
-//		List<MonitorRecordPO> entities = null;
-//		Pageable page = new PageRequest(currentPage-1, pageSize);
-		
-		
-		
-//		if("user".equals(deviceType)){
-//			if(userId.longValue()==1l || user.getIsGroupCreator()){
-//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-//													mode, null, parsedStartTime, parsedEndTime, 
-//													null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
-//				total = pagedEntities.getTotalElements();
-//				entities = pagedEntities.getContent();
-//			}else{
-//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-//													mode, null, parsedStartTime, parsedEndTime, 
-//													userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
-//				total = pagedEntities.getTotalElements();
-//				entities = pagedEntities.getContent();
-//			}
-//		}else{
-//			if(userId.longValue()==1l || user.getIsGroupCreator()){
-//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-//													mode, device, parsedStartTime, parsedEndTime, 
-//													null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
-//				total = pagedEntities.getTotalElements();
-//				entities = pagedEntities.getContent();
-//			}else{
-//				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-//													mode, device, parsedStartTime, parsedEndTime, 
-//													userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
-//				total = pagedEntities.getTotalElements();
-//				entities = pagedEntities.getContent();
-//			}
-//		}
-		
 		//查询
-		long total = 0;
+		Long total = 0L;
 		List<MonitorRecordManyTimesPO> entities = null;
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		
@@ -339,6 +281,8 @@ public class MonitorRecordController {
 		Page<MonitorRecordManyTimesPO> pagedEntities=monitorRecordManyTimesDao.findByRelation(relation.getId(),page);
 		
 		entities=pagedEntities.getContent();
+		
+		total=pagedEntities.getTotalElements();
 		
 		if(entities!=null && entities.size()>0){
 			List<AccessNodeBO> layers =resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(record.getStoreLayerId()).getList());

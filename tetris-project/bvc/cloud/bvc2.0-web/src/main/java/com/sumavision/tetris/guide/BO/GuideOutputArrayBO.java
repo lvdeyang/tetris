@@ -2,28 +2,72 @@ package com.sumavision.tetris.guide.BO;
 
 public class GuideOutputArrayBO {
 	
-	private String id;
+//	private String id;
 	
 	/**输出可能有多种封装类型，包括udp_ts,rtp_ts,rtmp,hls,...具体有哪些业务定 */
-	private UdpTsBO udp_ts;
+//	private UdpTsBO udp_ts;
 
-	public String getId() {
-		return id;
+//	public String getId() {
+//		return id;
+//	}
+//
+//	public GuideOutputArrayBO setId(String id) {
+//		this.id = id;
+//		return this;
+//	}
+
+//	public UdpTsBO getUdp_ts() {
+//		return udp_ts;
+//	}
+//
+//	public GuideOutputArrayBO setUdp_ts(UdpTsBO udp_ts) {
+//		this.udp_ts = udp_ts;
+//		return this;
+//	}
+	
+	private String type="udp_ts";
+	
+	private String url="udp://192.165.56.113:20001";
+	
+	private String rate_ctrl="VBR";
+	
+	private Long bitrate=8000000L;
+
+	public String getType() {
+		return type;
 	}
 
-	public GuideOutputArrayBO setId(String id) {
-		this.id = id;
+	public GuideOutputArrayBO setType(String type) {
+		this.type = type;
 		return this;
 	}
 
-	public UdpTsBO getUdp_ts() {
-		return udp_ts;
+	public String getUrl() {
+		return url;
 	}
 
-	public GuideOutputArrayBO setUdp_ts(UdpTsBO udp_ts) {
-		this.udp_ts = udp_ts;
+	public GuideOutputArrayBO setUrl(String url) {
+		this.url = url;
+		return this;
+	}
+
+	public String getRate_ctrl() {
+		return rate_ctrl;
+	}
+
+	public GuideOutputArrayBO setRate_ctrl(String rate_ctrl) {
+		this.rate_ctrl = rate_ctrl;
+		return this;
+	}
+
+	public Long getBitrate() {
+		return bitrate;
+	}
+
+	public GuideOutputArrayBO setBitrate(Long bitrate) {
+		this.bitrate = bitrate;
 		return this;
 	}
 	
-
+	
 }
