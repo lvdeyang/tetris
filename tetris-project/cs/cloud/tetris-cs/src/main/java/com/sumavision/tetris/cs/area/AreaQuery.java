@@ -110,7 +110,11 @@ public class AreaQuery {
 	}
 
 	public List<AreaData> getRootDivision() throws Exception {
-		return getChildDivision("3205000000");
+		//return getChildDivision("3205000000");
+		String profile=adapter.readProfile();
+		JSONObject jsonObject = JSONObject.parseObject(profile);
+		return getChildDivision(jsonObject.getString("division"));
+		
 	}
 
 	/**
