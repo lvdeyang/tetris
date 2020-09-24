@@ -197,7 +197,7 @@ public class Jv230ForwardService {
 			audioForward.setLayerId(bundle.getAccessNodeUid());
 			audioForward.setBundleId(bundle.getBundleId());
 			audioForward.setChannelId("VenusAudioOut_1");
-			audioForward.setSourceType(ForwardSourceType.CHANNEL_AUDIO);
+			audioForward.setSourceType(ForwardSourceType.COMBINE_AUDIO);
 			audioForward.setSourceBundleId(combineAudio.getUuid());
 			audioForward.setUserId(String.valueOf(user.getId()));
 			audioForward.setTerminalId(terminalEntity.getId());
