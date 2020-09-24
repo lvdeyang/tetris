@@ -1,0 +1,23 @@
+/* reset */
+.bvc2-monitor-currenttask * {
+  box-sizing: border-box !important;
+}
+
+.bvc2-monitor-currenttask .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+
+.curTask {
+  padding: 10px;
+}
+
+p {
+  line-height: 30px;
+  background-color: #ececec;
+  font-size: 16px;
+  color: #000;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
+}
