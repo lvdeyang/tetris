@@ -20,7 +20,7 @@ public class VideoParamBO {
 	
 	private String profile = "main";
 	
-	private String input_interface = "COLOR_BAR";
+	private String input_interface = "SDI_4X3G";//COLOR_BAR
 	
 	private String output_interface = "CTRL";
 	
