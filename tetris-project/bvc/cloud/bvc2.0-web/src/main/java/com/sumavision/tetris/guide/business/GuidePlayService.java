@@ -137,6 +137,7 @@ public class GuidePlayService {
 		Thread.currentThread().sleep(20000L);
 		
 		//2.创建输出源   只有一个、判空
+	 	System.out.println("------------------------------输出源------------------------------------------");
 		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(2L);
 		if(outputSources==null){
 			throw new BaseException(StatusCode.ERROR,"备份源为空"); 
@@ -150,16 +151,20 @@ public class GuidePlayService {
 		}
 		outputLogic.getPass_by().addAll(outputPassBys);
 	 	executeBusiness.execute(outputLogic,  "备份源编码");
+	 	//备份源输出结束
+	 	
+//	 	Thread.currentThread().sleep(1000L);
 	 	
 	 	//创建预监输出开始
-//	 	System.out.println("-------------------------预监-----------------------------------------");
-//	 	LogicBO previewsLogic=new LogicBO();
-//	 	if(previewsLogic.getPass_by()==null){
-//	 		previewsLogic.setPass_by(new ArrayList<PassByBO>());
-//		}
-//	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy());
-//	 	executeBusiness.execute(previewsLogic,  "预监编码");
+	 	System.out.println("-------------------------预监-----------------------------------------");
+	 	LogicBO previewsLogic=new LogicBO();
+	 	if(previewsLogic.getPass_by()==null){
+	 		previewsLogic.setPass_by(new ArrayList<PassByBO>());
+		}
+	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy());
+	 	executeBusiness.execute(previewsLogic,  "预监编码");
 	 	//创建预监输出结束
+	 	
 	}
 	
 	/**
@@ -301,20 +306,20 @@ public class GuidePlayService {
 		}
 		
 //		//删除预监
-//		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
-//		if(sources!=null){
-//			for(SourcePO source:sources){
-//				PassByBO pass=new PassByBO();
-//				pass.setBundle_id("preview_"+sources.get(0).getUuid());
-//				pass.setLayer_id(layer_id);
-//				pass.setType("deleteAllBackupSources");
-//				
-//				JSONObject pass_by_content=new JSONObject();
-//				pass.setPass_by_content(pass_by_content);
-//				
-//				logic.getPass_by().add(pass);
-//			}
-//		}
+		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
+		if(sources!=null){
+			for(SourcePO source:sources){
+				PassByBO pass=new PassByBO();
+				pass.setBundle_id("preview_"+sources.get(0).getUuid());
+				pass.setLayer_id(layer_id);
+				pass.setType("deleteAllBackupSources");
+				
+				JSONObject pass_by_content=new JSONObject();
+				pass.setPass_by_content(pass_by_content);
+				
+				logic.getPass_by().add(pass);
+			}
+		}
 //		//删除预监
 		
 		logic.getPass_by().addAll(deleteOutputs);
