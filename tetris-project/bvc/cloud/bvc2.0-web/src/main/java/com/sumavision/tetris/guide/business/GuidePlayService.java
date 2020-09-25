@@ -400,7 +400,7 @@ public class GuidePlayService {
 					             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 					             .setBundleId(source.getSource())
 					             .setBundle_type(bundlePO.getBundleType())
-					             .setLayerId(bundlePO.getAccessNodeUid());
+					             .setLayerId(layer_id);
 			logic.getDisconnectBundle().add(disconnectEncoderBundle);
 		}
 		return logic;
@@ -414,6 +414,7 @@ public class GuidePlayService {
 	 * @param outputSource
 	 * @return
 	 *//*
+	 *
 	public PassByBO getOutPutSettingPassBy(OutputSettingPO outputSource){
 
 		PassByBO passBy=new PassByBO();
@@ -657,6 +658,7 @@ public class GuidePlayService {
 		
 		GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
 //		guideOutputArray.setUdp_ts(udpTsBo);
+		guideOutputArray.setUrl(outputSource.getOutputAddress());
 		GuideOutputArrays.add(guideOutputArray);
 //		oupput_array结束
 		

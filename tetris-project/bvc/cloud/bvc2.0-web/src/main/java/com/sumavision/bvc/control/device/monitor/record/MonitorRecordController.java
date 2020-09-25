@@ -196,32 +196,66 @@ public class MonitorRecordController {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		
 		if("user".equals(deviceType)){
-			if(userId.longValue()==1l || user.getIsGroupCreator()){
-				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-													mode, null, parsedStartTime, parsedEndTime, 
-													null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
-				total = pagedEntities.getTotalElements();
-				entities = pagedEntities.getContent();
+			if("ALL".equals(mode)){
+				//对所有类型进行筛选
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
+														mode, null, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
+														mode, null, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
+				
 			}else{
-				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-													mode, null, parsedStartTime, parsedEndTime, 
-													userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
-				total = pagedEntities.getTotalElements();
-				entities = pagedEntities.getContent();
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+														mode, null, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+														mode, null, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
 			}
 		}else{
-			if(userId.longValue()==1l || user.getIsGroupCreator()){
-				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-													mode, device, parsedStartTime, parsedEndTime, 
-													null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
-				total = pagedEntities.getTotalElements();
-				entities = pagedEntities.getContent();
+			if("ALL".equals(mode)){
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
+														mode, device, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
+														mode, device, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
 			}else{
-				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-													mode, device, parsedStartTime, parsedEndTime, 
-													userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
-				total = pagedEntities.getTotalElements();
-				entities = pagedEntities.getContent();
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+														mode, device, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+														mode, device, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
 			}
 		}
 		
@@ -229,6 +263,7 @@ public class MonitorRecordController {
 		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
+												   .put("totalSizeMb", systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb())
 												   .getMap();
 	
 	}
