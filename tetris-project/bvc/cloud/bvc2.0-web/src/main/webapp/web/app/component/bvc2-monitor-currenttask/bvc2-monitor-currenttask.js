@@ -20,23 +20,26 @@ define([
     template: tpl,
     data: function () {
       return {
-        tableData: [{
-          id: 1,
-          date: '2020-05-02',
-          name: '联试联调',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          id: 2,
-          date: '2020-08-04',
-          name: '05-XXX',
-          address: '上海市普陀区金沙江路 1517 弄'
-        }, ],
-        formLabelAlign: {
-          name: '',
-          time: '',
-          address: '',
-          isCurrent: true,
+        table: {
+          data: [],
+          page: {
+            currentPage: 0,
+            pageSize: 20,
+            total: 0
+          },
+          prependRow: ''
         },
+        dialog: {
+          visible: false,
+          isCreate: false,
+          editId: '',
+          form: {
+            titleName: '',
+            beginTime: '',
+            isCurrentTask: true
+          },
+        },
+        tableData: [],
         activeName: '0',
         showBtn: true,
         row: '',
@@ -45,52 +48,54 @@ define([
       }
     },
     methods: {
-      createTask: function () {
+      addTaskSubmit: function () {
         var self = this;
-        if (self.showBtn) {
-          this.tableData.push({
-            date: self.formLabelAlign.time,
-            name: self.formLabelAlign.name,
-            address: self.formLabelAlign.address,
-          });
-          this.$message('创建任务成功,请到任务列表查看');
-        } else {
-          console.log(self.row)
-          console.log('xiugai')
-          this.tableData.forEach(function (item, index) {
-            if (item.id == self.row.id) {
-              console.log(item)
-              item.name = self.formLabelAlign.name;
-              item.date = self.formLabelAlign.time;
-              item.address = self.formLabelAlign.address;
-            }
+        if (!self.dialog.form.titleName) {
+          self.$message({
+            type: "waring",
+            message: "任务名称不能为空!"
           })
-          console.log(self.tableData)
+          return
+        } else if (!self.dialog.form.beginTime) {
+          self.$message({
+            type: "waring",
+            message: "开始时间不能为空！"
+          })
+          return
         }
+        if (self.isCreate) {
+          ajax.post('/command/system/title/add', self.dialog.form, function (data) {
+            self.table.data.push(data)
+          });
+        } else {
+          ajax.post('/command/system/title/edit', self.dialog.form, function (data) {
+            self.table.data.push(data)
+          });
+        }
+      },
 
-        self.formLabelAlign.time = "";
-        self.formLabelAlign.name = "";
-        self.formLabelAlign.address = "";
+      addTask: function () {
+        this.dialog.visible = true;
+        this.isCreate = true;
+        this.dialog.title = "新建任务"
+      },
+      editTask: function (row) {
+        this.dialog.visible = true;
+        this.isCreate = false;
+        this.dialog.editId = row.id;
+        this.dialog.title = "修改任务";
+        this.dialog.form = row;
       },
       // 取消
       cancel: function () {
-        self.formLabelAlign.time = "";
-        self.formLabelAlign.name = "";
-        self.formLabelAlign.address = "";
-      },
-      // 修改
-      handleEdit: function (row) {
-        var self = this;
-        this.activeName = '1';
-        this.row = row;
-        self.formLabelAlign.time = row.date;
-        self.formLabelAlign.name = row.name;
-        self.formLabelAlign.address = row.address;
-        self.showBtn = false;
+        this.dialog.visible = false;
+        this.dialog.form.titleName = '';
+        this.dialog.form.beginTime = '';
+        this.dialog.form.isCurrentTask = true;
       },
       // 设为当前任务
       setCur: function (row) {
-        this.curTask = row.name;
+        this.curTask = row.titleName;
         this.curId = row.id;
       },
       tableRowClass: function ({
@@ -103,13 +108,50 @@ define([
       },
       // 删除
       deleteRow: function (row) {
-        this.tableData = this.tableData.filter(function (item) {
-          return item.id != row.id;
-        })
-      }
+        var self = this;
+        ajax.post('/command/system/title/delete', {
+          id: row.id
+        }, function (data) {
+          self.table.data = self.table.data.filter(function (item) {
+            return item.id != row.id;
+          })
+        });
+
+      },
+      load: function (current) {
+        var self = this;
+        var condition = {
+          pageSize: self.table.page.pageSize,
+          currentPage: current
+        }
+
+        ajax.post('/command/system/title/query', condition, function (data) {
+          var total = data.total;
+          var rows = data.rows;
+          self.table.page.currentPage = current;
+          self.table.page.total = total;
+          if (rows && rows.length > 0) {
+            for (var i = 0; i < rows.length; i++) {
+              self.table.data.push(rows[i]);
+            }
+          }
+
+        });
+      },
+
+      handleSizeChange: function (pageSize) {
+        var self = this;
+        self.table.page.pageSize = pageSize;
+        self.load(1);
+      },
+      handleCurrentChange: function (currentPage) {
+        var self = this;
+        self.load(currentPage);
+      },
     },
     mounted: function () {
       var self = this;
+      self.load(1)
     }
   });
 
