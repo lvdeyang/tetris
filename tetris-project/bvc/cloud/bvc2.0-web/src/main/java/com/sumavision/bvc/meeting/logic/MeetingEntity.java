@@ -1228,6 +1228,15 @@ public class MeetingEntity {
 		channel_param.put("base_param", base_param);
 		aOutConnMediaMuxSet.put("channel_param", channel_param);
 		
+		//2020.09 组播和新增的录制模式
+		base_param.put("mode", aRecordSet.getString("mode"));
+		base_param.put("multi_video_addr", aRecordSet.getString("multi_video_addr"));
+		base_param.put("multi_audio_addr", aRecordSet.getString("multi_audio_addr"));
+		base_param.put("store_mode", aRecordSet.getString("store_mode"));
+		base_param.put("datetime", aRecordSet.getJSONObject("datetime"));
+		base_param.put("time_segment", aRecordSet.getJSONObject("time_segment"));
+		base_param.put("cycle", aRecordSet.getJSONObject("cycle"));
+		
 		//迭代三 如果有发布[rtmp]，需要一起更新
 		List<OutConnMediaMuxPO> rtmpPOs = outConnMediaMuxDao.getByRecordUuid(uuid);
 		for(OutConnMediaMuxPO rtmpPO : rtmpPOs){

@@ -200,14 +200,14 @@ public class MonitorRecordController {
 				//对所有类型进行筛选
 				if(userId.longValue()==1l || user.getIsGroupCreator()){
 					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
-														mode, null, parsedStartTime, parsedEndTime, 
-														null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+							fileNameReg, null, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}else{
 					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
-														mode, null, parsedStartTime, parsedEndTime, 
-														userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+							fileNameReg, null, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}
@@ -231,14 +231,14 @@ public class MonitorRecordController {
 			if("ALL".equals(mode)){
 				if(userId.longValue()==1l || user.getIsGroupCreator()){
 					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
-														mode, device, parsedStartTime, parsedEndTime, 
-														null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+							fileNameReg, device, parsedStartTime, parsedEndTime, 
+														null, MonitorRecordStatus.STOP.toString(), null, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}else{
 					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditions(
-														mode, device, parsedStartTime, parsedEndTime, 
-														userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+							fileNameReg, device, parsedStartTime, parsedEndTime, 
+														userId, MonitorRecordStatus.STOP.toString(), null, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}
