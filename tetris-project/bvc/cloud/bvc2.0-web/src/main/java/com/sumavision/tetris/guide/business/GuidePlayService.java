@@ -1,14 +1,12 @@
 package com.sumavision.tetris.guide.business;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -22,34 +20,24 @@ import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
-import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.guide.BO.GuideCommonBO;
 import com.sumavision.tetris.guide.BO.GuideOutputArrayBO;
 import com.sumavision.tetris.guide.BO.GuideSourceOutputBO;
 import com.sumavision.tetris.guide.BO.GuideSourcesBO;
-import com.sumavision.tetris.guide.BO.GuideTaskArrayBO;
-import com.sumavision.tetris.guide.BO.MediaArrayBO;
-import com.sumavision.tetris.guide.BO.ProgramArrayBO;
-import com.sumavision.tetris.guide.BO.UdpTsBO;
 import com.sumavision.tetris.guide.BO.VideoOrAudioSourceBO;
 import com.sumavision.tetris.guide.control.AudioParametersDAO;
-import com.sumavision.tetris.guide.control.AudioParametersPO;
 import com.sumavision.tetris.guide.control.GuideDAO;
 import com.sumavision.tetris.guide.control.GuidePO;
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
 import com.sumavision.tetris.guide.control.OutputSettingPO;
-import com.sumavision.tetris.guide.control.Resolution;
 import com.sumavision.tetris.guide.control.SourceDAO;
 import com.sumavision.tetris.guide.control.SourcePO;
 import com.sumavision.tetris.guide.control.SourceType;
 import com.sumavision.tetris.guide.control.SwitchingMode;
-import com.sumavision.tetris.guide.control.TaskArrayType;
 import com.sumavision.tetris.guide.control.VideoParametersDAO;
-import com.sumavision.tetris.guide.control.VideoParametersPO;
 
 @Service
 public class GuidePlayService {
@@ -137,6 +125,7 @@ public class GuidePlayService {
 		Thread.currentThread().sleep(20000L);
 		
 		//2.创建输出源   只有一个、判空
+	 	System.out.println("------------------------------输出源------------------------------------------");
 		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(2L);
 		if(outputSources==null){
 			throw new BaseException(StatusCode.ERROR,"备份源为空"); 
@@ -150,16 +139,20 @@ public class GuidePlayService {
 		}
 		outputLogic.getPass_by().addAll(outputPassBys);
 	 	executeBusiness.execute(outputLogic,  "备份源编码");
+	 	//备份源输出结束
+	 	
+//	 	Thread.currentThread().sleep(1000L);
 	 	
 	 	//创建预监输出开始
-//	 	System.out.println("-------------------------预监-----------------------------------------");
-//	 	LogicBO previewsLogic=new LogicBO();
-//	 	if(previewsLogic.getPass_by()==null){
-//	 		previewsLogic.setPass_by(new ArrayList<PassByBO>());
-//		}
-//	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy());
-//	 	executeBusiness.execute(previewsLogic,  "预监编码");
+	 	System.out.println("-------------------------预监-----------------------------------------");
+	 	LogicBO previewsLogic=new LogicBO();
+	 	if(previewsLogic.getPass_by()==null){
+	 		previewsLogic.setPass_by(new ArrayList<PassByBO>());
+		}
+	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy());
+	 	executeBusiness.execute(previewsLogic,  "预监编码");
 	 	//创建预监输出结束
+	 	
 	}
 	
 	/**
@@ -301,20 +294,20 @@ public class GuidePlayService {
 		}
 		
 //		//删除预监
-//		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
-//		if(sources!=null){
-//			for(SourcePO source:sources){
-//				PassByBO pass=new PassByBO();
-//				pass.setBundle_id("preview_"+sources.get(0).getUuid());
-//				pass.setLayer_id(layer_id);
-//				pass.setType("deleteAllBackupSources");
-//				
-//				JSONObject pass_by_content=new JSONObject();
-//				pass.setPass_by_content(pass_by_content);
-//				
-//				logic.getPass_by().add(pass);
-//			}
-//		}
+		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
+		if(sources!=null){
+			for(SourcePO source:sources){
+				PassByBO pass=new PassByBO();
+				pass.setBundle_id("preview_"+sources.get(0).getUuid());
+				pass.setLayer_id(layer_id);
+				pass.setType("deleteAllBackupSources");
+				
+				JSONObject pass_by_content=new JSONObject();
+				pass.setPass_by_content(pass_by_content);
+				
+				logic.getPass_by().add(pass);
+			}
+		}
 //		//删除预监
 		
 		logic.getPass_by().addAll(deleteOutputs);
