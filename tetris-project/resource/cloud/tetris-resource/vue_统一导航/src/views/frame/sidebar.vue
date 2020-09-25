@@ -1,7 +1,7 @@
 <template>
   <aside :class="[isCollapse? 'collapseMenu' : 'unCollapseMenu']">
     <!--导航菜单-->
-    <el-menu v-if="menurouter" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect" :collapse="isCollapse" :default-active="active" router background-color="#37404f" text-color="#fff" active-text-color="#ffd04b">>
+    <el-menu v-if="menurouter" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect" :collapse="isCollapse" :default-active="active" router background-color="#37404f" text-color="#fff" active-text-color="#ffd04b">
       <sidebarItem v-for="item in routes" :key="item.path" :item="item" :menurouter="menurouter"></sidebarItem>
     </el-menu>
     <el-menu v-else class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect" :collapse="isCollapse" :default-active="active" background-color="#37404f" text-color="#fff" active-text-color="#ffd04b">
