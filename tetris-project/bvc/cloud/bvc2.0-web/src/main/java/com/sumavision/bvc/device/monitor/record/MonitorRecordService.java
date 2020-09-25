@@ -263,7 +263,7 @@ public class MonitorRecordService {
 	}
 
 	/**
-	 * 录制本地设备<br/>
+	 * 排期：录制本地设备<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月1日 上午10:18:01
@@ -894,7 +894,7 @@ public class MonitorRecordService {
 		if (task == null)
 			return;
 
-		if (userId.longValue() == 1 && user.getIsGroupCreator()) {
+		if (userId.longValue() == 1 || user.getIsGroupCreator()) {
 			userId = task.getUserId();
 		}
 
@@ -1173,9 +1173,12 @@ public class MonitorRecordService {
 		//定时，循环额外添加
 		if(MonitorRecordMode.SCHEDULING.equals(task.getMode())){
 			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattenWithoutSecind))
-														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)));
+														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)))
+														.setStore_mode(task.getMode().getCode());
 		}else if(MonitorRecordMode.CYCLE.equals(task.getMode())){
-			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb()));
+			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb() *1024)).setStore_mode(task.getMode().getCode());
+		}else if(MonitorRecordMode.MANUAL.equals(task.getMode())){
+			recordSet.setStore_mode(task.getMode().getCode());
 		}
 		//额外添加结束
 		
@@ -1212,8 +1215,10 @@ public class MonitorRecordService {
 		
 		//处理排期额外添加开始
 		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
-		recordSet.setTime_segment(timeSegment);
-		recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(totalSizeMb));
+		recordSet.setCycle(new RecordCycleBO()
+				.setTotal_size_mb(totalSizeMb * 1024))
+		        .setStore_mode(task.getMode().getCode())
+		        .setTime_segment(timeSegment);;
 		//添加结束
 		
 		if (task.getAudioBundleId() != null) {

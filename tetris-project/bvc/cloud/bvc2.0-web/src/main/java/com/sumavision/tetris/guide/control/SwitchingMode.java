@@ -14,20 +14,27 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum SwitchingMode {
 	
-	TRANSCODE("转码"),
-	FRAME("按帧切换"),
-	DIRECTOR("直接切换");
+	TRANSCODE("转码","TRANSCODE"),
+	FRAME("按帧切换","FRAME"),
+	DIRECTOR("直接切换","DIRECTOR");
 	
 	private String name;
 	
-	private SwitchingMode(String name){
+	private String code;
+	
+	private SwitchingMode(String name,String code){
 		this.name = name;
+		this.code=code;
 	}
 	
 	public String getName(){
 		return name;
 	}
 	
+	public String getCode() {
+		return code;
+	}
+
 	public static SwitchingMode fromName(String name) throws Exception{
 		SwitchingMode[] value = SwitchingMode.values();
 		for (SwitchingMode switchingMode : value) {

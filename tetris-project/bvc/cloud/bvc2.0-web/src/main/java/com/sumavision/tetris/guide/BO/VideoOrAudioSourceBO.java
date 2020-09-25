@@ -1,6 +1,8 @@
 package com.sumavision.tetris.guide.BO;
 
 public class VideoOrAudioSourceBO {
+	
+	private String template_source_id;
 
 	private String layer_id;
 	
@@ -17,6 +19,15 @@ public class VideoOrAudioSourceBO {
 		return this;
 	}
 
+	public String getTemplate_source_id() {
+		return template_source_id;
+	}
+
+	public VideoOrAudioSourceBO setTemplate_source_id(String template_source_id) {
+		this.template_source_id = template_source_id;
+		return this;
+	}
+	
 	public String getBundle_id() {
 		return bundle_id;
 	}

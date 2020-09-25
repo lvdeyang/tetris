@@ -22,4 +22,6 @@ public interface SourceDAO extends BaseDAO<SourcePO>{
 
 	public List<SourcePO> findByGuideIdOrderBySourceNumber(Long guideId);
 	
+	public List<SourcePO> findByIsPreviewOut(boolean isPreviewOut);
+	
 }
