@@ -894,7 +894,7 @@ public class MonitorRecordService {
 		if (task == null)
 			return;
 
-		if (userId.longValue() == 1 && user.getIsGroupCreator()) {
+		if (userId.longValue() == 1L || user.getIsGroupCreator()) {
 			userId = task.getUserId();
 		}
 

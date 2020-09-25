@@ -39,9 +39,6 @@ define([
 					guides:{
 						list: []
 					},
-
-					//tabIndex: this.guides.list.length,
-
                 	user:context.getProp('user'),
                 	menurouter: false,
                     shortCutsRoutes:commons.data,
@@ -58,7 +55,7 @@ define([
 							previewOut:'',
                             typeOptions:['5G背包','直播流'],
 							bundleName: '',
-							set: ''
+							isPreviewOut: true
                     	},
                     	setOut:{
                     		visible: false,
@@ -119,38 +116,39 @@ define([
 				handleSelPgm: function () {
 					var self = this;
 				},
-				addTab: function(tabIndex){
+				addTab: function(){
+					var self = this;
 					var listLength = this.guides.list.length +1;
-					ajax.post('/tetris/guide/control/guide/po/add', {taskName: ("导播任务"+listLength)}, function(data, status){
-						self.guides.list.push({
-							id:data.id,
-							taskName:data.taskName
-						})
-					}, null, ajax.NO_ERROR_CATCH_CODE);
-					self.editableTabsValue = data.id;
+					ajax.post('/tetris/guide/control/guide/po/add', {taskName: ("导播任务"+listLength)}, function(data){
+						self.guides.list.push(data);
+						self.editableTabsValue = data.id+'';
+						self.handleClick({name:data.id+''});
+					});
 				},
 				removeTab: function(targetName) {
-					let tabs = this.guides.list;
-					let activeName = this.editableTabsValue;
-					if (activeName == targetName) {
-						tabs.forEach((tab, index) => {
-							if (tab.id == targetName) {
-								let nextTab = tabs[index + 1] || tabs[index - 1];
-								if (nextTab) {
-									activeName = nextTab.id;
-								}
+					var self = this;
+					ajax.post('/tetris/guide/control/guide/po/delete', {id: targetName}, function (data) {
+						for(var i = 0; i < self.guides.list.length; i++){
+							if(self.guides.list[i].id == targetName){
+								self.guides.list.splice(i, 1);
+								break;
 							}
-						});
-					}
-
-					this.editableTabsValue = activeName;
-					this.guides.list = tabs.filter(tab => tab.id != targetName);
-					ajax.post('/tetris/guide/control/guide/po/delete', {id: targetName}, function (data, status) {
-
-					}, null, ajax.NO_ERROR_CATCH_CODE);
+						}
+						if(self.editableTabsValue === targetName && self.guides.list.length > 0){
+							self.editableTabsValue = self.guides.list[0].id+'';
+							self.handleClick({name:self.guides.list[0].id+''});
+						}
+					});
 				},
 				handleClick:function(tab, event){
-					console.log(this.editableTabsValue)
+					//console.log(tab);
+					var self = this;
+					self.sources.list.splice(0, self.sources.list.length);
+					ajax.post('/tetris/guide/control/source/po/query', {id: tab.name}, function(data, status){
+						for(var i = 0; i < data.length; i++){
+							self.sources.list.push(data[i]);
+						}
+					})
 				},
 				handleSetDeviceClose:function(){
 					var self = this;
@@ -173,6 +171,7 @@ define([
 					self.dialog.setSource.previewOut = x.previewOut;
 					self.dialog.setSource.sourceName = x.sourceName;
 					self.dialog.setSource.bundleName = x.sourceName;
+					self.dialog.setSource.isPreviewOut = x.isPreviewOut;
             	},
 				handleSetSourceCommit:function(){
 					var self = this;
@@ -182,7 +181,8 @@ define([
 						sourceType: self.dialog.setSource.sourceType,
 						source:self.dialog.setSource.source,
 						sourceName:self.dialog.setSource.sourceName,
-						previewOut:self.dialog.setSource.previewOut
+						previewOut:self.dialog.setSource.previewOut,
+						isPreviewOut:self.dialog.setSource.isPreviewOut
 					};
 					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
 						for(var i = 0; i < self.sources.list.length; i++){
@@ -200,7 +200,7 @@ define([
 				},
             	handleSetOut:function(){
 					var self = this;
-					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: 2}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: this.editableTabsValue}, function(data, status){
 						//console.log(data);
 						for(var i = 0; i < data.length; i++){
 							self.output.out.push(data[i]);
@@ -212,7 +212,7 @@ define([
 						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: 2}, function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: this.editableTabsValue}, function(data, status){
 						console.log(data);
 						self.dialog.setOut.video.codingObject = data.codingObjectName;
 						self.dialog.setOut.video.fps = data.fps;
@@ -223,7 +223,7 @@ define([
 						self.dialog.setOut.video.maxBitrate = data.maxBitrate;
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: 2},function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: this.editableTabsValue},function(data, status){
 						self.dialog.setOut.audio.codingFormat = data.codingFormatName;
 						self.dialog.setOut.audio.channelLayout = data.channelLayoutName;
 						self.dialog.setOut.audio.bitrate = data.bitrate;
@@ -264,7 +264,7 @@ define([
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,
 						bitrate: self.dialog.setOut.out.bitrate,
-						switchingMode: dialog.setOut.out.switchingMode
+						switchingMode: self.dialog.setOut.out.switchingMode
 					}
 					ajax.post('/tetris/guide/control/output/setting/po/editVideo', questDataVideo, function (data, status) {
 						
@@ -273,6 +273,8 @@ define([
 					ajax.post('/tetris/guide/control/output/setting/po/editAudio', questDataAudio, function (data, status) {
 
 					}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					//console.log(questDataOut);
 
 					ajax.post('/tetris/guide/control/output/setting/po/edit', questDataOut, function (data, status) {
 
@@ -295,12 +297,12 @@ define([
 					})
 				},
 				startGuide:function(){
-					ajax.post('/tetris/guide/control/guide/po/start',{id: 1},function(data, status){
+					ajax.post('/tetris/guide/control/guide/po/start',{id: this.editableTabsValue},function(data, status){
 
 					})
 				},
 				stopGuide:function(){
-					ajax.post('/tetris/guide/control/guide/po/stop',{id: 1},function(data, status){
+					ajax.post('/tetris/guide/control/guide/po/stop',{id: this.editableTabsValue},function(data, status){
 
 					})
 				},
@@ -344,7 +346,7 @@ define([
 			created:function(){
 				var self = this;
 
-				ajax.post('/tetris/guide/control/source/po/query', {id: 2}, function(data, status){
+				ajax.post('/tetris/guide/control/source/po/query', {id: this.editableTabsValue}, function(data, status){
 					//console.log(data);
 					for(var i = 0; i < data.length; i++){
 						self.sources.list.push(data[i]);

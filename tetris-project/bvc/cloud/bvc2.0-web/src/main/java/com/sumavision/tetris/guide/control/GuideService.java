@@ -45,10 +45,7 @@ public class GuideService {
 	@Autowired
 	private AudioParametersDAO audioParametersDAO;
 	
-//	@Autowired
-//	GuidePlayService guidePlayService;
-	
-	public GuidePO add(String taskName){
+	public GuideVO add(String taskName) throws Exception{
 		GuidePO guidePO = new GuidePO();
 		guidePO.setTaskName(taskName);
 		guidePO.setCreationTime(new Date());
@@ -70,23 +67,36 @@ public class GuideService {
 		AudioParametersPO audioParametersPO = new AudioParametersPO();
 		audioParametersPO.setGuideId(guidePO.getId());
 		audioParametersDAO.save(audioParametersPO);
-		return guidePO;
+		return new GuideVO().set(guidePO);
 	}
 	
-	public GuidePO edit(
+	public GuideVO edit(
 			Long id,
 			String taskName
-			){
+			) throws Exception{
 		GuidePO guidePO = guideDAO.findOne(id);
 		guidePO.setTaskName(taskName);
-		return guideDAO.save(guidePO);
+		guideDAO.save(guidePO);
+		return new GuideVO().set(guidePO);
 	}
 	
 	public void delete(Long id){
-		videoParametersDAO.delete(videoParametersDAO.findByGuideId(id));
-		audioParametersDAO.delete(audioParametersDAO.findByGuideId(id));
-		outputSettingDAO.deleteInBatch(outputSettingDAO.findByGuideId(id));
-		sourceDAO.deleteInBatch(sourceDAO.findByGuideIdOrderBySourceNumber(id));
+		VideoParametersPO videoParametersPO = videoParametersDAO.findByGuideId(id);
+		if(videoParametersPO != null){
+			videoParametersDAO.delete(videoParametersPO);
+		}
+		AudioParametersPO audioParametersPO = audioParametersDAO.findByGuideId(id);
+		if(audioParametersPO != null){
+			audioParametersDAO.delete(audioParametersPO);
+		}
+		List<OutputSettingPO> list1= outputSettingDAO.findByGuideId(id);
+		if(list1.size() != 0){
+			outputSettingDAO.deleteInBatch(list1);
+		}
+		List<SourcePO> list2 = sourceDAO.findByGuideIdOrderBySourceNumber(id);
+		if(list2.size() != 0){
+			sourceDAO.deleteInBatch(list2);
+		}
 		guideDAO.delete(id);
 	}
 	

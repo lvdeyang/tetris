@@ -61,7 +61,10 @@ define([
         }
       },
       '$route': function (v) {
-        if (v.path == '/page-monitor-record-liangwu' || v.path == '/page-monitor-forword' || v.path == '/page-monitor-forword-list') {
+        if (v.path == '/page-monitor-record-liangwu' ||
+          v.path == '/page-monitor-forword' ||
+          v.path == '/page-monitor-forword-list' ||
+          v.path == '/page-monitor-currenttask') {
           this.isLiangwu = true
         } else {
           this.isLiangwu = false

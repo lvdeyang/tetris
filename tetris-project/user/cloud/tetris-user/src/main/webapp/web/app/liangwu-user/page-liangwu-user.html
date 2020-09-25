@@ -177,15 +177,15 @@
 
     <!-- 绑定角色对话框 -->
     <el-dialog title="绑定角色" :visible.sync="dialogBindRole.bindRoleDialogTableVisible">
-      <template>
-        <el-table :data="roleOption" @selection-change="handleSelectionChange" :row-key="rowKeyBindRole" ref="roleTable"
-          width="100%">
-          <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="name" label="名称" width="200"></el-table-column>
-        </el-table>
-        <el-button type="primary" size="small" @click="handleBindRoleSubmit"><span class="icon-plus"
-            style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
-      </template>
+
+      <el-table ref="roleTable" :data="roleOption" @selection-change="handleSelectionChange" :row-key="roleOption.id"
+        width="100%">
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column prop="name" label="名称" width="200"></el-table-column>
+      </el-table>
+      <el-button type="primary" size="small" @click="handleBindRoleSubmit"><span class="icon-plus"
+          style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
+
       <!-- <div>弹框</div> -->
     </el-dialog>
 
@@ -219,12 +219,8 @@
           <!-- 绑定角色 -->
 
           <el-form-item :label="i18n.labelCreateUserBindRole">
-            <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
+            <el-input v-model="dialog.editUser.bindrole" @click.native="handleChangeFolder"></el-input>
           </el-form-item>
-          <!-- <el-form-item :label="i18n.labelEditUserLevel">
-            <el-input-number v-model="dialog.editUser.level" :min="1" :max="1000"
-              :label="i18n.labelEditUserLevelNumber"></el-input-number>
-          </el-form-item> -->
           <div class="div_change_pw">
             <el-button class="bt_change_pw" type="text"
               @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">

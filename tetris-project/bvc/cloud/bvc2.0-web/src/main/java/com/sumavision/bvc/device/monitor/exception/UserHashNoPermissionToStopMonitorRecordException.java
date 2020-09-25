@@ -10,9 +10,9 @@ public class UserHashNoPermissionToStopMonitorRecordException extends BaseExcept
 	private static final long serialVersionUID = 1L;
 
 	public UserHashNoPermissionToStopMonitorRecordException(Long recordId, Long userId) {
-		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("您没有权限删除此直播任务！用户id：")
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("您没有权限删除此录制任务！用户id：")
 															 .append(userId)
-															 .append("，直播id：")
+															 .append("，录制id：")
 															 .append(recordId)
 															 .toString());
 	}
