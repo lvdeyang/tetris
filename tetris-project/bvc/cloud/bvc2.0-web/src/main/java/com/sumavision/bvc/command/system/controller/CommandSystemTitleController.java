@@ -24,7 +24,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
-@RequestMapping(value="/command/system/title")
+@RequestMapping(value = "/command/system/title")
 public class CommandSystemTitleController {
 	
 	@Autowired
@@ -131,7 +131,7 @@ public class CommandSystemTitleController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(name="/query")
+	@RequestMapping(value="/query")
 	public Object query(
 			Integer pageSize,
 			Integer currentPage){
@@ -146,6 +146,7 @@ public class CommandSystemTitleController {
 		List<CommandSystemTitleVO> titleVos=pageTitles.getContent().stream().map(title->{
 			CommandSystemTitleVO titleVo=new CommandSystemTitleVO();
 			titleVo.setId(title.getId())
+					.setTitleName(title.getTitleName())
 					.setBeginTime(DateUtil.format(title.getBeginTime()))
 					.setCurrentTask(title.getCurrentTask())
 					.setUserId(title.getUserId());

@@ -326,7 +326,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
 				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
-				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
 				"AND STATUS<>?6 \n#pageable\n",
 		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
 				"mode IS NOT NULL " + 
@@ -335,19 +335,19 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
 				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
-				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
 				"AND STATUS<>?6",
 		nativeQuery = true
 	)
 	public Page<MonitorRecordPO> findAllByConditions(
-			String mode,
+//			String mode,
+			String fileNameReg,
 			String videoBundleId,
 			Date startTime,
 			Date endTime,
 			Long userId,
 			String status,
 			Long recordUserId,
-			String fileNameReg,
 			Pageable pageable);
 	
 	public List<MonitorRecordPO> findByIdIn(Collection<Long> ids);
