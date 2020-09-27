@@ -13,6 +13,14 @@
 	border:1px solid #dcdfe6;
 	padding-top:20px;
 }
+/*#page-guide-control-wrapper .el-scrollbar__wrap{
+	overflow-x: hidden;
+}*/
+#page-guide-control-wrapper .el-scrollbar__wrap {
+	overflow: scroll;
+	overflow-x: hidden;
+	height: 100%;
+}
 /*
 #page-guide-control-wrapper .el-input__inner{
 	width:132px !important;
