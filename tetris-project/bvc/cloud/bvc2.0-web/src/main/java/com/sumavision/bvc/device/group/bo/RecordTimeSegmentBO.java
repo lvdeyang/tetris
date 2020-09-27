@@ -1,18 +1,33 @@
 package com.sumavision.bvc.device.group.bo;
 
+import java.util.Date;
+
 import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesMode;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesRelationPO;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 
 public class RecordTimeSegmentBO {
 
 	/** day、week、month*/
 	private String mode;
 	
+	/** 创建时间*/
+	private String create_date;
+	
 	private RecordDateTimeBO day;
 	
 	private RecordDateTimeBO week;
 	
 	private RecordDateTimeBO month;
+
+	public String getCreate_date() {
+		return create_date;
+	}
+
+	public RecordTimeSegmentBO setCreate_date(String create_date) {
+		this.create_date = create_date;
+		return this;
+	}
 
 	public String getMode() {
 		return mode;
@@ -52,6 +67,7 @@ public class RecordTimeSegmentBO {
 	
 	public RecordTimeSegmentBO set(MonitorRecordManyTimesRelationPO relation){
 		MonitorRecordManyTimesMode mode=relation.getMode();
+		this.setCreate_date(DateUtil.format(new Date(), DateUtil.dateTimePattern));
 		this.setMode(mode.getName());
 		if(MonitorRecordManyTimesMode.DAY.equals(mode)){
 			RecordDateTimeBO day=new RecordDateTimeBO();
