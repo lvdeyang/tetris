@@ -25,13 +25,14 @@ public class GuideOutputArrayBO {
 //		return this;
 //	}
 	
+//  输出可能有多种封装类型，包括"udp_ts","rtp_ts","rtmp","srt"等
 	private String type="udp_ts";
 	
-	private String url="udp://192.165.56.113:20001";
+	private String url;
 	
-	private String rate_ctrl="VBR";
+	private String rate_ctrl;
 	
-	private Long bitrate=8000000L;
+	private Long bitrate;
 
 	public String getType() {
 		return type;

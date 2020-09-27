@@ -54,14 +54,6 @@ public class CommandSystemTitleController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		CommandSystemTitlePO title=new CommandSystemTitlePO();
-		
-		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
-		title.setId(user.getId());
-		title.setCurrentTask(isCurrentTask);
-		title.setTitleName(titleName);
-		commandSystemTitleDao.save(title);
-		
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			List<CommandSystemTitlePO> titles=commandSystemTitleDao.findAll();
 			if(titles!=null&&titles.size()>0){
@@ -72,6 +64,14 @@ public class CommandSystemTitleController {
 			}
 			
 		}
+		
+		CommandSystemTitlePO title=new CommandSystemTitlePO();
+		
+		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
+		title.setId(user.getId());
+		title.setCurrentTask(isCurrentTask);
+		title.setTitleName(titleName);
+		commandSystemTitleDao.save(title);
 		
 		return null;
 	}
@@ -103,12 +103,6 @@ public class CommandSystemTitleController {
 			String titleName,
 			Boolean isCurrentTask){
 
-		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
-		title.setBeginTime(beginTime);
-		title.setTitleName(titleName);
-		title.setCurrentTask(isCurrentTask);
-		commandSystemTitleDao.save(title);
-		
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			List<CommandSystemTitlePO> titles=commandSystemTitleDao.findAll();
 			if(titles!=null&&titles.size()>0){
@@ -118,6 +112,13 @@ public class CommandSystemTitleController {
 				commandSystemTitleDao.save(titles);
 			}
 		}
+		
+		
+		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
+		title.setBeginTime(beginTime);
+		title.setTitleName(titleName);
+		title.setCurrentTask(isCurrentTask);
+		commandSystemTitleDao.save(title);
 		
 		return null;
 	}
