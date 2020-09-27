@@ -125,7 +125,7 @@ public class CommandSystemTitleController {
 	}
 	
 	/**
-	 * 方法概述<br/>
+	 * 分页查询任务标题<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月24日 下午3:50:41
@@ -158,6 +158,33 @@ public class CommandSystemTitleController {
 		return new HashMapWrapper<String, Object>().put("total", pageTitles.getTotalElements())
 				   .put("rows", titleVos)
 				   .getMap();
+	}
+	
+	/**
+	 * 查询当前任务标题<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月27日 上午11:33:27
+	 * @return 如果查不到，返回null
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/query/current")
+	public Object queryCurrent(){
+		
+		CommandSystemTitlePO title = commandSystemTitleDao.findByCurrentTaskEquals(true);
+		
+		if(title == null) return null;
+		
+		CommandSystemTitleVO titleVo = new CommandSystemTitleVO()
+				.setId(title.getId())
+				.setTitleName(title.getTitleName())
+				.setBeginTime(DateUtil.format(title.getBeginTime()))
+				.setCurrentTask(title.getCurrentTask())
+				.setUserId(title.getUserId());
+		
+		return titleVo;
 	}
 	
 }
