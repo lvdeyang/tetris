@@ -12,7 +12,7 @@ public class RecordTimeSegmentBO {
 	private String mode;
 	
 	/** 创建时间*/
-	private String creat_date;
+	private String create_date;
 	
 	private RecordDateTimeBO day;
 	
@@ -20,12 +20,12 @@ public class RecordTimeSegmentBO {
 	
 	private RecordDateTimeBO month;
 
-	public String getCreat_date() {
-		return creat_date;
+	public String getCreate_date() {
+		return create_date;
 	}
 
-	public RecordTimeSegmentBO setCreat_date(String creat_date) {
-		this.creat_date = creat_date;
+	public RecordTimeSegmentBO setCreate_date(String create_date) {
+		this.create_date = create_date;
 		return this;
 	}
 
@@ -67,7 +67,7 @@ public class RecordTimeSegmentBO {
 	
 	public RecordTimeSegmentBO set(MonitorRecordManyTimesRelationPO relation){
 		MonitorRecordManyTimesMode mode=relation.getMode();
-		this.setCreat_date(DateUtil.format(new Date(), DateUtil.dateTimePattern));
+		this.setCreate_date(DateUtil.format(new Date(), DateUtil.dateTimePattern));
 		this.setMode(mode.getName());
 		if(MonitorRecordManyTimesMode.DAY.equals(mode)){
 			RecordDateTimeBO day=new RecordDateTimeBO();
