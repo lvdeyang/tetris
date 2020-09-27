@@ -611,7 +611,7 @@ public class VodService {
 		userMemberPO.setGroupId(group.getId());
 		groupMemberDao.save(userMemberPO);
 		
-		//被点播用户作为成员
+		//被点播设备作为成员
 		GroupMemberPO vodUserMemberPO = new GroupMemberPO();
 		vodUserMemberPO.setName(encoderBundleEntity.getBundleName());
 		vodUserMemberPO.setGroupMemberType(GroupMemberType.MEMBER_DEVICE);
