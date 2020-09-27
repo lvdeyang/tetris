@@ -1,5 +1,6 @@
 package com.sumavision.bvc.command.system.controller;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,9 +100,9 @@ public class CommandSystemTitleController {
 	@RequestMapping(value="/edit")
 	public Object edit(
 			Long id,
-			Date beginTime,
+			String beginTime,
 			String titleName,
-			Boolean isCurrentTask){
+			Boolean isCurrentTask) throws ParseException{
 
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			List<CommandSystemTitlePO> titles=commandSystemTitleDao.findAll();
@@ -115,7 +116,7 @@ public class CommandSystemTitleController {
 		
 		
 		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
-		title.setBeginTime(beginTime);
+		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
 		title.setTitleName(titleName);
 		title.setCurrentTask(isCurrentTask);
 		commandSystemTitleDao.save(title);
