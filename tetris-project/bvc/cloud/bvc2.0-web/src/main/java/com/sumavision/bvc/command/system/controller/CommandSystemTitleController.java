@@ -1,5 +1,6 @@
 package com.sumavision.bvc.command.system.controller;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,14 +55,6 @@ public class CommandSystemTitleController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		CommandSystemTitlePO title=new CommandSystemTitlePO();
-		
-		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
-		title.setId(user.getId());
-		title.setCurrentTask(isCurrentTask);
-		title.setTitleName(titleName);
-		commandSystemTitleDao.save(title);
-		
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			List<CommandSystemTitlePO> titles=commandSystemTitleDao.findAll();
 			if(titles!=null&&titles.size()>0){
@@ -72,6 +65,14 @@ public class CommandSystemTitleController {
 			}
 			
 		}
+		
+		CommandSystemTitlePO title=new CommandSystemTitlePO();
+		
+		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
+		title.setId(user.getId());
+		title.setCurrentTask(isCurrentTask);
+		title.setTitleName(titleName);
+		commandSystemTitleDao.save(title);
 		
 		return null;
 	}
@@ -99,16 +100,10 @@ public class CommandSystemTitleController {
 	@RequestMapping(value="/edit")
 	public Object edit(
 			Long id,
-			Date beginTime,
+			String beginTime,
 			String titleName,
-			Boolean isCurrentTask){
+			Boolean isCurrentTask) throws ParseException{
 
-		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
-		title.setBeginTime(beginTime);
-		title.setTitleName(titleName);
-		title.setCurrentTask(isCurrentTask);
-		commandSystemTitleDao.save(title);
-		
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			List<CommandSystemTitlePO> titles=commandSystemTitleDao.findAll();
 			if(titles!=null&&titles.size()>0){
@@ -118,6 +113,13 @@ public class CommandSystemTitleController {
 				commandSystemTitleDao.save(titles);
 			}
 		}
+		
+		
+		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
+		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
+		title.setTitleName(titleName);
+		title.setCurrentTask(isCurrentTask);
+		commandSystemTitleDao.save(title);
 		
 		return null;
 	}

@@ -41,7 +41,8 @@ define([
                     data:[]
                 },
                 table:{
-                    data:[]
+                    data:[],
+                    id:''
                 },
                 dialog:{
                     selectTerminal:{
@@ -62,7 +63,21 @@ define([
                         },
                         data:[],
                         currentRow:''
+                    },
+                    layout:{
+                        visible:false,
+                        table:{
+                            rows:[]
+                        }
+                    },
+                    combine:{
+                        visible:false,
+                        id:'',
+                        table:{
+                            rows:[]
+                        }
                     }
+
                 }
             },
             computed:{
@@ -72,8 +87,12 @@ define([
 
             },
             methods:{
+                rowKey:function(row){
+                    return 'position-' + row.id;
+                },
                 queryRoles:function(){
                     var self = this;
+
                     ajax.post('/tetris/bvc/model/role/agenda/permission/load', {
                         agendaId:self.agendaId
                     }, function(data){
@@ -90,6 +109,7 @@ define([
                         agendaId:self.agendaId,
                         roleId:node.roleId
                     }, function(data){
+                        self.table.data=[];
                         if(data && data.length>0){
                             for(var i=0; i<data.length; i++){
                                 self.table.data.push(data[i]);
@@ -217,6 +237,80 @@ define([
                             }
                         }
                     }
+                },
+                handleRowLayout:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.layout.visible = true;
+                    ajax.post('/tetris/bvc/model/terminal/layout/position/load',{layoutId:row.layoutId},function(data){
+                        if(data && data.length>0){
+                            self.dialog.layout.table.rows = [];
+                            self.table.id = row.id;
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.layout.table.rows.push(data[i]);
+                            }
+                        }
+                    })
+                },
+                handleLayoutClose:function(scope){
+                    var self = this;
+                    self.dialog.layout.visible = false;
+                    self.dialog.layout.table.id = '';
+                },
+                handleRowBind: function (scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.combine.visible = true;
+                    ajax.post('/tetris/bvc/model/agenda/combine/video/load', {
+                        businessId:self.agendaId,
+                        businessType:'AGENDA'
+                    }, function(data, status){
+                        if(data && data.length>0){
+                            self.dialog.combine.table.rows = [];
+                            self.dialog.combine.table.id = row.id;
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.combine.table.rows.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleCombineClose:function(scope){
+                    var self = this;
+                    self.dialog.combine.visible = false;
+                },
+                handleRowCombine:function(scope){
+                    var self= this;
+                    var row =scope.row;
+                    ajax.post('/tetris/bvc/model/layout/virtual/source/template/bind/virtual', {
+                        agendaLayoutTemplateId:self.table.id,
+                        layoutPositionId:self.dialog.combine.table.id,
+                        virtualSourceId:row.id},function(data){
+                        if(status == 200){
+                            self.$message({
+                                type:'success',
+                                message:"绑定成功！"
+                            });
+                            return null;
+                        }
+                        self.dialog.combine.visible = false;
+                    })
+                },
+                handleRowUnbind:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/tetris/bvc/model/layout/virtual/source/template/unbind/virtual',{
+                        agendaLayoutTemplateId:self.table.id,
+                        layoutPositionId:row.id,
+                    },function(data,status){
+                        if(status == 200){
+                            self.$message({
+                                type:'success',
+                                message:"已解除绑定！"
+                            });
+                            return null;
+                        }
+                        self.dialog.combine.visible = false;
+                    })
                 }
             },
             created:function(){

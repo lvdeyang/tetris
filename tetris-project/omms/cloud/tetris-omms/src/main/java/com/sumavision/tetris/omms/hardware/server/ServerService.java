@@ -11,12 +11,14 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
@@ -411,13 +413,18 @@ public class ServerService {
 	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
 	        client = HttpClients.custom()
 			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
 			        		    .build();
-			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/ini_modify").toString();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/modifyini").toString();
+			System.out.println(url);
 			HttpPost httpPost = new HttpPost(url);
 			
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
 			formparams.add(new BasicNameValuePair("params", params.toJSONString()));  
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+            httpPost.setConfig(requestConfig);
 			
 			CloseableHttpResponse response = client.execute(httpPost);
 			int code = response.getStatusLine().getStatusCode();

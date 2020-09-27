@@ -81,11 +81,11 @@ public class GuidePlayService {
 	public void start(Long guideId) throws Exception{
 		//1.创建源：呼叫5G背包；打开虚拟源地址
 //		GuidePO guidePo=guideDao.findOne(guideId);
-		System.out.println("------------------------guide定死为2-------------------------");
-		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(2L);
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
+		
 		//虚拟源相关的集合
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
-			if(source.getSourceType().equals(SourceType.URL)){
+			if(SourceType.URL.equals(source.getSourceType())){
 				return true;
 			}
 			return false;
@@ -121,12 +121,9 @@ public class GuidePlayService {
 		//执行logic
 		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
 		
-		System.out.println("---------------------------睡20秒------------------------------");
-		Thread.currentThread().sleep(20000L);
-		
 		//2.创建输出源   只有一个、判空
 	 	System.out.println("------------------------------输出源------------------------------------------");
-		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(2L);
+		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(guideId);
 		if(outputSources==null){
 			throw new BaseException(StatusCode.ERROR,"备份源为空"); 
 		}
@@ -141,7 +138,6 @@ public class GuidePlayService {
 	 	executeBusiness.execute(outputLogic,  "备份源编码");
 	 	//备份源输出结束
 	 	
-//	 	Thread.currentThread().sleep(1000L);
 	 	
 	 	//创建预监输出开始
 	 	System.out.println("-------------------------预监-----------------------------------------");
@@ -169,10 +165,8 @@ public class GuidePlayService {
 		//GuidePO guidePo=guideDao.findOne(guideId);
 		SourcePO source=sourceDao.findOne(sourceId);
 		
-		System.out.println("------------------------guide定死为2-------------------------");
-		
 		//只有一个、判空、以后有问题
-		List<OutputSettingPO> outputs=outputSettingDao.findByGuideId(2L);
+		List<OutputSettingPO> outputs=outputSettingDao.findByGuideId(guideId);
 		if(outputs==null||outputs.size()==0){
 			throw new BaseException(StatusCode.ERROR, "备份源为空");
 		}
@@ -246,7 +240,7 @@ public class GuidePlayService {
 		//1.删除源
 		//删除虚拟源
 		GuidePO guidePo=guideDao.findOne(guideId);
-		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(2L);
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
 			if(source.getSourceType().equals(SourceType.URL)){
 				return true;
@@ -275,8 +269,7 @@ public class GuidePlayService {
 		
 		//2.删除所有输出源
 		//删除所有虚拟输出源
-		System.out.println("------------------------guide定死为2-------------------------");
-		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGuideId(2L);
+		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGuideId(guideId);
 		List<PassByBO> deleteOutputs=sourceOutputList.stream().map(source->{
 			PassByBO passBy=new PassByBO();
 			passBy.setBundle_id(source.getUuid());
@@ -288,7 +281,7 @@ public class GuidePlayService {
 			
 			return passBy;
 		}).collect(Collectors.toList());
-//		LogicBO logic=new LogicBO();
+		
 		if(logic.getPass_by()==null){
 			logic.setPass_by(new ArrayList<PassByBO>());
 		}
@@ -657,8 +650,9 @@ public class GuidePlayService {
 //				.setBitrate(8000000);
 		
 		GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
-//		guideOutputArray.setUdp_ts(udpTsBo);
-		guideOutputArray.setUrl(outputSource.getOutputAddress());
+		guideOutputArray.setUrl(outputSource.getOutputAddress())
+		                .setBitrate(outputSource.getBitrate())
+		                .setRate_ctrl(outputSource.getRateCtrl());
 		GuideOutputArrays.add(guideOutputArray);
 //		oupput_array结束
 		

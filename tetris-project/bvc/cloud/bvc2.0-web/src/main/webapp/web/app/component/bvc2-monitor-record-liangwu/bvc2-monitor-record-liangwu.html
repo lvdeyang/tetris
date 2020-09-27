@@ -5,6 +5,7 @@
       <el-button size="small" @click="handleAddRecord" type="primary">添加录制</el-button>
       <!--<el-button size="small" type="danger">停止录制</el-button>-->
       <el-select size="small" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
+        <el-option key="ALL" label="全部" value="ALL"></el-option>
         <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
         <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
         <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
@@ -16,6 +17,7 @@
         end-placeholder="结束日期" :default-time="['12:00:00']" style="margin-left:10px;">
       </el-date-picker>
       <el-button type="primary" size="small" @click="handleTotalSizeMb">设置磁盘大小</el-button>
+      <el-tag type="success" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag>
       <el-tag type="danger" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
     </div>
     <div style="width:100%; position:absolute; left:0; top:50px; bottom:52px; background-color:#fff;">

@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,21 +12,28 @@ import java.util.Set;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.druid.util.Base64;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -78,17 +86,24 @@ public class ServiceDeploymentService {
 		InstallationPackagePO installationPackageEntity = installationPackageDao.findOne(installationPackageId);
 		ServiceTypePO serviceTypeEntity = serviceTypeDao.findOne(installationPackageEntity.getServiceTypeId());
 		
+		ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findByServerIdAndServiceTypeId(serverId, installationPackageEntity.getServiceTypeId());
+		
 		ServiceDeploymentPO serviceDeploymentEntity = new ServiceDeploymentPO();
-		Date now = new Date();
-		serviceDeploymentEntity.setUpdateTime(now);
-		serviceDeploymentEntity.setServiceTypeId(installationPackageEntity.getServiceTypeId());
-		serviceDeploymentEntity.setInstallationPackageId(installationPackageEntity.getId());
-		serviceDeploymentEntity.setInstallFullPath(new StringBufferWrapper().append(RELATIVE_FOLDER).append("/").append(installationPackageEntity.getFileName()).toString());
-		serviceDeploymentEntity.setServerId(serverEntity.getId());
-		serviceDeploymentEntity.setStep(DeploymentStep.UPLOAD);
-		serviceDeploymentEntity.setProgress(0);
-		serviceDeploymentEntity.setCreateTime(now);
-		serviceDeploymentDao.save(serviceDeploymentEntity);
+		
+		if(serviceDeploymentPO != null && !serviceDeploymentPO.equals(" ")){
+			serviceDeploymentEntity = serviceDeploymentPO;
+		}else{
+			Date now = new Date();
+			serviceDeploymentEntity.setUpdateTime(now);
+			serviceDeploymentEntity.setServiceTypeId(installationPackageEntity.getServiceTypeId());
+			serviceDeploymentEntity.setInstallationPackageId(installationPackageEntity.getId());
+			serviceDeploymentEntity.setInstallFullPath(new StringBufferWrapper().append(RELATIVE_FOLDER).append("/").append(installationPackageEntity.getFileName()).toString());
+			serviceDeploymentEntity.setServerId(serverEntity.getId());
+			serviceDeploymentEntity.setStep(DeploymentStep.UPLOAD);
+			serviceDeploymentEntity.setProgress(0);
+			serviceDeploymentEntity.setCreateTime(now);
+			serviceDeploymentDao.save(serviceDeploymentEntity);
+		}		
 		
 		Thread uploadThread = new Thread(new Uploader(serverEntity, installationPackageEntity, serviceDeploymentEntity));
 		uploadThread.start();
@@ -327,14 +342,27 @@ public class ServiceDeploymentService {
 	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
 	        client = HttpClients.custom()
 			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
 			        		    .build();
-	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/get_bvc_install").toString();
+
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/install").toString();
+	        System.out.println(url);
 			HttpPost httpPost = new HttpPost(url);
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
-			formparams.add(new BasicNameValuePair("relative_path", deployment.getInstallFullPath()));  
-			formparams.add(new BasicNameValuePair("config", configBuffer.toString()));  
+			formparams.add(new BasicNameValuePair("path",deployment.getInstallFullPath()));  
+			formparams.add(new BasicNameValuePair("config", configBuffer.toString()));
+		
+			/*JSONObject params = new JSONObject();
+			params.put("path", deployment.getInstallFullPath());
+			params.put("config", configBuffer.toString());
+			
+			StringEntity entity = new StringEntity(params.toJSONString());
+			httpPost.setEntity(entity);*/
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
 			
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+            httpPost.setConfig(requestConfig);
+            
 			CloseableHttpResponse response = client.execute(httpPost);
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
@@ -365,13 +393,17 @@ public class ServiceDeploymentService {
 	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
 	        client = HttpClients.custom()
 			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
 			        		    .build();
-			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/bvc_uninstall").toString();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/bvc_uninstall_with_path").toString();
 			HttpPost httpPost = new HttpPost(url);
 			
-			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
-			formparams.add(new BasicNameValuePair("relative_path", deployment.getInstallFullPath()));  
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>(); 
+			formparams.add(new BasicNameValuePair("path", deployment.getInstallFullPath()));  
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+            httpPost.setConfig(requestConfig);
 			
 			CloseableHttpResponse response = client.execute(httpPost);
 			int code = response.getStatusLine().getStatusCode();

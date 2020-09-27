@@ -30,6 +30,7 @@ define([
         },
         taskId: '',
         totleRecord: '0',
+        totalSizeMb: '',
         downloadTable: {
           data: [],
           page: {
@@ -40,7 +41,7 @@ define([
           prependRow: ''
         },
         condition: {
-          mode: 'MANUAL',
+          mode: 'ALL',
           device: '',
           deviceName: '',
           timeScope: ''
@@ -182,7 +183,7 @@ define([
       getTotle: function (params) {
         var self = this;
         var condition = {
-          mode: '',
+          mode: 'ALL',
           device: '',
           currentPage: 1,
           pageSize: self.table.page.pageSize
@@ -208,6 +209,7 @@ define([
         ajax.post('/monitor/record/load', condition, function (data) {
           var total = data.total;
           var rows = data.rows;
+          self.totalSizeMb = data.totalSizeMb;
           self.table.page.currentPage = currentPage;
           self.table.page.total = total;
           if (self.table.prependRow) {
@@ -400,7 +402,6 @@ define([
 
           }
           task.timeQuantum = timeSegmentObj;
-          task.totalSizeMb = addRecord.totalSizeMb;
         }
         if (self.dialog.addRecord.timeScope && self.dialog.addRecord.timeScope.length > 0) {
           var datetimePatten = 'yyyy-MM-dd HH:mm:ss';
@@ -499,36 +500,28 @@ define([
         });
       },
       handleTotalSizeMb() {
-        {
-          this.$prompt('请输入磁盘大小(GB)', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputPattern: /\d/,
-            inputErrorMessage: '磁盘大小只能为数字！'
-          }).then(({
-            value
-          }) => {
-            this.dialog.addRecord.totalSizeMb = value
-            ajax.post('/monitor/record/total/size', {
-              totalSizeMb: value
-            }, function (data) {
-              if (data.status == 200) {
-                self.$message({
-                  type: 'success',
-                  message: '设置成功！'
-                });
-              } else {
-                self.$message({
-                  type: 'warning',
-                  message: data.message
-                });
-              }
-
+        var self = this;
+        this.$prompt('请输入磁盘大小(GB)', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: /\d/,
+          inputErrorMessage: '磁盘大小只能为数字！'
+        }).then(({
+          value
+        }) => {
+          self.totalSizeMb = value;
+          ajax.post('/monitor/record/total/size', {
+            totalSizeMb: value
+          }, function (data) {
+            self.$message({
+              type: 'success',
+              message: '设置成功！'
             });
-          }).catch(() => {
-
           });
-        }
+        }).catch(() => {
+
+        });
+
       }
     },
     mounted: function () {
