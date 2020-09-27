@@ -123,6 +123,7 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 	@Override
 	public AudioParametersVO set(AudioParametersPO entity) throws Exception {
 		this.setGuideId(entity.getGuideId());
+		this.setId(entity.getId());
 		this.setCodingFormat(entity.getCodingFormat()!= null ? entity.getCodingFormat().toString(): null);
 		this.setCodingFormatName(entity.getCodingFormat()!= null ? entity.getCodingFormat().getName(): null);
 		this.setChannelLayout(entity.getChannelLayout()!= null ? entity.getChannelLayout().toString(): null);

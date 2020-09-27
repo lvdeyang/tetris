@@ -157,6 +157,7 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 	@Override
 	public VideoParametersVO set(VideoParametersPO entity) throws Exception {
 		this.setGuideId(entity.getGuideId());
+		this.setId(entity.getId());
 		this.setCodingObject(entity.getCodingObject()!= null ? entity.getCodingObject().toString(): null);
 		this.setCodingObjectName(entity.getCodingObject()!= null ? entity.getCodingObject().getName(): null);
 		this.setFps(entity.getFps());
