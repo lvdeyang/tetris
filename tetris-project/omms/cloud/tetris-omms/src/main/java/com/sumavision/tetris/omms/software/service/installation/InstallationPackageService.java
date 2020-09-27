@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -89,13 +90,10 @@ public class InstallationPackageService {
 	        while ((rc = block.read(buff, 0, buffSize)) > 0) {  
 	            out.write(buff, 0, rc);  
 	        }  
-			
-			int lastPointIndex = installationPackage.getName().lastIndexOf(".");
-			String suffix = installationPackage.getName().substring(lastPointIndex, installationPackage.getName().length());
-			String zipRoot = installationPackage.getName().replace(suffix, "");
-			
+	        
 			zipFile = new ZipFile(testFile);
-			ZipEntry versionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("/version.ini").toString());
+			String zipRoot = zipFile.entries().nextElement().getName();
+			ZipEntry versionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("version.ini").toString());
 			if(versionFile == null){
 				throw new VersionIniNotFoundException();
 			}
@@ -115,7 +113,7 @@ public class InstallationPackageService {
 			packageEntity.setFileName(installationPackage.getName());
 			installationPackageDao.save(packageEntity);
 			
-			ZipEntry configDescriptionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("/config.description.json").toString());
+			ZipEntry configDescriptionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("config.description.json").toString());
 			if(configDescriptionFile != null){
 				List<PropertiesPO> properties = new ArrayList<PropertiesPO>();
 				String configDescription = FileUtil.readAsString(zipFile.getInputStream(configDescriptionFile));
