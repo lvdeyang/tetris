@@ -69,7 +69,8 @@ public class ServiceDeploymentQuery {
 			ServiceTypePO serviceTypePO = serviceTypeDao.findOne(serviceDeploymentPO.getServiceTypeId());
 			installationPackagePOs.add(installationPackagePO);
 			serviceTypePOs.add(serviceTypePO);
-			row.setServerId(serviceDeploymentPO.getServerId())
+			row.setId(serviceDeploymentPO.getId())
+			.setServerId(serviceDeploymentPO.getServerId())
 			.setServiceTypeId(serviceDeploymentPO.getServiceTypeId())
 			.setInstallationPackageId(serviceDeploymentPO.getInstallationPackageId())
 			.setInstallFullPath(serviceDeploymentPO.getInstallFullPath())

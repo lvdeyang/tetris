@@ -70,6 +70,11 @@ define([
                         currentDeployment:'',
                         properties:[],
                         loading:false
+                    },
+                    editProperties:{
+                        visible:false,
+                        properties:[],
+                        loading:false
                     }
                 }
             },
@@ -292,15 +297,15 @@ define([
                                 }, function(data, status){
                                     instance.confirmButtonLoading = false;
                                     if(status !== 200) return;
-                                    for(var i=0; i<self.table.data.length; i++){
-                                        if(self.table.data[i].id === row.id){
-                                            self.table.data.splice(i, 1);
+                                    for(var i=0; i<self.table.rows.length; i++){
+                                        if(self.table.rows[i].id === row.id){
+                                            self.table.rows.splice(i, 1);
                                             break;
                                         }
                                     }
-                                    self.table.page.total -= 1;
-                                    if(self.table.total>0 && self.table.data.length===0){
-                                        self.load(self.table.page.currentPage - 1);
+                                    self.table.total -= 1;
+                                    if(self.table.total>0 && self.table.rows.length===0){
+                                        self.load(self.table.currentPage - 1);
                                     }
                                     done();
                                 }, null, ajax.NO_ERROR_CATCH_CODE);

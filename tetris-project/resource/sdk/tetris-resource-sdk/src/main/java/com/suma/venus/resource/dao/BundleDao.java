@@ -196,4 +196,6 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	@Query(value="select * from bundlepo where device_model=?1 and user_id=?2",nativeQuery=true)
 	public List<BundlePO> findByDeviceModelAndUserId(String deviceModel,String userId);
+	
+	public List<BundlePO> findByDeviceModelIn(Collection<String> deviceModel);
 }

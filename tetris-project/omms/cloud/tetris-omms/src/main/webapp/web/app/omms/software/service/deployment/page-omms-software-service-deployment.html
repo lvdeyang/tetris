@@ -152,7 +152,7 @@
             </div>
 
             <div v-if="dialog.step.active===1" style="max-height:426px;">
-                <el-scrollbar v-if="dialog.step.properties.length>0" style="height:100%;">
+                <el-scrollbar v-if="dialog.step.properties.length>0" style="height: 400px;">
                     <div style="margin-top:20px; margin-bottom:20px;">
                         <el-row>
                             <el-col :span="11" v-for="(property, index) in dialog.step.properties" :offset="index%2==0?0:1" :key="property.id">
@@ -186,7 +186,8 @@
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="small" v-if="dialog.step.currentDeployment.error || dialog.step.active===3" @click="handleStepClose">关闭</el-button>
-                <el-button size="small" type="primary" v-if="dialog.step.active===1" @click="handleInstall">安装</el-button>
+                <!--v-if="dialog.step.active===1"-->
+                <el-button size="small" v-if="dialog.step.active===1" type="primary" @click="handleInstall">安装</el-button>
             </span>
         </el-dialog>
 

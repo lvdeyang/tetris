@@ -61,6 +61,9 @@
                                         <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end">
                                             <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                         </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="分屏" placement="bottom-end">
+                                            <el-button type="text" icon="icon-th" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowLayout(scope)"></el-button>
+                                        </el-tooltip>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -108,6 +111,99 @@
                         highlight-current
                         :data="dialog.selectLayout.data">
                 </el-tree>
+            </div>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="true"
+                title="布局排版"
+                :visible.sync="dialog.layout.visible"
+                width="80%"
+                :before-close="handleLayoutClose"
+                >
+            <div>
+                <el-scrollbar style="max-height:400px;">
+                    <el-table
+                            :data="dialog.layout.table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <!--<el-table-column-->
+                                <!--type="selection"-->
+                                <!--width="55">-->
+                        <!--</el-table-column>-->
+                        <el-table-column
+                                label="屏幕"
+                                prop="screenPrimaryKey">
+                        </el-table-column>
+                        <el-table-column
+                                label="左边距(/10000)">
+                            <template slot-scope="scope">{{scope.row.x||0}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="上边距(/10000)">
+                            <template slot-scope="scope">{{scope.row.y||0}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="宽(/10000)">
+                            <template slot-scope="scope">{{scope.row.width||0}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="高(/10000)">
+                            <template slot-scope="scope">{{scope.row.height||0}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="涂层">
+                            <template slot-scope="scope">{{scope.row.zIndex||0}}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="200">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="绑定" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-circle-plus" style="font-size:20px; padding:0;" @click="handleRowBind(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="解除绑定" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-remove" style="font-size:20px; padding:0;" @click="handleRowUnbind(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="true"
+                title="合屏"
+                :visible.sync="dialog.combine.visible"
+                width="40%"
+                :before-close="handleCombineClose"
+                >
+            <div>
+                <el-scrollbar style="max-height:400px;">
+                    <el-table
+                            :data="dialog.combine.table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <!--<el-table-column-->
+                                <!--type="selection"-->
+                                <!--width="55">-->
+                        <!--</el-table-column>-->
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="55">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="绑定合屏" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-check" style="font-size:20px; padding:0;" @click="handleRowCombine(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
             </div>
         </el-dialog>
 

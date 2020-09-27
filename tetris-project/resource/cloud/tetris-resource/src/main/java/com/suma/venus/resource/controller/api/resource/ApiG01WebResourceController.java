@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.service.ApiResourceService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
@@ -42,8 +43,12 @@ public class ApiG01WebResourceController {
 		
 		String bundleIp = requestWrapper.getString("bundleIp");
 		String daId = requestWrapper.getString("daId");
+		String location = requestWrapper.getString("location");
+		String group = requestWrapper.getString("group");
+		String type = requestWrapper.getString("type");
 		
-		return apiResourceService.addG01Bundle(bundleIp, daId);
+		
+		return apiResourceService.addG01Bundle(bundleIp, daId,location,group,type);
 	}
 	
 	/**
@@ -87,6 +92,33 @@ public class ApiG01WebResourceController {
 		apiResourceService.deleteG01Bundle(bundleId);
 		
 		return null;
+	}
+	
+	/**
+	 * 更新g01设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月24日 上午9:53:19
+	 * @param String bundleId  设备id
+	 * @param String location 设备地址，经纬度
+	 * @param String group 设备分组
+	 * @param String type 设备类型
+	 * @return
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/bundle/update")
+	public Object bundleUpdate(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		
+		String bundleId = requestWrapper.getString("bundleId");
+		String location = requestWrapper.getString("location");
+		String group = requestWrapper.getString("group");
+		String type = requestWrapper.getString("type");
+		
+		return apiResourceService.updateG01Bundle(bundleId,location,group,type);
+		
 	}
 	
 }
