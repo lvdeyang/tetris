@@ -81,7 +81,15 @@ public class GuidePlayService {
 	public void start(Long guideId) throws Exception{
 		//1.创建源：呼叫5G背包；打开虚拟源地址
 //		GuidePO guidePo=guideDao.findOne(guideId);
-		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
+		List<SourcePO> sourceListTemp=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
+		
+		List<SourcePO> sourceList=new ArrayList<SourcePO>();
+		
+		for(SourcePO source:sourceListTemp){
+			if(source.getSource()!=null){
+				sourceList.add(source);
+			}
+		}
 		
 		//虚拟源相关的集合
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
@@ -107,7 +115,14 @@ public class GuidePlayService {
 			JSONObject pass_by_content=new JSONObject();
 			source.getSource();
 			pass_by_content.put("url", source.getSource());
-			pass_by_content.put("type","udp_ts");
+			
+			if(source.getSource().contains("udp")){
+				pass_by_content.put("type","udp_ts");
+			}else{
+				pass_by_content.put("type","srt_ts");
+				pass_by_content.put("mode", Mode.CALLER.getCode()); //目前先写死
+			}
+			
 			passBy.setPass_by_content(pass_by_content);
 			
 			return passBy;
@@ -240,7 +255,15 @@ public class GuidePlayService {
 		//1.删除源
 		//删除虚拟源
 		GuidePO guidePo=guideDao.findOne(guideId);
-		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
+		List<SourcePO> sourcess=sourceDao.findByGuideIdOrderBySourceNumber(guideId);
+		
+		List<SourcePO> sourceList =new ArrayList<SourcePO>();
+		for(SourcePO source:sourcess){
+			if(source.getSource()!=null){
+				sourceList.add(source);
+			}
+		}
+		
 		List<SourcePO> virtualSources=sourceList.stream().filter(source->{
 			if(source.getSourceType().equals(SourceType.URL)){
 				return true;
@@ -586,7 +609,15 @@ public class GuidePlayService {
 		passBy.setType("CreateTask");
 		
 		//sources开始
-		List<SourcePO> sources=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
+		
+		List<SourcePO> sources=new ArrayList<SourcePO>();
+		for(SourcePO source:sourceList){
+			if(source.getSource()!=null){
+				sources.add(source);
+			}
+		}
+		
 		List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
 		for(SourcePO sourcePo:sources){
 			
@@ -743,5 +774,20 @@ public class GuidePlayService {
 		return passBys;
 	}
 	
+	enum Mode{
+		CALLER("caller"),
+		LISTENER("listener");
+		
+		private String code;
+		
+		private Mode(String code){
+			this.code=code;
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+	}
 }
 
