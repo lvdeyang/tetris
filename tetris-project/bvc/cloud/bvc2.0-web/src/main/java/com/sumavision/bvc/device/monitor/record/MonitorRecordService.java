@@ -894,7 +894,7 @@ public class MonitorRecordService {
 		if (task == null)
 			return;
 
-		if (userId.longValue() == 1 && user.getIsGroupCreator()) {
+		if (userId.longValue() == 1 || user.getIsGroupCreator()) {
 			userId = task.getUserId();
 		}
 
@@ -1176,7 +1176,7 @@ public class MonitorRecordService {
 														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)))
 														.setStore_mode(task.getMode().getCode());
 		}else if(MonitorRecordMode.CYCLE.equals(task.getMode())){
-			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb())).setStore_mode(task.getMode().getCode());
+			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb() *1024)).setStore_mode(task.getMode().getCode());
 		}else if(MonitorRecordMode.MANUAL.equals(task.getMode())){
 			recordSet.setStore_mode(task.getMode().getCode());
 		}
@@ -1216,8 +1216,8 @@ public class MonitorRecordService {
 		//处理排期额外添加开始
 		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
 		recordSet.setCycle(new RecordCycleBO()
-				.setTotal_size_mb(totalSizeMb))
-		        .setStore_mode(task.getMode().getName())
+				.setTotal_size_mb(totalSizeMb * 1024))
+		        .setStore_mode(task.getMode().getCode())
 		        .setTime_segment(timeSegment);;
 		//添加结束
 		

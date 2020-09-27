@@ -171,7 +171,7 @@ export default {
       ],
       deviceModelOptions: [],
       filters: {
-        deviceModel: '',
+        deviceModel: 'encoder', //默认查询编码器
         keyword: '',
         bindType: 'all',
         countPerPage: ''
@@ -309,139 +309,50 @@ export default {
       )
     },
     handleCheckReadAllChange: function (val) {
-      if (this.resourceTableShow) { // 设备
-        if (val) {
-          for (let resource of this.resources) {
-            this.readChecks.push(resource.bundleId)
-            resource.hasReadPrivilege = true
-          }
-        } else {
-          this.readChecks = []
-          for (let resource of this.resources) {
-            resource.hasReadPrivilege = false
-          }
-        }
-      } else if (this.userTableShow) { // 用户
-        if (val) {
-          for (let user of this.users) {
-            this.readChecks.push(user.userNo)
-            user.hasReadPrivilege = true
-          }
-        } else {
-          this.readChecks = []
-          for (let user of this.users) {
-            user.hasReadPrivilege = false
-          }
-        }
-      }
+      this.checkAllChange(val, 'readChecks', 'hasReadPrivilege')
     },
     handleCheckWriteAllChange: function (val) {
-      if (this.resourceTableShow) { // 设备
-        if (val) {
-          for (let resource of this.resources) {
-            this.writeChecks.push(resource.bundleId)
-            resource.hasWritePrivilege = true
-          }
-        } else {
-          this.writeChecks = []
-          for (let resource of this.resources) {
-            resource.hasWritePrivilege = false
-          }
-        }
-      } else if (this.userTableShow) { // 用户
-        if (val) {
-          for (let user of this.users) {
-            this.writeChecks.push(user.userNo)
-            user.hasWritePrivilege = true
-          }
-        } else {
-          this.writeChecks = []
-          for (let user of this.users) {
-            user.hasWritePrivilege = false
-          }
-        }
-      }
+      this.checkAllChange(val, 'writeChecks', 'hasWritePrivilege')
+
     },
     handleCheckCloudAllChange: function (val) {
-      if (this.resourceTableShow) {   //设备
-        if (val) {
-          for (let resource of this.resources) {
-            this.cloudChecks.push(resource.bundleId)
-            resource.hasCloudPrivilege = true;
-          }
-        } else {
-          this.cloudChecks = []
-          for (let resource of this.resources) {
-            resource.hasCloudPrivilege = false
-          }
-        }
-      } else if (this.userTableShow) { // 用户
-        if (val) {
-          for (let user of this.users) {
-            this.cloudChecks.push(user.userNo)
-            user.hasCloudPrivilege = true
-          }
-        } else {
-          this.cloudChecks = []
-          for (let user of this.users) {
-            user.hasCloudPrivilege = false
-          }
-        }
-      }
+      this.checkAllChange(val, 'cloudChecks', 'hasCloudPrivilege')
     },
     //下载
     handleCheckDownLoadAllChange: function (val) {
-      console.log(val)
-      if (this.resourceTableShow) {   //设备
-        if (val) {
-          for (let resource of this.resources) {
-            this.downloadChecks.push(resource.bundleId)
-            resource.hasDownloadPrivilege = true;
-          }
-        } else {
-          this.downloadChecks = []
-          for (let resource of this.resources) {
-            resource.hasDownloadPrivilege = false
-          }
-        }
-      } else if (this.userTableShow) { // 用户
-        if (val) {
-          for (let user of this.users) {
-            this.downloadChecks.push(user.userNo)
-            user.hasDownloadPrivilege = true
-          }
-        } else {
-          this.downloadChecks = []
-          for (let user of this.users) {
-            user.hasDownloadPrivilege = false
-          }
-        }
-      }
+      this.checkAllChange(val, 'downloadChecks', 'hasDownloadPrivilege')
     },
     // 本地录制
     handleCheckLocalReadAllChange: function (val) {
+      this.checkAllChange(val, 'LocalReadChecks', 'hasLocalReadPrivilege')
+
+    },
+    // 全选方法
+    checkAllChange: function (val, checks, hasPrivilege) {
       if (this.resourceTableShow) {   //设备
         if (val) {
+          this[checks] = []
           for (let resource of this.resources) {
-            this.LocalReadChecks.push(resource.bundleId)
-            resource.hasLocalReadPrivilege = true;
+            this[checks].push(resource.bundleId)
+            resource[hasPrivilege] = true;
           }
         } else {
-          this.LocalReadChecks = []
+          this[checks] = []
           for (let resource of this.resources) {
-            resource.hasLocalReadPrivilege = false
+            resource[hasPrivilege] = false
           }
         }
       } else if (this.userTableShow) { // 用户
         if (val) {
+          this[checks] = []
           for (let user of this.users) {
-            this.LocalReadChecks.push(user.userNo)
-            user.hasLocalReadPrivilege = true
+            this[checks].push(user.userNo)
+            user[hasPrivilege] = true
           }
         } else {
-          this.LocalReadChecks = []
+          this[checks] = []
           for (let user of this.users) {
-            user.hasLocalReadPrivilege = false
+            user[hasPrivilege] = false
           }
         }
       }
@@ -492,126 +403,44 @@ export default {
       }
     },
     handleCheckReadChange: function (row) {
-      if (this.resourceTableShow) {
-        if (row.hasReadPrivilege) {
-          this.readChecks.push(row.bundleId)
-          // 全选判断
-          if (this.readChecks.length === this.resources.length) {
-            this.checkReadAll = true
-          }
-        } else {
-          this.readChecks.splice(this.readChecks.indexOf(row.bundleId), 1)
-          this.checkReadAll = false
-        }
-      } else if (this.userTableShow) {
-        if (row.hasReadPrivilege) {
-          this.readChecks.push(row.userNo)
-          // 全选判断
-          if (this.readChecks.length === this.users.length) {
-            this.checkReadAll = true
-          }
-        } else {
-          this.readChecks.splice(this.readChecks.indexOf(row.userNo), 1)
-          this.checkReadAll = false
-        }
-      }
+      this.checkChange(row, 'hasReadPrivilege', 'readChecks', 'checkReadAll')
     },
     handleCheckWriteChange: function (row) {
-      if (this.resourceTableShow) {
-        if (row.hasWritePrivilege) {
-          this.writeChecks.push(row.bundleId)
-          if (this.writeChecks.length === this.resources.length) {
-            this.checkWriteAll = true
-          }
-        } else {
-          this.writeChecks.splice(this.writeChecks.indexOf(row.bundleId), 1)
-          this.checkWriteAll = false
-        }
-      } else if (this.userTableShow) {
-        if (row.hasWritePrivilege) {
-          this.writeChecks.push(row.userNo)
-          // 全选判断
-          if (this.writeChecks.length === this.users.length) {
-            this.checkWriteAll = true
-          }
-        } else {
-          this.writeChecks.splice(this.writeChecks.indexOf(row.userNo), 1)
-          this.checkWriteAll = false
-        }
-      }
+      this.checkChange(row, 'hasWritePrivilege', 'writeChecks', 'checkWriteAll')
     },
     handleCheckCloudChange: function (row) {
-      if (this.resourceTableShow) {
-        if (row.hasCloudPrivilege) {
-          this.cloudChecks.push(row.bundleId)
-          if (this.cloudChecks.length === this.resources.length) {
-            this.checkCloudAll = true
-          }
-        } else {
-          this.cloudChecks.splice(this.cloudChecks.indexOf(row.bundleId), 1)
-          this.checkCloudAll = false
-        }
-      } else if (this.userTableShow) {
-        if (row.hasCloudPrivilege) {
-          this.cloudChecks.push(row.userNo)
-          // 全选判断
-          if (this.cloudChecks.length === this.users.length) {
-            this.checkCloudAll = true
-          }
-        } else {
-          this.cloudChecks.splice(this.cloudChecks.indexOf(row.userNo), 1)
-          this.checkCloudAll = false
-        }
-      }
+      this.checkChange(row, 'hasCloudPrivilege', 'cloudChecks', 'checkCloudAll')
     },
     // 下载
     handleCheckDownLoadChange: function (row) {
-      if (this.resourceTableShow) {
-        if (row.hasDownloadPrivilege) {
-          this.downloadChecks.push(row.bundleId)
-          if (this.downloadChecks.length === this.resources.length) {
-            this.checkDownLoadAll = true
-          }
-        } else {
-          this.downloadChecks.splice(this.downloadChecks.indexOf(row.bundleId), 1)
-          this.checkDownLoadAll = false
-        }
-      } else if (this.userTableShow) {
-        if (row.hasDownloadPrivilege) {
-          this.downloadChecks.push(row.userNo)
-          // 全选判断
-          if (this.downloadChecks.length === this.users.length) {
-            this.checkDownLoadAll = true
-          }
-        } else {
-          this.downloadChecks.splice(this.downloadChecks.indexOf(row.userNo), 1)
-          this.checkDownLoadAll = false
-        }
-      }
+      this.checkChange(row, 'hasDownloadPrivilege', 'downloadChecks', 'checkDownLoadAll')
     },
 
     // 本地录制
     handleCheckLocalReadChange: function (row) {
+      this.checkChange(row, 'hasLocalReadPrivilege', 'LocalReadChecks', 'checkLocalReadAll')
+    },
+    // 单选方法
+    checkChange: function (row, hasPrivilege, checks, checkAll) {
       if (this.resourceTableShow) {
-        if (row.hasLocalReadPrivilege) {
-          this.LocalReadChecks.push(row.bundleId)
-          if (this.LocalReadChecks.length === this.resources.length) {
-            this.checkLocalReadAll = true
+        if (row[hasPrivilege]) {
+          this[checks].push(row.bundleId)
+          if (this[checks].length === this.resources.length) {
+            this[checkAll] = true
           }
         } else {
-          this.LocalReadChecks.splice(this.LocalReadChecks.indexOf(row.bundleId), 1)
-          this.checkLocalReadAll = false
+          this[checks].splice(this[checks].indexOf(row.bundleId), 1)
+          this[checkAll] = false
         }
       } else if (this.userTableShow) {
-        if (row.hasLocalReadPrivilege) {
-          this.LocalReadChecks.push(row.userNo)
-          // 全选判断
-          if (this.LocalReadChecks.length === this.users.length) {
-            this.checkLocalReadAll = true
+        if (row[hasPrivilege]) {
+          this[checks].push(row.userNo)
+          if (this[checks].length === this.user.length) {
+            this[checkAll] = true
           }
         } else {
-          this.LocalReadChecks.splice(this.LocalReadChecks.indexOf(row.userNo), 1)
-          this.checkLocalReadAll = false
+          this[checks].splice(this[checks].indexOf(row.userNo), 1)
+          this[checkAll] = false
         }
       }
     },
@@ -776,7 +605,7 @@ export default {
               this.prevDownloadChecks.push(resource.bundleId)
               this.downloadChecks.push(resource.bundleId)
             }
-            if (resource.hasvLocalReadPrivilege) {
+            if (resource.hasLocalReadPrivilege) {
               this.prevLocalReadChecks.push(resource.bundleId)
               this.LocalReadChecks.push(resource.bundleId)
             }
@@ -792,8 +621,6 @@ export default {
           if (this.cloudChecks.length === this.resources.length) {
             this.checkCloudAll = true
           }
-
-
           if (this.downloadChecks.length === this.resources.length) {
             this.checkDownLoadAll = true
           }
