@@ -34,6 +34,7 @@ define([
           isCreate: false,
           editId: '',
           form: {
+            id: '',
             titleName: '',
             beginTime: '',
             isCurrentTask: true
@@ -43,7 +44,7 @@ define([
         activeName: '0',
         showBtn: true,
         row: '',
-        curTask: "05-XXX", //当前任务
+        curTask: "", //当前任务
         curId: 2
       }
     },
@@ -63,28 +64,43 @@ define([
           })
           return
         }
-        if (self.isCreate) {
+        if (self.dialog.isCreate) {
           ajax.post('/command/system/title/add', self.dialog.form, function (data) {
-            self.table.data.push(data)
+            // self.table.data.push(data)
+            self.$message({
+              type: 'success',
+              message: "新建任务成功！"
+            })
+            self.load(1)
+            self.dialog.visible = false;
           });
         } else {
           ajax.post('/command/system/title/edit', self.dialog.form, function (data) {
-            self.table.data.push(data)
+            // self.table.data.push(data)
+            self.$message({
+              type: 'success',
+              message: "修改任务成功！"
+            })
+            self.load(1)
+            self.dialog.visible = false;
           });
         }
       },
 
       addTask: function () {
         this.dialog.visible = true;
-        this.isCreate = true;
+        this.dialog.isCreate = true;
         this.dialog.title = "新建任务"
       },
       editTask: function (row) {
         this.dialog.visible = true;
-        this.isCreate = false;
+        this.dialog.isCreate = false;
         this.dialog.editId = row.id;
         this.dialog.title = "修改任务";
-        this.dialog.form = row;
+        this.dialog.form.titleName = row.titleName;
+        this.dialog.form.beginTime = row.beginTime;
+        this.dialog.form.isCurrentTask = row.currentTask;
+        this.dialog.form.id = row.id;
       },
       // 取消
       cancel: function () {
@@ -95,8 +111,18 @@ define([
       },
       // 设为当前任务
       setCur: function (row) {
-        this.curTask = row.titleName;
-        this.curId = row.id;
+        var self = this;
+        row.isCurrentTask = true;
+        ajax.post('/command/system/title/edit', row, function (data) {
+          // self.table.data.push(data)
+          self.$message({
+            type: 'success',
+            message: "设置当前任务成功！"
+          })
+          self.load(1)
+        });
+        self.curTask = row.titleName;
+        self.curId = row.id;
       },
       tableRowClass: function ({
         row,
@@ -124,7 +150,7 @@ define([
           pageSize: self.table.page.pageSize,
           currentPage: current
         }
-
+        self.table.data = [];
         ajax.post('/command/system/title/query', condition, function (data) {
           var total = data.total;
           var rows = data.rows;
@@ -132,7 +158,12 @@ define([
           self.table.page.total = total;
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
+              if (rows[i].currentTask) {
+                self.curTask = rows[i].titleName;
+                self.curId = rows[i].id;
+              }
               self.table.data.push(rows[i]);
+
             }
           }
 
