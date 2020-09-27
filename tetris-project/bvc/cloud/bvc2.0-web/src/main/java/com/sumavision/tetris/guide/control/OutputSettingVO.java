@@ -120,6 +120,7 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	
 	@Override
 	public OutputSettingVO set(OutputSettingPO entity) throws Exception {
+		this.setId(entity.getId());
 		this.setName(entity.getName());
 		this.setOutputProtocol(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().toString(): null);
 		this.setOutputProtocolName(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().getName(): null);
