@@ -259,7 +259,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 	public int countByRecordUserIdAndStatusNotAndStartTimeBetween(Long userId, MonitorRecordStatus status, Date scopeStartTime, Date scopeEndTime);
 	
 	/**
-	 * 根据条件查询录制<br/>
+	 * 根据条件查询正在运行的录制<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月17日 下午7:11:00
@@ -305,8 +305,53 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 			Pageable pageable);
 	
 	/**
-	 * 根据条件查询录制<br/>
-	 * <b>作者:</b>lvdeyang<br/>
+	 * 根据条件查询所有未完成的录制<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午7:11:00
+	 * @param String videoBundleId 录制设备id
+	 * @param Date startTime 开始时间下限
+	 * @param Date endTime 开始时间上限
+	 * @param String userId 执行业务用户id
+	 * @param String status 录制执行状态
+	 * @param Pageable pageable 分页信息
+	 * @return List<MonitorRecordPO> 录制列表
+	 */
+	@Query(
+		value = "SELECT * FROM BVC_MONITOR_RECORD WHERE " + 
+				"mode IS NOT NULL " + 
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
+				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " + 
+				"AND STATUS<>?6 \n#pageable\n",
+		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
+				"mode IS NOT NULL " + 
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) "+
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
+				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+				"AND STATUS<>?6",
+		nativeQuery = true
+	)
+	public Page<MonitorRecordPO> findAllByConditions(
+//			String mode,
+			String fileNameReg,
+			String videoBundleId,
+			Date startTime,
+			Date endTime,
+			Long userId,
+			String status,
+			Long recordUserId,
+			Pageable pageable);
+	
+	/**
+	 * 根据条件查询mode对应所有状态录制任务<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月17日 下午7:11:00
 	 * @param String mode 录制模式
@@ -320,27 +365,73 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 	 */
 	@Query(
 		value = "SELECT * FROM BVC_MONITOR_RECORD WHERE " + 
-				"mode IS NOT NULL " + 
+				"mode=?1 " + 
 				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
 				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6)" +
 				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
-				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
-				"AND STATUS<>?6 \n#pageable\n",
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
+				"\n#pageable\n",
 		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
-				"mode IS NOT NULL " + 
+				"mode=?1 " + 
 				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
 				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6)" +
 				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
-				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
-				"AND STATUS<>?6",
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " ,
 		nativeQuery = true
 	)
-	public Page<MonitorRecordPO> findAllByConditions(
-//			String mode,
+	public Page<MonitorRecordPO> findByConditionsAndStatus(
+			String mode,
+			String videoBundleId,
+			Date startTime,
+			Date endTime,
+			Long userId,
+			String status,
+			Long recordUserId,
+			String fileNameReg,
+			Pageable pageable);
+	
+	/**
+	 * 根据条件查询所有mode的所有状态录制任务<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午7:11:00
+	 * @param String videoBundleId 录制设备id
+	 * @param Date startTime 开始时间下限
+	 * @param Date endTime 开始时间上限
+	 * @param String userId 执行业务用户id
+	 * @param String status 录制执行状态
+	 * @param Pageable pageable 分页信息
+	 * @return List<MonitorRecordPO> 录制列表
+	 */
+	@Query(
+		value = "SELECT * FROM BVC_MONITOR_RECORD WHERE " + 
+				"mode IS NOT NULL " + 
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) " +
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
+				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+				"AND IF(?7 IS NULL OR ?6='', TRUE, RECORD_USER_ID=?7) " + 
+				"\n#pageable\n",
+		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
+				"mode IS NOT NULL " + 
+				"AND IF(?1 IS NULL OR ?1='', TRUE, FILE_NAME like ?1) "+
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
+				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+				"AND IF(?7 IS NULL OR ?6='', TRUE, RECORD_USER_ID=?7) " ,
+		nativeQuery = true
+	)
+	public Page<MonitorRecordPO> findAllByConditionsAndStatus(
 			String fileNameReg,
 			String videoBundleId,
 			Date startTime,

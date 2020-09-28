@@ -269,6 +269,136 @@ public class MonitorRecordController {
 	}
 	
 	/**
+	 * 根据条件分页查询所有状态录制任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午7:35:49
+	 * @param String mode 录制模式
+	 * @param String fileName 文件名称
+	 * @param String deviceType 如果为user device为用户id
+	 * @param String device 设备id
+	 * @param String startTime 开始录制时间下限
+	 * @param String endTime 开始录制时间上限
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return total long 总数据量
+	 * @return rows List<MonitorRecordTaskVO> 任务列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all/status/record")
+	public Object loadAllStatusRecord(
+			String mode,
+			String fileName,
+			String deviceType,
+			String device,
+			String startTime,
+			String endTime,
+			int currentPage,
+			int pageSize,
+			String status,
+			HttpServletRequest request) throws Exception{
+		
+		if("".equals(device)) device = null;
+		
+		String fileNameReg = null;
+		if(fileName!=null && !"".equals(fileName)){
+			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
+		}
+		
+		com.sumavision.tetris.user.UserVO user = userQuery.current();
+		
+		//获取userId
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		Date parsedStartTime = null;
+		if(startTime != null){
+			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
+		}
+		
+		Date parsedEndTime = null;
+		if(endTime != null){
+			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
+		}
+		
+		long total = 0;
+		List<MonitorRecordPO> entities = null;
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		
+		if("user".equals(deviceType)){
+			if("ALL".equals(mode)){
+				//对所有类型进行筛选
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
+							fileNameReg, null, parsedStartTime, parsedEndTime, 
+														null, status, Long.valueOf(device), page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
+							fileNameReg, null, parsedStartTime, parsedEndTime, 
+														userId, status, Long.valueOf(device), page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
+				
+			}else{
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+														mode, null, parsedStartTime, parsedEndTime, 
+														null, status, Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+														mode, null, parsedStartTime, parsedEndTime, 
+														userId, status, Long.valueOf(device), fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
+			}
+		}else{
+			if("ALL".equals(mode)){
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
+							fileNameReg, device, parsedStartTime, parsedEndTime, 
+														null, status, null, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
+							fileNameReg, device, parsedStartTime, parsedEndTime, 
+														userId, status, null, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
+			}else{
+				if(userId.longValue()==1l || user.getIsGroupCreator()){
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+														mode, device, parsedStartTime, parsedEndTime, 
+														null,status, null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}else{
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+														mode, device, parsedStartTime, parsedEndTime, 
+														userId, status, null, fileNameReg, page);
+					total = pagedEntities.getTotalElements();
+					entities = pagedEntities.getContent();
+				}
+			}
+		}
+		
+		
+		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .put("totalSizeMb", systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb())
+												   .getMap();
+	
+	}
+	
+	/**
 	 * 根据条件分页查询录制任务<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -632,6 +762,14 @@ public class MonitorRecordController {
 		monitorRecordService.setTotalSize(totalSizeMb);
 		
 		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/detail/message/of/timesegment")
+	public Object detailMessageOfTimeSegment(Long id) throws Exception{
+		
+		return  monitorRecordService.getRecordRelation(id);
 	}
 	
 	/*@JsonBody
