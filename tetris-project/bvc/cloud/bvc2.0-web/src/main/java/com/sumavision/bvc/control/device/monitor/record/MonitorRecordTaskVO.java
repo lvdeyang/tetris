@@ -38,6 +38,18 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制用户号码 */
 	private String recordUserno;
 	
+	/** 录制状态*/
+	private String status;
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public MonitorRecordTaskVO setStatus(String status) {
+		this.status = status;
+		return this;
+	}
+
 	public String getFileName() {
 		return fileName;
 	}
@@ -131,6 +143,7 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	@Override
 	public MonitorRecordTaskVO set(MonitorRecordPO entity) throws Exception {
 		this.setId(entity.getId())
+			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setFileName(entity.getFileName())
@@ -146,4 +159,5 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 		return this;
 	}
 
+	
 }

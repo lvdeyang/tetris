@@ -2038,4 +2038,22 @@ public class MonitorRecordService {
 		systemConfigurationDao.save(congfiguration);
 		
 	}
+	
+	/**
+	 * 返回排期录制对应关系的VO<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月28日 下午3:41:31
+	 * @param business monitorrecord的id
+	 * @return
+	 * @throws Exception
+	 */
+	public MonitorRecordManyTimesRelationVO getRecordRelation(Long business) throws Exception{
+		MonitorRecordManyTimesRelationPO relationPo = monitorRecordManyTimesRelationDao.findByBusinessId(business);
+		if(relationPo==null){
+			return null;
+		}
+		MonitorRecordManyTimesRelationVO relationVo = new MonitorRecordManyTimesRelationVO().set(relationPo);
+		return relationVo;
+	}
 }
