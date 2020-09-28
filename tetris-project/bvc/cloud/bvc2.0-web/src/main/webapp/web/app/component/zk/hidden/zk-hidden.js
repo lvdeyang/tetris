@@ -346,7 +346,12 @@ define([
 	                        if(e.businessType === 'refreshPage'){
 	                        	self.qt.linkedWebview('historyMessage', {id: 'refreshPage', params: e.pageInfo});
 	                        }
-	                        
+
+                            //应急广播告警
+                            if(e.businessType === 'emergentBroadcastRelativeDevices'){
+                                self.qt.linkedWebview('rightBar', {id: 'emergentBroadcastRelativeDevices', params: e});
+                            }
+
 	                        //重复登录踢人---这个地方就叫businessId不叫businessType
 	                        if(e.businessId === 'forceOffLine'){
 	                        	self.qt.invoke('forceOffLine');

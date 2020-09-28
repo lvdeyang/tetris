@@ -1,6 +1,7 @@
 package com.suma.venus.resource.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,13 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.vo.BundleTreeVO;
+import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.G01BundleVO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -30,6 +37,12 @@ public class ApiResourceService extends ControllerBase{
 	
 	@Autowired
 	private FolderDao folderDao;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
 	
 
 	/**
@@ -272,5 +285,41 @@ public class ApiResourceService extends ControllerBase{
 		return roots;
 	}
 
-	
+	/**
+	 * 根据接入层节点查询设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月27日 下午5:47:27
+	 * @param worknodeId 接入层节点id
+	 * @return List<BundleVO> 设备列表
+	 */
+	public List<BundleVO> bundleList(String worknodeId)throws Exception{
+		Long id = Long.parseLong(worknodeId);
+		WorkNodePO workNodePO = workNodeDao.findOne(id);
+		List<BundlePO> bundlePOs = bundleDao.findByAccessNodeUid(workNodePO.getNodeUid());
+		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+		if(bundlePOs.size() != 0){
+			for (BundlePO bundlePO : bundlePOs) {
+				Map<String, Object> param = new HashMap<String, Object>();
+				List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleId(bundlePO.getId().toString());
+				if (extraInfoPOs.size() != 0) {
+					for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+						String name = extraInfoPO.getName();
+						String value = extraInfoPO.getValue();
+						param.put(name, value);
+					}
+					JSONObject jsonObject = new JSONObject(param);
+					BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+					bundleVO.setParam(jsonObject);
+					bundleVOs.add(bundleVO);
+				}else {
+					BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+					bundleVOs.add(bundleVO);
+					continue;
+				}
+			}
+		}else throw new BaseException(StatusCode.ERROR, "暂无可查询到的设备");
+		return bundleVOs;
+	}
+
 }
