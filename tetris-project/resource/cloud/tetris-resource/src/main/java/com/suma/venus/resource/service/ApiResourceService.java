@@ -3,6 +3,7 @@ package com.suma.venus.resource.service;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -152,7 +153,6 @@ public class ApiResourceService extends ControllerBase{
 	 */
 	public G01BundleVO updateG01Bundle(String bundleId,String location,String group,String type)throws Exception{
 		
-		Long bundle = Long.parseLong(bundleId);
 		String string = location.replace("，", ",");
 		String[] locat = string.split(",");
 		String longitude = locat[0];
@@ -171,7 +171,7 @@ public class ApiResourceService extends ControllerBase{
 			}
 		}
 		
-		BundlePO bundlePO = bundleDao.findOne(bundle);
+		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setLongitude(longitude);
 		bundlePO.setLatitude(latitude);
 		bundlePO.setFolderId(parentId);
@@ -214,7 +214,7 @@ public class ApiResourceService extends ControllerBase{
 		deviceModel.add("ts_monitor");
 		deviceModel.add("transmitter");
 		deviceModel.add("5G");
-//		deviceModel.add("default");//默认类型default
+		deviceModel.add("default");//默认类型default
 		
 		List<FolderPO> folders = folderDao.findAll();
 		if (folders.isEmpty()) {
@@ -271,5 +271,6 @@ public class ApiResourceService extends ControllerBase{
 		}
 		return roots;
 	}
+
 	
 }

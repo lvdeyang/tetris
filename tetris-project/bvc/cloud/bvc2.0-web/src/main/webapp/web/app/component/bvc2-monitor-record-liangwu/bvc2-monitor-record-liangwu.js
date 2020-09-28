@@ -416,7 +416,7 @@ define([
           if (self.dialog.addRecord.mode === self.condition.mode) {
             self.table.data.splice(0, 0, data);
           } else {
-            self.condition.mode = self.dialog.addRecord.mode;
+            // self.condition.mode = self.dialog.addRecord.mode;
             self.table.prependRow = data;
           }
           self.handleAddRecordClose();
@@ -505,6 +505,7 @@ define([
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           inputPattern: /\d/,
+          inputValue: self.totalSizeMb,
           inputErrorMessage: '磁盘大小只能为数字！'
         }).then(({
           value

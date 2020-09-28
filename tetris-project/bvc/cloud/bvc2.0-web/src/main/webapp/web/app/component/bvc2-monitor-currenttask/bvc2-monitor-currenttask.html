@@ -33,9 +33,9 @@
           </el-switch>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="addTaskSubmit" v-show="showBtn">创建任务</el-button>
-          <el-button type="primary" @click="addTaskSubmit" v-show="!showBtn">修改任务</el-button>
-          <el-button @click="cancel">取消创建</el-button>
+          <el-button type="primary" @click="addTaskSubmit" v-show="dialog.isCreate">创建任务</el-button>
+          <el-button type="primary" @click="addTaskSubmit" v-show="!dialog.isCreate">修改任务</el-button>
+          <el-button @click="cancel">取消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>

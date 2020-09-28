@@ -20,6 +20,8 @@ import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoUtil;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
@@ -33,6 +35,7 @@ import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.RectBO;
+import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.CombineVideoPositionPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
@@ -41,6 +44,7 @@ import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
+import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.bo.MemberChangedTaskBO;
 import com.sumavision.tetris.bvc.business.bo.ModifyMemberRoleBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
@@ -83,6 +87,7 @@ import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -194,6 +199,9 @@ public class AgendaExecuteService {
 	
 	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 
 	@Autowired
 	private CombineVideoUtil combineVideoUtil;
@@ -266,11 +274,12 @@ public class AgendaExecuteService {
 	 * @param businessInfoType 用于写入SourceBO
 	 * @param agendaForwardType 用于写入SourceBO
 	 * @return List<SourceBO>
+	 * @throws Exception 
 	 */
 	public List<SourceBO> obtainSource(
 			List<GroupMemberPO> sourceMembers,
 			String businessId,
-			BusinessInfoType businessInfoType){
+			BusinessInfoType businessInfoType) throws Exception{
 		return obtainSource(sourceMembers, businessId, businessInfoType, null);
 	}
 	
@@ -278,7 +287,7 @@ public class AgendaExecuteService {
 			List<GroupMemberPO> sourceMembers,
 			String businessId,
 			BusinessInfoType businessInfoType,
-			AgendaForwardType agendaForwardType){
+			AgendaForwardType agendaForwardType) throws Exception{
 		
 		//确认源（可能多个）
 		List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
@@ -292,6 +301,7 @@ public class AgendaExecuteService {
 			String originId = member.getOriginId();
 			Long terminalId = member.getTerminalId();
 			GroupMemberType groupMemberType = member.getGroupMemberType();
+			OriginType originType = member.getOriginType();
 			List<String> bundleIds = new ArrayList<String>();
 			
 			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
@@ -324,6 +334,14 @@ public class AgendaExecuteService {
 				}
 				
 			}else if(groupMemberType.equals(GroupMemberType.MEMBER_DEVICE)){
+				
+				if(originType.equals(OriginType.OUTER)){
+					String localLayerId = resourceRemoteService.queryLocalLayerId();
+					String useBundleId = new StringBufferWrapper().append(originId).append("_").append(originId).toString();
+					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO(null, useBundleId, "videoEncodeChannel", videoChannelId, LockStatus.IDLE, null, null, null, bundleType, channelNameFromTemplate, maxChannelCnt, baseType, externType, paramScope)
+				}
 				
 				bundleIds.add(originId);
 				
@@ -375,6 +393,8 @@ public class AgendaExecuteService {
 				}
 				sourceBOs.add(sourceBO);
 			}
+			
+			//遍历srcBundlePOs，处理外部系统
 		}
 		return sourceBOs;
 	}

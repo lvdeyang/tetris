@@ -91,7 +91,7 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 文件预览地址 */
 	private String previewUrl;
 	
-	/** 开始录制时间 */
+	/** 开始录制时间,当是排期录制的时候，是创建排期任务的时间 */
 	private Date startTime;
 	
 	/** 结束录制时间 */
