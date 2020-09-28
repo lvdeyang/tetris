@@ -118,15 +118,17 @@ define([
                     visible: false,
                     scope: '',
                     currentNode: '',
-                    left: '',
-                    top: '',
+                    left: 0,
+                    top: 0,
                     call: true,
                     vod: true,
                     intercom: true,
                     dedicatedCommand: true,
                     enterCommand: true,
                     recordRecord: true,
-                    download:true
+                    download:true,
+                    vodIpc:false,
+                    removeAlarm:false
                 },
                 //指挥组
                 group: {
@@ -164,10 +166,244 @@ define([
                 },
                 filterText: '',
                 //退出时退的是指挥还是会议，1：指挥，2：会议
-                agreeExitCommand: 0
+                agreeExitCommand: 0,
+
+                //应急广播喊话功能
+                tree:{
+                    filter:'',
+                    data:[],
+                    props:{
+                        children:'children',
+                        label:'name',
+                        isLeaf:'isLeaf'
+                    }
+                },
+                speakerTask:{
+                    id:'',
+                    udp:'',
+                    bundles:[]
+                }
             }
         },
         methods: {
+
+            //应急广播喊话功能
+            handleSpeakerCheckChange:function(scope){
+                var self = this;
+                var currentNode = scope.node;
+                var currentData = scope.data;
+                self.$nextTick(function(){
+                    if(currentData.checked){
+                        var currentAlarm = currentNode.parent.parent.data;
+                        for(var i=0; i<self.tree.data.length; i++){
+                            if(self.tree.data[i].id !== currentAlarm.id){
+                                var spks = self.tree.data[i].children[1].children;
+                                if(spks && spks.length>0){
+                                    for(var j=0; j<spks.length; j++){
+                                        Vue.set(spks[j], 'checked', false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            removeAlarm:function(){
+                var self = this;
+                self.qt.confirm('提示', '是否要删除当前告警？', '确定', function(){
+                    var alarm = self.contextMenu.currentNode;
+                    ajax.post('/command/emergent/broadcast/delete/alarms', {
+                        ids: $.toJSON([alarm.id])
+                    }, function(){
+                        for(var i=0; i<self.tree.data.length; i++){
+                            if(self.tree.data[i] === alarm){
+                                self.tree.data.splice(i, 1);
+                                break;
+                            }
+                        }
+                        self.handleContextMenuClose();
+                    });
+                });
+            },
+            vodIpc:function(data){
+                var self = this;
+                if(!data) data = self.contextMenu.currentNode;
+                ajax.post('/command/vod/device/start', {
+                    deviceId:data.bundleId
+                }, function(data){
+                    self.qt.invoke('vodDevices', $.toJSON([data]));
+                    self.handleContextMenuClose();
+                });
+            },
+            querySpeakerTask:function(){
+                var self = this;
+                ajax.post('/command/emergent/broadcast/query/speak/list', null, function(data){
+                    if(data && data.broadcastList && data.broadcastList.length>0){
+                        var broadcastList = data.broadcastList[0];
+                        self.speakerTask.id = broadcastList.id;
+                        self.speakerTask.udp = broadcastList.
+                            self.speakerTask.bundles.splice(0, self.speakerTask.bundles.length);
+                        var speakers = self.tree.data[1].children;
+                        for(var i=0; i<broadcastList.bundles.length; i++){
+                            self.speakerTask.bundles.push({
+                                bundleId:broadcastList.bundles[i].bundleId,
+                                bundleName:broadcastList.bundles[i].bundleName
+                            });
+                            if(speakers && speakers.length>0){
+                                for(var j=0; j<speakers.length; j++){
+                                    if(speakers[j].bundleId === broadcastList.bundles[i].bundleId){
+                                        speakers[j].checked = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        //TODO 调用QT让音频发流
+                        self.qt.invoke('startPushAudio', self.speakerTask.udp);
+                    }
+                });
+            },
+            addSpeakerTask:function(){
+                var self = this;
+                var totalSpeakers = [];
+                var unifiedId = null;
+                for(var i=0; i<self.tree.data.length; i++){
+                    var breakOuter = false;
+                    if(self.tree.data[i].children[1].children && self.tree.data[i].children[1].children.length>0){
+                        for(var j=0; j<self.tree.data[i].children[1].children.length; j++){
+                            var spk = self.tree.data[i].children[1].children[j];
+                            if(!spk.checked){
+                                continue;
+                            } else{
+                                breakOuter = true;
+                                totalSpeakers.push(spk);
+                                if(!unifiedId){
+                                    unifiedId = self.tree.data[i].unifiedId;
+                                }
+                            }
+                        }
+                    }
+                    if(breakOuter) break;
+                }
+                var speakers = totalSpeakers;
+                if(speakers && speakers.length>0){
+                    var speakerBundleIds = [];
+                    for(var i=0; i<speakers.length; i++){
+                        speakerBundleIds.push(speakers[i].bundleId);
+                    }
+                    ajax.post('/command/emergent/broadcast/speak/start', {
+                        bundleIds: $.toJSON(speakerBundleIds),
+                        eventLevel: 0,
+                        eventType: '11000',
+                        unifiedId: unifiedId
+                    }, function(data){
+                        self.speakerTask.id = data.result.id;
+                        var broadcastList = data.broadcastList;
+                        for(var i=0; i<broadcastList.length; i++){
+                            self.speakerTask.bundles.push({
+                                bundleId:broadcastList[i].bundleId,
+                                bundleName:broadcastList[i].bundleName
+                            });
+                            for(var j=0; j<speakers.length; j++){
+                                if(speakers[j].bundleId === broadcastList[i].bundleId){
+                                    speakers[j].checked = true;
+                                    break;
+                                }
+                            }
+                        }
+                        //TODO 调用QT让音频发流
+                        self.qt.invoke('startPushAudio', self.speakerTask.udp);
+                    });
+                }
+            },
+            stopSpeakerTask:function(){
+                var self = this;
+                ajax.post('/command/emergent/broadcast/speak/stop', {
+                    id:self.speakerTask.id
+                }, function(){
+                    self.speakerTask.id = '';
+                    self.speakerTask.bundles.splice(0, self.speakerTask.bundles.length);
+                    //TODO 调用QT让音频停止发流
+                    self.qt.invoke('stopPushAudio', self.speakerTask.udp);
+                });
+            },
+            filterNode:function(value, data){
+                if(data.type === 'ALARM') return false;
+                if(data.name.indexOf(value) >= 0){
+                    return true;
+                }
+                return false;
+            },
+            refreshAlarms:function(){
+                var self = this;
+                self.tree.data.splice(0, self.tree.data.length);
+                ajax.post('/command/emergent/broadcast/query/alarm/list', null, function(data){
+                    if(data && data.length>0){
+                        for(var i=0; i<data.length; i++){
+                            self.pushAlarmNode(data[i]);
+                        }
+                    }
+                });
+            },
+            pushAlarmNode:function(alarm){
+                var self = this;
+                var alarmNode = {
+                    id:alarm.id,
+                    unifiedId:alarm.unifiedId,
+                    name:'告警(' + alarm.creatTime + ')',
+                    type:'ALARM',
+                    children:[]
+                };
+                var ipcNode = {
+                    id:-1,
+                    name:'摄像头',
+                    type:'FOLDER',
+                    children:[]
+                };
+                var speakerNode = {
+                    id:-2,
+                    name:'大喇叭',
+                    type:'FOLDER',
+                    children:[]
+                };
+                alarmNode.children.push(ipcNode);
+                alarmNode.children.push(speakerNode);
+                var bundles = alarm.bundles;
+                for(var i=0; i<bundles.length; i++){
+                    bundles[i].name = bundles[i].bundleName;
+                    bundles[i].type = bundles[i].deviceModel;
+                    if(bundles[i].deviceModel === 'ipc'){
+                        ipcNode.children.push({
+                            id:alarm.unifiedId + '-' +bundles[i].bundleId,
+                            name:bundles[i].bundleName,
+                            bundleId:bundles[i].bundleId,
+                            streamUrl:bundles[i].streamUrl,
+                            type:'IPC'
+                        });
+                    }else if(bundles[i].deviceModel === 'speaker'){
+                        var bundleNode = {
+                            id:alarm.unifiedId + '-' +bundles[i].bundleId,
+                            name:bundles[i].bundleName,
+                            bundleId:bundles[i].bundleId,
+                            streamUrl:bundles[i].streamUrl,
+                            checked:false,
+                            type:'SPEAKER'
+                        };
+                        speakerNode.children.push(bundleNode);
+                        if(self.speakerTask.bundles && self.speakerTask.bundles.length>0){
+                            for(var j=0; j<self.speakerTask.bundles.length; j++){
+                                if(self.speakerTask.bundles[j].bundleId === bundles[i].bundleId){
+                                    bundleNode.checked = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                self.tree.data.push(alarmNode);
+            },
+
         	//用户拖拽
         	userDragStart:function(e, data){
         		var text = {
@@ -515,15 +751,17 @@ define([
             handleContextMenuClose: function () {
                 var self = this;
                 self.contextMenu.visible = false;
-                self.contextMenu.scope = '';
-                self.contextMenu.currentNode = '';
-                self.contextMenu.left = '';
-                self.contextMenu.top = '';
+                self.contextMenu.scope = null;
+                self.contextMenu.currentNode = null;
+                self.contextMenu.left = 0;
+                self.contextMenu.top =0;
             },
             handleContextMenuShow: function (e, data, type, name) {
                 if ($(e.target).hasClass('handDown')) {
                     if (data.type === 'FOLDER') return;
                     var self = this;
+                    self.contextMenu.left = e.clientX;
+                    self.contextMenu.top = e.clientY;
                     self.contextMenu.visible = true;
                     self.contextMenu.scope = type;
                     self.contextMenu.currentNode = data;
@@ -544,6 +782,8 @@ define([
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
                         self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
                     }else if(data.type === 'CONFERENCE_HALL'){
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -553,6 +793,8 @@ define([
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
                         self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
                     } else if (data.type === 'BUNDLE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -562,6 +804,8 @@ define([
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
                         self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
                     } else if (data.type === 'VOD_RESOURCE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -571,6 +815,8 @@ define([
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = false;
                         self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
                     } else if (data.type === 'COMMAND') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = false;
@@ -579,6 +825,8 @@ define([
                         self.contextMenu.enterCommand = true;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
                     } else if (data.type === 'RECORD_PLAYBACK') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -593,6 +841,30 @@ define([
                             self.contextMenu.removeRecord = false;
                             self.contextMenu.download = true;
                         }
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = false;
+                    }else if(data.type === 'ALARM'){
+                        self.contextMenu.call = false;
+                        self.contextMenu.vod = false;
+                        self.contextMenu.intercom = false;
+                        self.contextMenu.dedicatedCommand = false;
+                        self.contextMenu.enterCommand = false;
+                        self.contextMenu.recordRecord = false;
+                        self.contextMenu.removeRecord = false;
+                        self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = false;
+                        self.contextMenu.removeAlarm = true;
+                    }else if(data.type === 'IPC'){
+                        self.contextMenu.call = false;
+                        self.contextMenu.vod = false;
+                        self.contextMenu.intercom = false;
+                        self.contextMenu.dedicatedCommand = false;
+                        self.contextMenu.enterCommand = false;
+                        self.contextMenu.recordRecord = false;
+                        self.contextMenu.removeRecord = false;
+                        self.contextMenu.download = false;
+                        self.contextMenu.vodIpc = true;
+                        self.contextMenu.removeAlarm = false;
                     }
                     //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
                     // if (typeof data.param=='object') {
@@ -2240,6 +2512,15 @@ define([
                     //录像回放
                     self.refreshRecord();
                     self.refreshRecordButtonAction();
+                } else if(self.currentTab == 4){
+                    self.buttons.filterOnline = false;
+                    self.buttons.filterOffline = false;
+                    self.buttons.batchCall = false;
+                    self.buttons.batchVod = false;
+                    self.buttons.batchIntercom = false;
+                    self.buttons.addCommand = false;
+                    self.querySpeakerTask();
+                    self.refreshAlarms();
                 }
                 this.$nextTick(function () {
                     //在下次 DOM 更新循环结束之后执行这个回调。在修改数据之后立即使用这个方法，获取更新后的DOM.
@@ -2737,6 +3018,11 @@ define([
                 //本地预览
                 self.qt.on('vodUserLocal', function(e){
                 	self.qt.invoke('vodUserLocal', $.toJSON([e.params]));
+                });
+
+                //告警推送
+                self.qt.on('emergentBroadcastRelativeDevices', function(e){
+                   self. pushAlarmNode(e.params);
                 });
             });
         }

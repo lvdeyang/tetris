@@ -24,7 +24,7 @@ define([
             el:'#' + pageId + '-wrapper',
             data:function(){
                 return {
-					editableTabsValue: '2',
+					editableTabsValue: null,
 					guides:{
 						list: []
 					},
@@ -294,7 +294,7 @@ define([
 							outputAddress: self.output.out[i].outputAddress,
 							rateCtrl: self.output.out[i].rateCtrl,
 							bitrate: self.output.out[i].bitrate,
-							switchingMode: self.output.out[i].switchingMode
+							switchingMode: self.dialog.setOut.out.switchingMode
 						}
 						ajax.post('/tetris/guide/control/output/setting/po/edit', questDataOut, function (data, status) {
 
@@ -368,17 +368,15 @@ define([
 			created:function(){
 				var self = this;
 
-				ajax.post('/tetris/guide/control/source/po/query', {id: self.editableTabsValue}, function(data, status){
-					//console.log(data);
-					for(var i = 0; i < data.length; i++){
-						self.sources.list.push(data[i]);
-					}
-				})
-
 				ajax.post('/tetris/guide/control/guide/po/query', null, function(data, status){
-					for(var i = 0; i < data.length; i++){
-						self.guides.list.push(data[i]);
+					if(data && data.length > 0){
+						for(var i = 0; i < data.length; i++){
+							self.guides.list.push(data[i]);
+						}
+						self.editableTabsValue = self.guides.list[0].id + '';
+						self.handleClick({name:self.guides.list[0].id+''});
 					}
+					
 				})
 
 			}
