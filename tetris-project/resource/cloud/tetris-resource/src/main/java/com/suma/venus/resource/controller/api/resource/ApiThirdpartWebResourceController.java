@@ -1,5 +1,6 @@
 package com.suma.venus.resource.controller.api.resource;
 
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,4 +39,12 @@ public class ApiThirdpartWebResourceController {
 		return apiResourceService.queryBundle();
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/bundle/list")
+	public Object bundleList(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String worknodeId = requestWrapper.getString("worknodeId");
+		return apiResourceService.bundleList(worknodeId);
+	}
 }

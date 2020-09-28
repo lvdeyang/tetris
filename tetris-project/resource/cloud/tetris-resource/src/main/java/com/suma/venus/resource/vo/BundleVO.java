@@ -1,5 +1,6 @@
 package com.suma.venus.resource.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 
@@ -72,6 +73,9 @@ public class BundleVO {
 	/**是否转码*/
 	private Boolean transcod;
 	
+	/**扩展字段**/
+	private JSONObject param;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -135,7 +139,14 @@ public class BundleVO {
 		DECODER
 	}
 
-	
+	public JSONObject getParam() {
+		return param;
+	}
+
+	public void setParam(JSONObject param) {
+		this.param = param;
+	}
+
 	public String getBundleFolderName() {
 		return bundleFolderName;
 	}
