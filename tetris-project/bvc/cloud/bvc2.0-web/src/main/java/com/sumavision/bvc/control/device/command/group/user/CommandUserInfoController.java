@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
@@ -35,9 +36,11 @@ import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonConstant;
+import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.auth.token.TerminalType;
@@ -100,6 +103,9 @@ public class CommandUserInfoController {
 	
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	@Autowired
 	private PageTaskQueryService pageTaskQueryService;
@@ -347,6 +353,61 @@ public class CommandUserInfoController {
 		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(task);
 		
 		return playerVO;
+	}	
+
+	/**
+	 * 通过播放器序号校验用户是否有权限<br/>
+	 * <p>如果是云台权限，根据业务额外校验</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月28日 下午2:33:04
+	 * @param serial 播放器序号（0开头，0~15）
+	 * @param type 权限类型，DIANBO(点播)|RECORD(录制)|CLOUD(云台)|CALL(呼叫)|ZK(指挥)|HY(会议)|LR(本地录制)|DOWNLOAD(下载)
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/check/player/privilege")
+	public Object checkPlayerPrivilege(
+			int serial,
+			String type,
+			HttpServletRequest request) throws Exception{
+		Long userId = userUtils.getUserIdFromSession(request);
+		BundleBO bundle = null;
+		if(type.equals("CLOUD")){
+			//如果是云台权限，根据业务额外校验
+			bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, serial);
+		}else{
+			bundle = commandCommonServiceImpl.queryBundleByPlayerIndex(userId, serial);
+		}
+		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.valueOf(type));
+		return null;
+	}
+
+	/**
+	 * 通过设备id校验用户是否有权限<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月28日 下午2:36:04
+	 * @param bundleId
+	 * @param type 权限类型，DIANBO(点播)|RECORD(录制)|CLOUD(云台)|CALL(呼叫)|ZK(指挥)|HY(会议)|LR(本地录制)|DOWNLOAD(下载)
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/check/bundle/privilege")
+	public Object checkBundlePrivilege(
+			String bundleId,
+			String type,
+			HttpServletRequest request) throws Exception{
+		Long userId = userUtils.getUserIdFromSession(request);
+		commandCommonServiceImpl.authorizeBundle(bundleId, userId, BUSINESS_OPR_TYPE.valueOf(type));
+		return null;
 	}
 	
 	/**
