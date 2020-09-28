@@ -796,6 +796,7 @@ define([
                 self.qt.on('refreshPage', function (e) {
                     self.handleLayoutChange(e.params);
                 });
+
             });
         }
     });
