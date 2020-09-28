@@ -467,8 +467,8 @@ public class CommandCommonServiceImpl {
 	}
 	
 	/**
-	 * 根据播放器索引号，查找源设备<br/>
-	 * <p>详细描述</p>
+	 * 根据播放器索引号，给云台查找源设备<br/>
+	 * <p>会根据业务类型进行筛选过滤</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月4日 上午10:52:17
@@ -510,7 +510,32 @@ public class CommandCommonServiceImpl {
 		default:
 			throw new BaseException(StatusCode.FORBIDDEN, "没有云台可以控制");
 		}
+	}
+	
+	/**
+	 * 根据播放器索引号，查找源设备<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月28日 下午2:21:29
+	 * @param userId
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	public BundleBO queryBundleByPlayerIndex(Long userId, int index) throws Exception{
 		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);		
+		PageTaskPO pageTask = pageTaskQueryService.queryPageTask(userId.toString(), terminal.getId(), index);
+		
+		if(pageTask == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有对应的设备");
+		}		
+
+		return new BundleBO()
+				.setBundleId(pageTask.getSrcVideoBundleId())
+				.setNodeUid(pageTask.getSrcVideoLayerId())
+				.setName(pageTask.getBusinessName());		
 	}
 	
 	@Deprecated
