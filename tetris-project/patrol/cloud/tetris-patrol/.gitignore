@@ -1,0 +1,11 @@
+/target/
+/bin/
+/.apt_generated/
+/.settings/
+.classpath
+.factorypath
+.project
+/.idea/
+.springBeans
+/logs/
+/LOG_HOME_IS_UNDEFINED/
