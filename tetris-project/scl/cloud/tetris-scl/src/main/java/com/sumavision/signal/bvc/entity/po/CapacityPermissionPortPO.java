@@ -1,9 +1,12 @@
 package com.sumavision.signal.bvc.entity.po;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+import com.sumavision.signal.bvc.common.enumeration.CommonConstants.ProtocolType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 能力绑定端口信息<br/>
@@ -19,7 +22,10 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 	
 	/** 设备bundleId */
 	private String bundleId;
-	
+
+	/** 接入层layerId */
+	private String layerId;
+
 	/** 设备channelId */
 	private String channelId;
 	
@@ -31,9 +37,11 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 	
 	/** 转码能力端口 */
 	private Long capacityPort;
-	
+
 	/** 该源的转码任务id */
 	private String taskId;
+
+	private List<SourcePO> sourcePOs = new ArrayList();
 
 	public String getBundleId() {
 		return bundleId;
@@ -83,4 +91,21 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 		this.taskId = taskId;
 	}
 
+	public String getLayerId() {
+		return layerId;
+	}
+
+	public void setLayerId(String layerId) {
+		this.layerId = layerId;
+	}
+
+	@OneToMany(fetch= FetchType.EAGER , cascade=CascadeType.ALL,orphanRemoval = true)
+	@JoinColumn(name="bvcCapacityPermissionId")
+	public List<SourcePO> getSourcePOs() {
+		return sourcePOs;
+	}
+
+	public void setSourcePOs(List<SourcePO> sourcePOs) {
+		this.sourcePOs = sourcePOs;
+	}
 }

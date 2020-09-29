@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+
 /**
  * passby输出参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -51,5 +53,13 @@ public class OutputPassbyBO {
 		this.media = media;
 		return this;
 	}
-	
+
+	public OutputPassbyBO() {
+	}
+
+	public OutputPassbyBO(String url, String local_ip) {
+		this.ip = IpV4Util.getIpFromUrl(url);
+		this.port = IpV4Util.getPortFromUrl(url);
+		this.local_ip = local_ip;
+	}
 }

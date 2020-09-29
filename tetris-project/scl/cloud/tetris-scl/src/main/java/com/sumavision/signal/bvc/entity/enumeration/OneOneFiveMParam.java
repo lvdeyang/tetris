@@ -2,6 +2,8 @@ package com.sumavision.signal.bvc.entity.enumeration;
 
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
+import static com.sumavision.signal.bvc.common.enumeration.CommonConstants.ProtocolType.UDP_TS;
+
 /**
  * 115M设备参数枚举<br/>
  * <b>作者:</b>wjw<br/>
@@ -10,10 +12,30 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum OneOneFiveMParam {
 
+
+	//输出端口
+	CTRL("CTRL",0l),
+	SFP1("SFP1",1l),
+	SFP2("SFP2",2l),
+	GBE("GBE",3l),
+	FIFTHG1("5G1",4l),
+	FIFTHG2("5G2",5l),
+	FIFTHG3("5G3",6l),
+	USB1("USB1",7l),
+	USB2("USB2",8l),
+	USB3("USB3",9l),
+	USB4("USB4",10l),
+
+	//输入接口
+	COLOR_BAR("COLOR_BAR",0l),
+	SDI_4X3G("SDI_4X3G",1l),
+	SDI_12G("SDI_12G",2l),
+	UHD("UHD",3l),
+
 	//视频编码类型
-	H264("h264", 1l),
 	H265("h265", 0l),
-	
+	H264("h264", 1l),
+
 	//视频分辨率
 	P3840x2160F5994("3840x2160P59.94", 1l),
 	P3840x2160F60("3840x2160P60.0", 2l),
@@ -63,6 +85,8 @@ public enum OneOneFiveMParam {
 	ABR256("256000abr", 11l),
 	ABR320("320000abr", 12l),
 	ABR384("384000abr", 13l);
+
+
 	
 	private String name;
 	

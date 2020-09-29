@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.sumavision.tetris.business.common.Util.CommonUtil;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import org.hibernate.exception.ConstraintViolationException;
@@ -40,15 +41,6 @@ import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
 import com.sumavision.tetris.capacity.bo.input.RtpEsBO;
 import com.sumavision.tetris.capacity.bo.input.SourceUrlBO;
 import com.sumavision.tetris.capacity.bo.input.UdpPcmBO;
-import com.sumavision.tetris.capacity.bo.output.BaseMediaBO;
-import com.sumavision.tetris.capacity.bo.output.CommonTsOutputBO;
-import com.sumavision.tetris.capacity.bo.output.OutputBO;
-import com.sumavision.tetris.capacity.bo.output.OutputHlsRecordBO;
-import com.sumavision.tetris.capacity.bo.output.OutputMediaBO;
-import com.sumavision.tetris.capacity.bo.output.OutputProgramBO;
-import com.sumavision.tetris.capacity.bo.output.OutputRtpEsBO;
-import com.sumavision.tetris.capacity.bo.output.OutputRtpesMediaBO;
-import com.sumavision.tetris.capacity.bo.output.OutputRtspBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
 import com.sumavision.tetris.capacity.bo.request.CreateOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
@@ -56,14 +48,11 @@ import com.sumavision.tetris.capacity.bo.request.IdRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.response.CreateOutputsResponse;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
-import com.sumavision.tetris.capacity.bo.task.H264BO;
-import com.sumavision.tetris.capacity.bo.task.Mpeg2BO;
 import com.sumavision.tetris.capacity.bo.task.PreProcessingBO;
 import com.sumavision.tetris.capacity.bo.task.ResampleBO;
 import com.sumavision.tetris.capacity.bo.task.ScaleBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
-import com.sumavision.tetris.capacity.bo.task.X264BO;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
@@ -165,7 +154,16 @@ public class TransformService {
 										    .append(sourcePort)
 										    .toString();
 			
-		}else{
+		}else if (streamTranscodingVO.getBePCM().equals(6)){
+
+			String sourceUrl = streamTranscodingVO.getAssetUrl();
+			if(!sourceUrl.startsWith("rtmp")){
+				throw new BaseException(StatusCode.FORBIDDEN,"source url is not rtmp");
+			}
+
+			uniq = sourceUrl;
+
+		}else {
 			
 			String sourceUrl = streamTranscodingVO.getAssetUrl();
 			if(!sourceUrl.startsWith("udp")){
@@ -684,7 +682,7 @@ public class TransformService {
 				//udp_ts			
 				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
 
-				Boolean isMultiCast = CommonUtil.isMulticast(sourceIp);
+				Boolean isMultiCast = IpV4Util.isMulticast(sourceIp);
 
 				String localIp = "";
 				if (isMultiCast){
@@ -706,7 +704,7 @@ public class TransformService {
 				//udp_pcm
 				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
 
-				Boolean isMultiCast = CommonUtil.isMulticast(sourceIp);
+				Boolean isMultiCast = IpV4Util.isMulticast(sourceIp);
 
 				String localIp = "";
 				if (isMultiCast){
@@ -751,7 +749,7 @@ public class TransformService {
 				//rtp_es
 				String sourceIp = sourceUrl.split("rtp://")[1].split(":")[0];
 
-				Boolean isMultiCast = CommonUtil.isMulticast(sourceIp);
+				Boolean isMultiCast = IpV4Util.isMulticast(sourceIp);
 
 				String localIp = "";
 				if (isMultiCast){
@@ -780,6 +778,11 @@ public class TransformService {
 				
 				inputBO.setId(inputId)
 					   .setRtsp(source);
+			}else if(bePcm.equals(6)){
+				SourceUrlBO source = new SourceUrlBO().setUrl(sourceUrl);
+
+				inputBO.setId(inputId)
+						.setRtmp(source);
 			}
 		}
 		
@@ -793,8 +796,9 @@ public class TransformService {
 				
 				ProgramBO program = new ProgramBO().setProgram_number(1)
 												   .setVideo_array(new ArrayList<ProgramVideoBO>())
-												   .setAudio_array(new ArrayList<ProgramAudioBO>());
-				
+												   .setAudio_array(new ArrayList<ProgramAudioBO>())
+												   .setMedia_type_once_map(new JSONObject());
+
 				ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 														   .setDecode_mode("cpu");
 				ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
@@ -809,7 +813,8 @@ public class TransformService {
 			if(streamTranscodingVO.getMediaType().equals("audio")){
 				
 				ProgramBO program = new ProgramBO().setProgram_number(1)
-												   .setAudio_array(new ArrayList<ProgramAudioBO>());
+												   .setAudio_array(new ArrayList<ProgramAudioBO>())
+													.setMedia_type_once_map(new JSONObject());
 				
 				ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 						   								   .setDecode_mode("cpu");
@@ -923,7 +928,7 @@ public class TransformService {
 //									 .setBitrate(codecParam.getAbitrate() == null? "192":String.valueOf(codecParam.getAbitrate().intValue()/1000))
 //									 .setSample_rate(codecParam.getAsample() == null? "44.1": String.valueOf(codecParam.getAsample().intValue()/1000));
 //			audioEncode.setMp3(mp3);
-		
+
 		//aac
 		}else if(codecParam.getAcodec().equals("3")){
 
@@ -1072,6 +1077,9 @@ public class TransformService {
 		if(codecParam.getVbitrate() != null || codecParam.getAbitrate() != null){
 			outputBitrate = (long) (((codecParam.getVbitrate()==null?0: codecParam.getVbitrate()) + (codecParam.getAbitrate() == null?0l: codecParam.getAbitrate())) * 1.5);
 		}
+		if (outputBitrate!=null && outputBitrate < 2000000L){
+			outputBitrate = 2000000L;
+		}
 		
 		List<OutParamVO> outputParams = task.getOutParam();
 		
@@ -1122,6 +1130,7 @@ public class TransformService {
 																	.setIp(outputIp)
 																	.setPort(outputPort)
 																	.setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
+																	.setRate_ctrl("VBR")
 																	.setBitrate(outputBitrate == null?8000000: outputBitrate.intValue())
 																	.setProgram_array(new ArrayList<OutputProgramBO>());
 					
@@ -1276,6 +1285,60 @@ public class TransformService {
 					
 					output.setRtsp(rtsp);
 					
+					outputs.add(output);
+				}else if (task.getEsType().equals(5)){
+					String outputId = new StringBufferWrapper().append(OUTPUT_PREFIX)
+							.append(i+1)
+							.append("-")
+							.append(id)
+							.toString();
+
+					OutputBO output = new OutputBO();
+					output.setId(outputId);
+
+					String outputUrl = outParam.getOutputUrl();
+					String httpIp = outputUrl.split("http://")[1].split("/")[0].split(":")[0];
+					Integer httpPort = Integer.valueOf(outputUrl.split("http://")[1].split("/")[0].split(":")[1]);
+
+					String urlWithoutHead = outputUrl.split("://")[1];
+					String pubName = urlWithoutHead.substring(urlWithoutHead.indexOf(":")).split("/",2)[1] ;
+
+//拼媒体
+					List<OutputMediaBO> medias = new ArrayList<OutputMediaBO>();
+					for(TaskBO taskBO: tasks){
+						if(taskBO.getType().equals("video")){
+							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
+									.setType(taskBO.getType())
+									.setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
+									.setPid(outParam.getVid1pid() == null?513: outParam.getVid1pid());
+							medias.add(media);
+						}
+						if(taskBO.getType().equals("audio")){
+							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
+									.setType(taskBO.getType())
+									.setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
+									.setPid(outParam.getAud1pid() == null?514: outParam.getAud1pid());
+							medias.add(media);
+						}
+
+					}
+
+					OutputHttpTsBO httpts = new OutputHttpTsBO().setName(pubName)
+							.setIp(httpIp)
+							.setPort(httpPort)
+							.setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
+							.setRate_ctrl("VBR")
+							.setBitrate(outputBitrate == null?8000000: outputBitrate.intValue())
+							.setProgram_array(new ArrayList<>());//media_array
+
+					OutputProgramBO program = new OutputProgramBO().setProgram_number(outParam.getProgNum() == null?301: outParam.getProgNum())
+							.setPmt_pid(outParam.getPmtpid() == null?101: outParam.getPmtpid())
+							.setPcr_pid(outParam.getPcrpid() == null?100: outParam.getPcrpid())
+							.setMedia_array(new ArrayListWrapper<OutputMediaBO>().addAll(medias).getList());
+
+					httpts.getProgram_array().add(program);
+
+					output.setHttp_ts(httpts);
 					outputs.add(output);
 				}
 			}

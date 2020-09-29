@@ -14,9 +14,29 @@ public class ProcessCallBackRunnable implements Runnable {
 	
 	private ProcessReceivedMsg receivedMsg;
 
+	private MessageHandler messageHandler;
+
+	/**
+	 * 消息处理模式，0表示以前的方式，1表示yzx 修改后
+	 */
+	private Integer mode;
+
 	public ProcessCallBackRunnable(Message msg, ProcessReceivedMsg receivedMsg) {
 		this.msg = msg;
 		this.receivedMsg = receivedMsg;
+	}
+
+	public ProcessCallBackRunnable(Message msg, ProcessReceivedMsg receivedMsg, MessageHandler messageHandler) {
+		this.msg = msg;
+		this.receivedMsg = receivedMsg;
+		this.messageHandler = messageHandler;
+	}
+
+	public ProcessCallBackRunnable(Message msg, ProcessReceivedMsg receivedMsg, MessageHandler messageHandler, Integer mode) {
+		this.msg = msg;
+		this.receivedMsg = receivedMsg;
+		this.messageHandler = messageHandler;
+		this.mode=mode;
 	}
 
 	@Override
@@ -32,9 +52,12 @@ public class ProcessCallBackRunnable implements Runnable {
 					return;
 				}
 
-				LOGGER.info("==============ProcessCallBackMessageRunnable textMessage is : " + textMessage);
-
-				receivedMsg.process(textMessage);
+//				LOGGER.info("==============ProcessCallBackMessageRunnable textMessage is : " + textMessage);
+				if (mode == null || mode.equals(0)) {
+ 					receivedMsg.process(textMessage);
+				}else {
+					messageHandler.process(textMessage);//yzx add 新处理消息方式
+				}
 			}
 		} catch (Exception e) {
 			LOGGER.error("ProcessCallBackMessageRunnable failed",e);

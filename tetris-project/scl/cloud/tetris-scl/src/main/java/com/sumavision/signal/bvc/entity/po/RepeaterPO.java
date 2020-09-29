@@ -10,7 +10,7 @@ import com.sumavision.signal.bvc.entity.enumeration.RepeaterType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 流转发器<br/>
+ * 流转发器 设备<br/>
  * <b>作者:</b>wjw<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年5月20日 上午11:52:03
@@ -33,7 +33,7 @@ public class RepeaterPO extends AbstractBasePO {
 	/** 流转发器请求port */
 	private String port;
 	
-	/** 流转发器类型 */
+	/** 流转发器类型：主/备 */
 	private RepeaterType type;
 	
 	/** 关联流转发器id */

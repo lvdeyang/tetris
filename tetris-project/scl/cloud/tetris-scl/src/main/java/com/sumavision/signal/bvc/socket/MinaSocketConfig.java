@@ -15,10 +15,10 @@ public class MinaSocketConfig {
 	@Value("${socket.port}")
 	private int port;
 	
-	@Bean
+//	@Bean
 	public IoAcceptor ioAcceptor() throws Exception{
 		IoAcceptor acceptor = new NioSocketAcceptor();
-		acceptor.setHandler(new ServerHandler());
+//		acceptor.setHandler(new ServerHandler());
 		acceptor.getSessionConfig().setReadBufferSize(1024*1024*1024);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 100);
 		acceptor.bind(new InetSocketAddress(port));

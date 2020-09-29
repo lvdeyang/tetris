@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.Util.IdConstructor;
+import com.sumavision.tetris.capacity.bo.input.SrtTsBO;
+
 /**
  * 输出参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -205,5 +208,8 @@ public class OutputBO {
 		this.zixi_passby = zixi_passby;
 		return this;
 	}
-	
+
+
+
+
 }

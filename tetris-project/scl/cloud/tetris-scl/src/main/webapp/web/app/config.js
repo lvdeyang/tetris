@@ -7,12 +7,13 @@ define(function(){
             debug:false,
 //            login:'http://192.165.56.64:18080/vue/#/',
 //            login:'http://10.10.40.106:8885/vue/#/',
+//             login:'http://10.10.40.24:8085/vue/#/',
             login:'http://192.165.58.151:8885/vue/#/',
             authname:'business_cache_key_5002',
             //url:查询菜单
             //queryRouterUrl :'https://www.easy-mock.com/mock/5c35432c90862b0b0cf5042f/example/queryRouter'
             queryRouterUrl: 'http://192.165.58.151:8885/privilege/queryMenu',
-            url2600: 'http://192.165.56.153'
+            url2600: 'http://10.10.40.103'
         },
 
         //配置默认页面跳转

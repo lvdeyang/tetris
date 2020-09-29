@@ -10,6 +10,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +26,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
  */
 @Repository
 public class ResourceBundleDAO{
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceBundleDAO.class);
 
 	@Resource
 	@Qualifier("resourceEntityManager")
@@ -98,6 +102,10 @@ public class ResourceBundleDAO{
 		
 		resourceEntityManager.clear();
 		List<BundlePO> bundles = gainResultList("from BundlePO where deviceModel=?1", BundlePO.class, deviceModel, null, null, null);
+		bundles.stream().forEach(b->{
+			LOGGER.info("find bundlepos,ip:{}",b.getDeviceIp());
+		});
+
 		return bundles;
 	}
 	

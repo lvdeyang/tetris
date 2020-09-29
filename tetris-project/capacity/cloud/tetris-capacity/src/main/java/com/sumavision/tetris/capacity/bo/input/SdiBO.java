@@ -55,4 +55,11 @@ public class SdiBO {
 	public void setBlackmagic(JSONObject blackmagic) {
 		this.blackmagic = blackmagic;
 	}
+
+
+	public SdiBO(String url){
+		setCard_type(url.substring(url.indexOf(":") + 3, url.indexOf("/",6)));
+		setCard_no(Integer.parseInt(url.substring(url.indexOf(" ")+1).split("/")[0])) ;
+		setCard_port(Integer.parseInt(url.substring(url.indexOf(" ")+1).split("/")[1])) ;
+	}
 }

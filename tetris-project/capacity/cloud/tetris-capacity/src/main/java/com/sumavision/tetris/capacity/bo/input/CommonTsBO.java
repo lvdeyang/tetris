@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+
 /**
  * 通用协议参数 udp/rtp<br/>
  * <b>作者:</b>wjw<br/>
@@ -55,5 +57,14 @@ public class CommonTsBO {
 		this.igmpv3 = igmpv3;
 		return this;
 	}
-	
+
+	public CommonTsBO(){
+
+	}
+
+	public CommonTsBO(String url,String localIp){
+		this.source_ip = IpV4Util.getIpFromUrl(url);
+		this.source_port = IpV4Util.getPortFromUrl(url);
+		this.local_ip = localIp;
+	}
 }

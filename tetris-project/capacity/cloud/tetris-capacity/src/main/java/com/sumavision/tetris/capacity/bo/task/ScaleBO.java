@@ -18,6 +18,8 @@ public class ScaleBO {
 	
 	private Integer nv_card_idx = 0;
 
+	private Integer auto_blackside;
+
 	public Integer getWidth() {
 		return width;
 	}
@@ -62,5 +64,13 @@ public class ScaleBO {
 		this.nv_card_idx = nv_card_idx;
 		return this;
 	}
-	
+
+	public Integer getAuto_blackside() {
+		return auto_blackside;
+	}
+
+	public ScaleBO setAuto_blackside(Integer auto_blackside) {
+		this.auto_blackside = auto_blackside;
+		return this;
+	}
 }

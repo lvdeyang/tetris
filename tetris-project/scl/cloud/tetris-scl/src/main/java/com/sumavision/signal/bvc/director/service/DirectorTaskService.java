@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import com.sumavision.signal.bvc.feign.FifthGenerationKnapsackFeign;
+import com.sumavision.signal.bvc.socket.ServerHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ import com.sumavision.tetris.capacity.vo.director.OutputsVO;
 import com.sumavision.tetris.capacity.vo.director.SourceVO;
 import com.sumavision.tetris.capacity.vo.director.TranscodeVO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -58,7 +61,11 @@ public class DirectorTaskService {
 	
 	@Autowired
 	private DirectorService directorService;
-	
+
+
+	@Autowired
+	FifthGenerationKnapsackFeign fifthGenerationKnapsackFeign;
+
 	/**
 	 * 添加云导播任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -573,5 +580,10 @@ public class DirectorTaskService {
     	
     	return directorDst;
 		
+	}
+
+	public void doRegister() throws Exception {
+		JSONObject jsonObject = fifthGenerationKnapsackFeign.doRegister("123");
+		System.out.println("register: "+jsonObject);
 	}
 }
