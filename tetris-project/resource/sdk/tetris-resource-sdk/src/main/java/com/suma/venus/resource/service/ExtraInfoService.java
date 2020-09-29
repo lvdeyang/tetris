@@ -1,5 +1,6 @@
 package com.suma.venus.resource.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -16,13 +17,15 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 	@Autowired
 	private ExtraInfoDao extraInfoDao;
 	
-	public List<ExtraInfoPO> findByBundleId(String bundleId){
-		
+	public List<ExtraInfoPO> findByBundleId(String bundleId){		
 		return extraInfoDao.findByBundleId(bundleId);
 	}
 	
-	public List<ExtraInfoPO> findByWorknodeId(String worknodeId){
-		
+	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds){		
+		return extraInfoDao.findByBundleIdIn(bundleIds);
+	}
+	
+	public List<ExtraInfoPO> findByWorknodeId(String worknodeId){		
 		return extraInfoDao.findByWorknodeId(worknodeId);
 	}
 	
@@ -70,5 +73,15 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return null;
 	}
 	
+	public List<ExtraInfoPO> queryExtraInfoBundleId(Collection<ExtraInfoPO> extraInfos, String bundleId){
+		if(bundleId == null) return null;
+		List<ExtraInfoPO> infos = new ArrayList<ExtraInfoPO>();
+		for(ExtraInfoPO extraInfo : extraInfos){
+			if(bundleId.equals(extraInfo.getBundleId())){
+				infos.add(extraInfo);
+			}
+		}
+		return infos;
+	}
 	
 }

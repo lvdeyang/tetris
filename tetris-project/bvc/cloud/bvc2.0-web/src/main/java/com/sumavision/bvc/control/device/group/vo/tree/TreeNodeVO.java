@@ -5,12 +5,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -82,6 +84,9 @@ public class TreeNodeVO {
 	
 	/** jsonString 附加参数 */
 	private String param;
+	
+	/** jsonString 附加参数 扩展字段，来自设备的ExtraInfoPO */
+	private String extraInfo;
 	
 	private String icon;
 	
@@ -167,6 +172,15 @@ public class TreeNodeVO {
 
 	public TreeNodeVO setParam(String param) {
 		this.param = param;
+		return this;
+	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public TreeNodeVO setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
 		return this;
 	}
 
@@ -541,9 +555,16 @@ public class TreeNodeVO {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年10月14日 下午2:27:39
 	 * @param bundle 设备
+	 * @param extraInfos 拓展字段，作为字符串添加到“extraInfo”中。可以为null
 	 * @return TreeNodeVO 树节点
 	 */
-	public TreeNodeVO set(BundleBO bundle){
+	public TreeNodeVO set(BundleBO bundle, List<ExtraInfoPO> extraInfos){
+		JSONObject extraInfo = new JSONObject();
+		if(extraInfo != null){
+			for(ExtraInfoPO extra : extraInfos){
+				extraInfo.put(extra.getName(), extra.getValue());
+			}
+		}
 		this.setId(bundle.getBundleId())
 			.setName(bundle.getName())
 			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("folderId", bundle.getFolderId())
@@ -556,6 +577,7 @@ public class TreeNodeVO {
 																			.put("venusBundleType", bundle.getType())
 																			.put("realType", bundle.getRealType())
 																		    .getMap()))
+			.setExtraInfo(extraInfo.toJSONString())
 			.setType(TreeNodeType.BUNDLE)
 			.setIcon(TreeNodeIcon.BUNDLE.getName())
 			.setKey(this.generateKey())
@@ -602,6 +624,9 @@ public class TreeNodeVO {
 		}
 			
 		return this;
+	}
+	public TreeNodeVO set(BundleBO bundle){
+		return set(bundle, null);
 	}
 	
 	/**

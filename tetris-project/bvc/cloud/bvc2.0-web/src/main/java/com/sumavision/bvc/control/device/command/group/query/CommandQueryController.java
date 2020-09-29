@@ -28,8 +28,10 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -118,6 +120,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private ExtraInfoService extraInfoService;
 	
 	@Autowired
 	private TerminalDAO terminalDao;
@@ -1060,11 +1065,19 @@ public class CommandQueryController {
 			}
 		}
 		
+		//查到所有的扩展字段
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundleBO bundle : bundles){
+			bundleIds.add(bundle.getBundleId());
+		}
+		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+		
 		//往里装设备
 		if(bundles!=null && bundles.size()>0){
 			for(BundleBO bundle:bundles){
 				if(bundle.getFolderId()!=null && root.getId().equals(bundle.getFolderId().toString())){
-					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle)
+					List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, bundle.getBundleId());
+					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle, extraInfos)
 															.setChildren(new ArrayList<TreeNodeVO>());
 					root.getChildren().add(bundleNode);
 					if(!BundleBO.BundleRealType.XT.toString().equals(bundle.getRealType()) && channels!=null && channels.size()>0){
