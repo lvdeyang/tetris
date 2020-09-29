@@ -8,13 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
+import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.WorkNodeService;
 import com.suma.venus.resource.vo.WorkNodeVO;
 
@@ -26,6 +31,9 @@ public class WorkNodeController extends ControllerBase {
 
 	@Autowired
 	private WorkNodeService workNodeService;
+	
+	@Autowired
+	private ExtraInfoService extraInfoService;
 
 	@RequestMapping("/query")
 	@ResponseBody
@@ -77,12 +85,16 @@ public class WorkNodeController extends ControllerBase {
 
 	@RequestMapping("/save")
 	@ResponseBody
-	public Map<String, Object> save(@RequestParam(name = "json") String json) {
+	public Map<String, Object> save(@RequestParam(name = "json") String json,
+			String extraInfoVOList) {
 		Map<String, Object> data = makeAjaxData();
 		LOGGER.info("WorkNodeController save json=" + json);
 
 		try {
 			WorkNodeVO vo = JSONObject.parseObject(json, WorkNodeVO.class);
+			
+			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
+			
 			if (null != vo.getNodeUid()) {// 校验nodeUid是否重复
 				WorkNodePO checkNode = workNodeService.findByNodeUid(vo.getNodeUid());
 				if (null != checkNode && !checkNode.getId().equals(vo.getId())) {
@@ -100,6 +112,12 @@ public class WorkNodeController extends ControllerBase {
 			}
 			WorkNodePO po = vo.toPO();
 			workNodeService.save(po);
+			if (extraInfos!=null && extraInfos.size()>0) {
+				for (ExtraInfoPO extraInfo : extraInfos) {
+					extraInfo.setWorknodeId(po.getId().toString());
+					extraInfoService.save(extraInfo);
+				}
+			}
 //            if(null == po.getNodeUid() || po.getNodeUid().isEmpty()){
 //            	po.setNodeUid("suma-venus-access-" + po.getId());
 //            	workNodeService.save(po);
@@ -107,6 +125,7 @@ public class WorkNodeController extends ControllerBase {
 			data.put("nodeUid", po.getNodeUid());
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			data.put(ERRMSG, "内部错误");
 		}
 
@@ -115,7 +134,7 @@ public class WorkNodeController extends ControllerBase {
 	
 	@RequestMapping("/update")
 	@ResponseBody
-	public Map<String, Object> update(@RequestParam(name = "json") String json) {
+	public Map<String, Object> update(@RequestParam(name = "json") String json,String extraInfoVOList) {
 		Map<String, Object> data = makeAjaxData();
 		LOGGER.info("WorkNodeController save json=" + json);
 
@@ -134,6 +153,18 @@ public class WorkNodeController extends ControllerBase {
 //            	po.setNodeUid("suma-venus-access-" + po.getId());
 //            	workNodeService.save(po);
 //            }
+			
+			// 删除旧数据
+			extraInfoService.deleteByWorknodeId(po.getId().toString());
+
+				// 添加新数据
+			List<ExtraInfoPO> newData = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
+			if (null != newData) {
+				for (ExtraInfoPO extraInfoPO : newData) {
+					extraInfoPO.setWorknodeId(po.getId().toString());
+					extraInfoService.save(extraInfoPO);
+				}
+			}
 			data.put("nodeUid", po.getNodeUid());
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -163,4 +194,18 @@ public class WorkNodeController extends ControllerBase {
 		return data;
 	}
 
+	@RequestMapping(value = "/queryExtraInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> detail(String worknodeId) {
+		Map<String, Object> data = makeAjaxData();
+		try {
+			List<ExtraInfoPO> extraInfos = extraInfoService.findByWorknodeId(worknodeId);
+			data.put("extraInfos", extraInfos);
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
 }

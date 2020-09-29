@@ -21,6 +21,11 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return extraInfoDao.findByBundleId(bundleId);
 	}
 	
+	public List<ExtraInfoPO> findByWorknodeId(String worknodeId){
+		
+		return extraInfoDao.findByWorknodeId(worknodeId);
+	}
+	
 	public ExtraInfoPO findByBundleIdAndName(String bundleId,String name){
 		return extraInfoDao.findByBundleIdAndName(bundleId, name);
 	}
@@ -45,6 +50,10 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return extraInfoDao.deleteByBundleId(bundleId);
 	}
 	
+	public int deleteByWorknodeId(String worknodeId){
+		return extraInfoDao.deleteByWorknodeId(worknodeId);
+	}
+	
 	public ExtraInfoPO queryExtraInfoByName(Collection<ExtraInfoPO> extraInfos, String name){
 		if(name == null) return null;
 		for(ExtraInfoPO extraInfo : extraInfos){
@@ -60,4 +69,6 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		if(extraInfo != null) return extraInfo.getValue();
 		return null;
 	}
+	
+	
 }
