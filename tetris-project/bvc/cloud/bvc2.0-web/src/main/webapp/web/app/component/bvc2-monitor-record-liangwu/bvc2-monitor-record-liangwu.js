@@ -567,6 +567,31 @@ define([
           // })
         });
       },
+      handleDelete(row) {
+        var self = this;
+        self.$confirm('此操作将永久删除该任务和该任务下所有录制文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function () {
+          ajax.post('/monitor/record/remove/file/by/id/timeSegmentId', {
+            id: row.id
+          }, function (data) {
+            self.$message({
+              type: 'info',
+              message: '已删除'
+            });
+            self.load(self.table.page.currentPage)
+          });
+        }).catch(function () {
+          self.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+        self.load(1);
+      },
       handleTotalSizeMb() {
         var self = this;
         this.$prompt('请输入磁盘大小(GB)', '提示', {
