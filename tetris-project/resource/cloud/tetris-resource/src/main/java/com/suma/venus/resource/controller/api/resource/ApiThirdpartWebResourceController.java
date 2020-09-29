@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.suma.venus.resource.service.ApiResourceService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 /**
  * G01资源接口<br/>
