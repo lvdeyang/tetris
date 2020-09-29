@@ -22,6 +22,8 @@ public interface ExtraInfoDao extends CommonDao<ExtraInfoPO>{
 
 	public List<ExtraInfoPO> findByBundleId(String bundleId);
 	
+	public List<ExtraInfoPO> findByWorknodeId(String worknodeId);
+	
 	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds);
 	
 	/**
@@ -52,4 +54,9 @@ public interface ExtraInfoDao extends CommonDao<ExtraInfoPO>{
 	@Transactional
 	@Query("delete from ExtraInfoPO po where po.bundleId = ?1")
 	public int deleteByBundleId(String bundleId);
+	
+	@Modifying
+	@Transactional
+	@Query("delete from ExtraInfoPO po where po.worknodeId = ?1")
+	public int deleteByWorknodeId(String worknodeId);
 }
