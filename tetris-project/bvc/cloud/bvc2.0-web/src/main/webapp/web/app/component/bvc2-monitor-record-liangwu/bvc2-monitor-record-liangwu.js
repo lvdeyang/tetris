@@ -44,7 +44,8 @@ define([
           mode: 'ALL',
           device: '',
           deviceName: '',
-          timeScope: ''
+          timeScope: '',
+          status: 'RUN'
         },
         dialog: {
           addRecord: {
@@ -91,6 +92,21 @@ define([
           },
           download: {
             visible: false,
+          },
+          detail: {
+            visible: false,
+            form: {
+              fileName: '',
+              mode: '',
+              bundle: "",
+              timeSegmentMode: "",
+              timeSegmentStartDay: "",
+              timeSegmentEndDay: "",
+              timeSegmentStartWeek: "",
+              timeSegmentEndWeek: "",
+              timeSegmentStartTime: "",
+              timeSegmentEndTime: "",
+            }
           }
         },
         rules: {
@@ -114,6 +130,10 @@ define([
       condition_timeScope: function () {
         var self = this;
         return self.condition.timeScope;
+      },
+      condition_status: function () {
+        var self = this;
+        return self.condition.status;
       },
       dialog_addRecord_tree_currentUser: function () {
         var self = this;
@@ -142,6 +162,10 @@ define([
         self.load(1);
       },
       condition_timeScope: function (timeScope) {
+        var self = this;
+        self.load(1);
+      },
+      condition_status: function (timeScope) {
         var self = this;
         self.load(1);
       },
@@ -185,10 +209,11 @@ define([
         var condition = {
           mode: 'ALL',
           device: '',
+          status: 'RUN',
           currentPage: 1,
           pageSize: self.table.page.pageSize
         };
-        ajax.post('/monitor/record/load', condition, function (data) {
+        ajax.post('/monitor/record/load/all/status/record', condition, function (data) {
           self.totleRecord = data.total;
         });
       },
@@ -197,6 +222,7 @@ define([
         var condition = {
           mode: self.condition.mode,
           device: self.condition.device,
+          status: self.condition.status,
           currentPage: currentPage,
           pageSize: self.table.page.pageSize
         };
@@ -206,7 +232,7 @@ define([
           condition.endTime = self.condition.timeScope[1].format(datetimePatten);
         }
         self.table.data.splice(0, self.table.data.length);
-        ajax.post('/monitor/record/load', condition, function (data) {
+        ajax.post('/monitor/record/load/all/status/record', condition, function (data) {
           var total = data.total;
           var rows = data.rows;
           self.totalSizeMb = data.totalSizeMb;
@@ -275,6 +301,9 @@ define([
                 if (self.table.data.length <= 0 && self.table.page.currentPage > 1) {
                   self.load(self.table.page.currentPage - 1);
                 }
+
+                self.load(1);
+                self.getTotle(1);
               }, null, [403, 404, 409, 500]);
             } else {
               instance.confirmButtonLoading = false;
@@ -419,6 +448,9 @@ define([
             // self.condition.mode = self.dialog.addRecord.mode;
             self.table.prependRow = data;
           }
+
+          self.load(1);
+          self.getTotle(1);
           self.handleAddRecordClose();
         }, null, [403, 404, 409, 500]);
         // }
@@ -461,6 +493,32 @@ define([
         this.loadByDownload(rows.row.id)
         this.dialog.download.visible = true;
       },
+      handleDetail(rows) {
+        var self = this
+        ajax.post('/monitor/record//detail/message/of/timesegment', {
+          id: rows.id
+        }, function (data) {
+          console.log(data)
+          switch (data.timeSegmentMode) {
+            case "month":
+              self.dialog.detail.form.timeSegmentMode = "每月";
+              break
+            case "week":
+              self.dialog.detail.form.timeSegmentMode = "每周";
+              break
+            case "day":
+              self.dialog.detail.form.timeSegmentMode = "每日";
+              break
+          }
+          self.dialog.detail.form.timeSegmentStartDay = data.startTime
+          self.dialog.detail.form.timeSegmentEndDay = data.endTime
+        });
+        this.dialog.detail.visible = true;
+        this.dialog.detail.form.fileName = rows.fileName;
+        this.dialog.detail.form.mode = rows.mode;
+        this.dialog.detail.form.bundle = rows.videoSource;
+
+      },
       loadByDownload(id) {
         var self = this;
         var param = {
@@ -471,6 +529,9 @@ define([
         ajax.post('/monitor/record/load/many/times/record', param, function (data) {
           var total = data.total;
           var rows = data.rows;
+          if (!data) {
+            self.downloadTable.data = []
+          }
           // self.downloadTable.page.currentPage = currentPage;
           self.downloadTable.page.total = total;
           self.downloadTable.data = rows;
@@ -491,6 +552,13 @@ define([
       handleDownload(row) {
         var self = this;
         ajax.post('/monitor/record/download/url/' + row.id, null, function (data) {
+          var self = this;
+          var downloadUrl = data.downloadUrl;
+          var name = row.fileName;
+          var startTime = 0;
+          var endTime = data.duration;
+          downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
+          window.open(downloadUrl);
           // console.log(data)
           // this.rowDownload({
           //   downLoadPath: data.downloadUrl,

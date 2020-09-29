@@ -165,12 +165,12 @@ let routes = [{
         name: '添加层节点',
         hidden: true
       },
-      // {
-      //   path: '/LwModifyLayernode',
-      //   component: LwModifyLayernode,
-      //   name: '修改层节点',
-      //   hidden: true
-      // },
+      {
+        path: '/LwModifyLayerNode',
+        component: LwModifyLayerNode,
+        name: '修改层节点',
+        hidden: true
+      },
       // {
       //   path: '/LwBundleManage',
       //   component: LwBundleManage,
