@@ -52,7 +52,13 @@
       <!--<el-form-item label="访问地址" prop="url">-->
       <!--<el-input v-model="nodeForm.url" style="width: 200px;"></el-input>-->
       <!--</el-form-item>-->
+      <el-button style="margin-top:10px; margin-left: 30px" type="info" size="small" @click="addExtraInfo">新增扩展字段</el-button>
 
+      <div style="margin-top:10px; margin-left: 30px" v-for="(extraInfo, index) in extraInfos">
+        <el-input size="small" v-model="extraInfo.name" placeholder="扩展字段名" style="width: 180px;"></el-input>
+        <el-input size="small" v-model="extraInfo.value" placeholder="扩展字段值" style="width: 180px;margin-left: 10px;"></el-input>
+        <el-button size="small" type="danger" @click.prevent="remove(extraInfo)" style="margin-left: 10px;">删除</el-button>
+      </div>
       <div style="margin-top:30px;">
         <el-button type="primary" @click="submit()">提交</el-button>
         <el-button type="primary" @click="reset()">重置</el-button>
@@ -87,7 +93,8 @@ export default {
     };
 
     return {
-      activeTabName: "AddLayernode",
+      activeTabName: "LwAddLayernode",
+      extraInfos: [],
       typeOptions: [
         // {
         //   label : "JV210接入",
@@ -225,7 +232,8 @@ export default {
       }
 
       let param = {
-        json: JSON.stringify(this.nodeForm)
+        json: JSON.stringify(this.nodeForm),
+        extraInfoVOList: JSON.stringify(this.extraInfos)
       };
 
       saveNode(param).then(res => {
@@ -245,6 +253,16 @@ export default {
           this.$refs["nodeForm"].resetFields();
         }
       });
+    },
+
+    addExtraInfo: function () {
+      this.extraInfos.push({});
+    },
+    remove: function (item) {
+      var index = this.extraInfos.indexOf(item);
+      if (index !== -1) {
+        this.extraInfos.splice(index, 1)
+      }
     },
     validate: function () {
       var result = false;

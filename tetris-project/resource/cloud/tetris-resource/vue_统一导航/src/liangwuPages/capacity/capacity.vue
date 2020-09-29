@@ -1,5 +1,6 @@
 <template>
   <div class="Echarts">
+    <el-button size="small" type="primary" @click="handleInit">初始化容量</el-button>
     <el-row :gutter="0">
       <el-col class="col" :xs="24" :sm="12" :xl="12">
         <my-pie :optionData="optionDataComputed.ImageAccess" titleText='图像信息接入路数' :legend='legend.ImageAccess'></my-pie>
@@ -14,12 +15,32 @@
         <my-pie :optionData="optionDataComputed.playback" titleText='当前回放路数' :legend='legend.playback'></my-pie>
       </el-col>
     </el-row>
-
+    <el-dialog title="初始化" :visible.sync="dialogVisible" width="40%">
+      <el-form :model="initForm" label-width="200px">
+        <el-form-item label="图像信息接入总路数">
+          <el-input v-model="initForm.vedioCapacity" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="在线用户总人数">
+          <el-input v-model="initForm.userCapacity" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="当前转发总路数">
+          <el-input v-model="initForm.turnCapacity" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="当前回放总路数">
+          <el-input v-model="initForm.replayCapacity" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="initSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
+
 </template>
 
 <script>
-import { queryCapacityDatas } from '../../api/api'
+import { queryCapacityDatas, initCapacity } from '../../api/api'
 import Mypie from './Mypie.vue'
 export default {
   name: 'Echarts',
@@ -31,6 +52,14 @@ export default {
         onLine: [],
         transiter: [],
         playback: [],
+      },
+      dialogVisible: false,
+      initForm: {
+        vedioCapacity: '',
+        userCapacity: '',
+        turnCapacity: '',
+        replayCapacity: ''
+
       },
       legend: {
         ImageAccess: ['已接入', '空闲'],
@@ -66,12 +95,24 @@ export default {
   methods: {
     filterData () {
 
+    },
+    handleInit () {
+      var self = this;
+      self.dialogVisible = true;
+    },
+    initSubmit () {
+      initCapacity(this.initForm).then(res => {
+        console.log(res)
+      })
     }
   },
   mounted () {
     queryCapacityDatas({ 'id': 1 }).then(res => {
       this.resData = res;
-      console.log(res)
+      this.initForm.vedioCapacity = res.vedioCapacity
+      this.initForm.userCapacity = res.userCapacity
+      this.initForm.turnCapacity = res.turnCapacity
+      this.initForm.replayCapacity = res.replayCapacity
 
     })
     console.log(this.optionData)
