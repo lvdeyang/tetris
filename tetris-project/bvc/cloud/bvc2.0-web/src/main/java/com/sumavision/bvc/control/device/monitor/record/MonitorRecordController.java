@@ -755,10 +755,10 @@ public class MonitorRecordController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/remove/file/{id}/{timeSegmentId}")
+	@RequestMapping(value = "/remove/file/by/id/timeSegmentId")
 	public Object removeFileById(
-			@PathVariable Long id,
-			@PathVariable Long timeSegmentId,
+			Long id,
+			Long timeSegmentId,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
