@@ -52,6 +52,7 @@ import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskDAO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskPO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskService;
 import com.sumavision.bvc.feign.ResourceServiceClient;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.system.dao.AVtplGearsDAO;
 import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
@@ -125,6 +126,9 @@ public class MonitorLiveDeviceService {
 	
 	@Autowired
 	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	/**
 	 * xt看本地设备<br/>
@@ -577,6 +581,7 @@ public class MonitorLiveDeviceService {
 		}else if(LiveType.XT_XT.equals(live.getType())){
 			stopXtSeeXt(live, userId, userno);
 		}
+		operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
 	}
 	
 	/**
