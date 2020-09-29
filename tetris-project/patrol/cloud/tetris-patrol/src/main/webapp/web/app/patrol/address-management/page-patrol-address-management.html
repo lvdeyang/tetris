@@ -1,0 +1,113 @@
+<mi-frame id="page-patrol-address-management-wrapper" :menus="menus" :user="user" :groups="groups" active-id="">
+
+    <template slot="title">地址管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>地址管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加地址</el-button>
+            <el-input size="small" style="width:200px; margin-left:20px;" v-model="condition.name" placeholder="按照名称模糊查询"></el-input>
+            <el-button type="primary" size="small" @click="load(table.page.currentPage?table.page.currentPage:1)" icon="el-icon-search">查询</el-button>
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                width="600"
+                                label="url"
+                                prop="url">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="生成二维码" placement="bottom-end">
+                                    <el-button type="text" icon=" icon-qrcode" style="font-size:20px; padding:0;" @click="handleGenerateQrCod(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="修改地址" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:25px;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除地址" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.page.currentPage"
+                        :page-sizes="table.page.pageSizes"
+                        :page-size="table.page.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.page.total">
+                </el-pagination>
+            </div>
+        </el-card>
+
+    </template>
+
+    <template>
+        <el-dialog
+                title="添加地址"
+                :visible.sync="dialog.addAddress.visible"
+                :close-on-click-modal="false"
+                width="500px"
+                :before-close="handleAddAddressClose">
+
+            <el-input v-model="dialog.addAddress.name" placeholder="填写地址"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAddressClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAddressCommit" :loading="dialog.addAddress.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                title="修改地址"
+                :visible.sync="dialog.editAddress.visible"
+                :close-on-click-modal="false"
+                width="500px"
+                :before-close="handleEditAddressClose">
+
+            <el-input v-model="dialog.editAddress.name" placeholder="填写地址"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAddressClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAddressCommit" :loading="dialog.editAddress.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+            :title="dialog.qrCode.name"
+            :visible.sync="dialog.qrCode.visible"
+            :close-on-click-modal="false"
+            width="296px"
+            :before-close="handleQrCodeClose">
+
+            <div id="qr-code-container" style="height:256px;"></div>
+
+        </el-dialog>
+
+    </template>
+
+</mi-frame>
