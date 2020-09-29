@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -2017,6 +2018,63 @@ public class MonitorRecordService {
 			}
 
 			monitorRecordDao.delete(file);
+		}
+	}
+
+	/**
+	 * 删除文件，兼容老的删除<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月29日 上午9:49:02
+	 * @param id id 文件id
+	 * @param timeSegmentId 排期任务的子id
+	 * @param userId userId 当前业务用户
+	 * @throws Exception
+	 */
+	public void removeFileById(Long id,Long timeSegmentId, Long userId) throws Exception {
+		MonitorRecordPO file = monitorRecordDao.findOne(id);
+		if (file.getUserId().toString().equals(userId.toString())
+				&& MonitorRecordStatus.STOP.equals(file.getStatus())) {
+
+			// 发送删除文件命令
+			LogicBO logic = new LogicBO().setUserId("-1").setPass_by(new ArrayList<PassByBO>());
+			List<String> files = new ArrayList<String>();
+			String fileName = null;
+			
+			if (file.getPreviewUrl() != null) {
+				fileName = file.getPreviewUrl().split("/")[0];
+			}
+			
+			if (fileName != null && !fileName.equals("")) {
+				
+				//排期处理开始
+				if(MonitorRecordMode.TIMESEGMENT.equals(file.getMode())){
+										
+					MonitorRecordManyTimesPO timeSegmentFile=monitorRecordManyTimesDao.findOne(timeSegmentId);
+					
+					Optional<MonitorRecordManyTimesPO> optional=Optional.ofNullable(timeSegmentFile);
+					Optional<Integer> number=optional.map(timeSegment->{return timeSegment.getIndexNumber();});
+					if(number.isPresent()){
+						fileName =fileName+"/"+number.get();
+					}
+					
+				}
+				//排期处理结束
+				
+				files.add(fileName);
+				PassByBO passByBO = new PassByBO().setBundle_id("").setLayer_id(file.getStoreLayerId())
+						.setType("delete_record_file")
+						.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+				logic.getPass_by().add(passByBO);
+				executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
+			}
+
+			if(MonitorRecordMode.TIMESEGMENT.equals(file.getMode())){
+				monitorRecordManyTimesDao.delete(timeSegmentId);
+			}else{
+				monitorRecordDao.delete(file);
+			}
+			
 		}
 	}
 

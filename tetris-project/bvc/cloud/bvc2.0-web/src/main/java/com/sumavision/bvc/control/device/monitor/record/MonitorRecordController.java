@@ -747,6 +747,28 @@ public class MonitorRecordController {
 	}
 	
 	/**
+	 * 删除录制文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月25日 上午10:10:55
+	 * @param @PathVariable Long id 文件id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/file/{id}/{timeSegmentId}")
+	public Object removeFileById(
+			@PathVariable Long id,
+			@PathVariable Long timeSegmentId,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		monitorRecordService.removeFileById(id,timeSegmentId, userId);
+	
+		return null;
+	}
+	
+	/**
 	 * 设置磁盘大小<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
