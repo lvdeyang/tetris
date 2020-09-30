@@ -294,8 +294,9 @@ public class ApiResourceService extends ControllerBase{
 	 * @return List<BundleVO> 设备列表
 	 */
 	public List<BundleVO> bundleList(String worknodeId)throws Exception{
-		Long id = Long.parseLong(worknodeId);
-		WorkNodePO workNodePO = workNodeDao.findOne(id);
+		
+		WorkNodePO workNodePO = workNodeDao.findByNodeUid(worknodeId);
+		if (workNodePO == null) throw new BaseException(StatusCode.ERROR, "暂无可查询到的设备");
 		List<BundlePO> bundlePOs = bundleDao.findByAccessNodeUid(workNodePO.getNodeUid());
 		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
 		if(bundlePOs.size() != 0){
