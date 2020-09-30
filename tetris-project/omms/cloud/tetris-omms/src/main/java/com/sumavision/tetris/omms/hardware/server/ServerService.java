@@ -1,5 +1,6 @@
 package com.sumavision.tetris.omms.hardware.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -204,8 +205,7 @@ public class ServerService {
 				String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/get_capability_info").toString();
 				HttpPost httpPost = new HttpPost(url);
 				client.start();
-				client.execute(httpPost, new QueryStatusListener(server.getId()));
-				client.close();
+				client.execute(httpPost, new QueryStatusListener(server.getId(), client));
 			}
 		}
 	}
@@ -319,9 +319,13 @@ public class ServerService {
 
 		private Long serverId;
 		
+		private CloseableHttpAsyncClient client;
+		
 		QueryStatusListener(
-				Long serverId){
+				Long serverId,
+				CloseableHttpAsyncClient client){
 			this.serverId = serverId;
+			this.client = client;
 		}
 		
 		@Override
@@ -340,20 +344,42 @@ public class ServerService {
 			}catch(Exception e){
 				e.printStackTrace();
 				serverService.offlineStatus(this.serverId);
+			}finally{
+				try {
+					if(client!=null) client.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		@Override
 		public void failed(Exception ex) {
 			ex.printStackTrace();
-			ServerService serverService = SpringContext.getBean(ServerService.class);
-			serverService.offlineStatus(this.serverId);
+			try{
+				ServerService serverService = SpringContext.getBean(ServerService.class);
+				serverService.offlineStatus(this.serverId);
+			}finally{
+				try {
+					if(client!=null) client.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		@Override
 		public void cancelled() {
-			ServerService serverService = SpringContext.getBean(ServerService.class);
-			serverService.offlineStatus(this.serverId);
+			try{
+				ServerService serverService = SpringContext.getBean(ServerService.class);
+				serverService.offlineStatus(this.serverId);
+			}finally{
+				try {
+					if(client!=null) client.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}
