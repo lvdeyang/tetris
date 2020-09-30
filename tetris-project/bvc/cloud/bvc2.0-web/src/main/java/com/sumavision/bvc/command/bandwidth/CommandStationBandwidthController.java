@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -112,7 +113,8 @@ public class CommandStationBandwidthController {
 	@RequestMapping(value="/query")
 	public Object query(){
 		
-		return commandStationBandwidthDao.findAll();
+		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll());
+				
 	}
 	
 }
