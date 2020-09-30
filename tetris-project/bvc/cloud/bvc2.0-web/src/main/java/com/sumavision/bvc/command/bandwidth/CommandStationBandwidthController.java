@@ -113,7 +113,7 @@ public class CommandStationBandwidthController {
 	@RequestMapping(value="/query")
 	public Object query(){
 		
-		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll());
+		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll()).getMap();
 				
 	}
 	
