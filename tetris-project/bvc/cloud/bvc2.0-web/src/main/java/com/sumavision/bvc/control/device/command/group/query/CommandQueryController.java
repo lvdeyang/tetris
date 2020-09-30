@@ -1065,15 +1065,16 @@ public class CommandQueryController {
 			}
 		}
 		
-		//查到所有的扩展字段
-		List<String> bundleIds = new ArrayList<String>();
-		for(BundleBO bundle : bundles){
-			bundleIds.add(bundle.getBundleId());
-		}
-		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
-		
 		//往里装设备
 		if(bundles!=null && bundles.size()>0){
+			
+			//查到所有的扩展字段
+			List<String> bundleIds = new ArrayList<String>();
+			for(BundleBO bundle : bundles){
+				bundleIds.add(bundle.getBundleId());
+			}			
+			List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+			
 			for(BundleBO bundle:bundles){
 				if(bundle.getFolderId()!=null && root.getId().equals(bundle.getFolderId().toString())){
 					List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, bundle.getBundleId());
