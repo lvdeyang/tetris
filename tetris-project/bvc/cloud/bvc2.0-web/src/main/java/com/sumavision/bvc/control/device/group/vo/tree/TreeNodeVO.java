@@ -560,7 +560,7 @@ public class TreeNodeVO {
 	 */
 	public TreeNodeVO set(BundleBO bundle, List<ExtraInfoPO> extraInfos){
 		JSONObject extraInfo = new JSONObject();
-		if(extraInfo != null){
+		if(extraInfos != null){
 			for(ExtraInfoPO extra : extraInfos){
 				extraInfo.put(extra.getName(), extra.getValue());
 			}
