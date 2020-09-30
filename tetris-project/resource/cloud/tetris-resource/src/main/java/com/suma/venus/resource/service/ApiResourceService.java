@@ -302,7 +302,7 @@ public class ApiResourceService extends ControllerBase{
 		if(bundlePOs.size() != 0){
 			for (BundlePO bundlePO : bundlePOs) {
 				Map<String, Object> param = new HashMap<String, Object>();
-				List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleId(bundlePO.getId().toString());
+				List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleId(bundlePO.getBundleId());
 				if (extraInfoPOs.size() != 0) {
 					for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
 						String name = extraInfoPO.getName();
