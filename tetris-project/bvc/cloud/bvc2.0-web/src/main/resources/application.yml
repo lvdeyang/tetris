@@ -14,9 +14,9 @@ spring:
 #      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.16:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
-      username: sumadb
-      password: Sumavision@300079
+      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      username: root
+      password: root
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -30,9 +30,9 @@ spring:
 #      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.16:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
-      username: sumadb
-      password: Sumavision@300079
+      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      username: root
+      password: root
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20

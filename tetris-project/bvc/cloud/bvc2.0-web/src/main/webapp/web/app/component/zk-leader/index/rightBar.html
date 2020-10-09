@@ -306,6 +306,53 @@
                         </el-scrollbar>
                     </div>
                 </el-tab-pane>
+                <!-- 告警喊话 -->
+                <el-tab-pane class="tabPage">
+                    <span slot="label" class="myTitle">
+                        <img class="fontPic" src="../../../../../images/zk-leader/yjzh.png" draggable="false">
+                    </span>
+                    <div class="scrollTab" v-if="switchStatus2">
+                        <div style="height:56px; width:100%; padding:10px; box-sizing:border-box;">
+                            <el-input class="filter-input" v-model="tree.filter" style="border-radius:0;" size="medium" placeholder="筛选"></el-input>
+                        </div>
+                        <div style="position:absolute; top:56px; left:0; right:0; bottom:0;">
+                            <div style="width:100%; height:100%; position:relative;">
+                                <el-scrollbar style="height:100%;">
+                                    <el-tree
+                                            :expand-on-click-node="false"
+                                            ref="deviceTree"
+                                            :data="tree.data"
+                                            :filter-node-method="filterNode"
+                                            :props="tree.props">
+                                        <span class="headline" slot-scope="scope">
+                                            <span v-if="scope.data.type==='SPEAKER'">
+                                                <el-checkbox v-if="!speakerTask.id"
+                                                             v-model="scope.data.checked"
+                                                             @change="handleSpeakerCheckChange(scope)">
+                                                    <span v-if="scope.data.type==='SPEAKER'" class="tree-icon speaker icon-bullhorn"></span>
+                                                    <span class="tree-label">{{scope.data.name}}</span>
+                                                </el-checkbox>
+                                                <el-checkbox v-else
+                                                             v-model="scope.data.checked" disabled>
+                                                    <span v-if="scope.data.type==='SPEAKER'" class="tree-icon speaker icon-bullhorn"></span>
+                                                    <span class="tree-label">{{scope.data.name}}</span>
+                                                </el-checkbox>
+                                            </span>
+                                            <span v-else>
+                                                <span v-if="scope.data.type!=='FOLDER' && scope.data.type!=='SPEAKER'" class="handDown el-icon-tickets"
+                                                      style="font-size: 20px;margin: 5px;color: #00ceff"
+                                                      @click="handleContextMenuShow($event, scope.data)"></span>
+                                                <span v-if="scope.data.type==='ALARM' || scope.data.type==='FOLDER'" class="tree-icon folder icon-folder-open"></span>
+                                                <span v-if="scope.data.type==='IPC'" class="tree-icon ipc icon-facetime-video"></span>
+                                                <span class="tree-label">{{scope.data.name}}</span>
+                                            </span>
+                                        </span>
+                                    </el-tree>
+                                </el-scrollbar>
+                            </div>
+                        </div>
+                    </div>
+                </el-tab-pane>
             </el-tabs>
 
             <!-- 底部的按钮图标 -->
@@ -368,11 +415,17 @@
                     </div>
                 </div>
 
-                <div class="customIcon" v-else="currentTab==1" @click="refreshDevice" title="刷新">
+                <div class="customIcon" v-if="currentTab==1" @click="refreshDevice" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
-                <div class="customIcon" v-else="currentTab==3" @click="refreshRecord" title="刷新">
+                <div class="customIcon" v-if="currentTab==3" @click="refreshRecord" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
+                </div>
+                <div class="customIcon" v-if="currentTab==4 && !speakerTask.id" title="开始喊话" @click="addSpeakerTask">
+                    <img :src="baseUrl+'images/zk-leader/able/speaker-start.png'" alt="开始喊话"/>
+                </div>
+                <div class="customIcon" v-if="currentTab==4 && speakerTask.id" title="停止喊话" @click="stopSpeakerTask">
+                    <img :src="baseUrl+'images/zk-leader/able/speaker-stop.png'" alt="停止喊话"/>
                 </div>
             </div>
         </div>
@@ -602,6 +655,14 @@
                 进入指挥
             </div>
             <div :class="'menu ' + (contextMenu.removeRecord?'':'disable')" @click="removeRecord">
+                <i class="menuIcon icon-trash"></i>
+                删除
+            </div>
+            <div :class="'menu ' + (contextMenu.vodIpc?'':'disable')" @click="vodIpc">
+                <i class="menuIcon icon-facetime-video"></i>
+                点播
+            </div>
+            <div :class="'menu ' + (contextMenu.removeAlarm?'':'disable')" @click="removeAlarm">
                 <i class="menuIcon icon-trash"></i>
                 删除
             </div>

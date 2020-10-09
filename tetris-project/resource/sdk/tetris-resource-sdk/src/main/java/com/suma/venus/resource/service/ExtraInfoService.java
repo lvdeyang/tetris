@@ -1,5 +1,6 @@
 package com.suma.venus.resource.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -16,9 +17,16 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 	@Autowired
 	private ExtraInfoDao extraInfoDao;
 	
-	public List<ExtraInfoPO> findByBundleId(String bundleId){
-		
+	public List<ExtraInfoPO> findByBundleId(String bundleId){		
 		return extraInfoDao.findByBundleId(bundleId);
+	}
+	
+	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds){		
+		return extraInfoDao.findByBundleIdIn(bundleIds);
+	}
+	
+	public List<ExtraInfoPO> findByWorknodeId(String worknodeId){		
+		return extraInfoDao.findByWorknodeId(worknodeId);
 	}
 	
 	public ExtraInfoPO findByBundleIdAndName(String bundleId,String name){
@@ -45,6 +53,10 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return extraInfoDao.deleteByBundleId(bundleId);
 	}
 	
+	public int deleteByWorknodeId(String worknodeId){
+		return extraInfoDao.deleteByWorknodeId(worknodeId);
+	}
+	
 	public ExtraInfoPO queryExtraInfoByName(Collection<ExtraInfoPO> extraInfos, String name){
 		if(name == null) return null;
 		for(ExtraInfoPO extraInfo : extraInfos){
@@ -60,4 +72,16 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		if(extraInfo != null) return extraInfo.getValue();
 		return null;
 	}
+	
+	public List<ExtraInfoPO> queryExtraInfoBundleId(Collection<ExtraInfoPO> extraInfos, String bundleId){
+		if(bundleId == null) return null;
+		List<ExtraInfoPO> infos = new ArrayList<ExtraInfoPO>();
+		for(ExtraInfoPO extraInfo : extraInfos){
+			if(bundleId.equals(extraInfo.getBundleId())){
+				infos.add(extraInfo);
+			}
+		}
+		return infos;
+	}
+	
 }

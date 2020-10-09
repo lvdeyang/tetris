@@ -548,6 +548,9 @@ public class GroupService {
 						memberTerminalBO.getOriginId(), 
 						memberTerminalBO.getTerminalId(),
 						memberTerminalBO.getGroupMemberType());
+				if(memberTerminalBO.getGroupMemberType().equals(GroupMemberType.MEMBER_USER)){
+					pageInfo.setPageSize(16);
+				}
 				addPageInfos.add(pageInfo);
 			}
 		}

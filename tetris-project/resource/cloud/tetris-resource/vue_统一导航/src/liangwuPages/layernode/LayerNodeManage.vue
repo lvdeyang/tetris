@@ -3,7 +3,7 @@
 
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
       <el-tab-pane label="层节点列表" name="LwLayernodeManage"></el-tab-pane>
-      <el-tab-pane label="添加层节点" name="LwAddLayernode"></el-tab-pane>
+      <el-tab-pane label="添加层节点" name="LwAddLayerNode"></el-tab-pane>
     </el-tabs>
 
     <div style="float: left;width: 100%">
@@ -226,7 +226,7 @@ export default {
     },
     handleModify: function (row) {
       this.$router.push({
-        path: '/ModifyLayernode',
+        path: '/LwModifyLayernode',
         query: {
           id: row.id
         }

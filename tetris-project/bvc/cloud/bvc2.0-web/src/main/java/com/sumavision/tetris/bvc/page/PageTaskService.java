@@ -291,6 +291,7 @@ public class PageTaskService {
 	private int getLastIndex(PageInfoPO pageInfo){
 		int lastIndex = -1;
 		List<PageTaskPO> tasks =  pageInfo.getPageTasks();
+		if(tasks == null) return lastIndex;
 		for(PageTaskPO task : tasks){
 			if(task.getTaskIndex() > lastIndex){
 				lastIndex = task.getTaskIndex();
@@ -333,7 +334,9 @@ public class PageTaskService {
 	
 	/** pageNumber从1开始 */
 	private List<PageTaskPO> getPageTasks(PageInfoPO pageInfo, int pageNumber, boolean throwException) throws BaseException{
+		List<PageTaskPO> result = new ArrayList<PageTaskPO>();
 		List<PageTaskPO> tasks = pageInfo.getPageTasks();//new ArrayList<CommandPlayerTaskPO>();//userInfo.getxxx
+		if(tasks == null) return result;
 		Collections.sort(tasks, new PageTaskPO.TaskComparatorFromIndex());
 		int pageSize = pageInfo.getPageSize();
 		
@@ -361,7 +364,6 @@ public class PageTaskService {
 		
 		int startIndex = pageSize * (pageNumber - 1);
 		int endIndex = pageSize * pageNumber - 1;
-		List<PageTaskPO> result = new ArrayList<PageTaskPO>();
 		for(PageTaskPO task : tasks){
 			if(task.getTaskIndex() >= startIndex && task.getTaskIndex() <= endIndex){
 				result.add(task);

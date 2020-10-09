@@ -302,6 +302,6 @@ public class CloudControlController {
 			HttpServletRequest request) throws Exception{
 		Long userId = userUtils.getUserIdFromSession(request);
 		cloudControlService.checkPrivilege(serial, userId, null);
-		return request;
+		return null;
 	}
 }

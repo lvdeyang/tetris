@@ -37,6 +37,7 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -86,6 +87,9 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	@RequestMapping(value = "/terminal/index")
 	public ModelAndView terminalIndex(String token){
@@ -308,7 +312,9 @@ public class MonitorLiveController {
 					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
 					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
 					type, user.getId(), user.getUserno(), 
-					false, null);		
+					false, null);
+
+		operationLogService.send(user.getName(), "新建转发", bundle.getBundleName() + " 转发给 " + dstBundle.getBundleName());
 		
 		return new MonitorLiveDeviceVO().set(entity);
 	}

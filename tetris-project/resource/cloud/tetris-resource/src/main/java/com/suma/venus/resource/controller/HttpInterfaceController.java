@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.AccessToken;
 import com.suma.venus.resource.base.bo.BatchLockBundleParam;
 import com.suma.venus.resource.base.bo.BatchLockBundleRespBody;
@@ -117,6 +114,8 @@ import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.WorkNodeVO;
 import com.suma.venus.resource.vo.WsVO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
@@ -203,6 +202,9 @@ public class HttpInterfaceController {
 	
 	@Autowired
 	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private AlarmFeign alarmFeign;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -852,11 +854,19 @@ public class HttpInterfaceController {
 		LOGGER.info("Bundle online request : " + JSONObject.toJSONString(request));
 
 		String bundleId = request.getBundle_online_request().getBundle_id();
+		
 		BundleOnlineResp resp = new BundleOnlineResp();
 		BundleOnlineRespParam respBody = new BundleOnlineRespParam();
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_online_response(respBody);
 		try {
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-resource");
+			log.setUserName("");
+			log.setOprName("设备上线");
+			log.setSourceServiceIP("");
+			log.setOprDetail(bundleId);
+			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 			if (null == po) {
 				respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
@@ -902,6 +912,13 @@ public class HttpInterfaceController {
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_offline_response(respBody);
 		try {
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-resource");
+			log.setUserName("");
+			log.setOprName("设备下线");
+			log.setSourceServiceIP("");
+			log.setOprDetail(bundleId);
+			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 
 			if (null != po && po.getOnlineStatus() != ONLINE_STATUS.OFFLINE) {

@@ -2317,6 +2317,7 @@ public class LogicTreatCompo{
 				//组播
 				channel_param.getJSONObject("base_param").put("mode", channelToOperate.getMode());
 				channel_param.getJSONObject("base_param").put("multi_addr", channelToOperate.getMulti_addr());
+				channel_param.getJSONObject("base_param").put("src_multi_ip", channelToOperate.getSrc_multi_ip());
 				channelToOperate.setChannelParam(channel_param);
 			}catch(Exception ex){
 				iterator.remove();

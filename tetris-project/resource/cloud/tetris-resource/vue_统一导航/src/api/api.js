@@ -90,6 +90,9 @@ export const addBundle = params => {
 export const queryBundleExtraInfo = params => {
   return axiosInstance.post(`${basePath}/bundle/queryExtraInfo`, qs.stringify(params)).then(res => res.data)
 }
+export const queryLayernodeExtraInfo = params => {
+  return axiosInstance.post(`${basePath}/layernode/queryExtraInfo`, qs.stringify(params)).then(res => res.data)
+}
 export const modifyBundleExtraInfo = params => {
   return axiosInstance.post(`${basePath}/bundle/modifyExtraInfo`, qs.stringify(params)).then(res => res.data)
 }
@@ -338,4 +341,8 @@ export const getRecordDatas = params => {
 
 export const queryCapacityDatas = params => {
   return axiosInstance.post(`${basePath}/vedioCapacity/query`, qs.stringify(params)).then(res => res.data)
+}
+
+export const initCapacity = params => {
+  return axiosInstance.post(`${basePath}/vedioCapacity/change/capacity`, qs.stringify(params)).then(res => res.data)
 }

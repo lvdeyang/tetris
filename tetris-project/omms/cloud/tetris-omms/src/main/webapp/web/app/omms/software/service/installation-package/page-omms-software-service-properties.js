@@ -201,6 +201,7 @@ define([
                                     for(var i=0; i<self.table.rows.length; i++){
                                         if(self.table.rows[i].id === row.id){
                                             self.table.rows.splice(i, 1);
+                                            self.table.total --;
                                             break;
                                         }
                                     }

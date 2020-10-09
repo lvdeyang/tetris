@@ -1,5 +1,6 @@
 package com.suma.venus.resource.controller.api.resource;
 
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.service.ApiResourceService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
@@ -40,4 +40,20 @@ public class ApiThirdpartWebResourceController {
 		return apiResourceService.queryBundle();
 	}
 	
+	/**
+	 * 根据接入层节点查询设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月27日 下午5:47:27
+	 * @param worknodeId 接入层节点id
+	 * @return List<BundleVO> 设备列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/bundle/list")
+	public Object bundleList(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String worknodeId = requestWrapper.getString("worknodeId");
+		return apiResourceService.bundleList(worknodeId);
+	}
 }

@@ -2,7 +2,7 @@
   <section>
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
       <el-tab-pane label="层节点列表" name="LwLayernodeManage"></el-tab-pane>
-      <el-tab-pane label="修改层节点" name="LwModifyLayernode"></el-tab-pane>
+      <el-tab-pane label="修改层节点" name="LwModifyLayerNode"></el-tab-pane>
     </el-tabs>
 
     <el-form :model="nodeForm" :rules="rules" ref="nodeForm" label-width="100px">
@@ -44,6 +44,13 @@
       <!--<el-form-item label="访问地址" prop="url">-->
       <!--<el-input v-model="nodeForm.url" style="width: 200px;"></el-input>-->
       <!--</el-form-item>-->
+      <el-button type="info" size="small" @click="addExtraInfo" style="margin-top:20px; margin-left: 30px">新增扩展字段</el-button>
+
+      <div style="margin-top:10px;" v-for="(extraInfo, index) in extraInfos">
+        <el-input size="small" v-model="extraInfo.name" placeholder="扩展字段名" style="width: 180px;"></el-input>
+        <el-input size="small" v-model="extraInfo.value" placeholder="扩展字段值" style="width: 180px;margin-left: 10px;"></el-input>
+        <el-button size="small" type="danger" @click.prevent="remove(extraInfo)" style="margin-left: 10px;">删除</el-button>
+      </div>
 
       <div style="margin-top:30px;">
         <el-button type="primary" @click="submit()">提交</el-button>
@@ -56,7 +63,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { updateNode, getNodeById } from '../../api/api';
+import { updateNode, getNodeById, queryLayernodeExtraInfo } from '../../api/api';
 
 export default {
   name: "LwModifyLayernode",
@@ -78,7 +85,8 @@ export default {
       }
     };
     return {
-      activeTabName: "ModifyLayernode",
+      activeTabName: "LwModifyLayerNode",
+      extraInfos: [],
       typeOptions: [
         // {
         //   label : "JV210接入",
@@ -170,6 +178,8 @@ export default {
         monitorUrl: '',
         netUrl: ''
       },
+      extraInfos: [],
+      worknodeId: '',
       rules: {
         type: [
           { required: true, message: '请选择节点类型', trigger: 'change' }
@@ -215,13 +225,41 @@ export default {
         }
       });
     },
+    queryLayernodeExtraInfo: function () {
+      let param = {
+        worknodeId: this.id
+      };
+
+      queryLayernodeExtraInfo(param).then(res => {
+        if (res.errMsg) {
+          this.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
+          this.extraInfos = res.extraInfos;
+        }
+      });
+    },
+    addExtraInfo: function () {
+      this.extraInfos.push({});
+    },
+    remove: function (item) {
+      var index = this.extraInfos.indexOf(item);
+      if (index !== -1) {
+        this.extraInfos.splice(index, 1);
+      }
+    },
     submit: function () {
       if (!this.validate()) {
         return;
       }
-
+      if (!this.validateExtraInfo()) {
+        return;
+      }
       let param = {
-        json: JSON.stringify(this.nodeForm)
+        json: JSON.stringify(this.nodeForm),
+        extraInfoVOList: JSON.stringify(this.extraInfos)
       };
 
       updateNode(param).then(res => {
@@ -244,10 +282,23 @@ export default {
         result = valid;
       });
       return result;
-    }
+    },
+    validateExtraInfo: function () {
+      for (let extraInfo of this.extraInfos) {
+        if (!extraInfo.name || !extraInfo.value) {
+          this.$message({
+            message: "扩展字段不能为空",
+            type: 'error'
+          });
+          return false;
+        }
+      }
+      return true;
+    },
   },
   mounted () {
     this.getNode();
+    this.queryLayernodeExtraInfo();
   }
 }
 </script>

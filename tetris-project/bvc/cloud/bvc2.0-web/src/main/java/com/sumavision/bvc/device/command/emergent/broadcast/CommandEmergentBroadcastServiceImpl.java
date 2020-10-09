@@ -309,7 +309,7 @@ public class CommandEmergentBroadcastServiceImpl {
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<UserVO> userVOs = null;
 			try{
-				userQuery.queryAllUserBaseInfo("qt指控软件");
+				userVOs = userQuery.queryAllUserBaseInfo("qt指控软件");
 			}catch(Exception e){
 				userVOs = new ArrayList<UserVO>();
 				log.info("查询用户失败，可能是没有权限");

@@ -189,6 +189,8 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/eb-screendisplay-web/*")
 												   .add("/eb-statistics-web/*")
 												   .add("/device/group/record/download/file")
+												   .add("/sign/sign/page/*")
+												   .add("/sign/add")
 												   .getList();
 	}
 	

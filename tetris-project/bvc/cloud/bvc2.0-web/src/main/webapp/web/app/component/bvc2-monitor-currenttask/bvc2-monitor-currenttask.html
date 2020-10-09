@@ -10,7 +10,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button type="text" @click="setCur(scope.row)" v-if="!scope.row.currentTask">设为当前任务</el-button>
-          <el-tag type="success" v-else>这条数据是当前任务</el-tag>
+          <el-tag type="success" v-else>当前任务</el-tag>
           <el-button @click="editTask(scope.row)" type="text" size="small">修改</el-button>
           <el-button type="text" size="small" @click="deleteRow(scope.row)" v-show="!scope.row.currentTask">删除
           </el-button>
@@ -33,9 +33,9 @@
           </el-switch>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="addTaskSubmit" v-show="showBtn">创建任务</el-button>
-          <el-button type="primary" @click="addTaskSubmit" v-show="!showBtn">修改任务</el-button>
-          <el-button @click="cancel">取消创建</el-button>
+          <el-button type="primary" @click="addTaskSubmit" v-show="dialog.isCreate">创建任务</el-button>
+          <el-button type="primary" @click="addTaskSubmit" v-show="!dialog.isCreate">修改任务</el-button>
+          <el-button @click="cancel">取消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>

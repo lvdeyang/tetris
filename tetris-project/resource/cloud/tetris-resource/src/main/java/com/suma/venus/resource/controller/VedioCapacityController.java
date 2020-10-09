@@ -46,12 +46,13 @@ public class VedioCapacityController {
 	@ResponseBody
 	public Object query() throws Exception{
 		List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
-		if(vedioCapacityPOs.size()==0){
+		if(vedioCapacityPOs.size()==0 || vedioCapacityPOs.isEmpty()){
 			VedioCapacityPO vedioCapacityPO = new VedioCapacityPO();
-			vedioCapacityPO.setUserCapacity((long) 200);
-			vedioCapacityPO.setVedioCapacity((long) 1024);
-			vedioCapacityPO.setTurnCapacity((long) 128);
-			vedioCapacityPO.setReplayCapacity((long) 20);
+			vedioCapacityPO.setUserCapacity(200l);
+			vedioCapacityPO.setVedioCapacity(1024l);
+			vedioCapacityPO.setTurnCapacity(128l);
+			vedioCapacityPO.setReplayCapacity(20l);
+			vedioCapacityDAO.save(vedioCapacityPO);
 			vedioCapacityPOs.add(vedioCapacityPO);
 		}
 		VedioCapacityPO vedioCapacityPO = vedioCapacityPOs.get(0);
@@ -96,26 +97,26 @@ public class VedioCapacityController {
 	 * @param replayCapacity 回放容量
 	 * @return vedioCapacityVO 容量
 	 */
-//	@RequestMapping("/change/capacity")
-//	@ResponseBody
-//	public Object changeCapacity(
-//			Long userCapacity,
-//			Long vedioCapacity,
-//			Long turnCapacity,
-//			Long replayCapacity){
-//		List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
-//		VedioCapacityPO vedioCapacityPO = vedioCapacityPOs.get(0);
-//		vedioCapacityPO.setUserCapacity(userCapacity);
-//		vedioCapacityPO.setVedioCapacity(vedioCapacity);
-//		vedioCapacityPO.setTurnCapacity(turnCapacity);
-//		vedioCapacityPO.setReplayCapacity(replayCapacity);
-//		vedioCapacityDAO.save(vedioCapacityPO);
-//		VedioCapacityVO vedioCapacityVO = new VedioCapacityVO();
-//		vedioCapacityVO.setUserCapacity(vedioCapacityPO.getUserCapacity());
-//		vedioCapacityVO.setVedioCapacity(vedioCapacityPO.getVedioCapacity());
-//		vedioCapacityVO.setTurnCapacity(turnCapacity);
-//		vedioCapacityVO.setReplayCapacity(replayCapacity);
-//		return vedioCapacityVO;
-//	}
+	@RequestMapping("/change/capacity")
+	@ResponseBody
+	public Object changeCapacity(
+			Long userCapacity,
+			Long vedioCapacity,
+			Long turnCapacity,
+			Long replayCapacity){
+		List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
+		VedioCapacityPO vedioCapacityPO = vedioCapacityPOs.get(0);
+		vedioCapacityPO.setUserCapacity(userCapacity);
+		vedioCapacityPO.setVedioCapacity(vedioCapacity);
+		vedioCapacityPO.setTurnCapacity(turnCapacity);
+		vedioCapacityPO.setReplayCapacity(replayCapacity);
+		vedioCapacityDAO.save(vedioCapacityPO);
+		VedioCapacityVO vedioCapacityVO = new VedioCapacityVO();
+		vedioCapacityVO.setUserCapacity(vedioCapacityPO.getUserCapacity());
+		vedioCapacityVO.setVedioCapacity(vedioCapacityPO.getVedioCapacity());
+		vedioCapacityVO.setTurnCapacity(turnCapacity);
+		vedioCapacityVO.setReplayCapacity(replayCapacity);
+		return vedioCapacityVO;
+	}
 
 }

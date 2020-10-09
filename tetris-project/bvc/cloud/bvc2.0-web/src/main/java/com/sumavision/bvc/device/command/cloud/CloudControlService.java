@@ -221,7 +221,7 @@ public class CloudControlService {
 			Long userId,
 			BUSINESS_OPR_TYPE type) throws Exception{
 		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
-//		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.DIANBO);
+		commandCommonServiceImpl.authorizeBundle(bundle.getBundleId(), userId, BUSINESS_OPR_TYPE.CLOUD);
 	}
 	
 }

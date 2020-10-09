@@ -345,7 +345,7 @@ public class ServiceDeploymentService {
 			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
 			        		    .build();
 
-	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/install").toString();
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/install_simple").toString();
 	        System.out.println(url);
 			HttpPost httpPost = new HttpPost(url);
 			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  

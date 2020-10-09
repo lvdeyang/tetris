@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -42,6 +44,7 @@ import com.sumavision.bvc.device.monitor.exception.UserHashNoPermissionToStopMon
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.record.exception.ErrorRecordModeException;
 import com.sumavision.bvc.device.monitor.record.exception.MonitorRecordSourceVideoCannotBeNullException;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO.ResultDstBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -114,6 +117,12 @@ public class MonitorRecordService {
 	
 	@Autowired
 	private SystemConfigurationDAO systemConfigurationDao;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserUtils userUtils;
 	
 	/**
 	 * 录制本地设备<br/>
@@ -258,6 +267,8 @@ public class MonitorRecordService {
 		LogicBO logic = openBundle(task, codec);
 		logic.merge(startRecord(task, codec));
 		sendProtocol(task, logic, "点播系统：开始录制本地设备");
+		
+		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加录制", "添加录制任务文件名称："+fileName);
 
 		return task;
 	}
@@ -510,6 +521,8 @@ public class MonitorRecordService {
 		LogicBO logic = openBundle(task, codec);
 		logic.merge(startManyTimesRecord(task,relation,codec,totalSizeMb));
 		sendProtocol(task, logic, "点播系统：开始录制本地设备");
+		
+		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加录制", "添加录制任务文件名称："+fileName);
 		
 		return task;
 	}
@@ -1880,6 +1893,7 @@ public class MonitorRecordService {
 				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
 				monitorRecordManyTimesRelationService.updateNextTime(relation);
 			}
+			
 			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
 			//更新添加结束
 		}
@@ -1994,7 +2008,7 @@ public class MonitorRecordService {
 	 * @param Long
 	 *            userId 当前业务用户
 	 * @throws Exception
-	 */
+	 *//*
 	public void removeFile(Long id, Long userId) throws Exception {
 		MonitorRecordPO file = monitorRecordDao.findOne(id);
 		if (file.getUserId().toString().equals(userId.toString())
@@ -2018,6 +2032,154 @@ public class MonitorRecordService {
 
 			monitorRecordDao.delete(file);
 		}
+	}*/
+	
+	/**
+	 * 删除文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月25日 上午10:09:38
+	 * 
+	 * @param Long
+	 *            id 文件id
+	 * @param Long
+	 *            userId 当前业务用户
+	 * @throws Exception
+	 */
+	public void removeFile(Long id, Long userId) throws Exception {
+		MonitorRecordPO file = monitorRecordDao.findOne(id);
+		
+		if (file.getUserId().toString().equals(userId.toString())
+				&& MonitorRecordStatus.STOP.equals(file.getStatus())) {
+
+			// 发送删除文件命令
+			LogicBO logic = new LogicBO().setUserId("-1").setPass_by(new ArrayList<PassByBO>());
+			List<String> files = new ArrayList<String>();
+			String fileName = null;
+			if (file.getPreviewUrl() != null) {
+				fileName = file.getPreviewUrl().split("/")[0];
+			}
+			if (fileName != null && !fileName.equals("")) {
+				files.add(fileName);
+				PassByBO passByBO = new PassByBO().setBundle_id("").setLayer_id(file.getStoreLayerId())
+						.setType("delete_record_file")
+						.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+				logic.getPass_by().add(passByBO);
+				executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
+				
+				operationLogService.send(userUtils.queryUserById(userId).getName(), "删除录制", "删除录制任务文件名称："+file.getFileName());
+			}
+
+			monitorRecordDao.delete(file);
+		}
+	}
+
+	/**
+	 * 删除文件，兼容老的删除<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月29日 上午9:49:02
+	 * @param id id 文件id
+	 * @param timeSegmentId 排期任务的子id
+	 * @param userId userId 当前业务用户
+	 * @throws Exception
+	 */
+	public void removeFileById(Long id,Long timeSegmentId, Long userId) throws Exception {
+		
+		MonitorRecordPO file = monitorRecordDao.findOne(id);
+		
+		if(timeSegmentId!=null){
+			if (file.getUserId().toString().equals(userId.toString())){
+				
+				MonitorRecordManyTimesPO record=monitorRecordManyTimesDao.findOne(timeSegmentId);
+				
+				if(!MonitorRecordStatus.STOP.equals(record.getStatus())){
+					throw new BaseException(StatusCode.ERROR,"录制任务还未结束");
+				}
+				
+				LogicBO logic = new LogicBO().setUserId("-1").setPass_by(new ArrayList<PassByBO>());
+				List<String> files = new ArrayList<String>();
+				String fileName = null;
+				
+				if (file.getPreviewUrl() != null&& record.getIndexNumber() != null ) {
+					fileName = file.getPreviewUrl().split("/")[0]+record.getIndexNumber();
+				}
+				
+				if (fileName != null && !fileName.equals("")) {
+					
+					PassByBO passByBO = new PassByBO().setBundle_id("").setLayer_id(file.getStoreLayerId())
+							.setType("delete_record_file")
+							.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+					logic.getPass_by().add(passByBO);
+					
+					executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
+					
+					//不太清楚
+					operationLogService.send(userUtils.queryUserById(userId).getName(), "删除录制", "删除排期录制任务id："+record.getId());
+				}
+				
+				monitorRecordManyTimesDao.delete(record);
+				
+			}else if(!file.getUserId().toString().equals(userId.toString())){
+				throw new BaseException(StatusCode.ERROR,"没有权限删除");
+			}
+		}else{
+			if (file.getUserId().toString().equals(userId.toString())
+					&& (MonitorRecordStatus.STOP.equals(file.getStatus()))) {
+
+				// 发送删除文件命令
+				LogicBO logic = new LogicBO().setUserId("-1").setPass_by(new ArrayList<PassByBO>());
+				List<String> files = new ArrayList<String>();
+				String fileName = null;
+				
+				if (file.getPreviewUrl() != null) {
+					fileName = file.getPreviewUrl().split("/")[0];
+				}
+				
+				if (fileName != null && !fileName.equals("")) {
+					if(MonitorRecordMode.TIMESEGMENT.equals(file.getMode())){
+						Optional<List<MonitorRecordManyTimesPO>> records=Optional.ofNullable(monitorRecordManyTimesRelationDao.findByBusinessId(file.getId())).map(relation->{
+							monitorRecordManyTimesRelationDao.delete(relation);
+							return relation.getId();
+						}).map(relationId->{
+							return monitorRecordManyTimesDao.findByRelationId(relationId);
+						});
+						
+						if(records.isPresent()){
+							List<Long> ids=new ArrayList<Long>();
+							
+							for(MonitorRecordManyTimesPO record:records.get()){
+								files.add(fileName+"/"+record.getIndexNumber());
+								ids.add(record.getId());
+							}
+							
+							monitorRecordManyTimesDao.deleteByIdIn(ids);
+						}
+						
+					}
+					
+					PassByBO passByBO = new PassByBO().setBundle_id("").setLayer_id(file.getStoreLayerId())
+							.setType("delete_record_file")
+							.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+					logic.getPass_by().add(passByBO);
+					
+					executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
+					
+					operationLogService.send(userUtils.queryUserById(userId).getName(), "删除录制", "删除录制任务文件名称："+file.getFileName());
+
+				}
+				
+				monitorRecordDao.delete(file);
+					
+			}else if(!MonitorRecordStatus.STOP.equals(file.getStatus())){
+				throw new BaseException(StatusCode.ERROR,"录制任务还未结束");
+			}
+			else if(!file.getUserId().toString().equals(userId.toString())){
+				throw new BaseException(StatusCode.ERROR,"没有权限删除");
+			}
+		}
+		
+		
 	}
 
 	/**
@@ -2037,5 +2199,23 @@ public class MonitorRecordService {
 		congfiguration.setTotalSizeMb(totalSizeMb);
 		systemConfigurationDao.save(congfiguration);
 		
+	}
+	
+	/**
+	 * 返回排期录制对应关系的VO<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月28日 下午3:41:31
+	 * @param business monitorrecord的id
+	 * @return
+	 * @throws Exception
+	 */
+	public MonitorRecordManyTimesRelationVO getRecordRelation(Long business) throws Exception{
+		MonitorRecordManyTimesRelationPO relationPo = monitorRecordManyTimesRelationDao.findByBusinessId(business);
+		if(relationPo==null){
+			return null;
+		}
+		MonitorRecordManyTimesRelationVO relationVo = new MonitorRecordManyTimesRelationVO().set(relationPo);
+		return relationVo;
 	}
 }

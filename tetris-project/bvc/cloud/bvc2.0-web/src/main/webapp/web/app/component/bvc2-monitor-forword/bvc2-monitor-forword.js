@@ -66,6 +66,7 @@ define([
             confirmButtonText: '确定',
 
           });
+          return false;
         }
       },
       //拖拽结束事件
@@ -85,7 +86,7 @@ define([
             dstBundleId = items[i].attributes.bundleid.value
           }
         };
-        if (dstBundleId) {
+        if (dstBundleId && dstBundleId != srcBundleId) {
 
           // for (var i = 0; i < bundleEncodeArr.length; i++) {
           var param = {
