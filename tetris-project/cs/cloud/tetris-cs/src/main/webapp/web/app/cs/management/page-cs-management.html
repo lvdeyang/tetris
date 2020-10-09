@@ -474,6 +474,9 @@
             <div style="height: 500px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="是否轮播">
+                            <el-switch v-model="dialog.setOutput.rotation"></el-switch>
+                        </el-form-item>
                         <el-form-item label="PC播发用户">
                             <el-tag
                                     :key="simple.id"
@@ -501,6 +504,20 @@
                                 <!--</el-tag>-->
                                 <!--<el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleSetOutputUserSet(dialog.setOutput.outputPushUsers, pushEquipType)" icon="el-icon-edit"> 选择PUSH终端用户</el-button>-->
                             <!--</el-form-item>-->
+                            <el-form-item label="转码模板">
+                                <el-input v-model="dialog.setOutput.taskTemple" placeholder="转码模板"></el-input>
+                            </el-form-item>
+                            <el-form-item label="码率控制">
+                                <el-select placeholder="请选择码率控制" v-model="dialog.setOutput.rateCtrl">
+                                    <el-option
+                                            v-for="item in dialog.setOutput.rateCtrlOptions"
+                                            :value="item">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="码率">
+                                <el-input v-model="dialog.setOutput.rate" placeholder="码率"></el-input>
+                            </el-form-item>
                             <el-form-item label="可用起始端口">
                                 <el-input v-model="dialog.setOutput.outputUserPort" placeholder="可用起始端口" v-if="dialog.setOutput.broadWay == broadWayStream"></el-input>
                             </el-form-item>
