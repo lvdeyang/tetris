@@ -14,6 +14,8 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
  */
 public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSettingPO>{
 	
+	private Long id;
+	
 	/** 输出编号 */
 	private String name;
 	
@@ -28,31 +30,21 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	/** 码率控制方式 */
 	private String rateCtrl;
 	
+	private String rateCtrlName;
+	
 	/** 系统码率 */
 	private Long bitrate;
 	
-	/** 导播任务id */
-	private Long guideId;
+	/** 输出组id */
+	private Long groupId;
 	
-	/** 切换方式 */
-	private String switchingMode;
-	
-	private String switchingModeName;
-	
-	public String getSwitchingMode() {
-		return switchingMode;
+	public Long getId() {
+		return id;
 	}
 
-	public void setSwitchingMode(String switchingMode) {
-		this.switchingMode = switchingMode;
-	}
-	
-	public String getSwitchingModeName() {
-		return switchingModeName;
-	}
-
-	public void setSwitchingModeName(String switchingModeName) {
-		this.switchingModeName = switchingModeName;
+	public OutputSettingVO setId(Long id) {
+		this.id = id;
+		return this;
 	}
 
 	public String getName() {
@@ -108,16 +100,25 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.outputProtocolName = outputProtocolName;
 		return this;
 	}
-
-	public Long getGuideId() {
-		return guideId;
+	
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public OutputSettingVO setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public OutputSettingVO setGroupId(Long groupId) {
+		this.groupId = groupId;
 		return this;
 	}
 	
+	public String getRateCtrlName() {
+		return rateCtrlName;
+	}
+
+	public OutputSettingVO setRateCtrlName(String rateCtrlName) {
+		this.rateCtrlName = rateCtrlName;
+		return this;
+	}
+
 	@Override
 	public OutputSettingVO set(OutputSettingPO entity) throws Exception {
 		this.setId(entity.getId());
@@ -125,11 +126,10 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.setOutputProtocol(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().toString(): null);
 		this.setOutputProtocolName(entity.getOutputProtocol()!= null ? entity.getOutputProtocol().getName(): null);
 		this.setOutputAddress(entity.getOutputAddress());
-		this.setRateCtrl(entity.getRateCtrl());
+		this.setRateCtrl(entity.getRateCtrl()!= null ? entity.getRateCtrl().toString(): null);
+		this.setRateCtrlName(entity.getRateCtrl()!= null ? entity.getRateCtrl().getName(): null);
 		this.setBitrate(entity.getBitrate());
-		this.setGuideId(entity.getGuideId());
-		this.setSwitchingMode(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().toString(): null);
-		this.setSwitchingModeName(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().getName(): null);
+		this.setGroupId(entity.getGroupId());
 		return this;
 	}
 	

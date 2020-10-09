@@ -28,10 +28,13 @@ public class OutputGroupPO extends AbstractBasePO{
 	private Long guideId;
 	
 	/** 输出组名称 */
-	private String name;
+	private String name = "输出组1";
 	
 	/** 切换方式 */
 	private SwitchingMode switchingMode;
+	
+	/** 转码模板 */
+	private String transcodingTemplate;
 
 	@Column(name = "GUIDE_ID")
 	public Long getGuideId() {
@@ -59,6 +62,15 @@ public class OutputGroupPO extends AbstractBasePO{
 
 	public void setSwitchingMode(SwitchingMode switchingMode) {
 		this.switchingMode = switchingMode;
+	}
+	
+	@Column(name = "TRANSCODING_TEMPLATE")
+	public String getTranscodingTemplate() {
+		return transcodingTemplate;
+	}
+
+	public void setTranscodingTemplate(String transcodingTemplate) {
+		this.transcodingTemplate = transcodingTemplate;
 	}
 	
 	

@@ -93,6 +93,7 @@ public class SourceController {
 			String source,
 			String previewOut,
 			Boolean isPreviewOut,
+			String sourceProtocol,
 			HttpServletRequest request) throws Exception{
 		return sourceService.edit(
 				id,
@@ -100,7 +101,8 @@ public class SourceController {
 				sourceName,
 				source,
 				previewOut,
-				isPreviewOut);
+				isPreviewOut,
+				sourceProtocol);
 	}
 	
 	/**

@@ -36,26 +36,13 @@ public class OutputSettingPO extends AbstractBasePO {
 	private String outputAddress;
 	
 	/** 码率控制方式 */
-	private String rateCtrl;
+	private RateCtrl rateCtrl;
 	
 	/** 系统码率 */
 	private Long bitrate;
 
-	/** 导播任务id */
-	private Long guideId;
-	
-	/** 切换方式 */
-	private SwitchingMode switchingMode;
-
-	@Column(name = "SWITCHINGMODE")
-	@Enumerated(value = EnumType.STRING)
-	public SwitchingMode getSwitchingMode() {
-		return switchingMode;
-	}
-
-	public void setSwitchingMode(SwitchingMode switchingMode) {
-		this.switchingMode = switchingMode;
-	}
+	/** 输出组id */
+	private Long groupId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -86,11 +73,12 @@ public class OutputSettingPO extends AbstractBasePO {
 	}
 	
 	@Column(name = "RATE_CTRL")
-	public String getRateCtrl() {
+	@Enumerated(value = EnumType.STRING)
+	public RateCtrl getRateCtrl() {
 		return rateCtrl;
 	}
 
-	public void setRateCtrl(String rateCtrl) {
+	public void setRateCtrl(RateCtrl rateCtrl) {
 		this.rateCtrl = rateCtrl;
 	}
 
@@ -102,14 +90,14 @@ public class OutputSettingPO extends AbstractBasePO {
 	public void setBitrate(Long bitrate) {
 		this.bitrate = bitrate;
 	}
-	
-	@Column(name = "GUIDE_ID")
-	public Long getGuideId() {
-		return guideId;
+
+	@Column(name = "GROUP_ID")
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public void setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 
 }

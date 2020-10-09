@@ -36,15 +36,29 @@ public class GuideService {
 	@Autowired
 	private SourceDAO sourceDAO;
 	
-	@Autowired
-	private OutputSettingDAO outputSettingDAO;
+	@Autowired 
+	OutputSettingDAO outputSettingDAO;
 	
 	@Autowired
-	private VideoParametersDAO videoParametersDAO;
+	VideoParametersDAO videoParametersDAO;
 	
 	@Autowired
-	private AudioParametersDAO audioParametersDAO;
+	AudioParametersDAO audioParametersDAO;
 	
+	@Autowired
+	private OutputGroupDAO outputGroupDAO;
+	
+	/**
+	 * 
+	 * 添加导播任务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午3:48:17
+	 * @param taskName 导播任务名称
+	 * @return 添加的导播任务VO
+	 * @throws Exception
+	 */
 	public GuideVO add(String taskName) throws Exception{
 		GuidePO guidePO = new GuidePO();
 		guidePO.setTaskName(taskName);
@@ -58,18 +72,33 @@ public class GuideService {
 			list.add(sourcePO);
 		}
 		sourceDAO.save(list);
+		OutputGroupPO outputGroupPO = new OutputGroupPO();
+		outputGroupPO.setGuideId(guidePO.getId());
+		outputGroupDAO.save(outputGroupPO);
 		OutputSettingPO outputSettingPO = new OutputSettingPO();
-		outputSettingPO.setGuideId(guidePO.getId());
+		outputSettingPO.setGroupId(outputGroupPO.getId());
 		outputSettingDAO.save(outputSettingPO);
-		VideoParametersPO videoParametersPO = new VideoParametersPO();
-		videoParametersPO.setGuideId(guidePO.getId());
+		/*VideoParametersPO videoParametersPO = new VideoParametersPO();
+		videoParametersPO.setGroupId(outputGroupPO.getId());
 		videoParametersDAO.save(videoParametersPO);
 		AudioParametersPO audioParametersPO = new AudioParametersPO();
-		audioParametersPO.setGuideId(guidePO.getId());
-		audioParametersDAO.save(audioParametersPO);
+		audioParametersPO.setGroupId(outputGroupPO.getId());
+		audioParametersDAO.save(audioParametersPO);*/
 		return new GuideVO().set(guidePO);
 	}
 	
+	/**
+	 * 
+	 * 修改导播任务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午3:49:42
+	 * @param id 导播任务id
+	 * @param taskName 导播任务名称
+	 * @return 修改的导播任务VO
+	 * @throws Exception
+	 */
 	public GuideVO edit(
 			Long id,
 			String taskName
@@ -80,8 +109,17 @@ public class GuideService {
 		return new GuideVO().set(guidePO);
 	}
 	
+	/**
+	 * 
+	 * 删除导播任务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午3:50:42
+	 * @param id 导播任务id
+	 */
 	public void delete(Long id){
-		VideoParametersPO videoParametersPO = videoParametersDAO.findByGuideId(id);
+/*		VideoParametersPO videoParametersPO = videoParametersDAO.findByGuideId(id);
 		if(videoParametersPO != null){
 			videoParametersDAO.delete(videoParametersPO);
 		}
@@ -92,19 +130,52 @@ public class GuideService {
 		List<OutputSettingPO> list1= outputSettingDAO.findByGuideId(id);
 		if(list1.size() != 0){
 			outputSettingDAO.deleteInBatch(list1);
+		}*/
+		List<OutputGroupPO> list1 = outputGroupDAO.findByGuideId(id);
+		if(list1.size() != 0){
+			outputGroupDAO.deleteInBatch(list1);
 		}
+		
 		List<SourcePO> list2 = sourceDAO.findByGuideIdOrderBySourceNumber(id);
 		if(list2.size() != 0){
 			sourceDAO.deleteInBatch(list2);
 		}
+		List<OutputSettingPO> list3 = new ArrayList<OutputSettingPO>();
+		for (OutputGroupPO outputGroupPO : list1) {
+			List<OutputSettingPO> list = outputSettingDAO.findByGroupId(outputGroupPO.getId());
+			list3.addAll(list);
+		}
+		outputSettingDAO.deleteInBatch(list3);
 		guideDAO.delete(id);
 	}
 	
+	/**
+	 * 
+	 * 开始直播<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午3:51:26
+	 * @param id 导播任务id
+	 * @return
+	 * @throws Exception
+	 */
 	public Object start(Long id) throws Exception{
 		guidePlayService.start(id);
 		return null;
 	}
 	
+	/**
+	 * 
+	 * 停止直播<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午3:51:47
+	 * @param id 导播任务id
+	 * @return
+	 * @throws Exception
+	 */
 	public Object stop(Long id) throws Exception{
 		guidePlayService.stop(id);
 		return null;

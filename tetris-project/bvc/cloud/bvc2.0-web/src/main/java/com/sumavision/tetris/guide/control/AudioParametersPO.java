@@ -24,8 +24,8 @@ public class AudioParametersPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
-	/** 导播任务id */
-	private Long guideId;
+	/** 输出组id */
+	private Long groupId;
 
 	/** 编码格式 */
 	private CodingFormat codingFormat = CodingFormat.AAC;
@@ -42,13 +42,13 @@ public class AudioParametersPO extends AbstractBasePO{
 	/** 编码类型 */
 	private CodingType codingType = CodingType.MPEG4_ACC_LC;
 	
-	@Column(name = "GUIDE_ID")
-	public Long getGuideId() {
-		return guideId;
+	@Column(name = "GROUP_ID")
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public void setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 
 	@Column(name = "CODING_FORMAT")

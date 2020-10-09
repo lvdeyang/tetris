@@ -34,7 +34,8 @@ public class SourceService {
 			String sourceName,
 			String source,
 			String previewOut,
-			Boolean isPreviewOut) throws Exception{
+			Boolean isPreviewOut,
+			String sourceProtocol) throws Exception{
 		SourcePO sourcePO = sourceDAO.findOne(id);
 		SourceType type = SourceType.fromName(sourceType);
 		sourcePO.setSourceType(type);
@@ -42,6 +43,8 @@ public class SourceService {
 		sourcePO.setSource(source);
 		sourcePO.setPreviewOut(previewOut);
 		sourcePO.setIsPreviewOut(isPreviewOut);
+		SourceProtocol protocol = SourceProtocol.fromName(sourceProtocol);
+		sourcePO.setSourceProtocol(protocol);
 		sourceDAO.save(sourcePO);
 		return new SourceVO().set(sourcePO); 
 	}

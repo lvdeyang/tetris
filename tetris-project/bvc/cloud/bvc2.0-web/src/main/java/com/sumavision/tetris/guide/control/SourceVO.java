@@ -42,6 +42,11 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	
 	/** 输出地址 */
 	private String previewOut;
+	
+	/** 源协议 */
+	private String sourceProtocol;
+	
+	private String sourceProtocolName;
 
 	public Long getIndex() {
 		return index;
@@ -133,6 +138,24 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		return this;
 	}
 
+	public String getSourceProtocol() {
+		return sourceProtocol;
+	}
+
+	public SourceVO setSourceProtocol(String sourceProtocol) {
+		this.sourceProtocol = sourceProtocol;
+		return this;
+	}
+
+	public String getSourceProtocolName() {
+		return sourceProtocolName;
+	}
+
+	public SourceVO setSourceProtocolName(String sourceProtocolName) {
+		this.sourceProtocolName = sourceProtocolName;
+		return this;
+	}
+
 	@Override
 	public SourceVO set(SourcePO entity) throws Exception {
 		this.setId(entity.getId());
@@ -145,6 +168,8 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setVolume(entity.getVolume());
 		this.setIsPreviewOut(entity.getIsPreviewOut());
 		this.setPreviewOut(entity.getPreviewOut());
+		this.setSourceProtocol(entity.getSourceProtocol()!= null ? entity.getSourceProtocol().toString(): null);
+		this.setSourceProtocolName(entity.getSourceProtocol()!= null ? entity.getSourceProtocol().getName(): null);
 		return this;
 	}
 

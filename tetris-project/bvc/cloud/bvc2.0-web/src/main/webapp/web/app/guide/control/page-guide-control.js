@@ -24,8 +24,12 @@ define([
             el:'#' + pageId + '-wrapper',
             data:function(){
                 return {
-					editableTabsValue: '2',
+					editableTabsValue: null,
+					editableTabsValue2: null,
 					guides:{
+						list: []
+					},
+					outputGroups:{
 						list: []
 					},
                 	user:context.getProp('user'),
@@ -44,13 +48,14 @@ define([
 							previewOut:'',
                             typeOptions:['5G背包','直播流'],
 							bundleName: '',
-							isPreviewOut: false
+							isPreviewOut: false,
+							sourceProtocol: ''
                     	},
                     	setOut:{
                     		visible: false,
                             loading: false,
 
-							video:{
+/*							video:{
 								id: 0,
 								codingObject: '',
 								fps: '25',
@@ -76,15 +81,13 @@ define([
 								outputAddress: '',
 								rateCtrl: 'VBR',
 								bitrate: 8000000,
-								switchingMode: ''
-							}
+							}*/
                     	},
 						setDevice:{
 							visible: false,
                             loading: false,
 							deviceData:[]
 						}
-
                     },
 					sources:{
 						list:[]
@@ -98,26 +101,66 @@ define([
 							//{ min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
 							//{ validator: validatePass, trigger: 'blur'}
 						]
-					},
+					}
                 }
             },
             computed:{
                 
             },
             methods:{
+				addTab2: function(){
+
+				},
+				removeTab2: function(){
+
+				},
+				handleClick2: function(){
+
+				},
 				newOut: function(){
 					var self = this;
-					var data = {
+					/*var data = {
 						outputProtocol: '',
 						outputAddress: '',
 						rateCtrl: '',
 						bitrate: null,
-					}
-					self.output.out.push(data);
+					}*/
+					ajax.post('/tetris/guide/control/output/setting/po/add', { groupId: self.outputGroups.list[0].id }, function(data){
+						data.isCheck = false;
+						self.output.out.push(data);
+					})
 				},
 				deleteOut: function(){
 					var self = this;
-					self.output.out.pop();
+					/*for(var i = 0; i < self.output.out.length; i++){
+						if(self.output.out[i].isCheck === true){
+							ajax.post('/tetris/guide/control/output/setting/po/delete', { id: self.output.out[i].id }, function(data){
+								self.output.out.splice(i, 1);
+							});
+						}
+					}*/
+					var arr = [];
+					for(var i = 0; i < self.output.out.length; i++){
+						if(self.output.out[i].isCheck === true){
+							arr.push(self.output.out[i].id);
+						}
+					}
+
+					ajax.post('/tetris/guide/control/output/setting/po/delete',{ids:$.toJSON(arr)}, function(data){
+						/*for(var i = 0; i < self.output.out.length; i++) {
+							if (self.output.out[i].isCheck === true) {
+								self.output.out.splice(i, 1);
+							}
+						}*/
+						for(var i = 0; i < arr.length; i++){
+							for(var j = 0; j < self.output.out.length; j++){
+								if(self.output.out[j].id === arr[i]){
+									self.output.out.splice(j, 1);
+									break;
+								}
+							}
+						}
+					})
 				},
 				handleSelPgm: function () {
 					var self = this;
@@ -181,17 +224,38 @@ define([
 					if(x.isPreviewOut != null){
 						self.dialog.setSource.isPreviewOut = x.isPreviewOut;
 					}
+					self.dialog.setSource.sourceProtocol = x.sourceProtocolName;
             	},
 				handleSetSourceCommit:function(){
 					var self = this;
-					self.dialog.setSource.visible=false;
+					if(self.dialog.setSource.sourceType == null){
+						this.$message('源类型不能为空');
+						return;
+					}
+					if(self.dialog.setSource.sourceType === '直播流' && self.dialog.setSource.source == null){
+						this.$message('源地址不能为空');
+						return;
+					}
+					if(self.dialog.setSource.sourceProtocol == null){
+						this.$message('源协议不能为空');
+						return;
+					}
+					if(self.dialog.setSource.sourceName == null){
+						this.$message('源名称不能为空');
+						return;
+					}
+					if(self.dialog.setSource.isPreviewOut === true && self.dialog.setSource.previewOut == null){
+						this.$message('预监输出不能为空');
+						return;
+					}
 					var questData = {
 						id:self.dialog.setSource.id,
 						sourceType: self.dialog.setSource.sourceType,
 						source:self.dialog.setSource.source,
 						sourceName:self.dialog.setSource.sourceName,
 						previewOut:self.dialog.setSource.previewOut,
-						isPreviewOut:self.dialog.setSource.isPreviewOut
+						isPreviewOut:self.dialog.setSource.isPreviewOut,
+						sourceProtocol:self.dialog.setSource.sourceProtocol
 					};
 					ajax.post('/tetris/guide/control/source/po/edit', questData, function (data, status) {
 						for(var i = 0; i < self.sources.list.length; i++){
@@ -200,6 +264,13 @@ define([
 								break;
 							}
 						}
+						self.dialog.setSource.visible = false;
+						self.dialog.setSource.sourceType = '';
+						self.dialog.setSource.source = '';
+						self.dialog.setSource.sourceName = '';
+						self.dialog.setSource.previewOut = '';
+						self.dialog.setSource.isPreviewOut = false;
+						self.dialog.setSource.sourceProtocol = '';
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 				},
 				handleSetSourceClose:function(){
@@ -209,20 +280,29 @@ define([
 				},
             	handleSetOut:function(){
 					var self = this;
-					ajax.post('/tetris/guide/control/output/setting/po/query', {taskNumber: self.editableTabsValue}, function(data, status){
-						//console.log(data);
+					self.outputGroups.list.splice(0, self.outputGroups.list.length);
+					ajax.post('/tetris/guide/control/output/group/po/query',{ guideId: self.editableTabsValue }, function(data, status){
 						for(var i = 0; i < data.length; i++){
-							self.output.out.push(data[i]);
-							self.dialog.setOut.out.id = data[i].id;
-							self.dialog.setOut.out.outputProtocol = data[i].outputProtocolName;
-							self.dialog.setOut.out.outputAddress = data[i].outputAddress;
-							self.dialog.setOut.out.rateCtrl = data[i].rateCtrl;
-							self.dialog.setOut.out.bitrate = data[i].bitrate;
-							self.dialog.setOut.out.switchingMode = data[i].switchingModeName
+							self.outputGroups.list.push(data[i]);
 						}
-					}, null, ajax.NO_ERROR_CATCH_CODE);
+						self.editableTabsValue2 = data[0].id + '';
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryVideo', {taskNumber: self.editableTabsValue}, function(data, status){
+						self.output.out.splice(0, self.output.out.length);
+						ajax.post('/tetris/guide/control/output/setting/po/query', { groupId: self.outputGroups.list[0].id }, function(data, status){
+							//console.log(data);
+							for(var i = 0; i < data.length; i++){
+								data[i].isCheck = false;
+								self.output.out.push(data[i]);
+								/*self.dialog.setOut.out.id = data[i].id;
+								 self.dialog.setOut.out.outputProtocol = data[i].outputProtocolName;
+								 self.dialog.setOut.out.outputAddress = data[i].outputAddress;
+								 self.dialog.setOut.out.rateCtrl = data[i].rateCtrl;
+								 self.dialog.setOut.out.bitrate = data[i].bitrate;*/
+							}
+						}, null, ajax.NO_ERROR_CATCH_CODE);
+
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+					/*ajax.post('/tetris/guide/control/output/setting/po/queryVideo', { groupId: 1 }, function(data, status){
 						console.log(data);
 						self.dialog.setOut.video.id = data.id;
 						self.dialog.setOut.video.codingObject = data.codingObjectName;
@@ -234,14 +314,14 @@ define([
 						self.dialog.setOut.video.maxBitrate = data.maxBitrate;
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
-					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', {taskNumber: self.editableTabsValue},function(data, status){
+					ajax.post('/tetris/guide/control/output/setting/po/queryAudio', { groupId: 1 },function(data, status){
 						self.dialog.setOut.audio.id = data.id;
 						self.dialog.setOut.audio.codingFormat = data.codingFormatName;
 						self.dialog.setOut.audio.channelLayout = data.channelLayoutName;
 						self.dialog.setOut.audio.bitrate = data.bitrate;
 						self.dialog.setOut.audio.sampleRate = data.sampleRate;
 						self.dialog.setOut.audio.codingType = data.codingTypeName;
-					}, null, ajax.NO_ERROR_CATCH_CODE);
+					}, null, ajax.NO_ERROR_CATCH_CODE);*/
 
             		self.dialog.setOut.visible=true;
 					self.dialog.setOut.type="";
@@ -249,8 +329,7 @@ define([
             	},
 				handleSetOutCommit:function(){
 					var self = this;
-					self.dialog.setOut.visible=false;
-					var questDataVideo = {
+					/*var questDataVideo = {
 						id: self.dialog.setOut.video.id,
 						codingObject: self.dialog.setOut.video.codingObject,
 						fps:self.dialog.setOut.video.fps,
@@ -270,36 +349,115 @@ define([
 						codingType:self.dialog.setOut.audio.codingType,
 					};
 
-/*					var questDataOut = {
-						id: self.editableTabsValue,
+					var questDataOut = {
+						id: self.dialog.setOut.out.id,
 						outputProtocol: self.dialog.setOut.out.outputProtocol,
 						outputAddress: self.dialog.setOut.out.outputAddress,
 						rateCtrl: self.dialog.setOut.out.rateCtrl,
 						bitrate: self.dialog.setOut.out.bitrate,
 						switchingMode: self.dialog.setOut.out.switchingMode
 					}*/
-					ajax.post('/tetris/guide/control/output/setting/po/editVideo', questDataVideo, function (data, status) {
+					/*ajax.post('/tetris/guide/control/output/setting/po/editVideo', questDataVideo, function (data, status) {
 						
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 
 					ajax.post('/tetris/guide/control/output/setting/po/editAudio', questDataAudio, function (data, status) {
 
-					}, null, ajax.NO_ERROR_CATCH_CODE);
+					}, null, ajax.NO_ERROR_CATCH_CODE);*/
 
 					//console.log(questDataOut);
-					for(var i = 0; i < self.output.out.length; i++){
+					/*for(var i = 0; i < self.output.out.length; i++){
 						var questDataOut = {
 							id: self.output.out[i].id,
-							outputProtocol: self.output.out[i].outputProtocol,
+							outputProtocol: self.output.out[i].outputProtocolName,
 							outputAddress: self.output.out[i].outputAddress,
 							rateCtrl: self.output.out[i].rateCtrl,
-							bitrate: self.output.out[i].bitrate,
-							switchingMode: self.output.out[i].switchingMode
+							bitrate: self.output.out[i].bitrate
 						}
 						ajax.post('/tetris/guide/control/output/setting/po/edit', questDataOut, function (data, status) {
 
 						}, null, ajax.NO_ERROR_CATCH_CODE);
+					}*/
+					for(var i = 0; i < self.outputGroups.list.length; i++){
+						if(self.outputGroups.list[i].switchingModeName == null){
+							this.$message('切换方式不能为空');
+							return;
+						}
+						if(self.outputGroups.list[i].transcodingTemplate == null){
+							this.$message('转码模板不能为空');
+							return;
+						}
 					}
+					for(var i = 0; i < self.output.out.length; i++){
+						var reudp = /^udp\:\/\/(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+						var rertp = /^rtp\:\/\/(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+						var rertmp = /^rtmp\:\/\/(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+						var resrt = /^srt\:\/\/(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+
+
+						if(self.output.out[i].outputProtocolName == null){
+							this.$message('输出协议不能为空');
+							return;
+						}
+						if(self.output.out[i].outputAddress == null){
+							this.$message('输出地址不能为空');
+							return;
+						}
+						if((self.output.out[i].outputProtocolName === 'udp_ts') && (!(reudp.test(self.output.out[i].outputAddress)))){
+							this.$message('输出地址格式错误！正确格式举例：udp://10.10.40.24:15024');
+							return;
+						}
+						if((self.output.out[i].outputProtocolName === 'rtp_ts') && (!(rertp.test(self.output.out[i].outputAddress)))){
+							this.$message('输出地址格式错误！正确格式举例：rtp://10.10.40.24:15024');
+							return;
+						}
+						if((self.output.out[i].outputProtocolName === 'rtmp') && (!(rertmp.test(self.output.out[i].outputAddress)))){
+							this.$message('输出地址格式错误!正确格式举例：rtmp://10.10.40.24:15024');
+							return;
+						}
+						if((self.output.out[i].outputProtocolName === 'srt') && (!(resrt.test(self.output.out[i].outputAddress)))){
+							this.$message('输出地址格式错误!正确格式举例：srt://10.10.40.24:15024');
+							return;
+						}
+						if(self.output.out[i].rateCtrl == null){
+							this.$message('码率控制方式不能为空');
+							return;
+						}
+						if(self.output.out[i].bitrate == null){
+							this.$message('系统码率不能为空');
+							return;
+						}
+						//console.log(self.output.out[i].bitrate);
+						//console.log(typeof self.output.out[i].bitrate);
+						if(parseInt(self.output.out[i].bitrate) === NaN){
+							this.$message('系统码率必须为整数值');
+							return;
+						}
+						if(!(parseInt(self.output.out[i].bitrate) == self.output.out[i].bitrate)){
+							this.$message('系统码率必须为整数值');
+							return;
+						}
+						/*if(!Number.isInteger(self.output.out[i].bitrate)){
+							this.$message('系统码率必须为整数值');
+							return;
+						}*/
+					}
+					ajax.post('/tetris/guide/control/output/group/po/edit', { groups: $.toJSON(self.outputGroups.list) }, function(data, status){
+						for(var i = 0; i < self.outputGroups.list.length; i++){
+							self.outputGroups.list[i].switchingModeName = '';
+							self.outputGroups.list[i].transcodingTemplate = '';
+						}
+						self.dialog.setOut.visible=false;
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+					ajax.post('/tetris/guide/control/output/setting/po/edit',{ outputs: $.toJSON(self.output.out) },function(data, status){
+						for(var i = 0; i < self.output.out.length; i++){
+							self.output.out[i].outputProtocolName = '';
+							self.output.out[i].outputAddress = '';
+							self.output.out[i].rateCtrl = '';
+							self.output.out[i].bitrate = '';
+						}
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+
 				},
 				handleSetOutClose:function(){
 					var self=this;
@@ -368,19 +526,22 @@ define([
 			created:function(){
 				var self = this;
 
-				ajax.post('/tetris/guide/control/source/po/query', {id: self.editableTabsValue}, function(data, status){
-					//console.log(data);
-					for(var i = 0; i < data.length; i++){
-						self.sources.list.push(data[i]);
-					}
-				})
-
 				ajax.post('/tetris/guide/control/guide/po/query', null, function(data, status){
 					for(var i = 0; i < data.length; i++){
 						self.guides.list.push(data[i]);
 					}
-				})
+					self.editableTabsValue = data[0].id + '';
 
+					self.handleClick({ name:self.editableTabsValue });
+
+					/*ajax.post('/tetris/guide/control/source/po/query', {id: self.editableTabsValue}, function(data, status){
+						//console.log(data);
+						for(var i = 0; i < data.length; i++){
+							self.sources.list.push(data[i]);
+						}
+					})*/
+
+				})
 			}
 
         });

@@ -14,11 +14,11 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
  * <p>详细描述</p>
  * <b>作者:</b>Administrator<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年9月4日 上午9:03:17
+ * <b>日期：</b>2020年9月27日 下午2:35:10
  */
-@RepositoryDefinition(domainClass = OutputSettingPO.class, idClass = Long.class)
-public interface OutputSettingDAO extends BaseDAO<OutputSettingPO>{
+@RepositoryDefinition(domainClass = OutputGroupPO.class, idClass = Long.class)
+public interface OutputGroupDAO extends BaseDAO<OutputGroupPO>{
 	
-	public List<OutputSettingPO> findByGroupId(Long groupId);
-		
+	public List<OutputGroupPO> findByGuideId(Long guideId);
+
 }

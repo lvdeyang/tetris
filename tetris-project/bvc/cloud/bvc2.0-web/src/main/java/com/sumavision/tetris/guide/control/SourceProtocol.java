@@ -10,17 +10,16 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <p>详细描述</p>
  * <b>作者:</b>Administrator<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年9月22日 下午2:56:30
+ * <b>日期：</b>2020年9月28日 上午10:27:11
  */
-public enum OutputProtocol {
+public enum SourceProtocol {
+	
 	UDP_TS("udp_ts"),
-	RTP_TS("rtp_ts"),
-	RTMP("rtmp"),
 	SRT("srt");
 	
 	private String name;
 	
-	private OutputProtocol(String name){
+	private SourceProtocol(String name){
 		this.name = name;
 	}
 	
@@ -28,11 +27,11 @@ public enum OutputProtocol {
 		return name;
 	}
 	
-	public static OutputProtocol fromName(String name) throws Exception{
-		OutputProtocol[] values = OutputProtocol.values();
-		for (OutputProtocol outputProtocol : values) {
-			if(outputProtocol.getName().equals(name)){
-				return outputProtocol;
+	public static SourceProtocol fromName(String name) throws Exception{
+		SourceProtocol[] values = SourceProtocol.values();
+		for (SourceProtocol sourceProtocol : values) {
+			if(sourceProtocol.getName().equals(name)){
+				return sourceProtocol;
 			}
 		}
 		throw new ErrorTypeException("name", name);
