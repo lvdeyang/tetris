@@ -83,7 +83,11 @@ public class OutputGroupService {
 			outputGroupPO.setName(e.getName());
 			SwitchingMode mode = SwitchingMode.fromName(e.getSwitchingModeName());
 			outputGroupPO.setSwitchingMode(mode);
-			outputGroupPO.setTranscodingTemplate(e.getTranscodingTemplate());
+			if(e.getSwitchingModeName().equals("转码")){
+				outputGroupPO.setTranscodingTemplate(e.getTranscodingTemplate());
+			}else{
+				outputGroupPO.setTranscodingTemplate(null);
+			}
 			list2.add(outputGroupPO);
 		}
 		outputGroupDAO.save(list2);

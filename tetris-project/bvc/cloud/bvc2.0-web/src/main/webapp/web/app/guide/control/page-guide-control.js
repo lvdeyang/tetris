@@ -383,7 +383,7 @@ define([
 							this.$message('切换方式不能为空');
 							return;
 						}
-						if(self.outputGroups.list[i].transcodingTemplate == null){
+						if(self.outputGroups.list[i].switchingModeName === '转码' && self.outputGroups.list[i].transcodingTemplate == null){
 							this.$message('转码模板不能为空');
 							return;
 						}
@@ -419,7 +419,7 @@ define([
 							this.$message('输出地址格式错误!正确格式举例：srt://10.10.40.24:15024');
 							return;
 						}
-						if(self.output.out[i].rateCtrl == null){
+						if(self.output.out[i].rateCtrlName == null){
 							this.$message('码率控制方式不能为空');
 							return;
 						}

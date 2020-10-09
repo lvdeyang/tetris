@@ -344,7 +344,7 @@
 					</el-select>
 
 					<h4>转码模板</h4>
-					<el-input v-model="outputGroup.transcodingTemplate" style="width: 217px"></el-input>
+					<el-input v-model="outputGroup.transcodingTemplate" style="width: 217px" v-if="outputGroup.switchingModeName === '转码'"></el-input>
 					<!--<h4>视频编码参数</h4>
 					<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini" v-if="outputGroup.switchingModeName==='转码'">
 						<el-form-item label="编码对象" >
