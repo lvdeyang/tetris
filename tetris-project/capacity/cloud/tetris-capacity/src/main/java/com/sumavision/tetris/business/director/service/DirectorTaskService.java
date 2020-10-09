@@ -3,10 +3,18 @@ package com.sumavision.tetris.business.director.service;
 import java.util.*;
 
 import com.google.common.collect.Lists;
+import com.sumavision.tetris.business.common.ResultBO;
+import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.business.common.service.TaskService;
+import com.sumavision.tetris.business.director.vo.*;
+import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
+import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
+import com.sumavision.tetris.capacity.bo.request.PutTaskSourceRequest;
 import com.sumavision.tetris.capacity.constant.EncodeConstant.*;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.sts.transformTemplate.jni.TransformJniLib;
+import org.assertj.core.util.Strings;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -24,15 +32,6 @@ import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.director.bo.DirectorRequestBO;
-import com.sumavision.tetris.business.director.vo.OutputsVO;
-import com.sumavision.tetris.business.director.vo.DestinationVO;
-import com.sumavision.tetris.business.director.vo.DirectorTaskVO;
-import com.sumavision.tetris.business.director.vo.PictureVO;
-import com.sumavision.tetris.business.director.vo.SourceVO;
-import com.sumavision.tetris.business.director.vo.TextVO;
-import com.sumavision.tetris.business.director.vo.TranscodeAudioVO;
-import com.sumavision.tetris.business.director.vo.TranscodeVO;
-import com.sumavision.tetris.business.director.vo.TranscodeVideoVO;
 import com.sumavision.tetris.capacity.bo.input.BackUpEsAndRawBO;
 import com.sumavision.tetris.capacity.bo.input.BackUpProgramBO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
@@ -97,7 +96,13 @@ public class DirectorTaskService {
 
 	@Autowired
 	private TemplateService templateService;
-	
+
+	@Autowired
+	private TranscodeTaskService transcodeTaskService;
+
+	@Autowired
+	private TaskService taskService;
+
 	/**
 	 * 添加导播任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -1214,5 +1219,101 @@ public class DirectorTaskService {
 		}
 		
 	}
-	
+
+
+	public void addTask(TranscodeTaskVO transcode)throws Exception{
+		String taskUuid = transcode.getTask_id();
+		String capacityIp = transcode.getDevice_ip();
+
+		List<InputBO> inputBOs = transcode.getInput_array();
+		List<TaskBO> taskBOs = transcode.getTask_array();
+		List<OutputBO> outputBOs = transcode.getOutput_array();
+
+		transcodeTaskService.save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, BusinessType.DIRECTOR);
+	}
+
+	public void delTask(String taskId) throws Exception {
+		TaskOutputPO output = transcodeTaskService.delete(taskId,BusinessType.DIRECTOR);
+		if(output != null){
+			taskOutputDao.delete(output);
+		}
+	}
+
+	public String transferTask(TransferVO transferVO) throws Exception {
+		ProtocolType inType = ProtocolType.getProtocolType(transferVO.getInType());
+		ProtocolType outType = ProtocolType.getProtocolType(transferVO.getOutType());
+		String srtMode = transferVO.getSrtMode();
+		ResultBO resultBO = taskService.transferStream(transferVO.getDevice_ip(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
+		return JSON.toJSONString(resultBO);
+	}
+
+	public void switchTask(String jobId, String targetInputId) throws Exception {
+		if (Strings.isNullOrEmpty(jobId)||Strings.isNullOrEmpty(targetInputId)) {
+			throw new BaseException(StatusCode.FORBIDDEN,"params error");
+		}
+
+		TaskOutputPO job = taskOutputDao.findByTaskUuidAndType(jobId, BusinessType.DIRECTOR);
+		if (job == null){
+			throw new BaseException(StatusCode.ERROR,"cannot find task, id:"+jobId);
+		}
+
+		List<Long> inputIds = JSONArray.parseArray(job.getInputList(), Long.class);
+		InputBO backBO = null;
+		for (int i = 0; i < inputIds.size(); i++) {
+			TaskInputPO inputPO = taskInputDao.findOne(inputIds.get(i));
+			if (inputPO == null){
+				continue;
+			}
+			InputBO inputBO = JSONObject.parseObject(inputPO.getInput(), InputBO.class);
+			if (inputBO.getBack_up_raw()!=null ||inputBO.getBack_up_es()!=null||inputBO.getBack_up_passby()!=null) {
+				backBO = inputBO;
+				break;
+			}
+		}
+		if (backBO == null){
+			throw new BaseException(StatusCode.ERROR,"can not find backup info");
+		}
+		Integer selectIndex = 0 ;
+		if (backBO.getBack_up_raw() != null) {
+			for (int i = 0; i < backBO.getBack_up_raw().getProgram_array().size(); i++) {
+				BackUpProgramBO programBO = backBO.getBack_up_raw().getProgram_array().get(i);
+				if (targetInputId.equals(programBO.getInput_id())) {
+					selectIndex = i;
+					break;
+				}
+			}
+		}
+		if (backBO.getBack_up_es() != null) {
+			for (int i = 0; i < backBO.getBack_up_es().getProgram_array().size(); i++) {
+				BackUpProgramBO programBO = backBO.getBack_up_es().getProgram_array().get(i);
+				if (targetInputId.equals(programBO.getInput_id())) {
+					selectIndex = i;
+					break;
+				}
+			}
+		}
+		if (backBO.getBack_up_passby() != null) {
+			for (int i = 0; i < backBO.getBack_up_passby().getProgram_array().size(); i++) {
+				BackUpProgramBO programBO = backBO.getBack_up_passby().getProgram_array().get(i);
+				if (targetInputId.equals(programBO.getInput_id())) {
+					selectIndex = i;
+					break;
+				}
+			}
+		}
+		transcodeTaskService.changeBackUp(backBO.getId(),selectIndex.toString(),"manual",job.getCapacityIp());
+		if (backBO.getBack_up_raw()!=null) {
+			backBO.getBack_up_raw().setSelect_index(selectIndex.toString());
+		}
+		if (backBO.getBack_up_es()!=null){
+			backBO.getBack_up_es().setSelect_index(selectIndex.toString());
+		}
+		if (backBO.getBack_up_passby()!=null){
+			backBO.getBack_up_passby().setSelect_index(selectIndex.toString());
+		}
+		transcodeTaskService.updateInputToDB(backBO,BusinessType.DIRECTOR);
+	}
+
+
+
 }

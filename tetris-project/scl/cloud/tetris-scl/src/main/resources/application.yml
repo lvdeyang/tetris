@@ -6,14 +6,17 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.84
+      ipAddress: 10.10.40.24
   profiles:
     active: pro
   datasource:
     base:
-      url: jdbc:mysql://localhost:3306/scl?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+     
+      url: jdbc:mysql://localhost:3306/scl?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
       username: root
       password: sumavisionrd
+#      username: sumadb
+#      password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -24,9 +27,10 @@ spring:
       time-between-eviction-runs-millis : 600000
       min-evictable-idle-time-millis : 3600000
     resource:
-      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
-      username: root
-      password: sumavisionrd
+   
+      url: jdbc:mysql://10.10.40.103:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
+      username: sumadb
+      password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -81,9 +85,17 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.58.123:8081/eureka/
+
+      defaultZone: http://10.10.40.103:8081/eureka/
+#      defaultZone: http://192.165.56.16:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
 socket:
   port: 9999
+constant:
+  message:
+    mode: 1
+  package:
+    output:
+      type: srt

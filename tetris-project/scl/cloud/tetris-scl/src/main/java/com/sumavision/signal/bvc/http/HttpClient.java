@@ -38,10 +38,15 @@ import org.apache.http.util.EntityUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class HttpClient {
-	
+
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
+
 	/****************
 	 *  http POST方法
 	 ****************/
@@ -70,7 +75,9 @@ public class HttpClient {
 			httpPost.setHeader("Accept-Language", locale.toLanguageTag());
 		         
 		    httpPost.setEntity(new StringEntity(params, "utf-8"));
+		    LOGGER.info("http request, url:{} , params: {}",url,params);
 		    response = httpclient.execute(httpPost);
+			LOGGER.info("http response, url:{} , result: {}",url,response.getStatusLine().getStatusCode());
 		    if(response.getStatusLine().getStatusCode() == 200){
 		    	HttpEntity entity = response.getEntity();
 		 	    InputStream in = entity.getContent();

@@ -88,9 +88,9 @@ server:
   max-http-header-size: 10485760 #spring feign用了get请求，参数写在了url上，导致长度受限8K
 logging:
   pattern:
-    console: "%d - %msg%n" 
-    level: INFO 
-  path: /var/log/tomcat  
+    console: "%d - %msg%n"
+    level: INFO
+  path: /var/log/tomcat
 ribbon:
   eager-load:
       enabled: true
@@ -101,7 +101,9 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://10.10.40.184:8081/eureka/
+      defaultZone: http://10.10.40.126:8081/eureka/
+#      defaultZone: http://192.165.56.182:8081/eureka/
+#      defaultZone: http://192.165.56.16:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
@@ -137,3 +139,10 @@ log:
   maxFileSize: 30MB
   maxHistory: 10
   totalSizeCap: 1GB
+constant:
+  default:
+    video:
+      encode: m2v
+      resolution: 720x576
+    audio:
+      encode: mp2

@@ -103,5 +103,17 @@ public class DirectorFeignController {
 		
 		return null;
 	}
-	
+
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/register")
+	public Object register(
+			HttpServletRequest request) throws Exception{
+
+		directorTaskService.doRegister();
+		return null;
+	}
+
+
+
 }

@@ -1,5 +1,7 @@
 package com.sumavision.signal.bvc.mq.bo;
 
+import java.util.List;
+
 public class BaseParamBO {
 
 	private String codec;
@@ -25,6 +27,12 @@ public class BaseParamBO {
 	private String gain;
 	
 	private SourceBO source;
+
+	private String output_interface;
+
+	private String input_interface;
+
+	private List<SourceBO> sources;
 
 	public String getCodec() {
 		return codec;
@@ -120,5 +128,29 @@ public class BaseParamBO {
 
 	public void setSource(SourceBO source) {
 		this.source = source;
+	}
+
+	public String getOutput_interface() {
+		return output_interface;
+	}
+
+	public void setOutput_interface(String output_interface) {
+		this.output_interface = output_interface;
+	}
+
+	public String getInput_interface() {
+		return input_interface;
+	}
+
+	public void setInput_interface(String input_interface) {
+		this.input_interface = input_interface;
+	}
+
+	public List<SourceBO> getSources() {
+		return sources;
+	}
+
+	public void setSources(List<SourceBO> sources) {
+		this.sources = sources;
 	}
 }
