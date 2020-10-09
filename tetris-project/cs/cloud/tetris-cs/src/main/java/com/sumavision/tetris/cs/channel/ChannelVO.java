@@ -64,6 +64,18 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private String audioPid;
 	
 	private String audioType;
+	
+	/**转码模板*/
+	private String taskTemple;
+	
+	/**码率控制*/
+	private String rateCtrl;
+	
+	/**码率*/
+	private String rate;
+	
+	/**是否轮播*/
+	private boolean rotation;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -82,12 +94,52 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setType(entity.getType())
 		.setEncryption(entity.getEncryption())
 		.setAutoBroad(entity.getAutoBroad())
-		.setChannelUuid(entity.getChannelUuid());
+		.setChannelUuid(entity.getChannelUuid())
+		.setTaskTemple(entity.getTaskTemple())
+		.setRate(entity.getRate())
+		.setRateCtrl(entity.getRateCtrl())
+		.setRotation(entity.isRotation());
+		
 
 		return this;
 	}
 	
+	public String getTaskTemple() {
+		return taskTemple;
+	}
+
+	public ChannelVO setTaskTemple(String taskTemple) {
+		this.taskTemple = taskTemple;
+		return this;
+	}
+
 	
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public ChannelVO setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+		return this;
+	}
+
+	public String getRate() {
+		return rate;
+	}
+
+	public ChannelVO setRate(String rate) {
+		this.rate = rate;
+		return this;
+	}
+
+	public boolean isRotation() {
+		return rotation;
+	}
+
+	public ChannelVO setRotation(boolean rotation) {
+		this.rotation = rotation;
+		return this;
+	}
 
 	public String getTranscodeTemplateId() {
 		return transcodeTemplateId;

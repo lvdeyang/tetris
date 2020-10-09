@@ -96,12 +96,16 @@ define([
                         autoBroadStart: "",
                         date: "",
                         level: '',
-                        hasFile: true
+                        hasFile: true,
+                        taskTemple:'',
+                        rateCtrl:'',
+                        rate:'',
+                        rotation:false
                     },
                     editChannel: {
                         visible: false,
                         loading: false,
-                        data: "",
+                        data: [],
                         name: "",
                         broadWay: "",
                         outputQtUsers: [],
@@ -117,7 +121,11 @@ define([
                         autoBroadDuration: 1,
                         autoBroadStart: "",
                         level: '',
-                        hasFile: true
+                        hasFile: true,
+                        taskTemple:'',
+                        rateCtrl:'',
+                        rate:'',
+                        rotation:false
                     },
                     defaultSchedule: {
                         visible: false,
@@ -147,7 +155,12 @@ define([
                         outputUserEndPort: '',
                         outputCount: 1,
                         output: [],
-                        localIpOptions:[]
+                        localIpOptions:[],
+                        taskTemple:'',
+                        rateCtrl:'',
+                        rate:'',
+                        rateCtrlOptions:["VBR","CBR"],
+                        rotation: false
                     },
                     pcversion: {
                         visible: false,
@@ -490,6 +503,10 @@ define([
                     self.dialog.addProgram.autoBroadStart = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
+                    self.dialog.addProgram.taskTemple = "";
+                    self.dialog.addProgram.rateCtrl = "";
+                    self.dialog.addProgram.rate = "";
+                    self.dialog.addProgram.rotation = false;
                 },
                 //更换优先级监听
                 handleAddProgramLevelOptionsChange: function (data) {
@@ -538,7 +555,12 @@ define([
                         autoBroadStart: self.dialog.addProgram.autoBroadStart,
                         remark: self.dialog.addProgram.remark,
                         level: self.dialog.addProgram.broadWay == self.broadWayTerminal ? self.dialog.addProgram.level : '',
-                        hasFile: self.dialog.addProgram.hasFile
+                        hasFile: self.dialog.addProgram.hasFile,
+                        taskTemple:self.dialog.addProgram.taskTemple,
+                        rateCtrl:self.dialog.addProgram.rateCtrl,
+                        rate:self.dialog.addProgram.rate,
+                        rotation:self.dialog.addProgram.rotation
+
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
                         self.dialog.addProgram.loading = false;
@@ -591,6 +613,10 @@ define([
                     self.dialog.editChannel.autoBroadShuffle = row.autoBroadShuffle;
                     self.dialog.editChannel.autoBroadDuration = row.autoBroadDuration;
                     self.dialog.editChannel.autoBroadStart = row.autoBroadStart;
+                    self.dialog.editChannel.taskTemple = row.taskTemple;
+                    self.dialog.editChannel.rateCtrl = row.rateCtrl;
+                    self.dialog.editChannel.rate = row.rate;
+                    self.dialog.editChannel.rotation = (row.rotation != null) ? row.rotation : false;
                     self.dialog.editChannel.visible = true;
                 },
                 handleEditChannelClose: function () {
@@ -613,6 +639,10 @@ define([
                     self.dialog.editChannel.autoBroadShuffle = false;
                     self.dialog.editChannel.autoBroadDuration = 1;
                     self.dialog.editChannel.autoBroadStart = "";
+                    self.dialog.editChannel.taskTemple = "";
+                    self.dialog.editChannel.rate = "";
+                    self.dialog.editChannel.rateCtrl = "";
+                    self.dialog.editChannel.rotation = false;
                 },
                 handleDefaultSchedule: function () {
                     var self = this;
@@ -709,6 +739,10 @@ define([
                     var autoBroadShuffle = self.dialog.editChannel.autoBroadShuffle;
                     var autoBroadDuration = self.dialog.editChannel.autoBroadDuration;
                     var autoBroadStart = self.dialog.editChannel.autoBroadStart;
+                    var taskTemple = self.dialog.editChannel.taskTemple
+                    var rate = self.dialog.editChannel.rate
+                    var rateCtrl = self.dialog.editChannel.rateCtrl
+                    var rotation = self.dialog.editChannel.rotation;
                     var questData = {
                         id: self.dialog.editChannel.data.id,
                         name: newName,
@@ -723,7 +757,11 @@ define([
                         autoBroadStart: autoBroadStart,
                         remark: newRemark,
                         level: level,
-                        hasFile: hasFile
+                        hasFile: hasFile,
+                        taskTemple:taskTemple,
+                        rate:rate,
+                        rateCtrl:rateCtrl,
+                        rotation:rotation
                     };
                     ajax.post('/cs/channel/edit', questData, function (data, status) {
                         self.dialog.editChannel.loading = false;
@@ -746,6 +784,10 @@ define([
                         self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;
                         self.dialog.editChannel.data.autoBroadDuration = autoBroadDuration;
                         self.dialog.editChannel.data.autoBroadStart = autoBroadStart;
+                        self.dialog.editChannel.data.rateCtrl = rateCtrl;
+                        self.dialog.editChannel.data.taskTemple = taskTemple;
+                        self.dialog.editChannel.data.rate = rate;
+                        self.dialog.editChannel.data.rotation = rotation;
                         self.dialog.editChannel.data.broadcastStatus = data.broadcastStatus;
                         self.handleEditChannelClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE)
@@ -833,7 +875,10 @@ define([
                     self.dialog.setOutput.outputUserEndPort = self.dialog.setOutput.data.outputUserEndPort;
                     self.dialog.setOutput.outputCount = self.dialog.setOutput.data.outputCount;
                     self.dialog.setOutput.output = [];
-
+                    self.dialog.setOutput.taskTemple = self.dialog.setOutput.data.taskTemple;
+                    self.dialog.setOutput.rateCtrl = self.dialog.setOutput.data.rateCtrl;
+                    self.dialog.setOutput.rate = self.dialog.setOutput.data.rate;
+                    self.dialog.setOutput.rotation = self.dialog.setOutput.data.rotation;
                     var i = 0;
                     if (self.dialog.setOutput.data.outputQtUsers) {
                         for (i = 0; i < self.dialog.setOutput.data.outputQtUsers.length; i++) {
@@ -865,6 +910,10 @@ define([
                     self.dialog.setOutput.outputUserEndPort = '';
                     self.dialog.setOutput.outputCount = 1;
                     self.dialog.setOutput.output = [];
+                    self.dialog.setOutput.taskTemple = '';
+                    self.dialog.setOutput.rateCtrl = "";
+                    self.dialog.setOutput.rate = '';
+                    self.dialog.setOutput.rotation = false;
                 },
                 //添加流输出数的监听
                 handleOutputCountChange: function (currentValue) {
@@ -932,6 +981,12 @@ define([
                     self.dialog.setOutput.data.outputUserPort = self.dialog.setOutput.outputUserPort;
                     self.dialog.setOutput.data.outputUserEndPort = self.dialog.setOutput.outputUserEndPort;
                     self.dialog.setOutput.data.outputCount = self.dialog.setOutput.outputCount;
+
+                    self.dialog.setOutput.data.taskTemple = self.dialog.setOutput.taskTemple;
+                    self.dialog.setOutput.data.rateCtrl = self.dialog.setOutput.rateCtrl;
+                    self.dialog.setOutput.data.rate = self.dialog.setOutput.rate;
+                    self.dialog.setOutput.data.rotation = self.dialog.setOutput.rotation;
+
 
                     self.handleSetOutputClose();
                 },
