@@ -14,8 +14,8 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
  */
 public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioParametersPO>{
 	
-	/** 导播任务id */
-	private Long guideId;
+	/** 输出组id */
+	private Long groupId;
 
 	/** 编码格式 */
 	private String codingFormat;
@@ -38,12 +38,12 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 	
 	private String codingTypeName;
 
-	public Long getGuideId() {
-		return guideId;
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public AudioParametersVO setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public AudioParametersVO setGroupId(Long groupId) {
+		this.groupId = groupId;
 		return this;
 	}
 
@@ -122,7 +122,7 @@ public class AudioParametersVO extends AbstractBaseVO<AudioParametersVO, AudioPa
 
 	@Override
 	public AudioParametersVO set(AudioParametersPO entity) throws Exception {
-		this.setGuideId(entity.getGuideId());
+		this.setGroupId(entity.getGroupId());
 		this.setId(entity.getId());
 		this.setCodingFormat(entity.getCodingFormat()!= null ? entity.getCodingFormat().toString(): null);
 		this.setCodingFormatName(entity.getCodingFormat()!= null ? entity.getCodingFormat().getName(): null);

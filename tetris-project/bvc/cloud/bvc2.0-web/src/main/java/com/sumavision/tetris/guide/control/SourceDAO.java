@@ -6,7 +6,6 @@ package com.sumavision.tetris.guide.control;
 import java.util.List;
 
 import org.springframework.data.repository.RepositoryDefinition;
-import org.springframework.stereotype.Service;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
 

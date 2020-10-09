@@ -53,6 +53,9 @@ public class SourcePO extends AbstractBasePO{
 	/** 输出地址 */
 	private String previewOut;
 	
+	/** 源协议 */
+	private SourceProtocol sourceProtocol;
+	
 	@Column(name = "SOURCE_NUMBER")
 	public Long getSourceNumber() {
 		return sourceNumber;
@@ -135,6 +138,16 @@ public class SourcePO extends AbstractBasePO{
 
 	public void setPreviewOut(String previewOut) {
 		this.previewOut = previewOut;
+	}
+
+	@Column(name = "SOURCE_PROTOCOL")
+	@Enumerated(value = EnumType.STRING)
+	public SourceProtocol getSourceProtocol() {
+		return sourceProtocol;
+	}
+
+	public void setSourceProtocol(SourceProtocol sourceProtocol) {
+		this.sourceProtocol = sourceProtocol;
 	}
 
 }

@@ -26,8 +26,8 @@ public class VideoParametersPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
-	/** 导播任务id */
-	private Long guideId;
+	/** 输出组id */
+	private Long groupId;
 
 	/** 编码对象 */
 	private CodingObject codingObject = CodingObject.H264;
@@ -49,14 +49,14 @@ public class VideoParametersPO extends AbstractBasePO{
 
 	/** 最大码率 */
 	private Long maxBitrate = 1500L;
-	
-	@Column(name = "GUIDE_ID")
-	public Long getGuideId() {
-		return guideId;
+
+	@Column(name = "GROUP_ID")
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public void setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 
 	@Column(name = "CODING_OBJECT")

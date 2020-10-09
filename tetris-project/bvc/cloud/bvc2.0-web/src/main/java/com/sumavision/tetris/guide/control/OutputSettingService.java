@@ -3,9 +3,14 @@
  */
 package com.sumavision.tetris.guide.control;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * 类型概述<br/>
@@ -27,24 +32,30 @@ public class OutputSettingService {
 	@Autowired
 	AudioParametersDAO audioParametersDAO;
 	
-	public OutputSettingVO edit(
-			Long id,
-			String outputProtocol,
-			String outputAddress,
-			String rateCtrl,
-			Long bitrate,
-			String switchingMode
-			) throws Exception{
-		OutputSettingPO outputSettingPO = outputSettingDAO.findOne(id);
-		OutputProtocol protocol = OutputProtocol.fromName(outputProtocol);
-		outputSettingPO.setOutputProtocol(protocol);
-		outputSettingPO.setOutputAddress(outputAddress);
-		outputSettingPO.setRateCtrl(rateCtrl);
-		outputSettingPO.setBitrate(bitrate);
-		SwitchingMode mode = SwitchingMode.fromName(switchingMode);
-		outputSettingPO.setSwitchingMode(mode);
+	public OutputSettingVO addOutput(Long groupId) throws Exception{
+		OutputSettingPO outputSettingPO = new OutputSettingPO();
+		outputSettingPO.setGroupId(groupId);
 		outputSettingDAO.save(outputSettingPO);
 		return new OutputSettingVO().set(outputSettingPO);
+	}
+	
+	public Object edit(String outputs) throws Exception{
+		 List<OutputSettingVO> list1 = JSON.parseArray(outputs, OutputSettingVO.class);
+		 
+		 List<OutputSettingPO> list2 = new ArrayList<OutputSettingPO>();
+		 
+		 for (OutputSettingVO e : list1){
+			 OutputSettingPO outputSettingPO = outputSettingDAO.findOne(e.getId());
+			 OutputProtocol protocol = OutputProtocol.fromName(e.getOutputProtocolName());
+			 outputSettingPO.setOutputProtocol(protocol);
+			 outputSettingPO.setOutputAddress(e.getOutputAddress());
+			 RateCtrl rateCtrl = RateCtrl.fromName(e.getRateCtrlName());
+			 outputSettingPO.setRateCtrl(rateCtrl);
+			 outputSettingPO.setBitrate(e.getBitrate());
+			 list2.add(outputSettingPO);
+		 }
+		 outputSettingDAO.save(list2);
+		 return null;
 	}
 	
 	public VideoParametersVO editVideo(
@@ -93,8 +104,10 @@ public class OutputSettingService {
 		
 	}
 	
-	public void delete(Long id){
-		outputSettingDAO.delete(id);
+	public void deleteOutput(String ids){
+		List<Long> list1 = JSON.parseArray(ids, Long.class);
+		List<OutputSettingPO> list2 = outputSettingDAO.findAll(list1);
+		outputSettingDAO.deleteInBatch(list2);
 	}
 
 }
