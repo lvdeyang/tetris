@@ -129,7 +129,7 @@ public class GuidePlayService {
 //			}
 			
 			if(source.getSourceProtocol()!=null){
-				pass_by_content.put("type",source.getSourceProtocol());
+				pass_by_content.put("type",source.getSourceProtocol().getName());
 				pass_by_content.put("srt_mode", Mode.CALLER.getCode()); //目前先写死
 			}
 			
@@ -406,7 +406,7 @@ public class GuidePlayService {
 		if(sources!=null){
 			for(SourcePO source:sources){
 				PassByBO pass=new PassByBO();
-				pass.setBundle_id("preview_"+sources.get(0).getUuid());
+				pass.setBundle_id("preview_"+source.getUuid());
 				pass.setLayer_id(layer_id);
 				pass.setType("deleteAllBackupSources");
 				
