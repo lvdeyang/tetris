@@ -34,11 +34,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-public class testErrorController {
-	
-
-    @Autowired
-    MessageHandler messageHandler;
+public class SpringbootAppTest {
 
     @Test
     public void testJson() throws Exception {
