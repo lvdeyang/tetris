@@ -1,8 +1,13 @@
 package com.sumavision.signal.bvc.terminal;
 
+import com.sumavision.signal.bvc.http.HttpAsyncClient;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+
+/**
+ * 5G背包就一个编码通道
+ */
 
 @Service
 public class OneOneFiveMTerminal {
@@ -63,5 +68,80 @@ public class OneOneFiveMTerminal {
 		
 		return jsonObject;
 	}
-	
+
+
+	/**
+	 * 对应接口管理页面-获取参数
+	 * @return
+	 */
+	public static JSONObject getGBECfg(){
+
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("jsonrpc", "2.0");
+		jsonObject.put("method", "intf5g.getall");
+		jsonObject.put("params", "{}");
+		jsonObject.put("id", "getGBECfg");
+
+		return jsonObject;
+	}
+
+	/**
+	 * 接口管理页面-参数设置
+	 * @param params
+	 * @return
+	 */
+	public static JSONObject setGBECfg(JSONObject params){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("jsonrpc", "2.0");
+		jsonObject.put("method", "intf5g.set");
+		jsonObject.put("params", params);
+		jsonObject.put("id", "setGBECfg");
+
+		return jsonObject;
+	}
+
+	/**
+	 * 通道1监测页面-获取参数
+	 * @return
+	 */
+	public static JSONObject getMonitorInfo(){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("jsonrpc", "2.0");
+		jsonObject.put("method", "busMonitor.getall");
+		jsonObject.put("params", "{}");
+		jsonObject.put("id", "busMonitor");
+
+		return jsonObject;
+	}
+
+	/**
+	 * 通道1设置页面-获取参数
+	 * @return
+	 */
+	public static JSONObject getSuiBus(){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("jsonrpc", "2.0");
+		jsonObject.put("method", "suiBus.getall");
+		jsonObject.put("params", "{}");
+		jsonObject.put("id", "getSuiBus");
+
+		return jsonObject;
+	}
+
+	public static JSONObject setSuiBus(JSONObject params){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("jsonrpc", "2.0");
+		jsonObject.put("method", "suiBus.set");
+		jsonObject.put("params", params);
+		jsonObject.put("id", "setSuiBus");
+
+		return jsonObject;
+	}
+
+	public static void main(String[] args) throws Exception {
+		String deviceIp = "10.10.40.222";
+		HttpAsyncClient.getInstance().httpAsyncPost("http://" + deviceIp + TerminalParam.FIVEG_URL_SUFFIX, getGBECfg().toJSONString(), null, null);
+
+	}
+
 }

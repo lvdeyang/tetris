@@ -14,5 +14,12 @@ public class InputFileBO {
 		this.file_array = file_array;
 		return this;
 	}
+
+	public InputFileBO() {
+	}
+
+	public InputFileBO(List<InputFileObjectBO> file_array) {
+		this.file_array = file_array;
+	}
 	
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,8 @@ import com.sumavision.tetris.user.UserVO;
 @Controller
 @RequestMapping(value = "/api/server/stream/transcoding")
 public class ApiServerStreamTranscodingController {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApiServerStreamTranscodingController.class);
+
 	@Autowired
 	private UserQuery userQuery;
 	
@@ -38,9 +41,10 @@ public class ApiServerStreamTranscodingController {
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(String messageId, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		
+		LOGGER.info("[server-process]<delete-task> req, messageId: {}",messageId);
 		//能力对接
 		transformService.deleteStreamTask(user, messageId);
+		LOGGER.info("[server-process]<delete-task> resp, messageId: {}",messageId);
 		
 		return null;
 	}
@@ -57,13 +61,16 @@ public class ApiServerStreamTranscodingController {
 	@ResponseBody
 	@RequestMapping(value = "/add/output")
 	public Object addOutput(String id, String outputParam, HttpServletRequest request) throws Exception{
+		LOGGER.info("[server-process]<add-output> req, id: {}, param",id,outputParam);
+
 		UserVO user = userQuery.current();
 		
 		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
 		
 		//添加输出
 		transformService.addStreamOutput(id, outputParams);
-		
+
+		LOGGER.info("[server-process]<add-output> resp, id: {}",id);
 		return null;
 	}
 	
@@ -79,13 +86,14 @@ public class ApiServerStreamTranscodingController {
 	@ResponseBody
 	@RequestMapping(value = "/delete/output")
 	public Object deleteOutput(String id, String outputParam, HttpServletRequest request) throws Exception {
+		LOGGER.info("[server-process]<delete-output> req, id: {},param: {}",id,outputParam);
 		UserVO user = userQuery.current();
 		
 		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
 
 		//删除输出
 		transformService.deleteStreamOutput(id, outputParams);
-		
+		LOGGER.info("[server-process]<delete-output> resp, id: {}",id);
 		return null;
 	}
 }

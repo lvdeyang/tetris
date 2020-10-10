@@ -1,0 +1,37 @@
+{
+  "name": "tempate_1",
+  "content": {
+    "task_array": [{
+      "id":"__TASKID1__",
+      "type": "video",
+      "encode_array": [
+        {
+          "encode_id": "__ENCODEID1__",
+          "h264": {
+            "fps": "25",
+            "bitrate": 1500,
+            "resolution": "720x576",
+            "ratio":"16:9",
+            "rc_mode":"vbr",
+            "max_bitrate": 1500
+          }
+        }
+      ]
+    },
+      {
+        "id": "__TASKID2__",
+        "type": "audio",
+        "encode_array": [
+          {
+            "encode_id": "__ENCODEID2__",
+            "aac": {
+              "channel_layout": "mono",
+              "bitrate": "128",
+              "sample_rate": "44.1",
+              "type": "mpeg4-aac-lc"
+            }
+          }
+        ]
+      }]
+  }
+}

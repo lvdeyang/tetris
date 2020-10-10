@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+
 /**
  * srt_ts_passby<br/>
  * <b>作者:</b>wjw<br/>
@@ -24,6 +26,14 @@ public class OutputSrtTsPassbyBO extends OutputBaseMediaBO<OutputSrtTsPassbyBO>{
 	private String passphrase;
 	
 	private String key_len;
+
+	private String ip;
+
+	private Integer port;
+
+	private String local_ip;
+
+	private BaseMediaBO media;
 
 	public String getMode() {
 		return mode;
@@ -96,5 +106,47 @@ public class OutputSrtTsPassbyBO extends OutputBaseMediaBO<OutputSrtTsPassbyBO>{
 		this.key_len = key_len;
 		return this;
 	}
-	
+
+	public String getIp() {
+		return ip;
+	}
+
+	public OutputSrtTsPassbyBO setIp(String ip) {
+		this.ip = ip;
+		return this;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public OutputSrtTsPassbyBO setPort(Integer port) {
+		this.port = port;
+		return this;
+	}
+
+	public String getLocal_ip() {
+		return local_ip;
+	}
+
+	public OutputSrtTsPassbyBO setLocal_ip(String local_ip) {
+		this.local_ip = local_ip;
+		return this;
+	}
+
+	public BaseMediaBO getMedia() {
+		return media;
+	}
+
+	public OutputSrtTsPassbyBO setMedia(BaseMediaBO media) {
+		this.media = media;
+		return this;
+	}
+
+	public OutputSrtTsPassbyBO(String url, String local_ip) {
+		this.ip = IpV4Util.getIpFromUrl(url);
+		this.port = IpV4Util.getPortFromUrl(url);
+		this.local_ip = local_ip;
+	}
+
 }

@@ -2,6 +2,8 @@ package com.sumavision.tetris.business.yjgb.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +22,9 @@ import com.sumavision.tetris.user.UserVO;
 @Controller
 @RequestMapping(value = "/api/process/stream/transcoding")
 public class ApiProcessStreamTranscodingController {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApiProcessStreamTranscodingController.class);
+
+
 	@Autowired
 	private UserQuery userQuery;
 	
@@ -45,7 +49,7 @@ public class ApiProcessStreamTranscodingController {
 			String transcode_streamTranscodingInfo, 
 			String transcode_recordInfo, 
 			HttpServletRequest request) throws Exception{
-		System.out.println("process param of strem transcode : "+ transcode_streamTranscodingInfo);
+		LOGGER.info("[easy-process]<add-task> req, processId: {}, assetPath: {}, transcodeInfo: {}, recordInfo: {} ",__processInstanceId__,assetPath, transcode_streamTranscodingInfo,transcode_recordInfo);
 		UserVO user = userQuery.current();
 		
 		StreamTranscodingVO info = JSON.parseObject(transcode_streamTranscodingInfo, StreamTranscodingVO.class);
@@ -63,7 +67,7 @@ public class ApiProcessStreamTranscodingController {
 		if (info.isTranscoding()) {
 			messageId = transformService.addStreamTask(user, __processInstanceId__, info, recordInfo);
 		}
-		
+		LOGGER.info("[easy-process]<add-task> resp, processId: {}",__processInstanceId__);
 		return new HashMapWrapper<String, Object>().put("record_recordInfo", transcode_recordInfo).put("record_messageId", messageId).getMap();
 	}
 	
@@ -78,11 +82,14 @@ public class ApiProcessStreamTranscodingController {
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(String messageId, HttpServletRequest request) throws Exception{
+		LOGGER.info("[easy-process]<delete-task> req, messageId: {}",messageId);
+
 		UserVO user = userQuery.current();
 		
 		//能力对接
 		MimsVO _mims = transformService.deleteStreamTask(user, messageId);
-		
+
+		LOGGER.info("[easy-process]<delete-task> resp, messageId: {}",messageId);
 		return new HashMapWrapper<String, Object>().put("mimsIfAdd", _mims.isNeedAdd())
 												   .put("mimsName", _mims.getName())
 												   .put("mimsType", _mims.getType())
@@ -103,10 +110,11 @@ public class ApiProcessStreamTranscodingController {
 	@ResponseBody
 	@RequestMapping(value = "/record/callback")
 	public Object recordCallback(String messageId, String mimsId, String previewUrl, HttpServletRequest request) throws Exception{
+		LOGGER.info("[easy-process]<record-callback> req, messageId: {}, mimsId: {}, previewUrl: {}",messageId,mimsId,previewUrl);
 		UserVO user = userQuery.current();
 		
 		transformService.recordCallback(messageId, mimsId, previewUrl);
-		
+		LOGGER.info("[easy-process]<record-callback> req, messageId: {}",messageId);
 		return null;
 	}
 	
