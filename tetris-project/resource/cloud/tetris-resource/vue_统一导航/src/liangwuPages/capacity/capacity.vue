@@ -101,8 +101,14 @@ export default {
       self.dialogVisible = true;
     },
     initSubmit () {
+      var self = this;
       initCapacity(this.initForm).then(res => {
-        console.log(res)
+        self.$message({
+          type: "success",
+          message: "设置成功！"
+        })
+        self.dialogVisible = false;
+
       })
     }
   },

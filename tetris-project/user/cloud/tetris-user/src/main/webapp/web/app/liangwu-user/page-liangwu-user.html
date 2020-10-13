@@ -115,7 +115,7 @@
 
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
-        <el-form label-width="80px">
+        <el-form label-width="80px" size="small">
           <el-form-item :label="i18n.labelCreateUserNickname">
             <el-input v-model="dialog.createUser.nickname"></el-input>
           </el-form-item>
@@ -160,8 +160,11 @@
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
           </el-form-item>
-          <!-- <el-button type="primary" size="small" @click="handleBindRole"><span class="icon-plus"
-                style="position:relative; right:1px;"></span>&nbsp;{{i18n.labelCreateUserBindRole}}</el-button> -->
+
+          <!-- 绑定接入层 -->
+          <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
+            <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeNodeUid"></el-input>
+          </el-form-item>
         </el-form>
         <!-- </el-scrollbar> -->
       </div>

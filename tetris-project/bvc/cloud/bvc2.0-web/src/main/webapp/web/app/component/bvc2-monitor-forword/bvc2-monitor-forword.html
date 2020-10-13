@@ -1,11 +1,18 @@
 <div class="bvc2-monitor-forword " style="background-color:#fff; ">
+  <el-tabs v-model="activeName" @tab-click="handleClick">
+    <el-tab-pane label="本域转发" name="self"></el-tab-pane>
+    <el-tab-pane label="外域转发" name="external"></el-tab-pane>
+  </el-tabs>
+  <!-- <el-button size='small' type='primary' :autofocus='true' plain @click="isExterior = 'false'">本域转发</el-button>
+  <el-button size='small' type='primary' plain @click="isExterior = 'true'">外域转发</el-button> -->
   <div class="clearfix">
     <div class="col">
       <div class="title">编码器</div>
       <div class="custom-tree-container">
         <div>
           <el-tree ref="tree" :data="encodetree" default-expand-all node-key="id" highlight-current
-            :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick">
+            :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick"
+            :filter-node-method="handleFilterNode">
             <div class="custom-tree-node" slot-scope="{ node, data }">
               <span v-if="data.type == 'FOLDER'">{{data.name}}</span>
               <draggable v-else element="span" :options="{group:{name: 'site',pull:'clone', put: false},sort: true}"
@@ -18,11 +25,12 @@
       </div>
     </div>
     <div class="col">
-      <div class="title">解码器</div>
+      <div class="title">{{decodeTitle}}</div>
       <div class="custom-tree-container">
         <div>
-          <el-tree ref="tree" :data="recodetree" default-expand-all node-key="id" highlight-current
-            :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick">
+          <el-tree ref="tree2" :data="recodetree" default-expand-all node-key="id" highlight-current
+            :expand-on-click-node="false" :props="defaultProps" @node-click="handleNodeClick"
+            :filter-node-method="filterNode">
             <div class="custom-tree-node" slot-scope="{ node, data }">
               <span v-if="data.type == 'FOLDER'">{{data.name}}</span>
               <draggable v-else element="span" :options="{group:{name: 'site',pull:'clone'},sort: true}"

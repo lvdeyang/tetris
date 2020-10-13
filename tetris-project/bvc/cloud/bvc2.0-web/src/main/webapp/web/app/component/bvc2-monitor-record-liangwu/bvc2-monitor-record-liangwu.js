@@ -578,7 +578,7 @@ define([
             id: row.id
           }, function (data) {
             self.$message({
-              type: 'info',
+              type: 'success',
               message: '已删除'
             });
             self.load(self.table.page.currentPage)

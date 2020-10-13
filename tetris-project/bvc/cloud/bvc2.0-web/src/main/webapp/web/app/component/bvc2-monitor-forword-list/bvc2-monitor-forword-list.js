@@ -7,6 +7,7 @@ define([
   'date',
   'bvc2-dialog-single-osd',
   'bvc2-monitor-forword',
+  'bvc2-monitor-forword-bandwidth',
   'css!' + window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list.css'
 ], function (tpl, ajax, $, Vue) {
 
@@ -29,6 +30,9 @@ define([
         totleForword: '0',
         dialog: {
           forword: {
+            visible: false
+          },
+          bandwidth: {
             visible: false
           }
         },
@@ -72,7 +76,7 @@ define([
             h('div', {
               class: 'el-message-box__message'
             }, [
-              h('p', null, ['是否要停止此调阅任务?'])
+              h('p', null, ['是否要删除此转发任务?'])
             ])
           ]),
           type: 'wraning',
@@ -146,8 +150,14 @@ define([
         this.dialog.forword.visible = false;
 
       },
+      handlebandwidthClose: function () {
+        this.dialog.bandwidth.visible = false;
+      },
       openForword() {
         this.dialog.forword.visible = true;
+      },
+      openBandwidth() {
+        this.dialog.bandwidth.visible = true;
       }
     },
     mounted: function () {

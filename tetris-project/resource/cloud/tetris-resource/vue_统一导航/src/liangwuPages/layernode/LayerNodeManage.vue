@@ -228,7 +228,8 @@ export default {
       this.$router.push({
         path: '/LwModifyLayernode',
         query: {
-          id: row.id
+          id: row.id,
+          nodeUid: row.nodeUid
         }
       });
     },
