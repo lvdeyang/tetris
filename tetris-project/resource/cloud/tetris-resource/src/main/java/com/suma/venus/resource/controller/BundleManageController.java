@@ -49,6 +49,7 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.BundleLoginBlackListDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
@@ -78,6 +79,8 @@ import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.BundleVO.CoderType;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.capacity.server.CapacityService;
 
 @Controller
@@ -155,6 +158,12 @@ public class BundleManageController extends ControllerBase {
 	
 	@Autowired
 	private FolderDao folderDao;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
+	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -250,7 +259,30 @@ public class BundleManageController extends ControllerBase {
 				capacityService.setAlarmUrl(bundlePO.getDeviceIp());
 
 			}
-
+			
+			//透传
+			if(bundlePO.getAccessNodeUid() != null && !bundlePO.getAccessNodeUid().equals("")){
+				List<PassByBO> passByBOs = new ArrayList<PassByBO>();
+				PassByBO passByBO = new PassByBO();
+				passByBO.setLayer_id(bundlePO.getAccessNodeUid());
+				BundleVO bundleVO2 = BundleVO.fromPO(bundlePO);
+				bundleVO2.setOperate("create_bundle");
+				Map<String, Object> param = new HashMap<String, Object>();
+				List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleId(bundlePO.getBundleId());
+				if (extraInfoPOs.size() != 0) {
+					for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+						String name = extraInfoPO.getName();
+						String value = extraInfoPO.getValue();
+						param.put(name, value);
+					}
+					JSONObject jsonObject = new JSONObject(param);
+					bundleVO2.setParam(jsonObject);
+					}
+				passByBO.setPass_by_content(bundleVO2);
+				passByBOs.add(passByBO);
+				tetrisDispatchService.dispatch(passByBOs);
+			}
+			
 			data.put("bundleId", bundlePO.getBundleId());
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -337,6 +369,21 @@ public class BundleManageController extends ControllerBase {
 			String[] bundleIdArr = bundleIds.split(",");
 			for (String bundleId : bundleIdArr) {
 				try {
+					
+					//透传	
+					List<PassByBO> passByBOs = new ArrayList<PassByBO>();
+					PassByBO passByBO = new PassByBO();
+					BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
+					if(bundlePO.getAccessNodeUid() != null && !bundlePO.getAccessNodeUid().equals("")){
+						passByBO.setLayer_id(bundlePO.getAccessNodeUid());
+						BundleVO bundleVO = new BundleVO();
+						bundleVO.setOperate("delete_bundle");
+						bundleVO.setBundleId(bundleId);
+						passByBO.setPass_by_content(bundleVO);
+						passByBOs.add(passByBO);
+						tetrisDispatchService.dispatch(passByBOs);
+					}
+					
 					deleteByBundleId(bundleId);
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
@@ -620,6 +667,31 @@ public class BundleManageController extends ControllerBase {
 					extraInfoService.save(extraInfoPO);
 				}
 			}
+			
+			//透传
+			List<PassByBO> passByBOs = new ArrayList<PassByBO>();
+			PassByBO passByBO = new PassByBO();
+			BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
+			if(bundlePO.getAccessNodeUid() != null && !bundlePO.getAccessNodeUid().equals("")){
+				passByBO.setLayer_id(bundlePO.getAccessNodeUid());
+				BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+				bundleVO.setOperate("modify_bundle");
+				Map<String, Object> param = new HashMap<String, Object>();
+				List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleId(bundlePO.getBundleId());
+				if (extraInfoPOs.size() != 0) {
+					for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+						String name = extraInfoPO.getName();
+						String value = extraInfoPO.getValue();
+						param.put(name, value);
+					}
+					JSONObject jsonObject = new JSONObject(param);
+					bundleVO.setParam(jsonObject);
+					}
+				passByBO.setPass_by_content(bundleVO);
+				passByBOs.add(passByBO);
+				tetrisDispatchService.dispatch(passByBOs);
+			}
+			
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			data.put(ERRMSG, "内部错误");
