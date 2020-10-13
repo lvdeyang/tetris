@@ -1,5 +1,7 @@
 package com.sumavision.tetris.guide.BO;
 
+import com.sumavision.tetris.guide.control.RateCtrl;
+
 public class GuideOutputArrayBO {
 	
 //	private String id;
@@ -30,7 +32,7 @@ public class GuideOutputArrayBO {
 	
 	private String url;
 	
-	private String rate_ctrl;
+	private RateCtrl rate_ctrl;
 	
 	private Long bitrate;
 
@@ -52,11 +54,11 @@ public class GuideOutputArrayBO {
 		return this;
 	}
 
-	public String getRate_ctrl() {
+	public RateCtrl getRate_ctrl() {
 		return rate_ctrl;
 	}
 
-	public GuideOutputArrayBO setRate_ctrl(String rate_ctrl) {
+	public GuideOutputArrayBO setRate_ctrl(RateCtrl rate_ctrl) {
 		this.rate_ctrl = rate_ctrl;
 		return this;
 	}

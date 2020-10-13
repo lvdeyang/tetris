@@ -31,6 +31,8 @@ import com.sumavision.tetris.guide.BO.VideoOrAudioSourceBO;
 import com.sumavision.tetris.guide.control.AudioParametersDAO;
 import com.sumavision.tetris.guide.control.GuideDAO;
 import com.sumavision.tetris.guide.control.GuidePO;
+import com.sumavision.tetris.guide.control.OutputGroupDAO;
+import com.sumavision.tetris.guide.control.OutputGroupPO;
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
 import com.sumavision.tetris.guide.control.OutputSettingPO;
 import com.sumavision.tetris.guide.control.SourceDAO;
@@ -70,6 +72,9 @@ public class GuidePlayService {
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
+	
+	@Autowired
+	private OutputGroupDAO outputGroupDao;
 	/**
 	 * 开会<br/>
 	 * <b>作者:</b>lx<br/>
@@ -86,7 +91,7 @@ public class GuidePlayService {
 		List<SourcePO> sourceList=new ArrayList<SourcePO>();
 		
 		for(SourcePO source:sourceListTemp){
-			if(source.getSource()!=null){
+			if(source.getSource()!=null&&!"".equals(source.getSource())){
 				sourceList.add(source);
 			}
 		}
@@ -116,12 +121,18 @@ public class GuidePlayService {
 			source.getSource();
 			pass_by_content.put("url", source.getSource());
 			
-			if(source.getSource().contains("udp")){
-				pass_by_content.put("type","udp_ts");
-			}else{
-				pass_by_content.put("type","srt_ts");
-				pass_by_content.put("mode", Mode.CALLER.getCode()); //目前先写死
+//			if(source.getSource().contains("udp")){
+//				pass_by_content.put("type","udp_ts");
+//			}else{
+//				pass_by_content.put("type","srt_ts");
+//				pass_by_content.put("mode", Mode.CALLER.getCode()); //目前先写死
+//			}
+			
+			if(source.getSourceProtocol()!=null){
+				pass_by_content.put("type",source.getSourceProtocol().getName());
+				pass_by_content.put("srt_mode", Mode.CALLER.getCode()); //目前先写死
 			}
+			
 			
 			passBy.setPass_by_content(pass_by_content);
 			
@@ -136,21 +147,43 @@ public class GuidePlayService {
 		//执行logic
 		executeBusiness.execute(sourceLogic,"打开5G背包与源的编码");
 		
-		//2.创建输出源   只有一个、判空
+		//2.创建输出源   
 	 	System.out.println("------------------------------输出源------------------------------------------");
-		List<OutputSettingPO> outputSources=outputSettingDao.findByGuideId(guideId);
-		if(outputSources==null){
-			throw new BaseException(StatusCode.ERROR,"备份源为空"); 
-		}
-		List <PassByBO> outputPassBys=outputSources.stream().map(outputSource->{
-			return getNewOutPutSettingPassBy(outputSource);
-		}).collect(Collectors.toList());
-		LogicBO outputLogic=new LogicBO();
-		if(outputLogic.getPass_by()==null){
-			outputLogic.setPass_by(new ArrayList<PassByBO>());
-		}
-		outputLogic.getPass_by().addAll(outputPassBys);
-	 	executeBusiness.execute(outputLogic,  "备份源编码");
+	 	
+//	 	List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(guideId);
+//	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null){
+//	 		List<OutputSettingPO> outputSources=outputSettingDao.findByGroupId(outputGroups.get(0).getGuideId());
+//			if(outputSources==null){
+//				throw new BaseException(StatusCode.ERROR,"备份源为空"); 
+//			}
+//			List <PassByBO> outputPassBys=outputSources.stream().map(outputSource->{
+//				return getNewOutPutSettingPassBy(outputSource,outputGroups.get(0));
+//			}).collect(Collectors.toList());
+//			LogicBO outputLogic=new LogicBO();
+//			if(outputLogic.getPass_by()==null){
+//				outputLogic.setPass_by(new ArrayList<PassByBO>());
+//			}
+//			outputLogic.getPass_by().addAll(outputPassBys);
+//		 	executeBusiness.execute(outputLogic,  "备份源编码");
+//	 	}
+	 	
+	 	List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(guideId);
+	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null){
+	 		List<OutputSettingPO> outputSources=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
+			if(outputSources==null){
+				throw new BaseException(StatusCode.ERROR,"备份源为空"); 
+			}
+			
+			PassByBO passBy=getOutputSettingPassBy(outputGroups.get(0));
+			
+			LogicBO outputLogic=new LogicBO();
+			if(outputLogic.getPass_by()==null){
+				outputLogic.setPass_by(new ArrayList<PassByBO>());
+			}
+			outputLogic.getPass_by().add(passBy);
+		 	executeBusiness.execute(outputLogic,  "备份源编码");
+	 	}
+	 	
 	 	//备份源输出结束
 	 	
 	 	
@@ -160,7 +193,7 @@ public class GuidePlayService {
 	 	if(previewsLogic.getPass_by()==null){
 	 		previewsLogic.setPass_by(new ArrayList<PassByBO>());
 		}
-	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy());
+	 	previewsLogic.getPass_by().addAll(getPreviewOutputPassBy(guideId));
 	 	executeBusiness.execute(previewsLogic,  "预监编码");
 	 	//创建预监输出结束
 	 	
@@ -180,66 +213,156 @@ public class GuidePlayService {
 		//GuidePO guidePo=guideDao.findOne(guideId);
 		SourcePO source=sourceDao.findOne(sourceId);
 		
-		//只有一个、判空、以后有问题
-		List<OutputSettingPO> outputs=outputSettingDao.findByGuideId(guideId);
-		if(outputs==null||outputs.size()==0){
-			throw new BaseException(StatusCode.ERROR, "备份源为空");
-		}
-		OutputSettingPO outputSetting =outputs.get(0);
-		
-		if(outputSetting==null){
-			throw new BaseException(StatusCode.ERROR, "备份源为空");
-		}
-		
-		
-		//不太清楚切换源协议是否同时适用5G背包与虚拟源
-		if(source.getSourceType().equals(SourceType.URL)){
-			PassByBO passBy=new PassByBO();
-			passBy.setBundle_id(outputSetting.getUuid());
-			passBy.setLayer_id(layer_id);
-			passBy.setType("switchSource");
+		List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(guideId);
+	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null&&outputGroups.get(0).getUuid()!=null){
+	 		
+	 		List<OutputSettingPO> outputs=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
+	 		
+	 		if(outputs==null||outputs.size()==0){
+				throw new BaseException(StatusCode.ERROR, "备份源为空");
+			}
 			
-			JSONObject pass_by_content=new JSONObject();
-			pass_by_content.put("source",new GuideSourcesBO()
-					.setAudio_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getUuid())
-							.setLayer_id(layer_id)
-							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
-					.setVideo_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getUuid())
-							.setLayer_id(layer_id)
-							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
-						);
-			
-			passBy.setPass_by_content(pass_by_content);
 			LogicBO logic=new LogicBO();
 			logic.setPass_by(new ArrayList<PassByBO>());
-			logic.getPass_by().add(passBy);
+			
+			
+			if(source.getSourceType().equals(SourceType.URL)){
+				PassByBO passBy=new PassByBO();
+				passBy.setBundle_id(outputGroups.get(0).getUuid());
+				passBy.setLayer_id(layer_id);
+				passBy.setType("switchSource");
+				
+				JSONObject pass_by_content=new JSONObject();
+				pass_by_content.put("source",new GuideSourcesBO()
+						.setAudio_source(new VideoOrAudioSourceBO()
+								.setBundle_id(source.getUuid())
+								.setLayer_id(layer_id)
+								.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+						.setVideo_source(new VideoOrAudioSourceBO()
+								.setBundle_id(source.getUuid())
+								.setLayer_id(layer_id)
+								.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+							);
+				
+				passBy.setPass_by_content(pass_by_content);
+				logic.getPass_by().add(passBy);
+			}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
+				PassByBO passBy=new PassByBO();
+				passBy.setBundle_id(outputGroups.get(0).getUuid());
+				passBy.setLayer_id(layer_id);
+				passBy.setType("switchSource");
+				
+				JSONObject pass_by_content=new JSONObject();
+				pass_by_content.put("source",new GuideSourcesBO()
+						.setAudio_source(new VideoOrAudioSourceBO()
+								.setBundle_id(source.getSource())
+								.setLayer_id(layer_id)
+								.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+						.setVideo_source(new VideoOrAudioSourceBO()
+								.setBundle_id(source.getSource())
+								.setLayer_id(layer_id)
+								.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+							);
+				
+				passBy.setPass_by_content(pass_by_content);
+				logic.getPass_by().add(passBy);
+			}
+			
+//			outputs.stream().map(outputSetting->{
+//				if(source.getSourceType().equals(SourceType.URL)){
+//					PassByBO passBy=new PassByBO();
+//					passBy.setBundle_id(outputSetting.getUuid());
+//					passBy.setLayer_id(layer_id);
+//					passBy.setType("switchSource");
+//					
+//					JSONObject pass_by_content=new JSONObject();
+//					pass_by_content.put("source",new GuideSourcesBO()
+//							.setAudio_source(new VideoOrAudioSourceBO()
+//									.setBundle_id(source.getUuid())
+//									.setLayer_id(layer_id)
+//									.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+//							.setVideo_source(new VideoOrAudioSourceBO()
+//									.setBundle_id(source.getUuid())
+//									.setLayer_id(layer_id)
+//									.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+//								);
+//					
+//					passBy.setPass_by_content(pass_by_content);
+//					logic.getPass_by().add(passBy);
+//				}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
+//					PassByBO passBy=new PassByBO();
+//					passBy.setBundle_id(outputSetting.getUuid());
+//					passBy.setLayer_id(layer_id);
+//					passBy.setType("switchSource");
+//					
+//					JSONObject pass_by_content=new JSONObject();
+//					pass_by_content.put("source",new GuideSourcesBO()
+//							.setAudio_source(new VideoOrAudioSourceBO()
+//									.setBundle_id(source.getSource())
+//									.setLayer_id(layer_id)
+//									.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+//							.setVideo_source(new VideoOrAudioSourceBO()
+//									.setBundle_id(source.getSource())
+//									.setLayer_id(layer_id)
+//									.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+//								);
+//					
+//					passBy.setPass_by_content(pass_by_content);
+//					logic.getPass_by().add(passBy);
+//				}
+//				return null;
+//			}).count();
+			
 			executeBusiness.execute(logic,  "打开虚拟源编码");
-		}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
-			PassByBO passBy=new PassByBO();
-			passBy.setBundle_id(outputSetting.getUuid());
-			passBy.setLayer_id(layer_id);
-			passBy.setType("switchSource");
-			
-			JSONObject pass_by_content=new JSONObject();
-			pass_by_content.put("source",new GuideSourcesBO()
-					.setAudio_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getSource())
-							.setLayer_id(layer_id)
-							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
-					.setVideo_source(new VideoOrAudioSourceBO()
-							.setBundle_id(source.getSource())
-							.setLayer_id(layer_id)
-							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
-						);
-			
-			passBy.setPass_by_content(pass_by_content);
-			LogicBO logic=new LogicBO();
-			logic.setPass_by(new ArrayList<PassByBO>());
-			logic.getPass_by().add(passBy);
-			executeBusiness.execute(logic,  "打开5G背包编码");
-		}
+	 	}
+		
+//		if(source.getSourceType().equals(SourceType.URL)){
+//			PassByBO passBy=new PassByBO();
+//			passBy.setBundle_id(outputSetting.getUuid());
+//			passBy.setLayer_id(layer_id);
+//			passBy.setType("switchSource");
+//			
+//			JSONObject pass_by_content=new JSONObject();
+//			pass_by_content.put("source",new GuideSourcesBO()
+//					.setAudio_source(new VideoOrAudioSourceBO()
+//							.setBundle_id(source.getUuid())
+//							.setLayer_id(layer_id)
+//							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+//					.setVideo_source(new VideoOrAudioSourceBO()
+//							.setBundle_id(source.getUuid())
+//							.setLayer_id(layer_id)
+//							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+//						);
+//			
+//			passBy.setPass_by_content(pass_by_content);
+//			LogicBO logic=new LogicBO();
+//			logic.setPass_by(new ArrayList<PassByBO>());
+//			logic.getPass_by().add(passBy);
+//			executeBusiness.execute(logic,  "打开虚拟源编码");
+//		}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
+//			PassByBO passBy=new PassByBO();
+//			passBy.setBundle_id(outputSetting.getUuid());
+//			passBy.setLayer_id(layer_id);
+//			passBy.setType("switchSource");
+//			
+//			JSONObject pass_by_content=new JSONObject();
+//			pass_by_content.put("source",new GuideSourcesBO()
+//					.setAudio_source(new VideoOrAudioSourceBO()
+//							.setBundle_id(source.getSource())
+//							.setLayer_id(layer_id)
+//							.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId()))
+//					.setVideo_source(new VideoOrAudioSourceBO()
+//							.setBundle_id(source.getSource())
+//							.setLayer_id(layer_id)
+//							.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId()))
+//						);
+//			
+//			passBy.setPass_by_content(pass_by_content);
+//			LogicBO logic=new LogicBO();
+//			logic.setPass_by(new ArrayList<PassByBO>());
+//			logic.getPass_by().add(passBy);
+//			executeBusiness.execute(logic,  "打开5G背包编码");
+//		}
 		
 	}
 	
@@ -259,7 +382,7 @@ public class GuidePlayService {
 		
 		List<SourcePO> sourceList =new ArrayList<SourcePO>();
 		for(SourcePO source:sourcess){
-			if(source.getSource()!=null){
+			if(source.getSource()!=null&&!"".equals(source.getSource())){
 				sourceList.add(source);
 			}
 		}
@@ -288,33 +411,52 @@ public class GuidePlayService {
 		System.out.println("-------------------------删除输出源----------------------------------");
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic =closeEncoder( -1L, packageSources, codec);
-		logic.getPass_by().addAll(deleteSources);
-		
-		//2.删除所有输出源
-		//删除所有虚拟输出源
-		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGuideId(guideId);
-		List<PassByBO> deleteOutputs=sourceOutputList.stream().map(source->{
-			PassByBO passBy=new PassByBO();
-			passBy.setBundle_id(source.getUuid());
-			passBy.setLayer_id(layer_id);
-			passBy.setType("deleteAllBackupSources");
-			
-			JSONObject pass_by_content=new JSONObject();
-			passBy.setPass_by_content(pass_by_content);
-			
-			return passBy;
-		}).collect(Collectors.toList());
 		
 		if(logic.getPass_by()==null){
 			logic.setPass_by(new ArrayList<PassByBO>());
 		}
 		
-//		//删除预监
-		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
+		logic.getPass_by().addAll(deleteSources);
+		
+		//2.删除所有输出源
+		//删除所有虚拟输出源
+		List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(guideId);
+	 	if(outputGroups!=null&&outputGroups.get(0).getUuid()!=null){
+	 		
+//	 		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
+//	 		
+//	 		List<PassByBO> deleteOutputs=sourceOutputList.stream().map(source->{
+//				PassByBO passBy=new PassByBO();
+//				passBy.setBundle_id(source.getUuid());
+//				passBy.setLayer_id(layer_id);
+//				passBy.setType("deleteAllBackupSources");
+//				
+//				JSONObject pass_by_content=new JSONObject();
+//				passBy.setPass_by_content(pass_by_content);
+//				
+//				return passBy;
+//			}).collect(Collectors.toList());
+//	 		
+//	 		logic.getPass_by().addAll(deleteOutputs);
+	 		
+			PassByBO passBy=new PassByBO();
+			passBy.setBundle_id(outputGroups.get(0).getUuid());
+			passBy.setLayer_id(layer_id);
+			passBy.setType("deleteAllBackupSources");
+			
+			JSONObject pass_by_content=new JSONObject();
+			passBy.setPass_by_content(pass_by_content);
+	 		
+	 		logic.getPass_by().add(passBy);
+	 		
+	 	}
+		
+		//删除预监
+		List<SourcePO> sources=sourceDao.findByIsPreviewOutAndGuideId(true,guideId);
 		if(sources!=null){
 			for(SourcePO source:sources){
 				PassByBO pass=new PassByBO();
-				pass.setBundle_id("preview_"+sources.get(0).getUuid());
+				pass.setBundle_id("preview_"+source.getUuid());
 				pass.setLayer_id(layer_id);
 				pass.setType("deleteAllBackupSources");
 				
@@ -326,7 +468,6 @@ public class GuidePlayService {
 		}
 //		//删除预监
 		
-		logic.getPass_by().addAll(deleteOutputs);
 		executeBusiness.execute(logic,  "删除虚拟源，输出源与5G背包");
 	}
 	
@@ -422,6 +563,98 @@ public class GuidePlayService {
 		return logic;
 	}
 	
+//	/**
+//	 * 获取备份源对应的PassBy<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2020年9月24日 上午9:48:24
+//	 * @param outputSource
+//	 * @return
+//	 */
+//	public PassByBO getNewOutPutSettingPassBy(OutputSettingPO outputSource , OutputGroupPO outputGroup){
+//
+//		PassByBO passBy=new PassByBO();
+//		
+//		passBy.setBundle_id(outputSource.getUuid());
+//		passBy.setLayer_id(layer_id);
+//		passBy.setType("CreateTask");
+//		
+//		//sources开始
+//		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(outputGroup.getGuideId());
+//		
+////		List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(outputSource.getg);
+////	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null){
+////	 		
+////	 		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGroupId(outputGroups.get(0).geId());
+////	 	}
+//	 		
+//		List<SourcePO> sources=new ArrayList<SourcePO>();
+//		for(SourcePO source:sourceList){
+//			if(source.getSource()!=null){
+//				sources.add(source);
+//			}
+//		}
+//		
+//		List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
+//		for(SourcePO sourcePo:sources){
+//			
+//			if(sourcePo.getSourceType().equals(SourceType.KNAPSACK_5G)){
+//				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
+//				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
+//						.setBundle_id(sourcePo.getSource())
+//						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
+//						.setLayer_id(layer_id)
+//						.setTemplate_source_id("source1"))
+//				.setVideo_source(new VideoOrAudioSourceBO()
+//						.setBundle_id(sourcePo.getSource())
+//						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
+//						.setLayer_id(layer_id)
+//						.setTemplate_source_id("source12"));
+//				guideSources.add(guideSourcesBo);
+//			}else{
+//				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
+//				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
+//						.setBundle_id(sourcePo.getUuid())
+//						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
+//						.setLayer_id(layer_id).setTemplate_source_id("source1"))
+//				.setVideo_source(new VideoOrAudioSourceBO()
+//						.setBundle_id(sourcePo.getUuid())
+//						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
+//						.setLayer_id(layer_id).setTemplate_source_id("source2"));
+//				guideSources.add(guideSourcesBo);
+//			}
+//		}
+//		//sources结束
+//
+////		oupput_array开始
+//		List<GuideOutputArrayBO> GuideOutputArrays=new ArrayList<GuideOutputArrayBO>();
+//		
+//		GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
+//		guideOutputArray.setUrl(outputSource.getOutputAddress())
+//		                .setBitrate(outputSource.getBitrate())
+//		                .setRate_ctrl(outputSource.getRateCtrl());
+//		GuideOutputArrays.add(guideOutputArray);
+////		oupput_array结束
+//		
+//		GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
+//		guideSourceOutput.setTask_temple("task_temple_name1")
+//						.setMap_sources(guideSources);
+//		
+//		if(outputSource.getSwitchingMode()!=null){
+//			if(SwitchingMode.TRANSCODE.equals(outputSource.getSwitchingMode())){
+//				guideSourceOutput.setTask_common_type(outputSource.getSwitchingMode().getCode());
+//			}else{
+//				guideSourceOutput.setTask_common_type("STREAM");
+//				guideSourceOutput.setTask_common_mode(outputSource.getSwitchingMode().getCode());
+//			}
+//		}
+//		
+//		guideSourceOutput.setMap_outputs(GuideOutputArrays);
+//				
+//		passBy.setPass_by_content(guideSourceOutput);
+//		return passBy;
+//	}
+	
 	/**
 	 * 获取备份源对应的PassBy<br/>
 	 * <b>作者:</b>lx<br/>
@@ -429,194 +662,30 @@ public class GuidePlayService {
 	 * <b>日期：</b>2020年9月24日 上午9:48:24
 	 * @param outputSource
 	 * @return
-	 *//*
-	 *
-	public PassByBO getOutPutSettingPassBy(OutputSettingPO outputSource){
+	 */
+	public PassByBO getOutputSettingPassBy(OutputGroupPO outputGroup){
 
 		PassByBO passBy=new PassByBO();
 		
-		passBy.setBundle_id(outputSource.getUuid());
-		passBy.setLayer_id(layer_id);
-		passBy.setType("creatBackupSources");
-		
-		//common开始
-		
-		//common结束
-		
-		//sources开始
-		List<SourcePO> sources=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
-		List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
-		for(SourcePO sourcePo:sources){
-			
-			if(sourcePo.getSourceType().equals(SourceType.KNAPSACK_5G)){
-				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
-				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getSource())
-						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
-						.setLayer_id(layer_id))
-				.setVideo_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getSource())
-						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
-						.setLayer_id(layer_id));
-				guideSources.add(guideSourcesBo);
-			}else{
-				GuideSourcesBO guideSourcesBo=new GuideSourcesBO();
-				guideSourcesBo.setAudio_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getUuid())
-						.setChannel_id(ChannelType.AUDIOENCODE1.getChannelId())
-						.setLayer_id(layer_id))
-				.setVideo_source(new VideoOrAudioSourceBO()
-						.setBundle_id(sourcePo.getUuid())
-						.setChannel_id(ChannelType.VIDEOENCODE1.getChannelId())
-						.setLayer_id(layer_id));
-				guideSources.add(guideSourcesBo);
-			}
-		}
-		//sources结束
-		
-//		task_array开始
-		List<GuideTaskArrayBO> guideTaskArrays=new ArrayList<GuideTaskArrayBO>();
-		
-		if(!SwitchingMode.TRANSCODE.equals(outputSource.getSwitchingMode())){
-			
-			HashMap<String,Object> passByOneEncodeArray=new HashMap<String,Object>();
-			GuideTaskArrayBO passByOneGuideTaskArray=new GuideTaskArrayBO();
-			
-			HashMap<String,Object> passByEncodeArray=new HashMap<String,Object>();
-			GuideTaskArrayBO passByGuideTaskArray=new GuideTaskArrayBO();
-			
-			//第一个
-			passByOneEncodeArray.put("encode_id","ENCODE_ID_1");
-			passByOneEncodeArray.put("passby", "");
-			
-			passByOneGuideTaskArray.setId("TASK_ID_1");
-			passByOneGuideTaskArray.setType("passby");
-			passByOneGuideTaskArray.setEncode_array(passByOneEncodeArray);
-			//第一个结束
-			
-			//第二个
-			passByEncodeArray.put("encode_id","ENCODE_ID_2");
-			passByEncodeArray.put("passby", "");
-			
-			passByGuideTaskArray.setId("TASK_ID_2");
-			passByGuideTaskArray.setType("passby");
-			passByGuideTaskArray.setEncode_array(passByEncodeArray);
-			//第二个结束
-			
-			guideTaskArrays.add(passByGuideTaskArray);
-			guideTaskArrays.add(passByOneGuideTaskArray);
-		}else{
-			//这里应该是一个集合
-			VideoParametersPO videoParametersPO= videoParametersDao.findByGuideId(outputSource.getGuideId());
-			HashMap<String,Object> videoEncodeArray=new HashMap<String,Object>();
-			HashMap<String,Object> videoParameter=new HashMap<String,Object>();
-			AudioParametersPO audioParametersPO =auidoParametersDao.findByGuideId(outputSource.getGuideId());
-			HashMap<String,Object> audioEncodeArray=new HashMap<String,Object>();
-			HashMap<String,Object> audioParameter=new HashMap<String,Object>();
-			JSONArray videoEncodeArrays=new JSONArray();
-			JSONArray audioEncodeArrays=new JSONArray();
-			
-			videoEncodeArray.put("encode_id","ENCODE_ID_1");
-			
-			videoParameter.put("ratio",videoParametersPO.getRatio().getName());//宽比高
-			videoParameter.put("fps",videoParametersPO.getFps());
-			videoParameter.put("rc_mode",videoParametersPO.getRcMode());//
-			
-			videoParameter.put("bitrate", videoParametersPO.getBitrate());
-			videoParameter.put("resolution", videoParametersPO.getResolution().getName());
-			videoParameter.put("max_bitrate", videoParametersPO.getMaxBitrate());
-			videoEncodeArray.put(videoParametersPO.getCodingObject().getName(),videoParameter);
-			videoEncodeArrays.add(videoEncodeArray);
-			
-			GuideTaskArrayBO videoGuideTaskArrayBO=new GuideTaskArrayBO()
-					.setId("TASK_ID_1")
-					.setType("video")
-					.setEncode_array(videoEncodeArrays);
-			
-			audioEncodeArray.put("encode_id", "ENCODE_ID_2");
-			audioParameter.put("bitrate", audioParametersPO.getBitrate());
-			audioParameter.put("channel_layout", audioParametersPO.getChannelLayout());//声道布局
-			audioParameter.put("sample_rate", audioParametersPO.getSampleRate());//采样率
-			
-			1.    aac的时候type可以选  "mpeg4-aac-lc","mpeg4-he-aac-lc","mpeg4-he-aac-v2-lc"
-			2.    dolby的时候type可以选  "ac3","eac3"
-			3.    其他格式没有type
-			audioParameter.put("type", audioParametersPO.getCodingType().getName());
-			audioEncodeArray.put(audioParametersPO.getCodingFormat().getName(),audioParameter);
-			audioEncodeArrays.add(audioEncodeArray);
-			GuideTaskArrayBO audieGuideTaskArrayBO=new GuideTaskArrayBO()
-					.setId("TASK_ID_2")
-					.setType("audio")
-					.setEncode_array(audioEncodeArrays);
-			
-			guideTaskArrays.add(videoGuideTaskArrayBO);
-			guideTaskArrays.add(audieGuideTaskArrayBO);
-		}
-//		task_array结束
-		
-//		oupput_array开始
-		List<GuideOutputArrayBO> GuideOutputArrays=new ArrayList<GuideOutputArrayBO>();
-		List<MediaArrayBO> mediaArrayBOs=new ArrayList<MediaArrayBO>();
-		MediaArrayBO videoMediaArrayBO=new MediaArrayBO()
-				.setEncode_id("ENCODE_ID_1")
-				.setType("video")
-				.setTask_id("TASK_ID_1");
-		MediaArrayBO audioMediaArrayBO=new MediaArrayBO()
-				.setEncode_id("ENCODE_ID_2")
-				.setType("audio")
-				.setTask_id("TASK_ID_2");
-		mediaArrayBOs.add(videoMediaArrayBO);
-		mediaArrayBOs.add(audioMediaArrayBO);
-		
-		List<ProgramArrayBO> programArrayBOs=new ArrayList<ProgramArrayBO>();
-		ProgramArrayBO programArrayBO=new ProgramArrayBO()
-				.setProgram_number(301)
-				.setMedia_array(mediaArrayBOs);
-		programArrayBOs.add(programArrayBO);
-		
-		String[] params=outputSource.getOutputAddress().split(":");
-		String ip=params[1].replace("//", "");
-		String port=params[2];
-		UdpTsBO udpTsBo=new UdpTsBO()
-				.setIp(ip)
-				.setPort(Integer.parseInt(port))
-				.setProgram_array(programArrayBOs)
-//				.setLocal_ip("10.10.40.103")
-				.setRate_ctrl("VBR")
-				.setBitrate(8000000);
-		
-		GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
-		guideOutputArray.setId("OUTPUT_ID").setUdp_ts(udpTsBo);
-		GuideOutputArrays.add(guideOutputArray);
-//		oupput_array结束
-		
-		GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
-		guideSourceOutput.setSources(guideSources);
-		guideSourceOutput.setTask_array(guideTaskArrays);
-		guideSourceOutput.setOutput_array(GuideOutputArrays);
-		guideSourceOutput.setMode(outputSource.getSwitchingMode());
-		
-		passBy.setPass_by_content(guideSourceOutput);
-		return passBy;
-	}*/
-	
-	public PassByBO getNewOutPutSettingPassBy(OutputSettingPO outputSource){
-
-		PassByBO passBy=new PassByBO();
-		
-		passBy.setBundle_id(outputSource.getUuid());
+		passBy.setBundle_id(outputGroup.getUuid());
 		passBy.setLayer_id(layer_id);
 		passBy.setType("CreateTask");
 		
 		//sources开始
-		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(outputSource.getGuideId());
+		List<SourcePO> sourceList=sourceDao.findByGuideIdOrderBySourceNumber(outputGroup.getGuideId());
 		
+//		if(sourceList==null){
+//			return null;
+//		}
+	 		
 		List<SourcePO> sources=new ArrayList<SourcePO>();
 		for(SourcePO source:sourceList){
-			if(source.getSource()!=null){
+			if(source.getSource()!=null&&!"".equals(source.getSource())){
 				sources.add(source);
 			}
 		}
+		
+		List<GuideOutputArrayBO> GuideOutputArrays=new ArrayList<GuideOutputArrayBO>();
 		
 		List<GuideSourcesBO> guideSources=new ArrayList<GuideSourcesBO>();
 		for(SourcePO sourcePo:sources){
@@ -649,54 +718,35 @@ public class GuidePlayService {
 		}
 		//sources结束
 
-//		oupput_array开始
-		List<GuideOutputArrayBO> GuideOutputArrays=new ArrayList<GuideOutputArrayBO>();
-//		List<MediaArrayBO> mediaArrayBOs=new ArrayList<MediaArrayBO>();
-//		MediaArrayBO videoMediaArrayBO=new MediaArrayBO()
-//				.setEncode_id("ENCODE_ID_1")
-//				.setType("video")
-//				.setTask_id("TASK_ID_1");
-//		MediaArrayBO audioMediaArrayBO=new MediaArrayBO()
-//				.setEncode_id("ENCODE_ID_2")
-//				.setType("audio")
-//				.setTask_id("TASK_ID_2");
-//		mediaArrayBOs.add(videoMediaArrayBO);
-//		mediaArrayBOs.add(audioMediaArrayBO);
-		
-//		List<ProgramArrayBO> programArrayBOs=new ArrayList<ProgramArrayBO>();
-//		ProgramArrayBO programArrayBO=new ProgramArrayBO()
-//				.setProgram_number(301)
-//				.setMedia_array(mediaArrayBOs);
-//		programArrayBOs.add(programArrayBO);
-		
-//		String[] params=outputSource.getOutputAddress().split(":");
-//		String ip=params[1].replace("//", "");
-//		String port=params[2];
-//		UdpTsBO udpTsBo=new UdpTsBO()
-//				.setIp(ip)
-//				.setPort(Integer.parseInt(port))
-//				.setProgram_array(programArrayBOs)
-////				.setLocal_ip("10.10.40.103")
-//				.setRate_ctrl("VBR")
-//				.setBitrate(8000000);
-		
-		GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
-		guideOutputArray.setUrl(outputSource.getOutputAddress())
-		                .setBitrate(outputSource.getBitrate())
-		                .setRate_ctrl(outputSource.getRateCtrl());
-		GuideOutputArrays.add(guideOutputArray);
-//		oupput_array结束
+//			map_outputs开始
+	 	if(outputGroup!=null&&outputGroup.getGuideId()!=null){
+	 		
+	 		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGroupId(outputGroup.getId());
+	 		
+	 		for(OutputSettingPO outputSource:sourceOutputList){
+
+				GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
+				guideOutputArray.setUrl(outputSource.getOutputAddress())
+				                .setBitrate(outputSource.getBitrate())
+				                .setRate_ctrl(outputSource.getRateCtrl());
+				GuideOutputArrays.add(guideOutputArray);
+
+	 		}
+	 		
+	 	}
+//		map_outputs结束
+
 		
 		GuideSourceOutputBO guideSourceOutput=new GuideSourceOutputBO();
 		guideSourceOutput.setTask_temple("task_temple_name1")
 						.setMap_sources(guideSources);
 		
-		if(outputSource.getSwitchingMode()!=null){
-			if(SwitchingMode.TRANSCODE.equals(outputSource.getSwitchingMode())){
-				guideSourceOutput.setTask_common_type(outputSource.getSwitchingMode().getCode());
+		if(outputGroup.getSwitchingMode()!=null){
+			if(SwitchingMode.TRANSCODE.equals(outputGroup.getSwitchingMode())){
+				guideSourceOutput.setTask_common_type(outputGroup.getSwitchingMode().toString());
 			}else{
 				guideSourceOutput.setTask_common_type("STREAM");
-				guideSourceOutput.setTask_common_mode(outputSource.getSwitchingMode().getCode());
+				guideSourceOutput.setTask_common_mode(outputGroup.getSwitchingMode().toString());
 			}
 		}
 		
@@ -713,9 +763,9 @@ public class GuidePlayService {
 	 * <b>日期：</b>2020年9月24日 下午7:20:50
 	 * @return
 	 */
-	public List<PassByBO> getPreviewOutputPassBy(){
+	public List<PassByBO> getPreviewOutputPassBy(Long guideId){
 		
-		List<SourcePO> sources=sourceDao.findByIsPreviewOut(true);
+		List<SourcePO> sources=sourceDao.findByIsPreviewOutAndGuideId(true,guideId);
 		List<PassByBO> passBys=new ArrayList<PassByBO>();
 		
 		for(SourcePO sourcePo:sources){

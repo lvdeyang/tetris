@@ -5,6 +5,9 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 
 public class BundleVO {
+	
+	/**操作*/
+	private String operate;
 
 	private Long id;
 	
@@ -137,6 +140,14 @@ public class BundleVO {
 		DEFAULT,
 		ENCODER,
 		DECODER
+	}
+
+	public String getOperate() {
+		return operate;
+	}
+
+	public void setOperate(String operate) {
+		this.operate = operate;
 	}
 
 	public JSONObject getParam() {

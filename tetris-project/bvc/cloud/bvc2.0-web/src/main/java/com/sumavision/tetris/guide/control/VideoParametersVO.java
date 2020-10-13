@@ -14,8 +14,8 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
  */
 public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoParametersPO>{
 	
-	/** 导播任务id */
-	private Long guideId;
+	/** 输出组id */
+	private Long groupId;
 
 	/** 编码对象 */
 	private String codingObject;
@@ -82,12 +82,12 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 		return this;
 	}
 
-	public Long getGuideId() {
-		return guideId;
+	public Long getGroupId() {
+		return groupId;
 	}
 
-	public VideoParametersVO setGuideId(Long guideId) {
-		this.guideId = guideId;
+	public VideoParametersVO setGroupId(Long groupId) {
+		this.groupId = groupId;
 		return this;
 	}
 
@@ -156,7 +156,7 @@ public class VideoParametersVO extends AbstractBaseVO<VideoParametersVO, VideoPa
 
 	@Override
 	public VideoParametersVO set(VideoParametersPO entity) throws Exception {
-		this.setGuideId(entity.getGuideId());
+		this.setGroupId(entity.getGroupId());
 		this.setId(entity.getId());
 		this.setCodingObject(entity.getCodingObject()!= null ? entity.getCodingObject().toString(): null);
 		this.setCodingObjectName(entity.getCodingObject()!= null ? entity.getCodingObject().getName(): null);

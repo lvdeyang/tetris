@@ -67,5 +67,21 @@ public class DirectorService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.getEncodeTemplate(encodeType), String.class);
 	}
 
+	public String addDirectorTask(String taskInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addDirectorTask(taskInfo), String.class);
+	}
+
+	public String delDirectorTask(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.delDirectorTask(task), null);
+	}
+
+	public String switchDirectorTask(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.switchDirectorTask(task), null);
+	}
+
+	public String transferTask(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.transferTask(task), null);
+	}
+
 
 }

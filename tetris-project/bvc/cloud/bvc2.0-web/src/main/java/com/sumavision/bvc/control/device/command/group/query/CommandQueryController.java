@@ -2,11 +2,13 @@ package com.sumavision.bvc.control.device.command.group.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.management.relation.Relation;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
@@ -42,15 +45,12 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
-import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderSchemePO;
 import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
@@ -73,7 +73,6 @@ import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
-import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
@@ -91,10 +90,8 @@ import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
@@ -518,9 +515,11 @@ public class CommandQueryController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年9月25日
 	 * @param @PathVariable int type 通道类型，0编码，1解码，2视频编码，3音频编码，4视频解码，5音频解码
+//	 * @param @PathVariable int type 节点类型类型，0编码，1解码，2视频编码，3音频编码，4视频解码，5音频解码
 	 * @param @PathVariable boolean withChannel 是否要查询通道
 	 * @param @PathVariable boolean filterMode 过滤器模式 0全部，1在线，2离线
-//	 * @param @PathVariable int nodeType 节点类型类型，0编码，1解码，2视频编码，3音频编码，4视频解码，5音频解码
+	 * @param privilegesStr 数组类型的权限{@Code BUSINESS_OPR_TYPE的value}
+	 * @param satisfyAll true需要满足privilegesStr全部权限，false只需满足一个即可。为null的时候按默认查询
 	 * @return List<TreeNodeVO> 设备通道树
 	 */
 	@JsonBody
@@ -530,10 +529,14 @@ public class CommandQueryController {
 			@PathVariable int type,
 			@PathVariable boolean withChannel,
 			@PathVariable int filterMode,
+			String privilegesStr,
+			Boolean satisfyAll,
 			HttpServletRequest request) throws Exception{
 		
 		//获取userId
 		long userId = userUtils.getUserIdFromSession(request);
+		
+		List<String> privileges=JSONArray.parseArray(privilegesStr,String.class);
 		
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
@@ -549,7 +552,7 @@ public class CommandQueryController {
 		}
 		
 		//查询有权限的设备
-		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId);
+		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
 		
 		if(queryBundles==null || queryBundles.size()<=0) return _roots;
 		List<String> bundleIds = new ArrayList<String>();
@@ -1173,6 +1176,62 @@ public class CommandQueryController {
 		}
 		
 		return filteredFolders;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/privilege/of/user")
+	public Object queryPrivilegeOfUser(
+			Long dstUserId,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		Map<BUSINESS_OPR_TYPE,Boolean> privileges =resourceService.hasPrivilegesOfUser(userId, dstUserId, null);
+		
+		if(privileges == null || privileges.size()==0){
+			return null;
+		}
+		
+		Map <String,Object> privilegesWapper=new HashMap<String, Object>();
+		
+		privilegesWapper.put("auth", privileges);
+		
+		return privilegesWapper;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/privilege/of/bundle")
+	public Object queryPrivilegeOfBundle(
+			Long bundleId,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		Map<BUSINESS_OPR_TYPE,Boolean> privileges =resourceService.hasPrivilegesOfUser(userId, bundleId, null);
+		
+		if(privileges == null || privileges.size()==0){
+			return null;
+		}
+		
+		Map <String,Object> privilegesWapper=new HashMap<String, Object>();
+		
+		privilegesWapper.put("auth", privileges);
+		
+		return privilegesWapper;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/all/privilege")
+	public Object queryAllPrivilege(HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		Map<String, List<com.suma.venus.resource.service.ResourceService.Relation>> privileges = resourceService.hasPrivilegesOfAll(userId,null);
+		
+		return privileges;
 	}
 	
 }

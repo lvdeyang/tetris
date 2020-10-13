@@ -6,7 +6,6 @@ package com.sumavision.tetris.guide.control;
 import java.util.List;
 
 import org.springframework.data.repository.RepositoryDefinition;
-import org.springframework.stereotype.Service;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -22,7 +21,7 @@ public interface SourceDAO extends BaseDAO<SourcePO>{
 
 	public List<SourcePO> findByGuideIdOrderBySourceNumber(Long guideId);
 	
-	public List<SourcePO> findByIsPreviewOut(boolean isPreviewOut);
+	public List<SourcePO> findByIsPreviewOutAndGuideId(boolean isPreviewOut,Long guideId);
 	
 	public List<SourcePO> findByGuideIdAndUuidNotNullOrderBySourceNumber(Long guideId);
 }

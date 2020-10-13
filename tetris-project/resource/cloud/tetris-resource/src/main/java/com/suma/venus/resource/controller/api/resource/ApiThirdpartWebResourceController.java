@@ -40,6 +40,14 @@ public class ApiThirdpartWebResourceController {
 		return apiResourceService.queryBundle();
 	}
 	
+	/**
+	 * 根据接入层节点查询设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月27日 下午5:47:27
+	 * @param worknodeId 接入层节点id
+	 * @return List<BundleVO> 设备列表
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/bundle/list")

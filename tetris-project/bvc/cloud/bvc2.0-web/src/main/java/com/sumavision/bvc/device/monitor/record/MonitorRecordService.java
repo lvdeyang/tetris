@@ -2088,6 +2088,12 @@ public class MonitorRecordService {
 		
 		MonitorRecordPO file = monitorRecordDao.findOne(id);
 		
+		UserVO user = userQuery.current();
+		
+		if (userId.longValue() == 1 || user.getIsGroupCreator()) {
+			userId = file.getUserId();
+		}
+		
 		if(timeSegmentId!=null){
 			if (file.getUserId().toString().equals(userId.toString())){
 				
@@ -2218,4 +2224,5 @@ public class MonitorRecordService {
 		MonitorRecordManyTimesRelationVO relationVo = new MonitorRecordManyTimesRelationVO().set(relationPo);
 		return relationVo;
 	}
+
 }

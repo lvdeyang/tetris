@@ -1,5 +1,6 @@
 package com.suma.venus.resource.controller;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -114,7 +114,7 @@ public class WorkNodeController extends ControllerBase {
 			workNodeService.save(po);
 			if (extraInfos!=null && extraInfos.size()>0) {
 				for (ExtraInfoPO extraInfo : extraInfos) {
-					extraInfo.setWorknodeId(po.getId().toString());
+					extraInfo.setWorknodeId(po.getNodeUid());
 					extraInfoService.save(extraInfo);
 				}
 			}
@@ -161,7 +161,7 @@ public class WorkNodeController extends ControllerBase {
 			List<ExtraInfoPO> newData = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
 			if (null != newData) {
 				for (ExtraInfoPO extraInfoPO : newData) {
-					extraInfoPO.setWorknodeId(po.getId().toString());
+					extraInfoPO.setWorknodeId(po.getNodeUid());
 					extraInfoService.save(extraInfoPO);
 				}
 			}
@@ -206,6 +206,29 @@ public class WorkNodeController extends ControllerBase {
 			data.put(ERRMSG, "内部错误");
 		}
 
+		return data;
+	}
+	
+	@RequestMapping(value = "/load")
+	@ResponseBody
+	public Map<String,Object> load(){
+		Map<String, Object> data = makeAjaxData();
+		try {
+			List<WorkNodePO> workNodePOs = workNodeService.findAll();
+			List<WorkNodeVO> workNodeVOs = new ArrayList<WorkNodeVO>();
+			for (WorkNodePO workNodePO : workNodePOs) {
+				WorkNodeVO workNodeVO = new WorkNodeVO();
+				workNodeVO.setName(workNodePO.getName());
+				workNodeVO.setNodeUid(workNodePO.getNodeUid());
+				workNodeVO.setIp(workNodePO.getIp());
+				workNodeVOs.add(workNodeVO);
+			}
+			data.put("workNode", workNodeVOs);
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "内部错误");
+		}
+		
 		return data;
 	}
 }

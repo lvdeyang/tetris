@@ -17,5 +17,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = AudioParametersPO.class, idClass = Long.class)
 public interface AudioParametersDAO extends BaseDAO<AudioParametersPO>{
 	
-	public AudioParametersPO findByGuideId(Long guideId);
+	public AudioParametersPO findByGroupId(Long groupId);
+	
 }

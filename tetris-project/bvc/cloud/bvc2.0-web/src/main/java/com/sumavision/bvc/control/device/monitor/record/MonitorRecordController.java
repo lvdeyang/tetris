@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceService;
+import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.control.utils.UserUtils;
@@ -87,6 +89,9 @@ public class MonitorRecordController {
 	
 	@Autowired
 	private SystemConfigurationDAO systemConfigurationDao;
+	
+	@Autowired
+	private UserQueryService userQueryService;
 	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
@@ -390,10 +395,19 @@ public class MonitorRecordController {
 		}
 		
 		
-		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+//		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		List<MonitorRecordTaskVO> rows = new ArrayList<MonitorRecordTaskVO>();
+		for(MonitorRecordPO recordPo:entities){
+			MonitorRecordTaskVO recordTaskVo = new MonitorRecordTaskVO();
+			rows.add(recordTaskVo.set(recordPo, bo));
+		}
+		
+		Integer totalSizeMb=(systemConfigurationDao.findByTotalSizeMbNotNull()==null?null:systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb());
+		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
-												   .put("totalSizeMb", systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb())
+												   .put("totalSizeMb", totalSizeMb)
 												   .getMap();
 	
 	}

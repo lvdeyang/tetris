@@ -17,6 +17,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = VideoParametersPO.class, idClass = Long.class)
 public interface VideoParametersDAO extends BaseDAO<VideoParametersPO>{
 	
-	public VideoParametersPO findByGuideId(Long guideId);
+	public VideoParametersPO findByGroupId(Long groupId);
 	
 }

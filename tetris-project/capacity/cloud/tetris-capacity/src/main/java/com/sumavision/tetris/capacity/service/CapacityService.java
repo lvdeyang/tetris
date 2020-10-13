@@ -147,7 +147,8 @@ public class CapacityService {
 										      .append(UrlConstant.URL_COMBINE)
 										      .toString();
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all));
-		LOG.info("[delete-all] request, url: {}",url,request);
+		
+		LOG.info("[delete-all] request, url: {}, all: {}",url,request);
 
 		JSONObject result = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-all] response, result: {}",result);

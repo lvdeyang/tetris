@@ -10,12 +10,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.alibaba.druid.wall.violation.ErrorCode;
+import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +75,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 @Service
 public class ScheduleService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ScheduleService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleService.class);
 
 	public static final String SCHEDULE = "schedule";
 	
@@ -94,6 +96,16 @@ public class ScheduleService {
 
 	@Autowired
 	private TemplateService templateService;
+
+	@Value("${constant.default.video.encode:x264}")
+	private String vEncodeType;
+
+	@Value("${constant.default.video.resolution:1280x720}")
+	private String vResolution;
+
+	@Value("${constant.default.audio.encode:aac}")
+	private String aEncodeType;
+
 
 	/**
 	 * 添加排期任务<br/>
@@ -591,28 +603,40 @@ public class ScheduleService {
 			
 			//scale
 			ScaleBO scale = new ScaleBO().setPlat("cpu")
-										 .setWidth(1280)
-										 .setHeight(720);
+										 
+										 .setWidth(Integer.valueOf(vResolution.split("x")[0]))
+										 .setHeight(Integer.valueOf(vResolution.split("x")[1]));
 			
 			PreProcessingBO preProcessing = new PreProcessingBO().setScale(scale);
 			videoEncode.getProcess_array().add(preProcessing);
 			
-//			H264BO h264 = new H264BO().setBitrate(3000000)
-//									  .setMax_bitrate(3000000)
-//									  .setRatio("16:9")
-//									  .setWidth(1280)
-//									  .setHeight(720);
 
-
-			String params = templateService.getVideoEncodeMap(EncodeConstant.TplVideoEncoder.VENCODER_X264);
+			EncodeConstant.TplVideoEncoder videoEncoder = EncodeConstant.TplVideoEncoder.getTplVideoEncoder(vEncodeType);
+			String params = templateService.getVideoEncodeMap(videoEncoder);
 			JSONObject obj = JSONObject.parseObject(params);
-			obj.put("bitrate",2900);
-			obj.put("max_bitrate",2900);
+			
+			obj.put("bitrate",2300);
+			obj.put("max_bitrate",2300);
 			obj.put("rc_mode","cbr");
 			obj.put("ratio","16:9");
-			obj.put("resolution","1280x720");
+			
+			obj.put("resolution",vResolution);
 
-			videoEncode.setH264(obj);
+			
+			EncodeConstant.VideoType type = EncodeConstant.VideoType.getVideoType(videoEncoder);
+			switch (type) {
+				case h264:
+					videoEncode.setH264(obj);
+					break;
+				case h265:
+					videoEncode.setHevc(obj);
+					break;
+				case mpeg2:
+					videoEncode.setMpeg2(obj);
+					break;
+				default:
+					throw new CommonException("video encode type not support, type: "+type.name());
+			}
 			
 			videoTask.getEncode_array().add(videoEncode);
 			
@@ -636,20 +660,39 @@ public class ScheduleService {
 
 			EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId);
 
-			String aacMap = templateService.getAudioEncodeMap("aac");
-			JSONObject aacObj = JSONObject.parseObject(aacMap);
+			
+			String aMap = templateService.getAudioEncodeMap(aEncodeType);
+			JSONObject aObj = JSONObject.parseObject(aMap);
 
-//			AacBO aac = new AacBO().setAac()
-//		   			   			   .setBitrate("192")
-//		   			   			   .setSample_rate("44.1");
+
+			EncodeConstant.TplAudioEncoder audioEncoder = EncodeConstant.TplAudioEncoder.getTplAudioEncoder(aEncodeType);
+			EncodeConstant.AudioType audioType = EncodeConstant.AudioType.getAudioType(audioEncoder);
+
+			switch (audioType){
+				case aac:
+					audioEncode.setAac(aObj);
+					break;
+				case dolby:
+					audioEncode.setDolby(aObj);
+					break;
+				case mp2:
+					audioEncode.setMp2(aObj);
+					break;
+				case mp3:
+					audioEncode.setMp3(aObj);
+					break;
+				default:
+					throw new CommonException("audio encode type not support, type: "+audioType.name());
+			}
+
 			
-			audioEncode.setAac(aacObj);
+		 
+			audioEncode.setProcess_array(new ArrayList());
 			
-			audioEncode.setProcess_array(new ArrayList<PreProcessingBO>());
-			
-			ResampleBO resample = new ResampleBO().setSample_rate(Float.valueOf(aacObj.getFloat("sample_rate")*1000).intValue())
-													.setChannel_layout(aacObj.getString("channel_layout"))
-													.setFormat(aacObj.getString("sample_fmt"));
+			 
+			ResampleBO resample = new ResampleBO().setSample_rate(Float.valueOf(aObj.getFloat("sample_rate")*1000).intValue())
+													.setChannel_layout(aObj.getString("channel_layout"))
+													.setFormat(aObj.getString("sample_fmt"));
 
 			PreProcessingBO audio_decode_processing = new PreProcessingBO().setResample(resample);
 			audioEncode.getProcess_array().add(audio_decode_processing);
@@ -678,7 +721,7 @@ public class ScheduleService {
 			List<TaskBO> tasks, 
 			ScheduleTaskVO push) throws Exception {
 
-		List<OutputBO> outputs = new ArrayList<OutputBO>();
+		List<OutputBO> outputs = new ArrayList();
 		for(PushOutputVO outputVO: push.getOutput()){
 			
 			OutputBO output = new OutputBO();
@@ -1157,9 +1200,9 @@ public class ScheduleService {
 			if(bo == null){
 				bo = new CapacityDeleteBO();
 				bo.setCapacityIp(output.getCapacityIp());
-				bo.setInputs(new ArrayList<InputBO>());
-				bo.setTasks(new ArrayList<TaskBO>());
-				bo.setOutputs(new ArrayList<OutputBO>());
+				bo.setInputs(new ArrayList());
+				bo.setTasks(new ArrayList());
+				bo.setOutputs(new ArrayList());
 				
 				bos.add(bo);
 			}

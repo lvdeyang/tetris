@@ -55,12 +55,19 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-  
+ 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * 异步的HTTP请求对象，可设置代理 
  */  
-public class HttpAsyncClient {  
-	
+
+public class HttpAsyncClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpAsyncClient.class);
+
+
     private static int socketTimeout = 15000;// 设置等待数据超时时间5秒钟 根据业务调整  
   
     private static int connectTimeout = 2000;// 连接超时  
@@ -348,9 +355,10 @@ public class HttpAsyncClient {
                 httpPost.setURI(new URI(httpPost.getURI().toString()  
                         + "?" + urlParams));  
             }  
-  
-            hc.execute(httpPost, callback);  
-  
+            LOGGER.info("http async request, url: {}, postString: {}, urlParams :{} ",baseUrl, postString, urlParams);
+            hc.execute(httpPost, callback);
+            LOGGER.info("http async response, url: {},",baseUrl);
+
         } catch (Exception e) {  
             e.printStackTrace();  
         }  
