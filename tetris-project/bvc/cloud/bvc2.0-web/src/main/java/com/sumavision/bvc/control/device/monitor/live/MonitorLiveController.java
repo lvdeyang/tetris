@@ -1,9 +1,11 @@
 package com.sumavision.bvc.control.device.monitor.live;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,7 +18,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.ExtraInfoService;
 import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.device.MonitorDeviceController;
 import com.sumavision.bvc.control.device.monitor.osd.MonitorOsdVO;
@@ -91,6 +95,9 @@ public class MonitorLiveController {
 	@Autowired
 	private OperationLogService operationLogService;
 	
+	@Autowired
+	private ExtraInfoService extraInfoService;
+	
 	@RequestMapping(value = "/terminal/index")
 	public ModelAndView terminalIndex(String token){
 		
@@ -160,14 +167,31 @@ public class MonitorLiveController {
 			entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
 		}
 		
-		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
+//		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
+		
+		List<String> bundleIds=new ArrayList<String>();
+		entities.stream().forEach(entity->bundleIds.add(entity.getAudioBundleId()));
+		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+		
+		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
+			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getAudioBundleId());
+			try {
+				return new MonitorLiveDeviceVO().set(entity,extraInfos);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}).collect(Collectors.toList());
 		
 		if(rows!=null && rows.size()>0){
 			Set<Long> osdIds = new HashSet<Long>();
+			
 			for(MonitorLiveDeviceVO row:rows){
 				osdIds.add(row.getOsdId()==null?0l:row.getOsdId());
 			}
+			
 			List<MonitorOsdPO> osdEntities = monitorOsdDao.findAll(osdIds);
+			
 			if(osdEntities!=null && osdEntities.size()>0){
 				for(MonitorLiveDeviceVO row:rows){
 					for(MonitorOsdPO osdEntity:osdEntities){
