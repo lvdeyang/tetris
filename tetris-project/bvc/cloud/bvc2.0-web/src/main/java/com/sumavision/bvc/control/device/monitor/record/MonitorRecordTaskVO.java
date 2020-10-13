@@ -1,5 +1,7 @@
 package com.sumavision.bvc.control.device.monitor.record;
 
+import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordType;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -41,6 +43,18 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制状态*/
 	private String status;
 	
+	/** 是否有权限下载*/
+	private Boolean privilegeOfDownload;
+	
+	public Boolean getPrivilegeOfDownload() {
+		return privilegeOfDownload;
+	}
+
+	public MonitorRecordTaskVO setPrivilegeOfDownload(Boolean privilegeOfDownload) {
+		this.privilegeOfDownload = privilegeOfDownload;
+		return this;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -158,6 +172,32 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setRecordUserno(entity.getRecordUserno()==null?"-":entity.getRecordUserno());
 		return this;
 	}
-
 	
+	public MonitorRecordTaskVO set(MonitorRecordPO entity,ResourceIdListBO bo) throws Exception {
+		this.setId(entity.getId())
+			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
+			.setUuid(entity.getUuid())
+			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
+			.setFileName(entity.getFileName())
+			.setVideoSource(new StringBufferWrapper().append(entity.getVideoBundleName()).append("-").append(entity.getVideoChannelId()).toString())
+			.setAudioSource(new StringBufferWrapper().append(entity.getAudioBundleName()==null?"":entity.getAudioBundleName()).append("-").append(entity.getAudioChannelId()==null?"":entity.getAudioChannelId()).toString())
+			.setStartTime(DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
+			.setEndTime(entity.getEndTime()==null?"-":DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
+			.setMode(entity.getMode().getName())
+			.setType(entity.getType()==null?MonitorRecordType.LOCAL_DEVICE.getName():entity.getType().getName())
+			.setRecordUserId(entity.getRecordUserId()==null?"-":entity.getRecordUserId().toString())
+			.setRecordUsername(entity.getRecordUsername()==null?"-":entity.getRecordUsername())
+			.setRecordUserno(entity.getRecordUserno()==null?"-":entity.getRecordUserno());
+		if(bo!=null&&bo.getResourceCodes()!=null&&bo.getResourceCodes().size()>0){
+			if(entity.getType().equals(MonitorRecordType.LOCAL_DEVICE)&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+				this.setPrivilegeOfDownload(Boolean.TRUE);
+			}else if(entity.getType().equals(MonitorRecordType.LOCAL_USER)&&bo.getResourceCodes().contains(entity.getUserno()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+				this.setPrivilegeOfDownload(Boolean.TRUE);
+			}else{
+				this.setPrivilegeOfDownload(Boolean.FALSE);
+			}
+		}
+		return this;
+	}
+
 }
