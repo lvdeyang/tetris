@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.command.system.dao.CommandSystemTitleDAO;
+import com.sumavision.bvc.command.system.po.CommandSystemTitlePO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
@@ -124,6 +126,9 @@ public class MonitorRecordService {
 	@Autowired
 	private UserUtils userUtils;
 	
+	@Autowired
+	private CommandSystemTitleDAO commandSystemTitleDao;
+	
 	/**
 	 * 录制本地设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -218,6 +223,14 @@ public class MonitorRecordService {
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
 		
+		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
+			task.setTaskId(titleTask.getId()==null?null:titleTask.getId())
+				.setTaskName(titleTask.getTitleName()==null?"":titleTask.getTitleName());
+			return true;
+		});
+		//设置所属任务
+		
+		
 		MonitorRecordStatus status = null;
 
 		// 录制模式选择
@@ -245,6 +258,7 @@ public class MonitorRecordService {
 		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
+		
 		monitorRecordDao.save(task);
 
 		// 拼预览地址

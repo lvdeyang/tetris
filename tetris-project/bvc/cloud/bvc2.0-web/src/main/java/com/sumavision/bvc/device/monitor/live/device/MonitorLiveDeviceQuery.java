@@ -8,12 +8,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.bvc.page.PageTaskDAO;
+
 @Component
 public class MonitorLiveDeviceQuery {
 	
 	@Autowired
 	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
-
+	
+	@Autowired
+	private PageTaskDAO pageTaskDao;
+	
 	/**
 	 * 分页查询用户点播设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -54,6 +59,18 @@ public class MonitorLiveDeviceQuery {
 			return null;
 		}
 		return pagedEntities.getContent();
+	}
+	
+	/**
+	 * 查询转发路数<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月13日 下午4:32:43
+	 * @return
+	 */
+	public Long queryCountOfTransmit(){
+		
+		return monitorLiveDeviceDao.count();
 	}
 	
 }
