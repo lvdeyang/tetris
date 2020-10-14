@@ -175,8 +175,9 @@ public class MonitorLiveController {
 		
 		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
 			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getAudioBundleId());
+			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstAudioBundleId());
 			try {
-				return new MonitorLiveDeviceVO().set(entity,extraInfos);
+				return new MonitorLiveDeviceVO().set(entity,extraInfos,dstExtraInfos);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

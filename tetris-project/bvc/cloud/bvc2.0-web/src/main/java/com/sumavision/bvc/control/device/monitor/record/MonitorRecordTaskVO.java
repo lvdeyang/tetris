@@ -64,6 +64,18 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 做业务的用户昵称 */
 	private String nickname;
 	
+	/** 录制如果是设备，记录bundleId*/
+	private String bundleId;
+	
+	public String getBundleId() {
+		return bundleId;
+	}
+
+	public MonitorRecordTaskVO setBundleId(String bundleId) {
+		this.bundleId = bundleId;
+		return this;
+	}
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -247,7 +259,8 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setUserno(entity.getUserno()==null?"":entity.getUserno())
 			.setNickname(entity.getNickname()==null?"":entity.getNickname())
 			.setTaskId(entity.getTaskId()==null?null:entity.getTaskId())
-			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName());
+			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
+			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId());
 		return this;
 	}
 	

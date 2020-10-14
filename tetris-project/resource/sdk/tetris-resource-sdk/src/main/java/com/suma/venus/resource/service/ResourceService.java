@@ -2376,8 +2376,10 @@ public class ResourceService {
 		Set<String> allPrefixs=new HashSet<String>();
 		
 		for(String code:bo.getResourceCodes()){
+			if(code==null || !code.contains("-")){
+				continue;
+			}
 			allPrefixs.add(code.substring(0, code.lastIndexOf("-")));
-			System.out.println(code);
 		}
 		
 		//2.记录no之间的对应关系。
@@ -2412,6 +2414,11 @@ public class ResourceService {
 		
 		//3.遍历权限集合，查找属于哪一个集合。根据后半段查找权限。
 		for(String code:bo.getResourceCodes()){
+			
+			if(code==null || !code.contains("-")){
+				continue;
+			}
+			
 			String key=code.substring(0, code.lastIndexOf("-"));
 			String privilegeStr=code.substring(code.lastIndexOf("-"));
 			
@@ -2456,6 +2463,11 @@ public class ResourceService {
 			Set<String> allPrefixs=new HashSet<String>();
 			
 			for(String code:bo.getResourceCodes()){
+				
+				if(code==null || !code.contains("-")){
+					continue;
+				}
+				
 				allPrefixs.add(code.substring(0, code.lastIndexOf("-")));
 			}
 			
@@ -2493,6 +2505,11 @@ public class ResourceService {
 			
 			//3.遍历权限集合，查找属于哪一个集合。根据后半段查找权限。
 			for(String code:bo.getResourceCodes()){
+				
+				if(code==null||!code.contains("-")){
+					continue;
+				}
+				
 				String key=code.substring(0, code.lastIndexOf("-"));
 				String privilegeStr=code.substring(code.lastIndexOf("-"));
 				

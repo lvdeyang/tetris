@@ -43,8 +43,21 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 	
 	private String type;
 	
+	/** 源扩展字段*/
 	private String extraInfo;
 	
+	/** 目的扩展字段*/
+	private String dstExtraInfo;
+	
+	public String getDstExtraInfo() {
+		return dstExtraInfo;
+	}
+
+	public MonitorLiveDeviceVO setDstExtraInfo(String dstExtraInfo) {
+		this.dstExtraInfo = dstExtraInfo;
+		return this;
+	}
+
 	public String getExtraInfo() {
 		return extraInfo;
 	}
@@ -193,7 +206,7 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 		return this;
 	}
 	
-	public MonitorLiveDeviceVO set(MonitorLiveDevicePO entity,List<ExtraInfoPO> extraInfos)throws Exception{
+	public MonitorLiveDeviceVO set(MonitorLiveDevicePO entity,List<ExtraInfoPO> extraInfos,List<ExtraInfoPO> dstExtraInfos)throws Exception{
 		set(entity);
 		//添加扩展字段
 		JSONObject extraInfo = new JSONObject();
@@ -202,7 +215,15 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 				extraInfo.put(extra.getName(), extra.getValue());
 			}
 			this.setExtraInfo(extraInfo.toJSONString());
-		}		
+		}	
+		
+		JSONObject dstExtraInfo = new JSONObject();
+		if(dstExtraInfos != null && dstExtraInfos.size()>0){
+			for(ExtraInfoPO extra : dstExtraInfos){
+				dstExtraInfo.put(extra.getName(), extra.getValue());
+			}
+			this.setDstExtraInfo(dstExtraInfo.toJSONString());
+		}
 		return this;
 	}
 	
