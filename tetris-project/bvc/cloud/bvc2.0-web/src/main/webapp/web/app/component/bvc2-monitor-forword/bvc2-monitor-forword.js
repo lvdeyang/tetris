@@ -39,12 +39,13 @@ define([
       },
       initTree: function (keepExpand) {
         this.treeLoading = true;
+        var params = {privilegesStr:"['DIANBO']",satisfyAl:false};
         var self = this;
         ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
           self.encodetree = data;
           this.treeLoading = false;
         });
-        ajax.post('/command/query/find/institution/tree/bundle/4/false/0', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/4/false/0', params, function (data) {
           self.recodetree = data;
           self.isExterior = "self"
           this.treeLoading = false;

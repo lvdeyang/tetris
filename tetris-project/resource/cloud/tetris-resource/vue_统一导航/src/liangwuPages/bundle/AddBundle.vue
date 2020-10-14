@@ -9,12 +9,22 @@
     <el-form :model="bundleForm" :rules="rules" ref="bundleForm" label-width="100px" :inline="true" size="small">
 
       <el-form-item size="small" label="设备形态" prop="deviceModel">
-        <el-select size="small" v-model="bundleForm.deviceModel" style="width: 200px;">
+        <el-select size="small" v-model="bundleForm.deviceModel" style="width: 200px;" @change="deviceModelChange">
           <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
       </el-form-item>
-
+      <el-form-item label="设备类型" v-if="bundleForm.deviceModel =='jv210'">
+        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
+          <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="域类型" v-if="bundleForm.deviceModel =='jv210'">
+        <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
+          <el-option label="本域" value="self"></el-option>
+          <el-option label="外域" value="external"></el-option>
+        </el-select>
+      </el-form-item>
       <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
         <el-select v-model="bundleForm.coderType" style="width: 200px;">
           <el-option v-for="item in coderTypeOptions" :key="item.value" :label="item.label" :value="item.value">
@@ -58,7 +68,7 @@
       </el-form-item>
 
       <!-- TODO -->
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210' || bundleForm.deviceModel=='ws'" label="接入层UID" prop="accessNodeUid">
+      <el-form-item size="small" v-if="bundleForm.deviceModel =='jv210'" label="接入层UID" prop="accessNodeUid">
         <el-input v-model="bundleForm.accessNodeName" style="width: 200px;" readonly @click.native="handleSelectLayerNode"></el-input>
         <el-input v-show="false" v-model="bundleForm.accessNodeUid"></el-input>
       </el-form-item>
@@ -71,14 +81,14 @@
         <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
       </el-form-item> -->
 
-      <el-form-item size="small" label="源组播Ip">
+      <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
         <el-input v-model="bundleForm.multicastSourceIp" style="width: 200px;"></el-input>
       </el-form-item>
-      <el-form-item size="small" label="编码组播地址">
-        <el-input v-if="bundleForm.multicastEncode" v-model="bundleForm.multicastEncodeAddr" style="width: 200px;"></el-input>
-        <el-input v-else v-model="bundleForm.multicastEncodeAddr" style="width: 200px;" disabled></el-input>
+      <el-form-item size="small" label="编码组播地址" v-if="isFictitiouVisable">
+        <el-input v-model="bundleForm.multicastEncodeAddr" style="width: 200px;"></el-input>
+        <!-- <el-input v-else v-model="bundleForm.multicastEncodeAddr" style="width: 200px;" disabled></el-input> -->
       </el-form-item>
-      <el-form-item size="small" label="编码组播">
+      <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
       <!-- <el-form-item size="small" label="解码组播">
@@ -101,17 +111,6 @@
 
       <el-form-item size="small" v-show="bundleForm.deviceModel=='speaker'" label="标识" prop="identify">
         <el-input v-model="bundleForm.identify" style="width: 200px;"></el-input>
-      </el-form-item>
-      <el-form-item label="设备类型">
-        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
-          <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="域类型">
-        <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option label="本域" value="self"></el-option>
-          <el-option label="外域" value="external"></el-option>
-        </el-select>
       </el-form-item>
 
     </el-form>
@@ -278,17 +277,17 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="组播ip" prop="multi_ip">
-                  <el-input v-model="TSencFormData.multi_ip" placeholder="请输入组播ip" clearable :style="{width: '100%'}" :disabled="TSencFormMultiIpDis"></el-input>
+                  <el-input v-model="TSencFormData.multi_ip" placeholder="请输入组播ip" clearable :style="{width: '100%'}" :disabled="!TSencFormData.is_multi"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="本机ip" prop="local_ip">
+                <el-form-item label="本机ip" :prop="TSencFormData.is_multi?'local_ip':''">
                   <el-input v-model="TSencFormData.local_ip" placeholder="请输入本机ip" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="接收端口" prop="port">
-                  <el-input v-model="TSencFormData.port" placeholder="请输入接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="TSencFormData.port" placeholder="请输入接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -309,7 +308,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="目标端口" prop="dest_port">
-                  <el-input v-model="TSdecFormData.dest_port" placeholder="请输入目标端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="TSdecFormData.dest_port" placeholder="请输入目标端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -333,23 +332,23 @@
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="组播ip" prop="multi_ip">
+                <el-form-item label="组播ip" :prop="rtpPassbyEncFormData.is_multi?'multi_ip':''">
                   <el-input v-model="rtpPassbyEncFormData.multi_ip" placeholder="请输入组播ip" clearable :style="{width: '100%'}" :disabled="rtpPassbyEncFormMultiIpDis"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="本机ip" prop="local_ip">
+                <el-form-item label="本机ip" :prop="rtpPassbyEncFormData.is_multi?'local_ip':''">
                   <el-input v-model="rtpPassbyEncFormData.local_ip" placeholder="请输入本机ip" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="视频接收端口" prop="video_port">
-                  <el-input v-model="rtpPassbyEncFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyEncFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="音频接收端口" prop="audio_port">
-                  <el-input v-model="rtpPassbyEncFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyEncFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -369,13 +368,13 @@
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="视频接收端口" prop="video_port">
-                  <el-input v-model="rtpPassbyDecFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
+                <el-form-item label="视频发送端口" prop="video_port">
+                  <el-input v-model.number="rtpPassbyDecFormData.video_port" placeholder="请输入视频发送端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="音频接收端口" prop="audio_port">
-                  <el-input v-model="rtpPassbyDecFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
+                <el-form-item label="音频发送端口" prop="audio_port">
+                  <el-input v-model.number="rtpPassbyDecFormData.audio_port" placeholder="请输入音发送收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -437,7 +436,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="控制端口" prop="onvif_port">
-                  <el-input v-model="onvifEncFormData.onvif_port" placeholder="请输入控制端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="onvifEncFormData.onvif_port" placeholder="请输入控制端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -498,6 +497,12 @@
                   <el-input v-model.number="transcodeEecFormData.gop_size" placeholder="请输入帧间隔" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
+
+              <el-col :span="7">
+                <el-form-item label="url" prop="url">
+                  <el-input v-model.number="transcodeEecFormData.url" placeholder="udp://ip:port@localip" clearable :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
             </el-form>
           </el-row>
         </div>
@@ -512,7 +517,7 @@
     </div>
     <div style="margin-top:30px; margin-left: 30px">
       <el-button size="small" type="primary" @click="submit()">提交</el-button>
-      <el-button size="small" type="primary" @click="reset()">重置</el-button>
+      <!-- <el-button size="small" type="primary" @click="reset()">重置</el-button> -->
     </div>
     <template>
       <el-dialog title="选择分组" :visible.sync="dialog.changeFolder.visible" width="650px" :before-close="handleChangeFolderClose">
@@ -624,7 +629,7 @@ export default {
         accessNodeUid: "",
         accessNodeName: "",
         bundleFolderId: null,
-        bundleFolderName: '根目录',
+        bundleFolderName: '',
         transcod: false,
         multicastSourceIp: '',
         deviceAddr: {
@@ -669,6 +674,10 @@ export default {
         ],
         accessNodeUid: [
           { required: true, message: '请输入接入层标识', trigger: 'change' }
+        ],
+        bundleFolderName: [
+          { required: true, message: '请选择所属分组', trigger: 'change' }
+
         ]
       },
       deviceModelOptions: [
@@ -901,8 +910,18 @@ export default {
           message: '请选择接收类型',
           trigger: 'change'
         }],
-        'multi_ip': [],
-        'local_ip': [],
+        'multi_ip': [{
+          required: true,
+          message: '请输入组播ip',
+          trigger: 'blur'
+        }],
+        'local_ip': [
+          {
+            required: true,
+            message: '请输入本地ip',
+            trigger: 'blur'
+          }
+        ],
         'port': [{
           required: true,
           message: '请输入接收端口',
@@ -941,7 +960,7 @@ export default {
         dest_ip: "224.1.1.2",
         local_ip: "10.1.41.22",
         video_port: 2000,
-        audio_port: 2000,
+        audio_port: 2002,
         reset_tm: false,
         aac_out: false,
       },
@@ -988,8 +1007,18 @@ export default {
           message: '请选择接收类型',
           trigger: 'change'
         }],
-        multi_ip: [],
-        local_ip: [],
+        'multi_ip': [{
+          required: true,
+          message: '请输入组播ip',
+          trigger: 'blur'
+        }],
+        'local_ip': [
+          {
+            required: true,
+            message: '请输入本地ip',
+            trigger: 'blur'
+          }
+        ],
         video_port: [],
         audio_port: [],
       },
@@ -1090,6 +1119,7 @@ export default {
         height: 576,
         fps: 25,
         gop_size: 25,
+        url: "",
       },
       transcodeEecRules: {
         dst_codec: [{
@@ -1117,6 +1147,11 @@ export default {
           message: '请输入帧间隔',
           trigger: 'blur'
         }],
+        url: [{
+          required: true,
+          message: '请输入url',
+          trigger: 'blur'
+        }],
       },
       dst_codecOptions: [{
         "label": "h264",
@@ -1127,6 +1162,7 @@ export default {
       }],
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
+      isFictitiouVisable: true
     }
   },
   computed: {
@@ -1163,7 +1199,8 @@ export default {
     //   });
     // },
     devTypeChange: function (val) {
-      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec']
+      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec'],
+        isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
       if (hidArr.indexOf(val) > -1) {
         this.cardVisable = false;
       } else {
@@ -1180,6 +1217,12 @@ export default {
         this.bundleForm.username = this.randomString(12);
         this.bundleForm.onlinePassword = defaultPassword;
         this.bundleForm.checkPass = defaultPassword;
+      }
+
+      if (isFictitiousArr.indexOf(val) > -1) {
+        this.isFictitiouVisable = false
+      } else {
+        this.isFictitiouVisable = true
       }
     },
     addExtraInfo: function () {
@@ -1204,9 +1247,9 @@ export default {
 
     },
     reset: function () {
-      this.$refs["bundleForm"].resetFields();
-      this.bundleForm.bundleFolderId = null;
-      this.bundleForm.bundleFolderName = '根目录';
+      // this.$refs["bundleForm"].resetFields();
+      // this.bundleForm.bundleFolderId = null;
+      // this.bundleForm.bundleFolderName = '';
     },
     submit: function () {
       var self = this;
@@ -1249,6 +1292,9 @@ export default {
               break
             case 'rtp_passby_dec':
               extraParam.param = this.rtpPassbyDecFormData
+              break
+            case 'rtp_passby_enc':
+              extraParam.param = this.rtpPassbyEncFormData
               break
             case 'rtsp_enc':
               extraParam.param = this.rtspEncFormData
@@ -1432,7 +1478,6 @@ export default {
     TSencFormIsMultiChange (val) {
       if (!val) {
         this.TSencFormMultiIpDis = true
-        this.TSencFormData.multi_ip = '';
       } else {
         this.TSencFormMultiIpDis = false
       }
@@ -1440,10 +1485,26 @@ export default {
     rtpPassbyEncFormIsMultiChange (val) {
       if (!val) {
         this.rtpPassbyEncFormMultiIpDis = true
-        this.rtpPassbyEncFormData.multi_ip = '';
       } else {
         this.rtpPassbyEncFormMultiIpDis = false
       }
+    },
+    deviceModelChange (val) {
+      if (val == "jv210") {
+        this.isFictitiouVisable = true
+        this.isSipShow = true;
+        this.bundleForm.username = '';
+        this.bundleForm.onlinePassword = '';
+        this.bundleForm.checkPass = '';
+      } else {
+        this.isFictitiouVisable = false
+        this.isSipShow = false;
+        var defaultPassword = this.randomString(12)
+        this.bundleForm.username = this.randomString(12);
+        this.bundleForm.onlinePassword = defaultPassword;
+        this.bundleForm.checkPass = defaultPassword;
+      }
+
     }
   },
   mounted: function () {
