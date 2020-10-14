@@ -223,12 +223,13 @@ public class MonitorRecordService {
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
 		
+		//设置所属任务
 		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
 			task.setTaskId(titleTask.getId()==null?null:titleTask.getId())
 				.setTaskName(titleTask.getTitleName()==null?"":titleTask.getTitleName());
 			return true;
 		});
-		//设置所属任务
+		
 		
 		
 		MonitorRecordStatus status = null;
@@ -388,6 +389,13 @@ public class MonitorRecordService {
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
 		task.setTotalSizeMb(totalSizeMb);
+		
+		//设置所属任务
+		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
+			task.setTaskId(titleTask.getId()==null?null:titleTask.getId())
+				.setTaskName(titleTask.getTitleName()==null?"":titleTask.getTitleName());
+			return true;
+		});
 		monitorRecordDao.save(task);
 		
 		//拼预览地址（这里要查找对应的规则表去取到index）
