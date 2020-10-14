@@ -2,7 +2,7 @@
   <section>
 
     <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left;width:100%;">
-      <el-tab-pane label="资源列表" name="LwBundleManage"></el-tab-pane>
+      <el-tab-pane label="资源列表" name="LwLocalBundleManage"></el-tab-pane>
       <el-tab-pane label="能力配置" name="LwConfigBundle"></el-tab-pane>
     </el-tabs>
 

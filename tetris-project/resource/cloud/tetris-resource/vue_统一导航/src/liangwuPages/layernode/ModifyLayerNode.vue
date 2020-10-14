@@ -170,6 +170,7 @@ export default {
         }
       ],
       id: this.$route.query.id,
+      nodeUid: this.$route.query.nodeUid,
       nodeForm: {
         type: "",
         name: "",
@@ -227,7 +228,7 @@ export default {
     },
     queryLayernodeExtraInfo: function () {
       let param = {
-        worknodeId: this.id
+        worknodeId: this.nodeUid
       };
 
       queryLayernodeExtraInfo(param).then(res => {

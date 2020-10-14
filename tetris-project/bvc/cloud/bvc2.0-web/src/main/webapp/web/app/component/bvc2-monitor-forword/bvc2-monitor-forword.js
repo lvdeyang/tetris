@@ -26,7 +26,10 @@ define([
           children: 'children',
           label: 'name'
         },
-        treeLoading: false
+        treeLoading: false,
+        isExterior: "",
+        decodeTitle: "本域解码器",
+        activeName: 'self'
       }
     },
     methods: {
@@ -43,6 +46,7 @@ define([
         });
         ajax.post('/command/query/find/institution/tree/bundle/4/false/0', null, function (data) {
           self.recodetree = data;
+          self.isExterior = "self"
           this.treeLoading = false;
         });
       },
@@ -55,6 +59,9 @@ define([
           this.dialogFormVisible = false;
 
         }
+      },
+      handleFilterNode: function (val, data) {
+
       },
       //开始拖拽事件
       onStart(e) {
@@ -132,6 +139,39 @@ define([
         // console.log(from, 'from')
         // console.log(to, 'to')
         // console.log(e)
+      },
+      filterNode(value, data) {
+
+        var extraInfo = JSON.parse(data.extraInfo)
+        if (!extraInfo || !(extraInfo.extend_param)) {
+          // return true
+        } else {
+          var extend_param = JSON.parse(extraInfo.extend_param)
+          // if (value == (extend_param.region == "external").toString()) return true
+          // if (value != (extend_param.region == "external").toString()) return false
+          return (value == extend_param.region)
+        }
+      },
+      handleClick(tab, event) {
+        this.isExterior = tab.name
+
+      }
+    },
+    watch: {
+      isExterior: {
+        handler: function (val) {
+          var self = this;
+          self.$nextTick(function () {
+            self.$refs.tree2.filter(val);
+          })
+
+          if (val == "self") {
+            self.decodeTitle = "本域解码器"
+          } else {
+            self.decodeTitle = "外域解码器"
+          }
+        },
+
       }
     },
     mounted: function () {
