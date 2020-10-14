@@ -10,35 +10,6 @@
       <el-form-item size="small" label="设备名称" prop="bundleName">
         <el-input v-model="bundleName" style="width: 200px;" placeholder="输入新的设备名称"></el-input>
       </el-form-item>
-
-      <el-form-item size="small" label="设备IP" prop="deviceIp">
-        <el-input v-model="deviceIp" style="width: 200px;" placeholder="输入新的设备IP"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" label="地点" prop="bundleAlias">
-        <el-input v-model="location" style="width: 200px;"></el-input>
-      </el-form-item>
-      <el-form-item size="small" label="设备端口" prop="devicePort">
-        <el-input v-model="devicePort" style="width: 200px;" placeholder="输入新的设备端口"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" label="编码组播地址">
-        <el-input v-if="multicastEncode" v-model="multicastEncodeAddr" style="width: 200px;"></el-input>
-        <el-input v-else v-model="multicastEncodeAddr" style="width: 200px;" disabled></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" label="源组播Ip">
-        <el-input v-model="multicastSourceIp" style="width: 200px;"></el-input>
-      </el-form-item>
-      <el-form-item size="small" label="解码组播">
-        <el-switch v-model="multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item>
-      <el-form-item size="small" label="是否转码">
-        <el-switch v-model="transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item>
-      <el-form-item size="small" label="编码组播">
-        <el-switch v-model="multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item>
       <el-form-item size="small" label="设备类型">
         <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
           <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
@@ -47,9 +18,35 @@
       <el-form-item size="small" label="域类型">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
           <el-option label="本域" value="self"></el-option>
-          <el-option label="外域" value="External"></el-option>
+          <el-option label="外域" value="external"></el-option>
         </el-select>
       </el-form-item>
+      <!-- <el-form-item size="small" label="设备IP" prop="deviceIp">
+        <el-input v-model="deviceIp" style="width: 200px;" placeholder="输入新的设备IP"></el-input>
+      </el-form-item> -->
+
+      <el-form-item size="small" label="地点" prop="bundleAlias">
+        <el-input v-model="location" style="width: 200px;"></el-input>
+      </el-form-item>
+      <!-- <el-form-item size="small" label="设备端口" prop="devicePort">
+        <el-input v-model="devicePort" style="width: 200px;" placeholder="输入新的设备端口"></el-input>
+      </el-form-item> -->
+
+      <el-form-item size="small" label="编码组播地址" v-show="isFictitiouVisable">
+        <el-input v-model="multicastEncodeAddr" style="width: 200px;"></el-input>
+        <!-- <el-input v-else v-model="multicastEncodeAddr" style="width: 200px;" disabled></el-input> -->
+      </el-form-item>
+
+      <!-- <el-form-item size="small" label="解码组播">
+        <el-switch v-model="multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+      <el-form-item size="small" label="是否转码">
+        <el-switch v-model="transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item> -->
+      <el-form-item size="small" label="编码组播" v-show="isFictitiouVisable">
+        <el-switch v-model="multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+      </el-form-item>
+
       <!--
           <div style="margin-top:10px;">
             <el-input v-model="bundleName" placeholder="输入新的设备名称" style="width: 300px;">
@@ -224,18 +221,18 @@
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="组播ip" prop="multi_ip">
+                <el-form-item label="组播ip" :prop="TSencFormData.is_multi?'multi_ip':''">
                   <el-input v-model="TSencFormData.multi_ip" placeholder="请输入组播ip" clearable :style="{width: '100%'}" :disabled="TSencFormMultiIpDis"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="本机ip" prop="local_ip">
+                <el-form-item label="本机ip" :prop="TSencFormData.is_multi?'local_ip':''">
                   <el-input v-model="TSencFormData.local_ip" placeholder="请输入本机ip" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="接收端口" prop="port">
-                  <el-input v-model="TSencFormData.port" placeholder="请输入接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="TSencFormData.port" placeholder="请输入接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -256,7 +253,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="目标端口" prop="dest_port">
-                  <el-input v-model="TSdecFormData.dest_port" placeholder="请输入目标端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="TSdecFormData.dest_port" placeholder="请输入目标端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -280,23 +277,23 @@
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="组播ip" prop="multi_ip">
+                <el-form-item label="组播ip" :prop="rtpPassbyEncFormData.is_multi?'multi_ip':''">
                   <el-input v-model="rtpPassbyEncFormData.multi_ip" placeholder="请输入组播ip" clearable :style="{width: '100%'}" :disabled="rtpPassbyEncFormMultiIpDis"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
-                <el-form-item label="本机ip" prop="local_ip">
+                <el-form-item label="本机ip" :prop="rtpPassbyEncFormData.is_multi?'local_ip':''">
                   <el-input v-model="rtpPassbyEncFormData.local_ip" placeholder="请输入本机ip" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="视频接收端口" prop="video_port">
-                  <el-input v-model="rtpPassbyEncFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyEncFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="音频接收端口" prop="audio_port">
-                  <el-input v-model="rtpPassbyEncFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyEncFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -317,12 +314,12 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="视频接收端口" prop="video_port">
-                  <el-input v-model="rtpPassbyDecFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyDecFormData.video_port" placeholder="请输入视频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
                 <el-form-item label="音频接收端口" prop="audio_port">
-                  <el-input v-model="rtpPassbyDecFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="rtpPassbyDecFormData.audio_port" placeholder="请输入音频接收端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -384,7 +381,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="控制端口" prop="onvif_port">
-                  <el-input v-model="onvifEncFormData.onvif_port" placeholder="请输入控制端口" clearable :style="{width: '100%'}"></el-input>
+                  <el-input v-model.number="onvifEncFormData.onvif_port" placeholder="请输入控制端口" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -443,6 +440,11 @@
               <el-col :span="7">
                 <el-form-item label="视频I帧间隔" prop="gop_size">
                   <el-input v-model.number="transcodeEecFormData.gop_size" placeholder="请输入帧间隔" clearable :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="url" prop="url">
+                  <el-input v-model.number="transcodeEecFormData.url" placeholder="udp://ip:port@localip" clearable :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -556,7 +558,7 @@ export default {
           folderName: '',
           toLdap: '否'
         },
-
+        /*  */
       },
       devTypeOption: [
         { label: "sip编码器", value: "sip_enc" },
@@ -716,8 +718,18 @@ export default {
           message: '请选择接收类型',
           trigger: 'change'
         }],
-        'multi_ip': [],
-        'local_ip': [],
+        'multi_ip': [{
+          required: true,
+          message: '请输入组播ip',
+          trigger: 'blur'
+        }],
+        'local_ip': [
+          {
+            required: true,
+            message: '请输入本地ip',
+            trigger: 'blur'
+          }
+        ],
         'port': [{
           required: true,
           message: '请输入接收端口',
@@ -762,7 +774,7 @@ export default {
         dest_ip: "224.1.1.2",
         local_ip: "10.1.41.22",
         video_port: 2000,
-        audio_port: 2000,
+        audio_port: 2002,
         reset_tm: false,
         aac_out: false,
       },
@@ -802,8 +814,18 @@ export default {
           message: '请选择接收类型',
           trigger: 'change'
         }],
-        multi_ip: [],
-        local_ip: [],
+        'multi_ip': [{
+          required: true,
+          message: '请输入组播ip',
+          trigger: 'blur'
+        }],
+        'local_ip': [
+          {
+            required: true,
+            message: '请输入本地ip',
+            trigger: 'blur'
+          }
+        ],
         video_port: [],
         audio_port: [],
       },
@@ -904,6 +926,7 @@ export default {
         height: 576,
         fps: 25,
         gop_size: 25,
+        url: ''
       },
       transcodeEecRules: {
         dst_codec: [{
@@ -931,6 +954,11 @@ export default {
           message: '请输入视频I帧间隔',
           trigger: 'blur'
         }],
+        url: [{
+          required: true,
+          message: '请输入url',
+          trigger: 'blur'
+        }],
       },
       dst_codecOptions: [{
         "label": "h264",
@@ -941,6 +969,7 @@ export default {
       }],
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
+      isFictitiouVisable: true
     };
   },
   methods: {
@@ -980,6 +1009,13 @@ export default {
             self.cardVisable = true;
 
           }
+
+          var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
+          if (isFictitiousArr.indexOf(val) > -1) {
+            this.isFictitiouVisable = false
+          } else {
+            this.isFictitiouVisable = true
+          }
           switch (self.extraParam.dev_type) {
             case 'dh_camera':
               self.dahuaFormData = self.params
@@ -992,6 +1028,9 @@ export default {
               break
             case 'rtp_passby_dec':
               self.rtpPassbyDecFormData = self.params
+              break
+            case 'rtp_passby_enc':
+              self.rtpPassbyEncFormData = self.params
               break
             case 'rtsp_enc':
               self.rtspEncFormData = self.params
@@ -1020,6 +1059,12 @@ export default {
       } else {
         this.cardVisable = true;
 
+      }
+      var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
+      if (isFictitiousArr.indexOf(val) > -1) {
+        this.isFictitiouVisable = false
+      } else {
+        this.isFictitiouVisable = true
       }
     },
     addExtraInfo: function () {
@@ -1063,6 +1108,9 @@ export default {
           break
         case 'rtp_passby_dec':
           extraParam.param = this.rtpPassbyDecFormData
+          breakcase
+        case 'rtp_passby_enc':
+          extraParam.param = this.rtpPassbyEncFormData
           break
         case 'rtsp_enc':
           extraParam.param = this.rtspEncFormData
@@ -1202,7 +1250,6 @@ export default {
     TSencFormIsMultiChange (val) {
       if (!val) {
         this.TSencFormMultiIpDis = true
-        this.TSencFormData.multi_ip = '';
       } else {
         this.TSencFormMultiIpDis = false
       }
@@ -1210,7 +1257,6 @@ export default {
     rtpPassbyEncFormIsMultiChange (val) {
       if (!val) {
         this.rtpPassbyEncFormMultiIpDis = true
-        this.rtpPassbyEncFormData.multi_ip = '';
       } else {
         this.rtpPassbyEncFormMultiIpDis = false
       }
