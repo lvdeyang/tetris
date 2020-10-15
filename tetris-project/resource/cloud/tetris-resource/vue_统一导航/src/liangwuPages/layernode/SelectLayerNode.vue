@@ -45,58 +45,21 @@ export default {
         filterData: [],
         currentRow: ''
       },
-      layerNodeTypes: [{
-        value: 'ACCESS_JV230',
-        label: 'JV230接入'
-      }, {
-        value: 'ACCESS_TVOS',
-        label: '机顶盒接入'
-      }, {
-        value: 'ACCESS_MIXER',
-        label: '混合器接入'
-      }, {
-        value: 'ACCESS_MOBILE',
-        label: '手机终端接入'
-      }, {
-        value: 'ACCESS_JV210',
-        label: '音视频转发服务设备'
-      }, {
-        value: 'ACCESS_CDN',
-        label: '录像存储服务单元A型'
-      }, {
-        value: 'ACCESS_VOD',
-        label: '录像存储服务单元B型'
-      }, {
-        value: 'ACCESS_IPC',
-        label: '监控资源汇接网关'
-      }, {
-        value: 'ACCESS_STREAMMEDIA',
-        label: '流媒体管理服务设备'
-      }, {
-        value: 'ACCESS_NETWORK',
-        label: '联网服务设备'
-      }, {
-        value: 'ACCESS_DISPLAYCTRL',
-        label: '显控汇接网关'
-      }, {
-        value: 'ACCESS_S100',
-        label: '流转发器接入'
-      }, {
-        value: 'ACCESS_VODPROXY',
-        label: '点播代理服务设备'
-      }, {
-        value: 'ACCESS_LIANWANG',
-        label: '联网接入'
-      }, {
-        label: "LDAP目录资源服务设备",
-        value: "ACCESS_LDAP"
-      }, {
-        label: "综合运维服务设备",
-        value: "ACCESS_OMMS"
-      }, {
-        label: "ws接入",
-        value: "ACCESS_WS"
-      }],
+      layerNodeTypes: [
+        {
+          value: "",
+          label: "全部类型"
+        },
+
+        {
+          label: "终端设备",
+          value: "ACCESS_JV210"
+        },
+        {
+          label: "存储设备",
+          value: "ACCESS_CDN"
+        }
+      ],
       filters: {
         type: '',
         name: '',

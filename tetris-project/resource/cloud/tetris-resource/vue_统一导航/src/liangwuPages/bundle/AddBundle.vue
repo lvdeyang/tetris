@@ -97,7 +97,7 @@
       <el-form-item size="small" label="是否转码">
         <el-switch v-model="bundleForm.transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item> -->
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
+      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
         <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
       </el-form-item>
 
@@ -111,7 +111,7 @@
 
       <el-form-item size="small" v-show="bundleForm.deviceModel=='speaker'" label="标识" prop="identify">
         <el-input v-model="bundleForm.identify" style="width: 200px;"></el-input>
-      </el-form-item>
+      </el-form-item> -->
 
     </el-form>
     <el-card class="box-card" style="margin-top:10px" v-show="cardVisable">
@@ -639,7 +639,7 @@ export default {
         multicastEncode: false,
         multicastEncodeAddr: '',
         multicastDecode: false,
-        coderType: "DEFAULT",
+        coderType: "ENCODER",
         longitude: '',
         latitude: '',
         streamUrl: '',
@@ -655,9 +655,6 @@ export default {
         deviceModel: [
           { required: true, message: '请选择设备形态', trigger: 'change' }
         ],
-        // deviceDomain: [
-        //   { required: true, message: '请选择资源域', trigger: 'change' }
-        // ],
         bundleName: [
           { required: true, message: '请输入设备名称', trigger: 'blur' },
           { min: 1, max: 30, message: '长度在 1 到 30 个字符', trigger: 'blur' }
@@ -687,7 +684,7 @@ export default {
       devTypeOption: [
         { label: "sip编码器", value: "sip_enc" },
         { label: "sip解码器", value: "sip_dec" },
-        { label: "sip编解码器", value: "sip_enc_dec" },
+        // { label: "sip编解码器", value: "sip_enc_dec" },
         { label: "大华摄像机", value: "dh_camera" },
         { label: "ts输入(虚编码)", value: "ts_enc" },
         { label: "ts输出(虚解码)", value: "ts_dec" },
@@ -1162,7 +1159,13 @@ export default {
       }],
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
-      isFictitiouVisable: true
+      isFictitiouVisable: true,
+      configChannels: [
+        { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
+        { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
+        { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
+        { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+      ],
     }
   },
   computed: {
@@ -1200,7 +1203,7 @@ export default {
     // },
     devTypeChange: function (val) {
       var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec'],
-        isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
+        isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec'], isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
       if (hidArr.indexOf(val) > -1) {
         this.cardVisable = false;
       } else {
@@ -1223,6 +1226,24 @@ export default {
         this.isFictitiouVisable = false
       } else {
         this.isFictitiouVisable = true
+      }
+      // 判断解码编码设备
+      if (isEncArr.indexOf(val) > -1) {
+        this.bundleForm.coderType = 'ENCODER'
+        this.configChannels = [
+          { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
+          { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
+          { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
+          { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+        ]
+      } else {
+        this.bundleForm.coderType = 'DECODER'
+        this.configChannels = [
+          { "channelTemplateID": 1, "channelCnt": 0, "channelName": "VenusAudioIn" },
+          { "channelTemplateID": 2, "channelCnt": 1, "channelName": "VenusAudioOut" },
+          { "channelTemplateID": 3, "channelCnt": 0, "channelName": "VenusVideoIn" },
+          { "channelTemplateID": 4, "channelCnt": 1, "channelName": "VenusVideoOut" }
+        ]
       }
     },
     addExtraInfo: function () {
@@ -1457,7 +1478,7 @@ export default {
     handleConfigBundle: function (bundleId) {
       let param = {
         bundleId: bundleId,
-        configChannels: JSON.stringify([{ "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" }, { "channelTemplateID": 2, "channelCnt": 1, "channelName": "VenusAudioOut" }, { "channelTemplateID": 3, "channelCnt": "1", "channelName": "VenusVideoIn" }, { "channelTemplateID": 4, "channelCnt": 2, "channelName": "VenusVideoOut" }]),
+        configChannels: JSON.stringify(this.configChannels),
         configEditableAttrs: JSON.stringify([])
       };
 

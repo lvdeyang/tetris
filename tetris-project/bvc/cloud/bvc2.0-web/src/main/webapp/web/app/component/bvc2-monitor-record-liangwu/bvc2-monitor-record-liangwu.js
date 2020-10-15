@@ -542,13 +542,13 @@ define([
         this.dialog.download.visible = false;
       },
       rowDownload(row) {
-        var self = this;
-        var downloadUrl = row.downloadUrl;
-        var name = row.name;
-        var startTime = 0;
-        var endTime = row.duration;
-        downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
-        window.open(downloadUrl);
+        // var self = this;
+        // var downloadUrl = row.downloadUrl;
+        // var name = row.name;
+        // var startTime = 0;
+        // var endTime = row.duration;
+        // downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
+        window.open(row.downLoadPath);
       },
       handleDownload(row) {
         var self = this;
