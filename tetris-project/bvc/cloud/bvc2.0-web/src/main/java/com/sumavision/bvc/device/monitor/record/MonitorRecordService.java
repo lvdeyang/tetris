@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.system.dao.CommandSystemTitleDAO;
 import com.sumavision.bvc.command.system.po.CommandSystemTitlePO;
 import com.sumavision.bvc.control.utils.UserUtils;
@@ -41,6 +42,7 @@ import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
 import com.sumavision.bvc.device.monitor.exception.UserHashNoPermissionToStopMonitorRecordException;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
@@ -107,6 +109,9 @@ public class MonitorRecordService {
 
 	@Autowired
 	private UserQuery userQuery;
+
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private MonitorRecordManyTimesDAO monitorRecordManyTimesDao;
@@ -124,13 +129,16 @@ public class MonitorRecordService {
 	private OperationLogService operationLogService;
 	
 	@Autowired
+	private ResourceRemoteService resourceRemoteService;	
+	
+	@Autowired
 	private UserUtils userUtils;
 	
 	@Autowired
 	private CommandSystemTitleDAO commandSystemTitleDao;
 	
 	/**
-	 * 录制本地设备<br/>
+	 * 录制设备（支持本系统和外部系统）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月1日 上午10:18:01
@@ -179,7 +187,7 @@ public class MonitorRecordService {
 	 *            nickname 操作业务用户昵称
 	 * @return MonitorRecordPO 录制任务
 	 */
-	public MonitorRecordPO addLocalDevice(String mode, String fileName, String startTime, String endTime,
+	public MonitorRecordPO addDevice(String mode, String fileName, String startTime, String endTime,
 
 			String videoBundleId, String videoBundleName, String videoBundleType, String videoLayerId,
 			String videoChannelId, String videoBaseType, String videoChannelName,
@@ -188,6 +196,26 @@ public class MonitorRecordService {
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
 			String nickname
 	) throws Exception {
+		
+		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
+		boolean bLdap = queryUtil.isLdapBundle(bundle);
+		if(bLdap){
+			videoBundleId = new StringBufferWrapper().append(videoBundleId).append("_")
+					.append(UUID.randomUUID().toString().replace("-", "")).toString();
+			videoBundleName = bundle.getBundleName();
+			videoBundleType = bundle.getBundleType();
+			videoLayerId = resourceRemoteService.queryLocalLayerId();
+			videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+			//videoBaseType
+			videoChannelName = ChannelType.VIDEOENCODE1.getName();
+			audioBundleId = videoBundleId;
+			audioBundleName = bundle.getBundleName();
+			audioBundleType = bundle.getBundleType();
+			audioLayerId = videoLayerId;
+			audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+			//audioBaseType
+			audioChannelName = ChannelType.AUDIOENCODE1.getName();			
+		}
 
 		// 参数模板
 		Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -253,7 +281,7 @@ public class MonitorRecordService {
 		}
 
 		task.setStatus(status);
-		task.setType(MonitorRecordType.LOCAL_DEVICE);
+		task.setType(bLdap?MonitorRecordType.XT_DEVICE:MonitorRecordType.LOCAL_DEVICE);
 		task.setUserId(userId);
 		task.setUserno(userno);
 		task.setNickname(nickname);
@@ -268,7 +296,7 @@ public class MonitorRecordService {
 		task.setPreviewUrl(previewUrl);
 		monitorRecordDao.save(task);
 
-		// 处理排期录制   直接下命令
+		// 处理定时录制   直接下命令
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
 			now = DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
@@ -279,9 +307,9 @@ public class MonitorRecordService {
 			}
 		}
 
-		LogicBO logic = openBundle(task, codec);
+		LogicBO logic = bLdap ? startDevicePassby(task, codec, bundle) : openBundle(task, codec);
 		logic.merge(startRecord(task, codec));
-		sendProtocol(task, logic, "点播系统：开始录制本地设备");
+		sendProtocol(task, logic, bLdap?"点播系统：开始录制外部系统设备":"点播系统：开始录制本地设备");
 		
 		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加录制", "添加录制任务文件名称："+fileName);
 
@@ -289,7 +317,7 @@ public class MonitorRecordService {
 	}
 
 	/**
-	 * 排期：录制本地设备<br/>
+	 * 排期录制设备（支持本系统和外部系统）<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月1日 上午10:18:01
@@ -318,7 +346,7 @@ public class MonitorRecordService {
 	 * @param String timeQuantum 不同排期模式对应的时间选择
 	 * @return MonitorRecordPO 录制任务
 	 */
-	public MonitorRecordPO addLocalDevice(
+	public MonitorRecordPO addDeviceTimeSegment(
 			String mode, 
 			String fileName, 
 			String startTime, 
@@ -346,6 +374,23 @@ public class MonitorRecordService {
 			String timeQuantum,
 			Integer totalSizeMb
 			) throws Exception{
+
+		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
+		boolean bLdap = queryUtil.isLdapBundle(bundle);
+		if(bLdap){
+			videoBundleName = bundle.getBundleName();
+			videoBundleType = bundle.getBundleType();
+			videoLayerId = resourceRemoteService.queryLocalLayerId();
+			videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+			//videoBaseType
+			videoChannelName = ChannelType.VIDEOENCODE1.getName();
+			audioBundleName = bundle.getBundleName();
+			audioBundleType = bundle.getBundleType();
+			audioLayerId = videoLayerId;
+			audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+			//audioBaseType
+			audioChannelName = ChannelType.AUDIOENCODE1.getName();			
+		}
 		
 		//参数模板
 		Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -382,7 +427,7 @@ public class MonitorRecordService {
 		
 		task.setStatus(MonitorRecordStatus.WAITING);
 		
-		task.setType(MonitorRecordType.LOCAL_DEVICE);
+		task.setType(bLdap?MonitorRecordType.XT_DEVICE:MonitorRecordType.LOCAL_DEVICE);
 		task.setUserId(userId);
 		task.setUserno(userno);
 		task.setNickname(nickname);
@@ -542,9 +587,9 @@ public class MonitorRecordService {
 		//下命令
 		LogicBO logic = openBundle(task, codec);
 		logic.merge(startManyTimesRecord(task,relation,codec,totalSizeMb));
-		sendProtocol(task, logic, "点播系统：开始录制本地设备");
+		sendProtocol(task, logic, bLdap?"点播系统：开始排期录制外部系统设备":"点播系统：开始排期录制本地设备");
 		
-		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加录制", "添加录制任务文件名称："+fileName);
+		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加排期录制", "添加排期录制任务文件名称："+fileName);
 		
 		return task;
 	}
