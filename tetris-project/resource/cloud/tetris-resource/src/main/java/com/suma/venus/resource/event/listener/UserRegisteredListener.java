@@ -24,7 +24,7 @@ public class UserRegisteredListener implements ApplicationListener<UserRegistere
 	@Override
 	public void onApplicationEvent(UserRegisteredEvent event){
 		try{
-			bundleService.createUserBundle(event.getUserId(), event.getNickname(), event.getUserno());
+			bundleService.createUserBundle(event.getUserId(), event.getNickname(), event.getUserno(),event.getWorknodeUid());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
