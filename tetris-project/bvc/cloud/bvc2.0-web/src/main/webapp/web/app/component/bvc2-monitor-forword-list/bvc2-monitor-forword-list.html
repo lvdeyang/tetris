@@ -9,32 +9,34 @@
       <el-tab-pane label="本域转发" name="self"></el-tab-pane>
       <el-tab-pane label="外域转发" name="external">
         <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button>
+        <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currgentWidth}}/{{totalWidth}}</el-tag>
+        <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currgentWidthTotleNum}}</el-tag>
       </el-tab-pane>
     </el-tabs>
     <el-table :data="tableData" height="100%" style="width:100%">
 
       <el-table-column label="源视频设备" prop="videoBundleName" sortable>
       </el-table-column>
-      <el-table-column label="源视频通道" prop="videoChannelName">
-      </el-table-column>
+      <!-- <el-table-column label="源视频通道" prop="videoChannelName">
+      </el-table-column> -->
       <el-table-column label="源音频设备" prop="audioBundleName">
       </el-table-column>
-      <el-table-column label="源音频通道" prop="audioChannelName">
-      </el-table-column>
+      <!-- <el-table-column label="源音频通道" prop="audioChannelName">
+      </el-table-column> -->
 
       <el-table-column label="目标视频设备" prop="dstVideoBundleName" sortable>
       </el-table-column>
-      <el-table-column label="目标视频通道" prop="dstVideoChannelName">
-      </el-table-column>
+      <!-- <el-table-column label="目标视频通道" prop="dstVideoChannelName">
+      </el-table-column> -->
       <el-table-column label="目标音频设备" prop="dstAudioBundleName">
       </el-table-column>
-      <el-table-column label="目标音频通道" prop="dstAudioChannelName">
-      </el-table-column>
+      <!-- <el-table-column label="目标音频通道" prop="dstAudioChannelName">
+      </el-table-column> -->
 
-      <el-table-column label="osd" prop="osdName">
+      <!-- <el-table-column label="osd" prop="osdName">
       </el-table-column>
       <el-table-column label="osd创建者" prop="osdUsername">
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column label="任务类型" prop="type">
       </el-table-column>

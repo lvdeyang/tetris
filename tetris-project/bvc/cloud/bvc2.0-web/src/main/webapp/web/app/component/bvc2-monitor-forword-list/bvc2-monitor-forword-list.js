@@ -1,3 +1,5 @@
+
+
 define([
   'text!' + window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list.html',
   'restfull',
@@ -46,7 +48,9 @@ define([
         buttonIsShow: true,
         extendForwordList:[],
         selfForwordList:[],
-        activeName:"self"
+        activeName:"self",
+        totalWidth:'',
+        singleWidth:''
       }
     },
     computed: {
@@ -59,6 +63,12 @@ define([
           return this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
         }
       },
+      currgentWidth:function(){
+        return this.table.page.total * this.singleWidth
+      },
+      currgentWidthTotleNum:function(){
+        return Math.floor(this.totalWidth/this.singleWidth)
+      }
     },
     watch: {},
     methods: {
@@ -104,6 +114,7 @@ define([
           // this.table.data = this.selfForwordList
           self.table.page.total = self.selfForwordList.length;
         }else{
+          self.getBandwidth()
           // this.table.data = this.extendForwordList
           self.table.page.total = self.extendForwordList.length;
         }
@@ -199,6 +210,7 @@ define([
       },
       handlebandwidthClose: function () {
         this.dialog.bandwidth.visible = false;
+        this.getBandwidth()
       },
       openForword() {
         this.dialog.forword.visible = true;
@@ -206,10 +218,16 @@ define([
       openBandwidth() {
         this.dialog.bandwidth.visible = true;
       },
-      get(){
+      getBandwidth(){
+        var self = this;
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
-            self.table.data = data.rows;
+             data.rows.forEach(function(item){
+               if(item.stationName == "外域"){
+                self.totalWidth  = item.totalWidth;
+                self.singleWidth = item.singleWidth
+               }
+             });
           }
         })
       }
