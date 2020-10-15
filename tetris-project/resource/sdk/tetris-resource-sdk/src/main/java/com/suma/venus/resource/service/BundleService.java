@@ -431,7 +431,7 @@ public class BundleService extends CommonService<BundlePO> {
 	 * @param String username 用户名
 	 * @param String userNo 用户号码
 	 */
-	public void createUserBundle(String userId, String username, String userNo,String worknodeUid) throws Exception{
+	public void createUserBundle(String userId, String username, String userNo, String worknodeUid) throws Exception{
 		
 		try {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
@@ -447,7 +447,7 @@ public class BundleService extends CommonService<BundlePO> {
 				List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
 				choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
 			}
-				
+						
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
 				BundlePO bundlePO = new BundlePO();

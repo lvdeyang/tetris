@@ -47,7 +47,7 @@ public class EventPublishController {
 			String roleId,
 			String roleName,
 			HttpServletRequest request) throws Exception{
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId, roleName);
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId, roleName,null);
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}
