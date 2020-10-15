@@ -62,11 +62,11 @@
               </el-button>
             </el-tooltip>
 
-            <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="导出" placement="bottom">
+            <el-tooltip v-if="scope.row.mode == '排期' && scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)"></el-button>
             </el-tooltip>
-            <el-tooltip v-else class="item" effect="dark" content="导出" placement="bottom">
+            <el-tooltip v-else class="item" effect="dark && scope.row.privilegeOfDownload" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDownload(scope.row)">
               </el-button>
