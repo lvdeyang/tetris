@@ -969,7 +969,14 @@ export default {
       }],
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
-      isFictitiouVisable: true
+      isFictitiouVisable: true,
+      configChannels: [
+        { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
+        { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
+        { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
+        { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+      ],
+
     };
   },
   methods: {
@@ -1052,7 +1059,8 @@ export default {
       });
     },
     devTypeChange: function (val) {
-      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc']
+      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'],
+        isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
       if (hidArr.indexOf(val) > -1) {
         debugger
         this.cardVisable = false;
@@ -1065,6 +1073,24 @@ export default {
         this.isFictitiouVisable = false
       } else {
         this.isFictitiouVisable = true
+      }
+      // 判断解码编码设备
+      if (isEncArr.indexOf(val) > -1) {
+        this.bundleForm.coderType = 'ENCODER'
+        this.configChannels = [
+          { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
+          { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
+          { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
+          { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+        ]
+      } else {
+        this.bundleForm.coderType = 'DECODER'
+        this.configChannels = [
+          { "channelTemplateID": 1, "channelCnt": 0, "channelName": "VenusAudioIn" },
+          { "channelTemplateID": 2, "channelCnt": 1, "channelName": "VenusAudioOut" },
+          { "channelTemplateID": 3, "channelCnt": 0, "channelName": "VenusVideoIn" },
+          { "channelTemplateID": 4, "channelCnt": 1, "channelName": "VenusVideoOut" }
+        ]
       }
     },
     addExtraInfo: function () {
@@ -1157,6 +1183,8 @@ export default {
             message: "修改成功",
             type: 'success'
           });
+
+          this.handleConfigBundle(res.bundleId)
         }
       });
     },
@@ -1171,6 +1199,27 @@ export default {
       //   }
       // }
       // return true;
+    },
+    handleConfigBundle: function (bundleId) {
+      let param = {
+        bundleId: bundleId,
+        configChannels: JSON.stringify(this.configChannels),
+        configEditableAttrs: JSON.stringify([])
+      };
+
+      configBundle(param).then(res => {
+        // if (res.errMsg) {
+        //   this.$message({
+        //     message: res.errMsg,
+        //     type: 'error'
+        //   });
+        // } else {
+        //   this.$message({
+        //     message: "配置成功",
+        //     type: 'success'
+        //   });
+        // }
+      });
     },
     // 修改分组方法
     handleChangeFolder: function () {

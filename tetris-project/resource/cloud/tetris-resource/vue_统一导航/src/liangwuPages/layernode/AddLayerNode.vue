@@ -96,89 +96,18 @@ export default {
       activeTabName: "LwAddLayernode",
       extraInfos: [],
       typeOptions: [
-        // {
-        //   label : "JV210接入",
-        //   value : "ACCESS_JV210"
-        // },
-        // {
-        //   label : "CDN接入",
-        //   value : "ACCESS_CDN"
-        // },
-        // {
-        //   label : "IPC接入",
-        //   value : "ACCESS_IPC"
-        // },
         {
-          label: "JV230接入",
-          value: "ACCESS_JV230"
+          value: "",
+          label: "全部类型"
         },
+
         {
-          label: "机顶盒接入",
-          value: "ACCESS_TVOS"
-        },
-        {
-          label: "混合器接入",
-          value: "ACCESS_MIXER"
-        },
-        {
-          label: "手机接入",
-          value: "ACCESS_MOBILE"
-        },
-        {
-          label: "音视频转发服务设备",
+          label: "终端设备",
           value: "ACCESS_JV210"
         },
         {
-          label: "录像存储服务单元A型",
+          label: "存储设备",
           value: "ACCESS_CDN"
-        },
-        {
-          label: "录像存储服务单元B型",
-          value: "ACCESS_VOD"
-        },
-        {
-          label: "监控资源汇接网关",
-          value: "ACCESS_IPC"
-        },
-        {
-          label: "流媒体管理服务设备",
-          value: "ACCESS_STREAMMEDIA"
-        },
-        {
-          label: "联网服务设备",
-          value: "ACCESS_NETWORK"
-        },
-        {
-          label: "显控汇接网关",
-          value: "ACCESS_DISPLAYCTRL"
-        },
-        {
-          label: "流转发器接入",
-          value: "ACCESS_S100"
-        },
-        {
-          label: "点播代理服务设备",
-          value: "ACCESS_VODPROXY"
-        },
-        {
-          label: "webrtc接入",
-          value: "ACCESS_WEBRTC"
-        },
-        {
-          label: "联网接入",
-          value: "ACCESS_LIANWANG"
-        },
-        {
-          label: "LDAP目录资源服务设备",
-          value: "ACCESS_LDAP"
-        },
-        {
-          label: "综合运维服务设备",
-          value: "ACCESS_OMMS"
-        },
-        {
-          label: "ws接入",
-          value: "ACCESS_WS"
         }
       ],
       nodeForm: {

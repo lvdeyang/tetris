@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height:100%; min-width:1600px">
+  <el-container style="height:100%;">
     <el-header style="padding:0px; height:50px">
       <headerbar :sysUserName="sysUserName" :routes="shortCutsRoutes" :active="$route.path"></headerbar>
     </el-header>
