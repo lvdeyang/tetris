@@ -170,7 +170,7 @@ public class MonitorLiveController {
 //		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
 		
 		List<String> bundleIds=new ArrayList<String>();
-		entities.stream().forEach(entity->bundleIds.add(entity.getAudioBundleId()));
+		entities.stream().forEach(entity->{bundleIds.add(entity.getAudioBundleId());bundleIds.add(entity.getDstAudioBundleId());});
 		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
 		
 		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{

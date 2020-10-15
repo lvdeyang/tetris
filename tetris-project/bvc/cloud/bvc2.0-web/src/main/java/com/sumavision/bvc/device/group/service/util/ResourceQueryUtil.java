@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import com.suma.venus.resource.dao.VirtualResourceDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.CommonPO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
@@ -234,60 +236,45 @@ public class ResourceQueryUtil {
 		}
 		
 		if(satisfyAll){
-			Optional <Map<String,List<Relation>>> userAndBundleMap=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null));
-			Optional<List<Relation>> bundleListOptional=userAndBundleMap.map(map->{return map.get("bundle");}).filter(list->{
-				for(Relation relation:list){
+			Optional<List<Relation>> bundleListOptional=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null))
+					.map(map->{return map.get("bundle");});
+			if(bundleListOptional.isPresent()){
+				bundleIds=bundleListOptional.get().stream().filter(relation->{
 					for(String pribilege:privileges){
-//						relation.getMap().get(BUSINESS_OPR_TYPE.valueOf(pribilege)))
 						Optional<Boolean> satisfy=Optional.ofNullable(relation).map(entity->{
 							return entity.getMap();
 						}).map(entity->{
 							return entity.get(BUSINESS_OPR_TYPE.valueOf(pribilege));
 						});
-						if(satisfy.isPresent()&&!satisfy.get()){
+						if(!satisfy.isPresent()||!satisfy.get()){
 							return false;
 						}
 					}
-					
-				}
-				return true;
-			});
-			
-			if(!bundleListOptional.isPresent()){
-				return null;
-			}
-			
-			for(Relation relation:bundleListOptional.get()){
-				bundleIds.add(relation.getId());
+					return true;
+					}).map(relation->{return relation.getId();}).collect(Collectors.toSet());
 			}
 			
 		}else{
-			Optional <Map<String,List<Relation>>> userAndBundleMap=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null));
-			Optional<List<Relation>> bundleListOptional=userAndBundleMap.map(map->{return map.get("bundle");}).filter(list->{
-				for(Relation relation:list){
-					for(String pribilege:privileges){
-						Optional<Boolean> satisfy=Optional.ofNullable(relation).map(entity->{
-							return entity.getMap();
-						}).map(entity->{
-							return entity.get(BUSINESS_OPR_TYPE.valueOf(pribilege));
-						});
-						if(satisfy.isPresent()&&satisfy.get()){
-							return true;
-						}
+			
+			Optional<List<Relation>> bundleListOptional=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null))
+					.map(map->{return map.get("bundle");});
+			if(bundleListOptional.isPresent()){
+				bundleIds=bundleListOptional.get().stream().filter(relation->{
+				for(String pribilege:privileges){
+					
+					Optional<Boolean> satisfy=Optional.ofNullable(relation).map(entity->{
+						return entity.getMap();
+					}).map(entity->{
+						return entity.get(BUSINESS_OPR_TYPE.valueOf(pribilege));
+					});
+					if(satisfy.isPresent()&&satisfy.get()){
+						return true;
 					}
 				}
 				return false;
-			});
-			
-			if(!bundleListOptional.isPresent()){
-				return null;
-			}
-			
-			for(Relation relation:bundleListOptional.get()){
-				bundleIds.add(relation.getId());
+				}).map(relation->{return relation.getId();}).collect(Collectors.toSet());
 			}
 		}
-		
 		
 		return bundleIds;
 	}

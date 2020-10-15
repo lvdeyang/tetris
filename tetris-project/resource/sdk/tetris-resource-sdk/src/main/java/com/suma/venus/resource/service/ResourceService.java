@@ -2386,17 +2386,18 @@ public class ResourceService {
 		Map<String,Relation> usersRelation =new HashMap<String,Relation>();
 		Map<String,Relation> bundlesRelation =new HashMap<String,Relation>();
 		
-		Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
-		for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
-			privilegeTemplate.put(businessType, Boolean.FALSE);
-		}
-		
 		//用户先使用UserVO的Id作为返回
 		List<UserVO> users=userQuery.findByUsernoIn(allPrefixs);
 		if(users!=null&&users.size()>0){
 			for(UserVO user:users){
 				Relation relation=new Relation();
 				relation.setId(user.getId().toString());
+				
+				Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+				for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+					privilegeTemplate.put(businessType, Boolean.FALSE);
+				}
+				
 				relation.setMap(privilegeTemplate);
 				usersRelation.put(user.getUserno(),relation);
 			}
@@ -2407,6 +2408,12 @@ public class ResourceService {
 			for(BundlePO bundle:bundles){
 				Relation relation=new Relation();
 				relation.setId(bundle.getBundleId());
+				
+				Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+				for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+					privilegeTemplate.put(businessType, Boolean.FALSE);
+				}
+				
 				relation.setMap(privilegeTemplate);
 				bundlesRelation.put(bundle.getBundleId(),relation);
 			}
@@ -2456,85 +2463,8 @@ public class ResourceService {
 		if(businessTypes==null||businessTypes.size()<=0){
 			return hasPrivilegesOfAll(userId);
 		}else{
-			//1.根据前边的no获取bundle或者user
-			//1.1取出所有的no去重，保存在set中
-			ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
-			
-			Set<String> allPrefixs=new HashSet<String>();
-			
-			for(String code:bo.getResourceCodes()){
-				
-				if(code==null || !code.contains("-")){
-					continue;
-				}
-				
-				allPrefixs.add(code.substring(0, code.lastIndexOf("-")));
-			}
-			
-			//2.记录no之间的对应关系。
-			Map<String,Relation> usersRelation =new HashMap<String,Relation>();
-			Map<String,Relation> bundlesRelation =new HashMap<String,Relation>();
-			
-			Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
-			String privilegeCodes=new String();
-			for(BUSINESS_OPR_TYPE businessType:businessTypes){
-				privilegeTemplate.put(businessType, Boolean.FALSE);
-				privilegeCodes+=businessType.getCode();
-			}
-			
-			//用户先使用UserVO的Id作为返回
-			List<UserVO> users=userQuery.findByUsernoIn(allPrefixs);
-			if(users!=null&&users.size()>0){
-				for(UserVO user:users){
-					Relation relation=new Relation();
-					relation.setId(user.getId().toString());
-					relation.setMap(privilegeTemplate);
-					usersRelation.put(user.getUserno(),relation);
-				}
-			}
-			
-			List<BundlePO> bundles=bundleDao.findByBundleIdIn(allPrefixs);
-			if(bundles!=null&&bundles.size()>0){
-				for(BundlePO bundle:bundles){
-					Relation relation=new Relation();
-					relation.setId(bundle.getBundleId());
-					relation.setMap(privilegeTemplate);
-					bundlesRelation.put(bundle.getBundleId(),relation);
-				}
-			}
-			
-			//3.遍历权限集合，查找属于哪一个集合。根据后半段查找权限。
-			for(String code:bo.getResourceCodes()){
-				
-				if(code==null||!code.contains("-")){
-					continue;
-				}
-				
-				String key=code.substring(0, code.lastIndexOf("-"));
-				String privilegeStr=code.substring(code.lastIndexOf("-"));
-				
-				if(!privilegeCodes.contains(privilegeStr)){
-					continue;
-				}
-				
-				if(usersRelation.get(key)!=null){
-					BUSINESS_OPR_TYPE privilege=BUSINESS_OPR_TYPE.forCode(privilegeStr);
-					usersRelation.get(key).getMap().put(privilege, Boolean.TRUE);
-				}
-				
-				if(bundlesRelation.get(key)!=null){
-					BUSINESS_OPR_TYPE privilege=BUSINESS_OPR_TYPE.forCode(privilegeStr);
-					bundlesRelation.get(key).getMap().put(privilege, Boolean.TRUE);
-				}
-				
-			}
-			
-			Map<String,List<Relation>> allPrivilege=new HashMap<String, List<Relation>>();
-			
-			allPrivilege.put("user", usersRelation.values().stream().collect(Collectors.toList()));
-			allPrivilege.put("bundle", bundlesRelation.values().stream().collect(Collectors.toList()));
-			
-			return allPrivilege;
+			//此功能不需要
+			return null;
 		}
 		
 	}
