@@ -6,21 +6,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioPO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineBusinessType;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineContentType;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
 import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoUtil;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
@@ -34,9 +28,7 @@ import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
-import com.sumavision.bvc.device.group.bo.RectBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
-import com.sumavision.bvc.device.group.po.CombineVideoPositionPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -340,7 +332,12 @@ public class AgendaExecuteService {
 					String useBundleId = new StringBufferWrapper().append(originId).append("_").append(originId).toString();
 					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
 					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
-//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO(null, useBundleId, "videoEncodeChannel", videoChannelId, LockStatus.IDLE, null, null, null, bundleType, channelNameFromTemplate, maxChannelCnt, baseType, externType, paramScope)
+					//bundlePO应该实际查询
+					//造数据 videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
+//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
+//							.setChannelId(videoChannelId)
+//							.setBaseType("outer_no_base_type")
+//							.setChannelName("outer_no_video_channel_name");
 				}
 				
 				bundleIds.add(originId);
@@ -364,9 +361,49 @@ public class AgendaExecuteService {
 //			List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
 //			if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
 			
+			//级联设备
+			for(BundlePO srcBundlePO : srcBundlePOs){
+				if(originType.equals(OriginType.OUTER)){
+					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+					//造数据，videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
+					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
+							.setBundleId(srcBundlePO.getBundleId())
+							.setChannelId(videoChannelId)
+							.setBaseType("outer_no_base_type")
+							.setChannelName("outer_no_video_channel_name");
+					ChannelSchemeDTO audioEncodeChannel = new ChannelSchemeDTO()
+							.setBundleId(srcBundlePO.getBundleId())
+							.setChannelId(audioChannelId)
+							.setBaseType("outer_no_base_type")
+							.setChannelName("outer_no_video_channel_name");
+					SourceBO sourceBO = new SourceBO()
+							.setOriginType(OriginType.OUTER)
+							.setGroupMemberType(member.getGroupMemberType())
+							.setMemberUuid(member.getUuid())
+							.setBusinessId(businessId)
+							.setBusinessInfoType(businessInfoType)
+							.setAgendaForwardType(agendaForwardType)//音/视频，如果没有音频，这里是否应该写成“视频”？
+							.setSrcVideoId(member.getOriginId())
+							.setSrcVideoMemberId(member.getId())
+							.setSrcVideoName(member.getName())
+							.setSrcVideoCode(member.getCode())
+							.setVideoSourceChannel(videoEncodeChannel)
+							.setVideoBundle(srcBundlePO);
+					sourceBO.setAudioSourceChannel(audioEncodeChannel)
+							.setAudioBundle(srcBundlePO)
+							.setSrcAudioId(member.getOriginId())
+							.setSrcAudioMemberId(member.getId())
+							.setSrcAudioName(member.getName())
+							.setSrcAudioCode(member.getCode());
+					sourceBOs.add(sourceBO);
+				}
+			}
+			
 			//遍历视频通道，找到对应的音频通道
 			for(ChannelSchemeDTO videoEncode1Channel : videoEncodeChannels){
 				BundlePO videoBundle = queryUtil.queryBundlePOByBundleId(srcBundlePOs, videoEncode1Channel.getBundleId());
+				if(queryUtil.isLdapBundle(videoBundle)) continue;
 				SourceBO sourceBO = new SourceBO()
 						.setBusinessId(businessId)
 						.setBusinessInfoType(businessInfoType)

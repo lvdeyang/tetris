@@ -3,6 +3,8 @@ package com.sumavision.tetris.bvc.business.bo;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.OriginType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 
@@ -14,6 +16,15 @@ import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
  * <b>日期：</b>2020年7月2日 下午3:50:16
  */
 public class SourceBO {
+	
+	/** 来源：内部/外部系统 */
+	private OriginType originType = OriginType.INNER;
+	
+	/** 类型：设备/用户等 */
+	private GroupMemberType groupMemberType;
+	
+	/** 源成员uuid，级联时使用 */
+	private String memberUuid;
 	
 	/** 视频源类型 */
 	private AgendaSourceType videoSourceType;
@@ -53,6 +64,33 @@ public class SourceBO {
 	
 	String srcAudioCode;
 	
+	public OriginType getOriginType() {
+		return originType;
+	}
+
+	public SourceBO setOriginType(OriginType originType) {
+		this.originType = originType;
+		return this;
+	}
+
+	public GroupMemberType getGroupMemberType() {
+		return groupMemberType;
+	}
+
+	public SourceBO setGroupMemberType(GroupMemberType groupMemberType) {
+		this.groupMemberType = groupMemberType;
+		return this;
+	}
+
+	public String getMemberUuid() {
+		return memberUuid;
+	}
+
+	public SourceBO setMemberUuid(String memberUuid) {
+		this.memberUuid = memberUuid;
+		return this;
+	}
+
 	public AgendaSourceType getVideoSourceType() {
 		return videoSourceType;
 	}
