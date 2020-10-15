@@ -51,4 +51,16 @@ public class ResourceService {
 		return JsonBodyResponseParser.parseArray(resourceFeign.queryResource(JSON.toJSONString(userIds), type), ResourceVO.class);
 	}
 	
+	/**
+	 * 查询接入层节点<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月15日 上午8:42:33
+	 * @return workNodeVO
+	 */
+	public List<WorkNodeVO> load() throws Exception{
+		return JsonBodyResponseParser.parseArray(resourceFeign.load(), WorkNodeVO.class);
+	}
+	
 }

@@ -209,6 +209,15 @@ public class WorkNodeController extends ControllerBase {
 		return data;
 	}
 	
+	
+	/**
+	 * 查询接入层节点<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月15日 上午8:42:33
+	 * @return workNodeVO
+	 */
 	@RequestMapping(value = "/load")
 	@ResponseBody
 	public Map<String,Object> load(){
@@ -223,7 +232,7 @@ public class WorkNodeController extends ControllerBase {
 				workNodeVO.setIp(workNodePO.getIp());
 				workNodeVOs.add(workNodeVO);
 			}
-			data.put("workNode", workNodeVOs);
+			data.put("rows", workNodeVOs);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			data.put(ERRMSG, "内部错误");

@@ -20,6 +20,12 @@ public class UserRegisteredEvent extends ApplicationEvent{
 	
 	private String userno;
 	
+	private String worknodeUid;
+	
+	public String getWorknodeUid() {
+		return worknodeUid;
+	}
+
 	public String getUserId() {
 		return userId;
 	}
@@ -55,7 +61,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 			String companyId, 
 			String companyName,
 			String roleId,
-			String roleName) {
+			String roleName,
+			String worknodeUid) {
 		
 		super(source);
 		
@@ -65,6 +72,7 @@ public class UserRegisteredEvent extends ApplicationEvent{
 		this.companyName = companyName;
 		this.roleId = roleId;
 		this.roleName = roleName;
+		this.worknodeUid = worknodeUid;
 	}
 	
 	public UserRegisteredEvent(
@@ -73,7 +81,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 			String nickname, 
 			String companyId, 
 			String companyName,
-			String userno) {
+			String userno,
+			String worknodeUid) {
 		
 		super(source);
 		
@@ -82,6 +91,7 @@ public class UserRegisteredEvent extends ApplicationEvent{
 		this.companyId = companyId;
 		this.companyName = companyName;
 		this.userno = userno;
+		this.worknodeUid = worknodeUid;
 	}
 	
 	public UserRegisteredEvent(
@@ -89,7 +99,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 			String userId, 
 			String nickname, 
 			String companyId, 
-			String companyName) {
+			String companyName,
+			String worknodeUid) {
 		
 		super(source);
 		
@@ -97,17 +108,20 @@ public class UserRegisteredEvent extends ApplicationEvent{
 		this.nickname = nickname;
 		this.companyId = companyId;
 		this.companyName = companyName;
+		this.worknodeUid = worknodeUid;
 	}
 	
 	public UserRegisteredEvent(
 			Object source, 
 			String userId, 
-			String nickname) {
+			String nickname,
+			String worknodeUid) {
 		
 		super(source);
 		
 		this.userId = userId;
 		this.nickname = nickname;
+		this.worknodeUid = worknodeUid;
 	}
 
 }

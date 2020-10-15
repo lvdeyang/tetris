@@ -54,6 +54,7 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.bo.BusinessReturnBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
@@ -223,6 +224,7 @@ public class VodService {
 		GroupPO group = new GroupPO();
 		group.setUserId(user.getId());		
 		group.setUserName(user.getName());
+		group.setUserCode(user.getUserNo());
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
@@ -352,6 +354,7 @@ public class VodService {
 		GroupPO group = new GroupPO();
 		group.setUserId(user.getId());		
 		group.setUserName(user.getName());
+		group.setUserCode(user.getUserNo());
 		group.setName(user.getName() + "点播" + vodUser.getName() + "用户");
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
@@ -582,8 +585,9 @@ public class VodService {
 		BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
 		
 		GroupPO group = new GroupPO();
-		group.setUserId(user.getId());		
+		group.setUserId(user.getId());
 		group.setUserName(user.getName());
+		group.setUserCode(user.getUserNo());
 		group.setName(user.getName() + "点播" + encoderBundleEntity.getBundleName() + "设备");
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
@@ -620,6 +624,7 @@ public class VodService {
 		vodUserMemberPO.setFolderId(encoderBundleEntity.getFolderId());
 		vodUserMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
 		vodUserMemberPO.setGroupId(group.getId());
+		if(queryUtil.isLdapBundle(encoderBundleEntity)) vodUserMemberPO.setOriginType(OriginType.OUTER);
 		groupMemberDao.save(vodUserMemberPO);
 		
 		vod.setSrcMemberId(vodUserMemberPO.getId());
