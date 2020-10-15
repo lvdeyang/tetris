@@ -38,6 +38,9 @@ public class GroupPO extends AbstractBasePO{
 	/** 创建人用户名 */
 	private String userName;
 	
+	/** 创建人号码，级联使用 */
+	private String userCode;
+	
 	/** 创建时间 */
 	private Date createtime;
 	
@@ -113,6 +116,15 @@ public class GroupPO extends AbstractBasePO{
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	@Column(name = "USER_CODE")
+	public String getUserCode() {
+		return userCode;
+	}
+
+	public void setUserCode(String userCode) {
+		this.userCode = userCode;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)

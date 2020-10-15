@@ -45,6 +45,9 @@ public class CommandGroupUserPlayerSettingVO {
 	/** 文件、录像的播放地址 */
 	private String url;
 	
+	/** 源信息 */
+	private CommandGroupUserPlayerSrcVO src;
+	
 	/** 绑定的上屏设备 */
 	private List<CommandGroupUserPlayerCastDeviceVO> castDevices = new ArrayList<CommandGroupUserPlayerCastDeviceVO>();
 
@@ -110,6 +113,14 @@ public class CommandGroupUserPlayerSettingVO {
 
 	public void setBundleNo(String businessNo) {
 		this.bundleNo = businessNo;
+	}
+
+	public CommandGroupUserPlayerSrcVO getSrc() {
+		return src;
+	}
+
+	public void setSrc(CommandGroupUserPlayerSrcVO src) {
+		this.src = src;
 	}
 
 	public List<CommandGroupUserPlayerCastDeviceVO> getCastDevices() {
@@ -192,6 +203,11 @@ public class CommandGroupUserPlayerSettingVO {
 			GroupStatus status = commandGroupDao.findStatusById(groupId);
 			this.setStatus(status.toString().toLowerCase());
 		}*/
+		
+		//源
+		CommandGroupUserPlayerSrcVO src = new CommandGroupUserPlayerSrcVO().set(entity);
+		this.setSrc(src);
+		
 		//上屏设备
 		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
 		this.setCastDevicesByPO(devices);

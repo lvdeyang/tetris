@@ -51,6 +51,7 @@ import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
@@ -103,6 +104,7 @@ import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -501,6 +503,7 @@ public class GroupService {
 		
 		group.setUserId(creatorUserId);
 		group.setUserName(creatorUserBo.getName());
+		group.setUserCode(creatorUserBo.getUserNo());
 		group.setCreatetime(new Date());
 		
 //		group.setRecord(false);
@@ -2671,44 +2674,76 @@ public class GroupService {
 			CodecParamBO codec,
 			Long userId) throws Exception{
 		
+		String localLayerId = null;
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
 				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
 				 			 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(SourceBO sourceBO : sourceBOs){
-			ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
-			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
-			PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
-			ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-					            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-							    .setLock_type("write")
-							    .setBundleId(video.getBundleId())
-							    .setLayerId(bundlePO.getAccessNodeUid())
-							    .setBundle_type(bundlePO.getBundleType())
-							    .setPass_by_str(passBy);
-			ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(video.getChannelId())
-					      .setChannel_status("Open")
-					      .setBase_type(video.getBaseType())
-					      .setCodec_param(codec);
-			if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-				String videoAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
-				connectEncoderVideoChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(videoAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
-			}
-			connectEncoderBundle.getChannels().add(connectEncoderVideoChannel);
-			ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
-			if(audio != null){
-				ConnectBO connectEncoderAudioChannel = new ConnectBO().setChannelId(audio.getChannelId())
-					      .setChannel_status("Open")
-					      .setBase_type(audio.getBaseType())
-					      .setCodec_param(codec);
+			OriginType originType = sourceBO.getOriginType();
+			if(OriginType.INNER.equals(originType)){
+				ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+	//			BundlePO bundlePO = sourceBO.getVideoBundle();//后续改成这个
+				PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
+				ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+						            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+								    .setLock_type("write")
+								    .setBundleId(video.getBundleId())
+								    .setLayerId(bundlePO.getAccessNodeUid())
+								    .setBundle_type(bundlePO.getBundleType())
+								    .setPass_by_str(passBy);
+				ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(video.getChannelId())
+						      .setChannel_status("Open")
+						      .setBase_type(video.getBaseType())
+						      .setCodec_param(codec);
 				if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-					String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
-					connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
+					String videoAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
+					connectEncoderVideoChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(videoAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
 				}
-				connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);
+				connectEncoderBundle.getChannels().add(connectEncoderVideoChannel);
+				ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+				if(audio != null){
+					ConnectBO connectEncoderAudioChannel = new ConnectBO().setChannelId(audio.getChannelId())
+						      .setChannel_status("Open")
+						      .setBase_type(audio.getBaseType())
+						      .setCodec_param(codec);
+					if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
+						String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
+						connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
+					}
+					connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);
+				}
+	//			connectEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectEncoderVideoChannel).add(connectEncoderAudioChannel).getList());
+				logic.getConnectBundle().add(connectEncoderBundle);
+			}else{
+				GroupMemberType groupMemberType = sourceBO.getGroupMemberType();
+				//后续再支持级联用户；呼叫的实现方式也不同
+				if(GroupMemberType.MEMBER_DEVICE.equals(groupMemberType)){
+					//点播外部设备，passby拉流
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}
 			}
-//			connectEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectEncoderVideoChannel).add(connectEncoderAudioChannel).getList());
-			logic.getConnectBundle().add(connectEncoderBundle);
 		}
 		
 		return logic;
@@ -2731,23 +2766,53 @@ public class GroupService {
 			List<SourceBO> sourceBOs,
 			CodecParamBO codec,
 			Long userId) throws Exception{
-	
+		
+		String localLayerId = null;
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
 									 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
 									 .setMediaPushDel(new ArrayList<MediaPushSetBO>())
 									 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(SourceBO sourceBO : sourceBOs){
-			ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
-			BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
-			PassByBO passBy = new PassByBO().setHangUp(group, video.getBundleId() , bundlePO.getAccessNodeUid());
-			DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-					             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-					             .setBundleId(video.getBundleId())
-					             .setBundle_type(bundlePO.getBundleType())
-					             .setLayerId(bundlePO.getAccessNodeUid())
-					             .setPass_by_str(passBy);
-			logic.getDisconnectBundle().add(disconnectEncoderBundle);
+			OriginType originType = sourceBO.getOriginType();
+			if(OriginType.INNER.equals(originType)){
+				ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+				PassByBO passBy = new PassByBO().setHangUp(group, video.getBundleId() , bundlePO.getAccessNodeUid());
+				DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+						             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+						             .setBundleId(video.getBundleId())
+						             .setBundle_type(bundlePO.getBundleType())
+						             .setLayerId(bundlePO.getAccessNodeUid())
+						             .setPass_by_str(passBy);
+				logic.getDisconnectBundle().add(disconnectEncoderBundle);
+			}else{
+				GroupMemberType groupMemberType = sourceBO.getGroupMemberType();
+				//后续再支持级联用户；呼叫的实现方式也不同
+				if(GroupMemberType.MEMBER_DEVICE.equals(groupMemberType)){
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}
+			}
 		}
 		
 		return logic;
