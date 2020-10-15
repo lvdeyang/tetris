@@ -345,10 +345,11 @@ define([
       },
       handleAddRecord: function () {
         var self = this;
+        var params = {privilegesStr:"['RECORD','LR']",satisfyAll:false};
         self.dialog.addRecord.visible = true;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
         // ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', params, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.addRecord.tree.data.push(data[i]);
@@ -578,7 +579,7 @@ define([
             id: row.id
           }, function (data) {
             self.$message({
-              type: 'info',
+              type: 'success',
               message: '已删除'
             });
             self.load(self.table.page.currentPage)

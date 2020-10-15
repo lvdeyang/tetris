@@ -275,7 +275,7 @@ export default {
   mounted () {
     var self = this;
     this.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LayernodeManage');
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLayernodeManage');
     });
   }
 }

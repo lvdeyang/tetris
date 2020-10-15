@@ -85,11 +85,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="100" label="来源">
-        <template slot-scope="scope">
+      <el-table-column width="100" label="来源" prop="sourceType">
+        <!-- <template slot-scope="scope">
           <div v-if="scope.row.sourceType=='EXTERNAL'">外域</div>
           <div v-else>本域</div>
-        </template>
+        </template> -->
       </el-table-column>
 
       <el-table-column label="操作" width="250">
@@ -197,7 +197,10 @@ export default {
       activeTabName: "LwLocalBundleManage",
       resources: [],
       sourcesTotle: '',
-      deviceModelOptions: [],
+      deviceModelOptions: [
+        { label: "终端设备", value: "jv210" },
+        { label: "存储设备", value: "cdn" }
+      ],
       filters: {
         deviceModel: 'jv210',
         keyword: '',
@@ -232,11 +235,11 @@ export default {
         },
         {
           value: "SYSTEM",
-          label: "本域"  //BVC
+          label: "BVC"  //BVC
         },
         {
           value: "EXTERNAL",
-          label: "外域" //LDAP
+          label: "LDAP" //LDAP
         }
       ],
       multipleSelection: []
@@ -503,7 +506,7 @@ export default {
     ,
     abilityConfig: function (row) {
       this.$router.push({
-        path: '/ConfigBundle',
+        path: '/LwConfigBundle',
         query: {
           bundleId: row.bundleId
         }
@@ -885,7 +888,7 @@ export default {
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
     });
     this.getResourcesTotle(1);
-    this.getDeviceModels();
+    // this.getDeviceModels();
     this.getAllUsers();
     this.getResources(1);
 

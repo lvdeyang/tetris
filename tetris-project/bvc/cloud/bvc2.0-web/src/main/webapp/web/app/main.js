@@ -56,6 +56,7 @@ require.config({
     'bvc2-monitor-record-liangwu': window.APPPATH + 'component/bvc2-monitor-record-liangwu/bvc2-monitor-record-liangwu',
     'bvc2-monitor-forword': window.APPPATH + 'component/bvc2-monitor-forword/bvc2-monitor-forword',
     'bvc2-monitor-forword-list': window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list',
+    'bvc2-monitor-forword-bandwidth': window.APPPATH + 'component/bvc2-monitor-forword-bandwidth/bvc2-monitor-forword-bandwidth',
     'bvc2-monitor-currenttask': window.APPPATH + 'component/bvc2-monitor-currenttask/bvc2-monitor-currenttask',
     'native-record-player': window.APPPATH + 'component/jQuery/zk_Player/zk_RecordPlayer/js/zk_RecordPlayer',
     'native-sip-player': window.APPPATH + 'component/jQuery/zk_Player/zk_SipPlayer/js/zk_SipPlayer',
