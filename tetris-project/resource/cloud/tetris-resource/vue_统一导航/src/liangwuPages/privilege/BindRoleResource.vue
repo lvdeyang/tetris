@@ -74,51 +74,6 @@
         </el-table-column>
       </el-table>
 
-      <!--用户列表-->
-      <!-- <el-table :data="users" v-show="userTableShow" v-loading="userTableLoading" style="width: 100%;">
-        <el-table-column type="index" width="100"></el-table-column>
-        <el-table-column prop="name" label="名称" width="200" sortable>
-        </el-table-column>
-        <el-table-column prop="userNo" label="用户编号" width="270">
-        </el-table-column>
-        <el-table-column width="150" :render-header="renderCheckReadHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckWriteHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckCloudHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasCloudPrivilege" @change="handleCheckCloudChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckHJHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasHJPrivilege" @change="handleCheckHJChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckZKHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasZKPrivilege" @change="handleCheckZKChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-        <el-table-column width="150" :render-header="renderCheckHYHeader">
-          <template slot-scope="scope">
-            <el-checkbox v-model="scope.row.hasHYPrivilege" @change="handleCheckHYChange(scope.row)"></el-checkbox>
-          </template>
-        </el-table-column>
-
-      </el-table> -->
-
       <!--工具条-->
       <el-col :span="24" class="toolbar">
         <el-button size="small" type="primary" @click="submitPrivilege">提交</el-button>
@@ -150,7 +105,11 @@ export default {
       defaultExpandAll: false,
       expandOnClickNode: false,
       activeTabName: 'BindRoleResource',
-      deviceModelOptions: [],
+      deviceModelOptions: [
+        { label: "全部设备", value: "" },
+        { label: "终端设备", value: "jv210" },
+        { label: "存储设备", value: "cdn" }
+      ],
       roles: [
       ],
       currentRoleRow: null,
@@ -169,9 +128,8 @@ export default {
           label: '未绑定'
         }
       ],
-      deviceModelOptions: [],
       filters: {
-        deviceModel: 'encoder', //默认查询编码器
+        deviceModel: 'jv210', //默认查询编码器
         keyword: '',
         bindType: 'all',
         countPerPage: ''
@@ -542,9 +500,13 @@ export default {
       this.prevReadChecks = []
       this.prevWriteChecks = []
       this.prevCloudChecks = []
+      this.prevDownloadChecks = []
+      this.prevLocalReadChecks = []
       this.readChecks = []
       this.writeChecks = []
       this.cloudChecks = []
+      this.downloadChecks = []
+      this.LocalReadChecks = []
       this.checkReadAll = false
       this.checkWriteAll = false
       this.checkCloudAll = false
@@ -795,6 +757,7 @@ export default {
 
             this.prevDownloadChecks = [].concat(this.downloadChecks)
             this.prevLocalReadChecks = [].concat(this.LocalReadChecks)
+            this.getResources();
           }
           this.resourceTableLoading = false
         })
@@ -849,7 +812,7 @@ export default {
     //   self.$parent.$parent.$parent.$parent.$parent.setActive('/BindResource');
     // });
     self.getRoles();
-    self.getDeviceModels();
+    // self.getDeviceModels();
     // this.getRoles()
     self.initTree();
   }

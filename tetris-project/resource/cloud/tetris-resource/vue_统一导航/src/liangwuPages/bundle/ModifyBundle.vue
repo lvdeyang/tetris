@@ -10,7 +10,7 @@
       <el-form-item size="small" label="设备名称" prop="bundleName">
         <el-input v-model="bundleName" style="width: 200px;" placeholder="输入新的设备名称"></el-input>
       </el-form-item>
-      <el-form-item size="small" label="设备类型">
+      <el-form-item v-show="false" size="small" label="设备类型">
         <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
           <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
         </el-select>
@@ -1018,7 +1018,7 @@ export default {
           }
 
           var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
-          if (isFictitiousArr.indexOf(val) > -1) {
+          if (isFictitiousArr.indexOf(param.dev_type) > -1) {
             this.isFictitiouVisable = false
           } else {
             this.isFictitiouVisable = true
