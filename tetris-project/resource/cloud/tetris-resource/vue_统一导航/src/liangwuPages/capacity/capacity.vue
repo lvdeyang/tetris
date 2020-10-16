@@ -3,16 +3,16 @@
     <el-button size="small" type="primary" @click="handleInit">初始化容量</el-button>
     <el-row :gutter="0">
       <el-col class="col" :xs="24" :sm="12" :xl="12">
-        <my-pie :optionData="optionDataComputed.ImageAccess" titleText='图像信息接入路数' :legend='legend.ImageAccess'></my-pie>
+        <my-pie :optionData="optionDataComputed.ImageAccess" titleText='图像信息接入路数' :legend='legend.ImageAccess' :capacityData='resData' titleType='ImageAccess'></my-pie>
       </el-col>
       <el-col class="col" :xs="24" :sm="12" :xl="12">
-        <my-pie :optionData="optionDataComputed.onLine" titleText='在线用户人数' :legend='legend.onLine'></my-pie>
+        <my-pie :optionData="optionDataComputed.onLine" titleText='在线用户人数' :legend='legend.onLine' :capacityData='resData' titleType='onLine'></my-pie>
       </el-col>
       <el-col class="col" :xs="24" :sm="12" :xl="12">
-        <my-pie :optionData="optionDataComputed.transiter" titleText='当前转发路数' :legend='legend.transiter'></my-pie>
+        <my-pie :optionData="optionDataComputed.transiter" titleText='当前转发路数' :legend='legend.transiter' :capacityData='resData' titleType='transiter'></my-pie>
       </el-col>
       <el-col class="col" :xs="24" :sm="12" :xl="12">
-        <my-pie :optionData="optionDataComputed.playback" titleText='当前回放路数' :legend='legend.playback'></my-pie>
+        <my-pie :optionData="optionDataComputed.playback" titleText='当前回放路数' :legend='legend.playback' :capacityData='resData' titleType='playback'></my-pie>
       </el-col>
     </el-row>
     <el-dialog title="初始化" :visible.sync="dialogVisible" width="40%">

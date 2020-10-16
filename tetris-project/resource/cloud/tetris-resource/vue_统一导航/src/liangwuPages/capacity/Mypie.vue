@@ -1,10 +1,13 @@
 <template>
   <div class="Echarts">
     <div :id="echartsId" style="width: 500px;height:350px;"></div>
+    <div class="data-box">{{currentNum}}/{{totalNum}}</div>
   </div>
 </template>
 
 <script>
+
+// import { queryCapacityDatas } from '../../api/api'
 export default {
   name: 'my-pie',
   props: {
@@ -19,14 +22,40 @@ export default {
     legend: {
       type: Array,
       default: () => []
+    },
+    titleType: {
+      type: String,
+      default: ''
+    },
+    capacityData: {
+      type: Object,
+      default: function () {
+        return {}
+      }
     }
   },
   data () {
     return {
-
+      currentNum: undefined,
+      totalNum: undefined
     }
   },
   methods: {
+    initNum () {
+      if (this.titleType == "ImageAccess") {
+        this.currentNum = this.capacityData.vedioCount || 0
+        this.totalNum = this.capacityData.vedioCapacity
+      } else if (this.titleType == "onLine") {
+        this.currentNum = this.capacityData.userCount || 0
+        this.totalNum = this.capacityData.userCapacity
+      } else if (this.titleType == "transiter") {
+        this.currentNum = this.capacityData.turnCount || 0
+        this.totalNum = this.capacityData.turnCapacity
+      } else if (this.titleType == "playback") {
+        this.currentNum = this.capacityData.reIdleCount || 0
+        this.totalNum = this.capacityData.replayCapacity
+      }
+    },
     myEcharts () {
       // 基于准备好的dom，初始化echarts实例
       var myChart = this.$echarts.init(document.getElementById(this.echartsId));
@@ -64,7 +93,7 @@ export default {
           }
         ]
       };
-
+      this.initNum()
       // 使用刚指定的配置项和数据显示图表。
       // console.log(option)
       myChart.setOption(option);
@@ -88,4 +117,8 @@ export default {
 </script>
 
 <style>
+.data-box {
+  font-size: 13px;
+  margin: 10px;
+}
 </style>

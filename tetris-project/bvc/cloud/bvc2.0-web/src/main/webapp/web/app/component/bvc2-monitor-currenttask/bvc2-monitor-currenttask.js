@@ -45,7 +45,8 @@ define([
         showBtn: true,
         row: '',
         curTask: "", //当前任务
-        curId: 2
+        curId: 2,
+        addDisabled:false,
       }
     },
     methods: {
@@ -64,13 +65,23 @@ define([
           })
           return
         }
+        self.addDisabled = true;
         if (self.dialog.isCreate) {
+          
           ajax.post('/command/system/title/add', self.dialog.form, function (data) {
             // self.table.data.push(data)
             self.$message({
               type: 'success',
               message: "新建任务成功！"
             })
+           
+            self.dialog.form ={
+              id: '',
+              titleName: '',
+              beginTime: '',
+              isCurrentTask: true
+            }
+            self.addDisabled = false;
             self.load(1)
             self.dialog.visible = false;
           });
@@ -81,6 +92,13 @@ define([
               type: 'success',
               message: "修改任务成功！"
             })
+            self.dialog.form ={
+              id: '',
+              titleName: '',
+              beginTime: '',
+              isCurrentTask: true
+            }
+            self.addDisabled = false;
             self.load(1)
             self.dialog.visible = false;
           });

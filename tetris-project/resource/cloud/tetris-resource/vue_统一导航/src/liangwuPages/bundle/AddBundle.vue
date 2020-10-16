@@ -680,10 +680,10 @@ export default {
         accessNodeUid: [
           { required: true, message: '请输入接入层标识', trigger: 'change' }
         ],
-        bundleFolderName: [
-          { required: true, message: '请选择所属分组', trigger: 'change' }
+        // bundleFolderName: [
+        //   { required: true, message: '请选择所属分组', trigger: 'change' }
 
-        ]
+        // ]
       },
       deviceModelOptions: [
         { label: "终端设备", value: "jv210" },

@@ -102,11 +102,11 @@ export default {
         },
 
         {
-          label: "终端设备",
+          label: "终端设备节点",
           value: "ACCESS_JV210"
         },
         {
-          label: "存储设备",
+          label: "存储设备节点",
           value: "ACCESS_CDN"
         }
       ],
