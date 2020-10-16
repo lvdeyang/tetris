@@ -15,7 +15,8 @@ public enum PlayerSplitLayout {
 	SPLIT_6("六分屏", 6, 2),
 	SPLIT_9("九分屏", 9, 3),
 	SPLIT_16("十六分屏", 16, 4),
-	SPLIT_12("十二分屏", 12, 6);
+	SPLIT_12("十二分屏", 12, 6),
+	SPLIT_13("十三分屏", 13, 7);
 //	CUSTOM("自定义")
 	
 	private String name;

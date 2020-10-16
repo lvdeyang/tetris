@@ -158,7 +158,7 @@ public class CommandVodRecordParser {
 				String audioChannelName = encodeAudio.getName();
 				
 				//还没有区分录制模式
-				MonitorRecordPO task = monitorRecordService.addLocalDevice(
+				MonitorRecordPO task = monitorRecordService.addDevice(
 						mode, fileName, startTime, endTime, 
 						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 

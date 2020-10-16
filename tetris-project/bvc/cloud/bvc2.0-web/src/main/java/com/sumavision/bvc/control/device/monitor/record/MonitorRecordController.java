@@ -617,7 +617,7 @@ public class MonitorRecordController {
 			}
 			Integer totalSizeMb =configuration.getTotalSizeMb();
 			
-			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+			MonitorRecordPO task = monitorRecordService.addDeviceTimeSegment(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
@@ -625,7 +625,7 @@ public class MonitorRecordController {
 					timeQuantum, totalSizeMb);
 			return new MonitorRecordTaskVO().set(task);
 		}else{
-			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+			MonitorRecordPO task = monitorRecordService.addDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
