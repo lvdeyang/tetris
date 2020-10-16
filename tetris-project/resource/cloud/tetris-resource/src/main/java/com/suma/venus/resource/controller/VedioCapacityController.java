@@ -7,15 +7,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.VedioCapacityDAO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.vo.VedioCapacityVO;
+import com.sumavision.tetris.bvc.business.query.CommandSystemQueryService;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -32,6 +31,9 @@ public class VedioCapacityController {
 	
 	@Autowired
 	private BundleDao bundleDao;
+	
+	@Autowired
+	private CommandSystemQueryService commandSystemQueryService;
  	
 	/**
 	 * 容量状态查询<br/>
@@ -67,19 +69,26 @@ public class VedioCapacityController {
 		vedioCapacityVO.setUserCount(userCount);
 		List<BundlePO> bundlePOs = bundleDao.findAll();
 		List<BundlePO> bundleCountList = new ArrayList<BundlePO>();
-		
 		for (BundlePO bundlePO : bundlePOs) {
 			if(bundlePO.getDeviceModel().equalsIgnoreCase("jv210") && bundlePO.getOnlineStatus().toString().equals("ONLINE")){
 				bundleCountList.add(bundlePO);
 			}
 		}
+		Long turnCapacity = commandSystemQueryService.queryCountOfTransmit();
+		Long replayCapacity = commandSystemQueryService.queryCountOfTransmit();
+		vedioCapacityVO.setTurnCount(turnCapacity);
+		vedioCapacityVO.setReCount(replayCapacity);
 		Integer bundle = bundleCountList.size();
 		Long bundleCount = bundle.longValue();
 		vedioCapacityVO.setVedioCount(bundleCount);
 		Long idleUser = vedioCapacityPO.getUserCapacity() - userCount;
 		Long idleVedio = vedioCapacityPO.getVedioCapacity() - bundleCount;
+		Long turnIdleCount = vedioCapacityPO.getTurnCapacity() - turnCapacity;
+		Long reIdleCount = vedioCapacityPO.getReplayCapacity() - replayCapacity;
+		vedioCapacityVO.setReIdleCount(reIdleCount);
+		vedioCapacityVO.setTurnIdleCount(turnIdleCount);
 		vedioCapacityVO.setUserIdleCount(idleUser);
-		vedioCapacityVO.setVedioIdleCount(idleVedio);
+		vedioCapacityVO.setVedioIdleCount(idleVedio);		
 		vedioCapacityVO.setId(vedioCapacityPO.getId());
 		return vedioCapacityVO;
 	}
