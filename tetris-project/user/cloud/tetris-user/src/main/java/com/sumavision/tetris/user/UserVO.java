@@ -1,16 +1,19 @@
 package com.sumavision.tetris.user;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.config.server.ServerProps;
-import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.organization.CompanyPO;
 
 /**
@@ -457,17 +460,34 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		}
 		
 		if(this.getLogo() == null) this.setLogo(CompanyPO.DEFAULT_LOGO);
-		UserServerPropsQuery userServerPropsQuery = SpringContext.getBean(UserServerPropsQuery.class);
-		ServerProps props = userServerPropsQuery.queryProps();
+		
+		Path path = SpringContext.getBean(Path.class);
+		String logoPath = new StringBufferWrapper().append(path.webappPath()).append(this.getLogo().substring(1, this.getLogo().length())).toString();
+		File logoFile = new File(logoPath);
+		FileInputStream logoInputStream = new FileInputStream(logoFile);
+		byte[] logoBytes = ByteUtil.inputStreamToBytes(logoInputStream);
+		String logoBase64 = Base64.getEncoder().encodeToString(logoBytes);
+		this.setLogo(new StringBufferWrapper().append("data:image/png;base64,").append(logoBase64).toString());
+		//UserServerPropsQuery userServerPropsQuery = SpringContext.getBean(UserServerPropsQuery.class);
+		//ServerProps props = userServerPropsQuery.queryProps();
 		//TODO serverIp.properties
 		//props.getIp()
-		this.setLogo(new StringBufferWrapper().append("http://").append(props.getIpFromProperties()).append(":").append(props.getPort()).append(this.getLogo()).toString());
+		//this.setLogo(new StringBufferWrapper().append("http://").append(props.getIpFromProperties()).append(":").append(props.getPort()).append(this.getLogo()).toString());
 		if(this.getLogoStyle() == null) this.setLogoStyle(CompanyPO.DEFAULT_LOGOSTYLE);
 		if(this.getLogoShortName() == null) this.setLogoShortName(CompanyPO.DEFAULT_LOGOSHORTNAME);
 		if(this.getPlatformFullName() == null) this.setPlatformFullName(CompanyPO.DEFAULT_PLATFORMFULLNAME);
 		if(this.getPlatformShortName() == null) this.setPlatformShortName(CompanyPO.DEFAULT_PLATFORMSHORTNAME);
 		
 		return this;
+	}
+	
+	public static void main(String[] args) throws Exception{
+		/*File logoFile = new File("D:\\logo.bd8a658.png");
+		FileInputStream logoInputStream = new FileInputStream(logoFile);
+		byte[] logoBytes = ByteUtil.inputStreamToBytes(logoInputStream);
+		String logoBase64 = Base64.getEncoder().encodeToString(logoBytes);
+		System.out.println(new StringBufferWrapper().append("data:image/png;base64,").append(logoBase64).toString());*/
+		//System.out.println("/log".substring(1,"/log".length()));
 	}
 	
 }

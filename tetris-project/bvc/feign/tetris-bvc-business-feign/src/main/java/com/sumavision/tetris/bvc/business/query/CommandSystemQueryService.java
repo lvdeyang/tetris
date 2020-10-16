@@ -1,7 +1,9 @@
 package com.sumavision.tetris.bvc.business.query;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CommandSystemQueryService {
 
 	@Autowired
@@ -9,13 +11,13 @@ public class CommandSystemQueryService {
 	
 	public Long queryCountOfTransmit() throws Exception{
 		
-		return queryFeign.queryCountOfTransmit().getLong("date");
+		return queryFeign.queryCountOfTransmit().getLong("data");
 		
 	}
 	
 	public Long queryCountOfReview() throws Exception{
 		
-		return queryFeign.queryCountOfReview().getLong("date");
+		return queryFeign.queryCountOfReview().getLong("data");
 		
 	}
 }
