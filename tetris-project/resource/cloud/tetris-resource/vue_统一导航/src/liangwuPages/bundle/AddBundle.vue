@@ -130,6 +130,15 @@
                 </el-form-item>
               </el-col>
               <el-col :span="21">
+                <el-form-item label="模式设置" prop="url">
+                  <el-select v-model="dahuaFormData.modelConfig" placeholder="请选择" style="width: 100%;" @change="encodeModeChange">
+                    <el-option label="质量优先" value="quality_first"></el-option>
+                    <el-option label="码率优先" value="bitrate_first"></el-option>
+                    <el-option label="自定义" value="other"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="21">
                 <el-form-item label="字幕大小（px）" prop="osd_font_size">
                   <el-select v-model.number="dahuaFormData.osd_font_size" placeholder="请选择" style="width: 100%;">
                     <el-option label="16*16" :value="16"></el-option>
@@ -169,8 +178,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="编码码率" prop="enc_param.bitrate">
-                  <el-input v-model.number="dahuaFormData.enc_param.bitrate" placeholder="请输入编码码率" clearable :style="{width: '100%'}"><template slot="append">kbps</template></el-input>
-
+                  <el-input :disabled="bitrateDisable" v-model.number="dahuaFormData.enc_param.bitrate" placeholder="请输入编码码率" clearable :style="{width: '100%'}"><template slot="append">kbps</template></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7">
@@ -775,12 +783,13 @@ export default {
       isSipShow: true,
       dahuaFormData: {
         url: "dh://admin:suma123456@10.1.41.234:37777",
+        modelConfig: 'other',
         osd_font_size: 64,
         enc_param: {
           br_ctrl: "cbr",
           codec: "h264",
           quality: 80,
-          bitrate: 4096,
+          bitrate: 2048,
           width: 1920,
           frame_rate: 25,
           height: 1080,
@@ -1166,6 +1175,7 @@ export default {
         { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
         { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
       ],
+      bitrateDisable: false
     }
   },
   computed: {
@@ -1526,6 +1536,17 @@ export default {
         this.bundleForm.checkPass = defaultPassword;
       }
 
+    },
+    encodeModeChange (val) {
+      if (val == "bitrate_first") {
+        this.dahuaFormData.enc_param.bitrate = 1024
+        this.bitrateDisable = true;
+      } else if (val == "quality_first") {
+        this.dahuaFormData.enc_param.bitrate = 8192
+        this.bitrateDisable = true;
+      } else {
+        this.bitrateDisable = false;
+      }
     }
   },
   mounted: function () {

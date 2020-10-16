@@ -63,10 +63,10 @@ define([
           return this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
         }
       },
-      currgentWidth:function(){
+      currentWidth:function(){
         return this.table.page.total * this.singleWidth
       },
-      currgentWidthTotleNum:function(){
+      currentWidthTotleNum:function(){
         return Math.floor(this.totalWidth/this.singleWidth)
       }
     },

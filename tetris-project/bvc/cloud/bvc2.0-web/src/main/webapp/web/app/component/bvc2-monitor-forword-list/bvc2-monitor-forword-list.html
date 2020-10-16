@@ -9,8 +9,8 @@
       <el-tab-pane label="本域转发" name="self"></el-tab-pane>
       <el-tab-pane label="外域转发" name="external">
         <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button>
-        <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currgentWidth}}/{{totalWidth}}</el-tag>
-        <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currgentWidthTotleNum}}</el-tag>
+        <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
+        <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
       </el-tab-pane>
     </el-tabs>
     <el-table :data="tableData" height="100%" style="width:100%">

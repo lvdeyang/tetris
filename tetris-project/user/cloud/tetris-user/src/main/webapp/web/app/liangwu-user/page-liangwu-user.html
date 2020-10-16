@@ -53,10 +53,10 @@
                                 label="状态"
                                 prop="status">
                         </el-table-column> -->
-            <el-table-column :label="i18n.tableColumnMobile" prop="mobile">
+            <!-- <el-table-column :label="i18n.tableColumnMobile" prop="mobile">
             </el-table-column>
             <el-table-column :label="i18n.tableColumnMail" prop="mail">
-            </el-table-column>
+            </el-table-column> -->
 
 
             <el-table-column :label="i18n.labelCreateUserRemark" prop="remark">
@@ -132,12 +132,12 @@
             <el-input type="password" v-model="dialog.createUser.repeat"
               :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
           </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserMobile">
+          <!-- <el-form-item :label="i18n.labelCreateUserMobile">
             <el-input v-model="dialog.createUser.mobile"></el-input>
-          </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserMail">
+          </el-form-item> -->
+          <!-- <el-form-item :label="i18n.labelCreateUserMail">
             <el-input v-model="dialog.createUser.mail"></el-input>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item :label="i18n.labelCreateUserLevel">
             <el-input-number v-model="dialog.createUser.level" :min="1" :max="1000" :label="i18n.labelCreateUserNumber">
             </el-input-number>
@@ -215,12 +215,12 @@
           <el-form-item :label="i18n.labelEditUserNickname">
             <el-input v-model="dialog.editUser.nickname"></el-input>
           </el-form-item>
-          <el-form-item :label="i18n.labelEditUserMobile">
+          <!-- <el-form-item :label="i18n.labelEditUserMobile">
             <el-input v-model="dialog.editUser.mobile"></el-input>
           </el-form-item>
           <el-form-item :label="i18n.labelEditUserMail">
             <el-input v-model="dialog.editUser.mail"></el-input>
-          </el-form-item>
+          </el-form-item> -->
 
 
           <!-- 备注 -->
