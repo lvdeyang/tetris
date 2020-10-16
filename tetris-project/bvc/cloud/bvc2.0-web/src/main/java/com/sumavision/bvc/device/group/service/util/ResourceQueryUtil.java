@@ -228,7 +228,7 @@ public class ResourceQueryUtil {
 		Set<String> bundleIds = new HashSet<String>();
 		
 		if(null == bo || null == bo.getResourceCodes() || bo.getResourceCodes().size()<=0){
-			return null;
+			return bundleIds;
 		}
 		
 		if(satisfyAll==null){
