@@ -25,7 +25,7 @@ define([
           data: [],
           page: {
             currentPage: 1,
-            pageSize: 1,
+            pageSize: 10,
             total: 0
           },
           pageTab: {

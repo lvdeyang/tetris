@@ -32,9 +32,9 @@
         <img class="reminder-icon" v-if="showRemindHover" src="~assets/remind-h.png">
       </div>
 
-      <div class="notice-wrapper">
+      <!-- <div class="notice-wrapper">
         <span><img class="userinfo-icon" src="~assets/user.png" /> {{sysUserName}}</span>
-      </div>
+      </div> -->
     </el-col>
   </div>
 </template>
