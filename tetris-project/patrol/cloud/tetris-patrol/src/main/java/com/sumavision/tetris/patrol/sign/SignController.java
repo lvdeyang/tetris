@@ -189,7 +189,7 @@ public class SignController {
 					
 					HSSFRow dataRow = sheet.createRow(i + 1);
 					HSSFCell addressNameCell = dataRow.createCell(0, CellType.STRING);
-					addressNameCell.setCellValue(targetAddress.getName());
+					addressNameCell.setCellValue(targetAddress==null?"":targetAddress.getName());
 					HSSFCell signTimeCell = dataRow.createCell(1, CellType.STRING);
 					signTimeCell.setCellValue(DateUtil.format(sign.getSignTime(), DateUtil.dateTimePattern));
 					HSSFCell nameCell = dataRow.createCell(2, CellType.STRING);
