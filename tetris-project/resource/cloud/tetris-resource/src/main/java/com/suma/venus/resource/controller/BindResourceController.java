@@ -735,7 +735,7 @@ public class BindResourceController extends ControllerBase {
 				toUnbindChecks.add(localReadCheck + "-lr");
 			}
 			for (String downloadCheck : toUnbindDownloadCheList) {
-				toUnbindChecks.add(downloadCheck + "-c");
+				toUnbindChecks.add(downloadCheck + "-d");
 			}
 			if (!unbindResourceCodes(roleId, toUnbindChecks)) {
 				data.put(ERRMSG, "解绑失败");

@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Table
@@ -46,6 +47,57 @@ public class ChannelPO extends AbstractBasePO {
 	
 	/** 频道uuid标识--流程里面使用 */
 	private String channelUuid;
+	
+	/**转码模板*/
+	private String taskTemple;
+	
+	/**码率控制*/
+	private String rateCtrl;
+	
+	/**码率*/
+	private String rate;
+	
+	/**是否轮播*/
+	private boolean rotation;
+	
+	public boolean isRotation() {
+		return rotation;
+	}
+
+	public void setRotation(boolean rotation) {
+		this.rotation = rotation;
+	}
+
+	public enum RATE_CTRL {
+		VBR, CBR
+	}
+
+	@Column(name = "TASK_TEMPLE")
+	public String getTaskTemple() {
+		return taskTemple;
+	}
+
+	public void setTaskTemple(String taskTemple) {
+		this.taskTemple = taskTemple;
+	}
+
+	@Column(name = "RATE_CTRL")
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	@Column(name = "RATE")
+	public String getRate() {
+		return rate;
+	}
+
+	public void setRate(String rate) {
+		this.rate = rate;
+	}
 
 	@Column(name = "NAME")
 	public String getName() {

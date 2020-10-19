@@ -42,6 +42,7 @@ import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.ScreenBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.constant.VenusParamConstant;
 import com.suma.venus.resource.constant.VenusParamConstant.ParamScope;
@@ -84,6 +85,8 @@ import com.suma.venus.resource.pojo.WorkNodePO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 资源层统一资源查询Service
@@ -176,6 +179,9 @@ public class ResourceService {
 	
 	@Autowired
 	private LianwangPassbyDAO lianwangPassbyDao;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
@@ -2276,6 +2282,218 @@ public class ResourceService {
 		}
 		
 		return passbyPOs;
+	}
+	
+	/**
+	 * 查询对单个用户有什么权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月9日 下午4:58:15
+	 * @param userId 被查询用户id
+	 * @param dstUserId 被检测用户id
+	 * @param businessType 查询所需要的权限 //暂时不写
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<BUSINESS_OPR_TYPE,Boolean> hasPrivilegesOfUser(Long userId,Long dstUserId,List<BUSINESS_OPR_TYPE> businessTypes) throws Exception{
+		
+		UserBO dstUser = userQueryService.queryUserByUserId(dstUserId, null);
+		if(dstUser==null) return null;
+		
+		Map<BUSINESS_OPR_TYPE,Boolean> hasPrivileges=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+		
+		if(dstUser.getId().equals(userId)){//如果是对自己，理应是具有所有权限
+			for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+				hasPrivileges.put(businessType, Boolean.TRUE);
+			}
+			return hasPrivileges;
+		}
+		
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		
+		for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+			String code=new StringBufferWrapper().append(dstUser.getUserNo()).append(businessType.getCode()).toString();
+			if(bo.getResourceCodes().contains(code)){
+				hasPrivileges.put(businessType, Boolean.TRUE);
+			}else{
+				hasPrivileges.put(businessType, Boolean.FALSE);
+			}
+			
+		}
+	
+		return hasPrivileges;
+		
+	}
+	
+	/**
+	 * 查询对单个设备有什么权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月10日 上午10:35:39
+	 * @param userId 被查询用户id
+	 * @param bundleIds 被检测设备id
+	 * @param businessType 查询所需要的权限 //暂时不写
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<BUSINESS_OPR_TYPE,Boolean> hasPrivilegesOfBundle(Long userId,Long bundleId,List<BUSINESS_OPR_TYPE> businessTypes) throws Exception{
+		
+		if(bundleId==null) return null;
+		
+		Map<BUSINESS_OPR_TYPE,Boolean> hasPrivileges=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+		
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		
+		for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+			String code=new StringBufferWrapper().append(bundleId).append(businessType.getCode()).toString();
+			if(bo.getResourceCodes().contains(code)){
+				hasPrivileges.put(businessType, Boolean.TRUE);
+			}else{
+				hasPrivileges.put(businessType, Boolean.FALSE);
+			}
+			
+		}
+	
+		return hasPrivileges;
+		
+	} 
+	
+	/**
+	 * 查询对多个设备/用户都有什么权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月10日 上午10:54:45
+	 * @param userId 被查询用户id
+	 * @return
+	 * @throws Exception 
+	 */
+	public Map<String,List<Relation>> hasPrivilegesOfAll(Long userId) throws Exception{
+
+		//1.根据前边的no获取bundle或者user
+		//1.1取出所有的no去重，保存在set中
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		
+		Set<String> allPrefixs=new HashSet<String>();
+		
+		for(String code:bo.getResourceCodes()){
+			if(code==null || !code.contains("-")){
+				continue;
+			}
+			allPrefixs.add(code.substring(0, code.lastIndexOf("-")));
+		}
+		
+		//2.记录no之间的对应关系。
+		Map<String,Relation> usersRelation =new HashMap<String,Relation>();
+		Map<String,Relation> bundlesRelation =new HashMap<String,Relation>();
+		
+		//用户先使用UserVO的Id作为返回
+		List<UserVO> users=userQuery.findByUsernoIn(allPrefixs);
+		if(users!=null&&users.size()>0){
+			for(UserVO user:users){
+				Relation relation=new Relation();
+				relation.setId(user.getId().toString());
+				
+				Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+				for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+					privilegeTemplate.put(businessType, Boolean.FALSE);
+				}
+				
+				relation.setMap(privilegeTemplate);
+				usersRelation.put(user.getUserno(),relation);
+			}
+		}
+		
+		List<BundlePO> bundles=bundleDao.findByBundleIdIn(allPrefixs);
+		if(bundles!=null&&bundles.size()>0){
+			for(BundlePO bundle:bundles){
+				Relation relation=new Relation();
+				relation.setId(bundle.getBundleId());
+				
+				Map <BUSINESS_OPR_TYPE,Boolean> privilegeTemplate=new HashMap<BusinessConstants.BUSINESS_OPR_TYPE, Boolean>();
+				for(BUSINESS_OPR_TYPE businessType:BUSINESS_OPR_TYPE.values()){
+					privilegeTemplate.put(businessType, Boolean.FALSE);
+				}
+				
+				relation.setMap(privilegeTemplate);
+				bundlesRelation.put(bundle.getBundleId(),relation);
+			}
+		}
+		
+		//3.遍历权限集合，查找属于哪一个集合。根据后半段查找权限。
+		for(String code:bo.getResourceCodes()){
+			
+			if(code==null || !code.contains("-")){
+				continue;
+			}
+			
+			String key=code.substring(0, code.lastIndexOf("-"));
+			String privilegeStr=code.substring(code.lastIndexOf("-"));
+			
+			if(usersRelation.get(key)!=null){
+				BUSINESS_OPR_TYPE privilege=BUSINESS_OPR_TYPE.forCode(privilegeStr);
+				usersRelation.get(key).getMap().put(privilege, Boolean.TRUE);
+			}
+			if(bundlesRelation.get(key)!=null){
+				BUSINESS_OPR_TYPE privilege=BUSINESS_OPR_TYPE.forCode(privilegeStr);
+				bundlesRelation.get(key).getMap().put(privilege, Boolean.TRUE);
+			}
+		}
+		
+		Map<String,List<Relation>> allPrivilege=new HashMap<String, List<Relation>>();
+		
+		allPrivilege.put("user", usersRelation.values().stream().collect(Collectors.toList()));
+		allPrivilege.put("bundle", bundlesRelation.values().stream().collect(Collectors.toList()));
+		
+		return allPrivilege;
+	
+	}
+	
+	/**
+	 * 查询对多个设备/用户都有什么权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月10日 上午10:54:45
+	 * @param userId 被查询用户id
+	 * @param businessTypes 查询所需要的权限 
+	 * @return
+	 * @throws Exception 
+	 */
+	public Map<String,List<Relation>> hasPrivilegesOfAll(Long userId,List<BUSINESS_OPR_TYPE> businessTypes) throws Exception{
+		
+		if(businessTypes==null||businessTypes.size()<=0){
+			return hasPrivilegesOfAll(userId);
+		}else{
+			//此功能不需要
+			return null;
+		}
+		
+	}
+	
+	public class Relation{
+		
+		/**传送给前端的标识 */
+		private String id;
+		
+		private Map<BUSINESS_OPR_TYPE,Boolean> map;
+
+		public String getId() {
+			return id;
+		}
+
+		public Relation setId(String id) {
+			this.id = id;
+			return this;
+		}
+
+		public Map<BUSINESS_OPR_TYPE, Boolean> getMap() {
+			return map;
+		}
+
+		public Relation setMap(Map<BUSINESS_OPR_TYPE, Boolean> map) {
+			this.map = map;
+			return this;
+		}
+		
 	}
 	
 }

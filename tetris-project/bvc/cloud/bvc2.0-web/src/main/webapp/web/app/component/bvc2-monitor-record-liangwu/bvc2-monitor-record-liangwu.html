@@ -11,6 +11,13 @@
         <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
         <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
       </el-select>
+      <el-select size="small" v-model="condition.status" placeholder="任务状态" style="width:150px; margin-left:10px;">
+        <el-option key="" label="全部" value=""></el-option>
+        <el-option key="WAITING" label="等待" value="WAITING"></el-option>
+        <el-option key="RUN" label="进行中" value="RUN"></el-option>
+        <el-option key="STOP" label="已完成" value="STOP"></el-option>
+        <el-option key="WAITINGTORESTART" label="等待重新开始" value="WAITINGTORESTART"></el-option>
+      </el-select>
       <el-input size="small" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true"
         style="width:150px; margin-left:10px;" @click.native="handleSelectDevice"></el-input>
       <el-date-picker size="small" v-model="condition.timeScope" type="datetimerange" start-placeholder="开始日期"
@@ -20,8 +27,8 @@
       <el-tag type="success" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag>
       <el-tag type="danger" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
     </div>
-    <div style="width:100%;  left:0; bottom:52px; background-color:#fff;">
-      <el-table height="100%" :data="table.data" stripe style="width: 100%; min-height: 700px">
+    <div style="width:100%;height: calc(100% - 150px);  left:0; bottom:52px; background-color:#fff;overflow: auto;">
+      <el-table height="100%" :data="table.data" stripe style="width: 100%; min-height: calc(100% - 150px);">
         <!--<el-table-column
                         type="selection"
                         width="55">
@@ -36,17 +43,32 @@
         </el-table-column>
         <el-table-column prop="endTime" label="结束时间" width="200">
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column prop="status" label="任务状态" width="200">
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="150">
           <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" content="停止任务" placement="bottom">
+            <el-tooltip v-if="scope.row.status != '已完成'" class="item" effect="dark" content="停止任务" placement="bottom">
               <el-button type="text" icon="el-icon-circle-close-outline"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
             </el-tooltip>
-            <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="导出" placement="bottom">
-              <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)"></el-button>
+            <el-tooltip v-else class="item" effect="dark" content="删除" placement="bottom">
+              <el-button type="text" icon="el-icon-delete"
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDelete(scope.row)">
+              </el-button>
             </el-tooltip>
-            <el-tooltip v-else class="item" effect="dark" content="导出" placement="bottom">
+            <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="详情" placement="bottom">
+              <el-button type="text" icon="el-icon-tickets"
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDetail(scope.row)">
+              </el-button>
+            </el-tooltip>
+
+            <el-tooltip v-if="scope.row.mode == '排期' && scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
+              <el-button type="text" icon="el-icon-download"
+                style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)">
+              
+              </el-button>
+            </el-tooltip>
+            <el-tooltip v-else-if="scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
                 style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDownload(scope.row)">
               </el-button>
@@ -54,14 +76,21 @@
           </template>
         </el-table-column>
       </el-table>
+      <div style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+        <el-pagination style="float:right;" background @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" :current-page="table.page.currentPage"
+          :page-sizes="[20, 50, 100, 500, 1000]" :page-size="table.page.pageSize"
+          layout="total, sizes, prev, pager, next, jumper" :total="table.page.total">
+        </el-pagination>
+      </div>
     </div>
-    <div style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+    <!-- <div style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
       <el-pagination style="float:right;" background @size-change="handleSizeChange"
         @current-change="handleCurrentChange" :current-page="table.page.currentPage"
         :page-sizes="[20, 50, 100, 500, 1000]" :page-size="table.page.pageSize"
         layout="total, sizes, prev, pager, next, jumper" :total="table.page.total">
       </el-pagination>
-    </div>
+    </div> -->
   </div>
   <template>
     <el-dialog title="添加录制任务" :visible.sync="dialog.addRecord.visible" width="872px"
@@ -210,6 +239,30 @@
           layout="total, sizes, prev, pager, next, jumper" :total="downloadTable.page.total">
         </el-pagination>
       </div>
+    </el-dialog>
+
+
+    <el-dialog title="详情" :visible.sync="dialog.detail.visible" width="700px" class="dialog-detail">
+      <el-form label-width="100px" class="demo-ruleForm" v-model="dialog.detail.form">
+        <el-form-item label="任务名 :">
+          <el-input v-model="dialog.detail.form.fileName" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="录制模式 :">
+          <el-input v-model="dialog.detail.form.mode" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="录制设备 :">
+          <el-input v-model="dialog.detail.form.bundle" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="排期周期 :">
+          <el-input v-model="dialog.detail.form.timeSegmentMode" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="起始时间 :">
+          <el-input v-model="dialog.detail.form.timeSegmentStartDay" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="结束时间 :">
+          <el-input v-model="dialog.detail.form.timeSegmentEndDay" readonly></el-input>
+        </el-form-item>
+      </el-form>
     </el-dialog>
   </template>
 </div>

@@ -6,9 +6,9 @@
         <img v-if="isCollapsed" class="collapsed-icon" src="~assets/collapsed.png" />
       </div>
 
-      <div class="logo-wrapper">
+      <!-- <div class="logo-wrapper">
         <img class="logo-img" src="~assets/bvclogo.png" />
-      </div>
+      </div> -->
     </el-col>
     <el-col :span="12" class="header-col">
       <!-- <el-menu class="el-menu-demo" mode="horizontal"  :default-active="active"
@@ -32,9 +32,9 @@
         <img class="reminder-icon" v-if="showRemindHover" src="~assets/remind-h.png">
       </div>
 
-      <div class="notice-wrapper">
+      <!-- <div class="notice-wrapper">
         <span><img class="userinfo-icon" src="~assets/user.png" /> {{sysUserName}}</span>
-      </div>
+      </div> -->
     </el-col>
   </div>
 </template>
@@ -129,7 +129,7 @@ export default {
       height: 100%;
       float: left;
       //background-color: #07aaff;
-
+      display: none;
       .collapsed-icon {
         margin-left: 18px;
       }

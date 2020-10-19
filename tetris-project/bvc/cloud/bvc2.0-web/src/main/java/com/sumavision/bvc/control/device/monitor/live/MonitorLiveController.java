@@ -1,9 +1,12 @@
 package com.sumavision.bvc.control.device.monitor.live;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,12 +19,17 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.device.MonitorDeviceController;
 import com.sumavision.bvc.control.device.monitor.osd.MonitorOsdVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveService;
@@ -37,16 +45,21 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/monitor/live")
 public class MonitorLiveController {
+
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 
 	@Autowired
 	private MonitorLiveService monitorLiveService;
@@ -62,6 +75,9 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private MonitorLiveUserQuery monitorLiveUserQuery;
+	
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private UserUtils userUtils;
@@ -86,6 +102,12 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private ExtraInfoService extraInfoService;
 	
 	@RequestMapping(value = "/terminal/index")
 	public ModelAndView terminalIndex(String token){
@@ -156,14 +178,32 @@ public class MonitorLiveController {
 			entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
 		}
 		
-		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
+//		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
+		
+		List<String> bundleIds=new ArrayList<String>();
+		entities.stream().forEach(entity->{bundleIds.add(entity.getAudioBundleId());bundleIds.add(entity.getDstAudioBundleId());});
+		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+		
+		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
+			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getAudioBundleId());
+			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstAudioBundleId());
+			try {
+				return new MonitorLiveDeviceVO().set(entity,extraInfos,dstExtraInfos);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}).collect(Collectors.toList());
 		
 		if(rows!=null && rows.size()>0){
 			Set<Long> osdIds = new HashSet<Long>();
+			
 			for(MonitorLiveDeviceVO row:rows){
 				osdIds.add(row.getOsdId()==null?0l:row.getOsdId());
 			}
+			
 			List<MonitorOsdPO> osdEntities = monitorOsdDao.findAll(osdIds);
+			
 			if(osdEntities!=null && osdEntities.size()>0){
 				for(MonitorLiveDeviceVO row:rows){
 					for(MonitorOsdPO osdEntity:osdEntities){
@@ -249,9 +289,9 @@ public class MonitorLiveController {
 		ChannelVO dstEncodeAudio = null;
 		if(dstQueryChannels!=null && dstQueryChannels.size()>0){
 			for(ChannelSchemeDTO channel:dstQueryChannels){
-				if("VenusVideoOut".equals(channel.getBaseType())){
+				if(dstEncodeVideo==null && "VenusVideoOut".equals(channel.getBaseType())){
 					dstEncodeVideo = new ChannelVO().set(channel);
-				}else if("VenusAudioOut".equals(channel.getBaseType())){
+				}else if(dstEncodeAudio==null && "VenusAudioOut".equals(channel.getBaseType())){
 					dstEncodeAudio = new ChannelVO().set(channel);
 				}
 			}
@@ -272,43 +312,60 @@ public class MonitorLiveController {
 		String dstAudioChannelName = dstEncodeAudio.getName();
 		
 		//src
-		BundlePO bundle = bundleService.findByBundleId(srcBundleId);
+		BundlePO srcBundle = bundleService.findByBundleId(srcBundleId);
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleId).getList(), 0);
 		ChannelVO encodeVideo = null;
 		ChannelVO encodeAudio = null;
 		if(queryChannels!=null && queryChannels.size()>0){
 			for(ChannelSchemeDTO channel:queryChannels){
-				if("VenusVideoIn".equals(channel.getBaseType())){
+				if(encodeVideo==null && "VenusVideoIn".equals(channel.getBaseType())){
 					encodeVideo = new ChannelVO().set(channel);
-				}else if("VenusAudioIn".equals(channel.getBaseType())){
+				}else if(encodeAudio==null && "VenusAudioIn".equals(channel.getBaseType())){
 					encodeAudio = new ChannelVO().set(channel);
 				}
 			}
 		}
-		String videoBundleId = bundle.getBundleId();
-		String videoBundleName = bundle.getBundleName();
-		String videoBundleType = bundle.getBundleType();
-		String videoLayerId = bundle.getAccessNodeUid();
+		String videoBundleId = srcBundle.getBundleId();
+		String videoBundleName = srcBundle.getBundleName();
+		String videoBundleType = srcBundle.getBundleType();
+		String videoLayerId = srcBundle.getAccessNodeUid();
 		String videoChannelId = encodeVideo.getChannelId();
 		String videoBaseType = encodeVideo.getBaseType();
 		String videoChannelName = encodeVideo.getName();
-		String audioBundleId = bundle.getBundleId();
-		String audioBundleName = bundle.getBundleName();
-		String audioBundleType = bundle.getBundleType();
-		String audioLayerId = bundle.getAccessNodeUid();
+		String audioBundleId = srcBundle.getBundleId();
+		String audioBundleName = srcBundle.getBundleName();
+		String audioBundleType = srcBundle.getBundleType();
+		String audioLayerId = srcBundle.getAccessNodeUid();
 		String audioChannelId = encodeAudio.getChannelId();
 		String audioBaseType = encodeAudio.getBaseType();
 		String audioChannelName = encodeAudio.getName();
 		
-		
-		entity = monitorLiveDeviceService.startLocalSeeLocal(
+		if(!queryUtil.isLdapBundle(srcBundle)){
+			entity = monitorLiveDeviceService.startLocalSeeLocal(
 					osdId, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
 					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
 					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
 					type, user.getId(), user.getUserno(), 
-					false, null);		
+					false, null);
+		}else{
+			
+			videoLayerId = resourceRemoteService.queryLocalLayerId();
+			videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+			audioLayerId = videoLayerId;
+			audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+			
+			entity = monitorLiveDeviceService.startLocalSeeXt(
+					osdId, 
+					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
+					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
+					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
+					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
+					type, user.getId(), user.getUserno());
+		}
+
+		operationLogService.send(user.getName(), "新建转发", srcBundle.getBundleName() + " 转发给 " + dstBundle.getBundleName());
 		
 		return new MonitorLiveDeviceVO().set(entity);
 	}

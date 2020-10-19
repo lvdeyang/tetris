@@ -1,3 +1,5 @@
+
+
 define([
   'text!' + window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list.html',
   'restfull',
@@ -7,6 +9,7 @@ define([
   'date',
   'bvc2-dialog-single-osd',
   'bvc2-monitor-forword',
+  'bvc2-monitor-forword-bandwidth',
   'css!' + window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list.css'
 ], function (tpl, ajax, $, Vue) {
 
@@ -21,43 +24,101 @@ define([
         table: {
           data: [],
           page: {
-            currentPage: 0,
-            pageSize: 20,
+            currentPage: 1,
+            pageSize: 10,
+            total: 0
+          },
+          pageTab: {
+            currentPage: 1,
+            pageSize: 20000,
             total: 0
           }
+
         },
+        // tableData:[],
         totleForword: '0',
         dialog: {
           forword: {
             visible: false
+          },
+          bandwidth: {
+            visible: false
           }
         },
-        buttonIsShow: true
+        buttonIsShow: true,
+        extendForwordList:[],
+        selfForwordList:[],
+        activeName:"self",
+        totalWidth:'',
+        singleWidth:''
       }
     },
     computed: {
-
+      tableData: function () {
+        if(this.activeName == "self"){
+          return this.selfForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
+        }else{ 
+          // console.log(this.extendForwordList)
+          // console.log( this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize)) 
+          return this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
+        }
+      },
+      currentWidth:function(){
+        return this.table.page.total * this.singleWidth
+      },
+      currentWidthTotleNum:function(){
+        return Math.floor(this.totalWidth/this.singleWidth)
+      }
     },
     watch: {},
     methods: {
       load: function (currentPage) {
         var self = this;
+        var extendForwordList=[]
         self.table.data.splice(0, self.table.data.length);
         ajax.post('/monitor/live/load/device/lives', {
           currentPage: currentPage,
-          pageSize: self.table.page.pageSize
+          pageSize: self.table.pageTab.pageSize
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
           self.totleForword = total;
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
-              self.table.data.push(rows[i]);
+              // self.table.data.push(rows[i]);
+              var parseExtend = ""
+              if(rows[i].dstExtraInfo){
+                parseExtend = JSON.parse(rows[i].dstExtraInfo)
+                if(parseExtend.extend_param){
+                  parseExtend = JSON.parse(parseExtend.extend_param).region
+
+                }
+              }
+              if(parseExtend == "external"){
+                self.extendForwordList.push(rows[i])
+              }else{
+                self.selfForwordList.push(rows[i])
+              }
             }
           }
-          self.table.page.total = total;
-          self.table.page.currentPage = currentPage;
+          // self.tableData = self.selfForwordList
+          self.table.page.total = self.selfForwordList.length;
+          // self.table.page.currentPage = currentPage;
         });
+      },
+      handleClick(tab, event) {
+        var self = this;
+        
+        self.table.page.currentPage = 1;
+        if(tab.name == 'self'){
+          // this.table.data = this.selfForwordList
+          self.table.page.total = self.selfForwordList.length;
+        }else{
+          self.getBandwidth()
+          // this.table.data = this.extendForwordList
+          self.table.page.total = self.extendForwordList.length;
+        }
+
       },
       rowDelete: function (scope) {
         var self = this;
@@ -72,7 +133,7 @@ define([
             h('div', {
               class: 'el-message-box__message'
             }, [
-              h('p', null, ['是否要停止此调阅任务?'])
+              h('p', null, ['是否要删除此转发任务?'])
             ])
           ]),
           type: 'wraning',
@@ -133,11 +194,12 @@ define([
       handleSizeChange: function (pageSize) {
         var self = this;
         self.table.page.pageSize = pageSize;
-        self.load(1);
+        // self.load(1);
       },
       handleCurrentChange: function (currentPage) {
         var self = this;
-        self.load(currentPage);
+        self.table.page.currentPage = currentPage
+        // self.load(currentPage);
       },
       osdControl: function () {
 
@@ -146,8 +208,28 @@ define([
         this.dialog.forword.visible = false;
 
       },
+      handlebandwidthClose: function () {
+        this.dialog.bandwidth.visible = false;
+        this.getBandwidth()
+      },
       openForword() {
         this.dialog.forword.visible = true;
+      },
+      openBandwidth() {
+        this.dialog.bandwidth.visible = true;
+      },
+      getBandwidth(){
+        var self = this;
+        ajax.post('/command/station/bandwidth/query', null, function (data, status) {
+          if (status == 200) {
+             data.rows.forEach(function(item){
+               if(item.stationName == "外域"){
+                self.totalWidth  = item.totalWidth;
+                self.singleWidth = item.singleWidth
+               }
+             });
+          }
+        })
       }
     },
     mounted: function () {

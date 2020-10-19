@@ -14,6 +14,8 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
  */
 public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 	
+	private Long id;
+	
 	/** 导播任务id */
 	private Long guideId;
 	
@@ -24,6 +26,18 @@ public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 	private String switchingMode;
 
 	private String switchingModeName;
+	
+	/** 转码模板 */
+	private String transcodingTemplate;
+	
+	public Long getId() {
+		return id;
+	}
+
+	public OutputGroupVO setId(Long id) {
+		this.id = id;
+		return this;
+	}
 
 	public Long getGuideId() {
 		return guideId;
@@ -61,12 +75,23 @@ public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 		return this;
 	}
 
+	public String getTranscodingTemplate() {
+		return transcodingTemplate;
+	}
+
+	public OutputGroupVO setTranscodingTemplate(String transcodingTemplate) {
+		this.transcodingTemplate = transcodingTemplate;
+		return this;
+	}
+
 	@Override
 	public OutputGroupVO set(OutputGroupPO entity) throws Exception {
+		this.setId(entity.getId());
 		this.setGuideId(entity.getId());
 		this.setName(entity.getName());
 		this.setSwitchingMode(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().toString(): null);
 		this.setSwitchingModeName(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().getName(): null);
+		this.setTranscodingTemplate(entity.getTranscodingTemplate());
 		return this;
 	}
 	

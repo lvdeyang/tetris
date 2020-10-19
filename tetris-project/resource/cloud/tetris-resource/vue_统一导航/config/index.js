@@ -11,13 +11,13 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     //如果是开发环境取值'/',如果是生产环境取值'./'
-    assetsPublicPath: isPro ? /* '/res_/' */ "./": "/",
-    proxyTable: isPro?{}:{
-      '/':{
+    assetsPublicPath: isPro ? /* '/res_/' */ "./" : "/",
+    proxyTable: isPro ? {} : {
+      '/': {
         target: 'http://192.165.56.111:8093',
-        changeOrigin : true,
-        pathRewrite:{
-          '^/':'/'
+        changeOrigin: true,
+        pathRewrite: {
+          '^/': '/'
         }
       }
     },
@@ -55,10 +55,10 @@ module.exports = {
 
   build: {
     // Template for index.html
-    index: path.resolve(__dirname, '../dist/index.html'),
+    index: path.resolve(__dirname, '../../src/main/webapp/index.html'),
 
     // Paths
-    assetsRoot: path.resolve(__dirname, '../dist'),
+    assetsRoot: path.resolve(__dirname, '../../src/main/webapp'),
     assetsSubDirectory: 'static',
     //如果是开发环境取值'/',如果是生产环境取值'./'
     assetsPublicPath: isPro ? /* '/res_/' */ "./" : "/",

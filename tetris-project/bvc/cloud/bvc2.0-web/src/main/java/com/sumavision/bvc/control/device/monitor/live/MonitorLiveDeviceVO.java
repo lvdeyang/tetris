@@ -1,5 +1,10 @@
 package com.sumavision.bvc.control.device.monitor.live;
 
+import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
@@ -38,6 +43,30 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 	
 	private String type;
 	
+	/** 源扩展字段*/
+	private String extraInfo;
+	
+	/** 目的扩展字段*/
+	private String dstExtraInfo;
+	
+	public String getDstExtraInfo() {
+		return dstExtraInfo;
+	}
+
+	public MonitorLiveDeviceVO setDstExtraInfo(String dstExtraInfo) {
+		this.dstExtraInfo = dstExtraInfo;
+		return this;
+	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public MonitorLiveDeviceVO setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
+		return this;
+	}
+
 	public String getUdpUrl() {
 		return udpUrl;
 	}
@@ -172,6 +201,29 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 			.setOsdName("-")
 			.setOsdUsername("-")
 			.setType(entity.getDstDeviceType()==null?"":entity.getDstDeviceType().getName());
+		
+		
+		return this;
+	}
+	
+	public MonitorLiveDeviceVO set(MonitorLiveDevicePO entity,List<ExtraInfoPO> extraInfos,List<ExtraInfoPO> dstExtraInfos)throws Exception{
+		set(entity);
+		//添加扩展字段
+		JSONObject extraInfo = new JSONObject();
+		if(extraInfos != null && extraInfos.size()>0){
+			for(ExtraInfoPO extra : extraInfos){
+				extraInfo.put(extra.getName(), extra.getValue());
+			}
+			this.setExtraInfo(extraInfo.toJSONString());
+		}	
+		
+		JSONObject dstExtraInfo = new JSONObject();
+		if(dstExtraInfos != null && dstExtraInfos.size()>0){
+			for(ExtraInfoPO extra : dstExtraInfos){
+				dstExtraInfo.put(extra.getName(), extra.getValue());
+			}
+			this.setDstExtraInfo(dstExtraInfo.toJSONString());
+		}
 		return this;
 	}
 	

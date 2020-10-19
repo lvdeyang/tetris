@@ -25,7 +25,7 @@ public class UserImportListener implements ApplicationListener<UserImportEvent>{
 	@Override
 	public void onApplicationEvent(UserImportEvent event) {
 		try{
-			bundleService.createUserBundle(event.getUserId(), event.getNickname(), event.getUserno());
+			bundleService.createUserBundle(event.getUserId(), event.getNickname(), event.getUserno(),null);
 			
 			userQueryService.importUserPrivilage(event.getUserno(), event.getRoleIds());
 		}catch(Exception e){

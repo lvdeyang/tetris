@@ -272,6 +272,7 @@ public class UserCallService {
 //				group.setOriginType(originType);		
 		group.setUserId(callUser.getId());
 		group.setUserName(callUser.getName());
+		group.setUserCode(callUser.getUserNo());
 		group.setCreatetime(new Date());
 		group.setStatus(GroupStatus.PAUSE);
 		groupDao.save(group);

@@ -108,7 +108,13 @@ define([
             requireType: ['csv'],
             multiple: false
           },
-        }
+        },
+        
+        bindAccessNodeUidVisable:false,
+        accessNodeTable:[],
+        bindAccessNodeUid:'',
+        bindAccessNodeUidName:'',
+        bindAccessNodeUidRow:undefined
       },
       methods: {
         rowKey: function (row) {
@@ -134,7 +140,41 @@ define([
 
 
         },
-        handleBindRoleSubmit: function () {
+        handleChangeNodeUid: function () {
+          var self = this;
+          self.bindAccessNodeUidVisable = true;
+          // self.$refs.roleTable.clearSelection()
+          var self = this;
+          self.accessNodeTable =[];
+          self.table.rows.splice(0, self.table.rows.length);
+          ajax.post('/user/load', {
+            currentPage: 1,
+            pageSize: 10000,
+          }, function (data) {
+            var rows = data.rows;
+            if (rows && rows.length > 0) {
+              for (var i = 0; i < rows.length; i++) {
+                self.accessNodeTable.push(rows[i]);
+              }
+              console.log(self.accessNodeTable)
+            }
+          });
+
+
+        },
+        
+    currentRowChange: function (currentRow, oldRow) {
+      var self = this;
+      self.tbindAccessNodeUidRow = currentRow;
+      console.log(currentRow)
+    },
+
+    handleBindAccessNodeUidSubmit: function () {
+      this.bindAccessNodeUidVisable = false;
+      this.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
+      this.bindAccessNodeUid = this.tbindAccessNodeUidRow.nodeUid
+    },
+    handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
           var bindRoleNameArr = [];
           var bindRoleIdArr = [];
@@ -413,7 +453,8 @@ define([
             remark: self.dialog.createUser.remark,
             loginIp: self.dialog.createUser.loginIp,
             bindrole: self.dialog.createUser.bindrole,
-            bindRoles: self.dialog.createUser.bindRoles
+            bindRoles: self.dialog.createUser.bindRoles,
+            worknodeUid:self.bindAccessNodeUid
           };
 
           ajax.post('/user/add', params, function (data, status) {

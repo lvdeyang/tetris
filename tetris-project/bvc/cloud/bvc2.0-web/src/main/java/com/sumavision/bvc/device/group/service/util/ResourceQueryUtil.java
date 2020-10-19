@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
@@ -19,12 +23,15 @@ import com.suma.venus.resource.dao.VirtualResourceDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.CommonPO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
+import com.suma.venus.resource.service.ResourceService.Relation;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
@@ -70,7 +77,10 @@ public class ResourceQueryUtil {
 	private UserQueryFeign userFeign;
 	
 	@Autowired
-	UserQueryService userQueryService;
+	private UserQueryService userQueryService;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	/**
 	 * @Title 根据id集合查询整个文件夹树<br/> 注意对结果判空！
@@ -107,6 +117,29 @@ public class ResourceQueryUtil {
 	public List<BundlePO> queryUseableBundles(Long userId) throws Exception{
 		
 		Set<String> bundleIds = queryUseableBundleIds(userId);
+		
+		if(bundleIds.size() > 0){
+			List<BundlePO> bundles = nativeBundleDao.findByBundleIdIn(bundleIds);
+			return bundles;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 *  查询用户有权限的设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月12日 下午3:49:14
+	 * @param userId 用户id
+	 * @param privileges 所要满足的权限
+	 * @param satisfyAll true需要满足所有privileges中权限；false不需要满足所有privileges中权限
+	 * @return
+	 * @throws Exception
+	 */
+	public List<BundlePO> queryUseableBundles(Long userId,List<String> privileges,Boolean satisfyAll) throws Exception{
+		
+		Set<String> bundleIds = queryUseableBundleIds(userId,privileges,satisfyAll);
 		
 		if(bundleIds.size() > 0){
 			List<BundlePO> bundles = nativeBundleDao.findByBundleIdIn(bundleIds);
@@ -174,6 +207,75 @@ public class ResourceQueryUtil {
 				}
 			}
 		}
+		return bundleIds;
+	}
+
+	/**
+	 * 获取有权限的设备id列表<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月12日 下午3:51:51
+	 * @param userId 用户id
+	 * @param privileges 权限列表
+	 * @param satisfyAll true需要满足所有privileges中权限；false不需要满足所有privileges中权限
+	 * @return
+	 * @throws Exception
+	 */
+	public Set<String> queryUseableBundleIds(Long userId,List<String> privileges,Boolean satisfyAll) throws Exception{
+		//获取用户权限
+//		ResourceIdListBO bo = userFeign.queryResourceByUserId(userId);
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		Set<String> bundleIds = new HashSet<String>();
+		
+		if(null == bo || null == bo.getResourceCodes() || bo.getResourceCodes().size()<=0){
+			return bundleIds;
+		}
+		
+		if(satisfyAll==null){
+			return queryUseableBundleIds(userId);
+		}
+		
+		if(satisfyAll){
+			Optional<List<Relation>> bundleListOptional=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null))
+					.map(map->{return map.get("bundle");});
+			if(bundleListOptional.isPresent()){
+				bundleIds=bundleListOptional.get().stream().filter(relation->{
+					for(String pribilege:privileges){
+						Optional<Boolean> satisfy=Optional.ofNullable(relation).map(entity->{
+							return entity.getMap();
+						}).map(entity->{
+							return entity.get(BUSINESS_OPR_TYPE.valueOf(pribilege));
+						});
+						if(!satisfy.isPresent()||!satisfy.get()){
+							return false;
+						}
+					}
+					return true;
+					}).map(relation->{return relation.getId();}).collect(Collectors.toSet());
+			}
+			
+		}else{
+			
+			Optional<List<Relation>> bundleListOptional=Optional.ofNullable(resourceService.hasPrivilegesOfAll(userId,null))
+					.map(map->{return map.get("bundle");});
+			if(bundleListOptional.isPresent()){
+				bundleIds=bundleListOptional.get().stream().filter(relation->{
+				for(String pribilege:privileges){
+					
+					Optional<Boolean> satisfy=Optional.ofNullable(relation).map(entity->{
+						return entity.getMap();
+					}).map(entity->{
+						return entity.get(BUSINESS_OPR_TYPE.valueOf(pribilege));
+					});
+					if(satisfy.isPresent()&&satisfy.get()){
+						return true;
+					}
+				}
+				return false;
+				}).map(relation->{return relation.getId();}).collect(Collectors.toSet());
+			}
+		}
+		
 		return bundleIds;
 	}
 	

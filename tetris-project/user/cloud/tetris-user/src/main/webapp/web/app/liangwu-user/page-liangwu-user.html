@@ -53,10 +53,10 @@
                                 label="状态"
                                 prop="status">
                         </el-table-column> -->
-            <el-table-column :label="i18n.tableColumnMobile" prop="mobile">
+            <!-- <el-table-column :label="i18n.tableColumnMobile" prop="mobile">
             </el-table-column>
             <el-table-column :label="i18n.tableColumnMail" prop="mail">
-            </el-table-column>
+            </el-table-column> -->
 
 
             <el-table-column :label="i18n.labelCreateUserRemark" prop="remark">
@@ -115,7 +115,7 @@
 
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
-        <el-form label-width="80px">
+        <el-form label-width="120px" size="small">
           <el-form-item :label="i18n.labelCreateUserNickname">
             <el-input v-model="dialog.createUser.nickname"></el-input>
           </el-form-item>
@@ -132,22 +132,22 @@
             <el-input type="password" v-model="dialog.createUser.repeat"
               :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
           </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserMobile">
+          <!-- <el-form-item :label="i18n.labelCreateUserMobile">
             <el-input v-model="dialog.createUser.mobile"></el-input>
-          </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserMail">
+          </el-form-item> -->
+          <!-- <el-form-item :label="i18n.labelCreateUserMail">
             <el-input v-model="dialog.createUser.mail"></el-input>
-          </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserLevel">
+          </el-form-item> -->
+          <!-- <el-form-item :label="i18n.labelCreateUserLevel">
             <el-input-number v-model="dialog.createUser.level" :min="1" :max="1000" :label="i18n.labelCreateUserNumber">
             </el-input-number>
-          </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserClassify">
+          </el-form-item> -->
+          <!-- <el-form-item :label="i18n.labelCreateUserClassify">
             <el-input v-model="dialog.createUser.classify" disabled></el-input>
           </el-form-item>
           <el-form-item :label="i18n.labelCreateUserCompanyName">
             <el-input v-model="dialog.createUser.company.name" disabled></el-input>
-          </el-form-item>
+          </el-form-item> -->
           <!-- 备注 -->
           <el-form-item :label="i18n.labelCreateUserRemark">
             <el-input v-model="dialog.createUser.remark"></el-input>
@@ -160,8 +160,11 @@
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
           </el-form-item>
-          <!-- <el-button type="primary" size="small" @click="handleBindRole"><span class="icon-plus"
-                style="position:relative; right:1px;"></span>&nbsp;{{i18n.labelCreateUserBindRole}}</el-button> -->
+
+          <!-- 绑定接入层 -->
+          <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
+            <el-input v-model="bindAccessNodeUidName" @click.native="handleChangeNodeUid"></el-input>
+          </el-form-item>
         </el-form>
         <!-- </el-scrollbar> -->
       </div>
@@ -189,21 +192,35 @@
       <!-- <div>弹框</div> -->
     </el-dialog>
 
+    <!-- 绑定接入层 -->
+    <el-dialog title="绑定接入层" :visible.sync="bindAccessNodeUidVisable">
+
+      <el-table ref="accessNodeTable" :data="accessNodeTable"  :row-key="roleOption.id"
+        width="100%"  @current-change="currentRowChange">
+        <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+        <el-table-column prop="name" label="名称" width="200"></el-table-column>
+        <el-table-column prop="ip" label="ip" width="200"></el-table-column>
+      </el-table>
+      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit"><span class="icon-plus"
+          style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
+
+      <!-- <div>弹框</div> -->
+    </el-dialog>
     <!-- 修改流程对话框 -->
     <el-dialog :title="i18n.dialogEditUserTitle" :visible.sync="dialog.editUser.visible" width="500px"
       :before-close="handleEditUserClose">
 
       <div>
-        <el-form label-width="80px">
+        <el-form label-width="110px">
           <el-form-item :label="i18n.labelEditUserNickname">
             <el-input v-model="dialog.editUser.nickname"></el-input>
           </el-form-item>
-          <el-form-item :label="i18n.labelEditUserMobile">
+          <!-- <el-form-item :label="i18n.labelEditUserMobile">
             <el-input v-model="dialog.editUser.mobile"></el-input>
           </el-form-item>
           <el-form-item :label="i18n.labelEditUserMail">
             <el-input v-model="dialog.editUser.mail"></el-input>
-          </el-form-item>
+          </el-form-item> -->
 
 
           <!-- 备注 -->

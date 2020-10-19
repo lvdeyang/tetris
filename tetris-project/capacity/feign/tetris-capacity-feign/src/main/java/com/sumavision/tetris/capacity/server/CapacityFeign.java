@@ -383,4 +383,18 @@ public interface CapacityFeign{
 
 	@RequestMapping(value = "/director/task/feign/get/encode/template")
 	public JSONObject getEncodeTemplate(@RequestParam("encodeType") String encodeType) throws Exception;
+
+	@RequestMapping(value = "/director/task/feign/task/add")
+	public JSONObject addDirectorTask(@RequestParam("taskInfo") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/director/task/feign/task/delete")
+	public JSONObject delDirectorTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/director/task/feign/task/switch")
+	public JSONObject switchDirectorTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/director/task/feign/task/transfer")
+	public JSONObject transferTask(@RequestParam("task") String taskInfo) throws Exception;
+
+
 }

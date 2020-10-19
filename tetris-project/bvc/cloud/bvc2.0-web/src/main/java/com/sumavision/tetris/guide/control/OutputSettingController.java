@@ -3,6 +3,8 @@
  */
 package com.sumavision.tetris.guide.control;
 
+
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +33,12 @@ public class OutputSettingController {
 	
 	/**
 	 * 
-	 * 方法概述<br/>
+	 * 查询输出<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月4日 下午1:59:45
-	 * @param taskNumber
+	 * <b>日期：</b>2020年9月30日 下午4:12:03
+	 * @param groupId 输出组id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -44,9 +46,9 @@ public class OutputSettingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query")
-	public Object queryOutputSetting(Long taskNumber, HttpServletRequest request) throws Exception{
+	public Object queryOutputSetting(Long groupId, HttpServletRequest request) throws Exception{
 		
-		return outputSettingQuery.query(taskNumber);
+		return outputSettingQuery.query(groupId);
 	}
 	
 	/**
@@ -55,8 +57,8 @@ public class OutputSettingController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月22日 下午1:41:22
-	 * @param taskNumber
+	 * <b>日期：</b>2020年9月30日 下午4:13:19
+	 * @param groupId
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -64,9 +66,9 @@ public class OutputSettingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/queryVideo")
-	public Object queryVideoParameter(Long taskNumber, HttpServletRequest request) throws Exception{
+	public Object queryVideoParameter(Long groupId, HttpServletRequest request) throws Exception{
 		
-		return outputSettingQuery.queryVideo(taskNumber);
+		return outputSettingQuery.queryVideo(groupId);
 	}
 	
 	/**
@@ -75,8 +77,8 @@ public class OutputSettingController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月22日 下午1:46:58
-	 * @param taskNumber
+	 * <b>日期：</b>2020年9月30日 下午4:13:47
+	 * @param groupId
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -84,21 +86,40 @@ public class OutputSettingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/queryAudio")
-	public Object queryAudioParameter(Long taskNumber, HttpServletRequest request) throws Exception{
+	public Object queryAudioParameter(Long groupId, HttpServletRequest request) throws Exception{
 		 
-		return outputSettingQuery.queryAudio(taskNumber);
+		return outputSettingQuery.queryAudio(groupId);
 	}
+	
 	/**
 	 * 
-	 * 方法概述<br/>
+	 * 新建输出<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月4日 下午1:59:53
-	 * @param id
-	 * @param outputProtocol
-	 * @param outputAddress
-	 * @param taskNumber
+	 * <b>日期：</b>2020年9月30日 下午4:14:03
+	 * @param groupId 输出组id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add")
+	public Object add(Long groupId, HttpServletRequest request) throws Exception{
+		
+		return outputSettingService.addOutput(groupId);
+	
+	}
+
+	/**
+	 * 
+	 * 修改输出<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年9月30日 下午4:14:48
+	 * @param outputs
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -107,21 +128,9 @@ public class OutputSettingController {
 	@ResponseBody
 	@RequestMapping(value = "/edit")
 	public Object edit(
-			Long id,
-			String outputProtocol,
-			String outputAddress,
-			String rateCtrl,
-			Long bitrate,
-			String switchingMode,
+			String outputs,
 			HttpServletRequest request) throws Exception{
-		return outputSettingService.edit(
-				id,
-				outputProtocol,
-				outputAddress,
-				rateCtrl,
-				bitrate,
-				switchingMode
-				);
+		return outputSettingService.edit(outputs);
 	}
 
 	/**
@@ -130,14 +139,16 @@ public class OutputSettingController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月15日 下午2:09:00
+	 * <b>日期：</b>2020年9月30日 下午4:15:28
 	 * @param id
 	 * @param codingObject
-	 * @param profile
 	 * @param fps
 	 * @param bitrate
 	 * @param resolution
+	 * @param ratio
+	 * @param rcMode
 	 * @param maxBitrate
+	 * @param request
 	 * @return
 	 * @throws Exception
 	 */
@@ -172,11 +183,12 @@ public class OutputSettingController {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月15日 下午2:19:32
+	 * <b>日期：</b>2020年9月30日 下午4:15:39
 	 * @param id
 	 * @param codingFormat
-	 * @param sampleFmt
+	 * @param channelLayout
 	 * @param bitrate
+	 * @param sampleRate
 	 * @param codingType
 	 * @param request
 	 * @return
@@ -202,14 +214,15 @@ public class OutputSettingController {
 				codingType);
 		
 	}
+
 	/**
 	 * 
-	 * 方法概述<br/>
+	 * 删除输出<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月4日 下午2:01:16
-	 * @param id
+	 * <b>日期：</b>2020年9月30日 下午4:15:58
+	 * @param ids
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -218,9 +231,9 @@ public class OutputSettingController {
 	@ResponseBody
 	@RequestMapping(value = "/delete")
 	public Object delete(
-			Long id,
+			String ids,
 			HttpServletRequest request) throws Exception{
-		outputSettingService.delete(id);
+		outputSettingService.deleteOutput(ids);
 		return null;
 	}
 }

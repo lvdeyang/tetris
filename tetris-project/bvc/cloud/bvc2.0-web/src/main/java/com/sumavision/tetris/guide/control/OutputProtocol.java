@@ -13,7 +13,10 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <b>日期：</b>2020年9月22日 下午2:56:30
  */
 public enum OutputProtocol {
-	UDP("udp");
+	UDP_TS("udp_ts"),
+	RTP_TS("rtp_ts"),
+	RTMP("rtmp"),
+	SRT("srt");
 	
 	private String name;
 	

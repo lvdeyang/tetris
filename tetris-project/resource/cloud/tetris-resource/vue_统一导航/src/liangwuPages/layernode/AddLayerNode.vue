@@ -52,7 +52,13 @@
       <!--<el-form-item label="访问地址" prop="url">-->
       <!--<el-input v-model="nodeForm.url" style="width: 200px;"></el-input>-->
       <!--</el-form-item>-->
+      <el-button style="margin-top:10px; margin-left: 30px" type="info" size="small" @click="addExtraInfo">新增扩展字段</el-button>
 
+      <div style="margin-top:10px; margin-left: 30px" v-for="(extraInfo, index) in extraInfos">
+        <el-input size="small" v-model="extraInfo.name" placeholder="扩展字段名" style="width: 180px;"></el-input>
+        <el-input size="small" v-model="extraInfo.value" placeholder="扩展字段值" style="width: 180px;margin-left: 10px;"></el-input>
+        <el-button size="small" type="danger" @click.prevent="remove(extraInfo)" style="margin-left: 10px;">删除</el-button>
+      </div>
       <div style="margin-top:30px;">
         <el-button type="primary" @click="submit()">提交</el-button>
         <el-button type="primary" @click="reset()">重置</el-button>
@@ -87,91 +93,21 @@ export default {
     };
 
     return {
-      activeTabName: "AddLayernode",
+      activeTabName: "LwAddLayernode",
+      extraInfos: [],
       typeOptions: [
-        // {
-        //   label : "JV210接入",
-        //   value : "ACCESS_JV210"
-        // },
-        // {
-        //   label : "CDN接入",
-        //   value : "ACCESS_CDN"
-        // },
-        // {
-        //   label : "IPC接入",
-        //   value : "ACCESS_IPC"
-        // },
         {
-          label: "JV230接入",
-          value: "ACCESS_JV230"
+          value: "",
+          label: "全部类型"
         },
+
         {
-          label: "机顶盒接入",
-          value: "ACCESS_TVOS"
-        },
-        {
-          label: "混合器接入",
-          value: "ACCESS_MIXER"
-        },
-        {
-          label: "手机接入",
-          value: "ACCESS_MOBILE"
-        },
-        {
-          label: "音视频转发服务设备",
+          label: "终端设备节点",
           value: "ACCESS_JV210"
         },
         {
-          label: "录像存储服务单元A型",
+          label: "存储设备节点",
           value: "ACCESS_CDN"
-        },
-        {
-          label: "录像存储服务单元B型",
-          value: "ACCESS_VOD"
-        },
-        {
-          label: "监控资源汇接网关",
-          value: "ACCESS_IPC"
-        },
-        {
-          label: "流媒体管理服务设备",
-          value: "ACCESS_STREAMMEDIA"
-        },
-        {
-          label: "联网服务设备",
-          value: "ACCESS_NETWORK"
-        },
-        {
-          label: "显控汇接网关",
-          value: "ACCESS_DISPLAYCTRL"
-        },
-        {
-          label: "流转发器接入",
-          value: "ACCESS_S100"
-        },
-        {
-          label: "点播代理服务设备",
-          value: "ACCESS_VODPROXY"
-        },
-        {
-          label: "webrtc接入",
-          value: "ACCESS_WEBRTC"
-        },
-        {
-          label: "联网接入",
-          value: "ACCESS_LIANWANG"
-        },
-        {
-          label: "LDAP目录资源服务设备",
-          value: "ACCESS_LDAP"
-        },
-        {
-          label: "综合运维服务设备",
-          value: "ACCESS_OMMS"
-        },
-        {
-          label: "ws接入",
-          value: "ACCESS_WS"
         }
       ],
       nodeForm: {
@@ -225,7 +161,8 @@ export default {
       }
 
       let param = {
-        json: JSON.stringify(this.nodeForm)
+        json: JSON.stringify(this.nodeForm),
+        extraInfoVOList: JSON.stringify(this.extraInfos)
       };
 
       saveNode(param).then(res => {
@@ -246,6 +183,16 @@ export default {
         }
       });
     },
+
+    addExtraInfo: function () {
+      this.extraInfos.push({});
+    },
+    remove: function (item) {
+      var index = this.extraInfos.indexOf(item);
+      if (index !== -1) {
+        this.extraInfos.splice(index, 1)
+      }
+    },
     validate: function () {
       var result = false;
       this.$refs["nodeForm"].validate((valid) => {
@@ -257,7 +204,7 @@ export default {
   mounted () {
     var self = this;
     this.$nextTick(function () {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LayernodeManage');
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLayernodeManage');
     });
   }
 }

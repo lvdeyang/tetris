@@ -3,7 +3,6 @@ package com.sumavision.tetris.bvc.page;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
@@ -24,4 +23,6 @@ public interface PageTaskDAO extends MetBaseDAO<PageTaskPO>{
 //	public List<PageTaskPO> findByGroupId(Long roleId);
 	
 	public List<PageTaskPO> findByBusinessInfoTypeAndPageInfoId(BusinessInfoType businessInfoType,Long pageInfoId);
+	
+	public Long countByBusinessInfoTypeIn(List<BusinessInfoType> types);
 }

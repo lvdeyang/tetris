@@ -6,6 +6,9 @@ import javax.persistence.UniqueConstraint;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 转发器建的任务
+ */
 @Entity
 @Table(name = "BVC_REPEATER_TASK", uniqueConstraints={@UniqueConstraint(columnNames = {"ip", "dstIp", "dstPort"})})
 public class TaskPO extends AbstractBasePO{

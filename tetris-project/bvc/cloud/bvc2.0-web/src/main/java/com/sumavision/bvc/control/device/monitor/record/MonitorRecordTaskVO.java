@@ -1,5 +1,7 @@
 package com.sumavision.bvc.control.device.monitor.record;
 
+import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordType;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -41,6 +43,75 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制状态*/
 	private String status;
 	
+	/** 是否有权限下载*/
+	private Boolean privilegeOfDownload;
+	
+	/** 所属任务id*/
+	private Long taskId;
+
+	/** 所属任务名字*/
+	private String taskName;
+	
+	/** 预览地址*/
+	private String previewUrl;
+	
+	/** 做业务的用户id */
+	private Long userId;
+	
+	/** 做业务的用户号码 */
+	private String userno;
+	
+	/** 做业务的用户昵称 */
+	private String nickname;
+	
+	/** 录制如果是设备，记录bundleId*/
+	private String bundleId;
+	
+	public String getBundleId() {
+		return bundleId;
+	}
+
+	public MonitorRecordTaskVO setBundleId(String bundleId) {
+		this.bundleId = bundleId;
+		return this;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public MonitorRecordTaskVO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
+
+	public String getUserno() {
+		return userno;
+	}
+
+	public MonitorRecordTaskVO setUserno(String userno) {
+		this.userno = userno;
+		return this;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public MonitorRecordTaskVO setNickname(String nickname) {
+		this.nickname = nickname;
+		return this;
+	}
+
+	public Boolean getPrivilegeOfDownload() {
+		return privilegeOfDownload;
+	}
+
+	public MonitorRecordTaskVO setPrivilegeOfDownload(Boolean privilegeOfDownload) {
+		this.privilegeOfDownload = privilegeOfDownload;
+		return this;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -139,6 +210,33 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 		this.recordUserno = recordUserno;
 		return this;
 	}
+	
+	public Long getTaskId() {
+		return taskId;
+	}
+
+	public MonitorRecordTaskVO setTaskId(Long taskId) {
+		this.taskId = taskId;
+		return this;
+	}
+
+	public String getTaskName() {
+		return taskName;
+	}
+
+	public MonitorRecordTaskVO setTaskName(String taskName) {
+		this.taskName = taskName;
+		return this;
+	}
+	
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MonitorRecordTaskVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
 
 	@Override
 	public MonitorRecordTaskVO set(MonitorRecordPO entity) throws Exception {
@@ -155,9 +253,34 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setType(entity.getType()==null?MonitorRecordType.LOCAL_DEVICE.getName():entity.getType().getName())
 			.setRecordUserId(entity.getRecordUserId()==null?"-":entity.getRecordUserId().toString())
 			.setRecordUsername(entity.getRecordUsername()==null?"-":entity.getRecordUsername())
-			.setRecordUserno(entity.getRecordUserno()==null?"-":entity.getRecordUserno());
+			.setRecordUserno(entity.getRecordUserno()==null?"-":entity.getRecordUserno())
+			.setPreviewUrl(entity.getPreviewUrl()==null?"":entity.getPreviewUrl())
+			.setUserId(entity.getUserId()==null?null:entity.getUserId())
+			.setUserno(entity.getUserno()==null?"":entity.getUserno())
+			.setNickname(entity.getNickname()==null?"":entity.getNickname())
+			.setTaskId(entity.getTaskId()==null?null:entity.getTaskId())
+			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
+			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId());
+		return this;
+	}
+	
+	public MonitorRecordTaskVO set(MonitorRecordPO entity,ResourceIdListBO bo) throws Exception {
+		set(entity);
+//		/** 所属任务id*/
+//		private Long taskId;
+//		/** 所属任务名字*/
+//		private String taskName;
+		
+		if(bo!=null&&bo.getResourceCodes()!=null&&bo.getResourceCodes().size()>0){
+			if(entity.getType().equals(MonitorRecordType.LOCAL_DEVICE)&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+				this.setPrivilegeOfDownload(Boolean.TRUE);
+			}else if(entity.getType().equals(MonitorRecordType.LOCAL_USER)&&bo.getResourceCodes().contains(entity.getUserno()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+				this.setPrivilegeOfDownload(Boolean.TRUE);
+			}else{
+				this.setPrivilegeOfDownload(Boolean.FALSE);
+			}
+		}
 		return this;
 	}
 
-	
 }

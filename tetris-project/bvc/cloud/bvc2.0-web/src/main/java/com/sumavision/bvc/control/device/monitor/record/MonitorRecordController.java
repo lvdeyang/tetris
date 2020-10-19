@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceService;
+import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.control.utils.UserUtils;
@@ -87,6 +89,9 @@ public class MonitorRecordController {
 	
 	@Autowired
 	private SystemConfigurationDAO systemConfigurationDao;
+	
+	@Autowired
+	private UserQueryService userQueryService;
 	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
@@ -312,12 +317,12 @@ public class MonitorRecordController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		Date parsedStartTime = null;
-		if(startTime != null){
+		if(startTime != null && !"".equals(fileName)){
 			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
 		}
 		
 		Date parsedEndTime = null;
-		if(endTime != null){
+		if(endTime != null && !"".equals(fileName)){
 			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
 		}
 		
@@ -390,10 +395,19 @@ public class MonitorRecordController {
 		}
 		
 		
-		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+//		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		List<MonitorRecordTaskVO> rows = new ArrayList<MonitorRecordTaskVO>();
+		for(MonitorRecordPO recordPo:entities){
+			MonitorRecordTaskVO recordTaskVo = new MonitorRecordTaskVO();
+			rows.add(recordTaskVo.set(recordPo, bo));
+		}
+		
+		Integer totalSizeMb=(systemConfigurationDao.findByTotalSizeMbNotNull()==null?null:systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb());
+		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
-												   .put("totalSizeMb", systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb())
+												   .put("totalSizeMb", totalSizeMb)
 												   .getMap();
 	
 	}
@@ -603,7 +617,7 @@ public class MonitorRecordController {
 			}
 			Integer totalSizeMb =configuration.getTotalSizeMb();
 			
-			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+			MonitorRecordPO task = monitorRecordService.addDeviceTimeSegment(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
@@ -611,7 +625,7 @@ public class MonitorRecordController {
 					timeQuantum, totalSizeMb);
 			return new MonitorRecordTaskVO().set(task);
 		}else{
-			MonitorRecordPO task = monitorRecordService.addLocalDevice(
+			MonitorRecordPO task = monitorRecordService.addDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
@@ -742,6 +756,28 @@ public class MonitorRecordController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		monitorRecordService.removeFile(id, userId);
+	
+		return null;
+	}
+	
+	/**
+	 * 删除录制文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月25日 上午10:10:55
+	 * @param @PathVariable Long id 文件id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/file/by/id/timeSegmentId")
+	public Object removeFileById(
+			Long id,
+			Long timeSegmentId,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		monitorRecordService.removeFileById(id,timeSegmentId, userId);
 	
 		return null;
 	}

@@ -251,13 +251,14 @@ public class UserService{
             String remark,
             String loginIp,
             String bindRoles,
-            boolean emit) throws Exception{
+            boolean emit,
+            String worknodeUid) throws Exception{
 		
 		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp, bindRoles);
 		
 		if(emit){
 			//发布用户注册事件
-			UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+			UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(),worknodeUid);
 			applicationEventPublisher.publishEvent(event);
 		}
 		//boss系统添加一个用户
@@ -309,7 +310,8 @@ public class UserService{
             String companyName,
             String remark,
             String loginIp,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            String worknodeUid) throws Exception{
 		
 		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(), remark, loginIp, bindRoles);
 		
@@ -331,11 +333,14 @@ public class UserService{
 		//发布用户注册事件
 		UserRegisteredEvent event = null;
 		if(company == null){
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(),worknodeUid);
 		}else{
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), adminRole.getId().toString(), adminRole.getName());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), adminRole.getId().toString(), adminRole.getName(),worknodeUid);
 		}
 		applicationEventPublisher.publishEvent(event);
+		
+		//boss系统添加一个用户
+		bossService.addUser(user.getId());
 		
 		UserVO result = new UserVO().set(user);
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
@@ -383,7 +388,8 @@ public class UserService{
             Long companyId,
             String remark,
             String loginIp,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            String worknodeUid) throws Exception{
 		
 		CompanyPO company = companyDao.findOne(companyId);
 		
@@ -401,8 +407,11 @@ public class UserService{
 		}
 		
 		//发布用户注册事件
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), user.getUserno());
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), user.getUserno(),worknodeUid);
 		applicationEventPublisher.publishEvent(event);
+		
+		//boss系统添加一个用户
+		bossService.addUser(user.getId());
 		
 		UserVO result = new UserVO().set(user);
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();

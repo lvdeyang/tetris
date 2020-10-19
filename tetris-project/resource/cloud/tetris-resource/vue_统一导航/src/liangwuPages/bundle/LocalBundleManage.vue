@@ -15,10 +15,10 @@
         <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <el-select size="small" v-model="filters.userId" filterable placeholder="选择用户" style="float: left;margin-left:10px;width:200px;">
+      <!-- <el-select size="small" v-model="filters.userId" filterable placeholder="选择用户" style="float: left;margin-left:10px;width:200px;">
         <el-option v-for="item in users" :key="item.id" :label="item.name" :value="item.id">
         </el-option>
-      </el-select>
+      </el-select> -->
       <el-input size="small" v-model="filters.keyword" style="float: left;margin-left: 15px;width:200px;" placeholder="关键字"></el-input>
       <el-button size="small" @click="getResources(1)" style="float: left;margin-left: 10px;">查询</el-button>
 
@@ -40,14 +40,14 @@
 
       <el-button type="primary" size="small" @click="exportBundle" style="float: left; margin-left: 10px;">导出
       </el-button>
-      <el-button type="primary" size="small" @click="showMultiSetAccessLayerDialog" style="float: left; margin-left: 10px;">批量设置接入
-      </el-button>
+      <!-- <el-button type="primary" size="small" @click="showMultiSetAccessLayerDialog" style="float: left; margin-left: 10px;">批量设置接入
+      </el-button> -->
       <el-button type="danger" size="small" @click="handleMultiDelete" style="float: left; margin-left: 10px;">
         批量删除
       </el-button>
-      <el-button type="danger" size="small" @click="syncUser" style="float: left; margin-left: 10px;">
+      <!-- <el-button type="danger" size="small" @click="syncUser" style="float: left; margin-left: 10px;">
         同步用户
-      </el-button>
+      </el-button> -->
       <el-tag style="margin-left:10px" type="danger">当前设备数：{{sourcesTotle}}/1024</el-tag>
       <!--
             <el-button type="primary" size="small" v-on:click="handleCleanUpLdap()" style="float: right;margin-right: 10px;">重置LDAP数据</el-button>
@@ -64,13 +64,17 @@
       <el-table-column prop="location" label="地点" width="120" sortable>
       </el-table-column>
       <el-table-column prop="deviceModel" label="类型" width="120" sortable>
+        <template slot-scope="scope">
+          <div v-if="scope.row.deviceModel=='jv210'">终端设备</div>
+          <div v-else>存储设备</div>
+        </template>
       </el-table-column>
       <el-table-column prop="bundleAlias" label="别名" width="130" sortable>
       </el-table-column>
-      <el-table-column prop="username" label="设备账号" width="120">
+      <!-- <el-table-column prop="username" label="设备账号" width="120">
       </el-table-column>
       <el-table-column prop="accessNodeUid" label="所属接入层" width="220" sortable>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column width="100" label="在线状态">
         <template slot-scope="scope">
           <div v-if="scope.row.onlineStatus=='ONLINE'" style="height:20px;width:20px;border-radius:50%;background-color:#0f0"></div>
@@ -78,19 +82,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="100" label="锁定状态">
+      <el-table-column width="100" label="使用状态">
         <template slot-scope="scope">
-          <div v-if="scope.row.lockStatus=='IDLE'">空闲</div>
-          <div v-else-if="scope.row.lockStatus=='BUSY'">锁定</div>
+          <div v-if="scope.row.lockStatus=='IDLE'">未使用</div>
+          <div v-else-if="scope.row.lockStatus=='BUSY'">使用中</div>
         </template>
       </el-table-column>
 
-      <el-table-column width="100" label="来源">
-        <template slot-scope="scope">
+      <!-- <el-table-column width="100" label="来源" prop="sourceType">
+      <template slot-scope="scope">
           <div v-if="scope.row.sourceType=='EXTERNAL'">外域</div>
           <div v-else>本域</div>
-        </template>
-      </el-table-column>
+        </template> 
+      </el-table-column> -->
 
       <el-table-column label="操作" width="250">
         <template slot-scope="scope">
@@ -197,7 +201,10 @@ export default {
       activeTabName: "LwLocalBundleManage",
       resources: [],
       sourcesTotle: '',
-      deviceModelOptions: [],
+      deviceModelOptions: [
+        { label: "终端设备", value: "jv210" },
+        { label: "存储设备", value: "cdn" }
+      ],
       filters: {
         deviceModel: 'jv210',
         keyword: '',
@@ -232,11 +239,11 @@ export default {
         },
         {
           value: "SYSTEM",
-          label: "本域"  //BVC
+          label: "BVC"  //BVC
         },
         {
           value: "EXTERNAL",
-          label: "外域" //LDAP
+          label: "LDAP" //LDAP
         }
       ],
       multipleSelection: []
@@ -301,7 +308,7 @@ export default {
     ,
     getResourcesTotle: function (pageNum) {
       let param = {
-        deviceModel: '',
+        deviceModel: 'jv210',
         keyword: '',
         sourceType: '',
         userId: '',
@@ -503,7 +510,7 @@ export default {
     ,
     abilityConfig: function (row) {
       this.$router.push({
-        path: '/ConfigBundle',
+        path: '/LwConfigBundle',
         query: {
           bundleId: row.bundleId
         }
@@ -885,7 +892,7 @@ export default {
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
     });
     this.getResourcesTotle(1);
-    this.getDeviceModels();
+    // this.getDeviceModels();
     this.getAllUsers();
     this.getResources(1);
 

@@ -14,7 +14,8 @@ public interface ResourceUserRegisteredFeign {
 	public JSONObject userRegistered(
 			@RequestParam("userId") String userId,
 			@RequestParam("nickname") String nickname,
-			@RequestParam("userno") String userno) throws Exception;
+			@RequestParam("userno") String userno,
+			@RequestParam("worknodeUid") String worknodeUid) throws Exception;
 	
 	@RequestMapping(value = "/event/publish/user/offline")
 	public JSONObject userOffline(

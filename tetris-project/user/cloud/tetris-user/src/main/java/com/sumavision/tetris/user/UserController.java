@@ -30,6 +30,7 @@ import com.sumavision.tetris.config.server.ServerProps;
 import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.resouce.feign.resource.ResourceFeign;
 import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
@@ -63,6 +64,8 @@ public class UserController {
 	@Autowired
 	private UserImportInfoDAO userImportInfoDao;
 	
+	@Autowired
+	private ResourceFeign resourceFeign;
 	/**
 	 * 查询枚举类型<br/>
 	 * <p>
@@ -310,19 +313,20 @@ public class UserController {
             String companyName,
             String remark,
             String loginIp,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            String worknodeUid) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, bindRoles, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, bindRoles, true,worknodeUid);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp, bindRoles);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp, bindRoles,worknodeUid);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp, bindRoles);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp, bindRoles,worknodeUid);
 			}
 		}
 		return null;
@@ -614,11 +618,17 @@ public class UserController {
 	
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/query/user.online")
+	@RequestMapping(value = "/query/user/online")
 	public Object queryUserOnlin() throws Exception{
 		return userQuery.queryUserOnline();
 	}
 
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load")
+	public Object load()throws Exception{
+		return resourceFeign.load();
+	}
 }
 
 

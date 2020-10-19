@@ -6,3 +6,7 @@
 .bvc2-monitor-record .el-scrollbar__wrap {
   overflow-x: hidden;
 }
+
+.dialog-detail .el-input__inner {
+  border: none !important;
+}

@@ -431,17 +431,23 @@ public class BundleService extends CommonService<BundlePO> {
 	 * @param String username 用户名
 	 * @param String userNo 用户号码
 	 */
-	public void createUserBundle(String userId, String username, String userNo) throws Exception{
+	public void createUserBundle(String userId, String username, String userNo, String worknodeUid) throws Exception{
 		
 		try {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
 			
-			//自动选择player接入层
-			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
-			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
-				
+			
+			WorkNodePO choseWorkNode = new WorkNodePO();
+			if(worknodeUid != null && !worknodeUid.equals("")){
+				choseWorkNode = workNodeService.findByNodeUid(worknodeUid);
+			}else{
+				//自动选择player接入层
+				List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
+				choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+			}
+						
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
 				BundlePO bundlePO = new BundlePO();
@@ -567,6 +573,8 @@ public class BundleService extends CommonService<BundlePO> {
 			e.printStackTrace();
 		}
 	}
+	
+
 	
 	/**
 	 * 创建游客设备--播放器和pc<br/>

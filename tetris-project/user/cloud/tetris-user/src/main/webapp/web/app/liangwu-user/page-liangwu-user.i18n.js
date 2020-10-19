@@ -36,6 +36,7 @@ define(function () {
     labelCreateUserLastLoginTime: '上次登录时间',
     labelCreateUserBindIp: '绑定ip',
     labelCreateUserBindRole: '绑定角色',
+    labelCreateUserBindAccessNodeUid: '绑定服务节点',
     labelCreateUserPassword: '密码:',
     labelCreateUserRepeat: '确认:',
     placeholderCreateUserRepeat: '请再次输入密码！',

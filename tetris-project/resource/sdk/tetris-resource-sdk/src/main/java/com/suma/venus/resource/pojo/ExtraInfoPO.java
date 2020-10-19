@@ -1,6 +1,8 @@
 package com.suma.venus.resource.pojo;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -18,6 +20,16 @@ public class ExtraInfoPO extends CommonPO<ExtraInfoPO>{
 	private String value;
 	
 	private String bundleId;
+	
+	private String worknodeId;
+
+	public String getWorknodeId() {
+		return worknodeId;
+	}
+
+	public void setWorknodeId(String worknodeId) {
+		this.worknodeId = worknodeId;
+	}
 
 	public String getName() {
 		return name;
@@ -27,6 +39,8 @@ public class ExtraInfoPO extends CommonPO<ExtraInfoPO>{
 		this.name = name;
 	}
 
+	@Lob
+	@Column(name = "VALUE", columnDefinition="TEXT")
 	public String getValue() {
 		return value;
 	}

@@ -136,6 +136,32 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 循环录制文件大小*/
 	private Integer totalSizeMb;
 	
+	/** 所属任务任务名*/
+	private String taskName;
+	
+	/** 所属任务任务id*/
+	private Long taskId;
+	
+	@Column(name = "TASK_NAME")
+	public String getTaskName() {
+		return taskName;
+	}
+
+	public MonitorRecordPO setTaskName(String taskName) {
+		this.taskName = taskName;
+		return this;
+	}
+	
+	@Column(name = "TASK_ID")
+	public Long getTaskId() {
+		return taskId;
+	}
+
+	public MonitorRecordPO setTaskId(Long taskId) {
+		this.taskId = taskId;
+		return this;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "VIDEO_TYPE")
 	public MonitorRecordSourceType getVideoType() {

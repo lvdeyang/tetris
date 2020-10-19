@@ -19,7 +19,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = OutputSettingPO.class, idClass = Long.class)
 public interface OutputSettingDAO extends BaseDAO<OutputSettingPO>{
 	
-	public List<OutputSettingPO> findByGuideId(Long guideId);
-	
-	
+	public List<OutputSettingPO> findByGroupId(Long groupId);
+		
 }
