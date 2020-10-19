@@ -31,6 +31,7 @@ import com.sumavision.tetris.guide.BO.VideoOrAudioSourceBO;
 import com.sumavision.tetris.guide.control.AudioParametersDAO;
 import com.sumavision.tetris.guide.control.GuideDAO;
 import com.sumavision.tetris.guide.control.GuidePO;
+import com.sumavision.tetris.guide.control.OutType;
 import com.sumavision.tetris.guide.control.OutputGroupDAO;
 import com.sumavision.tetris.guide.control.OutputGroupPO;
 import com.sumavision.tetris.guide.control.OutputSettingDAO;
@@ -174,7 +175,7 @@ public class GuidePlayService {
 				throw new BaseException(StatusCode.ERROR,"备份源为空"); 
 			}
 			
-			PassByBO passBy=getOutputSettingPassBy(outputGroups.get(0));
+			PassByBO passBy=getOutputSettingPassBy(outputGroups.get(0),OutType.SWITCH);
 			
 			LogicBO outputLogic=new LogicBO();
 			if(outputLogic.getPass_by()==null){
@@ -182,6 +183,16 @@ public class GuidePlayService {
 			}
 			outputLogic.getPass_by().add(passBy);
 		 	executeBusiness.execute(outputLogic,  "备份源编码");
+		 	
+		 	//monitor输出
+            PassByBO passByMonitor=getOutputSettingPassBy(outputGroups.get(0),OutType.MONITOR);
+			
+			LogicBO outputMonitorLogic=new LogicBO();
+			if(outputMonitorLogic.getPass_by()==null){
+				outputMonitorLogic.setPass_by(new ArrayList<PassByBO>());
+			}
+			outputMonitorLogic.getPass_by().add(passByMonitor);
+		 	executeBusiness.execute(outputLogic,  "备份源Monitor编码");
 	 	}
 	 	
 	 	//备份源输出结束
@@ -660,14 +671,18 @@ public class GuidePlayService {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月24日 上午9:48:24
-	 * @param outputSource
+	 * @param outputSource OutType【预监or预览】
 	 * @return
 	 */
-	public PassByBO getOutputSettingPassBy(OutputGroupPO outputGroup){
+	public PassByBO getOutputSettingPassBy(OutputGroupPO outputGroup,OutType type){
 
 		PassByBO passBy=new PassByBO();
+		if(OutType.SWITCH.equals(type)){
+			passBy.setBundle_id(outputGroup.getUuid());
+		}else{
+			passBy.setBundle_id(outputGroup.getMonitorUuid());
+		}
 		
-		passBy.setBundle_id(outputGroup.getUuid());
 		passBy.setLayer_id(layer_id);
 		passBy.setType("CreateTask");
 		
@@ -719,17 +734,20 @@ public class GuidePlayService {
 		//sources结束
 
 //			map_outputs开始
+		
+		
 	 	if(outputGroup!=null&&outputGroup.getGuideId()!=null){
 	 		
 	 		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGroupId(outputGroup.getId());
 	 		
 	 		for(OutputSettingPO outputSource:sourceOutputList){
-
-				GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
-				guideOutputArray.setUrl(outputSource.getOutputAddress())
-				                .setBitrate(outputSource.getBitrate())
-				                .setRate_ctrl(outputSource.getRateCtrl());
-				GuideOutputArrays.add(guideOutputArray);
+	 			GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
+	 			if(outputSource.getOutType().equals(type)){
+					guideOutputArray.setUrl(outputSource.getOutputAddress())
+					                .setBitrate(outputSource.getBitrate())
+					                .setRate_ctrl(outputSource.getRateCtrl());
+				}
+	 			GuideOutputArrays.add(guideOutputArray);
 
 	 		}
 	 		

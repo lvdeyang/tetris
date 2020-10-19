@@ -30,6 +30,8 @@ public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 	/** 转码模板 */
 	private String transcodingTemplate;
 	
+	private String monitorUuid;
+	
 	public Long getId() {
 		return id;
 	}
@@ -83,6 +85,15 @@ public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 		this.transcodingTemplate = transcodingTemplate;
 		return this;
 	}
+	
+
+	public String getMonitorUuid() {
+		return monitorUuid;
+	}
+
+	public void setMonitorUuid(String monitorUuid) {
+		this.monitorUuid = monitorUuid;
+	}
 
 	@Override
 	public OutputGroupVO set(OutputGroupPO entity) throws Exception {
@@ -92,6 +103,7 @@ public class OutputGroupVO extends AbstractBaseVO<OutputGroupVO, OutputGroupPO>{
 		this.setSwitchingMode(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().toString(): null);
 		this.setSwitchingModeName(entity.getSwitchingMode()!= null ? entity.getSwitchingMode().getName(): null);
 		this.setTranscodingTemplate(entity.getTranscodingTemplate());
+		this.setMonitorUuid(entity.getMonitorUuid());
 		return this;
 	}
 	
