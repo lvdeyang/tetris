@@ -38,6 +38,8 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 	/** 输出组id */
 	private Long groupId;
 	
+	private String outType;
+	
 	public Long getId() {
 		return id;
 	}
@@ -118,6 +120,17 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.rateCtrlName = rateCtrlName;
 		return this;
 	}
+	
+	
+
+	public String getOutType() {
+		return outType;
+	}
+
+	public OutputSettingVO setOutType(String outType) {
+		this.outType = outType;
+		return this;
+	}
 
 	@Override
 	public OutputSettingVO set(OutputSettingPO entity) throws Exception {
@@ -130,6 +143,7 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.setRateCtrlName(entity.getRateCtrl()!= null ? entity.getRateCtrl().getName(): null);
 		this.setBitrate(entity.getBitrate());
 		this.setGroupId(entity.getGroupId());
+		this.setOutType(entity.getOutType().toString());
 		return this;
 	}
 	

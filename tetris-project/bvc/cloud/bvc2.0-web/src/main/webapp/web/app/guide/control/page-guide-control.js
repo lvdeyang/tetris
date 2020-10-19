@@ -455,6 +455,7 @@ define([
 							self.output.out[i].outputAddress = '';
 							self.output.out[i].rateCtrl = '';
 							self.output.out[i].bitrate = '';
+							self.output.out[i].outType = '';
 						}
 					}, null, ajax.NO_ERROR_CATCH_CODE);
 

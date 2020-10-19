@@ -47,6 +47,7 @@ public class OutputSettingService {
 		 for (OutputSettingVO e : list1){
 			 OutputSettingPO outputSettingPO = outputSettingDAO.findOne(e.getId());
 			 OutputProtocol protocol = OutputProtocol.fromName(e.getOutputProtocolName());
+			 outputSettingPO.setOutType(OutType.valueOf(e.getOutType()));
 			 outputSettingPO.setOutputProtocol(protocol);
 			 outputSettingPO.setOutputAddress(e.getOutputAddress());
 			 RateCtrl rateCtrl = RateCtrl.fromName(e.getRateCtrlName());

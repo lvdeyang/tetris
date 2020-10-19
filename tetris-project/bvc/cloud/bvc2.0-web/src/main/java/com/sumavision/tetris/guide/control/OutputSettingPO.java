@@ -43,6 +43,9 @@ public class OutputSettingPO extends AbstractBasePO {
 
 	/** 输出组id */
 	private Long groupId;
+	
+	/** 任务类型：预监任务，切换任务*/
+	private OutType outType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -99,5 +102,16 @@ public class OutputSettingPO extends AbstractBasePO {
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
+	@Column(name = "OUT_TYPE")
+	@Enumerated(value = EnumType.STRING)
+	public OutType getOutType() {
+		return outType;
+	}
+
+	public void setOutType(OutType outType) {
+		this.outType = outType;
+	}
+	
+	
 
 }
