@@ -21,6 +21,10 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return extraInfoDao.findByBundleId(bundleId);
 	}
 	
+	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds){
+		return extraInfoDao.findByBundleIdIn(bundleIds);
+	}
+	
 	public ExtraInfoPO findByBundleIdAndName(String bundleId,String name){
 		return extraInfoDao.findByBundleIdAndName(bundleId, name);
 	}

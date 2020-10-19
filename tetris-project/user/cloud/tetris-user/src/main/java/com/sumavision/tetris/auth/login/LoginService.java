@@ -3,13 +3,13 @@ package com.sumavision.tetris.auth.login;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
@@ -21,8 +21,10 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
@@ -68,6 +70,9 @@ public class LoginService {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private AlarmFeign alarmFeign;
 	
 	/**
 	 * 强制用户id登录<br/>
@@ -190,7 +195,8 @@ public class LoginService {
 			throw new PasswordErrorException(username, password);
 		} 
 		Date date = new Date();
-		user.setLastLoginTime(date);
+		user.setLastLoginTime(user.getUpdateTime());
+		user.setUpdateTime(date);
 		userDao.save(user);
 		if(TerminalType.QT_ZK.equals(terminalType)){
 			//指控终端重复登录校验
@@ -239,6 +245,24 @@ public class LoginService {
 		}
 		token.setIp(ip);
 		tokenDao.save(token);
+		
+		try{
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-user");
+			log.setUserName(user.getNickname());
+			log.setOprName("用户上线");
+			log.setSourceServiceIP("");
+			log.setOprDetail(new StringBufferWrapper().append("用户“")
+													  .append(user.getNickname())
+													  .append("”上线（")
+													  .append(DateUtil.format(user.getUpdateTime(), DateUtil.dateTimePattern))
+													  .append("）")
+													  .toString());
+			alarmFeign.sendOprlog(log);
+		}catch(Exception e){
+			System.out.println("用户登录日志存储失败！");
+		}
+		
 		return token.getToken();
 	}
 	

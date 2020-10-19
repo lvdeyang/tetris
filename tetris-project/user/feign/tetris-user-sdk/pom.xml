@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
     
     <name>tetris-user-feign</name>
-    <description>tetris-user-feign</description>
+    <description>用户sdk</description>
   
   	<packaging>jar</packaging>
   
