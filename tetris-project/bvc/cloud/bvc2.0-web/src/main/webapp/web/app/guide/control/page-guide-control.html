@@ -38,7 +38,7 @@
 					        <div style="width:620px;background:#f2f2f2;padding-left:15px; padding-top:10px; padding-bottom:10px; margin-top:10px;">
 								<div style="width:620px;">
 									<div style="color:#339999;font-weight:bold;text-align:center;padding-bottom:10px;">PVM</div>
-									<el-button v-for = "source in sources.list" :key = "source.id" type="primary"  size="mini" class="tab_btn ">{{source.index}}</el-button>
+									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPvm(source.id)" type="primary"  size="mini" class="tab_btn " :style="getPvmBackcolor(source)">{{source.index}}</el-button>
 								</div>
 								<div style="width:620px;margin-top:10px;">
 									<div style="color:#cc0033;font-weight:bold;text-align:center;padding-bottom:10px;">PGM</div>
@@ -446,7 +446,6 @@
 					<el-form v-for="item in output.out" :inline="true" label-width="100px" class="demo-form-inline" size="mini" :key="item.id" style="margin-bottom: 10px">
 
 						<el-checkbox v-model="item.isCheck" name="type" style="margin-left: 20px; margin-top: 2px;"></el-checkbox>
-					
 						<el-form-item label="输出类型">
 							<el-select v-model="item.outType" placeholder="请选择输出类型" style="width:178px">
 								<el-option label="预监任务" value="MONITOR"></el-option>

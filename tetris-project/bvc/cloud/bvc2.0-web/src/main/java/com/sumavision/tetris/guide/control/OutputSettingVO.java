@@ -143,7 +143,7 @@ public class OutputSettingVO extends AbstractBaseVO<OutputSettingVO, OutputSetti
 		this.setRateCtrlName(entity.getRateCtrl()!= null ? entity.getRateCtrl().getName(): null);
 		this.setBitrate(entity.getBitrate());
 		this.setGroupId(entity.getGroupId());
-		this.setOutType(entity.getOutType().toString());
+		this.setOutType(entity.getOutType()!=null?entity.getOutType().toString():null);
 		return this;
 	}
 	

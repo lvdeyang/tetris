@@ -37,6 +37,7 @@ define([
                     shortCutsRoutes:commons.data,
                     active:"/page-group-list",
 					curPgm:1,
+					curPvm:1,
                     dialog: {
                     	setSource:{
                     		visible: false,
@@ -491,10 +492,35 @@ define([
 					var self=this;
 					self.curPgm=index;
 				},
+				handleSelPvm:function(index){
+					var self=this;
+					self.curPvm=index;
+					
+					var questData = {
+						id: self.curPvm
+					};
+					ajax.post('/tetris/guide/control/source/po/pvmcut', questData, function (data, status) {
+						for(var i = 0; i < self.sources.list.length; i++){
+							if(self.sources.list[i].id === data.id){
+								self.sources.list[i].pvmCurrent = true;
+							}else{
+								self.sources.list[i].pvmCurrent = false;
+							}
+						}
+					}, null, ajax.NO_ERROR_CATCH_CODE);
+				},
 				getBackcolor:function(source){
 					var self=this;
 					if(source.current===true){
 						return "background:#cc0033"
+					}else{
+						return "background:#CCC"
+					}
+				},
+				getPvmBackcolor:function(source){
+					var self=this;
+					if(source.pvmCurrent===true){
+						return "background:#339999"
 					}else{
 						return "background:#CCC"
 					}
