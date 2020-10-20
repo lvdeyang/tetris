@@ -1,12 +1,18 @@
 //config.ini描述文件
-[{
-	"key":"",
-	"name":"名称",
-	"valueType":"TEXT, BOOLEAN, ENUM, IP",
-	//当valueType取值为ENUM时有valueSelect项
-	"valueSelect":[{
+{
+	config:[{
+		"key":"",
 		"name":"名称",
-		"value":"值"
+		"valueType":"TEXT, BOOLEAN, ENUM, IP",
+		//当valueType取值为ENUM时有valueSelect项
+		"valueSelect":[{
+			"name":"名称",
+			"value":"值"
+		}],
+		"defaultValue":""
 	}],
-	"defaultValue":""
-}]
+	process:[{
+		"id":"进程id",
+		"name":"进程中文别名"
+	}]
+}
