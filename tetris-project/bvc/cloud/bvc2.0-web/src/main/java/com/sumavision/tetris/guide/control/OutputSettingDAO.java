@@ -20,5 +20,7 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface OutputSettingDAO extends BaseDAO<OutputSettingPO>{
 	
 	public List<OutputSettingPO> findByGroupId(Long groupId);
+	
+	public List<OutputSettingPO> findByGroupIdAndOutType(Long groupId,OutType type);
 		
 }

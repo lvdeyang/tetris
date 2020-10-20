@@ -192,7 +192,7 @@ public class GuidePlayService {
 				outputMonitorLogic.setPass_by(new ArrayList<PassByBO>());
 			}
 			outputMonitorLogic.getPass_by().add(passByMonitor);
-		 	executeBusiness.execute(outputLogic,  "备份源Monitor编码");
+		 	executeBusiness.execute(outputMonitorLogic,  "备份源Monitor编码");
 	 	}
 	 	
 	 	//备份源输出结束
@@ -219,7 +219,7 @@ public class GuidePlayService {
 	 * @param sourceId
 	 * @throws Exception 
 	 */
-	public void exchange(Long guideId,Long sourceId) throws Exception{
+	public void exchange(Long guideId,Long sourceId,OutType type) throws Exception{
 		//切换源
 		//GuidePO guidePo=guideDao.findOne(guideId);
 		SourcePO source=sourceDao.findOne(sourceId);
@@ -227,7 +227,7 @@ public class GuidePlayService {
 		List<OutputGroupPO> outputGroups=outputGroupDao.findByGuideId(guideId);
 	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null&&outputGroups.get(0).getUuid()!=null){
 	 		
-	 		List<OutputSettingPO> outputs=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
+	 		List<OutputSettingPO> outputs=outputSettingDao.findByGroupIdAndOutType(outputGroups.get(0).getId(),type);
 	 		
 	 		if(outputs==null||outputs.size()==0){
 				throw new BaseException(StatusCode.ERROR, "备份源为空");
@@ -239,7 +239,13 @@ public class GuidePlayService {
 			
 			if(source.getSourceType().equals(SourceType.URL)){
 				PassByBO passBy=new PassByBO();
-				passBy.setBundle_id(outputGroups.get(0).getUuid());
+				if(OutType.MONITOR.equals(type)){
+					passBy.setBundle_id(outputGroups.get(0).getMonitorUuid());
+
+				}else{
+					passBy.setBundle_id(outputGroups.get(0).getUuid());
+
+				}
 				passBy.setLayer_id(layer_id);
 				passBy.setType("switchSource");
 				
@@ -259,8 +265,13 @@ public class GuidePlayService {
 				logic.getPass_by().add(passBy);
 			}else if(source.getSourceType().equals(SourceType.KNAPSACK_5G)){
 				PassByBO passBy=new PassByBO();
-				passBy.setBundle_id(outputGroups.get(0).getUuid());
-				passBy.setLayer_id(layer_id);
+				if(OutType.MONITOR.equals(type)){
+					passBy.setBundle_id(outputGroups.get(0).getMonitorUuid());
+
+				}else{
+					passBy.setBundle_id(outputGroups.get(0).getUuid());
+
+				}				passBy.setLayer_id(layer_id);
 				passBy.setType("switchSource");
 				
 				JSONObject pass_by_content=new JSONObject();
@@ -459,6 +470,18 @@ public class GuidePlayService {
 			passBy.setPass_by_content(pass_by_content);
 	 		
 	 		logic.getPass_by().add(passBy);
+	 		
+	 		
+	 		
+	 		PassByBO passByMonitor=new PassByBO();
+	 		passByMonitor.setBundle_id(outputGroups.get(0).getMonitorUuid());
+	 		passByMonitor.setLayer_id(layer_id);
+	 		passByMonitor.setType("deleteAllBackupSources");
+			
+			JSONObject pass_by_content_monitor=new JSONObject();
+			passByMonitor.setPass_by_content(pass_by_content_monitor);
+	 		
+	 		logic.getPass_by().add(passByMonitor);
 	 		
 	 	}
 		
@@ -741,13 +764,15 @@ public class GuidePlayService {
 	 		List<OutputSettingPO> sourceOutputList=outputSettingDao.findByGroupId(outputGroup.getId());
 	 		
 	 		for(OutputSettingPO outputSource:sourceOutputList){
-	 			GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
+	 			
 	 			if(outputSource.getOutType().equals(type)){
+	 				GuideOutputArrayBO guideOutputArray=new GuideOutputArrayBO();
 					guideOutputArray.setUrl(outputSource.getOutputAddress())
 					                .setBitrate(outputSource.getBitrate())
 					                .setRate_ctrl(outputSource.getRateCtrl());
+					GuideOutputArrays.add(guideOutputArray);
 				}
-	 			GuideOutputArrays.add(guideOutputArray);
+	 			
 
 	 		}
 	 		
