@@ -17,6 +17,7 @@ import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
@@ -372,25 +373,33 @@ public class VodService {
 		vodDao.save(vod);
 		
 		//点播用户作为成员
+		FolderUserMap userfolderUserMap = folderUserMapDao.findByUserId(user.getId());
+		boolean bUserLdap = queryUtil.isLdapUser(user, userfolderUserMap);
 		GroupMemberPO userMemberPO = new GroupMemberPO();
 		userMemberPO.setName(user.getName());
+		userMemberPO.setCode(user.getUserNo());
 		userMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
 		userMemberPO.setOriginId(user.getId().toString());
 		userMemberPO.setTerminalId(terminal.getId());
 		userMemberPO.setFolderId(user.getFolderId());
 		userMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
 		userMemberPO.setGroupId(group.getId());
+		if(bUserLdap) userMemberPO.setOriginType(OriginType.OUTER);
 		groupMemberDao.save(userMemberPO);
 		
 		//被点播用户作为成员
+		FolderUserMap vodUserfolderUserMap = folderUserMapDao.findByUserId(vodUser.getId());
+		boolean bVodUserLdap = queryUtil.isLdapUser(user, vodUserfolderUserMap);
 		GroupMemberPO vodUserMemberPO = new GroupMemberPO();
 		vodUserMemberPO.setName(vodUser.getName());
+		vodUserMemberPO.setCode(vodUser.getUserNo());
 		vodUserMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
 		vodUserMemberPO.setOriginId(vodUser.getId().toString());
 		vodUserMemberPO.setTerminalId(terminal.getId());
 		vodUserMemberPO.setFolderId(vodUser.getFolderId());
 		vodUserMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
 		vodUserMemberPO.setGroupId(group.getId());
+		if(bVodUserLdap) vodUserMemberPO.setOriginType(OriginType.OUTER);
 		groupMemberDao.save(vodUserMemberPO);
 		
 		vod.setSrcMemberId(vodUserMemberPO.getId());
@@ -610,6 +619,7 @@ public class VodService {
 		//点播用户作为成员
 		GroupMemberPO userMemberPO = new GroupMemberPO();
 		userMemberPO.setName(user.getName());
+		userMemberPO.setCode(user.getUserNo());
 		userMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
 		userMemberPO.setOriginId(user.getId().toString());
 		userMemberPO.setTerminalId(userTerminal.getId());
@@ -621,6 +631,7 @@ public class VodService {
 		//被点播设备作为成员
 		GroupMemberPO vodUserMemberPO = new GroupMemberPO();
 		vodUserMemberPO.setName(encoderBundleEntity.getBundleName());
+		vodUserMemberPO.setCode(encoderBundleEntity.getUsername());
 		vodUserMemberPO.setGroupMemberType(GroupMemberType.MEMBER_DEVICE);
 		vodUserMemberPO.setOriginId(bundleId);
 		vodUserMemberPO.setTerminalId(deviceTerminal.getId());//???
@@ -905,7 +916,7 @@ public class VodService {
 		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(allNeedClosePlayers, null, null, allNeedClosePlayers, codec, -1L);
 		executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播录制文件");
 		
-		return player;		
+		return player;
 	}
 
 	/**
