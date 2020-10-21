@@ -38,13 +38,15 @@ public class CommandStationBandwidthController {
 	public Object add(
 			String stationName,
 			Integer totalWidth,
-			Integer singleWidth) throws Exception{
+			Integer singleWidth,
+			String identity) throws Exception{
 		
 		CommandStationBandwidthPO station=new CommandStationBandwidthPO();
 		
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
+		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		
@@ -88,13 +90,15 @@ public class CommandStationBandwidthController {
 			Long id,
 			String stationName,
 			Integer totalWidth,
-			Integer singleWidth) throws ParseException{
+			Integer singleWidth,
+			String identity) throws ParseException{
 
 		CommandStationBandwidthPO station=commandStationBandwidthDao.findOne(id);
 		
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
+		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		

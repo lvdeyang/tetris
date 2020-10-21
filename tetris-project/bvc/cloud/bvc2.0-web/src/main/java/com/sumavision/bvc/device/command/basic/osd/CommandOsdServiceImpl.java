@@ -11,9 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.bvc.command.group.dao.CommandGroupDecoderScreenDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
-import com.sumavision.bvc.command.group.enumeration.SrcType;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
@@ -21,8 +19,6 @@ import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
-import com.sumavision.bvc.device.group.bo.ConnectBO;
-import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.OsdWrapperBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
@@ -33,16 +29,14 @@ import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
 import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistException;
 import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
-import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
-import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.page.PageTaskQueryService;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -90,6 +84,9 @@ public class CommandOsdServiceImpl {
 	
 	@Autowired
 	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	/**
 	 * 获取设备信息<br/>
@@ -207,7 +204,12 @@ public class CommandOsdServiceImpl {
 		}
 		
 		//后发设置
-		executeBusiness.execute(logic, "指控系统：重设播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+			businessReturnService.execute();
+		}else{
+			executeBusiness.execute(logic, "指控系统：重设播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		}
 		
 		//存储到资源层
 		for(BundleDTO bundle:bundles){
@@ -328,7 +330,12 @@ public class CommandOsdServiceImpl {
 		}
 		
 		//先发清除
-		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+			businessReturnService.execute();
+		}else{
+			executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + task.getDstBundleName());
+		}
 		
 		//存储到资源层
 		for(BundleDTO bundle:bundles){
