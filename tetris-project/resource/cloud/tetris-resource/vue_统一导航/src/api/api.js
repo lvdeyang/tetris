@@ -2,12 +2,13 @@ import axios from 'axios'
 
 var qs = require('qs')
 let requestIP = document.location.host.split(':')[0]
-
+console.log(requestIP)
 // TODO
 //let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
 //let basePath = process.env.RESOURCE_ROOT
 let basePath = document.location.origin;
-let loginUrl = process.env.USER_ROOT + '/vue'
+let loginUrl = process.env.USER_ROOT + '/vue';
+let bvcPath = document.location.protocol +"//"+document.location.hostname+':8214';
 
 if (basePath.indexOf('__requestIP__') !== -1) {
   basePath = basePath.replace('__requestIP__', requestIP)
@@ -18,13 +19,16 @@ if (loginUrl.indexOf('__requestIP__') !== -1) {
   loginUrl = loginUrl.replace('__requestIP__', requestIP)
   // console.log('loginUrl replace=' + loginUrl)
 }
-
+// if (bvcPath.indexOf('__requestIP__') !== -1) {
+//   bvcPath = bvcPath.replace('__requestIP__', requestIP)
+//   // console.log('loginUrl replace=' + loginUrl)
+// }
 let axiosInstance = axios.create({
   headers: {
-    'Access-Control-Allow-Origin': '*',
+    //'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Access-Control-Allow-Headers': 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild',
-    'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS'
+    //'Access-Control-Allow-Headers': 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild',
+    //'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS'
   },
   withCredentials: false
 })
@@ -35,7 +39,7 @@ axiosInstance.interceptors.request.use(function (config) {
   var bvcToken = localStorage.getItem('tetris-001');
   config.headers['tetris-001'] = resourceToken ? resourceToken : bvcToken;
   //config.headers['tetris-002'] = '';
-  config.headers.Authorization = resourceToken ? resourceToken : bvcToken;
+  //config.headers.Authorization = resourceToken ? resourceToken : bvcToken;
   return config
 }, function (err) {
   return Promise.reject(err)
@@ -345,4 +349,9 @@ export const queryCapacityDatas = params => {
 
 export const initCapacity = params => {
   return axiosInstance.post(`${basePath}/vedioCapacity/change/capacity`, qs.stringify(params)).then(res => res.data)
+}
+// https://192.165.56.131:8214/command/station/bandwidth/query
+console.log(bvcPath)
+export const getStationList = params => {
+  return axiosInstance.post(`${bvcPath}/command/station/bandwidth/query`, qs.stringify(params)).then(res => res.data)
 }
