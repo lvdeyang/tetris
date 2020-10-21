@@ -146,6 +146,16 @@ public class SourceController {
 	public Object cut(
 			Long id,
 			HttpServletRequest request) throws Exception{
-		return sourceService.cut(id);
+		return sourceService.cut(id,OutType.SWITCH);
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/pvmcut")
+	public Object pvmcut(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		return sourceService.cut(id,OutType.MONITOR);
+	}
+	
 }

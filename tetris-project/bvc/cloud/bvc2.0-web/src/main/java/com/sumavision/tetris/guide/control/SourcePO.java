@@ -44,6 +44,9 @@ public class SourcePO extends AbstractBasePO{
 	/** 源是否被切换到 */
 	private Boolean current;
 	
+	/**预监是否切换到*/
+	private Boolean pvmCurrent;
+	
 	/** 音量 */
 	private Long volume;
 	
@@ -112,6 +115,16 @@ public class SourcePO extends AbstractBasePO{
 		this.current = current;
 	}
 	
+	
+	@Column(name = "PGM_CURRENT")
+	public Boolean getPvmCurrent() {
+		return pvmCurrent;
+	}
+
+	public void setPvmCurrent(Boolean pvmCurrent) {
+		this.pvmCurrent = pvmCurrent;
+	}
+
 	@Column(name = "VOLUME")
 	public Long getVolume() {
 		return volume;

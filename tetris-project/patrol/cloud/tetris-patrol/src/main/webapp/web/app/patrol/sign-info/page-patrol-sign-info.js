@@ -86,7 +86,7 @@ define([
 
                     var h = self.$createElement;
                     self.$msgbox({
-                        title:'危险操作',
+                        title:'提示',
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
@@ -126,7 +126,41 @@ define([
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
-
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'提示',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['是否删除当前签到信息?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '是',
+                        cancelButtonText: '否',
+                        beforeClose:function(action, instance, done){
+                            if(action === 'confirm'){
+                                ajax.post('/sign/delete', {
+                                    id:row.id
+                                }, function(data){
+                                    for(var i=0; i<self.table.data.length; i++){
+                                        if(self.table.data[i].id === row.id){
+                                            self.table.data.splice(i, 1);
+                                            break;
+                                        }
+                                    }
+                                    self.table.page.total = self.table.page.total - 1;
+                                    if(self.table.data.length===0 && self.table.page.total>0){
+                                        self.load(self.table.page.currentPage-1);
+                                    }
+                                    done();
+                                });
+                            }else{
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
                 },
                 handleSizeChange:function(pageSize){
                     var self = this;

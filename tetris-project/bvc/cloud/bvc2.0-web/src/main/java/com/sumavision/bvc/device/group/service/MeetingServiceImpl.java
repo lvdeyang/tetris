@@ -197,6 +197,9 @@ public class MeetingServiceImpl {
 	@Autowired
 	private ResourceService resourceService;
 	
+	@Autowired
+	private DeviceGroupProceedRecordServiceImpl deviceGroupProceedRecordServiceImpl;
+	
 	/**
 	 * openBundle回复处理：离线
 	 * @Title: openBundleResponseOffline 
@@ -938,7 +941,9 @@ public class MeetingServiceImpl {
 			//保存设备组状态
 			deviceGroupDao.save(group);		
 		}
-				
+		
+		deviceGroupProceedRecordServiceImpl.saveStart(group);
+		
 		return group;
 	}
 	
@@ -1080,6 +1085,8 @@ public class MeetingServiceImpl {
 		
 		//调用逻辑层
 		executeBusiness.execute(logic, "逻辑层交互：设备组停止");
+		
+		deviceGroupProceedRecordServiceImpl.saveStop(group);
 		
 		return group;
 	}

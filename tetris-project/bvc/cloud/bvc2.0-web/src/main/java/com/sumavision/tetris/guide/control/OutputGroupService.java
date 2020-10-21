@@ -5,6 +5,7 @@ package com.sumavision.tetris.guide.control;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class OutputGroupService {
 	public OutputGroupVO add(String name) throws Exception{
 		OutputGroupPO outputGroupPO = new OutputGroupPO();
 		outputGroupPO.setName(name);
+		outputGroupPO.setMonitorUuid(UUID.randomUUID().toString().replace("-", ""));
 		outputGroupDAO.save(outputGroupPO);
 		/*VideoParametersPO videoParametersPO = new VideoParametersPO();
 		videoParametersPO.setGroupId(outputGroupPO.getId());

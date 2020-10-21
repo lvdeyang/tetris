@@ -34,6 +34,9 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 	/** 源是否被切换到 */
 	private Boolean current;
 	
+	/**预监是否切换到*/
+	private Boolean pvmCurrent;
+	
 	/** 音量 */
 	private Long volume;
 	
@@ -110,6 +113,16 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.current = current;
 	}
 	
+	
+	
+	public Boolean getPvmCurrent() {
+		return pvmCurrent;
+	}
+
+	public void setPvmCurrent(Boolean pvmCurrent) {
+		this.pvmCurrent = pvmCurrent;
+	}
+
 	public Long getVolume() {
 		return volume;
 	}
@@ -165,6 +178,7 @@ public class SourceVO extends AbstractBaseVO<SourceVO, SourcePO>{
 		this.setSource(entity.getSource());
 		this.setIndex(entity.getSourceNumber());
 		this.setCurrent(entity.getCurrent());
+		this.setPvmCurrent(entity.getPvmCurrent());
 		this.setVolume(entity.getVolume());
 		this.setIsPreviewOut(entity.getIsPreviewOut());
 		this.setPreviewOut(entity.getPreviewOut());

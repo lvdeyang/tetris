@@ -35,6 +35,8 @@ public class OutputGroupPO extends AbstractBasePO{
 	
 	/** 转码模板 */
 	private String transcodingTemplate;
+	
+	private String monitorUuid;
 
 	@Column(name = "GUIDE_ID")
 	public Long getGuideId() {
@@ -72,6 +74,16 @@ public class OutputGroupPO extends AbstractBasePO{
 	public void setTranscodingTemplate(String transcodingTemplate) {
 		this.transcodingTemplate = transcodingTemplate;
 	}
+	
+	@Column(name = "MONITOR_UUID")
+	public String getMonitorUuid() {
+		return monitorUuid;
+	}
+
+	public void setMonitorUuid(String monitorUuid) {
+		this.monitorUuid = monitorUuid;
+	}
+	
 	
 	
 }

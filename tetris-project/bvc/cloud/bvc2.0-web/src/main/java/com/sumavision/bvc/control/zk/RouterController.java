@@ -7,7 +7,53 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping(value = "/router")
 public class RouterController {
+	
+	//add by pangzhiyuan start using by liangwu project
+	@RequestMapping(value = "/lw_monitor/header")
+	public ModelAndView lwHeader(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/header/header");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	@RequestMapping(value = "/lw_monitor/index")
+	public ModelAndView lwIndex(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/index/right-bar");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	@RequestMapping(value = "/lw_monitor/hidden")
+	public ModelAndView lwHidden(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/hidden/hidden");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	@RequestMapping(value = "/lw_monitor/recordFile")
+	public ModelAndView lwRecordFile(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/recordFile/record-file");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	@RequestMapping(value = "/lw_monitor/settings")
+	public ModelAndView lwSettings(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/settings/leader-settings");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	@RequestMapping(value = "/lw_monitor/cloundControl")
+	public ModelAndView lwCloundControl(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/lw_monitor/clound-control/leader-cloud-control");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	//add by pangzhiyuan end using by liangwu project
 
+	
 	/**
 	 * 导航头<br/>
 	 * <b>作者:</b>lvdeyang<br/>

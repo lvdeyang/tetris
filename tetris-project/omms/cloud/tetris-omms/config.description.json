@@ -1,12 +1,21 @@
 //config.ini描述文件
-[{
-	"key":"",
-	"name":"名称",
-	"valueType":"TEXT, BOOLEAN, ENUM, IP",
-	//当valueType取值为ENUM时有valueSelect项
-	"valueSelect":[{
+{
+	config:[{
+		"key":"",
 		"name":"名称",
-		"value":"值"
+		"valueType":"TEXT, BOOLEAN, ENUM, IP, DBIP, DBPORT",
+		//当valueType取值为ENUM时有valueSelect项
+		"valueSelect":[{
+			"name":"名称",
+			"value":"值"
+		}],
+		"defaultValue":"",
+		//当valueType取值为DBPORT时标识成对的DBIP和DBPORT
+		"ref":"DBIP_KEY"
 	}],
-	"defaultValue":""
-}]
+	process:[{
+		"id":"进程id",
+		"name":"进程中文别名",
+		"db":"DBIP_KEY:DBPORT_KEY/数据库名"
+	}]
+}

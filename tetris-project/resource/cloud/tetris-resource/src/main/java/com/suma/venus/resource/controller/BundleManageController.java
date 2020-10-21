@@ -31,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
@@ -322,8 +320,10 @@ public class BundleManageController extends ControllerBase {
 			List<BundleVO> bundles = new ArrayList<BundleVO>();
 			int from = (pageNum - 1) * countPerPage;
 			int to = (pageNum * countPerPage > bundlePOs.size()) ? bundlePOs.size() : pageNum * countPerPage;
+			List<String> bundleIds = new ArrayList<String>();
 			for (int i = from; i < to; i++) {
 				BundlePO bundlePO = bundlePOs.get(i);
+				bundleIds.add(bundlePO.getBundleId());
 				BundleVO vo = BundleVO.fromPO(bundlePO);
 				if(bundlePO.getFolderId()!= null){
 					FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
@@ -336,6 +336,20 @@ public class BundleManageController extends ControllerBase {
 				}
 				bundles.add(vo);
 			}
+			
+			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+			if(extraInfos!=null && extraInfos.size()>0){
+				for(BundleVO bundle:bundles){
+					JSONObject params = new JSONObject();
+					for(ExtraInfoPO extraInfo:extraInfos){
+						if(bundle.getBundleId().equals(extraInfo.getBundleId())){
+							params.put(extraInfo.getName(), extraInfo.getValue());
+						}
+					}
+					bundle.setParam(params);
+				}
+			}
+			
 			data.put("resources", bundles);
 			data.put("total", bundlePOs.size());
 		} catch (Exception e) {
