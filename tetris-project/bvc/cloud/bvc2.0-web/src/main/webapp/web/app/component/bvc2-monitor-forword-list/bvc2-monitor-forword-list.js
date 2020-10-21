@@ -21,6 +21,7 @@ define([
     template: tpl,
     data: function () {
       return {
+        resourceApiUrl:'',
         table: {
           data: [],
           page: {
@@ -105,6 +106,7 @@ define([
           }
           self.tableCurrgenData = self.tableList.self;
           self.table.page.total = self.tableList.self.length;
+          // self.getCapacity()
           // self.table.page.total = self.selfForwordList.length;
         });
       },
@@ -119,8 +121,16 @@ define([
               identity: "self",
               stationName: "本域",
             })
-            // window.localStorage.setItem('stationList',JSON.stringify(self.stationList));
             self.load(1);
+            // self.getCapacity()
+          }
+        })
+      },
+      getCapacity(){
+        ajax.post(this.resourceApiUrl+'/vedioCapacity/query', null, function (data, status) {
+          if (status == 200) {
+            
+            
           }
         })
       },
@@ -243,9 +253,12 @@ define([
     },
     mounted: function () {
       var self = this;
-     
+      
+      var resourceApiUrl = document.location.protocol +"//"+document.location.hostname+':8213';
+      self.resourceApiUrl =resourceApiUrl;
+      console.log(resourceApiUrl)
       self.loadStation()
-
+      // self.getCapacity()
     },
     updated() {
 
