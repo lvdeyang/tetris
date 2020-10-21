@@ -2737,8 +2737,9 @@ public class GroupService {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月24日 下午1:16:42
-	 * @param videoAudioMap
+	 * <b>日期：</b>2020年10月20日 下午3:23:26
+	 * @param group
+	 * @param sourceBOs
 	 * @param codec
 	 * @param userId
 	 * @return
@@ -2759,8 +2760,8 @@ public class GroupService {
 			OriginType originType = sourceBO.getOriginType();
 			if(OriginType.INNER.equals(originType)){
 				ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
-				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
-	//			BundlePO bundlePO = sourceBO.getVideoBundle();//后续改成这个
+//				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+				BundlePO bundlePO = sourceBO.getVideoBundle();//后续改成这个
 				PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 				ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 						            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
@@ -2818,23 +2819,48 @@ public class GroupService {
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);
+				}else if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
+					//点播外部用户，passby拉流
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
 				}
 			}
 		}
 		
 		return logic;
 	}
-
+	
 	/**
-	 * 点播挂断协议<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * 关闭编码器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月24日 下午5:23:22
-	 * @param vod 点播信息
-	 * @param codec 点播信息
-	 * @param userId adminId
-	 * @param closeDecoder 是否关闭播放器/解码器，通常true，在换源业务时使用false
-	 * @return LogicBO 协议
+	 * <b>日期：</b>2020年10月20日 下午3:23:44
+	 * @param group
+	 * @param sourceBOs
+	 * @param codec
+	 * @param userId
+	 * @return
+	 * @throws Exception
 	 */
 	//TODO:检索设备或通道是否还在使用
 	public LogicBO closeEncoder(
@@ -2884,6 +2910,28 @@ public class GroupService {
 					
 					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
 					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}else if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);

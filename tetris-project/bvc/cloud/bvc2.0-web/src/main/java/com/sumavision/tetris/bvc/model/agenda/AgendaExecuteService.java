@@ -7,12 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoUtil;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.service.ResourceRemoteService;
+import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
@@ -31,6 +42,7 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.OriginType;
@@ -173,6 +185,9 @@ public class AgendaExecuteService {
 	private RunningAgendaDAO runningAgendaDao;
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private AutoCombineService autoCombineService;
 	
 	@Autowired
@@ -195,6 +210,9 @@ public class AgendaExecuteService {
 	
 	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
@@ -224,6 +242,9 @@ public class AgendaExecuteService {
 	
 	@Autowired
 	private BusinessReturnService businessReturnService;
+	
+	/** 级联使用：联网接入层id */
+	private String localLayerId = null;
 	
 //	private Map<String, TerminalBundlePO> terminalBundleMap = new HashMap<String, TerminalBundlePO>();
 	
@@ -286,6 +307,19 @@ public class AgendaExecuteService {
 			BusinessInfoType businessInfoType,
 			AgendaForwardType agendaForwardType) throws Exception{
 		
+		//先把用户查出来
+		List<Long> userIds = new ArrayList<Long>();
+		for(GroupMemberPO member : sourceMembers){
+			GroupMemberType groupMemberType = member.getGroupMemberType();
+			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
+				userIds.add(Long.parseLong(member.getOriginId()));
+			}
+		}
+		String userIdListStr = StringUtils.join(userIds.toArray(), ",");
+		List<UserBO> allUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+		if(allUserBos == null) allUserBos = new ArrayList<UserBO>();
+		List<FolderUserMap> userMaps = folderUserMapDao.findByUserIdIn(userIds);
+		
 		//确认源（可能多个）
 		List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
 //		List<ChannelSchemeDTO> srcChannels = new ArrayList<ChannelSchemeDTO>();
@@ -303,15 +337,22 @@ public class AgendaExecuteService {
 			
 			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
 				
-				List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
-				//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
-				for(TerminalBundleUserPermissionPO p : ps){
-					Long terminalBundleId = p.getTerminalBundleId();
-					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
-					TerminalBundleType type = terminalBundlePO.getType();
-					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
-						String bundleId = p.getBundleId();
-						bundleIds.add(bundleId);
+				if(originType.equals(OriginType.OUTER)){
+					//级联用户，bundleId用成员的uuid
+					SourceBO sourceBO = ldapUserMemberToSource(member, businessId, businessInfoType, agendaForwardType);
+					sourceBOs.add(sourceBO);
+					continue;
+				}else{					
+					List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
+					//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
+					for(TerminalBundleUserPermissionPO p : ps){
+						Long terminalBundleId = p.getTerminalBundleId();
+						TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
+						TerminalBundleType type = terminalBundlePO.getType();
+						if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
+							String bundleId = p.getBundleId();
+							bundleIds.add(bundleId);
+						}
 					}
 				}
 				
@@ -333,16 +374,11 @@ public class AgendaExecuteService {
 			}else if(groupMemberType.equals(GroupMemberType.MEMBER_DEVICE)){
 				
 				if(originType.equals(OriginType.OUTER)){
-					String localLayerId = resourceRemoteService.queryLocalLayerId();
-					String useBundleId = new StringBufferWrapper().append(originId).append("_").append(originId).toString();
-					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
-					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+//					String localLayerId = resourceRemoteService.queryLocalLayerId();
+//					String useBundleId = new StringBufferWrapper().append(originId).append("_").append(originId).toString();
+//					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+//					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
 					//bundlePO应该实际查询
-					//造数据 videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
-//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
-//							.setChannelId(videoChannelId)
-//							.setBaseType("outer_no_base_type")
-//							.setChannelName("outer_no_video_channel_name");
 				}
 				
 				bundleIds.add(originId);
@@ -350,6 +386,7 @@ public class AgendaExecuteService {
 			}
 			//查出bundle
 			List<BundlePO> srcBundlePOs = resourceBundleDao.findByBundleIds(bundleIds);
+			if(srcBundlePOs == null) srcBundlePOs = new ArrayList<BundlePO>();
 			
 			//查出视频编码通道
 			List<ChannelSchemeDTO> videoEncodeChannels = resourceChannelDao.findByBundleIdsAndChannelType(bundleIds, ResourceChannelDAO.ENCODE_VIDEO);
@@ -365,8 +402,8 @@ public class AgendaExecuteService {
 //			
 //			List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
 //			if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
-			
-			//级联设备
+						
+			//级联设备，bundleId用设备的bundleId
 			for(BundlePO srcBundlePO : srcBundlePOs){
 				if(originType.equals(OriginType.OUTER)){
 					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
@@ -405,7 +442,7 @@ public class AgendaExecuteService {
 				}
 			}
 			
-			//遍历视频通道，找到对应的音频通道
+			//本系统设备：遍历视频通道，找到对应的音频通道
 			for(ChannelSchemeDTO videoEncode1Channel : videoEncodeChannels){
 				BundlePO videoBundle = queryUtil.queryBundlePOByBundleId(srcBundlePOs, videoEncode1Channel.getBundleId());
 				if(queryUtil.isLdapBundle(videoBundle)) continue;
@@ -472,6 +509,7 @@ public class AgendaExecuteService {
 			String originId = member.getOriginId();
 			Long terminalId = member.getTerminalId();
 			GroupMemberType groupMemberType = member.getGroupMemberType();
+			OriginType originType = member.getOriginType();
 			List<String> bundleIds = new ArrayList<String>();
 			
 			//该用户成员绑定的多个设备
@@ -480,24 +518,31 @@ public class AgendaExecuteService {
 			List<TerminalBundleConferenceHallPermissionPO> hps = null;
 						
 			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
-
-				//该用户成员绑定的多个设备
-				ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
 				
-				//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
-				for(TerminalBundleUserPermissionPO p : ps){
+				if(originType.equals(OriginType.OUTER)){
+					//级联用户，bundleId用成员的uuid
+					SourceBO sourceBO = ldapUserMemberToSource(member, businessId, businessInfoType, agendaForwardType);
+					sourceBOs.add(sourceBO);
+					continue;
+				}else{
+					//该用户成员绑定的多个设备
+					ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
 					
-					//如果通道不包含该终端，则跳过
-					if(!terminalBundleIds.contains(p.getTerminalBundleId())){
-						continue;
-					}					
-					
-					Long terminalBundleId = p.getTerminalBundleId();
-					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
-					TerminalBundleType type = terminalBundlePO.getType();
-					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
-						String bundleId = p.getBundleId();
-						bundleIds.add(bundleId);
+					//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
+					for(TerminalBundleUserPermissionPO p : ps){
+						
+						//如果通道不包含该终端，则跳过
+						if(!terminalBundleIds.contains(p.getTerminalBundleId())){
+							continue;
+						}					
+						
+						Long terminalBundleId = p.getTerminalBundleId();
+						TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
+						TerminalBundleType type = terminalBundlePO.getType();
+						if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
+							String bundleId = p.getBundleId();
+							bundleIds.add(bundleId);
+						}
 					}
 				}
 				
@@ -527,6 +572,7 @@ public class AgendaExecuteService {
 			
 			//查出bundle，该成员与所需通道相关的bundle
 			List<BundlePO> srcBundlePOs = resourceBundleDao.findByBundleIds(bundleIds);
+			if(srcBundlePOs == null) srcBundlePOs = new ArrayList<BundlePO>();
 			
 			//查出编码通道
 			List<ChannelSchemeDTO> encodeChannels = resourceChannelDao.findByBundleIdsAndChannelType(bundleIds, 0);
@@ -630,8 +676,9 @@ public class AgendaExecuteService {
 	 * @param dstMembers
 	 * @param sourceBOs
 	 * @return
+	 * @throws Exception 
 	 */
-	public List<CommonForwardPO> obtainCommonForwardsFromSource(List<GroupMemberPO> dstMembers, List<SourceBO> sourceBOs){
+	public List<CommonForwardPO> obtainCommonForwardsFromSource(List<GroupMemberPO> dstMembers, List<SourceBO> sourceBOs) throws Exception{
 		List<CommonForwardPO> forwards = new ArrayList<CommonForwardPO>();
 		for(GroupMemberPO dstMember : dstMembers){
 			if(!dstMember.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
@@ -678,6 +725,10 @@ public class AgendaExecuteService {
 						forward.setSrcBundleType(bundlePO.getBundleType());
 						forward.setSrcBundleId(bundlePO.getBundleId());
 						forward.setSrcLayerId(bundlePO.getAccessNodeUid());
+						if(queryUtil.isLdapBundle(bundlePO)){
+							if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+							forward.setSrcLayerId(localLayerId);
+						}
 						forward.setSrcChannelId(video.getChannelId());
 						forward.setSrcBaseType(video.getBaseType());
 						forward.setSrcChannelName(video.getChannelName());
@@ -708,6 +759,10 @@ public class AgendaExecuteService {
 							forward.setSrcAudioBundleType(audioBundlePO.getBundleType());
 							forward.setSrcAudioBundleId(audioBundlePO.getBundleId());
 							forward.setSrcAudioLayerId(audioBundlePO.getAccessNodeUid());
+							if(queryUtil.isLdapBundle(audioBundlePO)){
+								if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+								forward.setSrcAudioLayerId(localLayerId);
+							}
 							forward.setSrcAudioChannelId(audio.getChannelId());
 							forward.setSrcAudioBaseType(audio.getBaseType());
 							forward.setSrcAudioChannelName(audio.getChannelName());
@@ -1361,6 +1416,52 @@ public class AgendaExecuteService {
 		//持久化 oldForwards不需要吧？
 		commonForwardDao.save(addForwards);
 		commonForwardDao.deleteInBatch(removeForwards);
+	}
+	
+	private SourceBO ldapUserMemberToSource(
+			GroupMemberPO ldapMember,
+			String businessId,
+			BusinessInfoType businessInfoType,
+			AgendaForwardType agendaForwardType
+			){
+		String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+		String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+		BundlePO srcBundlePO = new BundlePO();
+		srcBundlePO.setSourceType(SOURCE_TYPE.EXTERNAL);
+		srcBundlePO.setBundleId(ldapMember.getUuid());
+		srcBundlePO.setUsername(ldapMember.getCode());
+//		srcBundlePO.setAccessNodeUid(accessNodeUid);//实际上这里设了也没用
+		//造数据，videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
+		ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
+				.setBundleId(ldapMember.getUuid())
+				.setChannelId(videoChannelId)
+				.setBaseType("outer_no_base_type")
+				.setChannelName("outer_no_video_channel_name");
+		ChannelSchemeDTO audioEncodeChannel = new ChannelSchemeDTO()
+				.setBundleId(ldapMember.getUuid())
+				.setChannelId(audioChannelId)
+				.setBaseType("outer_no_base_type")
+				.setChannelName("outer_no_video_channel_name");
+		SourceBO sourceBO = new SourceBO()
+				.setOriginType(OriginType.OUTER)
+				.setGroupMemberType(ldapMember.getGroupMemberType())
+				.setMemberUuid(ldapMember.getUuid())
+				.setBusinessId(businessId)
+				.setBusinessInfoType(businessInfoType)
+				.setAgendaForwardType(agendaForwardType)//音/视频，如果没有音频，这里是否应该写成“视频”？
+				.setSrcVideoId(ldapMember.getOriginId())
+				.setSrcVideoMemberId(ldapMember.getId())
+				.setSrcVideoName(ldapMember.getName())
+				.setSrcVideoCode(ldapMember.getCode())
+				.setVideoSourceChannel(videoEncodeChannel)
+				.setVideoBundle(srcBundlePO);
+		sourceBO.setAudioSourceChannel(audioEncodeChannel)
+				.setAudioBundle(srcBundlePO)
+				.setSrcAudioId(ldapMember.getOriginId())
+				.setSrcAudioMemberId(ldapMember.getId())
+				.setSrcAudioName(ldapMember.getName())
+				.setSrcAudioCode(ldapMember.getCode());
+		return sourceBO;
 	}
 
 	/**
