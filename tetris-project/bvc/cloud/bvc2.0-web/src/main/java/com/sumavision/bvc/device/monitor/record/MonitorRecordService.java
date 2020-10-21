@@ -2167,7 +2167,7 @@ public class MonitorRecordService {
 				MonitorRecordManyTimesPO record=monitorRecordManyTimesDao.findOne(timeSegmentId);
 				
 				if(!MonitorRecordStatus.STOP.equals(record.getStatus())){
-					throw new BaseException(StatusCode.ERROR,"录制任务还未结束");
+					throw new BaseException(StatusCode.FORBIDDEN,"录制任务还未结束");
 				}
 				
 				LogicBO logic = new LogicBO().setUserId("-1").setPass_by(new ArrayList<PassByBO>());
@@ -2187,14 +2187,13 @@ public class MonitorRecordService {
 					
 					executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
 					
-					//不太清楚
 					operationLogService.send(userUtils.queryUserById(userId).getName(), "删除录制", "删除排期录制任务id："+record.getId());
 				}
 				
 				monitorRecordManyTimesDao.delete(record);
 				
 			}else if(!file.getUserId().toString().equals(userId.toString())){
-				throw new BaseException(StatusCode.ERROR,"没有权限删除");
+				throw new BaseException(StatusCode.FORBIDDEN,"没有权限删除");
 			}
 		}else{
 			if (file.getUserId().toString().equals(userId.toString())
@@ -2245,13 +2244,12 @@ public class MonitorRecordService {
 				monitorRecordDao.delete(file);
 					
 			}else if(!MonitorRecordStatus.STOP.equals(file.getStatus())){
-				throw new BaseException(StatusCode.ERROR,"录制任务还未结束");
+				throw new BaseException(StatusCode.FORBIDDEN,"录制任务还未结束");
 			}
 			else if(!file.getUserId().toString().equals(userId.toString())){
-				throw new BaseException(StatusCode.ERROR,"没有权限删除");
+				throw new BaseException(StatusCode.FORBIDDEN,"没有权限删除");
 			}
 		}
-		
 		
 	}
 
