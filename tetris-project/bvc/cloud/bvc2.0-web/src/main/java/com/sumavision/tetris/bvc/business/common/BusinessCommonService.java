@@ -7,9 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
@@ -20,6 +22,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
+import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
@@ -64,6 +67,7 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -180,6 +184,9 @@ public class BusinessCommonService {
 
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 
 	public RolePO queryGroupMemberRole(GroupPO group) {
 		BusinessType businessType = group.getBusinessType();
@@ -322,11 +329,18 @@ public class BusinessCommonService {
 		}
 
 		List<Long> consumeIds = new ArrayList<Long>();
-		for (Long userId : userIds) {
-			WebsocketMessageVO ws = websocketMessageService.send(userId, message, type);
-			consumeIds.add(ws.getId());
+		if(businessReturnService.getSegmentedExecute()){
+			for (Long userId : userIds) {
+				MessageSendCacheBO cache = new MessageSendCacheBO(userId, message, type);
+				businessReturnService.add(null, cache, null);
+			}
+		}else{
+			for (Long userId : userIds) {
+				WebsocketMessageVO ws = websocketMessageService.send(userId, message, type);
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 		}
-		websocketMessageService.consumeAll(consumeIds);
 	}
 
 	/**

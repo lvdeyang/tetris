@@ -412,11 +412,19 @@ public class VodService {
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
-		executeBusiness.execute(logic, group.getName() + "，打开编码");
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+		}else{
+			executeBusiness.execute(logic, group.getName() + "，打开编码");
+		}
 		
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_USER);//TODO
 		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
 	}
 	
 	/**
@@ -483,7 +491,11 @@ public class VodService {
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
-			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+			}else{
+				executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+			}
 			
 			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
@@ -492,18 +504,9 @@ public class VodService {
 			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
 			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
 			
-//			----------------------测试
-//			BusinessReturnBO businessReturnBO=businessReturnService.getAndRemove();
-//			executeBusiness.execute(businessReturnBO.getLogic(), "最终下发命令执行");
-//			
-//			List<Long> consumeIds = new ArrayList<Long>();
-//			List<MessageSendCacheBO> caches=businessReturnBO.getWebsocketCaches();
-//			for(MessageSendCacheBO cache : caches){
-//				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
-//				consumeIds.add(ws.getId());
-//				}
-//			websocketMessageService.consumeAll(consumeIds);
-//			----------------------测试结束
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
 			
 			//删除这些PO
 			groupDao.delete(group);
@@ -645,11 +648,20 @@ public class VodService {
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
-		executeBusiness.execute(logic, group.getName() + "，打开编码");
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+		}else{
+			executeBusiness.execute(logic, group.getName() + "，打开编码");
+		}
 		
 		//执行议程
 		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_DEVICE);//TODO
-		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//TODO 命令合并（已完成）
+		
+		//命令合并下发
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
 	}
 	
 	/**
@@ -689,14 +701,25 @@ public class VodService {
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
-			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+			}else{
+				executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+			}
+			
+//			
 			
 			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
 			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(dstMember.getOriginId(), dstMember.getTerminalId(), GroupMemberType.MEMBER_USER);
 			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
-			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);
+			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);//TODO 命令合并下发 （已完成）
+			
+			//命令合并下发
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
 			
 			//删除这些PO
 			groupDao.delete(group);

@@ -45,6 +45,7 @@ import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
@@ -123,6 +124,9 @@ public class CommandBasicController {
 	
 	@Autowired
 	private CommandOsdServiceImpl commandOsdServiceImpl;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	/**
 	 * 查询会议或指挥名称<br/>
@@ -478,6 +482,7 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
+		businessReturnService.init(Boolean.TRUE);
 		Object result = groupService.start(Long.parseLong(id), -1);
 		return result;		
 	}
@@ -501,6 +506,8 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 
 		Long userId = userUtils.getUserIdFromSession(request);
+		
+		businessReturnService.init(Boolean.TRUE);
 		Object chairSplits = groupService.stop(userId, Long.parseLong(id), 0);
 		return chairSplits;
 	}
@@ -513,6 +520,7 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.pause(Long.parseLong(id));
 		return new JSONArray();
 	}
@@ -525,6 +533,7 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.pauseRecover(Long.parseLong(id));
 		return new JSONArray();
 	}	
@@ -554,6 +563,8 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
+		
+		businessReturnService.init(Boolean.TRUE);
 		groupService.exitApply(userId, Long.parseLong(id));
 		return null;
 	}
@@ -570,6 +581,7 @@ public class CommandBasicController {
 //		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
+//		businessReturnService.init(Boolean.TRUE);
 		Object splits = groupService.removeMembersByMemberIds(Long.parseLong(id), userIdArray, 0);
 		
 		return splits;
@@ -587,6 +599,7 @@ public class CommandBasicController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupService.exitApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
 		
 		return null;
@@ -604,6 +617,8 @@ public class CommandBasicController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		List<Long> hallIdArray = JSONArray.parseArray(hallIds, Long.class);
+		
+		businessReturnService.init(Boolean.TRUE);
 		Object splits = groupService.addOrEnterMembers(Long.parseLong(id), userIdArray, hallIdArray, null);
 		return splits;
 	}
@@ -629,6 +644,8 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
+		
+		businessReturnService.init(Boolean.TRUE);
 		Object splits = groupService.removeMembers2(Long.parseLong(id), userIdArray, 2);
 		return splits;
 	}
@@ -654,6 +671,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.startSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
@@ -680,6 +698,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.stopSilence(Long.parseLong(id), userId, true, false);
 		
 		return null;
@@ -706,6 +725,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.startSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
@@ -732,6 +752,7 @@ public class CommandBasicController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		businessReturnService.init(Boolean.TRUE);
 		groupFunctionService.stopSilence(Long.parseLong(id), userId, false, true);
 		
 		return null;
@@ -749,6 +770,7 @@ public class CommandBasicController {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/vod/member/start")
@@ -776,6 +798,7 @@ public class CommandBasicController {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/vod/member/stop")
@@ -807,6 +830,7 @@ public class CommandBasicController {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/roll/all/vod/members")
@@ -853,6 +877,7 @@ public class CommandBasicController {
 		List<Long> srcUserIds = JSONArray.parseArray(src, Long.class);
 		List<Long> userIds = JSONArray.parseArray(dst, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		List<ForwardReturnBO> result = commandForwardServiceImpl.forward(Long.parseLong(id), srcUserIds, null, userIds);
 		
 		return result;
@@ -883,6 +908,7 @@ public class CommandBasicController {
 		List<String> bundleIds = JSONArray.parseArray(src, String.class);
 		List<Long> userIds = JSONArray.parseArray(dst, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		List<ForwardReturnBO> result = commandForwardServiceImpl.forward(Long.parseLong(id), null, bundleIds, userIds);
 		
 		return result;
@@ -912,6 +938,7 @@ public class CommandBasicController {
 		
 		List<Long> demandIds = JSONArray.parseArray(forwardIds, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		List<Object> result = commandForwardServiceImpl.forwardAgree(userId, Long.parseLong(id), demandIds);
 		
 		return result;
@@ -939,6 +966,7 @@ public class CommandBasicController {
 		
 		List<Long> demandIds = JSONArray.parseArray(forwardIds, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		commandForwardServiceImpl.forwardRefuse(Long.parseLong(id), demandIds);
 		
 		return null;
@@ -969,6 +997,7 @@ public class CommandBasicController {
 		List<String> resourceIds = JSONArray.parseArray(src, String.class);
 		List<Long> userIds = JSONArray.parseArray(dst, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		List<ForwardReturnBO> result = commandForwardServiceImpl.forwardFile(Long.parseLong(id), resourceIds, userIds);
 		
 		return result;
@@ -998,6 +1027,7 @@ public class CommandBasicController {
 		
 		List<Long> demandIds = JSONArray.parseArray(forwardIds, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		List<Object> result = commandForwardServiceImpl.forwardAgree(userId, Long.parseLong(id), demandIds);
 		
 		return result;
@@ -1025,6 +1055,7 @@ public class CommandBasicController {
 		
 		List<Long> demandIds = JSONArray.parseArray(forwardIds, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		commandForwardServiceImpl.forwardRefuse(Long.parseLong(id), demandIds);
 		
 		return null;
@@ -1052,6 +1083,7 @@ public class CommandBasicController {
 		
 		List<Long> demandIds = JSONArray.parseArray(forwardIds, Long.class);
 		
+		businessReturnService.init(Boolean.FALSE);
 		commandForwardServiceImpl.stopByChairman(Long.parseLong(id), demandIds);
 		
 		return null;
@@ -1080,6 +1112,7 @@ public class CommandBasicController {
 		Long demandId = Long.parseLong(businessId.split("-")[1]);
 		List<Long> demandIds = new ArrayListWrapper<Long>().add(demandId).getList();
 		
+		businessReturnService.init(Boolean.FALSE);
 		JSONArray splits = commandForwardServiceImpl.stopByMember(userId, demandIds);
 		
 		return splits;
@@ -1140,6 +1173,7 @@ public class CommandBasicController {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/stop/user/video/send")
@@ -1167,6 +1201,7 @@ public class CommandBasicController {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/stop/user/audio/send")
@@ -1199,6 +1234,7 @@ public class CommandBasicController {
 			Long osdId,
 			HttpServletRequest request) throws Exception{
 		
+		businessReturnService.init(Boolean.TRUE);
 		commandOsdServiceImpl.setOsd(serial, osdId);
 		return null;
 	}
@@ -1217,6 +1253,7 @@ public class CommandBasicController {
 			Integer serial,
 			HttpServletRequest request) throws Exception{
 		
+		businessReturnService.init(Boolean.TRUE);
 		commandOsdServiceImpl.clearOsd(serial);
 		return null;
 	}
