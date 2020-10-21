@@ -29,7 +29,8 @@ define([
         treeLoading: false,
         isExterior: "",
         decodeTitle: "本域解码器",
-        activeName: 'self'
+        activeName: 'self',
+        stationList:[]
       }
     },
     methods: {
@@ -148,15 +149,26 @@ define([
           // return true
         } else {
           var extend_param = JSON.parse(extraInfo.extend_param)
-          // if (value == (extend_param.region == "external").toString()) return true
-          // if (value != (extend_param.region == "external").toString()) return false
           return (value == extend_param.region)
         }
       },
       handleClick(tab, event) {
         this.isExterior = tab.name
 
-      }
+      },
+      loadStation: function () {
+        var self = this;
+        ajax.post('/command/station/bandwidth/query', null, function (data, status) {
+          if (status == 200) {
+            self.stationList = data.rows;
+            self.stationList.unshift({
+              id: 999,
+              identity: "self",
+              stationName: "本域",
+            })
+          }
+        })
+      },
     },
     watch: {
       isExterior: {
@@ -166,17 +178,18 @@ define([
             self.$refs.tree2.filter(val);
           })
 
-          if (val == "self") {
-            self.decodeTitle = "本域解码器"
-          } else {
-            self.decodeTitle = "外域解码器"
-          }
+          // if (val == "self") {
+          //   self.decodeTitle = "本域解码器"
+          // } else {
+          //   self.decodeTitle = "外域解码器"
+          // }
         },
 
       }
     },
     mounted: function () {
       var self = this;
+      this.loadStation()
       this.initTree()
       // self.load(1);
     }

@@ -410,7 +410,9 @@ export default {
           bundleFolderId: row.bundleFolderId,
           transcod: row.transcod,
           multicastSourceIp: row.multicastSourceIp,
-
+          accessNodeName: row.accessNodeUid,
+          accessNodeUid: row.accessNodeUid,
+          deviceModel: row.deviceModel
         }
       });
     }
