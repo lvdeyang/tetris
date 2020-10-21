@@ -1,16 +1,16 @@
 <div class="bvc2-monitor-forword-list"
   style="width:100%; height:100%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
   <el-button size='small' type='primary' @click="openForword" v-if="buttonIsShow">配置转发</el-button>
+  <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button>  
   <!-- <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button> -->
-  <el-tag type="danger" style="margin-left: 10px;">当前转发数：{{totleForword}}/200</el-tag>
-  
+  <el-tag type="danger" style="margin-left: 10px;">当前转发数：{{totleForword}}/200</el-tag>  
   <div style="position:absolute; left:10px; top:60px; right:10px; bottom:60px;">
-    <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="本域转发" name="self"></el-tab-pane>
-      <el-tab-pane label="外域转发" name="external">
-        <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button>
-        <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
-        <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
+    <el-tabs v-model="activeName" @tab-click="handleClick"  >
+      <el-tab-pane v-for="item in stationList" :label="item.stationName" :name="item.identity" ::key="item.identity">
+        <div v-if="item.identity != 'self'">
+          <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
+          <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
+        </div>
       </el-tab-pane>
     </el-tabs>
     <el-table :data="tableData" height="100%" style="width:100%">

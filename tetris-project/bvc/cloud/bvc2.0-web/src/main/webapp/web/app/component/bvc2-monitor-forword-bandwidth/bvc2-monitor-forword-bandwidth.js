@@ -30,7 +30,8 @@ define([
               id: "",
               stationName: '',
               totalWidth: '',
-              singleWidth: ''
+              singleWidth: '',
+              identity:''
             }
           },
 
@@ -61,6 +62,7 @@ define([
         self.dialog.addStation.form.stationName = row.stationName;
         self.dialog.addStation.form.totalWidth = row.totalWidth;
         self.dialog.addStation.form.singleWidth = row.singleWidth;
+        self.dialog.addStation.form.identity = row.identity;
       },
       load: function () {
         var self = this;

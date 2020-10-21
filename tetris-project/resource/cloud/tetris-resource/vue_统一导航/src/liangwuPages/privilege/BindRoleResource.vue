@@ -1,12 +1,12 @@
 <template>
   <section>
-    <el-card style="float:left;margin-top:10px;width:20%;font-size: 18px;" body-style="padding:0px">
+    <el-card style="float:left;margin-top:10px;width:15%;font-size: 18px;" body-style="padding:0px">
       <el-table ref="roleTable" :data="roles" highlight-current-row v-loading="roleTableLoading" @current-change="handleRoleTableRowChange" style="width: 100%;">
         <el-table-column prop="name" label="角色名" sortable>
         </el-table-column>
       </el-table>
     </el-card>
-    <el-card style="float:left;margin-left:50px;margin-top:10px;width:70%;" body-style="padding:0px">
+    <el-card style="float:left;margin-left:50px;margin-top:10px;width:80%;" body-style="padding:0px">
       <div slot="header" class="clearfix">
         <!--
         <span style="float: left;font-size: 18px;">设备资源</span>
@@ -34,15 +34,19 @@
 
       <!--资源列表-->
       <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="480">
-        <el-table-column type="index" width="100"></el-table-column>
-        <el-table-column prop="name" label="名称" width="200" sortable>
+        <!-- <el-table-column type="index" width="100"></el-table-column> -->
+        <el-table-column prop="name" label="名称" width="100" sortable>
         </el-table-column>
-        <el-table-column prop="deviceModel" label="资源类型" width="200" sortable>
+        <el-table-column prop="deviceModel" label="资源类型" width="120" sortable>
+          <template slot-scope="scope">
+            <div v-if="scope.row.deviceModel=='jv210'">终端设备</div>
+            <div v-else>存储设备</div>
+          </template>
         </el-table-column>
         <!--<el-table-column prop="bundleId" label="资源ID" width="350"  sortable>-->
         <!--</el-table-column>-->
-        <el-table-column prop="username" label="设备账号" width="270">
-        </el-table-column>
+        <!-- <el-table-column prop="username" label="设备账号" width="270">
+        </el-table-column> -->
         <el-table-column width="150" :render-header="renderCheckReadHeader">
           <template slot-scope="scope">
             <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
