@@ -3,6 +3,7 @@ package com.sumavision.bvc.device.monitor.record;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -305,7 +306,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 			Pageable pageable);
 	
 	/**
-	 * 根据条件查询所有未完成的录制<br/>
+	 * 根据条件查询所有未完成的录制（status决定）<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月17日 下午7:11:00
@@ -360,6 +361,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 	 * @param Date endTime 开始时间上限
 	 * @param String userId 执行业务用户id
 	 * @param String status 录制执行状态
+	 * @param String fileNameReg 录制任务名
 	 * @param Pageable pageable 分页信息
 	 * @return List<MonitorRecordPO> 录制列表
 	 */
@@ -418,7 +420,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
 				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
-				"AND IF(?7 IS NULL OR ?6='', TRUE, RECORD_USER_ID=?7) " + 
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " + 
 				"\n#pageable\n",
 		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
 				"mode IS NOT NULL " + 
@@ -428,7 +430,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
 				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
-				"AND IF(?7 IS NULL OR ?6='', TRUE, RECORD_USER_ID=?7) " ,
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " ,
 		nativeQuery = true
 	)
 	public Page<MonitorRecordPO> findAllByConditionsAndStatus(
@@ -440,6 +442,95 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 			String status,
 			Long recordUserId,
 			Pageable pageable);
+	
+	/**
+	 * 根据条件查询mode对应所有状态录制任务<br/>//注释都要修改
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午7:11:00
+	 * @param String mode 录制模式
+	 * @param String videoBundleId 录制设备id
+	 * @param Date startTime 开始时间下限
+	 * @param Date endTime 开始时间上限
+	 * @param Set<String> bundleIdSet bundleid集合
+	 * @param String status 录制执行状态
+	 * @param String fileNameReg 录制任务名
+	 * @param Pageable pageable 分页信息
+	 * @return List<MonitorRecordPO> 录制列表
+	 */
+	@Query(
+		value = "SELECT * FROM BVC_MONITOR_RECORD WHERE " + 
+				"1=1 "+
+				"AND IF(?1 IS NULL OR ?1='' ,TRUE, MODE=?1) " +
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3) " + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, END_TIME<=?4) " + 
+				"AND (coalesce (?5 , null) is null or VIDEO_BUNDLE_ID in ?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
+				"AND IF(?9 IS NULL OR ?9='', TRUE, TASK_NAME=?9) " +
+				"\n#pageable\n",
+		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " +
+				"1=1 "+
+				"AND IF(?1 IS NULL OR ?1='' ,TRUE, MODE=?1) " + 
+				"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3) " + 
+				"AND IF(?4 IS NULL OR ?4='', TRUE, END_TIME<=?4) " + 
+				"AND (coalesce (?5 , null) is null or VIDEO_BUNDLE_ID in ?5) " +
+				"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
+				"AND IF(?9 IS NULL OR ?9='', TRUE, TASK_NAME=?9) " ,
+		nativeQuery = true
+	)
+	public Page<MonitorRecordPO> findByConditionsAndStatusAndBundleIdIn(
+			String mode,
+			String videoBundleId,
+			Date startTime,
+			Date endTime,
+			Set<String> bundleIdSet,
+			String status,
+			Long recordUserId,
+			String fileNameReg,
+			String taskName,
+			Pageable pageable);
+	
+	
+	
+	@Query(
+			value = "SELECT * FROM BVC_MONITOR_RECORD WHERE " + 
+					"1=1 "+
+					"AND IF(?1 IS NULL OR ?1='' ,TRUE, MODE=?1) " +
+					"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+					"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3) " + 
+					"AND IF(?4 IS NULL OR ?4='', TRUE, END_TIME<=?4) " + 
+					"AND IF(?5 IS NULL OR ?5='', TRUE, FILE_NAME like ?5) " +
+					"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+					"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+					"\n#pageable\n ",
+			countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " +
+					"1=1 "+
+					"AND IF(?1 IS NULL OR ?1='' ,TRUE, MODE=?1) " + 
+					"AND IF(?2 IS NULL OR ?2='', TRUE, VIDEO_BUNDLE_ID=?2) " + 
+					"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3) " + 
+					"AND IF(?4 IS NULL OR ?4='', TRUE, END_TIME<=?4) " + 
+					"AND IF(?5 IS NULL OR ?5='', TRUE, FILE_NAME like ?5) "+
+					"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
+					"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+					"AND IF(?8 IS NULL OR ?9='', TRUE, TASK_NAME=?8) ",
+			nativeQuery = true
+		)
+		public Page<MonitorRecordPO> findAllByConditionsAndStatusAndBundleIdIn(
+				String mode,
+				String videoBundleId,
+				Date startTime,
+				Date endTime,
+				String fileNameReg,
+				String status,
+				Long recordUserId,
+				String taskName,
+				Pageable pageable);
 	
 	public List<MonitorRecordPO> findByIdIn(Collection<Long> ids);
 	

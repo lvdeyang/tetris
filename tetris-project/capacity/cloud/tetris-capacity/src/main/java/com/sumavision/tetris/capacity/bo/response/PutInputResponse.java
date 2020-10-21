@@ -12,6 +12,8 @@ public class PutInputResponse {
 	
 	private Integer result_code;
 
+	private String result_msg;
+
 	public String getMsg_id() {
 		return msg_id;
 	}
@@ -29,5 +31,13 @@ public class PutInputResponse {
 		this.result_code = result_code;
 		return this;
 	}
-	
+
+	public String getResult_msg() {
+		return result_msg;
+	}
+
+	public PutInputResponse setResult_msg(String result_msg) {
+		this.result_msg = result_msg;
+		return this;
+	}
 }

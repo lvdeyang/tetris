@@ -2,7 +2,6 @@ package com.sumavision.bvc.control.device.command.group.vod;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,6 +16,7 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.vod.VodService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -44,6 +44,9 @@ public class CommandVodController {
 
 	@Autowired
 	private VodService vodService;
+	
+	@Autowired 
+	private BusinessReturnService businessReturnService;
 
 	/**
 	 * 通用方法，指定播放器，播放各种类型的资源<br/>
@@ -82,8 +85,10 @@ public class CommandVodController {
 				throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
 			} else if ("user".equals(type)) {
 				UserBO vodUser = userUtils.queryUserById(Long.parseLong(id));
+				businessReturnService.init(Boolean.TRUE);
 				vodService.userStart(user, vodUser, serial);
 			} else if ("device".equals(type)) {
+				businessReturnService.init(Boolean.TRUE);
 				vodService.deviceStart(user, id, serial);
 			}
 
@@ -112,6 +117,7 @@ public class CommandVodController {
 
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
+			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, -1);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -147,6 +153,7 @@ public class CommandVodController {
 
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
+			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, serial);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -179,6 +186,7 @@ public class CommandVodController {
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 
+			businessReturnService.init(Boolean.TRUE);
 			List<String> resourceFileIdList = JSON.parseArray(resourceFileIds, String.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
 			for (String resourceFileId : resourceFileIdList) {
@@ -215,6 +223,7 @@ public class CommandVodController {
 			Long userId = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(userId);
 
+			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStop(user, businessId);
 
 			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex()).getMap();
@@ -248,7 +257,7 @@ public class CommandVodController {
 			// CommandGroupUserPlayerPO player =
 			// commandVodService.seeOneselfUserStart(user, admin, true);
 			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-
+			businessReturnService.init(Boolean.TRUE);
 			vodService.userStart(user, user, null);
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 
@@ -280,7 +289,7 @@ public class CommandVodController {
 			UserBO vodUser = userUtils.queryUserById(userId);
 
 			// vodService.userStop(153L);//test
-
+			businessReturnService.init(Boolean.TRUE);
 			vodService.userStart(user, vodUser, null);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
@@ -316,6 +325,7 @@ public class CommandVodController {
 
 			// vodService.userStop(153L);//test
 
+			businessReturnService.init(Boolean.TRUE);
 			vodService.userStart(user, vodUser, serial);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
@@ -372,6 +382,7 @@ public class CommandVodController {
 			UserBO admin = new UserBO();
 			admin.setId(-1L);
 	
+			businessReturnService.init(Boolean.TRUE);
 			List<UserBO> vodUsers=new ArrayList<UserBO>();
 			for (Long userId : userIdList) {
 				UserBO vodUser = userUtils.queryUserById(userId);
@@ -406,8 +417,7 @@ public class CommandVodController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 下午1:55:25
 	 * 
-	 * @param Long
-	 *            businessId 业务id
+	 * @param Long businessId 业务id
 	 */
 	@JsonBody
 	@ResponseBody
@@ -426,6 +436,7 @@ public class CommandVodController {
 
 			// CommandGroupUserPlayerPO player =
 			// commandVodService.userStop(user, businessId, admin);
+			businessReturnService.init(Boolean.TRUE);
 			vodService.userStop(businessId);
 
 			return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
@@ -459,7 +470,7 @@ public class CommandVodController {
 			// CommandGroupUserPlayerPO player =
 			// commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
 			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-
+			businessReturnService.init(Boolean.TRUE);
 			vodService.deviceStart(user, deviceId, null);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
@@ -505,6 +516,7 @@ public class CommandVodController {
 			// commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
 			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 
+			businessReturnService.init(Boolean.TRUE);
 			vodService.deviceStart(user, deviceId, serial);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
@@ -562,6 +574,7 @@ public class CommandVodController {
 			UserBO admin = new UserBO();
 			admin.setId(-1L);
 
+			businessReturnService.init(Boolean.TRUE);
 			for (String deviceId : deviceIdList) {
 				try {
 					vodService.deviceStart(user, deviceId, null);
@@ -605,6 +618,7 @@ public class CommandVodController {
 			UserBO admin = new UserBO();
 			admin.setId(-1L);
 
+			businessReturnService.init(Boolean.TRUE);
 			vodService.deviceStop(businessId);
 
 			return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
@@ -631,6 +645,8 @@ public class CommandVodController {
 
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
+			
+			businessReturnService.init(Boolean.TRUE);
 			commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();// .set(player);
@@ -649,6 +665,7 @@ public class CommandVodController {
 		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 
+			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.recordVodStop(user, serial);
 
 			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex()).getMap();
