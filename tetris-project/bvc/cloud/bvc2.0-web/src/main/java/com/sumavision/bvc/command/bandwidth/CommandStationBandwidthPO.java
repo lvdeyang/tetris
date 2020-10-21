@@ -20,6 +20,19 @@ public class CommandStationBandwidthPO extends AbstractBasePO{
 	
 	/** 单路带宽*/
 	private Integer singleWidth;
+	
+	/** 标识符*/
+	private String identity;
+
+	@Column(name="IDENTITY")
+	public String getIdentity() {
+		return identity;
+	}
+
+	public CommandStationBandwidthPO setIdentity(String identity) {
+		this.identity = identity;
+		return this;
+	}
 
 	@Column(name="STATION_NAME")
 	public String getStationName() {

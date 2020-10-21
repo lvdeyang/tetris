@@ -6,13 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
-import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoUtil;
+
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
@@ -41,6 +38,7 @@ import com.sumavision.tetris.bvc.business.bo.MemberChangedTaskBO;
 import com.sumavision.tetris.bvc.business.bo.ModifyMemberRoleBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
@@ -60,6 +58,11 @@ import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConference
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.AutoCombineService;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoDAO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoPO;
+import com.sumavision.tetris.bvc.model.agenda.combine.CombineVideoUtil;
 import com.sumavision.tetris.bvc.model.role.RoleChannelDAO;
 import com.sumavision.tetris.bvc.model.role.RoleChannelPO;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
@@ -83,6 +86,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -218,7 +222,8 @@ public class AgendaExecuteService {
 	@Autowired
 	private AgendaDAO agendaDao;
 	
-	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 //	private Map<String, TerminalBundlePO> terminalBundleMap = new HashMap<String, TerminalBundlePO>();
 	
@@ -1031,7 +1036,12 @@ public class AgendaExecuteService {
 			deviceGroupCombineVideoDao.delete(deleteCombineVideo);
 		}
 		deviceGroupCombineVideoDao.save(newAndUpdatecombineVideos);
-		executeBusiness.execute(combineVideoLogic, "给虚拟源创建/更新/停止合屏");
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(combineVideoLogic, null, null);
+		}else{
+			executeBusiness.execute(combineVideoLogic, "给虚拟源创建/更新/停止合屏");
+		}
 		
 		
 		//----------再次遍历memberSourceMap，非用户的成员观看合屏，用户看单画面，生成CommonForwardPO
@@ -1272,7 +1282,7 @@ public class AgendaExecuteService {
 		List<CommonForwardPO> newForwards = new ArrayList<CommonForwardPO>();
 		List<AgendaPO> agendas = agendaDao.findRunningAgendasByGroupId(groupId);
 		for(AgendaPO agenda : agendas){
-			List<CommonForwardPO> forwards = obtainCommonForwards(agenda, groupId);
+			List<CommonForwardPO> forwards = obtainCommonForwards(agenda, groupId); //TODO 合并命令 （已完成）
 			//取并集
 			newForwards.removeAll(forwards);
 			newForwards.addAll(forwards);

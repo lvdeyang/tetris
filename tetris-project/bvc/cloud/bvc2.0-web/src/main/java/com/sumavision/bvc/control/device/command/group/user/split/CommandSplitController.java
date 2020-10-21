@@ -17,6 +17,7 @@ import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.split.CommandSplitServiceImpl;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
@@ -45,9 +46,10 @@ public class CommandSplitController {
 	private PageInfoDAO	pageInfoDao;
 	
 	@Autowired
-	
 	private UserUtils userUtils;
 	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	/**
 	 * 切换分屏方案<br/>
 	 * <p>详细描述</p>
@@ -76,7 +78,12 @@ public class CommandSplitController {
 		PlayerSplitLayout newSplitLayout = PlayerSplitLayout.fromId(split);
 		int pageSize = newSplitLayout.getPlayerCount();
 		
+		businessReturnService.init(Boolean.TRUE);
 		pageTaskService.jumpToPageAndChangeSplit(pageInfo, 1, pageSize);
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
 		
 		return null;
 	}
@@ -92,7 +99,12 @@ public class CommandSplitController {
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
 		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		
+		businessReturnService.init(Boolean.TRUE);
 		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()+1, pageInfo.getPageSize());
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
 		
 		return null;
 	}
@@ -108,7 +120,12 @@ public class CommandSplitController {
 		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
 		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 		
+		businessReturnService.init(Boolean.TRUE);
 		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()-1, pageInfo.getPageSize());
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
 		
 		return null;
 	}

@@ -82,6 +82,7 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
@@ -98,6 +99,7 @@ import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -190,6 +192,9 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 		
 	public CommandGroupPO save(
 			Long creatorUserId,
@@ -4091,8 +4096,14 @@ public class CommandBasicServiceImpl {
 			Set<CommandGroupForwardPO> needForwards = new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet();
 			LogicBO logic = openBundle(null, null, allPlayers, needForwards, null, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needForwards, null, null, null, codec, group.getUserId());
-			logic.merge(logicCastDevice);			
-			executeBusiness.execute(logic, dstMember.getUserName() + " 观看 " + srcMember.getUserName());
+			logic.merge(logicCastDevice);
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+				businessReturnService.execute();
+			}else{
+				executeBusiness.execute(logic, dstMember.getUserName() + " 观看 " + srcMember.getUserName());
+			}
+			
 			operationLogService.send(user.getNickname(), "主席开始观看成员", user.getNickname() + "主席开始观看成员groupId:" + groupId + ", userId:" + memberUserId);
 			return player;
 		}
@@ -4146,7 +4157,12 @@ public class CommandBasicServiceImpl {
 			LogicBO logic = closeBundle(null, null, needClosePlayers, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(null, null, null, needClosePlayers, codec, group.getUserId());
 			logic.merge(logicCastDevice);
-			executeBusiness.execute(logic, dstMember.getUserName() + " 停止观看 " + srcMember.getUserName());
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+				businessReturnService.execute();
+			}else{
+				executeBusiness.execute(logic, dstMember.getUserName() + " 停止观看 " + srcMember.getUserName());
+			}
 			
 			if(needClosePlayers.size() > 0){
 				return needClosePlayers.get(0);
