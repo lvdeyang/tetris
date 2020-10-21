@@ -3,16 +3,19 @@
 	config:[{
 		"key":"",
 		"name":"名称",
-		"valueType":"TEXT, BOOLEAN, ENUM, IP",
+		"valueType":"TEXT, BOOLEAN, ENUM, IP, DBIP, DBPORT",
 		//当valueType取值为ENUM时有valueSelect项
 		"valueSelect":[{
 			"name":"名称",
 			"value":"值"
 		}],
-		"defaultValue":""
+		"defaultValue":"",
+		//当valueType取值为DBPORT时标识成对的DBIP和DBPORT
+		"ref":"DBIP_KEY"
 	}],
 	process:[{
 		"id":"进程id",
-		"name":"进程中文别名"
+		"name":"进程中文别名",
+		"db":"DBIP_KEY:DBPORT_KEY/数据库名"
 	}]
 }
