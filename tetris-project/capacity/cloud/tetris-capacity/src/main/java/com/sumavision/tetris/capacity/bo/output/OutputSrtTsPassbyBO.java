@@ -143,6 +143,9 @@ public class OutputSrtTsPassbyBO extends OutputBaseMediaBO<OutputSrtTsPassbyBO>{
 		return this;
 	}
 
+	public OutputSrtTsPassbyBO() {
+	}
+
 	public OutputSrtTsPassbyBO(String url, String local_ip) {
 		this.ip = IpV4Util.getIpFromUrl(url);
 		this.port = IpV4Util.getPortFromUrl(url);

@@ -66,7 +66,7 @@ public class ResponseService {
 		if(outputs != null && outputs.size() > 0){
 			for(ResultResponse output_response: outputs){
 				if(!output_response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
-					throw new InputResponseErrorException(output_response.getResult_msg());
+					throw new OutputResponseErrorException(output_response.getResult_msg());
 				}
 			}
 		}

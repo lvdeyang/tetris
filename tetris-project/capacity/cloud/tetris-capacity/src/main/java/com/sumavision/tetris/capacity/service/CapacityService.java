@@ -8,7 +8,12 @@ import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
+import com.sumavision.tetris.capacity.enumeration.OutputResponseEnum;
+import com.sumavision.tetris.capacity.enumeration.TaskResponseEnum;
 import com.sumavision.tetris.capacity.exception.HttpTimeoutException;
+import com.sumavision.tetris.capacity.exception.InputResponseErrorException;
+import com.sumavision.tetris.capacity.exception.OutputResponseErrorException;
+import com.sumavision.tetris.capacity.exception.TaskResponseErrorException;
 import com.sumavision.tetris.capacity.util.http.HttpUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -36,11 +41,11 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月11日 下午1:41:19
 	 * @return GetInputsResponse
 	 */
-	public GetInputsResponse getInputs() throws Exception{
+	public GetInputsResponse getInputs(String transfromIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		
-		return getInputs(msg_id);
+		return getInputs(msg_id,transfromIp);
 	}
 	
 	/**
@@ -51,10 +56,10 @@ public class CapacityService {
 	 * @param msg_id 消息id
 	 * @return GetInputsRespBO 输入信息
 	 */
-	private GetInputsResponse getInputs(String msg_id) throws Exception{
+	private GetInputsResponse getInputs(String msg_id,String transformIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(transformIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -324,7 +329,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
+			throw new InputResponseErrorException(response.getResult_msg());
+		}
 		return response;
 		
 	}
@@ -352,6 +359,7 @@ public class CapacityService {
 		LOG.info("[modify-elements] response, result: {}",res);
 
 		if(res == null) throw new HttpTimeoutException(ip);
+
 
 	}
 
@@ -562,7 +570,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
+			throw new InputResponseErrorException(response.getResult_msg());
+		}
 		return response;
 		
 	}
@@ -839,7 +849,7 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
-		
+
 		return response;
 		
 	}
@@ -902,7 +912,7 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
-		
+
 		return response;
 		
 	}
@@ -971,7 +981,10 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResultResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResultResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(TaskResponseEnum.SUCCESS.getCode())){
+			throw new TaskResponseErrorException(response.getResult_msg());
+		}
+
 		return response;
 		
 	}
@@ -1036,7 +1049,10 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
+			throw new InputResponseErrorException(response.getResult_msg());
+		}
+
 		return response;
 		
 	}
@@ -1101,7 +1117,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(capacityIp);
 
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(TaskResponseEnum.SUCCESS.getCode())){
+			throw new TaskResponseErrorException(response.getResult_msg());
+		}
 		return response;
 		
 	}
@@ -1166,7 +1184,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskRealIndexResponse response = JSONObject.parseObject(res.toJSONString(), TaskRealIndexResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
+			throw new InputResponseErrorException(response.getResult_msg());
+		}
 		return response;
 		
 	}
@@ -1212,7 +1232,7 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetOutputsResponse response = JSONObject.parseObject(res.toJSONString(), GetOutputsResponse.class);
-		
+
 		return response;
 		
 	}
@@ -1258,7 +1278,7 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(capacityIp);
 		
 		CreateOutputsResponse response = JSONObject.parseObject(res.toJSONString(), CreateOutputsResponse.class);
-		
+
 		return response;
 		
 	}
@@ -1413,7 +1433,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(OutputResponseEnum.SUCCESS.getCode())){
+			throw new OutputResponseErrorException(response.getResult_msg());
+		}
 		return response;
 		
 	}
@@ -1580,7 +1602,9 @@ public class CapacityService {
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
-		
+		if (response.getResult_code()!=null && !response.getResult_code().equals(TaskResponseEnum.SUCCESS.getCode())){
+			throw new TaskResponseErrorException(response.getResult_msg());
+		}
 		return response;
 	}
 	

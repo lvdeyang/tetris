@@ -2,30 +2,33 @@
   style="width:100%; height:100%; padding-left:10px; padding-right:10px; box-sizing:border-box; background-color:#fff;">
   <div style="width:100%; height:100%; position:relative;">
     <div style="width:100%; padding-top:10px; box-sizing:border-box;">
-      <el-button size="small" @click="handleAddRecord" type="primary">添加录制</el-button>
       <!--<el-button size="small" type="danger">停止录制</el-button>-->
-      <el-select size="small" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
+     
+      <el-input size="mini" v-model="condition.fileName" placeholder="请输入任务名称" style="width:150px; margin-left:10px;"></el-input>
+      <el-select size="mini" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
         <el-option key="ALL" label="全部" value="ALL"></el-option>
-        <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
+        <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
         <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
         <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
         <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
       </el-select>
-      <el-select size="small" v-model="condition.status" placeholder="任务状态" style="width:150px; margin-left:10px;">
+      <el-select size="mini" v-model="condition.status" placeholder="任务状态" style="width:150px; margin-left:10px;">
         <el-option key="" label="全部" value=""></el-option>
         <el-option key="WAITING" label="等待" value="WAITING"></el-option>
         <el-option key="RUN" label="进行中" value="RUN"></el-option>
         <el-option key="STOP" label="已完成" value="STOP"></el-option>
-        <el-option key="WAITINGTORESTART" label="等待重新开始" value="WAITINGTORESTART"></el-option>
+        <!-- <el-option key="WAITINGTORESTART" label="等待重新开始" value="WAITINGTORESTART"></el-option> -->
       </el-select>
-      <el-input size="small" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true"
-        style="width:150px; margin-left:10px;" @click.native="handleSelectDevice"></el-input>
-      <el-date-picker size="small" v-model="condition.timeScope" type="datetimerange" start-placeholder="开始日期"
+      <el-input size="mini" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true"
+        style="width:150px; margin-left:10px;" @click.native="handleSelectDevice" ></el-input>
+      <el-date-picker size="mini" v-model="condition.timeScope" type="datetimerange" start-placeholder="开始日期"
         end-placeholder="结束日期" :default-time="['12:00:00']" style="margin-left:10px;">
       </el-date-picker>
-      <el-button type="primary" size="small" @click="handleTotalSizeMb">设置磁盘大小</el-button>
-      <el-tag type="success" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag>
-      <el-tag type="danger" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
+      <el-button type="primary" size="mini" @click="handleReset">重置</el-button>
+      <el-button type="primary" size="mini" @click="handleTotalSizeMb">设置磁盘大小</el-button>
+      <el-button size="mini" @click="handleAddRecord" type="success">添加录制</el-button>
+      <el-tag type="success" size="mini" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag>
+      <el-tag type="danger" size="mini" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
     </div>
     <div style="width:100%;height: calc(100% - 150px);  left:0; bottom:52px; background-color:#fff;overflow: auto;">
       <el-table height="100%" :data="table.data" stripe style="width: 100%; min-height: calc(100% - 150px);">
@@ -33,7 +36,7 @@
                         type="selection"
                         width="55">
                 </el-table-column>-->
-        <el-table-column fixed prop="fileName" label="录制任务名">
+        <el-table-column fixed prop="fileName" label="录制任务名" sortable>
         </el-table-column>
         <el-table-column prop="mode" label="录制模式" width="100">
         </el-table-column>
@@ -123,7 +126,7 @@
                   <el-form-item style="margin-bottom:10px;">
                     <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式"
                       @change="addRecordModeChange" style="width:400px;">
-                      <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
+                      <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
                       <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
                       <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
                       <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
