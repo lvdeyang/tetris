@@ -50,7 +50,7 @@ public class OutputGroupService {
 	public OutputGroupVO add(String name) throws Exception{
 		OutputGroupPO outputGroupPO = new OutputGroupPO();
 		outputGroupPO.setName(name);
-		outputGroupPO.setMonitorUuid(UUID.randomUUID().toString());
+		outputGroupPO.setMonitorUuid(UUID.randomUUID().toString().replace("-", ""));
 		outputGroupDAO.save(outputGroupPO);
 		/*VideoParametersPO videoParametersPO = new VideoParametersPO();
 		videoParametersPO.setGroupId(outputGroupPO.getId());
