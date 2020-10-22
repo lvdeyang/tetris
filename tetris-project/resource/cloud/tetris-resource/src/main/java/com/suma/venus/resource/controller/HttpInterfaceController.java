@@ -115,6 +115,7 @@ import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.WorkNodeVO;
 import com.suma.venus.resource.vo.WsVO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
@@ -866,6 +867,7 @@ public class HttpInterfaceController {
 			log.setOprName("设备上线");
 			log.setSourceServiceIP("");
 			log.setOprDetail(bundleId);
+			log.setOprlogType(EOprlogType.DEVICE_ONLINE);
 			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 			if (null == po) {
@@ -918,6 +920,7 @@ public class HttpInterfaceController {
 			log.setOprName("设备下线");
 			log.setSourceServiceIP("");
 			log.setOprDetail(bundleId);
+			log.setOprlogType(EOprlogType.DEVICE_OFFLINE);
 			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 
