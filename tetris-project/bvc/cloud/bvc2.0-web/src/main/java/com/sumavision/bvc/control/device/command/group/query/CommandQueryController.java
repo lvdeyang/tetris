@@ -3,6 +3,7 @@ package com.sumavision.bvc.control.device.command.group.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -607,6 +608,9 @@ public class CommandQueryController {
 		folders =folderIds.stream().map(folderId->{
 			return folderMap.get(folderId);
 		}).collect(Collectors.toList());
+		
+		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//根据bundleIds从资源层查询channels
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);
