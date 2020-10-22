@@ -4,9 +4,13 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 
 @Entity
 @Table(name = "oprlogpo")
@@ -32,6 +36,10 @@ public class OprlogPO extends CommonPO<OprlogPO> {
 
 	@Column(name = "oprdetail", length = 1024)
 	private String oprDetail;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "oprlogtype")
+	private EOprlogType oprlogType;
 
 	public String getUserName() {
 		return userName;
@@ -80,4 +88,13 @@ public class OprlogPO extends CommonPO<OprlogPO> {
 	public String getSourceService() {
 		return sourceService;
 	}
+
+	public EOprlogType getOprlogType() {
+		return oprlogType;
+	}
+
+	public void setOprlogType(EOprlogType oprlogType) {
+		this.oprlogType = oprlogType;
+	}
+
 }
