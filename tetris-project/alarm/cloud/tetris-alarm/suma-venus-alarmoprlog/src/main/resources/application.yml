@@ -8,9 +8,9 @@ spring:
     name: tetris-alarm
   cloud:
     inetutils:
-      preferred-networks: 192.165.56.71
+      preferred-networks: 10.10.40.27
   datasource:
-     url: jdbc:mysql://192.165.56.71:3306/alarm?characterEncoding=utf-8&useUnicode=true
+     url: jdbc:mysql://10.10.40.207:3306/alarm?characterEncoding=utf-8&useUnicode=true
      username: root
      password: sumavisionrd
      driver-class-name: com.mysql.jdbc.Driver
@@ -39,11 +39,11 @@ eureka:
     lease-expiration-duration-in-seconds: 10
     lease-renewal-interval-in-seconds: 3
     preferIpAddress: true
-    ipAddress: 192.165.56.71
+    ipAddress: 10.10.40.27
     instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
   client:
     serviceUrl:
-      defaultZone:  http://192.165.56.71:8081/eureka/
+      defaultZone:  http://10.10.40.207:8081/eureka/
 
 
 #security:

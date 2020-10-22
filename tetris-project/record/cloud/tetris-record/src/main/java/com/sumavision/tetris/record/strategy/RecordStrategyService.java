@@ -1,6 +1,5 @@
 package com.sumavision.tetris.record.strategy;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,14 +12,15 @@ import com.sumavision.tetris.record.device.DeviceDAO;
 import com.sumavision.tetris.record.file.RecordFileDAO;
 import com.sumavision.tetris.record.file.RecordFilePO;
 import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
+import com.sumavision.tetris.record.file.RecordFileService;
 import com.sumavision.tetris.record.storage.StorageDAO;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO.EAutoInject;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyStatus;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyType;
 import com.sumavision.tetris.record.task.service.RecordCapacityService;
 import com.sumavision.tetris.record.task.service.RecordTimerBO;
 import com.sumavision.tetris.record.task.service.RecordTimerTask;
 
-import org.hibernate.bytecode.buildtime.spi.FieldFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +61,9 @@ public class RecordStrategyService {
 
 	@Autowired
 	private StorageDAO storageDAO;
+
+	@Autowired
+	private RecordFileService recordFileService;
 
 	/**
 	 * 外部接口，提供页面行为操作
@@ -230,6 +233,17 @@ public class RecordStrategyService {
 		recordFilePO.setStatus(ERecordFileStatus.RECORD_SUC);
 		recordFilePO.setStopTime(new Date());
 		recordFileDAO.save(recordFilePO);
+
+		if (recordStrategyPO.getAutoInjectSel().equals(EAutoInject.AUTO_INJECT_MIMS)) {
+			System.out.println("auto upload to mims");
+			try {
+				recordFileService.uploadMims(recordFilePO);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("auto upload to mims exception");
+			}
+		}
 
 	}
 
@@ -724,6 +738,18 @@ public class RecordStrategyService {
 			recordFilePO.setStatus(ERecordFileStatus.RECORD_SUC);
 			recordFilePO.setStopTime(operateTime);
 			recordFileDAO.save(recordFilePO);
+
+			if (recordStrategyPO.getAutoInjectSel().equals(EAutoInject.AUTO_INJECT_MIMS)) {
+				System.out.println("auto upload to mims");
+				try {
+					recordFileService.uploadMims(recordFilePO);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.out.println("auto upload to mims exception");
+				}
+			}
+
 		}
 
 		recordStrategyDAO.save(recordStrategyPO);

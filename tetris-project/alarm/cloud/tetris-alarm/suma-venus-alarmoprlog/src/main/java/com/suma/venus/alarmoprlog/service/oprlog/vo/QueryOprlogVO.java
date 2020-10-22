@@ -2,6 +2,8 @@ package com.suma.venus.alarmoprlog.service.oprlog.vo;
 
 public class QueryOprlogVO extends OprlogVO {
 
+	private String queryOprlogType;
+
 	private String queryTimeStart;
 
 	private String queryTimeEnd;
@@ -9,6 +11,14 @@ public class QueryOprlogVO extends OprlogVO {
 	private Integer pageIndex;
 
 	private Integer pageSize;
+
+	public String getQueryOprlogType() {
+		return queryOprlogType;
+	}
+
+	public void setQueryOprlogType(String queryOprlogType) {
+		this.queryOprlogType = queryOprlogType;
+	}
 
 	public Integer getPageIndex() {
 		return pageIndex;

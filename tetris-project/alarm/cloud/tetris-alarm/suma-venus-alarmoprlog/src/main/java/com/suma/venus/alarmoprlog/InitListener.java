@@ -1,5 +1,9 @@
 package com.suma.venus.alarmoprlog;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -12,6 +16,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.suma.venus.alarmoprlog.service.alarm.HandleReceiveAlarmThread;
 // import com.suma.venus.alarmoprlog.service.receive.MsgReceiveCallBack;
 import com.suma.venus.alarmoprlog.service.alarm.InitAlarmInfoService;
+import com.suma.venus.alarmoprlog.service.alarm.notify.HttpAlarmNotifyRetryHandler;
 // import com.suma.venus.alarmoprlog.service.receive.MsgForwardThread;
 // import com.suma.venus.message.service.MessageService;
 import com.suma.venus.alarmoprlog.service.oprlog.HandleReceiveOprlogThread;
@@ -54,6 +59,11 @@ public class InitListener implements ServletContextListener {
 			HandleReceiveOprlogThread handleReceiveOprlogThread = ctx.getBean(HandleReceiveOprlogThread.class);
 			handleReceiveOprlogThread.start();
 			LOGGER.info("==============initListener HandleReceiveOprlogThread finish=================");
+
+			LOGGER.info("==============initListener httpAlarmNotifyRetryHandler timerTask start=================");
+			HttpAlarmNotifyRetryHandler httpAlarmNotifyRetryHandler = ctx.getBean(HttpAlarmNotifyRetryHandler.class);
+			ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+			timer.scheduleAtFixedRate(httpAlarmNotifyRetryHandler, 120, 60, TimeUnit.SECONDS);
 
 		} catch (Exception e) {
 			LOGGER.error("==============initListener fail=================", e);
