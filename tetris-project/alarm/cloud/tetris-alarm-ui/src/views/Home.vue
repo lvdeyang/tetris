@@ -114,7 +114,7 @@
               &nbsp;版权归<a :href="footer.company.link" class="company" target="_blank">{{footer.company.name}}</a>所有.-->
               <strong>Copyright © {{footer.company.time}}</strong>
               &nbsp;版权归
-              <a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>所有.
+              <a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>
             </div>
             <div class="minimize">
               <el-breadcrumb separator style="float:right;">
@@ -217,7 +217,7 @@ export default {
           // link:'http://www.sumavision.com/',
           name: '北京市博汇科技股份有限公司',
           link: 'http://www.bohui.com.cn/',
-          time: '2018-2060'
+          time: '2020-2040'
         },
         minimize: [
           /* {
