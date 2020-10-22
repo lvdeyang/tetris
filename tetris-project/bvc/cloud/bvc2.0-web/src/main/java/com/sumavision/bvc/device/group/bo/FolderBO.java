@@ -15,6 +15,17 @@ public class FolderBO {
 	//父级文件夹所在层级/1/2/3
 	private String parentPath;
 	
+	private Integer folderIndex;
+	
+	public Integer getFolderIndex() {
+		return folderIndex;
+	}
+
+	public FolderBO setFolderIndex(Integer folderIndex) {
+		this.folderIndex = folderIndex;
+		return this;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -60,7 +71,8 @@ public class FolderBO {
 		this.setId(entity.getId())
 		    .setName(entity.getName())
 		    .setParentId(entity.getParentId())
-		    .setParentPath(entity.getParentPath());
+		    .setParentPath(entity.getParentPath())
+		    .setFolderIndex(entity.getFolderIndex());
 		return this;
 	}
 }
