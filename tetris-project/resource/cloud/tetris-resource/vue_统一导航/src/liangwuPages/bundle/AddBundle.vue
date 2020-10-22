@@ -810,7 +810,7 @@ export default {
         },
         date_osd: {
           enable: true,
-          has_week: true,
+          has_week: false,
           x: 0,
           y: 0,
           color: "#7d59f9",

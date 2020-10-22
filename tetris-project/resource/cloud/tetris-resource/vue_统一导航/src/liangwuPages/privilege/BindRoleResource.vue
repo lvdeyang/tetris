@@ -6,7 +6,7 @@
         </el-table-column>
       </el-table>
     </el-card>
-    <el-card style="float:left;margin-left:50px;margin-top:10px;width:80%;" body-style="padding:0px">
+    <el-card style="float:left;margin-left:20px;margin-top:10px;width:80%;" body-style="padding:0px">
       <div slot="header" class="clearfix">
         <!--
         <span style="float: left;font-size: 18px;">设备资源</span>
