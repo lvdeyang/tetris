@@ -70,7 +70,7 @@ public class VedioCapacityController {
 		List<BundlePO> bundlePOs = bundleDao.findAll();
 		List<BundlePO> bundleCountList = new ArrayList<BundlePO>();
 		for (BundlePO bundlePO : bundlePOs) {
-			if(bundlePO.getDeviceModel().equalsIgnoreCase("jv210") && bundlePO.getOnlineStatus().toString().equals("ONLINE")){
+			if(bundlePO.getDeviceModel().equalsIgnoreCase("jv210")){
 				bundleCountList.add(bundlePO);
 			}
 		}

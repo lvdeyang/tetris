@@ -787,10 +787,14 @@ public class MonitorRecordController {
 	
 	/**
 	 * 删除录制文件<br/>
-	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年4月25日 上午10:10:55
-	 * @param @PathVariable Long id 文件id
+	 * <b>日期：</b>2020年10月21日 下午4:31:50
+	 * @param id Long id 文件id
+	 * @param timeSegmentId
+	 * @param request
+	 * @return
+	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
