@@ -12,6 +12,7 @@ require.config({
     'sortablejs': window.LIBPATH + 'frame/draggable/sortable',
     'vue-draggable': window.LIBPATH + 'frame/draggable/vue-draggable',
     'extral': window.LIBPATH + 'extral/extral',
+    'echarts':window.LIBPATH + 'echarts/echarts.min',
 
     /* commons */
     'context': window.COMMONSPATH + 'context/context',
@@ -166,7 +167,11 @@ require.config({
     'page-monitor-external-folder': window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
     'page-monitor-currenttask': window.APPPATH + 'monitor/currenttask/page-monitor-currenttask',
     'page-monitor-forword-list': window.APPPATH + 'monitor/forword-list/page-monitor-forword-list',
-    'page-guide-control': window.APPPATH + 'guide/control/page-guide-control'
+    'page-guide-control': window.APPPATH + 'guide/control/page-guide-control',
+    'DiskPieChart':window.APPPATH + 'statistics/echarts/DiskPieChart',
+    'HistogramChart':window.APPPATH + 'statistics/echarts/HistogramChart',
+    'LineChart':window.APPPATH + 'statistics/echarts/LineChart',
+    'statistics':window.APPPATH+'statistics/statistics'
 
   },
   shim: {
