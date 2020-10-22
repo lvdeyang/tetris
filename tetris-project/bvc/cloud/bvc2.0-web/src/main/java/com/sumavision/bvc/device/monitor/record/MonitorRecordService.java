@@ -2228,6 +2228,8 @@ public class MonitorRecordService {
 							monitorRecordManyTimesDao.deleteByIdIn(ids);
 						}
 						
+					}else{
+						files.add(fileName);
 					}
 					
 					PassByBO passByBO = new PassByBO().setBundle_id("").setLayer_id(file.getStoreLayerId())
