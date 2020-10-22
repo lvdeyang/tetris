@@ -20,29 +20,29 @@ public class OprlogParamBO {
 	public enum EOprlogType {
 
 		/**
-		 * 用户操作
+		 * 鐢ㄦ埛鎿嶄綔
 		 */
-		USER_OPR("用户操作"),
+		USER_OPR("鐢ㄦ埛鎿嶄綔"),
 
 		/**
-		 * 设备上线
+		 * 璁惧涓婄嚎
 		 */
-		DEVICE_ONLINE("设备上线"),
+		DEVICE_ONLINE("璁惧涓婄嚎"),
 
 		/**
-		 * 设备下线
+		 * 璁惧涓嬬嚎
 		 */
-		DEVICE_OFFLINE("设备下线"),
+		DEVICE_OFFLINE("璁惧涓嬬嚎"),
 
 		/**
-		 * 外域连接成功
+		 * 澶栧煙杩炴帴鎴愬姛
 		 */
-		EXTERNAL_CONNECT("外域连接成功"),
+		EXTERNAL_CONNECT("澶栧煙杩炴帴鎴愬姛"),
 
 		/**
-		 * 外域连接断开
+		 * 澶栧煙杩炴帴鏂紑
 		 */
-		EXTERNAL_DISCONNECT("外域连接断开");
+		EXTERNAL_DISCONNECT("澶栧煙杩炴帴鏂紑");
 
 		private String name;
 
