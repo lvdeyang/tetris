@@ -30,6 +30,8 @@ import LwConfigBundle from './liangwuPages/bundle/ConfigBundle.vue'
 import LwBindRoleResource from './liangwuPages/privilege/BindRoleResource.vue'
 import LwEncodeManage from './liangwuPages/encodeManage/EncodeManage.vue'
 import LwCapacity from './liangwuPages/capacity/capacity.vue'
+import LwFolderManage from './liangwuPages/folder/FolderManage.vue'
+import LwSerInfoAndNode from './liangwuPages/serInfo/SerInfoAndNode.vue'
 
 let routes = [{
     path: '/404',
@@ -209,6 +211,18 @@ let routes = [{
         path: '/LwCapacity',
         component: LwCapacity,
         name: '',
+        hidden: true
+      },
+      {
+        path: '/LwFolderManage',
+        component: LwFolderManage,
+        name: '分组管理',
+        hidden: true
+      },
+      {
+        path: '/LwSerInfoAndNode',
+        component:LwSerInfoAndNode ,
+        name: '级联页面',
         hidden: true
       },
     ]
