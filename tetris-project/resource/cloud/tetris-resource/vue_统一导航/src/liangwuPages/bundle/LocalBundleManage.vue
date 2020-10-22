@@ -55,7 +55,11 @@
             <el-button type="primary" size="small" v-on:click="handleSyncFromLdap()" style="float: right;margin-right: 10px;">从LDAP下载</el-button>
             -->
     </div>
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane v-for="item in regionOption" :label="item.stationName" :name="item.identity" :key="item.identity">
 
+      </el-tab-pane>
+    </el-tabs>
     <!--资源列表-->
     <el-table :data="resources" v-loading="resourceTableLoading" @selection-change="handleSelectionChange" style="float: left;width: 100%;margin-top: 20px;">
       <el-table-column width="50" type="selection"></el-table-column>
@@ -186,7 +190,7 @@
 <script type="text/ecmascript-6">
 import {
   getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
-  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser
+  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser, getStationList
 } from '../../api/api';
 // let requestIP = document.location.host.split(":")[0];
 
@@ -246,7 +250,9 @@ export default {
           label: "LDAP" //LDAP
         }
       ],
-      multipleSelection: []
+      multipleSelection: [],
+      regionOption: [],
+      activeName: 'self'
     }
   },
   methods: {
@@ -882,9 +888,31 @@ export default {
 
         this.resourceTableLoading = false;
       });
+    },
+    handleClick (tab, event) {
+      var self = this;
+      // self.tableCurrgenData = self.tableList[tab.name];
+      // self.table.page.currentPage = 1;
+      // self.table.page.total = self.tableList[tab.name].length;
+    },
+    queryStationList () {
+      getStationList().then(res => {
+        if (res.errMsg) {
+          self.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
 
+          self.regionOption = res.data.rows;
+          self.regionOption.unshift({
+            id: 99999,
+            identity: "self",
+            stationName: "本域",
+          })
+        }
+      });
     }
-    ,
 
 
   },
@@ -897,6 +925,7 @@ export default {
     // this.getDeviceModels();
     this.getAllUsers();
     this.getResources(1);
+    this.queryStationList()
 
     if (this.uploadUrl.indexOf('__requestIP__') !== -1) {
       var requestIP = document.location.host.split(':')[0]

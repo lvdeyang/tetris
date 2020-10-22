@@ -1,75 +1,71 @@
 <template>
-    <section>
-        <!--查询工具条-->
-        <el-form :inline="true" :model="filters" ref="filters" label-width="80px" size="mini">
-            <el-col :span="24" class="toolbar" style="padding-bottom: 0px; margin:0px">
-               <el-form-item label="日志类型" prop="oprlogTypeSel"  :span="6">
-                     <el-select v-model="filters.oprlogTypeSel" clearable placeholder="请选择">
-                          <el-option
-                            v-for="item in oprlogTypeOptions"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                          </el-option>
-                        </el-select>
-                </el-form-item>
-                <el-form-item label="来源服务" prop="sourceService"  :span="6">
-                            <el-input v-model="filters.sourceService"></el-input>
-                </el-form-item>
-                <el-form-item label="用户名" prop="userName" :span="6">
-                            <el-input v-model="filters.userName"></el-input>
-                </el-form-item>
-                 <el-form-item label="操作名称" prop="oprName"  :span="6">
-                            <el-input v-model="filters.oprName"></el-input>
-                </el-form-item>
-            </el-col>
-            <el-col :span="24" class="toolbar" style="padding-top: 0px; padding-bottom: 5px; margin:0px" >
-                <el-form-item label="日志时间" prop="oprTimeRange" :span="12">
-                    <el-date-picker v-model="filters.oprTimeRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
-                            </el-form-item>
-                    <el-form-item :span="3">
-                                <el-button type="primary" v-on:click="queryOprlogList">查询</el-button>
-                            </el-form-item>
-                    <el-form-item :span="3">
-                    <el-button  v-on:click="resetForm('filters')">重置</el-button>
-                </el-form-item>
-            </el-col>
-        </el-form>
-        <!--查询工具条结束-->
+  <section style="height:100%">
+    <!--查询工具条-->
+    <el-form :inline="true" :model="filters" ref="filters" label-width="80px" size="mini">
+      <el-col :span="24" class="toolbar" style="padding-bottom: 0px; margin:0px">
+        <el-form-item label="日志类型" prop="oprlogTypeSel" :span="6">
+          <el-select v-model="filters.oprlogTypeSel" clearable placeholder="请选择">
+            <el-option v-for="item in oprlogTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="来源服务" prop="sourceService" :span="6">
+          <el-input v-model="filters.sourceService"></el-input>
+        </el-form-item>
+        <el-form-item label="用户名" prop="userName" :span="6">
+          <el-input v-model="filters.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="操作名称" prop="oprName" :span="6">
+          <el-input v-model="filters.oprName"></el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="24" class="toolbar" style="padding-top: 0px; padding-bottom: 5px; margin:0px">
+        <el-form-item label="日志时间" prop="oprTimeRange" :span="12">
+          <el-date-picker v-model="filters.oprTimeRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+        </el-form-item>
+        <el-form-item :span="3">
+          <el-button type="primary" v-on:click="queryOprlogList">查询</el-button>
+        </el-form-item>
+        <el-form-item :span="3">
+          <el-button v-on:click="resetForm('filters')">重置</el-button>
+        </el-form-item>
+      </el-col>
+    </el-form>
+    <!--查询工具条结束-->
 
-        <!--列表-->
-        <el-table :data="oprlogVOs" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
-            <el-table-column prop="id" v-if="false" width="60"></el-table-column>
-             <el-table-column prop="oprlogType" label="日志类型" width="160"></el-table-column>
-            <el-table-column prop="userName" label="用户名" width="120"></el-table-column>
-            <el-table-column prop="oprName" label="操作名称" width="200"></el-table-column>
-            <el-table-column prop="sourceService" label="来源服务" width="200"></el-table-column>
-            <el-table-column prop="oprTime" label="日志时间" :formatter="dateFormat" width="200" sortable></el-table-column>
-            <el-table-column label="操作">
-                <template slot-scope="scope">
-                    <el-button size="small" @click="handleShowDetail(scope.$index, scope.row)">详情</el-button>
-                    <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
-                  </template>
-            </el-table-column>
-        </el-table>
+    <!--列表-->
+    <el-table :data="oprlogVOs" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
+      <el-table-column prop="id" v-if="false" width="60"></el-table-column>
+      <el-table-column prop="oprlogType" label="日志类型" width="160"></el-table-column>
+      <el-table-column prop="userName" label="用户名" width="120"></el-table-column>
+      <el-table-column prop="oprName" label="操作名称" width="200"></el-table-column>
+      <el-table-column prop="sourceService" label="来源服务" width="200"></el-table-column>
+      <el-table-column prop="oprTime" label="日志时间" :formatter="dateFormat" width="200" sortable></el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button size="small" @click="handleShowDetail(scope.$index, scope.row)">详情</el-button>
+          <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-        <!--表底工具条-->
-        <el-col :span="24" class="toolbar">
-            <!--<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>-->
-            <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="20" :total="total" style="float:right;">
-            </el-pagination>
-        </el-col>
-        <!--表底工具条结束-->
+    <!--表底工具条-->
+    <el-col :span="24" class="toolbar">
+      <!--<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>-->
+      <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="20" :total="total" style="float:right;">
+      </el-pagination>
+    </el-col>
+    <!--表底工具条结束-->
 
-        <!--详情弹出框-->
-        <el-dialog title="操作详情" :visible.sync="detailFormVisible" :close-on-click-modal="false">
+    <!--详情弹出框-->
+    <el-dialog title="操作详情" :visible.sync="detailFormVisible" :close-on-click-modal="false">
 
-            <el-table :data="tableData" style="width: 100%">
-                <el-table-column prop="dataName"  width="180"></el-table-column>
-                <el-table-column prop="dataContent" width="180">
-                </el-table-column>
-            </el-table>
-            <!--
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column prop="dataName" width="180"></el-table-column>
+        <el-table-column prop="dataContent" width="180">
+        </el-table-column>
+      </el-table>
+      <!--
             <el-form :model="detailForm" label-position="left" label-width="160px">
                <el-form-item label="序号">
                    <span>{{ detailForm.id }}</span>
@@ -95,10 +91,10 @@
             </el-form>
             -->
 
-        </el-dialog>
-        <!--详情弹出框结束-->
+    </el-dialog>
+    <!--详情弹出框结束-->
 
-    </section>
+  </section>
 </template>
 
 <script>
@@ -109,11 +105,16 @@ import { queryOprlogListPage, delOprlog } from '../../api/api'
 export default {
   data () {
     return {
-      filters: {},
+      filters: {
+        oprlogTypeSel: 'USER_OPR'
+      },
 
       oprlogTypeOptions: [{
         value: 'USER_OPR',
         label: '用户操作'
+      }, {
+        value: 'USER_ONLINE',
+        label: '用户上线'
       }, {
         value: 'DEVICE_ONLINE',
         label: '设备上线'
@@ -123,7 +124,7 @@ export default {
       }, {
         value: 'EXTERNAL_CONNECT',
         label: '外域连接成功'
-      },{
+      }, {
         value: 'EXTERNAL_DISCONNECT',
         label: '外域连接断开'
       }],
@@ -238,7 +239,7 @@ export default {
       var json = []
 
       json.push({ dataName: 'id', dataContent: this.detailForm.id })
-       json.push({ dataName: '日志类型', dataContent: this.detailForm.oprlogType })
+      json.push({ dataName: '日志类型', dataContent: this.detailForm.oprlogType })
       json.push({ dataName: '用户名', dataContent: this.detailForm.userName })
       json.push({ dataName: '操作名称', dataContent: this.detailForm.oprName })
       json.push({ dataName: '操作时间', dataContent: util.formatDate.formatString(this.detailForm.oprTime, 'yyyy-MM-dd hh:mm:ss') })
@@ -276,3 +277,17 @@ export default {
   }
 }
 </script>
+<style>
+.oprlog-page {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* padding-bottom: 45px; */
+  /* position: relative; */
+}
+.el-table {
+  height: calc(100% - 135px);
+  overflow: auto;
+}
+</style>
+
