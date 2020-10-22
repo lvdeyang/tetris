@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -54,6 +53,7 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
@@ -133,6 +133,9 @@ public class CommandVodService {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
+	@Autowired
+	private BusinessReturnService businessReturnService;
+	
 	/**
 	 * 点播文件资源<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -167,7 +170,13 @@ public class CommandVodService {
 		
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
-		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logicCastDevice, null, null);
+			businessReturnService.execute();
+		}else{
+			executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
+		}
 		
 		return player;
 	}
@@ -193,7 +202,13 @@ public class CommandVodService {
 		List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList();
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(allNeedClosePlayers, null, null, allNeedClosePlayers, codec, -1L);
-		executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播文件");
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logicCastDevice, null, null);
+			businessReturnService.execute();
+		}else{
+			executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播文件");
+		}
 		
 		return player;
 		
@@ -819,6 +834,10 @@ public class CommandVodService {
 		task.setPlayUrl(url);
 		pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
 		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
+		
 		return new CommandGroupUserPlayerPO();
 		
 		/*//占用播放器
@@ -850,6 +869,11 @@ public class CommandVodService {
 		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);	
 		PageTaskPO removeTask = pageTaskQueryService.queryPageTask(user.getId().toString(), terminal.getId(), serial);
 		pageTaskService.addAndRemoveTasks(pageInfo, null, new ArrayListWrapper<PageTaskPO>().add(removeTask).getList());
+		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
+		
 		return new CommandGroupUserPlayerPO();
 		
 		/*

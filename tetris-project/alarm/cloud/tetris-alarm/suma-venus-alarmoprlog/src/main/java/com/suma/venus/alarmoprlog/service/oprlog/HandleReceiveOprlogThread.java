@@ -51,6 +51,8 @@ public class HandleReceiveOprlogThread extends Thread {
 			OprlogPO oprlogPO = new OprlogPO();
 
 			BeanUtils.copyProperties(oprlogParamBO, oprlogPO);
+			
+			
 
 			oprlogDAO.save(oprlogPO);
 

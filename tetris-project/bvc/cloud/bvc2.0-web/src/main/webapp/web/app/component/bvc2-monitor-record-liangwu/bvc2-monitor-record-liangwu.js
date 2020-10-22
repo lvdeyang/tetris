@@ -45,7 +45,8 @@ define([
           device: '',
           deviceName: '',
           timeScope: '',
-          status: 'RUN'
+          status: 'RUN',
+          fileName:''
         },
         dialog: {
           addRecord: {
@@ -63,7 +64,7 @@ define([
               currentBundle: '',
 
             },
-            mode: 'MANUAL',
+            mode: 'SCHEDULING',
             fileName: '',
             timeScope: '',
             timing: '',
@@ -135,6 +136,10 @@ define([
         var self = this;
         return self.condition.status;
       },
+      condition_fileName:function(){
+        var self = this;
+        return self.condition.fileName;
+      },
       dialog_addRecord_tree_currentUser: function () {
         var self = this;
         return self.dialog.addRecord.tree.currentUser;
@@ -150,7 +155,8 @@ define([
       dialog_addRecord_tree_currentAudio: function () {
         var self = this;
         return self.dialog.addRecord.tree.currentAudio;
-      }
+      },
+
     },
     watch: {
       condition_mode: function (mode) {
@@ -166,6 +172,10 @@ define([
         self.load(1);
       },
       condition_status: function (timeScope) {
+        var self = this;
+        self.load(1);
+      },
+      condition_fileName:function(){
         var self = this;
         self.load(1);
       },
@@ -223,6 +233,7 @@ define([
           mode: self.condition.mode,
           device: self.condition.device,
           status: self.condition.status,
+          fileName:self.condition.fileName,
           currentPage: currentPage,
           pageSize: self.table.page.pageSize
         };
@@ -269,7 +280,7 @@ define([
         var row = scope.row;
         var h = self.$createElement;
         self.$msgbox({
-          title: '危险操作',
+          title: '提示',
           message: h('div', null, [
             h('div', {
               class: 'el-message-box__status el-icon-warning'
@@ -277,7 +288,7 @@ define([
             h('div', {
               class: 'el-message-box__message'
             }, [
-              h('p', null, ['停止任务后可在回放页面查询录制内容，是否继续?'])
+              h('p', null, ['是否确定停止录制?'])
             ])
           ]),
           type: 'wraning',
@@ -336,7 +347,7 @@ define([
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
         self.dialog.addRecord.tree.currentVideo = '';
         self.dialog.addRecord.tree.currentAudio = '';
-        self.dialog.addRecord.mode = 'MANUAL';
+        self.dialog.addRecord.mode = 'SCHEDULING';
         self.dialog.addRecord.fileName = '';
         self.dialog.addRecord.timeScope = '';
         self.dialog.addRecord.loading = false;
@@ -349,7 +360,7 @@ define([
         self.dialog.addRecord.visible = true;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
         // ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', params, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', params, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.addRecord.tree.data.push(data[i]);
@@ -468,7 +479,7 @@ define([
         var self = this;
         self.dialog.selectDevice.visible = true;
         self.dialog.selectDevice.tree.data.splice(0, self.dialog.selectDevice.tree.data.length);
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.selectDevice.tree.data.push(data[i]);
@@ -476,6 +487,15 @@ define([
             app.addDeviceLoop('monitor-record-device-tree', data);
           }
         });
+      },
+      handleReset:function(){
+        var self = this;
+        self.condition.device = "";
+        self.condition.deviceName = "";
+        self.condition.timeScope = "";
+        self.condition.mode = "ALL";
+        self.condition.status = "RUN";
+        self.condition.fileName = ''
       },
       handleSelectDeviceCommit: function () {
         var self = this;
@@ -555,7 +575,7 @@ define([
         ajax.post('/monitor/record/download/url/' + row.id, null, function (data) {
           var self = this;
           var downloadUrl = data.downloadUrl;
-          var name = row.fileName;
+          var name = row.fileName+".ts";
           var startTime = 0;
           var endTime = data.duration;
           downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;

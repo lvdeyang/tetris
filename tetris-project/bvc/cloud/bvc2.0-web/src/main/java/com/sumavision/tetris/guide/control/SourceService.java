@@ -53,17 +53,25 @@ public class SourceService {
 		sourceDAO.delete(id);
 	}
 	
-	public SourceVO cut(Long id) throws Exception{
+	public SourceVO cut(Long id,OutType type) throws Exception{
 		
 		SourcePO sourcePO = sourceDAO.findOne(id);
 		List<SourcePO> list = sourceDAO.findByGuideIdOrderBySourceNumber(sourcePO.getGuideId());
-		for (SourcePO sourcePO2 : list) {
-			sourcePO2.setCurrent(false);
+		if(OutType.MONITOR.equals(type)){
+			for (SourcePO sourcePO2 : list) {
+				sourcePO2.setPvmCurrent(false);
+			}
+			sourcePO.setPvmCurrent(true);
+		}else{
+			for (SourcePO sourcePO2 : list) {
+				sourcePO2.setCurrent(false);
+			}
+			sourcePO.setCurrent(true);
 		}
-		sourcePO.setCurrent(true);
+		
 		sourceDAO.save(list);
 		sourceDAO.save(sourcePO);
-		guidePlayService.exchange(sourcePO.getGuideId(), id);	
+		guidePlayService.exchange(sourcePO.getGuideId(), id, type);	
 		return new SourceVO().set(sourcePO);
 	}
 }

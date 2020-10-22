@@ -8,6 +8,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -58,6 +60,9 @@ public class RecordFilePO extends AbstractBasePO {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "injectStatus")
 	private EInjectStatus injectStatus;
+	
+	@Value("${realIP}")
+	private String centerIP;
 
 	public enum ERecordFileStatus {
 		RECORD_WAIT("未录制"), RECORD_RUN("正在录制"), RECORD_SUC("录制完成");

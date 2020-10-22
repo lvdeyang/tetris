@@ -1,17 +1,14 @@
 package com.sumavision.tetris.bvc.model.agenda.combine;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import java.util.Date;
 
-import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaForwardDAO;
-import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
-import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.suma.venus.resource.dao.BundleDao;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
@@ -30,6 +27,7 @@ import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -37,6 +35,10 @@ import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
 import com.sumavision.tetris.bvc.business.terminal.hall.TerminalBundleConferenceHallPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaForwardDAO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
 import com.sumavision.tetris.bvc.model.role.RoleChannelDAO;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
@@ -49,6 +51,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -175,6 +178,9 @@ public class AutoCombineService {
 	
 	@Autowired
 	private AgendaDAO agendaDao;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	/**
 	 * 自动合屏，包括协议下发<br/>
@@ -348,7 +354,14 @@ public class AutoCombineService {
 			protocol.getCombineAudioDel().add(new CombineAudioBO().setUuid(audio.getUuid()));
 			combineAudioService.delete(audio.getId());
 		}
-		if(doProtocal) executeBusiness.execute(protocol, new StringBufferWrapper().append("删除合屏混音").toString());
+		if(doProtocal){
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(protocol, null, null);
+			}else{
+				executeBusiness.execute(protocol, new StringBufferWrapper().append("删除合屏混音").toString());
+			}
+		}
+		 
 	}
 	
 	public void deleteCombineByUuids(List<String> videoUuids, List<String> audioUuids, boolean doProtocal) throws Exception{

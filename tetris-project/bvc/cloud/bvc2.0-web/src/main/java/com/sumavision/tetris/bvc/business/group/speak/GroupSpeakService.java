@@ -2,6 +2,7 @@ package com.sumavision.tetris.bvc.business.group.speak;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -145,6 +147,9 @@ public class GroupSpeakService {
 	
 	@Autowired
 	private CommandCascadeService commandCascadeService;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 
 	@Transactional(rollbackFor = Exception.class)
 	public void speakAppointU(Long groupId, List<Long> userIds) throws Exception{
@@ -260,6 +265,10 @@ public class GroupSpeakService {
 			}
 		}*/
 		
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
+		
 		operationLogService.send(user.getNickname(), "指定发言", user.getNickname() + "指定发言，groupId:" + groupId + "，memberIds:" + memberIds.toString());
 		return chairSplits;
 	}
@@ -333,15 +342,22 @@ public class GroupSpeakService {
 				message.put("businessInfo", speakMember.getName() + "申请发言");
 				message.put("businessId", group.getId().toString() + "-" + speakMember.getId());
 				
-				WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
-				websocketMessageService.consume(ws.getId());
+				if(businessReturnService.getSegmentedExecute()){
+					businessReturnService.add(null, new MessageSendCacheBO(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND), group.getName() + "申请发言");
+					businessReturnService.execute();
+				}else{
+					WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
+					websocketMessageService.consume(ws.getId());
+					log.info(group.getName() + "申请发言");
+				}
+				
 			}else{
 				//级联：主席在外部系统（那么申请人在该系统）
 //				GroupBO groupBO = commandCascadeUtil.speakerSetRequest(group, speakMember);
 //				conferenceCascadeService.speakerSetRequest(groupBO);
 			}
 			
-			log.info(group.getName() + "申请发言");
+//			log.info(group.getName() + "申请发言");
 		}
 		operationLogService.send(user.getNickname(), "申请发言", user.getNickname() + "申请发言groupId:" + groupId);
 	}
@@ -464,11 +480,19 @@ public class GroupSpeakService {
 			agendaExecuteService.executeToFinal(groupId);
 			
 			//发消息
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, null);
+				}
+				businessReturnService.execute();
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
 			}
-			websocketMessageService.consumeAll(consumeIds);
+			
 		}
 		operationLogService.send(user.getNickname(), "同意申请发言", user.getNickname() + "同意申请发言groupId:" + groupId + ",memberIds:" + memberIds.toString());
 	}
@@ -519,13 +543,20 @@ public class GroupSpeakService {
 				}
 			}
 			
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, group.getName() + " 主席拒绝了 " + speakMembers.get(0).getName() + " 等人的发言申请");
+				}
+				businessReturnService.execute();
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
+				
+				log.info(group.getName() + " 主席拒绝了 " + speakMembers.get(0).getName() + " 等人的发言申请");
 			}
-			websocketMessageService.consumeAll(consumeIds);
-			
-			log.info(group.getName() + " 主席拒绝了 " + speakMembers.get(0).getName() + " 等人的发言申请");
 		}
 		operationLogService.send(user.getNickname(), "拒绝申请发言", user.getNickname() + "拒绝申请发言groupId:" + groupId + ", memberIds" + memberIds.toString());
 	}
@@ -588,6 +619,10 @@ public class GroupSpeakService {
 				//级联取消发言只有单个协议，没有批量
 //				GroupBO groupBO = commandCascadeUtil.speakerSetCancel(speakMember.getUserNum(), group, speakMember);
 //				conferenceCascadeService.speakerSetCancel(groupBO);
+			}
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
 			}
 		}
 		operationLogService.send(user.getNickname(), "停止发言", user.getNickname() + "停止发言groupId:" + groupId);
@@ -691,6 +726,10 @@ public class GroupSpeakService {
 			}
 		}
 		*/
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
+		
 		operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", memberIds:" + memberIds.toString());
 	}
 
@@ -762,7 +801,11 @@ public class GroupSpeakService {
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 //				GroupBO groupBO = commandCascadeUtil.discussStart(group);
 //				conferenceCascadeService.discussStart(groupBO);
-			}			
+			}
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
 		}
 		operationLogService.send(user.getNickname(), "开启讨论模式", user.getNickname() + "开启讨论模式groupId:" + groupId);
 	}
@@ -814,7 +857,11 @@ public class GroupSpeakService {
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 //				GroupBO groupBO = commandCascadeUtil.discussStop(group);
 //				conferenceCascadeService.discussStop(groupBO);
-			}			
+			}		
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
 		}
 		operationLogService.send(user.getNickname(), "停止讨论模式", user.getNickname() + "停止讨论模式groupId:" + groupId);
 	}
