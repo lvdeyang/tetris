@@ -61,7 +61,7 @@ public class BundleFeignController {
 	@Autowired
 	private ScreenSchemeDao screenSchemeDao;
 
-	@Value("${spring.cloud.client.ipAddress}")
+	@Value("${realIP}")
 	private String clientIP;
 
 	@Value("${zuulPort}")
@@ -78,28 +78,41 @@ public class BundleFeignController {
 		LOGGER.info("addTranscodeDevice feign api, params= " + name + "," + ip + ":" + port);
 		Map<String, String> data = new HashMap<>();
 
-		BundlePO bundlePO = new BundlePO();
+		BundlePO bundlePO;
 
 		try {
 
-			bundlePO.setBundleName(name);
-			bundlePO.setBundleAlias(ip);
-			bundlePO.setUsername(ip);
-			bundlePO.setOnlinePassword(ip);
-			bundlePO.setDeviceIp(ip);
-			bundlePO.setDevicePort(port);
-			bundlePO.setDeviceModel("transcode");
+			List<BundlePO> bunldePOList = bundleDao.findByDeviceIpAndDevicePortAndDeviceModel(ip, port, "transcode");
 
-			bundlePO.setBundleType(
-					channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
+			if (bunldePOList == null || bunldePOList.isEmpty()) {
+				bundlePO = new BundlePO();
 
-			bundlePO.setBundleId(BundlePO.createBundleId());
+				bundlePO.setBundleName(name);
+				bundlePO.setBundleAlias(ip);
+				bundlePO.setUsername(ip);
+				bundlePO.setOnlinePassword(ip);
 
-			bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+				bundlePO.setDeviceIp(ip);
+				bundlePO.setDevicePort(port);
+				bundlePO.setDeviceModel("transcode");
+				bundlePO.setBundleType(
+						channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
+				bundlePO.setBundleId(BundlePO.createBundleId());
+				bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+				bundleService.save(bundlePO);
 
-			bundleService.save(bundlePO);
+				bundleService.configDefaultAbility(bundlePO);
 
-			bundleService.configDefaultAbility(bundlePO);
+			} else {
+				LOGGER.info("addTranscodeDevice feign, device already exist");
+				bundlePO = bunldePOList.get(0);
+				bundlePO.setBundleName(name);
+				bundlePO.setBundleAlias(ip);
+				bundlePO.setUsername(ip);
+				bundlePO.setOnlinePassword(ip);
+				bundleService.save(bundlePO);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -161,7 +174,7 @@ public class BundleFeignController {
 			return "success";
 
 		} catch (Exception e) {
-			
+
 			return "";
 		}
 

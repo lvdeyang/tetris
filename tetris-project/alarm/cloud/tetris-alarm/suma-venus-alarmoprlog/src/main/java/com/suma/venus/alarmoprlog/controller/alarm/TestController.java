@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.alarmoprlog.orm.dao.IAlarmDAO;
 import com.suma.venus.alarmoprlog.orm.dao.IAlarmInfoDAO;
@@ -38,6 +39,8 @@ import com.suma.venus.alarmoprlog.service.alarm.vo.QueryAlarmVO;
 import com.suma.venus.alarmoprlog.websocket.WebSocketServer;
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
 import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
+// import com.sumavision.tetris.capacity.server.CapacityService;
+// import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
 
 @Controller
 @RequestMapping("/test")
@@ -61,6 +64,12 @@ public class TestController {
 	@Autowired
 	@LoadBalanced
 	RestTemplate restTemplate;
+
+	// @Autowired
+	// private BundleFeignService bundleFeignService;
+	
+	// @Autowired 
+	// private CapacityService capacityService;
 
 	@RequestMapping(value = "/addAlarmPO", method = RequestMethod.POST)
 	@ResponseBody
@@ -206,12 +215,98 @@ public class TestController {
 		AlarmNotifyBO alarmNotifyBO = new AlarmNotifyBO();
 
 		alarmNotifyBO.setAlarmCode("11010001");
-		 // alarmNotifyBO.setSourceObj("obj");
+		// alarmNotifyBO.setSourceObj("obj");
 
 		try {
 			restTemplate.postForObject("http://" + "suma-venus-resource" + "/feign/test/testNotify", alarmNotifyBO,
 					String.class);
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return "true";
+	}
+
+	// 推送数据接口
+	@ResponseBody
+	@RequestMapping("/testAddDevice")
+	public Map<String, String> testAddDevice() {
+
+		Map<String, String> map = null;
+		try {
+			// map = bundleFeignService.addTransCodeDevice("testchenmo", "10.10.40.27", 5656);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return map;
+
+	}
+
+	// 推送数据接口
+	@ResponseBody
+	@RequestMapping("/testDelDevice")
+	public String testDelDevice(String bundle_id) {
+
+		try {
+			// bundleFeignService.delTransCodeDevice(bundle_id);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return "true";
+	}
+
+	// 推送数据接口
+	@ResponseBody
+	@RequestMapping("/resetDeviceHeartBeatUrl")
+	public String resetDeviceHeartBeatUrl() {
+
+		JSONObject jsObject = new JSONObject();
+		jsObject.put("span_ms", 3000);
+		jsObject.put("loss_times", 10);
+		
+		
+		JSONObject alarmListObject = new JSONObject();
+		alarmListObject.put("ts_plp_high", jsObject);
+		
+		String str = alarmListObject.toJSONString();
+		
+		try {
+			// capacityService.putAlarmlist("10.10.40.228", str);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return "true";
+	}
+	
+	// 推送数据接口
+	@ResponseBody
+	@RequestMapping("/testPutAlarmList")
+	public String testPutAlarmList(String bundle_ip) {
+		JSONObject jsObject = new JSONObject();
+		jsObject.put("span_ms", 3000);
+		jsObject.put("loss_times", 30);
+		
+		
+		JSONObject ts_plp_highObject = new JSONObject();
+		ts_plp_highObject.put("ts_plp_high", jsObject);
+		
+		JSONObject alarmListObject = new JSONObject();
+		alarmListObject.put("alarm_list", ts_plp_highObject);
+		
+		
+		String str = alarmListObject.toJSONString();
+		
+		try {
+			// capacityService.putAlarmlist(bundle_ip, str);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

@@ -508,6 +508,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 					"AND IF(?5 IS NULL OR ?5='', TRUE, FILE_NAME like ?5) " +
 					"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
 					"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+					"AND IF(?8 IS NULL OR ?8='', TRUE, TASK_NAME=?8)" +
 					"\n#pageable\n ",
 			countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " +
 					"1=1 "+
@@ -518,7 +519,7 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 					"AND IF(?5 IS NULL OR ?5='', TRUE, FILE_NAME like ?5) "+
 					"AND IF(?6 IS NULL OR ?6='', TRUE, STATUS =?6) " +
 					"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
-					"AND IF(?8 IS NULL OR ?9='', TRUE, TASK_NAME=?8) ",
+					"AND IF(?8 IS NULL OR ?8='', TRUE, TASK_NAME=?8) ",
 			nativeQuery = true
 		)
 		public Page<MonitorRecordPO> findAllByConditionsAndStatusAndBundleIdIn(

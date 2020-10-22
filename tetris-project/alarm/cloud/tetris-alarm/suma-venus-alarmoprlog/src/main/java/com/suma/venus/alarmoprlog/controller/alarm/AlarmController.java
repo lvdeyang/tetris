@@ -203,8 +203,8 @@ public class AlarmController {
 			alarmPO.setRecoverTime(Calendar.getInstance().getTime());
 			alarmDAO.save(alarmPO);
 
-			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO,
-					alarmDAO, loadBalanced, restTemplate);
+			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, null, subscribeAlarmDAO,
+					alarmDAO, loadBalanced, restTemplate, false);
 			// 放入线程池待执行
 			AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
 

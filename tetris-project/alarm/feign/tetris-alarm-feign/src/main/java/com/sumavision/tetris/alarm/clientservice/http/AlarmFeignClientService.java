@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
 import com.sumavision.tetris.alarm.bo.http.SubscribeParamBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.JsonBodyWrapper;
@@ -215,6 +216,39 @@ public class AlarmFeignClientService {
 		oprlogParamBO.setOprName(oprName);
 		oprlogParamBO.setOprDetail(detail);
 		oprlogParamBO.setSourceServiceIP(sourceServiceIP);
+		oprlogParamBO.setOprlogType(EOprlogType.USER_OPR);
+
+		if (oprTime != null) {
+			oprlogParamBO.setOprTime(oprTime);
+		}
+
+		alarmFeign.sendOprlog(oprlogParamBO);
+
+	}
+
+	/**
+	 * @param userName
+	 * @param oprName
+	 * @param detail
+	 * @param oprTime
+	 * @param oprlogType
+	 * 
+	 * @throws Exception
+	 */
+	public void sendOprLog(String userName, String oprName, String detail, Date oprTime, EOprlogType oprlogType)
+			throws Exception {
+
+		if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(oprName) || oprlogType == null) {
+			throw new IllegalArgumentException("UserName or OprName Should not be Empty!");
+		}
+
+		OprlogParamBO oprlogParamBO = new OprlogParamBO();
+		oprlogParamBO.setUserName(userName);
+		oprlogParamBO.setSourceService(serviceName);
+		oprlogParamBO.setOprName(oprName);
+		oprlogParamBO.setOprDetail(detail);
+		oprlogParamBO.setSourceServiceIP(sourceServiceIP);
+		oprlogParamBO.setOprlogType(oprlogType);
 
 		if (oprTime != null) {
 			oprlogParamBO.setOprTime(oprTime);

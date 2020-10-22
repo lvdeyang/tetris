@@ -20,6 +20,9 @@ public class CommandStationBandwidthController {
 	
 	@Autowired
 	private CommandStationBandwidthDAO commandStationBandwidthDao;
+	
+	@Autowired
+	private CommandStationBandwidthService commandStationBandwidthService;
 	/**
 	 * 添加站点<br/>
 	 * <b>作者:</b>lx<br/>
@@ -117,8 +120,9 @@ public class CommandStationBandwidthController {
 	@RequestMapping(value="/query")
 	public Object query(){
 		
+		commandStationBandwidthService.syncSerNodeToStation();
 		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll()).getMap();
-				
+		
 	}
 	
 }

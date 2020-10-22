@@ -1,15 +1,17 @@
 server:
-  port: 8098
+  port: 8090
 
 spring:
   application:
     name: tetris-record
   cloud:
+    client:
+      ipAddress: 10.10.40.27
     inetutils:
       preferred-networks: 10.10.40.27
 
   datasource:
-      url: jdbc:mysql://10.10.40.207:3306/record?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      url: jdbc:mysql://10.10.40.207:3306/record?characterEncoding=utf-8&useUnicode=true
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
@@ -25,7 +27,7 @@ spring:
     
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
       ddl-auto: update
@@ -64,8 +66,8 @@ hystrix:
             timeoutInMilliseconds: 5000
           strategy: SEMAPHORE
 localRecordBasePath: /home/record/
-ftpBasePath: ftp://suma:suma123@10.10.40.116/
-httpBasePath: http://10.10.40.207:8099/record/
+ftpBasePath: ftp://suma:suma123@10.10.40.103/
+httpBasePath: http://10.10.40.103:9081/record/
 storageSize: 80
 cleanSpaceThreshold: 60
 cleanTimeThreshold: 30
