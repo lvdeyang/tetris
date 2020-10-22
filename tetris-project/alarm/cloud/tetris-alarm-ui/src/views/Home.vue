@@ -514,8 +514,8 @@ export default {
     var self = this
     var menus = self.menus
 
-    console.log('home.vue, menus=' + JSON.stringify(menus))
-    console.log('home.vue, loginUrl-' + self.loginUrl)
+    // console.log('home.vue, menus=' + JSON.stringify(menus))
+    // console.log('home.vue, loginUrl-' + self.loginUrl)
 
     var activeId = self.activeId
     // 设置当前菜单
@@ -523,7 +523,7 @@ export default {
     // 初始化菜单的选中状态
     var activeUuid = this.getActiveUuid(menus)
 
-    console.log('activeUuid=' + JSON.stringify(activeUuid))
+    // console.log('activeUuid=' + JSON.stringify(activeUuid))
     if (activeUuid) {
       self.active = activeUuid
     }

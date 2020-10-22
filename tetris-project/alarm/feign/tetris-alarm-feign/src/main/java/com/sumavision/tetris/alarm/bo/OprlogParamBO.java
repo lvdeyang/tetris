@@ -15,6 +15,46 @@ public class OprlogParamBO {
 
 	private String sourceServiceIP;
 
+	private EOprlogType oprlogType;
+
+	public enum EOprlogType {
+
+		/**
+		 * 用户操作
+		 */
+		USER_OPR("用户操作"),
+
+		/**
+		 * 设备上线
+		 */
+		DEVICE_ONLINE("设备上线"),
+
+		/**
+		 * 设备下线
+		 */
+		DEVICE_OFFLINE("设备下线"),
+
+		/**
+		 * 外域连接成功
+		 */
+		EXTERNAL_CONNECT("外域连接成功"),
+
+		/**
+		 * 外域连接断开
+		 */
+		EXTERNAL_DISCONNECT("外域连接断开");
+
+		private String name;
+
+		private EOprlogType(String name) {
+			this.name = name;
+		}
+		
+		public String getEnumName() {
+			return name;
+		}
+	}
+
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date oprTime = Calendar.getInstance().getTime();
 
@@ -66,6 +106,14 @@ public class OprlogParamBO {
 
 	public void setOprDetail(String oprDetail) {
 		this.oprDetail = oprDetail;
+	}
+
+	public EOprlogType getOprlogType() {
+		return oprlogType;
+	}
+
+	public void setOprlogType(EOprlogType oprlogType) {
+		this.oprlogType = oprlogType;
 	}
 
 }

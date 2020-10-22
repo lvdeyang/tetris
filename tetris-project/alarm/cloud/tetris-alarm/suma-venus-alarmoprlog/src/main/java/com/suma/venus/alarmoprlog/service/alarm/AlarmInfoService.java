@@ -107,13 +107,13 @@ public class AlarmInfoService {
 		switch (str) {
 		case "INFO":
 			return EAlarmLevel.INFO;
-		case "MINOR":
+		case "MINOR":                                                                                                                                                                                                                                                                                                                                                                                                     
 			return EAlarmLevel.MINOR;
 		case "MAJOR":
 			return EAlarmLevel.MAJOR;
 		case "CRITICAL":
 			return EAlarmLevel.CRITICAL;
-		case "信息":
+		case "提示":
 			return EAlarmLevel.INFO;
 		case "一般":
 			return EAlarmLevel.MINOR;

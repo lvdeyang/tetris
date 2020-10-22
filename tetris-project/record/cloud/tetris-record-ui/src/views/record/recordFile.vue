@@ -42,12 +42,19 @@
                                     <el-table-column prop="status" label="录制状态" width="100"></el-table-column>
                                     <el-table-column label="操作">
                                         <template slot-scope="scope">
+                                            <!--
                                             <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="handleo=handlePreview(scope.$index, scope.row)">
                                                   <span style="font-size:16px;" class="el-icon-view"></span>
                                             </el-button>
+                                            -->
+                                            <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="uploadRecordFile(scope.$index, scope.row)">
+                                                  <span style="font-size:16px;" class="el-icon-upload"></span>
+                                            </el-button>
+                                            <!--
                                             <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="delRecordFile(scope.$index, scope.row)">
                                                   <span style="font-size:16px;" class="el-icon-delete"></span>
                                             </el-button>
+                                            -->
 
                                         </template>
                                     </el-table-column>
@@ -74,7 +81,7 @@
 
 <script>
 import util from '../../common/js/util'
-import { queryAllStrategy, queryRecordFile, delRecordFile, previewRecordFile } from '../../api/api'
+import { queryAllStrategy, queryRecordFile, delRecordFile, previewRecordFile, uploadFileToMims } from '../../api/api'
 
 export default {
   data () {
@@ -170,6 +177,26 @@ export default {
           })
         } else {
           console.log('previewRecordFile, url=' + res.previewUrl)
+        }
+
+        this.tableLoading = false
+      })
+    },
+
+    uploadRecordFile: function (index, row) {
+      let para = {
+        id: row.id
+      }
+
+      uploadFileToMims(para).then(res => {
+        if (res.errMsg !== null && res.errMsg !== '') {
+          this.$message({
+            message: res.errMsg,
+            type: 'error',
+            duration: 3000
+          })
+        } else {
+          console.log('uploadFileToMims, resp=' + res.resp)
         }
 
         this.tableLoading = false
