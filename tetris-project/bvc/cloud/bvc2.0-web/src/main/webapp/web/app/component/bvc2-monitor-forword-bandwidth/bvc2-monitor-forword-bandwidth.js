@@ -14,7 +14,7 @@ define([
 
   var app = context.getProp('app');
   Vue.component(pluginName, {
-    props: [],
+    props: ['originType'],
     template: tpl,
     data: function () {
       return {
@@ -69,7 +69,19 @@ define([
         self.title = "新建站点"
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
-            self.table.data = data.rows;
+            var outerData=[],systemData=[];
+            data.rows.forEach(function(i){
+              if(i.originType == "OUTER"){
+                outerData.push(i)
+              }else{
+                systemData.push(i)
+              }
+            })
+            if(self.originType == "OUTER"){
+              self.table.data = outerData;
+            }else{
+              self.table.data = systemData;
+            }
           }
         })
       },

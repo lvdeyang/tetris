@@ -1,17 +1,20 @@
 <div class="bvc2-monitor-forword-list"
   style="width:100%; height:100%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
-  <el-button size='small' type='primary' @click="openForword" v-if="buttonIsShow">配置转发</el-button>
-  <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button>  
+  <el-button size='small' type='primary' @click="openForword" v-if="originType !== 'OUTER'">配置转发</el-button>
+  <el-button size='small' type='primary' @click="openBandwidth"  v-if="originType !== 'OUTER'">配置站点带宽</el-button>  
   <!-- <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button> -->
   <el-tag type="danger" style="margin-left: 10px;">当前转发数：{{totleForword}}/200</el-tag>  
   <div style="position:absolute; left:10px; top:60px; right:10px; bottom:60px;">
     <el-tabs v-model="activeName" @tab-click="handleClick"  >
-      <el-tab-pane v-for="item in stationList" :label="item.stationName" :name="item.identity" ::key="item.identity">
-        <div v-if="item.identity != 'self'">
-          <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
-          <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
-        </div>
-      </el-tab-pane>
+      <template v-for="item in stationList">
+        <el-tab-pane :label="item.stationName" :name="item.identity" :key="item.identity" v-if="item.originType == originType">
+          <div v-if="item.identity != 'self'&& originType !== 'OUTER'">
+            <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
+            <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
+          </div>
+        </el-tab-pane>
+      </template>
+      
     </el-tabs>
     <el-table :data="tableData" height="100%" style="width:100%">
 
@@ -19,8 +22,8 @@
       </el-table-column>
       <!-- <el-table-column label="源视频通道" prop="videoChannelName">
       </el-table-column> -->
-      <el-table-column label="源音频设备" prop="audioBundleName">
-      </el-table-column>
+      <!-- <el-table-column label="源音频设备" prop="audioBundleName">
+      </el-table-column> -->
       <!-- <el-table-column label="源音频通道" prop="audioChannelName">
       </el-table-column> -->
 
@@ -28,8 +31,8 @@
       </el-table-column>
       <!-- <el-table-column label="目标视频通道" prop="dstVideoChannelName">
       </el-table-column> -->
-      <el-table-column label="目标音频设备" prop="dstAudioBundleName">
-      </el-table-column>
+      <!-- <el-table-column label="目标音频设备" prop="dstAudioBundleName">
+      </el-table-column> -->
       <!-- <el-table-column label="目标音频通道" prop="dstAudioChannelName">
       </el-table-column> -->
 
@@ -38,8 +41,8 @@
       <el-table-column label="osd创建者" prop="osdUsername">
       </el-table-column> -->
 
-      <el-table-column label="任务类型" prop="type">
-      </el-table-column>
+      <!-- <el-table-column label="任务类型" prop="type">
+      </el-table-column> -->
 
       <el-table-column label="操作" width="200">
         <template slot-scope="scope">
@@ -76,6 +79,6 @@
 
   <el-dialog v-if="dialog.bandwidth.visible" title="配置站点带宽" :visible.sync="dialog.bandwidth.visible" width="80%"
     :before-close="handlebandwidthClose">
-    <bvc2-monitor-forword-bandwidth></bvc2-monitor-forword-bandwidth>
+    <bvc2-monitor-forword-bandwidth :origin-type="originType"></bvc2-monitor-forword-bandwidth>
   </el-dialog>
 </div>

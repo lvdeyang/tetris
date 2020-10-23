@@ -167,6 +167,7 @@ require.config({
     'page-monitor-external-folder': window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
     'page-monitor-currenttask': window.APPPATH + 'monitor/currenttask/page-monitor-currenttask',
     'page-monitor-forword-list': window.APPPATH + 'monitor/forword-list/page-monitor-forword-list',
+    'page-between-domain-list': window.APPPATH + 'monitor/between-domain-list/page-between-domain-list',
     'page-guide-control': window.APPPATH + 'guide/control/page-guide-control',
     'DiskPieChart':window.APPPATH + 'statistics/echarts/DiskPieChart',
     'HistogramChart':window.APPPATH + 'statistics/echarts/HistogramChart',
