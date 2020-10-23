@@ -20,4 +20,6 @@ public interface DeviceGroupProceedRecordDAO extends MetBaseDAO<DeviceGroupProce
 	public List<DeviceGroupProceedRecordPO> findByGroupIdIn(Collection<Long> groupIds);
 	
 	public Page<DeviceGroupProceedRecordPO> findByUserIdOrderByStartTimeDesc(Long userId, Pageable page);
+	
+	public List<DeviceGroupProceedRecordPO> findByUserIdOrderByStartTimeDesc(Long userId);
 }

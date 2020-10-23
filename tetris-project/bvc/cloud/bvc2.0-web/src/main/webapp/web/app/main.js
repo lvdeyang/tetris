@@ -171,7 +171,7 @@ require.config({
     'DiskPieChart':window.APPPATH + 'statistics/echarts/DiskPieChart',
     'HistogramChart':window.APPPATH + 'statistics/echarts/HistogramChart',
     'LineChart':window.APPPATH + 'statistics/echarts/LineChart',
-    'statistics':window.APPPATH+'statistics/statistics'
+    'page-bvc-statistics':window.APPPATH+'statistics/page-bvc-statistics'
 
   },
   shim: {
