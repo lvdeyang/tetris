@@ -36,19 +36,20 @@ public class DeviceGroupProceedRecordQueryServiceImpl {
 	 */
 	public Map<String, Long> statisticsTimeAndNumberOfPeopleAndNumberOfProceedRecord(Long userId) {
 
-		List<DeviceGroupPO> deviceGroups = deviceGroupDao.findByUserId(userId);
+//		List<DeviceGroupPO> deviceGroups = deviceGroupDao.findByUserId(userId);
 		Map<String, Long> statisticsResult = new HashMapWrapper<String, Long>().put("time", 0L).put("totalPeople", 0L)
 				.put("totalProceedRecord", 0L).getMap();
-		if (deviceGroups == null || deviceGroups.size() < 0) {
-			return statisticsResult;
-		}
+//		if (deviceGroups == null || deviceGroups.size() < 0) {
+//			return statisticsResult;
+//		}
 
-		List<DeviceGroupProceedRecordPO> proceedRecords = new ArrayListWrapper<DeviceGroupProceedRecordPO>()
-				.addAll(deviceGroupProceedRecordDao
-						.findByGroupIdIn(deviceGroups.stream().map(DeviceGroupPO::getId).collect(Collectors.toList())))
-				.getList();
+		List<DeviceGroupProceedRecordPO> proceedRecords = deviceGroupProceedRecordDao.findByUserIdOrderByStartTimeDesc(userId);
+//				new ArrayListWrapper<DeviceGroupProceedRecordPO>()
+//				.addAll(deviceGroupProceedRecordDao
+//						.findByGroupIdIn(deviceGroups.stream().map(DeviceGroupPO::getId).collect(Collectors.toList())))
+//				.getList();
 
-		if (deviceGroups == null || deviceGroups.size() < 0) {
+		if (proceedRecords == null || proceedRecords.size() < 0) {
 			return statisticsResult;
 		}
 

@@ -138,4 +138,47 @@
     Date.prototype.formatNumber = function(i){
     	return i<10 ? ("0"+i) : (""+i);
     }
+
+    /**
+     * 将毫秒值格式化成 hh:mm:ss, 格式化后忽略毫秒
+     * @param milliseconds 毫秒值
+     */
+    Date.prototype.formatMilliseconds = function(milliseconds){
+        return Date.prototype.formatSeconds(parseInt(milliseconds/1000));
+    }
+
+    /**
+     * 将秒值格式化成 hh:mm:ss
+     * @param seconds 秒值
+     */
+    Date.prototype.formatSeconds = function(seconds){
+        var theTime = seconds;
+        var theTime1 = 0;
+        var theTime2 = 0;
+        if (theTime > 60) {
+            theTime1 = parseInt(theTime / 60);
+            theTime = parseInt(theTime % 60);
+            if (theTime1 > 60) {
+                theTime2 = parseInt(theTime1 / 60);
+                theTime1 = parseInt(theTime1 % 60);
+            }
+        }
+        var result = "" + parseInt(theTime);
+        if (10 > theTime > 0) {
+            result = "0" + parseInt(theTime);
+        } else {
+            result = "" + parseInt(theTime);
+        }
+
+        if (10 > theTime1 > 0) {
+            result = "0" + parseInt(theTime1) + ":" + result;
+        } else {
+            result = "" + parseInt(theTime1) + ":" + result;
+        }
+        if (theTime2 > 0) {
+            result = "" + parseInt(theTime2) + ":" + result;
+        }
+        return result;
+    }
+
 });
