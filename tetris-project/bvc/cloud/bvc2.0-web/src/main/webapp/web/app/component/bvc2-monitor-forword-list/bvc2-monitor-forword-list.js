@@ -17,7 +17,6 @@ define([
   var pluginName = 'bvc2-monitor-forword-list';
 
   Vue.component(pluginName, {
-    props: [],
     template: tpl,
     data: function () {
       return {
@@ -54,9 +53,11 @@ define([
         totalWidth:'',
         singleWidth:'',
         tableList:{},
-        tableCurrgenData:[]
+        tableCurrgenData:[],
+        outerDataLength:0
       }
     },
+    props:['originType'],
     computed: {
       tableData: function () {
           return this.tableCurrgenData.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
@@ -80,7 +81,11 @@ define([
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
-          self.totleForword = total;
+          if(self.originType == "OUTER"){
+            self.totleForword = self.outerDataLength;
+          }else{
+            self.totleForword = total - self.outerDataLength;
+          }
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
               // self.table.data.push(rows[i]);
@@ -94,19 +99,15 @@ define([
               }
               for(var j=0;j<self.stationList.length;j++){
                 var item = self.stationList[j];
-                  if(!self.tableList[item.identity]){
-                    self.tableList[item.identity]=[];
-                    self.tableList[item.identity].push(rows[i])
-                  }else{
                     if(item.identity == parseExtend){
                     self.tableList[item.identity].push(rows[i])
                   }
-                }
               }
             }
           }
-          self.tableCurrgenData = self.tableList.self;
-          self.table.page.total = self.tableList.self.length;
+          self.tableCurrgenData = self.tableList[self.activeName];
+          self.table.page.total = self.tableList[self.activeName].length;
+          console.log(self.tableList[self.activeName].length)
           // self.getCapacity()
           // self.table.page.total = self.selfForwordList.length;
         });
@@ -119,9 +120,35 @@ define([
             self.stationList = data.rows;
             self.stationList.unshift({
               id: 999,
+              stationList:"SYSTEM",
               identity: "self",
               stationName: "本域",
             })
+            for(var j=0;j<self.stationList.length;j++){
+              var item = self.stationList[j];
+                  if(!item.originType){
+                    item.originType = "SYSTEM"
+                  }
+                  self.tableList[item.identity]=[];
+            }
+            // 设置tab栏初始选中值,和带宽初始值
+            var outerData=[],systemData=[];
+            self.stationList.forEach(function(i){
+              if(i.originType == "OUTER"){
+                outerData.push(i)
+              }else{
+                systemData.push(i)
+              }
+            })
+            if(self.originType == "OUTER"){
+              self.activeName = outerData[0].identity
+              self.singleWidth = outerData[0].singleWidth
+              self.totalWidth = outerData[0].totalWidth
+            }else{
+              self.activeName = systemData[0].identity
+            }
+            
+            self.outerDataLength = outerData.length;
             self.load(1);
             // self.getCapacity()
           }
@@ -254,7 +281,7 @@ define([
     },
     mounted: function () {
       var self = this;
-      
+      console.log(self.originType)
       var resourceApiUrl = document.location.protocol +"//"+document.location.hostname+':8213';
       self.resourceApiUrl =resourceApiUrl;
       console.log(resourceApiUrl)
