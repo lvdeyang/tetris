@@ -1,5 +1,8 @@
 package com.sumavision.bvc.device.group.dao;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -12,6 +15,9 @@ public interface DeviceGroupProceedRecordDAO extends MetBaseDAO<DeviceGroupProce
 	
 	public DeviceGroupProceedRecordPO findByGroupIdAndFinished(Long groupId, Boolean finished);
 	
-	public Page<DeviceGroupProceedRecordPO> findByGroupId(Long groupId, Pageable page);
+	public Page<DeviceGroupProceedRecordPO> findByGroupIdOrderByStartTimeDesc(Long groupId, Pageable page);
+
+	public List<DeviceGroupProceedRecordPO> findByGroupIdIn(Collection<Long> groupIds);
 	
+	public Page<DeviceGroupProceedRecordPO> findByUserIdOrderByStartTimeDesc(Long userId, Pageable page);
 }
