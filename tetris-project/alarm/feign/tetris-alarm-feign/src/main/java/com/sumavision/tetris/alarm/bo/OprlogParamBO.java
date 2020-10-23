@@ -25,6 +25,11 @@ public class OprlogParamBO {
 		USER_OPR("用户操作"),
 
 		/**
+		 * 用户上线
+		 */
+		USER_ONLINE("用户上线"),
+
+		/**
 		 * 设备上线
 		 */
 		DEVICE_ONLINE("设备上线"),
