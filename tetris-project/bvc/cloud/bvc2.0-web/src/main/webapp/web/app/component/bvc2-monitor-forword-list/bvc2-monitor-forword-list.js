@@ -96,6 +96,7 @@ define([
                 var item = self.stationList[j];
                   if(!self.tableList[item.identity]){
                     self.tableList[item.identity]=[];
+                    self.tableList[item.identity].push(rows[i])
                   }else{
                     if(item.identity == parseExtend){
                     self.tableList[item.identity].push(rows[i])

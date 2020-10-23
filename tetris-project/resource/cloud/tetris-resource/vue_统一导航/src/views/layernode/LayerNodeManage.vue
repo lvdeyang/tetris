@@ -54,264 +54,264 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { getNodes,deleteNodes} from '../../api/api';
+import { getNodes, deleteNodes } from '../../api/api';
 
-  export default {
-    data() {
-      return {
-        activeTabName : "LayernodeManage",
-        nodes: [
-        ],
-        typeOptions : [
-          {
-            value : "",
-            label : "全部类型"
-          },
-          // {
-          //   label : "JV210接入",
-          //   value : "ACCESS_JV210"
-          // },
-          // {
-          //   label : "CDN接入",
-          //   value : "ACCESS_CDN"
-          // },
-          // {
-          //   label : "IPC接入",
-          //   value : "ACCESS_IPC"
-          // },
-          {
-            label : "JV230接入",
-            value : "ACCESS_JV230"
-          },
-          {
-            label : "机顶盒接入",
-            value : "ACCESS_TVOS"
-          },
-          {
-            label : "混合器接入",
-            value : "ACCESS_MIXER"
-          },
-          {
-            label : "手机接入",
-            value : "ACCESS_MOBILE"
-          },
-          {
-            label : "音视频转发服务设备",
-            value : "ACCESS_JV210"
-          },
-          {
-            label : "录像存储服务单元A型",
-            value : "ACCESS_CDN"
-          },
-          {
-            label : "录像存储服务单元B型",
-            value : "ACCESS_VOD"
-          },
-          {
-            label : "监控资源汇接网关",
-            value : "ACCESS_IPC"
-          },
-          {
-            label : "流媒体管理服务设备",
-            value : "ACCESS_STREAMMEDIA"
-          },
-          {
-            label : "联网服务设备",
-            value : "ACCESS_NETWORK"
-          },
-          {
-            label : "显控汇接网关",
-            value : "ACCESS_DISPLAYCTRL"
-          },
-          {
-            label : "流转发器接入",
-            value : "ACCESS_S100"
-          },
-          // 暂时都用 JV210设备
-          {
-            label : "点播代理服务设备",
-            value : "ACCESS_VODPROXY"
-          },
-          {
-            label : "webrtc接入",
-            value : "ACCESS_WEBRTC"
-          },
-          {
-            label : "联网接入",
-            value : "ACCESS_LIANWANG"
-          },
-          {
-            label : "LDAP目录资源服务设备",
-            value : "ACCESS_LDAP"
-          },
-          {
-            label : "综合运维服务设备",
-            value : "ACCESS_OMMS"
-          },
-          {
-            label : "ws接入",
-            value : "ACCESS_WS"
-          }
-        ],
-        typeObj : {
-          // ACCESS_JV210 : "JV210接入",
-          // ACCESS_CDN : "CDN接入",
-          // ACCESS_IPC : "IPC接入",
-          ACCESS_MOBILE : "手机接入",
-          ACCESS_JV230 : "JV230接入",
-          ACCESS_TVOS : "机顶盒接入",
-          ACCESS_MIXER : "混合器接入",
-          ACCESS_JV210 : "音视频转发服务设备",
-          ACCESS_CDN : "录像存储服务单元A型",
-          ACCESS_VOD : "录像存储服务单元B型",
-          ACCESS_IPC : "监控资源汇接网关",
-          ACCESS_STREAMMEDIA : "流媒体管理服务设备",
-          ACCESS_NETWORK : "联网服务设备",
-          ACCESS_DISPLAYCTRL : "显控汇接网关",
-          ACCESS_S100 : "流转发器接入",
-          ACCESS_VODPROXY : "点播代理服务设备",
-          ACCESS_WEBRTC: "webrtc接入",
-          ACCESS_LIANWANG: "联网接入",
-          ACCESS_LDAP: "LDAP目录资源服务设备",
-          ACCESS_OMMS: "综合运维服务设备",
-          ACCESS_WS: "ws接入"
+export default {
+  data () {
+    return {
+      activeTabName: "LayernodeManage",
+      nodes: [
+      ],
+      typeOptions: [
+        {
+          value: "",
+          label: "全部类型"
         },
-        filters: {
-          type : '',
-          keyword: ''
+        // {
+        //   label : "JV210接入",
+        //   value : "ACCESS_JV210"
+        // },
+        // {
+        //   label : "CDN接入",
+        //   value : "ACCESS_CDN"
+        // },
+        // {
+        //   label : "IPC接入",
+        //   value : "ACCESS_IPC"
+        // },
+        {
+          label: "JV230接入",
+          value: "ACCESS_JV230"
         },
-        nodeTableLoading: false,
-        multipleSelection : []
+        {
+          label: "机顶盒接入",
+          value: "ACCESS_TVOS"
+        },
+        {
+          label: "混合器接入",
+          value: "ACCESS_MIXER"
+        },
+        {
+          label: "手机接入",
+          value: "ACCESS_MOBILE"
+        },
+        {
+          label: "音视频转发服务设备",
+          value: "ACCESS_JV210"
+        },
+        {
+          label: "录像存储服务单元A型",
+          value: "ACCESS_CDN"
+        },
+        {
+          label: "录像存储服务单元B型",
+          value: "ACCESS_VOD"
+        },
+        {
+          label: "监控资源汇接网关",
+          value: "ACCESS_IPC"
+        },
+        {
+          label: "流媒体管理服务设备",
+          value: "ACCESS_STREAMMEDIA"
+        },
+        {
+          label: "联网服务设备",
+          value: "ACCESS_NETWORK"
+        },
+        {
+          label: "显控汇接网关",
+          value: "ACCESS_DISPLAYCTRL"
+        },
+        {
+          label: "流转发器接入",
+          value: "ACCESS_S100"
+        },
+        // 暂时都用 JV210设备
+        {
+          label: "点播代理服务设备",
+          value: "ACCESS_VODPROXY"
+        },
+        {
+          label: "webrtc接入",
+          value: "ACCESS_WEBRTC"
+        },
+        {
+          label: "联网接入",
+          value: "ACCESS_LIANWANG"
+        },
+        {
+          label: "LDAP目录资源服务设备",
+          value: "ACCESS_LDAP"
+        },
+        {
+          label: "综合运维服务设备",
+          value: "ACCESS_OMMS"
+        },
+        {
+          label: "ws接入",
+          value: "ACCESS_WS"
+        }
+      ],
+      typeObj: {
+        // ACCESS_JV210 : "JV210接入",
+        // ACCESS_CDN : "CDN接入",
+        // ACCESS_IPC : "IPC接入",
+        ACCESS_MOBILE: "手机接入",
+        ACCESS_JV230: "JV230接入",
+        ACCESS_TVOS: "机顶盒接入",
+        ACCESS_MIXER: "混合器接入",
+        ACCESS_JV210: "音视频转发服务设备",
+        ACCESS_CDN: "录像存储服务单元A型",
+        ACCESS_VOD: "录像存储服务单元B型",
+        ACCESS_IPC: "监控资源汇接网关",
+        ACCESS_STREAMMEDIA: "流媒体管理服务设备",
+        ACCESS_NETWORK: "联网服务设备",
+        ACCESS_DISPLAYCTRL: "显控汇接网关",
+        ACCESS_S100: "流转发器接入",
+        ACCESS_VODPROXY: "点播代理服务设备",
+        ACCESS_WEBRTC: "webrtc接入",
+        ACCESS_LIANWANG: "联网接入",
+        ACCESS_LDAP: "LDAP目录资源服务设备",
+        ACCESS_OMMS: "综合运维服务设备",
+        ACCESS_WS: "ws接入"
+      },
+      filters: {
+        type: '',
+        keyword: ''
+      },
+      nodeTableLoading: false,
+      multipleSelection: []
+    }
+  },
+  methods: {
+    gotoMonitor: function (row) {
+      var self = this;
+      window.open(row.monitorUrl);
+    },
+    gotoAdmin: function (row) {
+      var self = this;
+      window.open(row.netUrl);
+    },
+    handleTabClick (tab, event) {
+      if ("LayernodeManage" !== tab.name) {
+        this.$router.push('/' + tab.name);
       }
     },
-    methods: {
-      gotoMonitor:function(row){
-        var self = this;
-        window.open(row.monitorUrl);
-      },
-      gotoAdmin:function(row){
-        var self = this;
-        window.open(row.netUrl);
-      },
-      handleTabClick(tab, event) {
-        if("LayernodeManage" !== tab.name){
-          this.$router.push('/' + tab.name);
+    //获取节点列表
+    getNodes: function () {
+      let param = {
+        type: this.filters.type,
+        keyword: this.filters.keyword
+      };
+      this.nodeTableLoading = true;
+      getNodes(param).then((res) => {
+        if (res.errMsg) {
+          this.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
+          this.nodes = res.nodes;
         }
-      },
-      //获取节点列表
-      getNodes : function(){
+
+        this.nodeTableLoading = false;
+      });
+    },
+    handleModify: function (row) {
+      this.$router.push({
+        path: '/ModifyLayernode',
+        query: {
+          id: row.id
+        }
+      });
+    },
+    handleDelete: function (row) {
+      this.$confirm('是否确认删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         let param = {
-          type : this.filters.type,
-          keyword : this.filters.keyword
+          nodeIds: row.id
         };
-        this.nodeTableLoading = true;
-        getNodes(param).then((res) => {
+
+        deleteNodes(param).then(res => {
           if (res.errMsg) {
             this.$message({
               message: res.errMsg,
               type: 'error'
             });
           } else {
-            this.nodes = res.nodes;
-          }
-
-          this.nodeTableLoading = false;
-        });
-      },
-      handleModify : function(row){
-        this.$router.push({
-          path: '/ModifyLayernode',
-          query: {
-            id: row.id
+            this.$message({
+              message: "删除成功",
+              type: 'success'
+            });
+            this.getNodes();
           }
         });
-      },
-      handleDelete : function(row){
-        this.$confirm('是否确认删除?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          let param = {
-            nodeIds : row.id
-          };
-
-          deleteNodes(param).then(res => {
-            if(res.errMsg){
-              this.$message({
-                message: res.errMsg,
-                type: 'error'
-              });
-            } else {
-              this.$message({
-                message: "删除成功",
-                type: 'success'
-              });
-              this.getNodes();
-            }
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
         });
-      },
-      handleMultiDelete : function(){
-        if(!this.multipleSelection.length){
-          this.$message({
-            message: '请至少选择一行',
-            type: 'warning'
-          });
-          return;
-        }
-
-        this.$confirm('是否确认删除?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          let nodeIds = [];
-          for(let selection of this.multipleSelection){
-            nodeIds.push(selection.id);
-          }
-          let param = {
-            nodeIds : nodeIds.join(",")
-          };
-
-          deleteNodes(param).then(res => {
-            if(res.errMsg){
-              this.$message({
-                message: res.errMsg,
-                type: 'error'
-              });
-            } else {
-              this.$message({
-                message: "删除成功",
-                type: 'success'
-              });
-              this.getNodes();
-            }
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
-        });
-      },
-      handleSelectionChange : function(val){
-        this.multipleSelection = val;
-      },
+      });
     },
-    mounted() {
+    handleMultiDelete: function () {
+      if (!this.multipleSelection.length) {
+        this.$message({
+          message: '请至少选择一行',
+          type: 'warning'
+        });
+        return;
+      }
+
+      this.$confirm('是否确认删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let nodeIds = [];
+        for (let selection of this.multipleSelection) {
+          nodeIds.push(selection.id);
+        }
+        let param = {
+          nodeIds: nodeIds.join(",")
+        };
+
+        deleteNodes(param).then(res => {
+          if (res.errMsg) {
+            this.$message({
+              message: res.errMsg,
+              type: 'error'
+            });
+          } else {
+            this.$message({
+              message: "删除成功",
+              type: 'success'
+            });
+            this.getNodes();
+          }
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+    handleSelectionChange: function (val) {
+      this.multipleSelection = val;
+    },
+  },
+  mounted () {
     var self = this;
-    this.$nextTick(function() {
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LayernodeManage');
+    this.$nextTick(function () {
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwSerInfoAndNode');
     });
-      this.getNodes();
-    }
+    this.getNodes();
   }
+}
 
 </script>
 

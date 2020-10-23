@@ -21,7 +21,7 @@
       </el-form-item>
       <el-form-item label="域类型" v-if="bundleForm.deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity">
+          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
       <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
@@ -216,7 +216,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="text_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
 
@@ -252,7 +252,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="date_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
                   <el-col :span="7">
@@ -654,6 +654,7 @@ export default {
 
         // accessNodeUid : ""
       },
+      predefineColors: ['#ffffff', '#000000', '#409EFF', '#E6A23C', '#F56C6C'],
       regionOption: [
         { name: "本域", key: "self" },
         { name: "外域", key: "external" },
@@ -809,7 +810,7 @@ export default {
         },
         date_osd: {
           enable: true,
-          has_week: true,
+          has_week: false,
           x: 0,
           y: 0,
           color: "#7d59f9",

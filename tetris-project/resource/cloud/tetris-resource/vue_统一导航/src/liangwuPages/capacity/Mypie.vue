@@ -52,7 +52,7 @@ export default {
         this.currentNum = this.capacityData.turnCount || 0
         this.totalNum = this.capacityData.turnCapacity
       } else if (this.titleType == "playback") {
-        this.currentNum = this.capacityData.reIdleCount || 0
+        this.currentNum = this.capacityData.reCount || 0
         this.totalNum = this.capacityData.replayCapacity
       }
     },
