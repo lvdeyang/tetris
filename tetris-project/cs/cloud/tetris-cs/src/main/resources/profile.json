@@ -4,5 +4,9 @@
 	"abilityBroadIp": "192.165.56.190",
 	"abilityBroadPort": "9000",
 	"ifLocal": false,
-	"division":"340111"
+	"division":"340111",
+	"ftpIp": "192.165.56.229",
+	"ftpPort": "",
+	"ftpUsername": "test",
+	"ftpPassword": "123",
  }

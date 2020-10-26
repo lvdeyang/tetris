@@ -42,12 +42,13 @@ public class BossService {
 		try {
 			JSONObject json=new JSONObject();
 			UserPO userPO=userDao.findOne(userId);
-			json.put("userId", userPO.getUuid());
+			json.put("userId", userId);
 			json.put("userName", userPO.getUsername());
+			json.put("userUuid", userPO.getUuid());
 			JSONObject configJson=JSONObject.parseObject(readProfile());
 			HttpUtil.httpPost(configJson.getString("bossAddUserUrl"), json);
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 		
 	}
