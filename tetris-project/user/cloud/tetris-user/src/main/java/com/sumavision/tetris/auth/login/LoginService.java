@@ -174,6 +174,10 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
+		
+		if(user.getIsLoginIp() != null && user.getIsLoginIp() == true && user.getLoginIp() == null){
+			user.setLoginIp(loginIp);
+		}
 		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
 			if(!loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
 		}

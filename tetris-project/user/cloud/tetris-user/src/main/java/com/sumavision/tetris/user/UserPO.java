@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -20,7 +21,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2019年1月15日 下午4:40:52
  */
 @Entity
-@Table(name = "TETRIS_USER")
+@Table(name = "TETRIS_USER",uniqueConstraints = {@UniqueConstraint(columnNames="USERNO")})
 public class UserPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
@@ -88,6 +89,18 @@ public class UserPO extends AbstractBasePO{
 	/**限制登陆ip*/
 	private String loginIp;
 	
+	/**是否首次登陆ip为限制登陆ip*/
+	private Boolean isLoginIp;
+	
+	@Column(name = "ISLOGINIP")
+	public Boolean getIsLoginIp() {
+		return isLoginIp;
+	}
+
+	public void setIsLoginIp(Boolean isLoginIp) {
+		this.isLoginIp = isLoginIp;
+	}
+
 	@Column(name = "LOGINIP")
 	public String getLoginIp() {
 		return loginIp;
