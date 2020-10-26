@@ -78,6 +78,18 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资视频类型 */
 	private String videoType;
 	
+	/**是否必选节目*/
+	private Boolean isRequired;
+	
+	@Column(name = "ISREQUIRED")
+	public Boolean getIsRequired() {
+		return isRequired;
+	}
+
+	public void setIsRequired(Boolean isRequired) {
+		this.isRequired = isRequired;
+	}
+
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
 		return programId;

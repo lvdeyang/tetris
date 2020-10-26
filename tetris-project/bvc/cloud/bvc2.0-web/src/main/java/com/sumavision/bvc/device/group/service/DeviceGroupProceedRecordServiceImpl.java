@@ -273,6 +273,7 @@ public class DeviceGroupProceedRecordServiceImpl {
 		DeviceGroupAuthorizationPO auth = deviceGroupAuthorizationDao.findByGroupUuid(group.getUuid());
 		
 		DeviceGroupProceedRecordPO recordPO = new DeviceGroupProceedRecordPO();
+		recordPO.setUserId(group.getUserId());
 		recordPO.setStartTime(new Date());
 		recordPO.setAuthorizationMemberNumber(auth==null?0:auth.getAuthorizationMembers().size());
 		recordPO.setTotalMemberNumber(group.getMembers().size());

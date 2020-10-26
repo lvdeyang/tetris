@@ -28,37 +28,37 @@ public class MimsResourceCallBack extends HttpCallBack<Long, Object, Object>{
 			
 			System.out.println("媒资返回：" + res);
 //			临时对回调注释，不做处理
-//			Long publishId = this.getParam1();
-//			PublishStreamDAO publishStreamDao = SpringContext.getBean(PublishStreamDAO.class);
-//			
-//			String status = JSON.parseObject(res).getString("status");
-//			if(status.equals("200")){
-//				String data = JSON.parseObject(res).getString("data");
-//				Long id = JSON.parseObject(data).getLong("id");
-//				
-//				System.out.println("publishId:" + publishId + " id:" + id);
-//				
-//				PublishStreamPO publish = publishStreamDao.findOne(publishId);
-//				publish.setMimsId(id);
-//				
-//				publishStreamDao.save(publish);
-//				
-//				//加一条RecordLiveChannelPO
-//				RecordPO record = publish.getRecord();
-//				String groupUuid = record.getGroup().getUuid();
-//				DeviceGroupAuthorizationDAO deviceGroupAuthorizationDao = SpringContext.getBean(DeviceGroupAuthorizationDAO.class);
-//				//调用前已经确定建立了authorizationPO，不会为null
-//				DeviceGroupAuthorizationPO authorizationPO = deviceGroupAuthorizationDao.findByGroupUuid(groupUuid);	
-//				//添加RecordLiveChannelPO和authorizationPO
-//				RecordLiveChannelPO recordLiveChannelPO = new RecordLiveChannelPO();
-//				recordLiveChannelPO.setAuthorization(authorizationPO);
-//				recordLiveChannelPO.setRecordUuid(record.getUuid());
-//				recordLiveChannelPO.setName(record.getVideoName());
-//				recordLiveChannelPO.setCid(id.toString());
-//				recordLiveChannelPO.setPlayUrl(publish.getUrl());
-//				authorizationPO.getLiveChannels().add(recordLiveChannelPO);
-//				deviceGroupAuthorizationDao.save(authorizationPO);
-//			}
+			Long publishId = this.getParam1();
+			PublishStreamDAO publishStreamDao = SpringContext.getBean(PublishStreamDAO.class);
+			
+			String status = JSON.parseObject(res).getString("status");
+			if(status.equals("200")){
+				String data = JSON.parseObject(res).getString("data");
+				Long id = JSON.parseObject(data).getLong("id");
+				
+				System.out.println("publishId:" + publishId + " id:" + id);
+				
+				PublishStreamPO publish = publishStreamDao.findOne(publishId);
+				publish.setMimsId(id);
+				
+				publishStreamDao.save(publish);
+				
+				//加一条RecordLiveChannelPO
+				RecordPO record = publish.getRecord();
+				String groupUuid = record.getGroup().getUuid();
+				DeviceGroupAuthorizationDAO deviceGroupAuthorizationDao = SpringContext.getBean(DeviceGroupAuthorizationDAO.class);
+				//调用前已经确定建立了authorizationPO，不会为null
+				DeviceGroupAuthorizationPO authorizationPO = deviceGroupAuthorizationDao.findByGroupUuid(groupUuid);	
+				//添加RecordLiveChannelPO和authorizationPO
+				RecordLiveChannelPO recordLiveChannelPO = new RecordLiveChannelPO();
+				recordLiveChannelPO.setAuthorization(authorizationPO);
+				recordLiveChannelPO.setRecordUuid(record.getUuid());
+				recordLiveChannelPO.setName(record.getVideoName());
+				recordLiveChannelPO.setCid(id.toString());
+				recordLiveChannelPO.setPlayUrl(publish.getUrl());
+				authorizationPO.getLiveChannels().add(recordLiveChannelPO);
+				deviceGroupAuthorizationDao.save(authorizationPO);
+			}
 			
 		}catch(Exception e){
 			e.printStackTrace();

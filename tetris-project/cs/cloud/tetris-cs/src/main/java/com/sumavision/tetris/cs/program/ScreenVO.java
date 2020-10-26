@@ -26,6 +26,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String type;
 	private String mimetype;
 	private String previewUrl;
+	private String downloadUrl;
 	private String encryption;
 	private String encryptionUrl;
 	private Integer hotWeight;
@@ -37,6 +38,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String videoPid;
 	private String audioType;
 	private String videoType;
+	private Boolean isRequired;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -64,7 +66,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setAudioType(entity.getAudioType())
 		.setVideoType(entity.getVideoType())
 		.setMimsUuid(entity.getMimsUuid())
-		.setResourceId(entity.getResourceId());
+		.setResourceId(entity.getResourceId())
+		.setIsRequired(entity.getIsRequired());
 		return this;
 	}
 	
@@ -178,7 +181,18 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setAudioType(vo.getAudioType());
 		screenPO.setVideoType(vo.getVideoType());
 		screenPO.setUpdateTime(new Date());
+		screenPO.setIsRequired(vo.getIsRequired() == null ? false:vo.getIsRequired());
 		return screenPO;
+	}
+	
+
+	public String getDownloadUrl() {
+		return downloadUrl;
+	}
+
+	public ScreenVO setDownloadUrl(String downloadUrl) {
+		this.downloadUrl = downloadUrl;
+		return this;
 	}
 
 	public Long getProgramId() {
@@ -382,6 +396,18 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		this.videoType = videoType;
 		return this;
 	}
+	
+
+	public Boolean getIsRequired() {
+		return isRequired;
+	}
+
+	public ScreenVO setIsRequired(Boolean isRequired) {
+		this.isRequired = isRequired;
+		return this;
+	}
+
+
 
 	public static final class ScreenVOOrderComparator implements Comparator<ScreenVO>{
 		@Override

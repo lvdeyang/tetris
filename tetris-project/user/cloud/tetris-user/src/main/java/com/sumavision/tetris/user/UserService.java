@@ -250,11 +250,12 @@ public class UserService{
             String classify,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles,
             boolean emit,
             String worknodeUid) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp, bindRoles);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp,isLoginIp, bindRoles);
 		
 		if(emit){
 			//发布用户注册事件
@@ -310,10 +311,11 @@ public class UserService{
             String companyName,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles,
             String worknodeUid) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(), remark, loginIp, bindRoles);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName(), remark, loginIp,isLoginIp, bindRoles);
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -388,6 +390,7 @@ public class UserService{
             Long companyId,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles,
             String worknodeUid) throws Exception{
 		
@@ -397,7 +400,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp, bindRoles);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp,isLoginIp, bindRoles);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -458,6 +461,7 @@ public class UserService{
             String classify,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles) throws Exception{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
@@ -511,6 +515,7 @@ public class UserService{
 		user.setUpdateTime(new Date());
 		user.setRemark(remark);
 		user.setLoginIp(loginIp);
+		user.setIsLoginIp(isLoginIp);
 		userDao.save(user);
 		
 		//创建私有角色
