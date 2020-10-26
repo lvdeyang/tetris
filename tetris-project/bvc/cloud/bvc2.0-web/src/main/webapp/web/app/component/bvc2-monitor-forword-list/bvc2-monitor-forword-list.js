@@ -81,11 +81,12 @@ define([
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
-          if(self.originType == "OUTER"){
-            self.totleForword = self.outerDataLength;
-          }else{
-            self.totleForword = total - self.outerDataLength;
-          }
+          var currentTotle =0;
+          // if(self.originType == "OUTER"){
+          //   self.totleForword = self.outerDataLength;
+          // }else{
+          //   self.totleForword = total - self.outerDataLength;
+          // }
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
               // self.table.data.push(rows[i]);
@@ -104,7 +105,14 @@ define([
                   }
               }
             }
+            for(var i=0;i<self.stationList.length;i++){
+              var item = self.stationList[i];
+              if(item.originType == self.originType){
+                currentTotle+= self.tableList[item.identity].length;
+              }
+            }
           }
+          self.totleForword = currentTotle;
           self.tableCurrgenData = self.tableList[self.activeName];
           self.table.page.total = self.tableList[self.activeName].length;
           console.log(self.tableList[self.activeName].length)
@@ -114,20 +122,19 @@ define([
       },
       loadStation: function () {
         var self = this;
-        self.title = "新建站点"
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
             self.stationList = data.rows;
             self.stationList.unshift({
               id: 999,
-              stationList:"SYSTEM",
+              originType:"INNER",
               identity: "self",
               stationName: "本域",
             })
             for(var j=0;j<self.stationList.length;j++){
               var item = self.stationList[j];
                   if(!item.originType){
-                    item.originType = "SYSTEM"
+                    item.originType = "INNER"
                   }
                   self.tableList[item.identity]=[];
             }
@@ -149,6 +156,7 @@ define([
             }
             
             self.outerDataLength = outerData.length;
+            console.log(outerData.length,'outerData.length')
             self.load(1);
             // self.getCapacity()
           }

@@ -115,7 +115,7 @@
 
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
-        <el-form label-width="120px" size="small">
+        <el-form label-width="120px" size="mini">
           <el-form-item :label="i18n.labelCreateUserNickname">
             <el-input v-model="dialog.createUser.nickname"></el-input>
           </el-form-item>
@@ -137,9 +137,16 @@
             <el-input v-model="dialog.createUser.remark"></el-input>
           </el-form-item>
           <!-- 绑定ip -->
-          <el-form-item :label="i18n.labelCreateUserBindIp">
-            <el-input v-model="dialog.createUser.loginIp"></el-input>
-          </el-form-item>
+            <el-form-item :label="i18n.labelCreateUserBindIp">
+              <el-col :span="13">
+              <el-input :disabled="isLoginIpDisabled" v-model="dialog.createUser.loginIp"></el-input>
+            </el-col>
+            <el-col :span="5" :offset="2">
+                <el-checkbox v-model="dialog.createUser.isLoginIp" @change="isLoginIpChange">是否首次登录记录IP</el-checkbox>
+            </el-col>
+            </el-form-item>
+          
+      
           <!-- 绑定角色 -->
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>

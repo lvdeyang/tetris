@@ -27,7 +27,7 @@ define(function(){
         //页面标题
         page:{
             title:{
-                base:'融合通信平台',
+                base:'视频监控平台',
                 sub:{
                     'page-group-list':'组管理',
                     'page-group-control':'流调度',
@@ -38,6 +38,8 @@ define(function(){
                     'page-layout':'布局方案',
                     'page-record-scheme':'录制方案',
                     'page-tpl':'组模板',
+                    'page-liangwu-user':'用户管理',
+                    'page-liangwu-role':'角色管理',
                     'page-error':'出错啦'
                 },
                 separator:'-'
