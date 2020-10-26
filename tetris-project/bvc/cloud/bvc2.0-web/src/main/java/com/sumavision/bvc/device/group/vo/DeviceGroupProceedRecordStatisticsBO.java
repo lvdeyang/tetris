@@ -11,6 +11,7 @@ import java.util.List;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年10月22日 下午7:32:03
  */
+@Deprecated
 public class DeviceGroupProceedRecordStatisticsBO {
 
 	/** 最近20次会议人数 */
