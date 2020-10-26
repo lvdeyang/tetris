@@ -38,7 +38,7 @@ define(function(){
         //页面标题
         page:{
             title:{
-                base:'视频点播系统',
+                base:'视频监控平台',
                 sub:{
                     'page-group-list':'组管理',
                     'page-group-control':'流调度',
@@ -50,7 +50,11 @@ define(function(){
                     'page-layout':'布局方案',
                     'page-record-scheme':'录制方案',
                     'page-tpl':'组模板',
-                    'page-error':'出错啦'
+                    'page-error':'出错啦',
+                    
+                    'page-monitor-forword-list':'转发管理',
+                    'page-monitor-currenttask':'当前任务',
+                    'page-monitor-record-liangwu':'录制管理',
                 },
                 separator:'-'
             }
