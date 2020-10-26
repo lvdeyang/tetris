@@ -117,7 +117,7 @@ public class MonitorLiveUserService {
 	 * @param String userno 业务用户号码
 	 * @return MonitorLiveUserPO 点播用户任务
 	 */
-	public MonitorLiveUserPO startXtSeeLocal(
+	public MonitorLiveUserPO startXtSeeLocal_old(
 			String uuid,
 			UserBO user,
 			Long userId,
@@ -198,6 +198,99 @@ public class MonitorLiveUserService {
 		return live;
 	}
 	
+	/**
+	 * xt点播本地用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 下午4:37:25
+	 * @param String uuid 既定uuid
+	 * @param UserBO user 本地用户
+	 * @param Long userId 当前操作业务用户
+	 * @param String username 业务用户名
+	 * @param String userno 业务用户号码
+	 * @return MonitorLiveUserPO 点播用户任务
+	 */
+	public MonitorLiveUserPO startXtSeeLocal(
+			String uuid,
+			UserBO user,
+			Long userId,
+			String username,
+			String userno) throws Exception{
+		
+		if(user == null) throw new UserCannotBeFoundException();
+//		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
+//		authorize(user.getId(), userId);//TODO: 暂时注释
+		
+		//参数模板
+		Map<String, Object> result = commons.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+				
+		//联网layerId
+		String networkLayerId = commons.queryNetworkLayerId();
+		
+		//本地用户绑定编码器
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
+		BundlePO srcBundleEntity = srcBundleEntities.get(0);
+		
+		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
+		ChannelSchemeDTO srcVideoChannel = srcVideoChannels.get(0);
+		
+		List<ChannelSchemeDTO> srcAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
+		ChannelSchemeDTO srcAudioChannel = srcAudioChannels.get(0);
+		
+		MonitorLiveUserPO live = new MonitorLiveUserPO(
+				user.getUserNo(), user.getName(),
+				srcBundleEntity.getBundleId(), srcBundleEntity.getBundleName(), srcBundleEntity.getBundleType(), srcBundleEntity.getAccessNodeUid(),
+				srcVideoChannel.getChannelId(), srcVideoChannel.getBaseType(), srcAudioChannel.getChannelId(), srcAudioChannel.getBaseType(),
+				null, null, null, null, null, null,
+				null, null, null, null, null, null,
+				userId, username,
+				targetAvtpl.getId(),
+				targetGear.getId(),
+				null,
+				LiveType.XT_LOCAL);
+		
+		if(uuid != null) live.setUuid(uuid);
+		
+		monitorLiveUserDao.save(live);
+		
+		LogicBO logic = openBundle(live, codec, userId);
+		
+		logic.setPass_by(new ArrayList<PassByBO>());
+		
+		XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER)
+																				 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+																				 .setUuid(live.getUuid())
+																				 .setSrc_user(userno)
+																				 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", live.getLayerId())
+																						 											   .put("bundleid", live.getBundleId())
+																						 											   .put("video_channelid", live.getVideoChannelId())
+																						 											   .put("audio_channelid", live.getAudioChannelId())
+																						 											   .getMap())
+																				 .setDst_number(user.getUserNo())
+																				 .setVparam(codec);
+		
+		PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
+										.setType(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER)
+										.setPass_by_content(passByContent);
+		
+		logic.getPass_by().add(passby);
+		
+		resourceServiceClient.coverLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER, 
+				JSON.toJSONString(passby));
+		
+		executeBusiness.execute(logic, "点播系统：xt点播本地用户 " + live.getSrcUsername());
+		
+		return live;
+	}
+
 	/**
 	 * 本地点播本地用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
