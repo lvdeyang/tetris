@@ -61,6 +61,8 @@ public class BundleHeartBeatService {
 			BundlePO bundlePO = bundlePOs.get(0);
 			bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 			bundleDao.save(bundlePO);
+		} else {
+			LOGGER.warn("removeBundleStatus, cannot find budlePO, ip=" + bundle_ip);
 		}
 
 		if (bunldeStatusMap.size() == 0 && t != null) {
@@ -107,10 +109,13 @@ public class BundleHeartBeatService {
 
 		// TODO 判断是否需要启动线程
 		if (threadFlag) {
-			LOGGER.info("new thread");
-			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService,
-					timeout);
-			t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
+			startBundleHeartBeatMonitor();
 		}
+	}
+
+	public void startBundleHeartBeatMonitor() {
+		LOGGER.info("new thread for bundle monitor");
+		BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService, timeout);
+		t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
 	}
 }

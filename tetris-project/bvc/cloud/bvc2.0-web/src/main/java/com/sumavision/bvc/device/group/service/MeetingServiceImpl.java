@@ -65,6 +65,7 @@ import com.sumavision.bvc.device.group.po.DeviceGroupMemberScreenPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberScreenRectPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupRecordSchemePO;
+import com.sumavision.bvc.device.group.po.PublishStreamPO;
 import com.sumavision.bvc.device.group.po.RecordPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
@@ -78,6 +79,7 @@ import com.sumavision.bvc.device.jv230.po.Jv230ChannelPO;
 import com.sumavision.bvc.device.jv230.po.Jv230PO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO.ResultDstBO;
+import com.sumavision.bvc.meeting.logic.record.mims.MimsService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.dao.BusinessRoleDAO;
 import com.sumavision.bvc.system.dao.ChannelNameDAO;
@@ -196,6 +198,12 @@ public class MeetingServiceImpl {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private DeviceGroupProceedRecordServiceImpl deviceGroupProceedRecordServiceImpl;
+	
+	@Autowired
+	private MimsService mimsService;
 	
 	/**
 	 * openBundle回复处理：离线
@@ -938,7 +946,9 @@ public class MeetingServiceImpl {
 			//保存设备组状态
 			deviceGroupDao.save(group);		
 		}
-				
+		
+		deviceGroupProceedRecordServiceImpl.saveStart(group);
+		
 		return group;
 	}
 	
@@ -1009,12 +1019,26 @@ public class MeetingServiceImpl {
 			
 			//清理录制--协议
 			logic.setRecordDel(new ArrayList<RecordSetBO>());
+			List<PublishStreamPO> needDeletePublishStreams = new ArrayList<PublishStreamPO>();
 			List<RecordPO> records = queryUtil.queryRunRecords(group);
 			if(records!=null && records.size()>0){
 				for(RecordPO record:records){
-					logic.getRecordDel().add(new RecordSetBO().setUuid(record.getUuid()));
+					logic.getRecordDel().add(new RecordSetBO().setUuid(record.getUuid()).setGroupUuid(group.getUuid()));
 					record.setRun(false);
+					
+					//清除直播
+					Set<PublishStreamPO> publishStreams = record.getPublishStreams();
+					if(publishStreams != null && publishStreams.size() > 0){
+						for(PublishStreamPO publish: publishStreams){
+							publish.setRecord(null);
+							needDeletePublishStreams.add(publish);
+						}
+						record.getPublishStreams().removeAll(publishStreams);
+					}
 				}
+				
+				//调用媒资
+				mimsService.removeMimsResource(needDeletePublishStreams);
 			}
 			
 			group.setRecord(false);
@@ -1080,6 +1104,8 @@ public class MeetingServiceImpl {
 		
 		//调用逻辑层
 		executeBusiness.execute(logic, "逻辑层交互：设备组停止");
+		
+		deviceGroupProceedRecordServiceImpl.saveStop(group);
 		
 		return group;
 	}

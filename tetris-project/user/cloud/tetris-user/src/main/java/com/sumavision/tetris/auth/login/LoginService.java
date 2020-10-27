@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
@@ -173,6 +174,10 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
+		
+		if(user.getIsLoginIp() != null && user.getIsLoginIp() == true && user.getLoginIp() == null){
+			user.setLoginIp(loginIp);
+		}
 		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
 			if(!loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
 		}
@@ -258,6 +263,7 @@ public class LoginService {
 													  .append(DateUtil.format(user.getUpdateTime(), DateUtil.dateTimePattern))
 													  .append("）")
 													  .toString());
+			log.setOprlogType(EOprlogType.USER_ONLINE);
 			alarmFeign.sendOprlog(log);
 		}catch(Exception e){
 			System.out.println("用户登录日志存储失败！");

@@ -211,7 +211,6 @@ export default {
             duration: 3000
           })
         } else {
-
           console.log(JSON.stringify(res.alarmVOs))
           this.total = res.total
           this.alarmVOs = res.alarmVOs
@@ -239,7 +238,7 @@ export default {
       json.push({ dataName: '首次告警时间', dataContent: util.formatDate.formatString(this.editForm.firstCreateTime, 'yyyy-MM-dd hh:mm:ss') })
       json.push({ dataName: '解决建议', dataContent: this.editForm.alarmSolution })
       json.push({ dataName: '来源微服务名称', dataContent: this.editForm.sourceService })
-      json.push({ dataName: '来源微服务IP', dataContent: this.editForm.sourceServiceIP })    
+      json.push({ dataName: '来源微服务IP', dataContent: this.editForm.sourceServiceIP })
       this.tableData = json
     },
 
@@ -387,13 +386,25 @@ export default {
     },
 
     initWebpack () { // 初始化websocket
-      var requestIP = document.location.host.split(':')[0]
+      var basePath = document.location.origin
+      var wsuri
 
-      var wsuri = process.env.WEBSOCKET_URL + '/websocket/alarm'
+      if (basePath.startsWith('https')) {
+        console.log('https')
+        wsuri = 'wss' + basePath.substring(5) + '/websocket/alarm'
+      } else {
+        console.log('http')
+        wsuri = 'ws' + basePath.substring(4) + '/websocket/alarm'
+      }
+
+      console.log('wsuri replace=' + wsuri)
+
+      /*
       if (wsuri.indexOf('__requestIP__') !== -1) {
         wsuri = wsuri.replace('__requestIP__', requestIP)
         console.log('wsuri replace=' + wsuri)
       }
+      */
 
       this.websock = new WebSocket(wsuri)// 这里面的this都指向vue
       this.websock.onopen = this.websocketopen

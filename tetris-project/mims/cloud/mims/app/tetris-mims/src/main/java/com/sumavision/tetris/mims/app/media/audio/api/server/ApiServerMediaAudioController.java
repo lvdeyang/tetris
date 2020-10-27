@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.mims.app.boss.MediaType;
 import com.sumavision.tetris.mims.app.boss.QdBossService;
@@ -40,6 +42,7 @@ import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+import com.sun.mail.handlers.image_gif;
 
 import it.sauronsoftware.jave.Encoder;
 import it.sauronsoftware.jave.MultimediaInfo;
@@ -229,9 +232,24 @@ public class ApiServerMediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/set/price")
 	public Object setPrice(HttpServletRequest request) throws Exception{
-		UserVO user = userQuery.current();
-		JSONHttpServletRequestWrapper wrapper=new JSONHttpServletRequestWrapper(request);
-		bossService.setMediaPrice(wrapper.getString("mediaId"), MediaType.AUDIO, wrapper.getLongValue("price"));
-		return "success";
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		JSONArray medias = wrapper.getJSONArray("list");
+		return bossService.setMediaPrice(medias);
+	}
+	/**
+	 * 开启同步计费<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月15日 下午3:02:55
+	 * @param String charged “0”表示不启用计费，“1”表示启用计费。初始状态为不启用计费。
+	 * @return code 0：成功，其它：失败
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/product/charge")
+	public Object productCharge(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		String charged = wrapper.getString("charged");
+		return bossService.productCharge(charged);
 	}
 }

@@ -21,8 +21,7 @@
       </el-form-item>
       <el-form-item label="域类型" v-if="bundleForm.deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option label="本域" value="self"></el-option>
-          <el-option label="外域" value="external"></el-option>
+          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
       <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
@@ -51,7 +50,7 @@
         <el-input v-model="bundleForm.bundleName" style="width: 200px;"></el-input>
       </el-form-item>
 
-      <el-form-item size="small" label="设备分组" prop="bundleFolderName">
+      <el-form-item size="small" label="设备分组" prop="bundleFolderName" v-if="bundleFolderVisable">
         <el-input v-model="bundleForm.bundleFolderName" style="width: 200px;" readOnly @click.native="handleChangeFolder"></el-input>
       </el-form-item>
 
@@ -86,7 +85,6 @@
       </el-form-item>
       <el-form-item size="small" label="编码组播地址" v-if="isFictitiouVisable">
         <el-input v-model="bundleForm.multicastEncodeAddr" style="width: 200px;"></el-input>
-        <!-- <el-input v-else v-model="bundleForm.multicastEncodeAddr" style="width: 200px;" disabled></el-input> -->
       </el-form-item>
       <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
@@ -218,7 +216,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="text_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
 
@@ -254,7 +252,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="date_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
                   <el-col :span="7">
@@ -593,7 +591,8 @@ import {
   queryFolderTree,
   initFolderTree,
   addFolder,
-  configBundle
+  configBundle,
+  getStationList
 } from '../../api/api';
 
 import selectLayerNode from '../layernode/SelectLayerNode'
@@ -624,6 +623,7 @@ export default {
     return {
       activeTabName: "LwAddBundle",
       extraInfos: [],
+      bundleFolderVisable: true,
       bundleForm: {
         deviceDomain: "",
         deviceModel: "jv210",
@@ -654,6 +654,12 @@ export default {
 
         // accessNodeUid : ""
       },
+      predefineColors: ['#ffffff', '#000000', '#409EFF', '#E6A23C', '#F56C6C'],
+      regionOption: [
+        { name: "本域", key: "self" },
+        { name: "外域", key: "external" },
+        { name: "卫通", key: "weitong" },
+      ],
       extraParam: {
         dev_type: 'sip_enc',
         region: 'self',
@@ -680,10 +686,10 @@ export default {
         accessNodeUid: [
           { required: true, message: '请输入接入层标识', trigger: 'change' }
         ],
-        // bundleFolderName: [
-        //   { required: true, message: '请选择所属分组', trigger: 'change' }
+        bundleFolderName: [
+          { required: true, message: '请选择所属分组', trigger: 'change' }
 
-        // ]
+        ]
       },
       deviceModelOptions: [
         { label: "终端设备", value: "jv210" },
@@ -804,7 +810,7 @@ export default {
         },
         date_osd: {
           enable: true,
-          has_week: true,
+          has_week: false,
           x: 0,
           y: 0,
           color: "#7d59f9",
@@ -1212,7 +1218,7 @@ export default {
     //   });
     // },
     devTypeChange: function (val) {
-      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec'],
+      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'],
         isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec'], isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
       if (hidArr.indexOf(val) > -1) {
         this.cardVisable = false;
@@ -1232,13 +1238,14 @@ export default {
         this.bundleForm.checkPass = defaultPassword;
       }
 
-      if (isFictitiousArr.indexOf(val) > -1) {
-        this.isFictitiouVisable = false
-      } else {
-        this.isFictitiouVisable = true
-      }
+      // if (isFictitiousArr.indexOf(val) > -1) {
+      //   this.isFictitiouVisable = false
+      // } else {
+      //   this.isFictitiouVisable = true
+      // }
       // 判断解码编码设备
       if (isEncArr.indexOf(val) > -1) {
+        this.isFictitiouVisable = true
         this.bundleForm.coderType = 'ENCODER'
         this.configChannels = [
           { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
@@ -1247,6 +1254,7 @@ export default {
           { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
         ]
       } else {
+        this.isFictitiouVisable = false
         this.bundleForm.coderType = 'DECODER'
         this.configChannels = [
           { "channelTemplateID": 1, "channelCnt": 0, "channelName": "VenusAudioIn" },
@@ -1529,11 +1537,11 @@ export default {
         this.bundleForm.checkPass = '';
       } else {
         this.isFictitiouVisable = false
-        this.isSipShow = false;
-        var defaultPassword = this.randomString(12)
-        this.bundleForm.username = this.randomString(12);
-        this.bundleForm.onlinePassword = defaultPassword;
-        this.bundleForm.checkPass = defaultPassword;
+        this.isSipShow = true;
+        this.bundleFolderVisable = false;
+        this.bundleForm.username = '';
+        this.bundleForm.onlinePassword = '';
+        this.bundleForm.checkPass = '';
       }
 
     },
@@ -1552,6 +1560,23 @@ export default {
   mounted: function () {
     var self = this;
     this.$nextTick(function () {
+
+      getStationList().then(res => {
+        if (res.errMsg) {
+          self.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
+
+          self.regionOption = res.data.rows;
+          self.regionOption.unshift({
+            id: 99999,
+            identity: "self",
+            stationName: "本域",
+          })
+        }
+      });
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
     });
 

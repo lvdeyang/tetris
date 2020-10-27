@@ -17,10 +17,10 @@ define([
   var pluginName = 'bvc2-monitor-forword-list';
 
   Vue.component(pluginName, {
-    props: [],
     template: tpl,
     data: function () {
       return {
+        resourceApiUrl:'',
         table: {
           data: [],
           page: {
@@ -35,6 +35,7 @@ define([
           }
 
         },
+        stationList:[],
         // tableData:[],
         totleForword: '0',
         dialog: {
@@ -50,18 +51,16 @@ define([
         selfForwordList:[],
         activeName:"self",
         totalWidth:'',
-        singleWidth:''
+        singleWidth:'',
+        tableList:{},
+        tableCurrgenData:[],
+        outerDataLength:0
       }
     },
+    props:['originType'],
     computed: {
       tableData: function () {
-        if(this.activeName == "self"){
-          return this.selfForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
-        }else{ 
-          // console.log(this.extendForwordList)
-          // console.log( this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize)) 
-          return this.extendForwordList.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
-        }
+          return this.tableCurrgenData.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
       },
       currentWidth:function(){
         return this.table.page.total * this.singleWidth
@@ -82,7 +81,12 @@ define([
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
-          self.totleForword = total;
+          var currentTotle =0;
+          // if(self.originType == "OUTER"){
+          //   self.totleForword = self.outerDataLength;
+          // }else{
+          //   self.totleForword = total - self.outerDataLength;
+          // }
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
               // self.table.data.push(rows[i]);
@@ -94,29 +98,90 @@ define([
 
                 }
               }
-              if(parseExtend == "external"){
-                self.extendForwordList.push(rows[i])
-              }else{
-                self.selfForwordList.push(rows[i])
+              for(var j=0;j<self.stationList.length;j++){
+                var item = self.stationList[j];
+                    if(item.identity == parseExtend){
+                    self.tableList[item.identity].push(rows[i])
+                  }
+              }
+            }
+            for(var i=0;i<self.stationList.length;i++){
+              var item = self.stationList[i];
+              if(item.originType == self.originType){
+                currentTotle+= self.tableList[item.identity].length;
               }
             }
           }
-          // self.tableData = self.selfForwordList
-          self.table.page.total = self.selfForwordList.length;
-          // self.table.page.currentPage = currentPage;
+          self.totleForword = currentTotle;
+          self.tableCurrgenData = self.tableList[self.activeName];
+          self.table.page.total = self.tableList[self.activeName].length;
+          console.log(self.tableList[self.activeName].length)
+          // self.getCapacity()
+          // self.table.page.total = self.selfForwordList.length;
         });
+      },
+      loadStation: function () {
+        var self = this;
+        ajax.post('/command/station/bandwidth/query', null, function (data, status) {
+          if (status == 200) {
+            self.stationList = data.rows;
+            self.stationList.unshift({
+              id: 999,
+              originType:"INNER",
+              identity: "self",
+              stationName: "本域",
+            })
+            for(var j=0;j<self.stationList.length;j++){
+              var item = self.stationList[j];
+                  if(!item.originType){
+                    item.originType = "INNER"
+                  }
+                  self.tableList[item.identity]=[];
+            }
+            // 设置tab栏初始选中值,和带宽初始值
+            var outerData=[],systemData=[];
+            self.stationList.forEach(function(i){
+              if(i.originType == "OUTER"){
+                outerData.push(i)
+              }else{
+                systemData.push(i)
+              }
+            })
+            if(self.originType == "OUTER"){
+              self.activeName = outerData[0].identity
+              self.singleWidth = outerData[0].singleWidth
+              self.totalWidth = outerData[0].totalWidth
+            }else{
+              self.activeName = systemData[0].identity
+            }
+            
+            self.outerDataLength = outerData.length;
+            console.log(outerData.length,'outerData.length')
+            self.load(1);
+            // self.getCapacity()
+          }
+        })
+      },
+      getCapacity(){
+        ajax.post(this.resourceApiUrl+'/vedioCapacity/query', null, function (data, status) {
+          if (status == 200) {
+            
+            
+          }
+        })
       },
       handleClick(tab, event) {
         var self = this;
-        
+        self.tableCurrgenData = self.tableList[tab.name];
         self.table.page.currentPage = 1;
-        if(tab.name == 'self'){
-          // this.table.data = this.selfForwordList
-          self.table.page.total = self.selfForwordList.length;
-        }else{
-          self.getBandwidth()
-          // this.table.data = this.extendForwordList
-          self.table.page.total = self.extendForwordList.length;
+        self.table.page.total = self.tableList[tab.name].length;
+       
+        for(var i=0;i<self.stationList.length;i++){
+          var item = self.stationList[i];
+          if(item.identity == tab.name){
+            self.singleWidth = item.singleWidth
+            self.totalWidth = item.totalWidth
+          }
         }
 
       },
@@ -210,7 +275,9 @@ define([
       },
       handlebandwidthClose: function () {
         this.dialog.bandwidth.visible = false;
-        this.getBandwidth()
+        this.tableList={};
+        this.tableCurrgenData=[]
+        this.loadStation()
       },
       openForword() {
         this.dialog.forword.visible = true;
@@ -218,24 +285,16 @@ define([
       openBandwidth() {
         this.dialog.bandwidth.visible = true;
       },
-      getBandwidth(){
-        var self = this;
-        ajax.post('/command/station/bandwidth/query', null, function (data, status) {
-          if (status == 200) {
-             data.rows.forEach(function(item){
-               if(item.stationName == "外域"){
-                self.totalWidth  = item.totalWidth;
-                self.singleWidth = item.singleWidth
-               }
-             });
-          }
-        })
-      }
+      
     },
     mounted: function () {
       var self = this;
-      self.load(1);
-
+      console.log(self.originType)
+      var resourceApiUrl = document.location.protocol +"//"+document.location.hostname+':8213';
+      self.resourceApiUrl =resourceApiUrl;
+      console.log(resourceApiUrl)
+      self.loadStation()
+      // self.getCapacity()
     },
     updated() {
 

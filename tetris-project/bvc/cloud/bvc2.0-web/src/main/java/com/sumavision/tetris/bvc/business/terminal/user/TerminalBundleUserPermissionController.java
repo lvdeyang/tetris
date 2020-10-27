@@ -1,5 +1,7 @@
 package com.sumavision.tetris.bvc.business.terminal.user;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -167,7 +171,7 @@ public class TerminalBundleUserPermissionController {
 	
 	/**
 	 * 为用户设备自动绑定<br/>
-	 * <b>作者:</b>lixin<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月17日 上午11:11:41
 	 * @param String userId 用户id
@@ -178,9 +182,27 @@ public class TerminalBundleUserPermissionController {
 	@RequestMapping(value="/add/all")
 	public Object addAll(
 			String userId,
-			Long terminalId,
 			HttpServletRequest request)throws Exception{
-		terminalBundleUserPermissionService.addAll(userId,terminalId);
+		terminalBundleUserPermissionService.addAll(new ArrayListWrapper<String>().add(userId).getList());
+		return null;
+	}
+	
+	/**
+	 * (批量)为用户设备自动绑定<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年8月17日 上午11:11:41
+	 * @param String userId 用户id
+	 * @param terminalId 终端id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/add/all/bunch")
+	public Object addAllBunch(
+			String userIds,
+			HttpServletRequest request)throws Exception{
+		List<String> userList=JSONArray.parseArray(userIds,String.class);
+		terminalBundleUserPermissionService.addAll(userList);
 		return null;
 	}
 }

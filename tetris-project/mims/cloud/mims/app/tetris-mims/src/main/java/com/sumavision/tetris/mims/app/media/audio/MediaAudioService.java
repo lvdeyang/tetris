@@ -145,7 +145,7 @@ public class MediaAudioService {
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
 	
-	//@Autowired
+	@Autowired
 	private QdBossService bossService;
 	
 	/**

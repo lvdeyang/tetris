@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.suma.venus.alarmoprlog.orm.entity.OprlogPO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 
 public class OprlogVO {
 
@@ -18,7 +19,7 @@ public class OprlogVO {
 	private String userName;
 
 	private String oprName;
-	
+
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date oprTime;
 
@@ -28,6 +29,8 @@ public class OprlogVO {
 
 	private String oprDetail;
 
+	private String oprlogType;
+
 	public static OprlogVO transFromPO(OprlogPO po) {
 
 		if (null == po) {
@@ -36,6 +39,12 @@ public class OprlogVO {
 
 		OprlogVO oprlogVO = new OprlogVO();
 		BeanUtils.copyProperties(po, oprlogVO);
+
+		if (po.getOprlogType() == null || po.getOprlogType().equals(EOprlogType.USER_OPR)) {
+			oprlogVO.setOprlogType(EOprlogType.USER_OPR.getEnumName());
+		} else {
+			oprlogVO.setOprlogType(po.getOprlogType().getEnumName());
+		}
 
 		return oprlogVO;
 	}
@@ -106,6 +115,14 @@ public class OprlogVO {
 
 	public void setOprDetail(String oprDetail) {
 		this.oprDetail = oprDetail;
+	}
+
+	public String getOprlogType() {
+		return oprlogType;
+	}
+
+	public void setOprlogType(String oprlogType) {
+		this.oprlogType = oprlogType;
 	}
 
 }

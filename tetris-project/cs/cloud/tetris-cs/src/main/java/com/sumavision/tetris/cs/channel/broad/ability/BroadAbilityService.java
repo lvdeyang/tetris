@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -22,6 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.capacity.server.PushService;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
@@ -58,11 +60,17 @@ import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeTa
 import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeType;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
+import com.sumavision.tetris.cs.program.ProgramDAO;
+import com.sumavision.tetris.cs.program.ProgramPO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenDAO;
+import com.sumavision.tetris.cs.program.ScreenPO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.program.TemplateScreenVO;
 import com.sumavision.tetris.cs.program.TemplateVO;
+import com.sumavision.tetris.cs.schedule.ScheduleDAO;
+import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
@@ -74,6 +82,8 @@ import com.sumavision.tetris.easy.process.stream.transcode.TaskVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
@@ -151,6 +161,21 @@ public class BroadAbilityService {
 	
 	@Autowired
 	private BundleFeignService bundleFeignService;
+	
+	@Autowired
+	private BroadAbilityBroadInfoDAO broadAbilityBroadInfoDAO;
+	
+	@Autowired
+	private ScheduleDAO scheduleDAO;
+	
+	@Autowired
+	private ProgramDAO programDAO;
+	
+	@Autowired
+	private ScreenDAO screenDAO;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 	
 	private Map<Long, List<ScheduledFuture<?>>> channelScheduleMap = new HashMapWrapper<Long, List<ScheduledFuture<?>>>().getMap();
 	
@@ -348,7 +373,8 @@ public class BroadAbilityService {
 //		List<BundleFeignVO> abilityList = bundleFeignService.queryTranscodeDevice();
 //		if (abilityList != null && !abilityList.isEmpty()) abilityIp = abilityList.get(0).getDeviceIp();
 		
-		Boolean broad = false;
+//		Boolean broad = false;
+		Boolean broad = true;
 		//遍历排期单
 		for (int i = 0; i < scheduleVOs.size(); i++) {
 			final ScheduleVO scheduleVO = scheduleVOs.get(i);
@@ -552,6 +578,11 @@ public class BroadAbilityService {
 		if (broad) {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
 			channelDao.save(channel);
+			//将节目单下发给声纹比对系统
+			List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+			for (SchedulePO schedulePO : schedulePOs) {
+				startVoiceprint(schedulePO.getId());
+			}
 		}
 	}
 	
@@ -1715,7 +1746,51 @@ public class BroadAbilityService {
 		}
 	}
 	
-	
+	private Map<String , Object> startVoiceprint (Long scheduleId) throws Exception{
+		Map<String, Object> data = new HashMap<String, Object>();
+		SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
+		ChannelPO channelPO = channelDao.findOne(schedulePO.getChannelId());
+		List<BroadAbilityBroadInfoPO> broadAbilityBroadInfoPOs = broadAbilityBroadInfoDAO.findByChannelId(channelPO.getId());
+		List<Long> broadUserIds = null;
+		if (! broadAbilityBroadInfoPOs.isEmpty()) {
+			for (BroadAbilityBroadInfoPO broadAbilityBroadInfoPO : broadAbilityBroadInfoPOs) {
+				if (broadAbilityBroadInfoPO.getUserId() != null ) {
+					broadUserIds.add(broadAbilityBroadInfoPO.getUserId());
+				}
+			}
+		}
+		StringBufferWrapper dUrl = new StringBufferWrapper().append("ftp://").append(mimsServerPropsQuery.queryProps().getFtpUsername())
+				  .append(":")
+				  .append(mimsServerPropsQuery.queryProps().getFtpPassword())
+				  .append("@")
+				  .append(mimsServerPropsQuery.queryProps().getFtpIp())
+				  .append(":")
+				  .append(mimsServerPropsQuery.queryProps().getFtpPort());
+		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		if(broadUserIds.size()>0){
+			ProgramPO programPO = programDAO.findByScheduleId(scheduleId);
+			List<ScreenPO> screenPOs = screenDAO.findByProgramId(programPO.getId());
+			for (ScreenPO screenPO : screenPOs) {
+				ScreenVO screenVO = new ScreenVO();
+				screenVO.setPreviewUrl(screenPO.getPreviewUrl());
+				String downloadUrl = null;
+				String[] urlString = screenPO.getPreviewUrl().split("/");
+				for(int i = 3;i < urlString.length;i++){
+					downloadUrl = dUrl.append("/").append(urlString[i]).toString();
+				}
+				screenVO.setDownloadUrl(downloadUrl);
+				screenVO.setUuid(screenPO.getMimsUuid());
+				screenVO.setName(screenPO.getName());
+				screenVO.setIsRequired(screenPO.getIsRequired());
+				screenVOs.add(screenVO);
+			}
+		}
+		data.put("program", screenVOs);
+		data.put("effectTime",schedulePO.getBroadDate());
+		data.put("userId", broadUserIds);
+		data.put("uuid",schedulePO.getUuid());
+		return data;
+	}
 	
 	
 	

@@ -238,6 +238,9 @@ public class DeviceGroupServiceImpl {
 	@Autowired
 	private AgendaServiceImpl agendaServiceImpl;
 	
+	@Autowired
+	private DeviceGroupProceedRecordServiceImpl deviceGroupProceedRecordServiceImpl;
+	
 	/**
 	 * @Title: 添加一个设备组数据 <br/>
 	 * @Description: 多次数据库操作需要事务<br/>
@@ -1803,6 +1806,8 @@ public class DeviceGroupServiceImpl {
 			//调用逻辑层
 			executeBusiness.execute(logic, "逻辑层交互：设备组启动");
 			
+			deviceGroupProceedRecordServiceImpl.saveStart(group);
+			
 			return group;
 		}
 		
@@ -1980,6 +1985,8 @@ public class DeviceGroupServiceImpl {
 			
 			//调用逻辑层
 			executeBusiness.execute(logic, "逻辑层交互：设备组停止");
+			
+			deviceGroupProceedRecordServiceImpl.saveStop(group);
 			
 			return group;
 		

@@ -11,4 +11,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface MediaPriceDAO extends BaseDAO<MediaPricePO>{
 
 	public List<MediaPricePO> findByMediaIdAndMediaType(Long mediaId,MediaType mediaType);
+	
+	public List<MediaPricePO> findByMediaIdIn(Collection<Long> mediaIds);
 }

@@ -1,12 +1,18 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.management.relation.Relation;
 import javax.servlet.http.HttpServletRequest;
@@ -553,7 +559,6 @@ public class CommandQueryController {
 		
 		//查询有权限的设备
 		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
-		
 		if(queryBundles==null || queryBundles.size()<=0) return _roots;
 		List<String> bundleIds = new ArrayList<String>();
 		for(BundlePO bundleBody:queryBundles){
@@ -580,6 +585,32 @@ public class CommandQueryController {
 				}
 			}
 		}
+		
+		//没有文件的文件夹不显示
+		/*1.通过设备集合拿到文件夹id
+		 * 2.通过文件夹id找文件夹路径，分离出父文件夹id
+		 * 3找到所有不为空文件夹给folders
+		 * */
+		Set<Long> folderIds=new HashSet<Long>();//所有文件夹id
+		Map<Long,FolderBO> folderMap=folders.stream().collect(Collectors.toMap(FolderBO::getId, Function.identity()));
+		bundles.stream().map(BundleBO::getFolderId).collect(Collectors.toSet()).stream().map(folderId->{
+			Optional<FolderBO> folderBo=Optional.ofNullable(folderMap).map(folderMAP->{return folderMAP.get(folderId);});
+			if(folderBo.isPresent()){//空值校验
+				folderIds.add(folderId);
+				String parentPath=folderBo.get().getParentPath();
+				if(parentPath!=null && !"".equals(parentPath)){
+					folderIds.addAll(Arrays.asList(parentPath.replaceFirst("/", "").split("/")).stream().map(Long::valueOf).collect(Collectors.toList()));
+				} 
+			}
+			return  folderId;
+		}).collect(Collectors.toSet());
+		
+		folders =folderIds.stream().map(folderId->{
+			return folderMap.get(folderId);
+		}).collect(Collectors.toList());
+		
+		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//根据bundleIds从资源层查询channels
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);

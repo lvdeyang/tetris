@@ -15,10 +15,10 @@
         <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <!-- <el-select size="small" v-model="filters.userId" filterable placeholder="选择用户" style="float: left;margin-left:10px;width:200px;">
-        <el-option v-for="item in users" :key="item.id" :label="item.name" :value="item.id">
+      <el-select size="small" v-model="filters.region" placeholder="选择域" style="float: left;margin-left:10px;width:200px;">
+        <el-option v-for="item in regionOption" :key="item.identity" :label="item.stationName" :value="item.identity" v-if="item.originType!='OUTER'">
         </el-option>
-      </el-select> -->
+      </el-select>
       <el-input size="small" v-model="filters.keyword" style="float: left;margin-left: 15px;width:200px;" placeholder="关键字"></el-input>
       <el-button size="small" @click="getResources(1)" style="float: left;margin-left: 10px;">查询</el-button>
 
@@ -55,7 +55,6 @@
             <el-button type="primary" size="small" v-on:click="handleSyncFromLdap()" style="float: right;margin-right: 10px;">从LDAP下载</el-button>
             -->
     </div>
-
     <!--资源列表-->
     <el-table :data="resources" v-loading="resourceTableLoading" @selection-change="handleSelectionChange" style="float: left;width: 100%;margin-top: 20px;">
       <el-table-column width="50" type="selection"></el-table-column>
@@ -82,6 +81,9 @@
         </template>
       </el-table-column>
 
+      <el-table-column label="IP端口" width="200" sortable :formatter="handleIPFormatter">
+
+      </el-table-column>
       <el-table-column width="100" label="使用状态">
         <template slot-scope="scope">
           <div v-if="scope.row.lockStatus=='IDLE'">未使用</div>
@@ -186,7 +188,7 @@
 <script type="text/ecmascript-6">
 import {
   getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
-  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser
+  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser, getStationList
 } from '../../api/api';
 // let requestIP = document.location.host.split(":")[0];
 
@@ -222,7 +224,7 @@ export default {
       channelSchemes: [],
       total: 0,
       pageNum: 1,
-      countPerPage: 20,
+      countPerPage: 9999999,
       currentRow: {},
       bundleId: "",
       newAccessNodeUid: "",
@@ -246,7 +248,9 @@ export default {
           label: "LDAP" //LDAP
         }
       ],
-      multipleSelection: []
+      multipleSelection: [],
+      regionOption: [],
+      activeName: 'self'
     }
   },
   methods: {
@@ -410,7 +414,9 @@ export default {
           bundleFolderId: row.bundleFolderId,
           transcod: row.transcod,
           multicastSourceIp: row.multicastSourceIp,
-
+          accessNodeName: row.accessNodeUid,
+          accessNodeUid: row.accessNodeUid,
+          deviceModel: row.deviceModel
         }
       });
     }
@@ -880,9 +886,66 @@ export default {
 
         this.resourceTableLoading = false;
       });
+    },
+    handleClick (tab, event) {
+      var self = this;
+      // self.tableCurrgenData = self.tableList[tab.name];
+      // self.table.page.currentPage = 1;
+      // self.table.page.total = self.tableList[tab.name].length;
+    },
+    queryStationList () {
+      var self = this;
+      getStationList().then(res => {
+        if (res.errMsg) {
+          self.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
 
-    }
-    ,
+          self.regionOption = res.data.rows;
+          self.regionOption.unshift({
+            id: 99999,
+            identity: "self",
+            stationName: "本域",
+          })
+
+          console.log(self.regionOption)
+        }
+      });
+    },
+    handleIPFormatter (row, column, cellValue, index) {
+      var IP_URL = ''
+      if (row.param.extend_param) {
+        var extendsParams = JSON.parse(row.param.extend_param);
+        var param = extendsParams.param || {};
+        if (extendsParams.dev_type == "ts_enc") {
+          if (!param.is_multi) {
+            IP_URL = `udp://${param.local_ip}:${param.port}`
+          } else {
+            IP_URL = `udp://${param.multi_ip}:${param.port}`
+          }
+        } else if (extendsParams.dev_type == "ts_dec") {
+          IP_URL = `udp://${param.dest_ip}:${param.dest_port}`
+
+        } else if (extendsParams.dev_type == "rtp_passby_enc") {
+          if (!param.is_multi) {
+            IP_URL = `udp://${param.local_ip}:${param.video_port}`
+          } else {
+            IP_URL = `udp://${param.multi_ip}:${param.video_port}`
+          }
+        } else if (extendsParams.dev_type == "rtp_passby_dec") {
+          IP_URL = `udp://${param.dest_ip}:${param.video_port}`
+        } else if (extendsParams.dev_type == "onvif_enc") {
+          IP_URL = `udp://${param.onvif_ip}:${param.onvif_port}`
+        } else {
+          IP_URL = param.url
+        }
+        return IP_URL
+      } else {
+        return ''
+      }
+    },
 
 
   },
@@ -890,6 +953,8 @@ export default {
     var self = this;
     this.$nextTick(function () {
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
+
+      this.queryStationList()
     });
     this.getResourcesTotle(1);
     // this.getDeviceModels();

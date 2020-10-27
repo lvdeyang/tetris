@@ -1,6 +1,5 @@
 package com.sumavision.tetris.bvc.business.terminal.user;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +11,9 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.tetris.bvc.business.terminal.user.exception.TerminalBundleUserPermissionNotFoundException;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundlePO;
-import com.sumavision.tetris.bvc.model.terminal.TerminalBundleType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 
@@ -27,6 +28,9 @@ public class TerminalBundleUserPermissionService {
 	
 	@Autowired
 	private BundleDao bundleDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 	
 	/**
 	 * 添加用户设备绑定<br/>
@@ -103,85 +107,88 @@ public class TerminalBundleUserPermissionService {
 	
 	/**
 	 * 为用户设备自动绑定<br/>
-	 * <b>作者:</b>lixin<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年8月17日 上午11:15:25
-	 * @param userId 用户id
-	 * @param terminalId 设备id
+	 * @param userIds 用户id集合
 	 * @throws BaseException 
 	 */
-	public void addAll(
-			String userId,
-			Long terminalId) throws BaseException {
+	public void addAll(List<String> userIds) throws BaseException {
 		
-		//TerminalBundleType a = TerminalBundleType.DECODER.equals(other);
-		if(1!=terminalId){
-			throw new BaseException(StatusCode.FORBIDDEN,"QT终端才能一键绑定");
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+		
+		Long terminalId =terminal.getId();
+		
+		if(userIds==null || userIds.size()<=0){
+			throw new BaseException(StatusCode.FORBIDDEN,"缺少用户id");
 		}
+		
 		//1拿到QT对应的所有终端
 		List<TerminalBundlePO> terminalBundleEntities = terminalBundleDao.findByTerminalIdAndBundleType(terminalId,"player");
 		//2拿到用户对应的设备
 		//通过device_model以及user_id拿到设备
-		List<BundlePO>  bundleEntities= bundleDao.findByDeviceModelAndUserId("player",userId);
-		//3将对应的设备与终端进行关联
-		//for循环为TETRIS_BVC_BUSINESS_TERMINAL_BUNDLE_USER_PERMISSION添加数据  如果原来有数据就将数据更新
-		if(terminalBundleEntities.size()<=bundleEntities.size()){
-			for(int index=0;index<terminalBundleEntities.size();index++){
-				BundlePO bundlePOTemp =bundleEntities.get(index);
-				TerminalBundlePO terminalBundlePOTemp =terminalBundleEntities.get(index);
-				TerminalBundleUserPermissionPO entity=terminalBundleUserPermissionDao.findByUserIdAndTerminalIdAndTerminalBundleId(
-						bundlePOTemp.getUserId().toString(),
-						terminalBundlePOTemp.getTerminalId(),
-						terminalBundlePOTemp.getId());
-				if(entity!=null){
-					entity.setUserId(userId);
-					entity.setTerminalId(terminalId);
-					entity.setTerminalBundleId(terminalBundlePOTemp.getId());
-					entity.setBundleType(terminalBundlePOTemp.getBundleType());
-					entity.setBundleId(bundlePOTemp.getBundleId());
-					entity.setBundleName(bundlePOTemp.getBundleName());
-					entity.setUpdateTime(new Date());
-					terminalBundleUserPermissionDao.save(entity);
-				}else{
-					entity= new TerminalBundleUserPermissionPO();
-					entity.setUserId(userId);
-					entity.setTerminalId(terminalId);
-					entity.setTerminalBundleId(terminalBundlePOTemp.getId());
-					entity.setBundleType(terminalBundlePOTemp.getBundleType());
-					entity.setBundleId(bundlePOTemp.getBundleId());
-					entity.setBundleName(bundlePOTemp.getBundleName());
-					entity.setUpdateTime(new Date());
-					terminalBundleUserPermissionDao.save(entity);
+		for(String userId:userIds){
+			List<BundlePO>  bundleEntities= bundleDao.findByDeviceModelAndUserId("player",userId);
+			//3将对应的设备与终端进行关联
+			//for循环为TETRIS_BVC_BUSINESS_TERMINAL_BUNDLE_USER_PERMISSION添加数据  如果原来有数据就将数据更新
+			if(terminalBundleEntities.size()<=bundleEntities.size()){
+				for(int index=0;index<terminalBundleEntities.size();index++){
+					BundlePO bundlePOTemp =bundleEntities.get(index);
+					TerminalBundlePO terminalBundlePOTemp =terminalBundleEntities.get(index);
+					TerminalBundleUserPermissionPO entity=terminalBundleUserPermissionDao.findByUserIdAndTerminalIdAndTerminalBundleId(
+							bundlePOTemp.getUserId().toString(),
+							terminalBundlePOTemp.getTerminalId(),
+							terminalBundlePOTemp.getId());
+					if(entity!=null){
+						entity.setUserId(userId);
+						entity.setTerminalId(terminalId);
+						entity.setTerminalBundleId(terminalBundlePOTemp.getId());
+						entity.setBundleType(terminalBundlePOTemp.getBundleType());
+						entity.setBundleId(bundlePOTemp.getBundleId());
+						entity.setBundleName(bundlePOTemp.getBundleName());
+						entity.setUpdateTime(new Date());
+						terminalBundleUserPermissionDao.save(entity);
+					}else{
+						entity= new TerminalBundleUserPermissionPO();
+						entity.setUserId(userId);
+						entity.setTerminalId(terminalId);
+						entity.setTerminalBundleId(terminalBundlePOTemp.getId());
+						entity.setBundleType(terminalBundlePOTemp.getBundleType());
+						entity.setBundleId(bundlePOTemp.getBundleId());
+						entity.setBundleName(bundlePOTemp.getBundleName());
+						entity.setUpdateTime(new Date());
+						terminalBundleUserPermissionDao.save(entity);
+					}
 				}
 			}
-		}
-		else{
-			for(int index=0;index<bundleEntities.size();index++){
-				BundlePO bundlePOTemp =bundleEntities.get(index);
-				TerminalBundlePO terminalBundlePOTemp =terminalBundleEntities.get(index);
-				TerminalBundleUserPermissionPO entity=terminalBundleUserPermissionDao.findByUserIdAndTerminalIdAndTerminalBundleId(
-						bundlePOTemp.getUserId().toString(),
-						terminalBundlePOTemp.getTerminalId(),
-						terminalBundlePOTemp.getId());
-				if(entity!=null){
-					entity.setUserId(userId);
-					entity.setTerminalId(terminalId);
-					entity.setTerminalBundleId(terminalBundlePOTemp.getId());
-					entity.setBundleType(terminalBundlePOTemp.getBundleType());
-					entity.setBundleId(bundlePOTemp.getBundleId());
-					entity.setBundleName(bundlePOTemp.getBundleName());
-					entity.setUpdateTime(new Date());
-					terminalBundleUserPermissionDao.save(entity);
-				}else{
-					entity= new TerminalBundleUserPermissionPO();
-					entity.setUserId(userId);
-					entity.setTerminalId(terminalId);
-					entity.setTerminalBundleId(terminalBundlePOTemp.getId());
-					entity.setBundleType(terminalBundlePOTemp.getBundleType());
-					entity.setBundleId(bundlePOTemp.getBundleId());
-					entity.setBundleName(bundlePOTemp.getBundleName());
-					entity.setUpdateTime(new Date());
-					terminalBundleUserPermissionDao.save(entity);
+			else{
+				for(int index=0;index<bundleEntities.size();index++){
+					BundlePO bundlePOTemp =bundleEntities.get(index);
+					TerminalBundlePO terminalBundlePOTemp =terminalBundleEntities.get(index);
+					TerminalBundleUserPermissionPO entity=terminalBundleUserPermissionDao.findByUserIdAndTerminalIdAndTerminalBundleId(
+							bundlePOTemp.getUserId().toString(),
+							terminalBundlePOTemp.getTerminalId(),
+							terminalBundlePOTemp.getId());
+					if(entity!=null){
+						entity.setUserId(userId);
+						entity.setTerminalId(terminalId);
+						entity.setTerminalBundleId(terminalBundlePOTemp.getId());
+						entity.setBundleType(terminalBundlePOTemp.getBundleType());
+						entity.setBundleId(bundlePOTemp.getBundleId());
+						entity.setBundleName(bundlePOTemp.getBundleName());
+						entity.setUpdateTime(new Date());
+						terminalBundleUserPermissionDao.save(entity);
+					}else{
+						entity= new TerminalBundleUserPermissionPO();
+						entity.setUserId(userId);
+						entity.setTerminalId(terminalId);
+						entity.setTerminalBundleId(terminalBundlePOTemp.getId());
+						entity.setBundleType(terminalBundlePOTemp.getBundleType());
+						entity.setBundleId(bundlePOTemp.getBundleId());
+						entity.setBundleName(bundlePOTemp.getBundleName());
+						entity.setUpdateTime(new Date());
+						terminalBundleUserPermissionDao.save(entity);
+					}
 				}
 			}
 		}

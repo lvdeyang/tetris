@@ -69,6 +69,7 @@ businessMode: vod
 
 checkBundleHeartBeatFreq: 5000
 checkBundleHeartBeatTimeout: 15000
+realIP: 10.10.40.207
 zuulPort: 8082
 
 feign: 

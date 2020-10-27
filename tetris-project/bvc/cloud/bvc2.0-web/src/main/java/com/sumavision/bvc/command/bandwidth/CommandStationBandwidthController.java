@@ -20,6 +20,9 @@ public class CommandStationBandwidthController {
 	
 	@Autowired
 	private CommandStationBandwidthDAO commandStationBandwidthDao;
+	
+	@Autowired
+	private CommandStationBandwidthService commandStationBandwidthService;
 	/**
 	 * 添加站点<br/>
 	 * <b>作者:</b>lx<br/>
@@ -38,13 +41,15 @@ public class CommandStationBandwidthController {
 	public Object add(
 			String stationName,
 			Integer totalWidth,
-			Integer singleWidth) throws Exception{
+			Integer singleWidth,
+			String identity) throws Exception{
 		
 		CommandStationBandwidthPO station=new CommandStationBandwidthPO();
 		
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
+		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		
@@ -88,13 +93,15 @@ public class CommandStationBandwidthController {
 			Long id,
 			String stationName,
 			Integer totalWidth,
-			Integer singleWidth) throws ParseException{
+			Integer singleWidth,
+			String identity) throws ParseException{
 
 		CommandStationBandwidthPO station=commandStationBandwidthDao.findOne(id);
 		
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
+		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		
@@ -113,8 +120,9 @@ public class CommandStationBandwidthController {
 	@RequestMapping(value="/query")
 	public Object query(){
 		
+		commandStationBandwidthService.syncSerNodeToStation();
 		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll()).getMap();
-				
+		
 	}
 	
 }

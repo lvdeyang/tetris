@@ -10,15 +10,22 @@
       <el-form-item size="small" label="设备名称" prop="bundleName">
         <el-input v-model="bundleName" style="width: 200px;" placeholder="输入新的设备名称"></el-input>
       </el-form-item>
-      <el-form-item v-show="false" size="small" label="设备类型">
-        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
-          <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
+      <el-form-item size="small" label="设备形态" prop="deviceModel">
+        <el-select size="small" v-model="deviceModel" style="width: 200px;" @change="deviceModelChange">
+          <el-option disabled v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item size="small" label="域类型">
+      <el-form-item size="small" label="设备类型" v-if="deviceModel =='jv210'">
+        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
+          <template v-for="item in devTypeOption">
+            <el-option disabled :label="item.label" :value="item.value" :key="item.value"></el-option>
+          </template>
+        </el-select>
+      </el-form-item>
+      <el-form-item size="small" label="域类型" v-if="deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option label="本域" value="self"></el-option>
-          <el-option label="外域" value="external"></el-option>
+          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
       <!-- <el-form-item size="small" label="设备IP" prop="deviceIp">
@@ -28,13 +35,17 @@
       <el-form-item size="small" label="地点" prop="bundleAlias">
         <el-input v-model="location" style="width: 200px;"></el-input>
       </el-form-item>
+      <el-form-item size="small" label="接入层" v-if="deviceModel =='jv210'" prop="accessNodeName">
+        <el-input v-model="accessNodeName" style="width: 200px;" readOnly></el-input>
+      </el-form-item>
       <!-- <el-form-item size="small" label="设备端口" prop="devicePort">
         <el-input v-model="devicePort" style="width: 200px;" placeholder="输入新的设备端口"></el-input>
       </el-form-item> -->
-
+      <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
+        <el-input v-model="multicastSourceIp" style="width: 200px;"></el-input>
+      </el-form-item>
       <el-form-item size="small" label="编码组播地址" v-show="isFictitiouVisable">
         <el-input v-model="multicastEncodeAddr" style="width: 200px;"></el-input>
-        <!-- <el-input v-else v-model="multicastEncodeAddr" style="width: 200px;" disabled></el-input> -->
       </el-form-item>
 
       <!-- <el-form-item size="small" label="解码组播">
@@ -72,6 +83,15 @@
                 <el-form-item label="url" prop="url">
                   <el-input v-model="dahuaFormData.url" placeholder="请输入url" clearable :style="{width: '100%'}">
                   </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="21">
+                <el-form-item label="模式设置" prop="url">
+                  <el-select v-model="modelConfig" placeholder="请选择" style="width: 100%;" @change="encodeModeChange">
+                    <el-option label="质量优先" value="quality_first"></el-option>
+                    <el-option label="码率优先" value="bitrate_first"></el-option>
+                    <el-option label="自定义" value="other"></el-option>
+                  </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="21">
@@ -114,7 +134,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="编码码率" prop="enc_param.bitrate">
-                  <el-input v-model.number="dahuaFormData.enc_param.bitrate" placeholder="请输入编码码率" clearable :style="{width: '100%'}"><template slot="append">kbps</template></el-input>
+                  <el-input :disabled="bitrateDisable" v-model.number="dahuaFormData.enc_param.bitrate" placeholder="请输入编码码率" clearable :style="{width: '100%'}"><template slot="append">kbps</template></el-input>
 
                 </el-form-item>
               </el-col>
@@ -518,7 +538,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { queryBundleExtraInfo, modifyBundleExtraInfo, queryFolderTree, } from '../../api/api';
+import { queryBundleExtraInfo, modifyBundleExtraInfo, queryFolderTree, getStationList } from '../../api/api';
 
 export default {
   name: "LwModifyBundle",
@@ -538,6 +558,8 @@ export default {
       bundleFolderName: this.$route.query.bundleFolderName,
       transcod: this.$route.query.transcod,
       multicastSourceIp: this.$route.query.multicastSourceIp,
+      accessNodeName: this.$route.query.accessNodeName,
+      deviceModel: this.$route.query.deviceModel,
       dialog: {
         changeFolder: {
           visible: false,
@@ -583,6 +605,16 @@ export default {
         region: '',
         address: ''
       },
+      deviceModelOptions: [
+        { label: "终端设备", value: "jv210" },
+        { label: "存储设备", value: "cdn" }
+      ],
+      regionOption: [
+        { name: "本域", key: "self" },
+        { name: "外域", key: "external" },
+        { name: "卫通", key: "weitong" },
+      ],
+      modelConfig: 'other',
       dahuaFormData: {
         url: "",
         osd_font_size: undefined,
@@ -970,6 +1002,7 @@ export default {
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
       isFictitiouVisable: true,
+      bitrateDisable: false,
       configChannels: [
         { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
         { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
@@ -1017,11 +1050,16 @@ export default {
 
           }
 
-          var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
-          if (isFictitiousArr.indexOf(param.dev_type) > -1) {
-            this.isFictitiouVisable = false
-          } else {
+          var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec'],
+            isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
+          if (isEncArr.indexOf(param.dev_type) > -1) {
             this.isFictitiouVisable = true
+          } else {
+            this.isFictitiouVisable = false
+          }
+          if (this.deviceModel == "cdn") {
+            this.isFictitiouVisable = false;
+            this.bundleFolderVisable = false;
           }
           switch (self.extraParam.dev_type) {
             case 'dh_camera':
@@ -1309,11 +1347,38 @@ export default {
       } else {
         this.rtpPassbyEncFormMultiIpDis = false
       }
+    },
+    encodeModeChange (val) {
+      if (val == "bitrate_first") {
+        this.dahuaFormData.enc_param.bitrate = 1024
+        this.bitrateDisable = true;
+      } else if (val == "quality_first") {
+        this.dahuaFormData.enc_param.bitrate = 8192
+        this.bitrateDisable = true;
+      } else {
+        this.bitrateDisable = false;
+      }
     }
   },
   mounted () {
     this.queryBundleExtraInfo();
     this.row = JSON.parse(sessionStorage.getItem('row'))
+    getStationList().then(res => {
+      if (res.errMsg) {
+        self.$message({
+          message: res.errMsg,
+          type: 'error'
+        });
+      } else {
+
+        self.regionOption = res.data.rows;
+        self.regionOption.unshift({
+          id: 99999,
+          identity: "self",
+          stationName: "本域",
+        })
+      }
+    });
   }
 }
 </script>

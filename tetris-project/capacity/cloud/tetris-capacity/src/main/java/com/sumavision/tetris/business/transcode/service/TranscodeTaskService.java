@@ -602,7 +602,7 @@ public class TranscodeTaskService {
 			Set<Long> inputsInDB = new HashSet<>();
 			for (int i = 0; i < inputBOs.size(); i++) {
 				InputBO inputBO = inputBOs.get(i);
-				String uniq = generateUniq(inputBO);
+				String uniq = generateUniq(inputBO);//这判重合理不，是不是还不如直接看转换
 				TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
 				if (inputPO == null) {
 					inputPO = new TaskInputPO();
@@ -632,13 +632,13 @@ public class TranscodeTaskService {
 					String inputJsonStr = inputPO.getInput();
 					InputBO curInputBO = JSONObject.parseObject(inputJsonStr, InputBO.class);
 					taskBOs.stream().forEach(t->{
-						if (t.getPassby_source() != null) {
+						if (curInputBO.getBack_up_passby()!=null && t.getPassby_source() != null) {
 							t.getPassby_source().setInput_id(curInputBO.getId());
 						}
-						if (t.getEs_source()!=null){
+						if (curInputBO.getBack_up_es()!=null && t.getEs_source()!=null){
 							t.getEs_source().setInput_id(curInputBO.getId());
 						}
-						if (t.getRaw_source()!=null){
+						if (curInputBO.getBack_up_raw()!=null && t.getRaw_source()!=null){
 							t.getRaw_source().setInput_id(curInputBO.getId());
 						}
 					});
@@ -1053,7 +1053,82 @@ public class TranscodeTaskService {
 			}
 		}
 	}
-	
+
+
+	public Boolean beRepeatInput(String transformIp,InputBO inputBO){
+
+		Boolean beRepeat = false;
+
+		try {
+			GetInputsResponse inputs = capacityService.getInputs(transformIp);
+			if (inputBO.getUdp_ts() != null) {
+				beRepeat = inputs.getInput_array().stream().anyMatch(i-> i.getUdp_ts()!=null
+						&& i.getUdp_ts().getSource_ip()==inputBO.getUdp_ts().getSource_ip()
+						&& i.getUdp_ts().getSource_port().equals(inputBO.getUdp_ts().getSource_port())
+						&& i.getUdp_ts().getLocal_ip().equals(inputBO.getUdp_ts().getLocal_ip()));
+			}
+			if (inputBO.getRtp_ts() != null) {
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtp_ts()!=null
+						&& i.getRtp_ts().getSource_ip()==inputBO.getRtp_ts().getSource_ip()
+						&& i.getRtp_ts().getSource_port().equals(inputBO.getRtp_ts().getSource_port())
+						&& i.getRtp_ts().getLocal_ip().equals(inputBO.getRtp_ts().getLocal_ip()));
+			}
+			if(inputBO.getHttp_ts() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHttp_ts()!=null && i.getHttp_ts().getUrl()==inputBO.getHttp_ts().getUrl());
+			}
+			if(inputBO.getSrt_ts() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getSrt_ts()!=null
+						&& i.getSrt_ts().getSource_ip()==inputBO.getSrt_ts().getSource_ip()
+						&& i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port()));
+			}
+			if(inputBO.getHls() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl());
+			}
+			if(inputBO.getDash() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl());
+			}
+			if(inputBO.getMss() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl());
+			}
+			if(inputBO.getRtmp() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl());
+			}
+			if(inputBO.getRtsp() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl());
+			}
+			if(inputBO.getHttp_flv() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl());
+			}
+			if(inputBO.getSdi() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getSdi()!=null
+						&& i.getSdi().getCard_no()==inputBO.getSdi().getCard_no()
+						&& i.getSdi().getCard_port()==inputBO.getSdi().getCard_port());
+			}
+			if(inputBO.getRtp_es() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtp_es()!=null && i.getRtp_es().getLocal_port()==inputBO.getRtp_es().getLocal_port());
+			}
+			if(inputBO.getFile() != null){
+				beRepeat = false;
+			}
+			if(inputBO.getUdp_pcm() != null){
+				beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getUdp_pcm()!=null
+						&& i.getUdp_pcm().getSource_ip()==inputBO.getUdp_pcm().getSource_ip()
+						&& i.getUdp_pcm().getSource_port()==inputBO.getUdp_pcm().getSource_port()
+				);
+			}
+			if(inputBO.getBack_up_es() != null || inputBO.getBack_up_passby() != null || inputBO.getBack_up_raw() != null){
+				beRepeat = false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			//拿不到就从数据库判断吧
+
+
+		}
+
+		return beRepeat;
+	}
 	/**
 	 * 生成输入校验标识<br/>
 	 * <b>作者:</b>wjw<br/>

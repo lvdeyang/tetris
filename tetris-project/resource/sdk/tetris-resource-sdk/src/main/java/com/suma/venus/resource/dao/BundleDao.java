@@ -46,6 +46,9 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public List<BundlePO> findByDeviceIp(String deviceIp);
 
+	public List<BundlePO> findByDeviceIpAndDevicePortAndDeviceModel(String deviceIp, Integer devicePort,
+			String deviceModel);
+
 	public List<BundlePO> findBySourceType(SOURCE_TYPE sourceType);
 
 	public List<BundlePO> findByBundleTypeAndExtraBindId(String bundleType, String extraBindId);
@@ -198,4 +201,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findByDeviceModelAndUserId(String deviceModel,String userId);
 	
 	public List<BundlePO> findByDeviceModelIn(Collection<String> deviceModel);
+	
+	@Query("select b from BundlePO b where b.deviceModel=?1 and b.onlineStatus='ONLINE'")
+	public List<BundlePO> findOnlineDevicesByDeviceModel(String deviceModel);
 }

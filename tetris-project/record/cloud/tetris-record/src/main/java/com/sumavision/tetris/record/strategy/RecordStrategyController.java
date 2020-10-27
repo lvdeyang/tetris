@@ -33,6 +33,7 @@ import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
 import com.sumavision.tetris.record.source.SourceVO;
 import com.sumavision.tetris.record.storage.StorageDAO;
 import com.sumavision.tetris.record.storage.StoragePO;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO.EAutoInject;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyStatus;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyType;
 import com.sumavision.tetris.user.UserQuery;
@@ -182,7 +183,7 @@ public class RecordStrategyController {
 	@RequestMapping("/addRecordStrategy")
 	@ResponseBody
 	public Object addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
-			@RequestParam(value = "name") String name,  
+			@RequestParam(value = "name") String name,
 			@RequestParam(value = "status", required = false) String statusStr,
 			@RequestParam(value = "type") String typeStr,
 			@RequestParam(value = "startDate", required = false) String startDate,
@@ -259,6 +260,13 @@ public class RecordStrategyController {
 
 				// stgPo.setCreater(username);
 				// stgPo.setUpdater(username);
+
+				if (autoInjectToMims) {
+					stgPo.setAutoInjectSel(EAutoInject.AUTO_INJECT_MIMS);
+				} else {
+					stgPo.setAutoInjectSel(EAutoInject.MANUAL);
+				}
+
 				recordStragegyService.save(stgPo);
 
 			} else {
@@ -327,7 +335,7 @@ public class RecordStrategyController {
 						}
 					}
 				}
-				
+
 				// 更新当前策略
 				recordStragegyService.startScheduleTimerTask(stgPo);
 			}

@@ -201,7 +201,7 @@
                     tooltip-effect="dark"
                     :data="options.currentScreen.data"
                     :default-sort="{prop:'index',order:'ascending'}"
-                    style="width: 490px;height: 450px;overflow: auto;display: inline-block;">
+                    style="width: 550px;height: 450px;overflow: auto;display: inline-block;">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
@@ -246,6 +246,9 @@
                                 <el-button type="text" icon="feather-icon-chevron-down"
                                            style="margin:0 5px; font-size:18px; padding:0;"
                                            @click="programResourceDown(scope)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip content="是否必选资源">
+                                <el-switch v-model="scope.row.isRequired"></el-switch>
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" content="删除资源"
                                         placement="bottom">
