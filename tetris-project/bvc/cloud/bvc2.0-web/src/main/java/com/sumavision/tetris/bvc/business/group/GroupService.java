@@ -2918,7 +2918,7 @@ public class GroupService {
 					BundlePO bundlePO = sourceBO.getVideoBundle();
 					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
 					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
-					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
 										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
 										 .setUuid(sourceBO.getMemberUuid())
 										 .setSrc_user(group.getUserCode())//发起人、目的号码
