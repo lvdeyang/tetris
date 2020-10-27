@@ -34,7 +34,7 @@ public class TerminalChannelPO extends AbstractBasePO{
 	/** 隶属终端类型 */
 	private Long terminalId;
 	
-	/** 与真实设备类型中的通道绑定 */
+	/** 与真实设备绑定 */
 	private Long terminalBundleId;
 	
 	/** 与真实设备类型中的通道绑定 */
