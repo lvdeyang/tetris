@@ -52,28 +52,28 @@
           <template slot-scope="scope">
             <el-tooltip v-if="scope.row.status != '已完成'" class="item" effect="dark" content="停止任务" placement="bottom">
               <el-button type="text" icon="el-icon-circle-close-outline"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="rowDelete(scope)"></el-button>
             </el-tooltip>
             <el-tooltip v-else class="item" effect="dark" content="删除" placement="bottom">
               <el-button type="text" icon="el-icon-delete"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDelete(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDelete(scope.row)">
               </el-button>
             </el-tooltip>
             <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="详情" placement="bottom">
               <el-button type="text" icon="el-icon-tickets"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDetail(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDetail(scope.row)">
               </el-button>
             </el-tooltip>
 
             <el-tooltip v-if="scope.row.mode == '排期' && scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="openDownload(scope)">
               
               </el-button>
             </el-tooltip>
             <el-tooltip v-else-if="scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDownload(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDownload(scope.row)">
               </el-button>
             </el-tooltip>
           </template>
