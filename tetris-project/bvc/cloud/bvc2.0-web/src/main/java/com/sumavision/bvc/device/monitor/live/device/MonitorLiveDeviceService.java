@@ -573,15 +573,68 @@ public class MonitorLiveDeviceService {
 			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
 		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
-			stopXtSeeLocal(live, userId, userno);
+			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){
-			stopLocalSeeXt(live, userId, userno);
+			stopLocalSeeXt(live, userId, userno, null);
 		}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
-			stopLocalSeeLocal(live, userId, userno);
+			stopLocalSeeLocal(live, userId, userno, null);
 		}else if(LiveType.XT_XT.equals(live.getType())){
-			stopXtSeeXt(live, userId, userno);
+			stopXtSeeXt(live, userId, userno, null);
 		}
 		operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
+	}
+	
+	/**
+	 * 停止点播设备<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 下午2:46:51
+	 * @param Long liveId 点播任务id
+	 * @param Long userId 发起用户id
+	 * @param String userno 发起用户号码
+	 * @param Boolean stopAndDelete TRUE停止且删除、FALSE停止不删除、null删除
+	 */
+	public void stop(Long liveId, Long userId, String userno, Boolean stopAndDelete) throws Exception{
+		
+		MonitorLiveDevicePO live = monitorLiveDeviceDao.findOne(liveId);
+		if(live == null) return;
+		UserVO userVO = userQuery.current();
+		if(userId.longValue() == 1l || userVO.getIsGroupCreator()){
+			//admin操作转换
+			userId = live.getUserId();
+			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
+			userno = user.getUserNo();
+		}
+		if(!live.getUserId().equals(userId)){
+			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
+		}
+		
+		if(stopAndDelete == null){
+			monitorLiveDeviceDao.delete(live);
+		}else if(Boolean.TRUE.equals(stopAndDelete)){
+			if(LiveType.XT_LOCAL.equals(live.getType())){
+				stopXtSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_XT.equals(live.getType())){
+				stopLocalSeeXt(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
+				stopLocalSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.XT_XT.equals(live.getType())){
+				stopXtSeeXt(live, userId, userno, stopAndDelete);
+			}
+			
+			operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
+		}else{
+			if(LiveType.XT_LOCAL.equals(live.getType())){
+				stopXtSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_XT.equals(live.getType())){
+				stopLocalSeeXt(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
+				stopLocalSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.XT_XT.equals(live.getType())){
+				stopXtSeeXt(live, userId, userno, stopAndDelete);
+			}
+		}
+		
 	}
 	
 	/**
@@ -606,13 +659,13 @@ public class MonitorLiveDeviceService {
 			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveUuid);
 		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
-			stopXtSeeLocal(live, userId, userno);
+			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){
-			stopLocalSeeXt(live, userId, userno);
+			stopLocalSeeXt(live, userId, userno, null);
 		}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
-			stopLocalSeeLocal(live, userId, userno);
+			stopLocalSeeLocal(live, userId, userno, null);
 		}else if(LiveType.XT_XT.equals(live.getType())){
-			stopXtSeeXt(live, userId, userno);
+			stopXtSeeXt(live, userId, userno, null);
 		}
 	}
 	
@@ -625,7 +678,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopXtSeeLocal(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopXtSeeLocal(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		//本地编码器
 		BundlePO localEncoder = bundleDao.findByBundleId(live.getVideoBundleId());
@@ -659,7 +712,9 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(Boolean.TRUE.equals(stopAndDelete)){
+			monitorLiveDeviceDao.delete(live);
+		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
@@ -676,7 +731,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopLocalSeeLocal(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopLocalSeeLocal(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		AvtplPO targetAvtpl = avtplDao.findOne(live.getAvTplId());
 		AvtplGearsPO targetGear = avtplGearsDao.findOne(live.getGearId());
@@ -688,7 +743,9 @@ public class MonitorLiveDeviceService {
 		
 		LogicBO logic = closeBundle(live);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(Boolean.TRUE.equals(stopAndDelete)){
+			monitorLiveDeviceDao.delete(live);
+		}
 		
 		executeBusiness.execute(logic, "点播系统：停止本地点播本地设备任务");
 	}
@@ -702,7 +759,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopLocalSeeXt(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopLocalSeeXt(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		//xt编码器
 		BundlePO xtEncoder = bundleDao.findByBundleId(live.getVideoBundleId().indexOf("_")>=0?live.getVideoBundleId().split("_")[0]:live.getVideoBundleId());
@@ -737,7 +794,9 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(Boolean.TRUE.equals(stopAndDelete)){
+			monitorLiveDeviceDao.delete(live);
+		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
@@ -751,7 +810,7 @@ public class MonitorLiveDeviceService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月19日 下午2:40:01
 	 */
-	public void stopXtSeeXt(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopXtSeeXt(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 	}
 	
