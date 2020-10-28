@@ -4,5 +4,5 @@
 	"dataWarehouseUsername": "testUser",
 	"dataWarehousePassword": "test@@123456",
 	"bossAddUserUrl":"http://10.10.60.30:6050/user/add",
-	"bossPlayRecordUrl":"http://10.10.60.30:6050/user/play",
+	"bossPlayRecordUrl":"http://10.10.60.30:6050/user/play"
  }

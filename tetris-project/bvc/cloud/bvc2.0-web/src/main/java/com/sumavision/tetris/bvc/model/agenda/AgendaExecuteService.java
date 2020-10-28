@@ -536,6 +536,7 @@ public class AgendaExecuteService {
 							continue;
 						}					
 						
+						//以下判断目前不必要。查询出来的一定是编码设备
 						Long terminalBundleId = p.getTerminalBundleId();
 						TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成批量，缓存
 						TerminalBundleType type = terminalBundlePO.getType();
@@ -716,7 +717,8 @@ public class AgendaExecuteService {
 						forward.setSrcMemberId(sourceBO.getSrcVideoMemberId());
 					}else{						
 						ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
-						BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+//						BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+						BundlePO bundlePO = sourceBO.getVideoBundle();
 						forward.setSrcId(sourceBO.getSrcVideoId());
 						forward.setSrcName(sourceBO.getSrcVideoName());
 						forward.setSrcMemberId(sourceBO.getSrcVideoMemberId());
@@ -750,7 +752,8 @@ public class AgendaExecuteService {
 					}else{
 						ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
 						if(audio != null){
-							BundlePO audioBundlePO = bundleDao.findByBundleId(audio.getBundleId());
+//							BundlePO audioBundlePO = bundleDao.findByBundleId(audio.getBundleId());
+							BundlePO audioBundlePO = sourceBO.getAudioBundle();
 							forward.setSrcAudioId(sourceBO.getSrcAudioId());
 							forward.setSrcAudioName(sourceBO.getSrcAudioName());
 							forward.setSrcAudioMemberId(sourceBO.getSrcAudioMemberId());

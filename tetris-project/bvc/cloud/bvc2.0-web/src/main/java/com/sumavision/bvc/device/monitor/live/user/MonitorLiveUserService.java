@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,13 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelDAO;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelPO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
@@ -104,6 +113,18 @@ public class MonitorLiveUserService {
 	
 	@Autowired
 	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
+	private TerminalBundleUserPermissionDAO terminalBundleUserPermissionDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private TerminalChannelDAO terminalChannelDao;
+	
+	@Autowired
+	private BusinessCommonService businessCommonService;
 	
 	/**
 	 * xt点播本地用户<br/>
@@ -219,7 +240,20 @@ public class MonitorLiveUserService {
 		
 		if(user == null) throw new UserCannotBeFoundException();
 //		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
-		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+		
+		//获取用户设备对应的16个设备拿到对应终端设备编号为17的编码器
+		TerminalPO terminalPo=terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		List<TerminalChannelPO> terminalChannelPos= terminalChannelDao.findByTerminalIdOrderByTypeAscNameAsc(terminalPo.getId());
+		Set<Long> terminalBundleIds = businessCommonService.obtainTerminalBundleIdsFromTerminalChannel(terminalChannelPos);
+		List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(user.getId().toString(),terminalPo.getId());
+		
+		Optional<TerminalBundleUserPermissionPO> terminalBundleUserPermissionOptional = ps.stream().filter(p->{
+			return terminalBundleIds.contains(p.getTerminalBundleId());
+		}).findFirst();
+		
+		String encoderId = terminalBundleUserPermissionOptional.isPresent()?encoderId=terminalBundleUserPermissionOptional.get().getBundleId():null;
+		
+//		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 //		authorize(user.getId(), userId);//TODO: 暂时注释
 		
