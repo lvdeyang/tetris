@@ -930,17 +930,19 @@ public class MonitorLiveController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月27日 上午10:03:40
 	 * @param @PathVariable Long id 点播设备任务id
+	 * @param Boolean stopAndDelete TRUE停止且删除、FALSE停止不删除、null删除
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/device/{id}")
 	public Object stopLiveDevice(
 			@PathVariable Long id,
+			Boolean stopAndDelete,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno());
+		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno(), stopAndDelete);
 		
 		return null;
 	}

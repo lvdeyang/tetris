@@ -550,6 +550,10 @@ public class MonitorRecordController {
 	 * @param String audioChannelId 音频通道id
 	 * @param String audioBaseType 音频通道类型
 	 * @param String audioChannelName 音频通道名称
+	 * @param storeMode 当mode为TIMESEGMENT时：day、week或者month
+	 * @param timeQuantum mode为TIMESEGMENT时，开始和结束时间的String。（举例：day:{11:00:00，12:00:00}或者week:{1-11:00:00，7-11:00:00}或者month:{1-11:00:00，10-11:00:00}）
+	 * @param Long cycleRecordMaxTime 循环录制最大时长
+	 * @param Long cycleRecordMaxSize 循环录制最大存储容量
 	 * @return MonitorRecordTaskVO 录制任务
 	 */
 	@JsonBody
@@ -577,6 +581,8 @@ public class MonitorRecordController {
 			String audioChannelName,
 			String storeMode,
 			String timeQuantum,
+			Long cycleRecordMaxTime,
+			Long cycleRecordMaxSize,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -654,7 +660,7 @@ public class MonitorRecordController {
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-					user.getId(), user.getUserno(), user.getName());
+					user.getId(), user.getUserno(), user.getName(), cycleRecordMaxTime, cycleRecordMaxSize);
 			return new MonitorRecordTaskVO().set(task);
 		}
 	}

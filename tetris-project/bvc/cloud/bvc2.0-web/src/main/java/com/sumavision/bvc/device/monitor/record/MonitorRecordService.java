@@ -185,6 +185,10 @@ public class MonitorRecordService {
 	 *            userno 操作业务用户名称
 	 * @param String
 	 *            nickname 操作业务用户昵称
+	 * @param String 
+	 * 			  cycleRecordMaxTime 循环录制最大时长
+	 * @param String 
+	 * 			  cycleRecordMaxSize	循环录制最大存储容量
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addDevice(String mode, String fileName, String startTime, String endTime,
@@ -194,7 +198,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname
+			String nickname, Long cycleRecordMaxTime, Long cycleRecordMaxSize
 	) throws Exception {
 		
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
@@ -275,6 +279,8 @@ public class MonitorRecordService {
 			Integer totalSizeMb =configuration.getTotalSizeMb();
 			
 			status = MonitorRecordStatus.RUN;
+			task.setMaxSize(cycleRecordMaxSize);
+			task.setMaxTime(cycleRecordMaxTime);
 			task.setTotalSizeMb(totalSizeMb);
 		} else {
 			throw new ErrorRecordModeException(mode);
@@ -1256,7 +1262,8 @@ public class MonitorRecordService {
 														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)))
 														.setStore_mode(task.getMode().getCode());
 		}else if(MonitorRecordMode.CYCLE.equals(task.getMode())){
-			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb() *1024)).setStore_mode(task.getMode().getCode());
+			recordSet.setCycle(new RecordCycleBO().setMax_size(task.getMaxSize()).setMax_time(task.getMaxTime())
+					                              .setTotal_size_mb(task.getTotalSizeMb() *1024)).setStore_mode(task.getMode().getCode());
 		}else if(MonitorRecordMode.MANUAL.equals(task.getMode())){
 			recordSet.setStore_mode(task.getMode().getCode());
 		}
