@@ -1013,7 +1013,7 @@ public class BroadAbilityService {
 									seekPlayTime = (int)(different / duration);
 									firstFileSeek = different - (duration * seekPlayTime);
 								}
-								taskId = streamTranscodeQuery.addFileTask(fileDealVO.getFileUrl(), screenVOs.size() - seekPlayTime, firstFileSeek, false, null, screen.getType().equals("AUDIO_STREAM") ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
+								taskId = streamTranscodeQuery.addFileTask(fileDealVO.getFileUrl(), screenVOs.size() - seekPlayTime, firstFileSeek, false, null, (screen.getType().equals("AUDIO_STREAM")||screen.getType().equals("AUDIO")) ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
 								System.out.println(new Date() + ": create finish: " + taskId);
 							} else if (broadWay == BroadStreamWay.ABILITY_STREAM_TRANSCODE) {
 								taskId = streamTranscodeQuery.addTask(null, assetPath, false, null, screen.getType().equals("AUDIO_STREAM") ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
