@@ -285,7 +285,25 @@ define([
       openBandwidth() {
         this.dialog.bandwidth.visible = true;
       },
-      
+      rowStop(scope,stopAndDelete){
+        var row=scope.row
+        ajax.post('/monitor/live/stop/live/device/'+ row.id, {stopAndDelete:stopAndDelete}, function (data, status) {
+          if (status == 200) {
+            console.log(data)
+            
+          }
+        })
+      },
+      rowStart(scope){
+        var row=scope.row
+        var self= this;
+        ajax.post('/monitor/live/stop/to/restart', {id:row.id}, function (data, status) {
+          if (status == 200) {
+            console.log(data)
+            
+          }
+        })
+      },
     },
     mounted: function () {
       var self = this;
