@@ -133,7 +133,7 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 文件存储位置 */
 	private String storeLayerId;
 	
-	/** 循环录制文件大小*/
+	/** 循环录制文件全局大小*/
 	private Integer totalSizeMb;
 	
 	/** 所属任务任务名*/
@@ -142,6 +142,32 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 所属任务任务id*/
 	private Long taskId;
 	
+	/** 循环录制最大时长*/
+	private Long maxTime;
+	
+	/** 循环录制最大存储容量*/
+	private Long maxSize;
+	
+	@Column(name = "MAX_TIME")
+	public Long getMaxTime() {
+		return maxTime;
+	}
+
+	public MonitorRecordPO setMaxTime(Long maxTime) {
+		this.maxTime = maxTime;
+		return this;
+	}
+
+	@Column(name = "MAX_SIZE")
+	public Long getMaxSize() {
+		return maxSize;
+	}
+
+	public MonitorRecordPO setMaxSize(Long maxSize) {
+		this.maxSize = maxSize;
+		return this;
+	}
+
 	@Column(name = "TASK_NAME")
 	public String getTaskName() {
 		return taskName;

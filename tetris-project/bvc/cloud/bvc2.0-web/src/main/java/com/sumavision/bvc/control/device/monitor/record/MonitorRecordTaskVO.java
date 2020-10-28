@@ -67,6 +67,30 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制如果是设备，记录bundleId*/
 	private String bundleId;
 	
+	/** 循环录制最大时长*/
+	private Long cycleRecordMaxTime;
+	 
+	/** 循环录制最大存储容量*/
+	private Long cycleRecordMaxSize; 
+	
+	public Long getCycleRecordMaxTime() {
+		return cycleRecordMaxTime;
+	}
+
+	public MonitorRecordTaskVO setCycleRecordMaxTime(Long cycleRecordMaxTime) {
+		this.cycleRecordMaxTime = cycleRecordMaxTime;
+		return this;
+	}
+
+	public Long getCycleRecordMaxSize() {
+		return cycleRecordMaxSize;
+	}
+
+	public MonitorRecordTaskVO setCycleRecordMaxSize(Long cycleRecordMaxSize) {
+		this.cycleRecordMaxSize = cycleRecordMaxSize;
+		return this;
+	}
+
 	public String getBundleId() {
 		return bundleId;
 	}
@@ -260,16 +284,24 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setNickname(entity.getNickname()==null?"":entity.getNickname())
 			.setTaskId(entity.getTaskId()==null?null:entity.getTaskId())
 			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
-			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId());
+			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId())
+			.setCycleRecordMaxSize(entity.getMaxSize()==null?0:entity.getMaxSize())
+			.setCycleRecordMaxTime(entity.getMaxTime()==null?0:entity.getMaxTime());
 		return this;
 	}
 	
+	/**
+	 * 扩展下载权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月27日 下午5:37:58
+	 * @param entity
+	 * @param bo
+	 * @return
+	 * @throws Exception
+	 */
 	public MonitorRecordTaskVO set(MonitorRecordPO entity,ResourceIdListBO bo) throws Exception {
 		set(entity);
-//		/** 所属任务id*/
-//		private Long taskId;
-//		/** 所属任务名字*/
-//		private String taskName;
 		
 		if(bo!=null&&bo.getResourceCodes()!=null&&bo.getResourceCodes().size()>0){
 			if(entity.getType().equals(MonitorRecordType.LOCAL_DEVICE)&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
