@@ -15,21 +15,16 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" v-if="bundleForm.deviceModel =='jv210'">
-        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
+        <!-- <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
           <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
-        </el-select>
+        </el-select> -->
+        <el-cascader :options="devTypeOption" v-model="devType" @change="devTypeChange"></el-cascader>
       </el-form-item>
       <el-form-item label="域类型" v-if="bundleForm.deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
           <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
-      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
-        <el-select v-model="bundleForm.coderType" style="width: 200px;">
-          <el-option v-for="item in coderTypeOptions" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item> -->
 
       <el-form-item size="small" v-show="bundleForm.deviceModel=='ws'" label="编解码类型" prop="coderType">
         <el-select v-model="bundleForm.coderType" style="width: 200px;">
@@ -72,14 +67,6 @@
         <el-input v-show="false" v-model="bundleForm.accessNodeUid"></el-input>
       </el-form-item>
 
-      <!-- <el-form-item size="small" label="设备IP">
-        <el-input v-model="bundleForm.deviceAddr.deviceIp" style="width: 200px;"></el-input>
-      </el-form-item> -->
-
-      <!-- <el-form-item size="small" label="设备端口">
-        <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
-      </el-form-item> -->
-
       <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
         <el-input v-model="bundleForm.multicastSourceIp" style="width: 200px;"></el-input>
       </el-form-item>
@@ -89,6 +76,13 @@
       <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
+
+      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
+        <el-select v-model="bundleForm.coderType" style="width: 200px;">
+          <el-option v-for="item in coderTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item> -->
       <!-- <el-form-item size="small" label="解码组播">
         <el-switch v-model="bundleForm.multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
@@ -98,6 +92,13 @@
       <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
         <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
       </el-form-item>
+      <!-- <el-form-item size="small" label="设备IP">
+        <el-input v-model="bundleForm.deviceAddr.deviceIp" style="width: 200px;"></el-input>
+      </el-form-item> -->
+
+      <!-- <el-form-item size="small" label="设备端口">
+        <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
+      </el-form-item> 
 
       <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标纬度(°)" prop="latitude">
         <el-input v-model="bundleForm.latitude" style="width: 200px;"></el-input>
@@ -696,21 +697,49 @@ export default {
         { label: "存储设备", value: "cdn" }
       ],
       devTypeOption: [
-        { label: "sip编码器", value: "sip_enc" },
-        { label: "sip解码器", value: "sip_dec" },
-        // { label: "sip编解码器", value: "sip_enc_dec" },
-        { label: "大华摄像机", value: "dh_camera" },
-        { label: "ts输入(虚编码)", value: "ts_enc" },
-        { label: "ts输出(虚解码)", value: "ts_dec" },
-        { label: "rtp透传输入(虚编码)", value: "rtp_passby_enc" },
-        { label: "rtp透传输出(虚解码)", value: "rtp_passby_dec" },
-        { label: "rtsp输入(虚编码)", value: "rtsp_enc" },
-        { label: "rtmp输入(虚编码)", value: "rtmp_enc" },
-        { label: "onvif输入(虚编码)", value: "onvif_enc" },
-        { label: "北清编码器输入", value: "bq_enc" },
-        { label: "28181编码器输入", value: "28181_enc" },
-        { label: "转码输出(虚解码)", value: "transcode_dec" },
+        {
+          label: "编码器", value: "enc", children: [
+            { label: "sip编码器", value: "sip_enc" },
+            { label: "ts输入(虚编码)", value: "ts_enc" },
+            { label: "rtp透传输入(虚编码)", value: "rtp_passby_enc" },
+            { label: "rtsp输入(虚编码)", value: "rtsp_enc" },
+            { label: "rtmp输入(虚编码)", value: "rtmp_enc" },
+            { label: "onvif输入(虚编码)", value: "onvif_enc" },
+            { label: "北清编码器输入", value: "bq_enc" },
+            { label: "28181编码器输入", value: "28181_enc" },]
+
+        },
+        {
+          label: "解码器", value: "dec", children: [
+            { label: "sip解码器", value: "sip_dec" },
+            { label: "ts输出(虚解码)", value: "ts_dec" },
+            { label: "rtp透传输出(虚解码)", value: "rtp_passby_dec" },
+            { label: "转码输出(虚解码)", value: "transcode_dec" },
+          ]
+        },
+        {
+          label: "摄像机", value: "camera", children: [
+            { label: "主流摄像机1", value: "dh_camera" },
+          ]
+        }
       ],
+      devType: ['enc', 'sip_enc'],
+      // devTypeOption: [
+      //   { label: "sip编码器", value: "sip_enc" },
+      //   { label: "sip解码器", value: "sip_dec" },
+      //   // { label: "sip编解码器", value: "sip_enc_dec" },
+      //   { label: "大华摄像机", value: "dh_camera" },
+      //   { label: "ts输入(虚编码)", value: "ts_enc" },
+      //   { label: "ts输出(虚解码)", value: "ts_dec" },
+      //   { label: "rtp透传输入(虚编码)", value: "rtp_passby_enc" },
+      //   { label: "rtp透传输出(虚解码)", value: "rtp_passby_dec" },
+      //   { label: "rtsp输入(虚编码)", value: "rtsp_enc" },
+      //   { label: "rtmp输入(虚编码)", value: "rtmp_enc" },
+      //   { label: "onvif输入(虚编码)", value: "onvif_enc" },
+      //   { label: "北清编码器输入", value: "bq_enc" },
+      //   { label: "28181编码器输入", value: "28181_enc" },
+      //   { label: "转码输出(虚解码)", value: "transcode_dec" },
+      // ],
       deviceDomainOptions: [, { label: "本域资源", value: "2" }],
 
       coderTypeOptions: [
@@ -811,8 +840,8 @@ export default {
         date_osd: {
           enable: true,
           has_week: false,
-          x: 0,
-          y: 0,
+          x: 8192,
+          y: 7168,
           color: "#7d59f9",
         },
       },
@@ -1217,7 +1246,8 @@ export default {
     //     }
     //   });
     // },
-    devTypeChange: function (val) {
+    devTypeChange: function (value) {
+      var val = this.extraParam.dev_type = value[value.length - 1]
       var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'],
         isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec'], isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
       if (hidArr.indexOf(val) > -1) {

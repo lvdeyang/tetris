@@ -66,6 +66,8 @@ define([
             },
             mode: 'SCHEDULING',
             fileName: '',
+            max_size:0,
+            max_time:0,
             timeScope: '',
             timing: '',
             totalSizeMb: '',
@@ -115,6 +117,11 @@ define([
             required: true,
             message: '请输入活动名称',
             trigger: 'blur'
+          }
+        },
+        pickerOptions:{
+          disabledDate:function(time){
+            return time.getTime() < Date.now() - 8.64e7;
           }
         }
       }
@@ -272,7 +279,7 @@ define([
           this.dialog.addRecord.timeModeChangeText = ""
           this.dialog.addRecord.timeSegmentmodeStartDay = ""
           this.dialog.addRecord.timeSegmentmodeEndDay = ""
-          this.dialog.addRecord.startTimeDisabled = true;
+          // this.dialog.addRecord.timeSegmentReadonly = true;
         }
       },
       rowDelete: function (scope) {
@@ -381,7 +388,9 @@ define([
           mode: self.dialog.addRecord.mode,
           fileName: self.dialog.addRecord.fileName,
           bundleId: self.dialog.addRecord.bundleId,
-          storeMode: self.dialog.addRecord.timeSegmentmode
+          storeMode: self.dialog.addRecord.timeSegmentmode,
+          cycleRecordMaxSize:self.dialog.addRecord.cycleRecordMaxSize,
+          cycleRecordMaxTime:self.dialog.addRecord.cycleRecordMaxTime,
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
