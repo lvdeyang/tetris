@@ -223,9 +223,10 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                self.roleOption.push(rows[i]);
+                if(rows[i].id != 7){
+                  self.roleOption.push(rows[i]);
+                }
               }
-              console.log(self.roleOption)
             }
           });
         },
@@ -321,8 +322,10 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            rolesName.push(businessRoles[i].name)
-            rolesId.push(businessRoles[i].id)
+            if(businessRoles[i].id != '7'){//去掉媒资用户
+              rolesName.push(businessRoles[i].name)
+              rolesId.push(businessRoles[i].id)
+            }
           }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;

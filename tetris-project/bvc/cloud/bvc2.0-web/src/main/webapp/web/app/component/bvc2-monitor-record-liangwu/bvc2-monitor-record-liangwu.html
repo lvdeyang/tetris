@@ -134,17 +134,23 @@
                   </el-form-item>
                   <el-form-item style="margin-bottom:10px;width: 400px;" prop="fileName">
                     <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入任务名称"></el-input>
+                  </el-form-item> 
+                  <el-form-item style="margin-bottom:10px;width: 400px;" prop="cycleRecordMaxSize">
+                    <el-input size="medium" v-model.number="dialog.addRecord.cycleRecordMaxSize" placeholder="请输入覆盖最大容量（GB）" v-if="dialog.addRecord.mode==='CYCLE'"></el-input>
+                  </el-form-item>
+                  <el-form-item style="margin-bottom:10px;width: 400px;" prop="cycleRecordMaxTime">
+                    <el-input size="medium" v-model.number="dialog.addRecord.cycleRecordMaxTime" placeholder="请输入覆盖最大时间（小时）"v-if="dialog.addRecord.mode==='CYCLE'"></el-input>
                   </el-form-item>
 
                   <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px">
                     <el-date-picker size="medium" v-model="dialog.addRecord.timeScope" type="datetimerange"
-                      start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+                      start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00'] " :picker-options="pickerOptions">
                     </el-date-picker>
                   </el-form-item>
                   <div v-if="dialog.addRecord.mode==='TIMESEGMENT'">
                     <el-form-item>
                       <el-input :disabled="dialog.addRecord.startTimeDisabled"
-                        v-model="dialog.addRecord.timeSegmentmodeStartDay" style="width: 230px;">
+                        v-model="dialog.addRecord.timeSegmentmodeStartDay" style="width: 230px;" >
                         <el-select slot="prepend" size="medium" v-model="dialog.addRecord.timeSegmentmode"
                           @change="timeModeChange" style="width:100px;" placeholder="时间段">
                           <el-option key="month" label="每月" value="month"></el-option>
