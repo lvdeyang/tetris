@@ -80,8 +80,8 @@ define([
             timeModeChangeText: '日',
             startTimeDisabled: false,
             bundleId: '',
-            cycleRecordMaxSize:0,
-            cycleRecordMaxTime:0
+            total_size_mb:0,
+            time_duration:0
           },
           selectDevice: {
             visible: false,
