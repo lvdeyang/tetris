@@ -165,13 +165,15 @@ public class PageTaskService {
 		//新添加的是同一个groupPO下的任务。
 		if(newTasks.size()>0){
 			String businessId=newTasks.get(0).getBusinessId();
-			Long groupId=Long.parseLong(businessId);
-			GroupPO group=groupDao.findOne(groupId);
-			if(group!=null&&group.getLocationIndex()!=null){
-				int taskIndex=(pageInfo.getCurrentPage()-1)*pageInfo.getPageSize()+group.getLocationIndex();
-				for(PageTaskPO newTask:newTasks){
-					newTask.setTaskIndex(taskIndex++);
-					newTask.setFixedAtPageAndLocation(true);
+			if(businessId.matches("\\d+")){
+				Long groupId=Long.parseLong(businessId);
+				GroupPO group=groupDao.findOne(groupId);
+				if(group!=null&&group.getLocationIndex()!=null){
+					int taskIndex=(pageInfo.getCurrentPage()-1)*pageInfo.getPageSize()+group.getLocationIndex();
+					for(PageTaskPO newTask:newTasks){
+						newTask.setTaskIndex(taskIndex++);
+						newTask.setFixedAtPageAndLocation(true);
+					}
 				}
 			}
 		}
@@ -1252,5 +1254,4 @@ public class PageTaskService {
 			pageTask.setFixedAtPageAndLocation(true);
 		}
 	}
-	
 }
