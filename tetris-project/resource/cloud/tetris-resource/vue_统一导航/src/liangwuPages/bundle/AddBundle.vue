@@ -1615,5 +1615,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+.el-color-predefine__color-selector {
+  border: 1px solid #666 !important;
+}
 </style>
