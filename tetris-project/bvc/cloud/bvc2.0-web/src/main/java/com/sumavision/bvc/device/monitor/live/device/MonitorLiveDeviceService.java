@@ -746,6 +746,9 @@ public class MonitorLiveDeviceService {
 		
 		if(stopAndDelete == null){
 			monitorLiveDeviceDao.delete(live);
+		}if(Boolean.TRUE.equals(stopAndDelete)){
+			live.setStatus(MonitorRecordStatus.STOP);
+			monitorLiveDeviceDao.save(live);
 		}
 		
 		executeBusiness.execute(logic, "点播系统：停止本地点播本地设备任务");
@@ -1000,7 +1003,11 @@ public class MonitorLiveDeviceService {
 		List<MonitorLiveDevicePO> deviceLives = monitorLiveDeviceDao.findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId);
 		if(deviceLives!=null && deviceLives.size()>0){
 			for(MonitorLiveDevicePO deviceLive:deviceLives){
-				stop(deviceLive.getId(), userId, userno);
+				if(MonitorRecordStatus.STOP.equals(deviceLive.getStatus())){
+					
+				}else{
+					stop(deviceLive.getId(), userId, userno);
+				}
 			}
 		}
 		
@@ -1398,7 +1405,6 @@ public class MonitorLiveDeviceService {
 		live.setStatus(MonitorRecordStatus.RUN);
 		
 		monitorLiveDeviceDao.save(live);
-		
 		
 		LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, user.getId(), false, live.getUdpUrl());
 		
