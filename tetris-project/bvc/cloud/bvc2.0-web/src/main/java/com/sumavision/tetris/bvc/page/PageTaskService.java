@@ -162,7 +162,7 @@ public class PageTaskService {
 		
 		Integer currentPage = pageInfo.getCurrentPage();
 		
-		//新添加的应该是同一个groupPO下的任务。
+		//新添加的是同一个groupPO下的任务。
 		if(newTasks.size()>0){
 			String businessId=newTasks.get(0).getBusinessId();
 			if(businessId.matches("\\d+")){
