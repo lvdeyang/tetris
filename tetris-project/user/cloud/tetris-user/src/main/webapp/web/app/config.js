@@ -38,11 +38,9 @@ define(function(){
                     'page-layout':'布局方案',
                     'page-record-scheme':'录制方案',
                     'page-tpl':'组模板',
-                    'page-liangwu-user':'用户管理',
-                    'page-liangwu-role':'角色管理',
                     'page-error':'出错啦'
                 },
-                separator:'-'
+                separator:''
             }
         },
 
