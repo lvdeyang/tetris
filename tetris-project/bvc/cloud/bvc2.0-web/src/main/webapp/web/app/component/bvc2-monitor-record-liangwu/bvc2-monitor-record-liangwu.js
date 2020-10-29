@@ -79,7 +79,9 @@ define([
             loading: false,
             timeModeChangeText: '日',
             startTimeDisabled: false,
-            bundleId: ''
+            bundleId: '',
+            cycleRecordMaxSize:0,
+            cycleRecordMaxTime:0
           },
           selectDevice: {
             visible: false,

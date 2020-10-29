@@ -159,7 +159,7 @@
         .el-tree .bvc2-tree-node-custom{font-size: 15px;}
     </style>
 
-    <title>视频点播系统</title>
+    <title>视频监控平台</title>
 </head>
 <body>
     <div id="app" class="page-wrapper" v-loading.fullscreen.lock="loading">

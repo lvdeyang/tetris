@@ -51,12 +51,8 @@ define(function(){
                     'page-record-scheme':'录制方案',
                     'page-tpl':'组模板',
                     'page-error':'出错啦',
-                    
-                    'page-monitor-forword-list':'转发管理',
-                    'page-monitor-currenttask':'当前任务',
-                    'page-monitor-record-liangwu':'录制管理',
                 },
-                separator:'-'
+                separator:''
             }
         },
 
