@@ -7,7 +7,7 @@
       <el-input size="mini" v-model="condition.fileName" placeholder="请输入任务名称" style="width:150px; margin-left:10px;"></el-input>
       <el-select size="mini" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
         <el-option key="ALL" label="全部" value="ALL"></el-option>
-        <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
+        <el-option key="MANUAL" label="长期录制" value="MANUAL"></el-option>
         <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
         <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
         <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
@@ -126,7 +126,7 @@
                   <el-form-item style="margin-bottom:10px;">
                     <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式"
                       @change="addRecordModeChange" style="width:400px;">
-                      <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
+                      <el-option key="MANUAL" label="长期录制" value="MANUAL"></el-option>
                       <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
                       <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
                       <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
