@@ -391,8 +391,8 @@ define([
           fileName: self.dialog.addRecord.fileName,
           bundleId: self.dialog.addRecord.bundleId,
           storeMode: self.dialog.addRecord.timeSegmentmode,
-          cycleRecordMaxSize:self.dialog.addRecord.cycleRecordMaxSize,
-          cycleRecordMaxTime:self.dialog.addRecord.cycleRecordMaxTime,
+          total_size_mb:self.dialog.addRecord.total_size_mb,
+          time_duration:self.dialog.addRecord.time_duration,
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
