@@ -76,7 +76,7 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                if(rows[i].id == 7){
+                if(rows[i].id == 7||rows[i].id == 6){
 
                 }else{
                   self.table.rows.push(rows[i]);

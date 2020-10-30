@@ -252,7 +252,7 @@ export default {
 
     // 删除告警基本信息
     handleDel: function (index, row) {
-      this.$confirm('删除告警基本信息会删除所有此类告警，确认？', '提示', {}).then(() => {
+      this.$confirm('确认删除此条日志？', '提示', {}).then(() => {
         let para = {
           ids: row.id
         }

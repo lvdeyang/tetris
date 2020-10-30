@@ -223,7 +223,7 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                if(rows[i].id != 7){
+                if(rows[i].id != 7||rows[i].id != 6){
                   self.roleOption.push(rows[i]);
                 }
               }
@@ -322,7 +322,7 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            if(businessRoles[i].id != '7'){//去掉媒资用户
+            if(businessRoles[i].id != '7'||businessRoles[i].id != '6'){//去掉媒资用户
               rolesName.push(businessRoles[i].name)
               rolesId.push(businessRoles[i].id)
             }
