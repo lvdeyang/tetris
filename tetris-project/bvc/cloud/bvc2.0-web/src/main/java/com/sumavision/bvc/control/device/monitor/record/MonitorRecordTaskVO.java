@@ -67,27 +67,27 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制如果是设备，记录bundleId*/
 	private String bundleId;
 	
-	/** 循环录制最大时长*/
-	private Long cycleRecordMaxTime;
+	/** 录制最大时长*/
+	private Long time_duration;
 	 
-	/** 循环录制最大存储容量*/
-	private Long cycleRecordMaxSize; 
+	/** 录制最大存储容量*/
+	private Long total_size_mb; 
 	
-	public Long getCycleRecordMaxTime() {
-		return cycleRecordMaxTime;
+	public Long getTime_duration() {
+		return time_duration;
 	}
 
-	public MonitorRecordTaskVO setCycleRecordMaxTime(Long cycleRecordMaxTime) {
-		this.cycleRecordMaxTime = cycleRecordMaxTime;
+	public MonitorRecordTaskVO setTime_duration(Long time_duration) {
+		this.time_duration = time_duration;
 		return this;
 	}
 
-	public Long getCycleRecordMaxSize() {
-		return cycleRecordMaxSize;
+	public Long getTotal_size_mb() {
+		return total_size_mb;
 	}
 
-	public MonitorRecordTaskVO setCycleRecordMaxSize(Long cycleRecordMaxSize) {
-		this.cycleRecordMaxSize = cycleRecordMaxSize;
+	public MonitorRecordTaskVO setTotal_size_mb(Long total_size_mb) {
+		this.total_size_mb = total_size_mb;
 		return this;
 	}
 
@@ -285,8 +285,8 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setTaskId(entity.getTaskId()==null?null:entity.getTaskId())
 			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
 			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId())
-			.setCycleRecordMaxSize(entity.getMaxSize()==null?0:entity.getMaxSize())
-			.setCycleRecordMaxTime(entity.getMaxTime()==null?0:entity.getMaxTime());
+			.setTotal_size_mb(entity.getTotal_size_mb())
+			.setTime_duration(entity.getTime_duration());
 		return this;
 	}
 	

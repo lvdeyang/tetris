@@ -133,38 +133,33 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 文件存储位置 */
 	private String storeLayerId;
 	
-	/** 循环录制文件全局大小*/
-	private Integer totalSizeMb;
-	
 	/** 所属任务任务名*/
 	private String taskName;
 	
 	/** 所属任务任务id*/
 	private Long taskId;
 	
-	/** 循环录制最大时长*/
-	private Long maxTime;
+	/** 录制任务最大存储容量*/
+	private Long total_size_mb;
 	
-	/** 循环录制最大存储容量*/
-	private Long maxSize;
-	
-	@Column(name = "MAX_TIME")
-	public Long getMaxTime() {
-		return maxTime;
+	/** 录制任务最大存储时长*/
+	private Long time_duration;
+
+	public Long getTotal_size_mb() {
+		return total_size_mb;
 	}
 
-	public MonitorRecordPO setMaxTime(Long maxTime) {
-		this.maxTime = maxTime;
+	public MonitorRecordPO setTotal_size_mb(Long total_size_mb) {
+		this.total_size_mb = total_size_mb;
 		return this;
 	}
 
-	@Column(name = "MAX_SIZE")
-	public Long getMaxSize() {
-		return maxSize;
+	public Long getTime_duration() {
+		return time_duration;
 	}
 
-	public MonitorRecordPO setMaxSize(Long maxSize) {
-		this.maxSize = maxSize;
+	public MonitorRecordPO setTime_duration(Long time_duration) {
+		this.time_duration = time_duration;
 		return this;
 	}
 
@@ -521,14 +516,6 @@ public class MonitorRecordPO extends AbstractBasePO{
 
 	public void setStoreLayerId(String storeLayerId) {
 		this.storeLayerId = storeLayerId;
-	}
-	@Column(name = "TOTAL_SIZE_MB")
-	public Integer getTotalSizeMb() {
-		return totalSizeMb;
-	}
-
-	public void setTotalSizeMb(Integer totalSizeMb) {
-		this.totalSizeMb = totalSizeMb;
 	}
 	
 }

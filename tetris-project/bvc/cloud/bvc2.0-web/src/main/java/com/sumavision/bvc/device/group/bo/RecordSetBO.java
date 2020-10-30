@@ -1,10 +1,8 @@
 package com.sumavision.bvc.device.group.bo;
 
-import com.sumavision.bvc.device.group.enumeration.GroupType;
 import com.sumavision.bvc.device.group.enumeration.RecordType;
 import com.sumavision.bvc.device.group.enumeration.SourceType;
 import com.sumavision.bvc.device.group.po.RecordPO;
-import com.sumavision.bvc.device.monitor.record.MonitorRecordMode;
 
 public class RecordSetBO {
 
@@ -60,8 +58,28 @@ public class RecordSetBO {
 	/** 排期起始时间*/
 	private RecordTimeSegmentBO time_segment;
 	
-	/** 循环录制*/
-	private RecordCycleBO cycle;
+	/** cycle循环参数*/
+	private CycleBO cycle;
+	
+	private AlarmBO alarm;
+
+	public CycleBO getCycle() {
+		return cycle;
+	}
+
+	public RecordSetBO setCycle(CycleBO cycle) {
+		this.cycle = cycle;
+		return this;
+	}
+
+	public AlarmBO getAlarm() {
+		return alarm;
+	}
+
+	public RecordSetBO setAlarm(AlarmBO alarm) {
+		this.alarm = alarm;
+		return this;
+	}
 
 	public String getTaskId() {
 		return taskId;
@@ -231,15 +249,6 @@ public class RecordSetBO {
 
 	public RecordSetBO setTime_segment(RecordTimeSegmentBO time_segment) {
 		this.time_segment = time_segment;
-		return this;
-	}
-
-	public RecordCycleBO getCycle() {
-		return cycle;
-	}
-
-	public RecordSetBO setCycle(RecordCycleBO cycle) {
-		this.cycle = cycle;
 		return this;
 	}
 

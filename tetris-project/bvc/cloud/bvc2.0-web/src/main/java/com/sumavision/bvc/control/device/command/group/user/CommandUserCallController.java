@@ -17,6 +17,7 @@ import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.tetris.bvc.business.call.UserCallService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -50,6 +51,9 @@ public class CommandUserCallController {
 	@Autowired
 	private UserCallService userCallService;
 	
+	@Autowired
+	private BusinessReturnService businessReturnService;
+	
 	/**
 	 * 呼叫用户<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -69,6 +73,7 @@ public class CommandUserCallController {
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			UserBO calledUser = userUtils.queryUserById(userId);
 			
+			businessReturnService.init(Boolean.TRUE);
 			userCallService.userCallUser(callUser, calledUser, -1, null, null);
 			
 //			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
