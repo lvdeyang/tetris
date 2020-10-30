@@ -154,6 +154,7 @@ define([
       },
       handleClick(tab, event) {
         this.isExterior = tab.name
+        this.decodeTitle =tab.label +'解码器'
 
       },
       loadStation: function () {
