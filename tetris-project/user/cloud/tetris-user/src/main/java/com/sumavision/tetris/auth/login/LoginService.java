@@ -120,7 +120,7 @@ public class LoginService {
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
 		
-		if(user.getIsLoginIp() != null && user.getIsLoginIp() == true && user.getLoginIp() == null){
+		if(user.getIsLoginIp() != null && user.getIsLoginIp() == true && (user.getLoginIp() == null || user.getLoginIp().isEmpty())){
 			user.setLoginIp(ip);
 		}
 		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
