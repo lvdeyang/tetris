@@ -536,6 +536,8 @@ public class MonitorRecordController {
 	 * @param String startTime 开始录制时间
 	 * @param String endTime 结束录制时间
 	 * @param String bundleId 传channel信息时有这个字段，代表录制设备（当前设备只有一个音频编码和一个视频编码）
+	 * @param Long total_size_mb 此任务可占用的磁盘大小，单位兆，0代表无限大。
+	 * @param Long time_duration 此任务可录制的时长，单位：小时，0代表物无限长
 	 * @param String videoBundleId 视频设备id
 	 * @param String videoBundleName 视频设备名称
 	 * @param String videoBundleType 视频设备类型
@@ -550,6 +552,8 @@ public class MonitorRecordController {
 	 * @param String audioChannelId 音频通道id
 	 * @param String audioBaseType 音频通道类型
 	 * @param String audioChannelName 音频通道名称
+	 * @param storeMode 当mode为TIMESEGMENT时：day、week或者month
+	 * @param timeQuantum mode为TIMESEGMENT时，开始和结束时间的String。（举例：day:{11:00:00，12:00:00}或者week:{1-11:00:00，7-11:00:00}或者month:{1-11:00:00，10-11:00:00}）
 	 * @return MonitorRecordTaskVO 录制任务
 	 */
 	@JsonBody
@@ -561,6 +565,8 @@ public class MonitorRecordController {
 			String startTime, 
 			String endTime,
 			String bundleId,
+			Long total_size_mb,
+			Long time_duration,
 			String videoBundleId,
 			String videoBundleName,
 			String videoBundleType,
@@ -636,25 +642,19 @@ public class MonitorRecordController {
 		
 		if(MonitorRecordMode.TIMESEGMENT.equals(MonitorRecordMode.valueOf(mode))){
 			
-			SystemConfigurationPO configuration=systemConfigurationDao.findByTotalSizeMbNotNull();
-			if(configuration==null){
-				throw new BaseException(StatusCode.FORBIDDEN, "还没有设置磁盘大小");
-			}
-			Integer totalSizeMb =configuration.getTotalSizeMb();
-			
 			MonitorRecordPO task = monitorRecordService.addDeviceTimeSegment(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
 					user.getId(), user.getUserno(), user.getName(), storeMode,
-					timeQuantum, totalSizeMb);
+					timeQuantum, total_size_mb, time_duration);
 			return new MonitorRecordTaskVO().set(task);
 		}else{
 			MonitorRecordPO task = monitorRecordService.addDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-					user.getId(), user.getUserno(), user.getName());
+					user.getId(), user.getUserno(), user.getName(), total_size_mb, time_duration);
 			return new MonitorRecordTaskVO().set(task);
 		}
 	}

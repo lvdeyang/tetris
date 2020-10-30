@@ -76,7 +76,11 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                self.table.rows.push(rows[i]);
+                if(rows[i].id == 7){
+
+                }else{
+                  self.table.rows.push(rows[i]);
+                }
               }
               self.table.total = total;
             }

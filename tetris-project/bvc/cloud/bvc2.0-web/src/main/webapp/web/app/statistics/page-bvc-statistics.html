@@ -4,43 +4,104 @@
         <el-container style="width:100%; height:100%">
             <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
             <el-main style="padding:10px; background-color:#fff;">
-                <div style="width:100%; height:430px; border:1px solid #F2F3F7; border-radius:5px; padding:10px; box-sizing:border-box;">
-                    <div style="width:50%; height:350px; float:left;">
-                        <div class="per-number" style="width:100%; height:100%;"></div>
-                    </div>
-                    <div style="width:50%; height:350px; float:left;">
-                        <div class="per-duration" style="width:100%; height:100%;"></div>
-                    </div>
-                    <div style="clear:both;"></div>
-                    <div style="height:60px; width:100%; text-align:center;">
-                        <el-pagination
-                                background
-                                layout="total, prev, pager, next, jumper, sizes"
-                                :page-size="page.pageSize"
-                                :current-page="page.currentPage"
-                                :page-sizes="page.pageSizes"
-                                :total="page.total"
-                                @size-change="handleSizeChange"
-                                @current-change="handleCurrentChange">
-                        </el-pagination>
-                    </div>
-                </div>
-                <div style="width:100%; height:400px;">
-                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:0; padding-right:5px; float:left; box-sizing:border-box;">
-                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
-                            <div class="total-number" style="width:100%; height:100%;"></div>
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="width:100%; height:240px; padding:0 10px; box-sizing:border-box;">
+                        <div style="height:100%; width:33.333%; float:left; padding:20px 10px 20px 10px; box-sizing:border-box;">
+                            <div style="width:100%; height:100%; box-sizing:border-box; position:relative; border-radius:5px; overflow:hidden; background-color:#91acc1;">
+                                <div style="width:38.02%; height:100%; background-color:#87a1b8; display:table;">
+                                    <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                        <span class="feather-icon-user-plus" style="font-size:80px; font-weight:900; color:#99b8d3; -webkit-font-smoothing:antialiased; -webkit-text-stroke-width:.2px;"></span>
+                                    </div>
+                                </div>
+                                <div style="position:absolute; left:38.02%; top:0; right:0; bottom:0; background-color:#91acc1;">
+                                    <div style="width:100%; height:100%; display:table;">
+                                        <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                            <span>
+                                                <div style="font-size:16px; font-weight:900; color:#fff; margin-bottom:10px;">已参会总人数</div>
+                                                <div style="font-size:30px; font-weight:900; color:#fff;">{{totalNumber.value}}人</div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height:100%; width:33.333%; float:left; padding:20px 10px 20px 10px; box-sizing:border-box;">
+                            <div style="width:100%; height:100%; box-sizing:border-box; position:relative; border-radius:5px; overflow:hidden; background-color:#b4d9a5;">
+                                <div style="width:38.02%; height:100%; background-color:#a9ce9a; display:table;">
+                                    <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                        <span class="feather-icon-clipboard" style="font-size:80px; font-weight:900; color:#c2e4b1;"></span>
+                                    </div>
+                                </div>
+                                <div style="position:absolute; left:38.02%; top:0; right:0; bottom:0; background-color:#b4d9a5;">
+                                    <div style="width:100%; height:100%; display:table;">
+                                        <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                            <span>
+                                                <div style="font-size:16px; font-weight:900; color:#fff; margin-bottom:10px;">已开会总次数</div>
+                                                <div style="font-size:30px; font-weight:900; color:#fff;">{{totalTimes.value}}次</div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height:100%; width:33.333%; float:left; padding:20px 10px 20px 10px; box-sizing:border-box;">
+                            <div style="width:100%; height:100%; box-sizing:border-box; position:relative; border-radius:5px; overflow:hidden; background-color:#daa37c;">
+                                <div style="width:38.02%; height:100%; background-color:#ce9a90; display:table;">
+                                    <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                        <span class="feather-icon-clock" style="font-size:80px; font-weight:900; color:#e8b694;"></span>
+                                    </div>
+                                </div>
+                                <div style="position:absolute; left:38.02%; top:0; right:0; bottom:0; background-color:#daa37c;">
+                                    <div style="width:100%; height:100%; display:table;">
+                                        <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                                            <span>
+                                                <div style="font-size:16px; font-weight:900; color:#fff; margin-bottom:10px;">已开会总时长</div>
+                                                <div style="font-size:30px; font-weight:900; color:#fff;">{{totalDuration.value}}</div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:5px; padding-right:5px; float:left; box-sizing:border-box;">
-                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
-                            <div class="total-times" style="width:100%; height:100%;"></div>
+                    <div style="width:100%; border:1px solid #F2F3F7; border-radius:5px; padding:10px; box-sizing:border-box;">
+                        <div style="width:50%; height:350px; float:left;">
+                            <div class="per-number" style="width:100%; height:100%;"></div>
+                        </div>
+                        <div style="width:50%; height:350px; float:left;">
+                            <div class="per-duration" style="width:100%; height:100%;"></div>
+                        </div>
+                        <div style="clear:both;"></div>
+                        <div style="height:60px; width:100%; text-align:center;">
+                            <el-pagination
+                                    background
+                                    layout="total, prev, pager, next, jumper, sizes"
+                                    :page-size="page.pageSize"
+                                    :current-page="page.currentPage"
+                                    :page-sizes="page.pageSizes"
+                                    :total="page.total"
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange">
+                            </el-pagination>
                         </div>
                     </div>
-                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-right:0; padding-left:5px; float:left; box-sizing:border-box;">
-                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
-                            <div class="total-duration" style="width:100%; height:100%;"></div>
+                    <!--<div style="width:100%; height:400px;">
+                        <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:0; padding-right:5px; float:left; box-sizing:border-box;">
+                            <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                                <div class="total-number" style="width:100%; height:100%;"></div>
+                            </div>
                         </div>
-                    </div>
+                        <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:5px; padding-right:5px; float:left; box-sizing:border-box;">
+                            <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                                <div class="total-times" style="width:100%; height:100%;"></div>
+                            </div>
+                        </div>
+                        <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-right:0; padding-left:5px; float:left; box-sizing:border-box;">
+                            <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                                <div class="total-duration" style="width:100%; height:100%;"></div>
+                            </div>
+                        </div>
+                    </div>-->
                 </div>
             </el-main>
         </el-container>

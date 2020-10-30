@@ -461,7 +461,15 @@ export default {
             type: 'error'
           })
         } else {
-          this.roles = res.roles
+          for (let i = 0; i < res.roles.length; i++) {
+            const item = res.roles[i];
+            if (item.id == 7 || item.id == 4) {
+
+            } else {
+              this.roles.push(item)
+            }
+
+          }
         }
 
         this.roleTableLoading = false

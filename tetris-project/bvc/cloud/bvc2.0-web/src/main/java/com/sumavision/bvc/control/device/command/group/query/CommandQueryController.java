@@ -1253,16 +1253,4 @@ public class CommandQueryController {
 		return privilegesWapper;
 	}
 	
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/query/all/privilege")
-	public Object queryAllPrivilege(HttpServletRequest request) throws Exception{
-		
-		Long userId = userUtils.getUserIdFromSession(request);
-		
-		Map<String, List<com.suma.venus.resource.service.ResourceService.Relation>> privileges = resourceService.hasPrivilegesOfAll(userId,null);
-		
-		return privileges;
-	}
-	
 }

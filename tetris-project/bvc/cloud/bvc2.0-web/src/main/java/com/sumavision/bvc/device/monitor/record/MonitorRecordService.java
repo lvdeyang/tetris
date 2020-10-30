@@ -23,15 +23,16 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.system.dao.CommandSystemTitleDAO;
-import com.sumavision.bvc.command.system.po.CommandSystemTitlePO;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.group.bo.AapAlarmBO;
+import com.sumavision.bvc.device.group.bo.AlarmBO;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
+import com.sumavision.bvc.device.group.bo.CycleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
-import com.sumavision.bvc.device.group.bo.RecordCycleBO;
 import com.sumavision.bvc.device.group.bo.RecordDateTimeBO;
 import com.sumavision.bvc.device.group.bo.RecordSetBO;
 import com.sumavision.bvc.device.group.bo.RecordSourceBO;
@@ -185,6 +186,8 @@ public class MonitorRecordService {
 	 *            userno 操作业务用户名称
 	 * @param String
 	 *            nickname 操作业务用户昵称
+	 * @param Long total_size_mb 此任务可占用的磁盘大小，单位兆，0代表无限大。
+	 * @param Long time_duration 此任务可录制的时长，单位：小时，0代表物无限长
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addDevice(String mode, String fileName, String startTime, String endTime,
@@ -194,7 +197,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname
+			String nickname, Long total_size_mb,Long time_duration
 	) throws Exception {
 		
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
@@ -250,6 +253,8 @@ public class MonitorRecordService {
 		task.setAudioChannelId(audioChannelId);
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
+		task.setTotal_size_mb(total_size_mb);
+		task.setTime_duration(time_duration);
 		
 		//设置所属任务
 		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
@@ -267,15 +272,6 @@ public class MonitorRecordService {
 			status = MonitorRecordStatus.RUN;
 		} else if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			status = MonitorRecordStatus.WAITING;
-		} else if(MonitorRecordMode.CYCLE.equals(parsedMode)){
-			SystemConfigurationPO configuration=systemConfigurationDao.findByTotalSizeMbNotNull();
-			if(configuration==null){
-				throw new BaseException(StatusCode.FORBIDDEN, "还没有设置磁盘大小");
-			}
-			Integer totalSizeMb =configuration.getTotalSizeMb();
-			
-			status = MonitorRecordStatus.RUN;
-			task.setTotalSizeMb(totalSizeMb);
 		} else {
 			throw new ErrorRecordModeException(mode);
 		}
@@ -344,6 +340,8 @@ public class MonitorRecordService {
 	 * @param String nickname 操作业务用户昵称
 	 * @param String storeMode 排期存储模式//day、week、year
 	 * @param String timeQuantum 不同排期模式对应的时间选择
+	 * @param Long total_size_mb 此任务可占用的磁盘大小，单位兆，0代表无限大。
+	 * @param Long time_duration 此任务可录制的时长，单位：小时，0代表物无限长
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addDeviceTimeSegment(
@@ -372,7 +370,8 @@ public class MonitorRecordService {
 			String nickname,
 			String storeMode,
 			String timeQuantum,
-			Integer totalSizeMb
+			Long total_size_mb, 
+			Long time_duration
 			) throws Exception{
 
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
@@ -425,7 +424,7 @@ public class MonitorRecordService {
 		task.setAudioBaseType(audioBaseType);
 		task.setAudioChannelName(audioChannelName);
 		
-		task.setStatus(MonitorRecordStatus.WAITING);
+		task.setStatus(MonitorRecordStatus.RUN);
 		
 		task.setType(bLdap?MonitorRecordType.XT_DEVICE:MonitorRecordType.LOCAL_DEVICE);
 		task.setUserId(userId);
@@ -433,7 +432,8 @@ public class MonitorRecordService {
 		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
-		task.setTotalSizeMb(totalSizeMb);
+		task.setTotal_size_mb(total_size_mb);
+		task.setTime_duration(time_duration);
 		
 		//设置所属任务
 		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
@@ -586,7 +586,7 @@ public class MonitorRecordService {
 		
 		//下命令
 		LogicBO logic = openBundle(task, codec);
-		logic.merge(startManyTimesRecord(task,relation,codec,totalSizeMb));
+		logic.merge(startManyTimesRecord(task,relation,codec));
 		sendProtocol(task, logic, bLdap?"点播系统：开始排期录制外部系统设备":"点播系统：开始排期录制本地设备");
 		
 		operationLogService.send(userUtils.queryUserById(userId).getName(), "添加排期录制", "添加排期录制任务文件名称："+fileName);
@@ -1250,15 +1250,13 @@ public class MonitorRecordService {
 				.setLayer_id(task.getVideoLayerId()).setChannel_id(task.getVideoChannelId());
 		recordSet.setVideo_source(videoSource);
 		
-		//定时，循环额外添加
+		//额外添加
+		recordSet.setCycle(new CycleBO().setTime_duration(task.getTime_duration()).setTotal_size_mb(task.getTotal_size_mb()))
+				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getTotal_size_mb())))
+				 .setStore_mode(task.getMode().getCode());
 		if(MonitorRecordMode.SCHEDULING.equals(task.getMode())){
 			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattenWithoutSecind))
-														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)))
-														.setStore_mode(task.getMode().getCode());
-		}else if(MonitorRecordMode.CYCLE.equals(task.getMode())){
-			recordSet.setCycle(new RecordCycleBO().setTotal_size_mb(task.getTotalSizeMb() *1024)).setStore_mode(task.getMode().getCode());
-		}else if(MonitorRecordMode.MANUAL.equals(task.getMode())){
-			recordSet.setStore_mode(task.getMode().getCode());
+														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)));
 		}
 		//额外添加结束
 		
@@ -1282,7 +1280,7 @@ public class MonitorRecordService {
 	 * @return
 	 * @throws Exception
 	 */
-	private LogicBO startManyTimesRecord(MonitorRecordPO task,MonitorRecordManyTimesRelationPO relation, CodecParamBO codec,Integer totalSizeMb) throws Exception {
+	private LogicBO startManyTimesRecord(MonitorRecordPO task,MonitorRecordManyTimesRelationPO relation, CodecParamBO codec) throws Exception {
 
 		LogicBO logic = new LogicBO().setUserId(task.getUserId().toString());
 
@@ -1294,11 +1292,9 @@ public class MonitorRecordService {
 		recordSet.setVideo_source(videoSource);
 		
 		//处理排期额外添加开始
-		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
-		recordSet.setCycle(new RecordCycleBO()
-				.setTotal_size_mb(totalSizeMb * 1024))
-		        .setStore_mode(task.getMode().getCode())
-		        .setTime_segment(timeSegment);;
+		recordSet.setCycle(new CycleBO().setTime_duration(task.getTime_duration()).setTotal_size_mb(task.getTotal_size_mb()))
+				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getTotal_size_mb())))
+				 .setStore_mode(task.getMode().getCode());
 		//添加结束
 		
 		if (task.getAudioBundleId() != null) {

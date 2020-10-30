@@ -104,14 +104,17 @@ define([
                     pageSizes:[10, 15, 20]
                 },
                 totalNumber:{
+                    value:0,
                     $el:'',
                     echarts:''
                 },
                 totalTimes:{
+                    value:0,
                     $el:'',
                     echarts:''
                 },
                 totalDuration:{
+                    value:0,
                     $el:'',
                     echarts:''
                 }
@@ -167,7 +170,7 @@ define([
                         }
                     });
                 },
-                getPieOption:function(title, unit, data){
+                /*getPieOption:function(title, unit, data){
                     return {
                         title:{
                             text:title
@@ -193,20 +196,23 @@ define([
                             }
                         ]
                     }
-                },
+                },*/
                 renderPie:function(){
                     var self = this;
-                    self.totalNumber.$el = $('#page-bvc-statistics-wrapper .total-number')[0];
+                    /*self.totalNumber.$el = $('#page-bvc-statistics-wrapper .total-number')[0];
                     self.totalNumber.echarts = echarts.init(self.totalNumber.$el);
 
                     self.totalTimes.$el = $('#page-bvc-statistics-wrapper .total-times')[0];
                     self.totalTimes.echarts = echarts.init(self.totalTimes.$el);
 
                     self.totalDuration.$el = $('#page-bvc-statistics-wrapper .total-duration')[0];
-                    self.totalDuration.echarts = echarts.init(self.totalDuration.$el);
+                    self.totalDuration.echarts = echarts.init(self.totalDuration.$el);*/
 
                     ajax.post('/device/group/proceed/record/statistics/total/of/record/time/people', null, function(data){
-                        var totalNumberOption = self.getPieOption('总入会人数：10000人', '人', [
+                        self.totalNumber.value = data.totalPeople;
+                        self.totalTimes.value = data.totalProceedRecord;
+                        self.totalDuration.value = Date.prototype.formatSeconds(data.time);
+                        /*var totalNumberOption = self.getPieOption('总入会人数：10000人', '人', [
                             {value:data.totalPeople, name:'已入会人数'},
                             {value:10000-data.totalPeople, name:'剩余入会人数'}
                         ]);
@@ -223,7 +229,7 @@ define([
                         totalDurationOption.tooltip.formatter = function(params){
                             return params.data.name + '：'+Date.prototype.formatSeconds(params.data.value)+' ('+params.percent+'%)';
                         };
-                        self.totalDuration.echarts.setOption(totalDurationOption);
+                        self.totalDuration.echarts.setOption(totalDurationOption);*/
                     });
                 }
             },

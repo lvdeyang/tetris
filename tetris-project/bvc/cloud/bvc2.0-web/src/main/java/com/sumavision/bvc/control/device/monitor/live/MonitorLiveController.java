@@ -930,17 +930,19 @@ public class MonitorLiveController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月27日 上午10:03:40
 	 * @param @PathVariable Long id 点播设备任务id
+	 * @param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/device/{id}")
 	public Object stopLiveDevice(
 			@PathVariable Long id,
+			Boolean stopAndDelete,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno());
+		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno(), stopAndDelete);
 		
 		return null;
 	}
@@ -1014,4 +1016,24 @@ public class MonitorLiveController {
 		return prop.getProperty("udpPortStart");
 	}
 	
+	/**
+	 * 停止转发重新开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月28日 上午11:28:22
+	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/to/restart")
+	public Object stopToRestart(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		MonitorLiveDevicePO entity = monitorLiveDeviceService.stopToRestart(id, user);
+		
+		return new MonitorLiveDeviceVO().set(entity);
+	}
 }

@@ -115,7 +115,6 @@ define([
           self.totleForword = currentTotle;
           self.tableCurrgenData = self.tableList[self.activeName];
           self.table.page.total = self.tableList[self.activeName].length;
-          console.log(self.tableList[self.activeName].length)
           // self.getCapacity()
           // self.table.page.total = self.selfForwordList.length;
         });
@@ -156,7 +155,6 @@ define([
             }
             
             self.outerDataLength = outerData.length;
-            console.log(outerData.length,'outerData.length')
             self.load(1);
             // self.getCapacity()
           }
@@ -271,6 +269,7 @@ define([
       },
       handleforwordClose: function () {
         this.dialog.forword.visible = false;
+        this.loadStation()
 
       },
       handlebandwidthClose: function () {
@@ -285,7 +284,32 @@ define([
       openBandwidth() {
         this.dialog.bandwidth.visible = true;
       },
-      
+      rowStop(scope,stopAndDelete){
+        var row=scope.row,self = this;
+        ajax.post('/monitor/live/stop/live/device/'+ row.id, {stopAndDelete:stopAndDelete}, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type':"success",
+              'message':"操作成功！"
+            })
+            self.loadStation()
+          }
+        })
+      },
+      rowStart(scope){
+        var row=scope.row
+        var self= this;
+        ajax.post('/monitor/live/stop/to/restart', {id:row.id}, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type':"success",
+              'message':"开始成功！"
+            })
+            self.loadStation()
+            
+          }
+        })
+      },
     },
     mounted: function () {
       var self = this;

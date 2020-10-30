@@ -165,11 +165,11 @@ export default {
 
       if (this.filters.oprTimeRange != undefined) {
         if (typeof (this.filters.oprTimeRange[0]) !== undefined) {
-          timeStart = util.formatDate.format(this.filters.oprTimeRange[0], 'yyyy-MM-dd hh:mm:ss')
+          timeStart = util.formatDate.format(this.filters.oprTimeRange[0], 'yyyy/MM/dd hh:mm:ss')
         };
 
         if (typeof (this.filters.oprTimeRange[1]) !== undefined) {
-          timeEnd = util.formatDate.format(this.filters.oprTimeRange[1], 'yyyy-MM-dd hh:mm:ss')
+          timeEnd = util.formatDate.format(this.filters.oprTimeRange[1], 'yyyy/MM/dd hh:mm:ss')
         };
       };
 
@@ -222,12 +222,12 @@ export default {
     },
 
     dateFormat: function (row, column) {
-      var dateString = row[column.property]
+      var dateString = row[column.property].replace(/-/g, "/")
       if (dateString == undefined) {
         return ''
       }
 
-      return util.formatDate.format(new Date(Date.parse(dateString)), 'yyyy-MM-dd hh:mm:ss')
+      return util.formatDate.format(new Date(Date.parse(dateString)), 'yyyy/MM/dd hh:mm:ss')
     },
 
     // 获取操作日志详情
@@ -242,7 +242,7 @@ export default {
       json.push({ dataName: '日志类型', dataContent: this.detailForm.oprlogType })
       json.push({ dataName: '用户名', dataContent: this.detailForm.userName })
       json.push({ dataName: '操作名称', dataContent: this.detailForm.oprName })
-      json.push({ dataName: '操作时间', dataContent: util.formatDate.formatString(this.detailForm.oprTime, 'yyyy-MM-dd hh:mm:ss') })
+      json.push({ dataName: '操作时间', dataContent: util.formatDate.formatString(this.detailForm.oprTime, 'yyyy/MM/dd hh:mm:ss') })
       json.push({ dataName: '操作详情', dataContent: this.detailForm.oprDetail })
       json.push({ dataName: '来源服务', dataContent: this.detailForm.sourceService })
       json.push({ dataName: '来源IP', dataContent: this.detailForm.ip })

@@ -86,7 +86,7 @@
         window.SESSIONID = '<%=sessionId%>';
     </script>
 
-    <title>媒体融合平台</title>
+    <title>视频监控平台</title>
 </head>
 <body>
     <div id="app" v-loading.fullscreen.lock="loading">

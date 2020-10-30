@@ -15,12 +15,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
-import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.device.group.bo.AudioParamBO;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -51,6 +49,7 @@ import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistExcepti
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskDAO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskPO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskService;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.system.dao.AVtplGearsDAO;
@@ -573,15 +572,70 @@ public class MonitorLiveDeviceService {
 			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
 		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
-			stopXtSeeLocal(live, userId, userno);
+			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){
-			stopLocalSeeXt(live, userId, userno);
+			stopLocalSeeXt(live, userId, userno, null);
 		}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
-			stopLocalSeeLocal(live, userId, userno);
+			stopLocalSeeLocal(live, userId, userno, null);
 		}else if(LiveType.XT_XT.equals(live.getType())){
-			stopXtSeeXt(live, userId, userno);
+			stopXtSeeXt(live, userId, userno, null);
 		}
 		operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
+	}
+	
+	/**
+	 * 停止点播设备<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 下午2:46:51
+	 * @param Long liveId 点播任务id
+	 * @param Long userId 发起用户id
+	 * @param String userno 发起用户号码
+	 * @param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
+	 */
+	public void stop(Long liveId, Long userId, String userno, Boolean stopAndDelete) throws Exception{
+		
+		MonitorLiveDevicePO live = monitorLiveDeviceDao.findOne(liveId);
+		if(live == null) return;
+		UserVO userVO = userQuery.current();
+		if(userId.longValue() == 1l || userVO.getIsGroupCreator()){
+			//admin操作转换
+			userId = live.getUserId();
+			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
+			userno = user.getUserNo();
+		}
+		if(!live.getUserId().equals(userId)){
+			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
+		}
+		
+		if(stopAndDelete == null){
+			if(LiveType.XT_LOCAL.equals(live.getType())){
+				stopXtSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_XT.equals(live.getType())){
+				stopLocalSeeXt(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
+				stopLocalSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.XT_XT.equals(live.getType())){
+				stopXtSeeXt(live, userId, userno, stopAndDelete);
+			}
+			
+			operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
+		}else if(Boolean.TRUE.equals(stopAndDelete)){
+			
+			if(LiveType.XT_LOCAL.equals(live.getType())){
+				stopXtSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_XT.equals(live.getType())){
+				stopLocalSeeXt(live, userId, userno, stopAndDelete);
+			}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
+				stopLocalSeeLocal(live, userId, userno, stopAndDelete);
+			}else if(LiveType.XT_XT.equals(live.getType())){
+				stopXtSeeXt(live, userId, userno, stopAndDelete);
+			}
+		}else{
+			monitorLiveDeviceDao.delete(live);
+			
+		}
+		
 	}
 	
 	/**
@@ -606,13 +660,13 @@ public class MonitorLiveDeviceService {
 			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveUuid);
 		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
-			stopXtSeeLocal(live, userId, userno);
+			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){
-			stopLocalSeeXt(live, userId, userno);
+			stopLocalSeeXt(live, userId, userno, null);
 		}else if(LiveType.LOCAL_LOCAL.equals(live.getType())){
-			stopLocalSeeLocal(live, userId, userno);
+			stopLocalSeeLocal(live, userId, userno, null);
 		}else if(LiveType.XT_XT.equals(live.getType())){
-			stopXtSeeXt(live, userId, userno);
+			stopXtSeeXt(live, userId, userno, null);
 		}
 	}
 	
@@ -625,7 +679,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopXtSeeLocal(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopXtSeeLocal(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		//本地编码器
 		BundlePO localEncoder = bundleDao.findByBundleId(live.getVideoBundleId());
@@ -659,7 +713,9 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(Boolean.TRUE.equals(stopAndDelete)){
+			monitorLiveDeviceDao.delete(live);
+		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
@@ -676,7 +732,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopLocalSeeLocal(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopLocalSeeLocal(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		AvtplPO targetAvtpl = avtplDao.findOne(live.getAvTplId());
 		AvtplGearsPO targetGear = avtplGearsDao.findOne(live.getGearId());
@@ -688,7 +744,12 @@ public class MonitorLiveDeviceService {
 		
 		LogicBO logic = closeBundle(live);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(stopAndDelete == null){
+			monitorLiveDeviceDao.delete(live);
+		}if(Boolean.TRUE.equals(stopAndDelete)){
+			live.setStatus(MonitorRecordStatus.STOP);
+			monitorLiveDeviceDao.save(live);
+		}
 		
 		executeBusiness.execute(logic, "点播系统：停止本地点播本地设备任务");
 	}
@@ -702,7 +763,7 @@ public class MonitorLiveDeviceService {
 	 * @param Long userId 发起用户id
 	 * @param String userno 发起用户号码
 	 */
-	public void stopLocalSeeXt(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopLocalSeeXt(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 		//xt编码器
 		BundlePO xtEncoder = bundleDao.findByBundleId(live.getVideoBundleId().indexOf("_")>=0?live.getVideoBundleId().split("_")[0]:live.getVideoBundleId());
@@ -737,7 +798,9 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		monitorLiveDeviceDao.delete(live);
+		if(Boolean.TRUE.equals(stopAndDelete)){
+			monitorLiveDeviceDao.delete(live);
+		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
@@ -751,7 +814,7 @@ public class MonitorLiveDeviceService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月19日 下午2:40:01
 	 */
-	public void stopXtSeeXt(MonitorLiveDevicePO live, Long userId, String userno) throws Exception{
+	public void stopXtSeeXt(MonitorLiveDevicePO live, Long userId, String userno, Boolean stopAndDelete) throws Exception{
 		
 	}
 	
@@ -940,7 +1003,11 @@ public class MonitorLiveDeviceService {
 		List<MonitorLiveDevicePO> deviceLives = monitorLiveDeviceDao.findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId);
 		if(deviceLives!=null && deviceLives.size()>0){
 			for(MonitorLiveDevicePO deviceLive:deviceLives){
-				stop(deviceLive.getId(), userId, userno);
+				if(MonitorRecordStatus.STOP.equals(deviceLive.getStatus())){
+					
+				}else{
+					stop(deviceLive.getId(), userId, userno);
+				}
 			}
 		}
 		
@@ -1299,4 +1366,50 @@ public class MonitorLiveDeviceService {
 		return logic;
 	}
 	
+	/**
+	 * 停止转发重新开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月28日 上午11:37:29
+	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 * @param userId 业务用户
+	 * @throws Exception 
+	 */
+	public MonitorLiveDevicePO stopToRestart(Long id, com.sumavision.bvc.control.welcome.UserVO user) throws Exception{
+		
+		MonitorLiveDevicePO live = monitorLiveDeviceDao.findOne(id);
+		
+		if(live == null){
+			return live;
+		}
+		
+		authorize(live.getVideoBundleId(), live.getAudioBundleId(), user.getId());
+		
+		//参数模板
+		Map<String, Object> result = commons.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		CodecParamBO codec = playerCodec;
+		
+		//字幕
+		MonitorOsdPO osd = monitorOsdDao.findOne(live.getOsdId()==null?0:live.getOsdId());
+		
+		//处理业务覆盖
+		coverBusiness(live.getDstVideoBundleId(), live.getDstVideoChannelId(), live.getDstAudioBundleId(), live.getDstAudioChannelId(), user.getId(), user.getUserno());
+		
+		//视频源和目的
+		BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId());
+		BundlePO dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
+		
+		live.setStatus(MonitorRecordStatus.RUN);
+		
+		monitorLiveDeviceDao.save(live);
+		
+		LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, user.getId(), false, live.getUdpUrl());
+		
+		executeBusiness.execute(logic, "点播系统：重新开始点播设备");
+		
+		return live;
+	}
 }
