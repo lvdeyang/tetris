@@ -19,18 +19,26 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, MonitorLiveDevicePO>{
 
 	private String udpUrl;
+	
+	private String videoBundleId;
 
 	private String videoBundleName;
 	
 	private String videoChannelName;
 	
+	private String audioBundleId;
+	
 	private String audioBundleName;
 	
 	private String audioChannelName;
 	
+	private String dstVideoBundleId;
+	
 	private String dstVideoBundleName;
 	
 	private String dstVideoChannelName;
+	
+	private String dstAudioBundleId;
 	
 	private String dstAudioBundleName;
 	
@@ -53,6 +61,42 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 	/** RUN代表在执行，STOP表示停止*/
 	private String status;
 	
+	public String getVideoBundleId() {
+		return videoBundleId;
+	}
+
+	public MonitorLiveDeviceVO setVideoBundleId(String videoBundleId) {
+		this.videoBundleId = videoBundleId;
+		return this;
+	}
+
+	public String getAudioBundleId() {
+		return audioBundleId;
+	}
+
+	public MonitorLiveDeviceVO setAudioBundleId(String audioBundleId) {
+		this.audioBundleId = audioBundleId;
+		return this;
+	}
+
+	public String getDstVideoBundleId() {
+		return dstVideoBundleId;
+	}
+
+	public MonitorLiveDeviceVO setDstVideoBundleId(String dstVideoBundleId) {
+		this.dstVideoBundleId = dstVideoBundleId;
+		return this;
+	}
+
+	public String getDstAudioBundleId() {
+		return dstAudioBundleId;
+	}
+
+	public MonitorLiveDeviceVO setDstAudioBundleId(String dstAudioBundleId) {
+		this.dstAudioBundleId = dstAudioBundleId;
+		return this;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -214,7 +258,11 @@ public class MonitorLiveDeviceVO extends AbstractBaseVO<MonitorLiveDeviceVO, Mon
 			.setOsdName("-")
 			.setOsdUsername("-")
 			.setType(entity.getDstDeviceType()==null?"":entity.getDstDeviceType().getName())
-			.setStatus(entity.getStatus()==null?"":(entity.getStatus().toString().equals("RUN")?"运行中":"已停止"));
+			.setStatus(entity.getStatus()==null?"":(entity.getStatus().toString().equals("RUN")?"运行中":"已停止"))
+			.setAudioBundleId(entity.getAudioBundleId()==null?"-":entity.getAudioBundleId())
+			.setVideoBundleId(entity.getVideoBundleId()==null?"-":entity.getVideoBundleId())
+			.setDstAudioBundleId(entity.getDstAudioBundleId()==null?"-":entity.getDstAudioBundleId())
+			.setDstVideoBundleId(entity.getDstVideoBundleId()==null?"-":entity.getDstVideoBundleId());
 		return this;
 	}
 	
