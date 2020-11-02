@@ -7,7 +7,9 @@ public enum PropertyValueType {
 	TEXT("文本"),
 	BOOLEAN("布尔值"),
 	ENUM("枚举"),
-	IP("ip地址");
+	IP("ip地址"),
+	DBIP("数据库IP"),
+	DBPORT("数据库端口");
 	
 	private String name;
 	

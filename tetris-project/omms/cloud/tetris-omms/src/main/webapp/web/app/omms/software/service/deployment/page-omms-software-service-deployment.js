@@ -71,12 +71,47 @@ define([
                         properties:[],
                         loading:false
                     },
+                    updateStep:{
+                        visible:false,
+                        active:0,
+                        interval:'',
+                        currentDeployment:'',
+                        properties:[],
+                        loading:false,
+                        updatePackageId:0
+                    },
                     editProperties:{
                         visible:false,
                         properties:[],
                         loading:false
+                    },
+                    backups:{
+                        visible:false,
+                        backupData:[]
+                    },
+                    updatePackages:{
+                        visible:false,
+                        name:'',
+                        version:'',
+                        updatePackagesData:[]
+                    },
+                    addBackup:{
+                        visible:false,
+                        isBackup:true,
+                        notes:""
+                    },
+                    uninstallService:{
+                        visible:false,
+                        type:"uninstall",
+                        row:{},
+                        notes:""
+                    },
+                    modifyParameters:{
+                        visible:false,
+                        properties:[]
                     }
                 }
+
             },
             computed:{
 
@@ -111,7 +146,7 @@ define([
                         if(rows && rows.length>0){
                             for(var i = 0;i<rows.length;i++){
                                 rows[i].popvisible = false;
-                                self.table.rows.push(rows[i])
+                                self.table.rows.push(rows[i]);
                             }
                             self.table.total = total;
                         }
@@ -212,6 +247,8 @@ define([
                                 data[i].value = data[i].propertyDefaultValue;
                                 if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                 self.dialog.selectInstallationPackage.list.data.push(data[i]);
+                                //self.dialog.installPackages.installPackagesData.push(data[i]);
+
                             }
                         }
                     });
@@ -236,6 +273,18 @@ define([
                     self.dialog.step.properties.splice(0, self.dialog.step.properties.length);
                     self.dialog.step.loading = false;
                     self.dialog.step.visible = false;
+                },
+                handleUpdateStepClose:function(){
+                    var self = this;
+                    self.dialog.updateStep.active = 0;
+                    if(self.dialog.updateStep.interval){
+                        clearInterval(self.dialog.updateStep.interval);
+                    }
+                    self.dialog.updateStep.interval = '';
+                    self.dialog.updateStep.currentDeployment = '';
+                    self.dialog.updateStep.properties.splice(0, self.dialog.updateStep.properties.length);
+                    self.dialog.updateStep.loading = false;
+                    self.dialog.updateStep.visible = false;
                 },
                 handleInstall:function(){
                     var self = this;
@@ -263,26 +312,59 @@ define([
                         if(status !== 200){
                             return;
                         }
+                        self.load(self.table.currentPage);
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
-                editDeployment:function(scope){
+                restart:function(p){
                     var self = this;
-                    var row = scope.row;
+                    ajax.post('/service/deployment/restart', {
+                        deploymentId: p.serviceDeploymentId,
+                        processId: p.processId
+                    }, function(data, status, message){
+                        self.load(self.table.currentPage);
+                        /*if(status === 200){
+                            self.status = false;
+                        }*/
+                        /*if(status !== 200){
+                            self.$message({
+                                type:'error',
+                                message:message
+                            });
+                            return;
+                        }
+                        setTimeout(function(){
+                            self.dialog.step.active = 3;
+                        }, 1000);
+                        if(status !== 200){
+                            return;
+                        }*/
+                    }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 deploymentStatus:function(scope){
                     var self = this;
                     var row = scope.row;
                 },
-                handleRowDelete:function(scope){
+                handleDelete:function(scope){
                     var self = this;
                     var row = scope.row;
+                    self.dialog.uninstallService.row = row;
+                    self.dialog.uninstallService.visible = true;
+                },
+                handleUninstallServiceClose:function(){
+                    var self = this;
+                    self.dialog.uninstallService.visible = false;
+                    self.dialog.uninstallService.type = "uninstall";
+                },
+                handleRowDelete:function(){
+                    var self = this;
+                    var row = self.dialog.uninstallService.row;
                     var h = self.$createElement;
                     self.$msgbox({
                         title:'危险操作',
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将卸载改服务，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将卸载该服务，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -293,20 +375,27 @@ define([
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
                                 ajax.post('/service/deployment/uninstall', {
-                                    deploymentId:row.id
+                                    deploymentId:row.id,
+                                    type:self.dialog.uninstallService.type,
+                                    notes:self.dialog.uninstallService.notes
                                 }, function(data, status){
                                     instance.confirmButtonLoading = false;
                                     if(status !== 200) return;
-                                    for(var i=0; i<self.table.rows.length; i++){
-                                        if(self.table.rows[i].id === row.id){
-                                            self.table.rows.splice(i, 1);
-                                            break;
+                                    if(self.dialog.uninstallService.type === "delete"){
+                                        for(var i=0; i<self.table.rows.length; i++){
+                                            if(self.table.rows[i].id === row.id){
+                                                self.table.rows.splice(i, 1);
+                                                break;
+                                            }
                                         }
                                     }
                                     self.table.total -= 1;
                                     if(self.table.total>0 && self.table.rows.length===0){
                                         self.load(self.table.currentPage - 1);
                                     }
+                                    self.load(self.table.currentPage);
+                                    self.dialog.uninstallService.notes = "";
+                                    self.dialog.uninstallService.visible = false;
                                     done();
                                 }, null, ajax.NO_ERROR_CATCH_CODE);
                             }else{
@@ -315,6 +404,179 @@ define([
                             }
                         }
                     }).catch(function(){});
+                },
+                gotoBackup:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    window.location.hash = '#/page-omms-software-service-backup/' + row.id + '/' + row.name;
+                },
+                backupRestore:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.backups.backupData.splice(0, self.dialog.backups.backupData.length);
+                    ajax.post('/service/deployment/findBackup',{ deploymentId:row.id }, function(data, status, message){
+                        for(var i = 0; i < data.length; i++){
+                            self.dialog.backups.backupData.push(data[i]);
+                        }
+                        self.dialog.backups.visible = true;
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                handleSelectBackupClose:function(){
+                    var self = this;
+                    self.dialog.backups.visible = false;
+                },
+                handleSelectBackupClick:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/service/deployment/restore',{ backupId:row.id }, function(data, status, message){
+                        self.dialog.backups.visible = false;
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                selectUpdatePackages:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.updatePackages.updatePackagesData.splice(0, self.dialog.updatePackages.updatePackagesData.length);
+                    ajax.post('/installation/package/load', {
+                        serviceTypeId:row.serviceTypeId
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                if(data[i].id != row.installationPackageId){
+                                    self.dialog.updatePackages.updatePackagesData.push(data[i]);
+                                }
+                            }
+                        }
+                        self.dialog.updatePackages.visible = true;
+                    });
+                },
+                handleSelectUpdatePackageClose:function(){
+                    var self = this;
+                    self.dialog.updatePackages.visible = false;
+                },
+                handleSelectUpdatePackageSubmit:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.updatePackages.name = row.fileName;
+                    self.dialog.updatePackages.version = row.version;
+                    self.dialog.updateStep.visible = true;
+                    self.dialog.updateStep.updatePackageId = row.id;
+                    ajax.post('/service/deployment/upload',{
+                        serverId:self.serverId,
+                        installationPackageId:row.id
+                    }, function(data){
+                        //self.table.rows.push(data);
+                        //self.table.total += 1;
+                        self.dialog.updateStep.currentDeployment = data;
+                        self.dialog.updateStep.interval = setInterval(function(){
+                            ajax.post('/service/deployment/query/upload/status', {
+                                serviceDeploymentId:self.dialog.updateStep.currentDeployment.id
+                            }, function(data){
+                                for(var i=0; i<self.table.rows.length; i++){
+                                    if(self.table.rows[i].id == data.id){
+                                        self.table.rows.splice(i, 1, data);
+                                        break;
+                                    }
+                                }
+                                self.dialog.updateStep.currentDeployment = data;
+                                if(self.dialog.updateStep.currentDeployment.error){
+                                    clearInterval(self.dialog.updateStep.interval);
+                                }else if(self.dialog.updateStep.currentDeployment.step == 'CONFIG'){
+                                    clearInterval(self.dialog.updateStep.interval);
+                                    self.dialog.updateStep.properties.splice(0, self.dialog.updateStep.properties.length);
+                                    ajax.post('/properties/find/by/installation/package/id', {
+                                        installationPackageId:row.id
+                                    }, function(data){
+                                        setTimeout(function(){
+                                            self.dialog.updateStep.active = 1;
+                                        }, 1000);
+                                        if(data && data.length>0){
+                                            for(var i=0; i<data.length; i++){
+                                                data[i].value = data[i].propertyDefaultValue;
+                                                if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
+                                                self.dialog.updateStep.properties.push(data[i]);
+                                            }
+                                        }
+                                    });
+                                }
+                            })
+                        }, 1000);
+                    })
+                },
+                handleUpdate:function(){
+                    var self = this;
+                    var config = {};
+                    if(self.dialog.updateStep.properties.length > 0){
+                        for(var i=0; i<self.dialog.updateStep.properties.length; i++){
+                            config[self.dialog.updateStep.properties[i].propertyKey] = self.dialog.updateStep.properties[i].value;
+                        }
+                    }
+                    self.dialog.addBackup.visible = false;
+                    self.dialog.updateStep.active = 2;
+                    ajax.post('/service/deployment/update', {
+                        deploymentId:self.dialog.updateStep.currentDeployment.id,
+                        updatePackageId:self.dialog.updateStep.updatePackageId,
+                        config: $.toJSON(config),
+                        isBackup:self.dialog.addBackup.isBackup,
+                        notes:self.dialog.addBackup.notes
+                    }, function(data, status, message){
+                        if(status !== 200){
+                            self.$message({
+                                type:'error',
+                                message:message
+                            });
+                            return;
+                        }
+                        setTimeout(function(){
+                            self.dialog.updateStep.active = 3;
+                        }, 1000);
+                        if(status !== 200){
+                            return;
+                        }
+                        self.dialog.addBackup.isBackup = true;
+                        self.dialog.addBackup.notes = '';
+                        self.load(self.table.currentPage);
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                handleAddBackup:function(){
+                    var self = this;
+                    self.dialog.addBackup.visible = true;
+                },
+                handleAddBackupClose:function(){
+                    var self = this;
+                    self.dialog.addBackup.visible = false;
+                    self.dialog.addBackup.isBackup = false;
+                    self.dialog.addBackup.notes = '';
+                },
+                deleteDeploymentData:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/service/deployment/delete/deployment/data',{ deploymentId:row.id }, function(data, status, message){
+                        self.load(self.table.currentPage);
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                modifyParameters:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.modifyParameters.visible = true;
+                    ajax.post('/properties/find/by/deployment/id', {
+                        deploymentId:row.id
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i = 0; i < data.length; i++){
+                                data[i].value = data[i].propertyDefaultValue;
+                                if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
+                                self.dialog.modifyParameters.properties.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleModifyParametersClose:function(){
+                    var self = this;
+                    self.dialog.modifyParameters.visible = false;
+                    self.dialog.modifyParameters.properties.splice(0, self.dialog.modifyParameters.properties.length);
+                },
+                handleModifyParametersSubmit:function(){
+
                 }
             },
             mounted:function(){

@@ -57,6 +57,12 @@ public class ServerOneDimensionalDataPO extends AbstractBasePO{
 	/** 运行时间 */
 	private String upTime;
 	
+	/** CPU温度 */
+	private String temperature;
+	
+	/** 风扇转速 */
+	private Long fanspeed;
+	
 	/** 服务器id */
 	private Long serverId;
 
@@ -175,6 +181,24 @@ public class ServerOneDimensionalDataPO extends AbstractBasePO{
 
 	public void setUpTime(String upTime) {
 		this.upTime = upTime;
+	}
+	
+	@Column(name = "TEMPERATURE")
+	public String getTemperature() {
+		return temperature;
+	}
+
+	public void setTemperature(String temperature) {
+		this.temperature = temperature;
+	}
+
+	@Column(name = "FANSPEED")
+	public Long getFanspeed() {
+		return fanspeed;
+	}
+
+	public void setFanspeed(Long fanspeed) {
+		this.fanspeed = fanspeed;
 	}
 
 	@Column(name = "SERVER_ID")

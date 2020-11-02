@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
 import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryPO;
 import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryVO;
 
@@ -20,6 +21,9 @@ public class PropertiesQuery {
 	
 	@Autowired
 	public PropertiesDAO propertiesDAO;
+	
+	@Autowired
+	public ServiceDeploymentDAO serviceDeploymentDAO;
 
 	/**
 	 * 查询服务属性值类型<br/>
@@ -69,6 +73,21 @@ public class PropertiesQuery {
 	 * @return List<PropertiesVO> 参数列表
 	 */
 	public List<PropertiesVO> findByInstallationPackageId(Long installationPackageId) throws Exception{
+		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
+		return PropertiesVO.getConverter(PropertiesVO.class).convert(propertyEntities, PropertiesVO.class);
+	}
+	
+	/**
+	 * 根据部署id查询参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午2:12:26
+	 * @param deploymentId 部署id
+	 * @return
+	 * @throws Exception
+	 */
+	public List<PropertiesVO> findByDeploymentId(Long deploymentId) throws Exception{
+		Long installationPackageId = serviceDeploymentDAO.findOne(deploymentId).getInstallationPackageId();
 		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
 		return PropertiesVO.getConverter(PropertiesVO.class).convert(propertyEntities, PropertiesVO.class);
 	}
