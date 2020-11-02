@@ -142,6 +142,25 @@ public class PropertiesController {
 	}
 	
 	/**
+	 * 根据部署id查询参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午2:02:30
+	 * @param deploymentId 部署id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/deployment/id")
+	public Object findByDeploymentId(
+			Long deploymentId,
+			HttpServletRequest request) throws Exception{
+		
+		return propertiesQuery.findByDeploymentId(deploymentId);
+	}
+	/**
 	 *删除安装包版本参数<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>

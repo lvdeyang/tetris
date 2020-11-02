@@ -1,6 +1,7 @@
 package com.sumavision.tetris.omms.software.service.installation;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.repository.RepositoryDefinition;
 
@@ -18,5 +19,7 @@ public interface InstallationPackageDAO extends BaseDAO<InstallationPackagePO>{
 	 * @return List<InstallationPackagePO> 安装包列表
 	 */
 	public List<InstallationPackagePO> findByServiceTypeId(Long serviceTypeId);
+	
+	public List<InstallationPackagePO> findByIdIn(Set<Long> id);
 	
 }

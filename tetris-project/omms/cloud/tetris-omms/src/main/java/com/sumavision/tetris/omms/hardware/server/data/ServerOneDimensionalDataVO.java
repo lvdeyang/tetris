@@ -1,5 +1,6 @@
 package com.sumavision.tetris.omms.hardware.server.data;
 
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -43,6 +44,12 @@ public class ServerOneDimensionalDataVO extends AbstractBaseVO<ServerOneDimensio
 	
 	/** 运行时间 */
 	private String upTime;
+	
+	/** CPU温度 */
+	private String temperature;
+	
+	/** 风扇转速 */
+	private Long fanspeed;
 
 	public Long getMemoryTotal() {
 		return memoryTotal;
@@ -161,6 +168,24 @@ public class ServerOneDimensionalDataVO extends AbstractBaseVO<ServerOneDimensio
 		return this;
 	}
 
+	public String getTemperature() {
+		return temperature;
+	}
+
+	public ServerOneDimensionalDataVO setTemperature(String temperature) {
+		this.temperature = temperature;
+		return this;
+	}
+
+	public Long getFanspeed() {
+		return fanspeed;
+	}
+
+	public ServerOneDimensionalDataVO setFanspeed(Long fanspeed) {
+		this.fanspeed = fanspeed;
+		return this;
+	}
+
 	@Override
 	public ServerOneDimensionalDataVO set(ServerOneDimensionalDataPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -177,7 +202,9 @@ public class ServerOneDimensionalDataVO extends AbstractBaseVO<ServerOneDimensio
 			.setCpuOccupy(entity.getCpuOccupy())
 			.setSystemTime(entity.getSystemTime())
 			.setLastRebootTime(entity.getLastRebootTime())
-			.setUpTime(entity.getUpTime());
+			.setUpTime(entity.getUpTime())
+			.setTemperature(entity.getTemperature())
+			.setFanspeed(entity.getFanspeed());
 		return this;
 	}
 	
