@@ -63,7 +63,9 @@ define([
                     rxkB:'',
                     txkB:'',
                     disks:[]
-                }
+                },
+                temperature:'',
+                fanspeed:0
             },
             computed:{
 
@@ -83,6 +85,8 @@ define([
                             self.systemTime = data.oneDimensionalData.systemTime;
                             self.lastRebootTime = data.oneDimensionalData.lastRebootTime;
                             self.upTime = data.oneDimensionalData.upTime;
+                            self.temperature = data.oneDimensionalData.temperature;
+                            self.fanspeed = data.oneDimensionalData.fanspeed;
                             self.charts.cpuOccupy.setData(self.cpuOccupy);
 
                             self.memoryInfo.total = data.oneDimensionalData.memoryTotal;

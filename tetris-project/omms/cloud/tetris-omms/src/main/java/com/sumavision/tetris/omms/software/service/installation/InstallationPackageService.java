@@ -43,6 +43,9 @@ public class InstallationPackageService {
 	@Autowired
 	private Path path;
 	
+	@Autowired
+	private ProcessDAO processDAO;
+	
 	/**
 	 * 添加版本<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -116,8 +119,9 @@ public class InstallationPackageService {
 			ZipEntry configDescriptionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("config.description.json").toString());
 			if(configDescriptionFile != null){
 				List<PropertiesPO> properties = new ArrayList<PropertiesPO>();
+				List<ProcessPO> processes = new ArrayList<ProcessPO>();
 				String configDescription = FileUtil.readAsString(zipFile.getInputStream(configDescriptionFile));
-				JSONArray descriptions = JSON.parseArray(configDescription);
+				/*JSONArray descriptions = JSON.parseArray(configDescription);
 				for(int i=0; i<descriptions.size(); i++){
 					JSONObject description = descriptions.getJSONObject(i);
 					PropertiesPO property = new PropertiesPO();
@@ -131,8 +135,35 @@ public class InstallationPackageService {
 					property.setPropertyDefaultValue(description.getString("defaultValue"));
 					property.setInstallationPackageId(packageEntity.getId());
 					properties.add(property);
+				}*/
+				JSONObject jsonObject = JSONObject.parseObject(configDescription);
+				JSONArray arr1 = jsonObject.getJSONArray("config");
+				for(int i = 0; i < arr1.size(); i++){
+					JSONObject description = arr1.getJSONObject(i);
+					PropertiesPO property = new PropertiesPO();
+					property.setUpdateTime(now);
+					property.setPropertyKey(description.getString("key"));
+					property.setPropertyName(description.getString("name"));
+					property.setValueType(PropertyValueType.valueOf(description.getString("valueType").toUpperCase()));
+					if(PropertyValueType.ENUM.equals(property.getValueType())){
+						property.setValueSelect(description.getString("valueSelect"));
+					}
+					property.setPropertyDefaultValue(description.getString("defaultValue"));
+					property.setInstallationPackageId(packageEntity.getId());
+					properties.add(property);
 				}
 				propertiesDao.save(properties);
+				
+				JSONArray arr2 = jsonObject.getJSONArray("process");
+				for(int i = 0; i < arr2.size(); i++){
+					JSONObject description2 = arr2.getJSONObject(i);
+					ProcessPO process = new ProcessPO();
+					process.setProcessId(description2.getString("id"));
+					process.setProcessName(description2.getString("name"));
+					process.setInstallationPackageId(packageEntity.getId());
+					processes.add(process);
+				}
+				processDAO.save(processes);
 			}
 			
 			return new InstallationPackageVO().set(packageEntity);
