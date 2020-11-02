@@ -1,6 +1,7 @@
 package com.sumavision.bvc.control.device.group.vo.tree;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -98,6 +99,17 @@ public class TreeNodeVO {
 	private String webUrl;
 	
 	private String layerWebUrl;
+	
+	private List<TreeNodeVO> bundleList;
+
+	public List<TreeNodeVO> getBundleList() {
+		return bundleList;
+	}
+
+	public TreeNodeVO setBundleList(List<TreeNodeVO> bundleList) {
+		this.bundleList = bundleList;
+		return this;
+	}
 
 	public String getId() {
 		return id;
