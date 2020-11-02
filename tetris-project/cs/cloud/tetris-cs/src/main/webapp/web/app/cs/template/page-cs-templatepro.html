@@ -1,0 +1,195 @@
+<mi-frame id="page-cs-templatepro-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">模板节目单管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>模板节目单管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading"
+                     :element-loading-text=loadingText>
+                <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
+                            <el-button size="small" type="primary" @click="handleAddTemplatepro()">
+                                <span class="icon-plus" style="margin-right:5px;"></span>
+                                添加
+                            </el-button>
+                            <el-button size="small" type="warning" style="display: none" @click="multiDelete()">
+                                <span class="icon-trash" style="margin-right:5px;"></span>
+                                删除
+                            </el-button>
+                           
+                        </div>
+                        <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
+                            <el-table
+                                    ref="multipleTempproTable"
+                                    :data="templatepro.data"
+                                    tooltip-effect="dark"
+                                    style="width: 100%"
+                                    @selection-change="handleSelectionChange">
+                                <el-table-column type="selection" width="55"></el-table-column>
+                                <el-table-column label="开始时间" width="200" prop="startTimeStr"></el-table-column>
+                                <el-table-column label="结束时间" width="200" prop="endTimeStr"></el-table-column>
+                                <el-table-column label="类型" width="200" prop="programeType"></el-table-column>
+                                <el-table-column label="标签内容" width="200" prop="labelNames"></el-table-column>
+                                <el-table-column label="媒资内容" width="200" prop="mimsName"></el-table-column>
+                                <el-table-column label="操作">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="删除节目" placement="bottom">
+                                            <el-button type="text" icon="el-icon-delete"
+                                                       class="templateManage"
+                                                       @click="rowDelete(scope)"></el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
+                            <el-pagination
+                                    background
+                                    @size-change="handleTemplateproSizeChange"
+                                    @current-change="handleTemplateproPageCurrentChange"
+                                    :current-page="templatepro.page.currentPage"
+                                    :page-sizes="templatepro.page.sizes"
+                                    :page-size="templatepro.page.size"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="templatepro.page.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </el-card>
+        </div>
+
+        
+        <el-dialog
+                title="添加模板"
+                :visible.sync="dialog.addTemplatepro.visible"
+                width="650px"
+                :before-close="handleAddTemplateproClose">
+
+            <div style="height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                    	<el-form-item label="节目类型">
+	                    	<el-select
+	                                v-model="dialog.addTemplatepro.programeType"
+	                                placeholder="请选择类型"
+	                                style="width: 180px">
+	                            <el-option
+	                                    v-for="item in dialog.addTemplatepro.typeOptions"
+	                                    :value="item">
+	                            </el-option>
+	                        </el-select>
+                        </el-form-item>
+                        <el-form-item label="标签列表" v-if="dialog.addTemplatepro.programeType=='标签'">
+                            <el-tag
+                                    :key="simple.id"
+                                    v-for="simple in dialog.addTemplatepro.labels"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleLabelRemove(dialog.addTemplatepro.labels, simple)">
+                                {{simple.name}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small"
+                                       @click="handleSetLabelSet()"
+                                       icon="el-icon-edit"> 选择标签</el-button>
+                        </el-form-item>
+                        
+                        
+                        
+                        
+                        <el-form-item label="媒资" v-if="dialog.addTemplatepro.programeType=='媒资'">
+                            <el-tag
+                                    :key="simple.id"
+                                    v-for="simple in dialog.addTemplatepro.mims"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleMimsRemove(dialog.addTemplatepro.mims, simple)">
+                                {{simple.name}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small"
+                                       @click="handleMimsSet()"
+                                       icon="el-icon-edit"> 选择媒资</el-button>
+                        </el-form-item>
+                        <el-form-item label="开始时间">
+                            <el-date-picker
+                                    style="width:100%;"
+                                    v-model="dialog.addTemplatepro.startTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="dialog.addTemplatepro.startTime"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
+                        </el-form-item>
+                        
+                        <el-form-item label="结束时间">
+                            <el-date-picker
+                                    style="width:100%;"
+                                    v-model="dialog.addTemplatepro.endTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="dialog.addTemplatepro.endTime"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.addTemplatepro.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddTemplateproCommit"
+                           :loading="dialog.addTemplatepro.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+        
+        
+        <el-dialog
+                    title="资源选择"
+                    :visible.sync="dialog.addTemplatepro.dialog.chooseResource.visible"
+                    width="500px"
+                    append-to-body
+                    :before-close="handleChooseResourceClose">
+                <el-tree
+                        v-loading="dialog.addTemplatepro.dialog.chooseResource.tree.loading"
+                        ref="menuResourceTree"
+                        :props="dialog.addTemplatepro.dialog.chooseResource.tree.props"
+                        :data="dialog.addTemplatepro.dialog.chooseResource.tree.data"
+                        node-key="type + id"
+                        :check-strictly=false
+                        show-checkbox
+                        @check="handleMenuResourceCheckChange"
+                        :expand-on-click-node="false"
+                        default-expand-all
+                        highlight-current
+                        style="padding: 20px;max-height: 400px;overflow-y:auto">
+                        <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                              slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                     <span>{{data.name}}</span>
+                                </span>
+                        </span>
+                </el-tree>
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleChooseResourceClose">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="handleChooseResourceCommit"
+                               :loading="dialog.addTemplatepro.dialog.chooseResource.loading">确 定
+                    </el-button>
+                </span>
+            </el-dialog>
+
+            <mi-tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></mi-tag-dialog>
+    </template>
+
+</mi-frame>

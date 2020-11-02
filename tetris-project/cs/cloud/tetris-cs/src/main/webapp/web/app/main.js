@@ -43,6 +43,7 @@ require.config({
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
         'mi-compress-dialog':window.APPPATH + 'component/dialog/mims/compress/mims-compress',
+        'mi-tag-dialog': window.APPPATH + 'component/dialog/mims/tag/mims-tag',
 
         /* dialogs */
         'cs-user-dialog':window.APPPATH + 'cs/dialog/user/user-dialog',
@@ -51,7 +52,9 @@ require.config({
         'cs-area-picker':window.APPPATH + 'cs/dialog/areaPicker/area-picker-dialog',
 
         /* pages */
-        'page-cs-management':window.APPPATH + 'cs/management/page-cs-management'
+        'page-cs-management':window.APPPATH + 'cs/management/page-cs-management',
+        'page-cs-template':window.APPPATH + 'cs/template/page-cs-template',
+        'page-cs-templatepro':window.APPPATH + 'cs/template/page-cs-templatepro'
 
     },
     shim:{
