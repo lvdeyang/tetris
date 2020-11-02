@@ -1,0 +1,13 @@
+
+.templateManage{
+    margin:0;
+    font-size:18px;
+    padding:0;
+    margin-right:14px;
+    position:relative;
+    top:1px;
+}
+
+.templateManage:last-child{
+    margin-right: 0;
+}
