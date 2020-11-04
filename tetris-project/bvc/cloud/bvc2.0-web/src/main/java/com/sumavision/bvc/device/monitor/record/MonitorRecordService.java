@@ -197,7 +197,7 @@ public class MonitorRecordService {
 
 			String audioBundleId, String audioBundleName, String audioBundleType, String audioLayerId,
 			String audioChannelId, String audioBaseType, String audioChannelName, Long userId, String userno,
-			String nickname, Long total_size_mb,Long time_duration
+			String nickname, Long total_size_mb, Long time_duration,Long alarm_size_mb 
 	) throws Exception {
 		
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
@@ -255,6 +255,7 @@ public class MonitorRecordService {
 		task.setAudioChannelName(audioChannelName);
 		task.setTotal_size_mb(total_size_mb);
 		task.setTime_duration(time_duration);
+		task.setAlarm_size_mb(alarm_size_mb);
 		
 		//设置所属任务
 		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
@@ -371,7 +372,8 @@ public class MonitorRecordService {
 			String storeMode,
 			String timeQuantum,
 			Long total_size_mb, 
-			Long time_duration
+			Long time_duration,
+			Long alarm_size_mb
 			) throws Exception{
 
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
@@ -434,6 +436,7 @@ public class MonitorRecordService {
 		task.setGearId(targetGear.getId());
 		task.setTotal_size_mb(total_size_mb);
 		task.setTime_duration(time_duration);
+		task.setAlarm_size_mb(alarm_size_mb);
 		
 		//设置所属任务
 		Optional.ofNullable(commandSystemTitleDao.findByCurrentTaskEquals(true)).map(titleTask->{
@@ -1252,7 +1255,7 @@ public class MonitorRecordService {
 		
 		//额外添加
 		recordSet.setCycle(new CycleBO().setTime_duration(task.getTime_duration()).setTotal_size_mb(task.getTotal_size_mb()))
-				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getTotal_size_mb())))
+				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getAlarm_size_mb())))
 				 .setStore_mode(task.getMode().getCode());
 		if(MonitorRecordMode.SCHEDULING.equals(task.getMode())){
 			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattenWithoutSecind))
@@ -1293,7 +1296,7 @@ public class MonitorRecordService {
 		
 		//处理排期额外添加开始
 		recordSet.setCycle(new CycleBO().setTime_duration(task.getTime_duration()).setTotal_size_mb(task.getTotal_size_mb()))
-				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getTotal_size_mb())))
+				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getAlarm_size_mb())))
 				 .setStore_mode(task.getMode().getCode());
 		//添加结束
 		
