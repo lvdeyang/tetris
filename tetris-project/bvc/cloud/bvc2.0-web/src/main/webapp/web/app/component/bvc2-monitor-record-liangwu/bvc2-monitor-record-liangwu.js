@@ -46,7 +46,7 @@ define([
           deviceName: '',
           timeScope: '',
           status: 'RUN',
-          fileName:''
+          fileName: ''
         },
         dialog: {
           addRecord: {
@@ -66,8 +66,8 @@ define([
             },
             mode: 'SCHEDULING',
             fileName: '',
-            max_size:0,
-            max_time:0,
+            max_size: 0,
+            max_time: 0,
             timeScope: '',
             timing: '',
             totalSizeMb: '',
@@ -80,8 +80,9 @@ define([
             timeModeChangeText: '日',
             startTimeDisabled: false,
             bundleId: '',
-            total_size_mb:0,
-            time_duration:0
+            total_size_mb: 0,
+            time_duration: 0,
+            alarm_size_mb: ""
           },
           selectDevice: {
             visible: false,
@@ -121,8 +122,8 @@ define([
             trigger: 'blur'
           }
         },
-        pickerOptions:{
-          disabledDate:function(time){
+        pickerOptions: {
+          disabledDate: function (time) {
             return time.getTime() < Date.now() - 8.64e7;
           }
         }
@@ -145,7 +146,7 @@ define([
         var self = this;
         return self.condition.status;
       },
-      condition_fileName:function(){
+      condition_fileName: function () {
         var self = this;
         return self.condition.fileName;
       },
@@ -184,7 +185,7 @@ define([
         var self = this;
         self.load(1);
       },
-      condition_fileName:function(){
+      condition_fileName: function () {
         var self = this;
         self.load(1);
       },
@@ -242,7 +243,7 @@ define([
           mode: self.condition.mode,
           device: self.condition.device,
           status: self.condition.status,
-          fileName:self.condition.fileName,
+          fileName: self.condition.fileName,
           currentPage: currentPage,
           pageSize: self.table.page.pageSize
         };
@@ -330,7 +331,7 @@ define([
               done();
             }
           }
-        }).catch(function () {});
+        }).catch(function () { });
       },
       handleSizeChange: function (pageSize) {
         var self = this;
@@ -365,7 +366,7 @@ define([
       },
       handleAddRecord: function () {
         var self = this;
-        var params = {privilegesStr:"['RECORD','LR']",satisfyAll:false};
+        var params = { privilegesStr: "['RECORD','LR']", satisfyAll: false };
         self.dialog.addRecord.visible = true;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
         // ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
@@ -391,8 +392,9 @@ define([
           fileName: self.dialog.addRecord.fileName,
           bundleId: self.dialog.addRecord.bundleId,
           storeMode: self.dialog.addRecord.timeSegmentmode,
-          total_size_mb:self.dialog.addRecord.total_size_mb,
-          time_duration:self.dialog.addRecord.time_duration,
+          total_size_mb: self.dialog.addRecord.total_size_mb,
+          time_duration: self.dialog.addRecord.time_duration,
+          alarm_size_mb: self.dialog.addRecord.alarm_size_mb
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
@@ -499,7 +501,7 @@ define([
           }
         });
       },
-      handleReset:function(){
+      handleReset: function () {
         var self = this;
         self.condition.device = "";
         self.condition.deviceName = "";
@@ -520,12 +522,12 @@ define([
         }
         self.handleSelectDeviceClose();
       },
-      openDownload(rows) {
+      openDownload (rows) {
         this.taskId = rows.row.id;
         this.loadByDownload(rows.row.id)
         this.dialog.download.visible = true;
       },
-      handleDetail(rows) {
+      handleDetail (rows) {
         var self = this
         ajax.post('/monitor/record//detail/message/of/timesegment', {
           id: rows.id
@@ -551,7 +553,7 @@ define([
         this.dialog.detail.form.bundle = rows.videoSource;
 
       },
-      loadByDownload(id) {
+      loadByDownload (id) {
         var self = this;
         var param = {
           id: id,
@@ -569,10 +571,10 @@ define([
           self.downloadTable.data = rows;
         });
       },
-      handleDownloadClose() {
+      handleDownloadClose () {
         this.dialog.download.visible = false;
       },
-      rowDownload(row) {
+      rowDownload (row) {
         // var self = this;
         // var downloadUrl = row.downloadUrl;
         // var name = row.name;
@@ -581,12 +583,12 @@ define([
         // downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
         window.open(row.downLoadPath);
       },
-      handleDownload(row) {
+      handleDownload (row) {
         var self = this;
         ajax.post('/monitor/record/download/url/' + row.id, null, function (data) {
           var self = this;
           var downloadUrl = data.downloadUrl;
-          var name = row.fileName+".ts";
+          var name = row.fileName + ".ts";
           var startTime = 0;
           var endTime = data.duration;
           downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
@@ -599,7 +601,7 @@ define([
           // })
         });
       },
-      handleDelete(row) {
+      handleDelete (row) {
         var self = this;
         self.$confirm('此操作将永久删除该任务和该任务下所有录制文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -624,7 +626,7 @@ define([
 
         self.load(1);
       },
-      handleTotalSizeMb() {
+      handleTotalSizeMb () {
         var self = this;
         this.$prompt('请输入磁盘大小(GB)', '提示', {
           confirmButtonText: '确定',

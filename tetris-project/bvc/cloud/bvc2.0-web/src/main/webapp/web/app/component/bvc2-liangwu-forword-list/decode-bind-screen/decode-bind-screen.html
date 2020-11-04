@@ -9,7 +9,7 @@
         </el-input>
       </div>
       <div>
-        <el-tree ref="tree" :data="encodetree" node-key="id" highlight-current :expand-on-click-node="true"
+        <el-tree ref="tree" :data="decodetree" node-key="id" highlight-current :expand-on-click-node="true"
           :props="defaultProps" :default-checked-keys="checked" :default-expand-all="defaultExpandAll"
           :filter-node-method="filterNode" :render-content="renderContent" @node-expand="nodeExpand"
           @node-collapse="nodeCollapse" draggable :allow-drop="allowDrop" :allow-drag="allowDrag"
@@ -20,11 +20,19 @@
   </div>
   <div class="bvc2-auto-layout-wrapper liangwu-forword">
     <template>
-      <el-select v-model="value8" filterable placeholder="请选择" size="mini">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"
-          @change="screenSelectChange">
-        </el-option>
-      </el-select>
+      <span class="tool-bar-item">
+        <el-select size="small" v-model="layout.row" @change="rowChange">
+          <el-option v-for="rowOption in options.rowOptions" :key="rowOption.value" :label="rowOption.label"
+            :value="rowOption.value" />
+        </el-select>
+      </span>
+      <span class="tool-bar-item-times">&times;</span>
+      <span class="tool-bar-item">
+        <el-select size="small" v-model="layout.column" @change="columnChange">
+          <el-option v-for="columnOption in options.columnOptions" :key="columnOption.value" :label="columnOption.label"
+            :value="columnOption.value" />
+        </el-select>
+      </span>
     </template>
     <div class="bvc2-auto-layout-container"></div>
   </div>

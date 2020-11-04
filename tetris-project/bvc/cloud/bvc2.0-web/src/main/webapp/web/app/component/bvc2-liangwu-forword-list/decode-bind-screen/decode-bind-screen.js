@@ -1,5 +1,5 @@
 define([
-  'text!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/forword-inner-control/forword-inner-control.html',
+  'text!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/decode-bind-screen/decode-bind-screen.html',
   'restfull',
   'jquery',
   'vue',
@@ -8,16 +8,17 @@ define([
   'bvc2-dialog-single-osd',
   'bvc2-auto-layout',
   'jquery.layout.auto',
-  'css!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/forword-inner-control/forword-inner-control.css'
+  'css!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/decode-bind-screen/decode-bind-screen.css'
 ], function (tpl, ajax, $, Vue) {
 
   //组件名称
-  var pluginName = 'forword-inner-control';
+  var pluginName = 'decode-bind-screen';
   Vue.component(pluginName, {
     template: tpl,
     data: function () {
       return {
-        encodetree: [],
+        layout: '',
+        decodetree: [],
         checked: [],
         defaultExpandAll: true,
         defaultProps: {
@@ -26,19 +27,39 @@ define([
           isLeaf: 'isLeaf'
         },
         filterText: '',
-        options: [{
-          value: '1',
-          label: '屏幕1'
-        }, {
-          value: '2',
-          label: '屏幕2'
-        }, {
-          value: '3',
-          label: '屏幕3'
-        }, {
-          value: '4',
-          label: '屏幕4'
-        },],
+
+        options: {
+          columnOptions: [
+            {
+              value: 1,
+              label: 1
+            }, {
+              value: 2,
+              label: 2
+            }, {
+              value: 3,
+              label: 3
+            }, {
+              value: 4,
+              label: 4
+            }
+          ],
+          rowOptions: [
+            {
+              value: 1,
+              label: 1
+            }, {
+              value: 2,
+              label: 2
+            }, {
+              value: 3,
+              label: 3
+            }, {
+              value: 4,
+              label: 4
+            }
+          ]
+        },
         value8: ''
 
       }
@@ -58,9 +79,9 @@ define([
           satisfyAll: false
         };
         var self = this;
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
-          self.encodetree = data;
-          this.treeLoading = false;
+        ajax.post('/command/query/find/institution/tree/bundle/4/false/0', params, function (data) {
+          self.decodetree = data;
+          self.treeLoading = false;
         });
       },
       handleDragEnd (draggingNode, dropNode, dropType, ev) {
@@ -229,6 +250,51 @@ define([
         });
       },
 
+      columnChange: function (column) {
+        var layout_instance = this;
+        //获取设置前的值
+        var $container = getLayoutContainer(layout_instance.$el);
+        var oldColumn = $container['layout-auto']('queryColumn');
+        layout_instance.$confirm('此操作将清空屏幕上的配置，并且设置为：' + layout_instance.layout.row + '行' + column + '列, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          beforeClose: function (action, instance, done) {
+            if (action === 'confirm') {
+              var newLayout = $.extend(true, {}, layout_instance.layout);
+              newLayout.column = column;
+              newLayout.cellspan = [];
+              layout_instance.layout = newLayout;
+            } else if (action === 'cancel') {
+              layout_instance.layout.column = oldColumn;
+            }
+            done();
+          }
+        });
+      },
+
+      rowChange: function (row) {
+        var layout_instance = this;
+        //获取设置前的值
+        var $container = getLayoutContainer(layout_instance.$el);
+        var oldRow = $container['layout-auto']('queryRow');
+        layout_instance.$confirm('此操作将清空屏幕上的配置，并且设置为：' + row + '行' + layout_instance.layout.column + '列, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          beforeClose: function (action, instance, done) {
+            if (action === 'confirm') {
+              var newLayout = $.extend(true, {}, layout_instance.layout);
+              newLayout.row = row;
+              newLayout.cellspan = [];
+              layout_instance.layout = newLayout;
+            } else {
+              layout_instance.layout.row = oldRow;
+            }
+            done();
+          }
+        });
+      },
       saveLayout: function (config, video, websiteDraw, position, dst, roleDst, done, layout, smallScreen) {
         var _uri = '';
         if (config.__businessType === 'agenda') {
