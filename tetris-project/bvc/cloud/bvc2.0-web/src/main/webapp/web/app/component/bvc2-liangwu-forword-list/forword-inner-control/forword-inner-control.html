@@ -1,0 +1,31 @@
+<div class="forword-inner-control"
+  style="width:100%; height:95%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
+  <div class="col">
+    <div class="title">编码器</div>
+    <div class="custom-tree-container">
+      <div class="">
+        <el-input placeholder="输入关键字过滤" size="mini" clearable v-model="filterText">
+          <span slot="prefix" class="el-input__icon el-icon-search"></span>
+        </el-input>
+      </div>
+      <div>
+        <el-tree ref="tree" :data="encodetree" default-expand-all node-key="id" highlight-current
+          :expand-on-click-node="true" :props="defaultProps" :default-checked-keys="checked"
+          :default-expand-all="defaultExpandAll" :filter-node-method="filterNode" :render-content="renderContent"
+          @node-expand="nodeExpand" @node-collapse="nodeCollapse" draggable :allow-drop="allowDrop"
+          :allow-drag="allowDrag" @node-drag-start="handleDragStart">
+        </el-tree>
+      </div>
+    </div>
+  </div>
+  <div class="bvc2-auto-layout-wrapper liangwu-forword">
+    <template>
+      <el-select v-model="value8" filterable placeholder="请选择" size="mini">
+        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"
+          @change="screenSelectChange">
+        </el-option>
+      </el-select>
+    </template>
+    <div class="bvc2-auto-layout-container"></div>
+  </div>
+</div>
