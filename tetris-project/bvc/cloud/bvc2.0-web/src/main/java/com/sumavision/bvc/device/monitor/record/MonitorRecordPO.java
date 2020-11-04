@@ -144,6 +144,18 @@ public class MonitorRecordPO extends AbstractBasePO{
 	
 	/** 录制任务最大存储时长*/
 	private Long time_duration;
+	
+	/** 告警参数*/
+	private Long alarm_size_mb;
+	
+	public Long getAlarm_size_mb() {
+		return alarm_size_mb;
+	}
+
+	public MonitorRecordPO setAlarm_size_mb(Long alarm_size_mb) {
+		this.alarm_size_mb = alarm_size_mb;
+		return this;
+	}
 
 	public Long getTotal_size_mb() {
 		return total_size_mb;
