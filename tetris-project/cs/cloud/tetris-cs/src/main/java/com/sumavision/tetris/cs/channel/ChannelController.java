@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
+//import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.template.ChannelTemplatePO;
+import com.sumavision.tetris.cs.template.ChannelTemplateService;
+import com.sumavision.tetris.cs.template.ChannelTemplateVo;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -40,8 +43,8 @@ public class ChannelController {
 	@Autowired
 	private UserQuery userQuery;
 	
-	@Autowired
-	private AlarmFeignClientService alarmFeignClientService;
+	//@Autowired
+	//private AlarmFeignClientService alarmFeignClientService;
 	
 	/**
 	 * 分页获取频道列表<br/>
@@ -92,6 +95,18 @@ public class ChannelController {
          }
 		return netcards;
 	}
+	
+	@Autowired
+	ChannelTemplateService ChannelTemplateService;
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/template/get")
+	public Object getTemplate() throws Exception {
+		List<ChannelTemplateVo> channelTemplateVos=ChannelTemplateService.findAllNopage();
+		return channelTemplateVos;
+	}
+
 
 	/**
 	 * 添加频道<br/>
@@ -123,6 +138,7 @@ public class ChannelController {
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
+			Long autoBroadTemplateId,
 			String autoBroadStart,
 			String taskTemple,
 			String rateCtrl,
@@ -146,6 +162,7 @@ public class ChannelController {
 				.setAutoBroad(autoBroad)
 				.setAutoBroadShuffle(autoBroadShuffle)
 				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadTemplateId(autoBroadTemplateId)
 				.setAutoBroadStart(autoBroadStart);
 		
 		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
@@ -215,6 +232,7 @@ public class ChannelController {
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
 			String autoBroadStart,
+			Long autoBroadTemplateId,
 			String taskTemple,
 			String rateCtrl,
 			String rate,
@@ -238,6 +256,7 @@ public class ChannelController {
 				.setAutoBroad(autoBroad)
 				.setAutoBroadShuffle(autoBroadShuffle)
 				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadTemplateId(autoBroadTemplateId)
 				.setAutoBroadStart(autoBroadStart);
 		
 		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()

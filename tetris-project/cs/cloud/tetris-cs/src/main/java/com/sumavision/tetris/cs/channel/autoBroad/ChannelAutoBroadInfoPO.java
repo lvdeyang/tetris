@@ -29,6 +29,9 @@ public class ChannelAutoBroadInfoPO extends AbstractBasePO{
 	
 	/** 起始日期 */
 	private String startDate;
+	
+	/** 模板ID */
+	private long templateId;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -74,4 +77,13 @@ public class ChannelAutoBroadInfoPO extends AbstractBasePO{
 	public void setStartDate(String startDate) {
 		this.startDate = startDate;
 	}
+	@Column(name = "TEMPLATE_ID")
+	public long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(long templateId) {
+		this.templateId = templateId;
+	}
+	
 }

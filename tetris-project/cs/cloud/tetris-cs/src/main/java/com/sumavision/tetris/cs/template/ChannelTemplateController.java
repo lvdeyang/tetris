@@ -86,8 +86,8 @@ public class ChannelTemplateController {
 			String url,HttpServletRequest request) throws Exception {
 		
 		TemplateProgramePO templateProgramePO=channelTemplateService.addpro(templateId, 
-				DateUtil.parse(startTime,"yyyy-MM-dd HH:mm:ss"),
-				DateUtil.parse(endTime, "yyyy-MM-dd HH:mm:ss"),
+				DateUtil.parse(startTime,"HH:mm:ss"),
+				DateUtil.parse(endTime, "HH:mm:ss"),
 				ProgrameType.fromName(programeType), labelIds, labelNames, mimsId, mimsName, url);
 		return new TemplateProgrameVo().set(templateProgramePO);
 		

@@ -12,6 +12,8 @@ public class SetAutoBroadBO {
 	
 	/** 开始播发时间点 */
 	private String autoBroadStart;
+	
+	private long autoBroadTemplateId;
 
 	public Boolean getAutoBroad() {
 		return autoBroad;
@@ -48,4 +50,14 @@ public class SetAutoBroadBO {
 		this.autoBroadStart = autoBroadStart;
 		return this;
 	}
+
+	public long getAutoBroadTemplateId() {
+		return autoBroadTemplateId;
+	}
+
+	public SetAutoBroadBO setAutoBroadTemplateId(long autoBroadTemplateId) {
+		this.autoBroadTemplateId = autoBroadTemplateId;
+		return this;
+	}
+	
 }
