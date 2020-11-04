@@ -1,7 +1,7 @@
 <el-dialog
         class="program-scree"
         title="节目编辑"
-        :width="orientOptions.current.value=='horizontal'?'1240px':'1140px'"
+        :width="orientOptions.current.value=='horizontal'?'1640px':'1140px'"
         :visible.sync="visible"
         :before-close="handleClose">
 
@@ -201,7 +201,7 @@
                     tooltip-effect="dark"
                     :data="options.currentScreen.data"
                     :default-sort="{prop:'index',order:'ascending'}"
-                    style="width: 550px;height: 450px;overflow: auto;display: inline-block;">
+                    style="width: 950px;height: 450px;overflow: auto;display: inline-block;">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
@@ -209,7 +209,7 @@
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>
-                <el-table-column label="时长/秒" width="110" v-if="channelData.hasFile != false">
+                <el-table-column label="时长/秒" width="80" v-if="channelData.hasFile != false">
                     <template slot-scope="scope">
                         <span v-if="scope.row.type=='VIDEO' || scope.row.type=='AUDIO'">{{ scope.row.duration / 1000 }}</span>
                         <el-input
@@ -221,6 +221,34 @@
                                 @change="handleDurationChange(scope.row, $event)"
                                 v-model="scope.row.duration / 1000">
                         </el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column label="开始时间" width="210">
+                    <template slot-scope="scope">
+                			<el-date-picker
+                                    style="width:100%;"
+                                    v-model="scope.row.startTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="scope.row.startTime"
+                                    @change="handleStartTimeChange(scope.row, $event)"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
+                    </template>
+                </el-table-column>
+                <el-table-column label="结束时间" width="210">
+                    <template slot-scope="scope">
+                			<el-date-picker
+                                    style="width:100%;"
+                                    v-model="scope.row.endTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="scope.row.endTime"
+                                    @change="handleEndTimeChange(scope.row, $event)"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
