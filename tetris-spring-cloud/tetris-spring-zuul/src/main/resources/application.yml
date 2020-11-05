@@ -70,6 +70,10 @@ zuul:
     tetris-resource:
       path: /tetris-resource/**
       serviceId: tetris-resource
+      sensitive-headers: Access-Control-Allow-Origin
+    tetris-alarm:
+      path: /tetris-alarm/**
+      serviceId: tetris-alarm
       sensitive-headers: Access-Control-Allow-Origin  
     eb-insert-web:
       path: /eb-insert-web/**

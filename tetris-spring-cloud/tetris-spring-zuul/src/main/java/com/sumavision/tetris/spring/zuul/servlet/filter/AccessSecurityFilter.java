@@ -75,6 +75,7 @@ public class AccessSecurityFilter implements Filter{
 				!requestUri.startsWith("/tetris-cs") &&
 				!requestUri.startsWith("/tetris-p2p") &&
 				!requestUri.startsWith("/tetris-resource") &&
+				!requestUri.startsWith("/tetris-alarm") &&
 				!requestUri.startsWith("/tetris-capacity") &&
 				!requestUri.startsWith("/tetris-bvc-business") &&
 				!requestUri.startsWith("/tetris-zoom") &&
