@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import com.suma.venus.resource.pojo.BundlePO.CoderType;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -75,7 +76,6 @@ import com.suma.venus.resource.service.FolderService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
-import com.suma.venus.resource.vo.BundleVO.CoderType;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;

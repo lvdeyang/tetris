@@ -1,7 +1,9 @@
 package com.suma.venus.resource.vo;
 
+
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.CoderType;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 
 public class BundleVO {
@@ -79,6 +81,12 @@ public class BundleVO {
 	/**扩展字段**/
 	private JSONObject param;
 	
+	/** 所属分组ID */
+	private Long folderId;
+	
+	/** 所属分组uuid*/
+	private String institution;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -104,6 +112,8 @@ public class BundleVO {
 		po.setMulticastSourceIp(this.getMulticastSourceIp());
 		po.setLocation(this.getLocation());
 		po.setTranscod(this.getTranscod());
+		po.setCoderType(this.getCoderType()==null ? null:this.getCoderType());
+		po.setFolderId(this.folderId);
 		return po;
 	}
 	
@@ -133,13 +143,25 @@ public class BundleVO {
 		vo.setMulticastSourceIp(po.getMulticastSourceIp()==null?"":po.getMulticastSourceIp());
 		vo.setLocation(po.getLocation()==null?"":po.getLocation());
 		vo.setTranscod(po.getTranscod()==null?false:po.getTranscod());
+		vo.setCoderType(po.getCoderType()==null?null:po.getCoderType());
+		vo.setFolderId(po.getFolderId());
 		return vo;
 	}
 	
-	public enum CoderType{
-		DEFAULT,
-		ENCODER,
-		DECODER
+	public String getInstitution() {
+		return institution;
+	}
+
+	public void setInstitution(String institution) {
+		this.institution = institution;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public void setFolderId(Long folderId) {
+		this.folderId = folderId;
 	}
 
 	public String getOperate() {
