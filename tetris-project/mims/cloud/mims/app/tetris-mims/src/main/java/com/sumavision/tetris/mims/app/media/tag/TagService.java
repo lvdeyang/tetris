@@ -26,7 +26,7 @@ public class TagService {
 	@Autowired
 	private TagQuery tagQuery;
 	
-	public TagVO add(UserVO user, String name, Long parentId, String remark) throws Exception{
+	public TagVO add(UserVO user, String name, Long parentId, String remark,Long hotCount) throws Exception{
 		TagPO findTag = tagDAO.findByName(user.getGroupId(), name);
 		if (findTag != null) throw new TagHasExistsException(name); 
 		
@@ -34,6 +34,7 @@ public class TagService {
 		tag.setName(name);
 		tag.setParentId(parentId);
 		tag.setRemark(remark);
+		tag.setHotCount(hotCount);
 		tag.setUpdateTime(new Date());
 		tagDAO.save(tag);
 		
@@ -45,7 +46,7 @@ public class TagService {
 		return new TagVO().set(tag).setSubColumns(new ArrayList<TagVO>());
 	}
 	
-	public TagVO edit(UserVO user, Long id, String name, String remark) throws Exception{
+	public TagVO edit(UserVO user, Long id, String name, String remark,Long hotCount) throws Exception{
 		TagPO findTag = tagDAO.findByNameAndId(id, user.getGroupId(), name);
 		if (findTag != null) throw new TagHasExistsException(name); 
 		
@@ -55,6 +56,7 @@ public class TagService {
 		
 		tag.setName(name);
 		tag.setRemark(remark);
+		tag.setHotCount(hotCount);
 		tagDAO.save(tag);
 		
 		return new TagVO().set(tag);

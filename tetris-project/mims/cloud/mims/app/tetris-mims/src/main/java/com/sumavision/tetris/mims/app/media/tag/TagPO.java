@@ -23,6 +23,8 @@ public class TagPO extends AbstractBasePO{
 	
 	/** 备注 */
 	private String remark;
+	
+	private Long hotCount;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -50,4 +52,14 @@ public class TagPO extends AbstractBasePO{
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
+	@Column(name = "HOT_COUNT")
+	public Long getHotCount() {
+		return hotCount;
+	}
+
+	public void setHotCount(Long hotCount) {
+		this.hotCount = hotCount;
+	}
+	
+	
 }

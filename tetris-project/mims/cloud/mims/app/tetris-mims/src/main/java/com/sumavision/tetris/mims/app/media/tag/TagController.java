@@ -27,12 +27,12 @@ public class TagController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object addTag(Long parentId, String name, String remark, HttpServletRequest request) throws Exception{
+	public Object addTag(Long parentId, String name, String remark,Long hotCount, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if (user.getGroupId() == null) throw new UserHasNoGroupException(user.getNickname());
 		
-		return tagService.add(user, name, parentId, remark);
+		return tagService.add(user, name, parentId, remark,hotCount);
 	}
 	
 	@JsonBody
@@ -51,12 +51,12 @@ public class TagController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object editTag(Long id, String name, String remark, HttpServletRequest request) throws Exception{
+	public Object editTag(Long id, String name, String remark,Long hotCount, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
 		if (user.getGroupId() == null) throw new UserHasNoGroupException(user.getNickname());
 		
-		return tagService.edit(user, id, name, remark);
+		return tagService.edit(user, id, name, remark,hotCount);
 	}
 	
 	/**
