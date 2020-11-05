@@ -3,17 +3,17 @@
   <div class="col">
     <div class="title">编码器</div>
     <div class="custom-tree-container">
-      <div class="">
+      <div style="margin-bottom: 10px;">
         <el-input placeholder="输入关键字过滤" size="mini" clearable v-model="filterText">
           <span slot="prefix" class="el-input__icon el-icon-search"></span>
         </el-input>
       </div>
       <div>
-        <el-tree ref="tree" :data="encodetree" default-expand-all node-key="id" highlight-current
-          :expand-on-click-node="true" :props="defaultProps" :default-checked-keys="checked"
-          :default-expand-all="defaultExpandAll" :filter-node-method="filterNode" :render-content="renderContent"
-          @node-expand="nodeExpand" @node-collapse="nodeCollapse" draggable :allow-drop="allowDrop"
-          :allow-drag="allowDrag" @node-drag-start="handleDragStart">
+        <el-tree ref="tree" :data="encodetree" node-key="id" highlight-current :expand-on-click-node="true"
+          :props="defaultProps" :default-checked-keys="checked" :default-expand-all="defaultExpandAll"
+          :filter-node-method="filterNode" :render-content="renderContent" @node-expand="nodeExpand"
+          @node-collapse="nodeCollapse" draggable :allow-drop="allowDrop" :allow-drag="allowDrag"
+          @node-drag-start="handleDragStart">
         </el-tree>
       </div>
     </div>

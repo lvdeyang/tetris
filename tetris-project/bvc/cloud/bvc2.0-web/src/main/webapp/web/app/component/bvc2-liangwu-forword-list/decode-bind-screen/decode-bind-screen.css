@@ -1,0 +1,29 @@
+.decode-bind-screen .bvc2-auto-layout-wrapper{
+  position: relative;
+    width: 65%;
+    height: 95%;
+    /* background-color: #16191E; */
+    float: left;
+    margin-left: 20px;
+    top: 0;
+}
+.decode-bind-screen .liangwu-forword .bvc2-auto-layout-container{
+  position: relative;
+}
+.decode-bind-screen .liangwu-forword .layout-auto{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.decode-bind-screen .col{
+  width: 30%;
+  min-height: calc(100% - 40px);
+}
+.decode-bind-screen .liangwu-forword .el-select input {
+  background: transparent;
+  border-radius: 2px;
+  border-color: #5C676D;
+  color: #666;
+}
+.decode-bind-screen .liangwu-forword .el-select{
+}
