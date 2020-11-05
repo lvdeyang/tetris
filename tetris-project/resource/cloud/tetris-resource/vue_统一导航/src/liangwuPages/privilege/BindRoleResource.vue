@@ -21,7 +21,7 @@
             <el-tree ref="tree" :data="treeData" :props="defaultProps" :default-expand-all="defaultExpandAll" :filter-node-method="filterNode" :expand-on-click-node="expandOnClickNode" @node-click="handleNodeClick"></el-tree>
           </el-option>
         </el-select>
-        <el-select v-model="filters.deviceModel" size="medium" placeholder="选择资源类型" style="float: left;margin-left:10px;width:120px;">
+        <el-select v-model="filters.deviceModel" size="medium" placeholder="选择资源类型" style="float: left;margin-left:10px;width:120px;" @change="deviceModelChange">
           <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
@@ -213,7 +213,9 @@ export default {
         this.folderTreeSelected.label = "",
         this.$refs.tree.filter("");
     },
-
+    deviceModelChange (val) {
+      this.pageNum = 1
+    },
     handleTabClick (tab, event) {
       if (tab.name !== 'BindResource') {
         this.$router.push('/' + tab.name)
@@ -496,9 +498,7 @@ export default {
     // 获取资源列表
     getResources: function () {
 
-      if (!this.resourceTableShow) {
-        this.pageNum = 1;
-      }
+
 
       if (!this.currentRoleRow) {
         this.$message({
@@ -537,7 +537,7 @@ export default {
       }
 
       if (this.filters.deviceModel != '' || this.filters.keyword != '' || this.folderTreeSelected.value != '') {
-        this.pageNum = 1;
+        // this.pageNum = 1;
       }
 
       let param = {
@@ -609,6 +609,7 @@ export default {
     // 资源列表分页
     handleCurrentPageChange (val) {
       this.pageNum = val
+
       if (this.resourceTableShow) {
         this.getResources()
       } else {

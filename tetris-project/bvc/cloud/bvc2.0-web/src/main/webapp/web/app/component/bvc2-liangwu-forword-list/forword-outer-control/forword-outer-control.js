@@ -17,6 +17,7 @@ define([
     template: tpl,
     data: function () {
       return {
+        loading: false,
         encodetree: [],
         checked: [],
         defaultExpandAll: true,
@@ -32,10 +33,11 @@ define([
         regionOption: [],
         singleWidth: '',
         totalWidth: '',
+        forwordTotal: '',
         originType: 'OUTER',
         tableList: {},
         totalNum: {},
-        pageSize: 1,
+        pageSize: 10,
         currentPage: 0,
         total: 0
       }
@@ -46,7 +48,7 @@ define([
         return this.tableCurrgenData.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
       },
       currentWidth: function () {
-        return this.table.page.total * this.singleWidth
+        return this.forwordTotal * this.singleWidth
       },
       currentWidthTotleNum: function () {
         return Math.floor(this.totalWidth / this.singleWidth)
@@ -116,26 +118,22 @@ define([
                   var item = self.regionOption[j];
                   if (item.identity == parseExtend) {
                     self.tableList[item.identity].push(rows[i])
-                    if (rows[i].forwordid) { //计算转发路数
+                    if (rows[i].forwordid && rows[i].status == '运行中') { //计算转发路数
                       self.totalNum[item.identity] += 1
                     }
                   }
                 }
               }
-              // for (var i = 0; i < self.regionOption.length; i++) {
-              //   var item = self.regionOption[i];
-              //   if (item.originType == self.originType) {
-              //     currentTotle += self.tableList[item.identity].length;
-              //   }
-              // }
             }
 
             var region = self.region ? self.region : self.regionOption[0].identity;
             self.tableCurrgenData = self.tableList[region];
             self.currentPage = 1;
             self.total = self.tableList[region].length
-            console.log(self.tableList)
-            console.log(self.totalNum)
+            self.forwordTotal = self.totalNum[region];
+            self.singleWidth = self.regionOption[0].singleWidth
+            self.totalWidth = self.regionOption[0].totalWidth
+            self.loading = false;
           })
         });
 
@@ -143,9 +141,9 @@ define([
 
       loadStation: function () {
         var self = this;
+        self.loading = true;
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
-            self.tableList = {};
             self.regionOption = data.rows;
             for (var j = 0; j < self.regionOption.length; j++) {
               var item = self.regionOption[j];
@@ -176,16 +174,14 @@ define([
         self.tableCurrgenData = self.tableList[val];
         self.currentPage = 1
         self.total = self.tableList[val].length;
-        // self.table.page.currentPage = 1;
-        // self.table.page.total = self.tableList[tab.name].length;
-
-        // for(var i=0;i<self.stationList.length;i++){
-        //   var item = self.stationList[i];
-        //   if(item.identity == tab.name){
-        //     self.singleWidth = item.singleWidth
-        //     self.totalWidth = item.totalWidth
-        //   }
-        // }
+        self.forwordTotal = self.totalNum[val];
+        for (var i = 0; i < self.regionOption.length; i++) {
+          var item = self.regionOption[i];
+          if (item.identity == val) {
+            self.singleWidth = item.singleWidth
+            self.totalWidth = item.totalWidth
+          }
+        }
 
       },
       handleDragEnd (draggingNode, dropNode, dropType, ev) {

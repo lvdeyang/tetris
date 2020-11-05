@@ -1,27 +1,25 @@
 <div class="bvc2-monitor-forword-list"
   style="width:100%; height:100%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
-    <el-tabs v-model="activeName" @tab-click="handleClick"  >
-      <template v-for="item in tabList">
-        <el-tab-pane :label="item.label" :name="item.name" :key="item.name">
-         
-        </el-tab-pane>
-      </template>
-      
-    </el-tabs>
-    <!-- 概况 -->
-    <el-table
-    :data="overviewTableData"
-    style="width: 100%"
-    v-if="activeName == 'overview'">
+  <el-tabs v-model="activeName" @tab-click="handleClick">
+    <template v-for="item in tabList">
+      <el-tab-pane :label="item.label" :name="item.name" :key="item.name">
+
+      </el-tab-pane>
+    </template>
+
+  </el-tabs>
+  <!-- 概况 -->
+  <el-table :data="overviewTableData" style="width: 100%" v-if="activeName == 'overview'">
     <el-table-column prop="name" label="名称" width="180">
     </el-table-column>
     <el-table-column prop="transmit" label="转发情况" width="180">
     </el-table-column>
-    </el-table>
-    <!-- 上屏 -->
-    <forword-inner-control v-if="activeName == 'inner'"></forword-inner-control>
-    <forword-outer-control v-if="activeName == 'outer'"></forword-outer-control>
-</template>
+  </el-table>
+  <!-- 上屏 -->
+  <forword-inner-control v-if="activeName == 'inner'"></forword-inner-control>
+  <forword-outer-control v-if="activeName == 'outer'"></forword-outer-control>
+  <decode-bind-screen v-if="activeName == 'screen'"></decode-bind-screen>
+  </template>
   <!-- <el-dialog v-if="dialog.bandwidth.visible" title="配置站点带宽" :visible.sync="dialog.bandwidth.visible" width="80%"
     :before-close="handlebandwidthClose">
     <bvc2-monitor-forword-bandwidth :origin-type="originType"></bvc2-monitor-forword-bandwidth>

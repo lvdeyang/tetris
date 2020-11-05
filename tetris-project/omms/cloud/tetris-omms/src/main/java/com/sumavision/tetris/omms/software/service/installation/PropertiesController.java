@@ -160,6 +160,30 @@ public class PropertiesController {
 		
 		return propertiesQuery.findByDeploymentId(deploymentId);
 	}
+	
+	/**
+	 * 
+	 * 查询升级参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月4日 下午2:00:12
+	 * @param installationPackageId 安装包id
+	 * @param deploymentId 部署id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/update/parameters")
+	public Object findUpdateParameters(
+			Long installationPackageId,
+			Long deploymentId,
+			HttpServletRequest request) throws Exception{
+		
+		return propertiesQuery.findUpdateParameters(installationPackageId, deploymentId);
+	}
+	
 	/**
 	 *删除安装包版本参数<br/>
 	 * <p>详细描述</p>
@@ -230,5 +254,28 @@ public class PropertiesController {
 			HttpServletRequest request) throws Exception{
 		
 		return propertiesService.addProperty(installationPackageId, propertyKey, propertyName, valueType, propertyDefaultValue,valueSelect);
+	}
+	
+	/**
+	 * 
+	 * 修改部署参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月4日 上午10:13:31
+	 * @param deploymentId 部署id
+	 * @param config 配置参数
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modifyParameters")
+	public Object modifyParameters(
+			Long deploymentId, 
+			String config,
+			HttpServletRequest request) throws Exception{
+		propertiesService.modifyParameters(deploymentId, config);
+		return null;
 	}
 }

@@ -10,6 +10,7 @@ define([
   'bvc2-dialog-single-osd',
   'forword-inner-control',
   'forword-outer-control',
+  'decode-bind-screen',
   'css!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/bvc2-liangwu-forword-list.css'
 ], function (tpl, ajax, $, Vue) {
 
@@ -20,47 +21,48 @@ define([
     template: tpl,
     data: function () {
       return {
-        tabList:[
-        {label:"概况",name:"overview"},
-        {label:"上屏",name:"inner"},
-        {label:"外域转发",name:"outer"}
+        tabList: [
+          // {label:"概况",name:"overview"},
+          { label: "上屏", name: "inner" },
+          { label: "外域转发", name: "outer" },
+          { label: "大屏设置", name: "screen" },
         ],
-        activeName:"overview",
-        overviewTableData:[
-          {name:'本域上屏',transmit:'4/200'},
-          {name:'外域一',transmit:'2/200'},
-          {name:'外域二',transmit:'4/200'},
+        activeName: "inner",
+        overviewTableData: [
+          { name: '本域上屏', transmit: '4/200' },
+          { name: '外域一', transmit: '2/200' },
+          { name: '外域二', transmit: '4/200' },
         ]
-        
+
       }
     },
-    props:['originType'],
+    props: ['originType'],
     computed: {
     },
     watch: {},
     methods: {
-      handleClick(tab, event) {
+      handleClick (tab, event) {
         var self = this;
         console.log(tab)
         // this.getCapacity()
       },
-      getCapacity(){
-        ajax.post(self.resourceApiUrl+'/vedioCapacity/query', null, function (data, status) {
-        if (status == 200) {
-          
-        }
-      })
+      getCapacity () {
+        ajax.post(self.resourceApiUrl + '/vedioCapacity/query', null, function (data, status) {
+          if (status == 200) {
+
+          }
+        })
       }
     },
     mounted: function () {
-      var self = this; var opcityUrl ='/vedioCapacity/query'
-      var resourceApiUrl = document.location.protocol +"//"+document.location.hostname+':8213';
-      self.resourceApiUrl =resourceApiUrl;
-      console.log(self.resourceApiUrl+'/vedioCapacity/query')
-      
-   
+      var self = this; var opcityUrl = '/vedioCapacity/query'
+      var resourceApiUrl = document.location.protocol + "//" + document.location.hostname + ':8213';
+      self.resourceApiUrl = resourceApiUrl;
+      console.log(self.resourceApiUrl + '/vedioCapacity/query')
+
+
     },
-    updated() {
+    updated () {
 
     },
   });

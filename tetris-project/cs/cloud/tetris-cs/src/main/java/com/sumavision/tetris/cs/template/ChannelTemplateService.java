@@ -50,6 +50,13 @@ public class ChannelTemplateService {
 				.getMap();
 	}
 	
+	
+	public List<ChannelTemplateVo> findAllNopage() throws Exception {
+		List<ChannelTemplatePO> temps= channelTemplateDao.findAll();
+		List<ChannelTemplateVo> tempVOs = ChannelTemplateVo.getConverter(ChannelTemplateVo.class).convert(temps, ChannelTemplateVo.class);
+		return tempVOs;
+	}
+	
 	public ChannelTemplatePO add(String name) throws Exception {
 	    ChannelTemplatePO channelTemplatePo=new ChannelTemplatePO();
 	    channelTemplatePo.setName(name);

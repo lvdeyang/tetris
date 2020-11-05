@@ -19,7 +19,7 @@ define([
       return {
         encodetree: [],
         checked: [],
-        defaultExpandAll: false,
+        defaultExpandAll: true,
         defaultProps: {
           children: 'children',
           label: 'name',
@@ -280,7 +280,7 @@ define([
       var $container = getLayoutContainer(this.$el);
       $container['layout-auto']('create', {
         cell: {
-          column: 4,
+          column: 3,
           row: 3,
           // html:tdHtml
         },
@@ -290,6 +290,7 @@ define([
         event: {
           drop: function (e) {
             var $cell = $(this);
+            console.log($cell)
             $cell['layout-auto']('setData', e.dataTransfer.getData('id'));
             $cell.text(e.dataTransfer.getData('id'));
           }

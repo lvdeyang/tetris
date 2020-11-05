@@ -127,8 +127,12 @@ public class ServiceDeploymentService {
 			serviceDeploymentDao.save(serviceDeploymentEntity);
 		}		
 		
+		enableFtp(serviceDeploymentEntity.getId());
+		
 		Thread uploadThread = new Thread(new Uploader(serverEntity, installationPackageEntity, serviceDeploymentEntity));
 		uploadThread.start();
+		
+		//disableFtp(serviceDeploymentEntity.getId());
 		
 		return new ServiceDeploymentVO().set(serviceDeploymentEntity)
 										.setVersion(installationPackageEntity.getVersion())
@@ -694,6 +698,9 @@ public class ServiceDeploymentService {
 			if(!file.exists()){
 				file.mkdirs();
 			}
+			
+			enableFtp(deploymentId);// 打开ftp端口
+			
 			Boolean bool = downFile(
 				server.getIp(), 
 				Integer.parseInt(server.getFtpPort()), 
@@ -702,6 +709,8 @@ public class ServiceDeploymentService {
 				new StringBufferWrapper().append("/install/").append(folderName).append("/backup").toString(), 
 				"backfile.zip", 
 				downloadPath);
+			
+			disableFtp(deploymentId);// 关闭ftp端口
 			
 			// 将备份的相关信息存入到数据库中
 			if(bool){
@@ -850,6 +859,8 @@ public class ServiceDeploymentService {
 		// 根据备份信息找到运维服务器上的安装包上传到ftp服务器（覆盖原有的安装包）
 		Path path = SpringContext.getBean(Path.class);
 		
+		enableFtp(deployment.getId());// 打开ftp端口
+		
 		uploadFile(
 				server.getIp(), 
 				Integer.parseInt(server.getFtpPort()), 
@@ -859,6 +870,9 @@ public class ServiceDeploymentService {
 				fileName,
 				new StringBufferWrapper().append(path.webappPath()).append("packages").append(File.separator).append(backupInformation.getDeploymentName()).append(File.separator).append(fileName).toString()
 		);
+		
+		disableFtp(deployment.getId());// 关闭ftp端口
+		
 		// 解压安装包
 		CloseableHttpClient decompressionClient = null;
 		try {
@@ -891,6 +905,9 @@ public class ServiceDeploymentService {
 		}
 		
 		// 根据备份信息找到之前备份下来的xxx.zip压缩包，将其上传到ftp服务器上对应安装包下的backup文件夹中
+		
+		enableFtp(deployment.getId());// 打开ftp端口
+		
 		uploadFile(
 				server.getIp(), 
 				Integer.parseInt(server.getFtpPort()), 
@@ -899,6 +916,8 @@ public class ServiceDeploymentService {
 				new StringBufferWrapper().append("/install/").append(folderName).append("/backup/").toString(), 
 				"backfile.zip", 
 				backupInformation.getBackupFullPath());
+		
+		disableFtp(deployment.getId());// 关闭ftp端口
 		
 		// 执行恢复脚本restore.sh
 		CloseableHttpClient client = null;
@@ -947,7 +966,7 @@ public class ServiceDeploymentService {
 	 * @return 成功返回true，否则返回false
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public static boolean uploadFile(String url,int port,String username, String password, String path, String filename, String inputPath) throws Exception{
+	public boolean uploadFile(String url,int port,String username, String password, String path, String filename, String inputPath) throws Exception{
 		boolean success = false;
 		FTPClient ftp = new FTPClient();
 		
@@ -1005,6 +1024,88 @@ public class ServiceDeploymentService {
 			}
 		}
 		return success;
+	}
+	
+	/**
+	 * 
+	 * 打开ftp端口<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 上午9:21:55
+	 * @param deploymentId 部署id
+	 * @throws Exception
+	 */
+	public void enableFtp(Long deploymentId) throws Exception{
+		CloseableHttpClient client = null;
+		try {
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+			ServerPO server = serverDao.findOne(deployment.getServerId());
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+	        
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/enable_ftp").toString();
+	        HttpPost httpPost = new HttpPost(url);
+//	        List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+//			formparams.add(new BasicNameValuePair("name", processId));  
+//	        
+//			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+	        
+	        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60*60*1000).setConnectTimeout(60*60*1000).build();
+	        httpPost.setConfig(requestConfig);
+	        
+			CloseableHttpResponse response = client.execute(httpPost);
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}     
+		}finally{
+			if(client != null) client.close();
+		} 	
+	}
+	
+	/**
+	 * 
+	 * 关闭ftp端口<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 上午9:33:10
+	 * @param deploymentId 部署id
+	 * @throws Exception
+	 */
+	public void disableFtp(Long deploymentId) throws Exception{
+		CloseableHttpClient client = null;
+		try {
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+			ServerPO server = serverDao.findOne(deployment.getServerId());
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+	        
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/disable_ftp").toString();
+	        HttpPost httpPost = new HttpPost(url);
+	        
+	        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60*60*1000).setConnectTimeout(60*60*1000).build();
+	        httpPost.setConfig(requestConfig);
+	        
+			CloseableHttpResponse response = client.execute(httpPost);
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}     
+		}finally{
+			if(client != null) client.close();
+		} 	
 	}
 	
 	/**

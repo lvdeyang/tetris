@@ -129,8 +129,8 @@ public class TemplateProgrameVo extends AbstractBaseVO<TemplateProgrameVo, Templ
 		this.setMimsId(entity.getMimsId());
 		this.setMimsName(entity.getMimsName());
 		this.setProgrameType(entity.getProgrameType().getName());
-		this.setStartTimeStr(DateUtil.format(entity.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
-		this.setEndTimeStr(DateUtil.format(entity.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+		this.setStartTimeStr(DateUtil.format(entity.getStartTime(),"HH:mm:ss"));
+		this.setEndTimeStr(DateUtil.format(entity.getEndTime(),"HH:mm:ss"));
 		this.setTemplateId(entity.getTemplateId());
 		return this;
 	}

@@ -23,6 +23,8 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 	/** valueType为ENUM时，存enum项格式：[{name:"", value:""}] */
 	private String valueSelect;
 	
+	/** 配置属性值 */
+	private String propertyValue;
 	
 	public String getValueSelect() {
 		return valueSelect;
@@ -75,6 +77,15 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 
 	public PropertiesVO setPropertyDefaultValue(String propertyDefaultValue) {
 		this.propertyDefaultValue = propertyDefaultValue;
+		return this;
+	}
+
+	public String getPropertyValue() {
+		return propertyValue;
+	}
+
+	public PropertiesVO setPropertyValue(String propertyValue) {
+		this.propertyValue = propertyValue;
 		return this;
 	}
 

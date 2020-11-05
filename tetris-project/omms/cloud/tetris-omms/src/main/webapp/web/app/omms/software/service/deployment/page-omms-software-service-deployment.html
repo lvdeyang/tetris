@@ -186,9 +186,17 @@
                 <el-scrollbar v-if="dialog.step.properties.length>0" style="height: 400px;">
                     <div style="margin-top:20px; margin-bottom:20px;">
                         <el-row>
+                            <el-col :span="11" style="margin-left: 28px">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item label="数据库IP和端口" style="margin-right: 20px">
+                                        <el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+
                             <el-col :span="11" v-for="(property, index) in dialog.step.properties" :offset="index%2==0?0:1" :key="property.id">
                                 <el-form label-position="top" label-width="300px">
-                                    <el-form-item :label="property.propertyName">
+                                    <el-form-item :label="property.propertyName" style="margin-right: 20px">
                                         <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
                                             <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
                                         </el-select>
@@ -291,14 +299,22 @@
                 <el-scrollbar v-if="dialog.updateStep.properties.length>0" style="height: 400px;">
                     <div style="margin-top:20px; margin-bottom:20px;">
                         <el-row>
+                            <el-col :span="11" style="margin-left: 28px">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item label="数据库IP和端口" style="margin-right: 20px">
+                                        <el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+
                             <el-col :span="11" v-for="(property, index) in dialog.updateStep.properties" :offset="index%2==0?0:1" :key="property.id">
                                 <el-form label-position="top" label-width="300px">
-                                    <el-form-item :label="property.propertyName">
+                                    <el-form-item :label="property.propertyName" style="margin-right: 20px">
                                         <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
                                             <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
                                         </el-select>
                                         <el-switch v-else-if="property.valueType==='BOOLEAN'" v-model="property.value" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-                                        <el-input v-else v-model="property.value"></el-input>
+                                        <el-input v-else v-model="property.propertyValue"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </el-col>
@@ -389,14 +405,22 @@
                 <el-scrollbar v-if="dialog.modifyParameters.properties.length > 0" style="height: 500px;">
                     <div style="margin-top:20px; margin-bottom:20px;">
                         <el-row>
+                            <el-col :span="11" style="margin-left: 28px">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item label="数据库IP和端口" style="margin-right: 20px">
+                                        <el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+
                             <el-col :span="11" v-for="(property, index) in dialog.modifyParameters.properties" :offset="index%2==0?0:1" :key="property.id">
                                 <el-form label-position="top" label-width="300px">
-                                    <el-form-item :label="property.propertyName">
+                                    <el-form-item :label="property.propertyName" style="margin-right: 20px">
                                         <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
                                             <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
                                         </el-select>
                                         <el-switch v-else-if="property.valueType==='BOOLEAN'" v-model="property.value" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-                                        <el-input v-else v-model="property.value"></el-input>
+                                        <el-input v-else v-model="property.propertyValue"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </el-col>
@@ -412,6 +436,24 @@
                 <el-button size="small" @click="handleModifyParametersClose">取消</el-button>
                 <el-button size="small" type="primary" @click="handleModifyParametersSubmit()">确定</el-button>
             </span>
+        </el-dialog>
+
+        <el-dialog
+                title="选择数据库"
+                :visible.sync="dialog.database.visible"
+                width="600px"
+                :before-close="handleSelectDatabaseClose">
+
+            <el-table :data="dialog.database.rows" border style="width: 100%">
+                <el-table-column fixed prop = "databaseIP" label="数据库IP" width="200px"></el-table-column>
+                <el-table-column fixed prop = "databasePort" label="数据库端口" width="200px"></el-table-column>
+                <el-table-column fixed="right" label="操作" width="100px">
+                    <template slot-scope="scope">
+                        <el-button @click="handleSelectDatabaseClick(scope)" type="text" size="small">选择</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
         </el-dialog>
     </template>
 
