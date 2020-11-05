@@ -113,6 +113,17 @@ define([
               timeSegmentStartTime: "",
               timeSegmentEndTime: "",
             }
+          },
+          detailelse: {
+            visible: false,
+            form: {
+              fileName: '',
+              mode: '',
+              bundle: "",
+              total_size_mb: 0,
+              time_duration: 0,
+              alarm_size_mb: ""
+            }
           }
         },
         rules: {
@@ -551,6 +562,19 @@ define([
         this.dialog.detail.form.fileName = rows.fileName;
         this.dialog.detail.form.mode = rows.mode;
         this.dialog.detail.form.bundle = rows.videoSource;
+        this.dialog.detail.form.total_size_mb = rows.total_size_mb;
+        this.dialog.detail.form.time_duration = rows.time_duration;
+        this.dialog.detail.form.alarm_size_mb = rows.alarm_size_mb;
+
+      },
+      handleDetailElse (rows) {
+        this.dialog.detailelse.visible = true;
+        this.dialog.detailelse.form.fileName = rows.fileName;
+        this.dialog.detailelse.form.mode = rows.mode;
+        this.dialog.detailelse.form.bundle = rows.videoSource;
+        this.dialog.detailelse.form.total_size_mb = rows.total_size_mb;
+        this.dialog.detailelse.form.time_duration = rows.time_duration;
+        this.dialog.detailelse.form.alarm_size_mb = rows.alarm_size_mb;
 
       },
       loadByDownload (id) {
