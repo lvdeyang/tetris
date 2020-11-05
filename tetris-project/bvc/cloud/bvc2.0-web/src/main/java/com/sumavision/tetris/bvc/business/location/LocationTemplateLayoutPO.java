@@ -12,8 +12,8 @@ public class LocationTemplateLayoutPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
-//	/** 所属用户*/
-//	private Long userId;
+	/** 所属用户*/
+	private Long userId;
 	
 	/** 模板名字*/
 	private String templateName;
@@ -24,15 +24,15 @@ public class LocationTemplateLayoutPO extends AbstractBasePO{
 	/** 模板的y方向屏幕数量*/
 	private Integer screenNumberOfY;
 
-//	@Column(name="USER_ID")
-//	public Long getUserId() {
-//		return userId;
-//	}
-//
-//	public LocationTemplateLayoutPO setUserId(Long userId) {
-//		this.userId = userId;
-//		return this;
-//	}
+	@Column(name="USER_ID")
+	public Long getUserId() {
+		return userId;
+	}
+
+	public LocationTemplateLayoutPO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
 
 	@Column(name="TEMPLATE_NAME")
 	public String getTemplateName() {
