@@ -276,6 +276,11 @@ define([
                     var row = scope.row;
                     window.location.hash = '#/page-omms-software-service-deployment/' + row.id + '/' + row.name;
                 },
+                gotoDatabase:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    window.location.hash = '#/page-omms-hardware-database/' + row.id + '/' + row.name;
+                },
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;

@@ -77,7 +77,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                width="250">
+                                width="280px">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
@@ -90,6 +90,9 @@
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="部署服务" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDeployment(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="数据库管理" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-database" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDatabase(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>

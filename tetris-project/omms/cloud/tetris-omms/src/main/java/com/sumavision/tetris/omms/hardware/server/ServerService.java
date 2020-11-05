@@ -35,6 +35,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
+import com.sumavision.tetris.omms.hardware.database.DatabasePO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataDAO;
@@ -63,6 +66,9 @@ public class ServerService {
 	
 	@Autowired
 	private ServiceDeploymentDAO serviceDeploymentDao;
+	
+	@Autowired
+	private DatabaseDAO databaseDAO;
 	
 	/**
 	 * 添加一个服务器<br/>
@@ -465,4 +471,41 @@ public class ServerService {
 		}
 	}
 	
+	/**
+	 * 
+	 * 删除数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午6:02:04
+	 * @param databaseId 数据库id
+	 * @throws Exception
+	 */
+	public void deleteDatabase(Long databaseId) throws Exception{
+		databaseDAO.delete(databaseId);
+	}
+	
+	/**
+	 * 
+	 * 添加数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午7:13:37
+	 * @param serverId 服务器id
+	 * @param databaseIP 数据库IP
+	 * @param databasePort 数据库端口
+	 * @param username 用户名
+	 * @param password 密码
+	 * @throws Exception 
+	 */
+	public DatabaseVO addDatabase(Long serverId, String databasePort, String username, String password) throws Exception{
+		ServerPO server = serverDao.findOne(serverId);
+		DatabasePO database = new DatabasePO();
+		database.setServerId(serverId);
+		database.setDatabaseIP(server.getIp());
+		database.setDatabasePort(databasePort);
+		database.setUsername(username);
+		database.setPassword(password);
+		databaseDAO.save(database);
+		return new DatabaseVO().set(database);
+	}
 }

@@ -5,11 +5,17 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
+
 @Service
 public class PropertiesService {
 
 	@Autowired
 	private PropertiesDAO propertiesDao;
+	
+	@Autowired 
+	private ServiceDeploymentDAO serviceDeploymentDAO;
 	
 	/**
 	 * 添加服务属性<br/>
@@ -167,4 +173,18 @@ public class PropertiesService {
 		return new PropertiesVO().set(entity);
 	}
 	
+	/**
+	 * 
+	 * 修改部署参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月4日 上午10:41:17
+	 * @param deploymentId 部署id
+	 * @param config 配置参数
+	 */
+	public void modifyParameters(Long deploymentId, String config){
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		deployment.setConfig(config);
+		serviceDeploymentDAO.save(deployment);
+	}
 }
