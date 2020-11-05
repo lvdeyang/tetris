@@ -1247,7 +1247,7 @@ public class BindResourceController extends ControllerBase {
 		bundlePrivilege.setDeviceModel(po.getDeviceModel());
 		bundlePrivilege.setName(po.getBundleName());
 		bundlePrivilege.setUsername(po.getUsername());
-//		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
+		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
 		return bundlePrivilege;
 	}
 
