@@ -7,8 +7,6 @@ import javax.persistence.Table;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
-@Entity
-@Table(name="TETRIS_BVC_LOCATION_TEMPLATE_LAYOUT")
 public class LocationTemplateLayoutVO extends AbstractBaseVO<LocationTemplateLayoutVO, LocationTemplateLayoutPO>{
 
 	private static final long serialVersionUID = 1L;
