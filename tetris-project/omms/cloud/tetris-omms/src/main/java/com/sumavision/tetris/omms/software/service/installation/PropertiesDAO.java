@@ -34,4 +34,6 @@ public interface PropertiesDAO extends BaseDAO<PropertiesPO>{
 	
 	public int countByInstallationPackageId(Long installationPackageId);
 	
+	public List<PropertiesPO> findByPropertyKey(String propertyKey);
+	
 }

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.omms.software.service.installation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,19 +12,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
-import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryPO;
-import com.sumavision.tetris.omms.software.service.installation.history.InstallationPackageHistoryVO;
+import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
 
 @Component
 public class PropertiesQuery {
 	
 	@Autowired
-	public PropertiesDAO propertiesDAO;
+	private PropertiesDAO propertiesDAO;
 	
 	@Autowired
-	public ServiceDeploymentDAO serviceDeploymentDAO;
+	private ServiceDeploymentDAO serviceDeploymentDAO;
+	
+	@Autowired
+	private InstallationPackageDAO installationPackageDAO; 
 
 	/**
 	 * 查询服务属性值类型<br/>
@@ -74,7 +79,16 @@ public class PropertiesQuery {
 	 */
 	public List<PropertiesVO> findByInstallationPackageId(Long installationPackageId) throws Exception{
 		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
-		return PropertiesVO.getConverter(PropertiesVO.class).convert(propertyEntities, PropertiesVO.class);
+		List<PropertiesPO> list = new ArrayList<PropertiesPO>();
+		for (PropertiesPO propertiesPO : propertyEntities) {
+			String propertyKey = propertiesPO.getPropertyKey();
+			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+				continue;
+			}else{
+				list.add(propertiesPO);
+			}
+		}
+		return PropertiesVO.getConverter(PropertiesVO.class).convert(list, PropertiesVO.class);
 	}
 	
 	/**
@@ -87,9 +101,97 @@ public class PropertiesQuery {
 	 * @throws Exception
 	 */
 	public List<PropertiesVO> findByDeploymentId(Long deploymentId) throws Exception{
-		Long installationPackageId = serviceDeploymentDAO.findOne(deploymentId).getInstallationPackageId();
-		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
-		return PropertiesVO.getConverter(PropertiesVO.class).convert(propertyEntities, PropertiesVO.class);
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		InstallationPackagePO installationPackage = installationPackageDAO.findOne(deployment.getInstallationPackageId());
+		List<PropertiesPO> packagePropertiesList = propertiesDAO.findByInstallationPackageId(installationPackage.getId());
+		List<PropertiesVO> list = PropertiesVO.getConverter(PropertiesVO.class).convert(packagePropertiesList, PropertiesVO.class);
+		
+		String config = deployment.getConfig();
+		JSONObject jsonObject = JSON.parseObject(config);
+		Set<String> propertyKeys = jsonObject.keySet();
+		
+		for (PropertiesVO propertiesVO : list) {
+			String propertyKey = propertiesVO.getPropertyKey();
+			for (String key : propertyKeys) {
+				if(propertyKey.equals(key)){
+					propertiesVO.setPropertyValue(jsonObject.getString(key));
+					break;
+				}
+			}
+		}
+		
+		List<PropertiesVO> resList = new ArrayList<PropertiesVO>();
+		for (PropertiesVO propertiesVO : list) {
+			String propertyKey = propertiesVO.getPropertyKey();
+			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+				continue;
+			}else{
+				resList.add(propertiesVO);
+			}
+		}
+		return resList;
+		
+		/*ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		String config = deployment.getConfig();
+		JSONObject jsonObject = JSON.parseObject(config);
+		List<PropertiesVO> list = new ArrayList<PropertiesVO>();
+		Set<String> propertyKeys = jsonObject.keySet();
+		for (String propertyKey : propertyKeys) {
+			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+				continue;
+			}
+			String propertyValue = jsonObject.getString(propertyKey);
+			PropertiesVO properties = new PropertiesVO();
+			properties.setPropertyKey(propertyKey);
+			properties.setPropertyValue(propertyValue);
+			List<PropertiesPO> propertiesPOList = propertiesDAO.findByPropertyKey(propertyKey);
+			properties.setPropertyName(propertiesPOList.get(0).getPropertyName());
+			list.add(properties);
+		}
+		return list;*/
+	}
+	
+	/**
+	 * 
+	 * 查询升级参数<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月4日 下午2:00:12
+	 * @param installationPackageId 安装包id
+	 * @param deploymentId 部署id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public List<PropertiesVO> findUpdateParameters(Long installationPackageId, Long deploymentId) throws Exception{
+		List<PropertiesPO> packagePropertiesList = propertiesDAO.findByInstallationPackageId(installationPackageId);
+		List<PropertiesVO> list = PropertiesVO.getConverter(PropertiesVO.class).convert(packagePropertiesList, PropertiesVO.class);
+		
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		String config = deployment.getConfig();
+		JSONObject jsonObject = JSON.parseObject(config);
+		Set<String> propertyKeys = jsonObject.keySet();
+		
+		for (PropertiesVO propertiesVO : list) {
+			String propertyKey = propertiesVO.getPropertyKey();
+			for (String key : propertyKeys) {
+				if(propertyKey.equals(key)){
+					propertiesVO.setPropertyValue(jsonObject.getString(key));
+					break;
+				}
+			}
+		}
+		
+		List<PropertiesVO> updatePropertiesList = new ArrayList<PropertiesVO>();
+		for (PropertiesVO propertiesVO : list) {
+			String propertyKey = propertiesVO.getPropertyKey();
+			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+				continue;
+			}else{
+				updatePropertiesList.add(propertiesVO);
+			}
+		}
+		return updatePropertiesList;
 	}
 	
 }

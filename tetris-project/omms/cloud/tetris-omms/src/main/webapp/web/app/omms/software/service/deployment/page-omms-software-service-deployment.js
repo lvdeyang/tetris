@@ -93,7 +93,8 @@ define([
                         visible:false,
                         name:'',
                         version:'',
-                        updatePackagesData:[]
+                        updatePackagesData:[],
+                        deploymentId:0
                     },
                     addBackup:{
                         visible:false,
@@ -108,7 +109,15 @@ define([
                     },
                     modifyParameters:{
                         visible:false,
-                        properties:[]
+                        properties:[],
+                        deploymentId:0,
+                    },
+                    database:{
+                        rows:[],
+                        visible:false,
+                        databaseIP:"",
+                        databasePort:"",
+                        ipAndPort:""
                     }
                 }
 
@@ -293,6 +302,8 @@ define([
                         for(var i=0; i<self.dialog.step.properties.length; i++){
                             config[self.dialog.step.properties[i].propertyKey] = self.dialog.step.properties[i].value;
                         }
+                        config["databaseAddr"] = self.dialog.database.databaseIP;
+                        config["databaseport"] = self.dialog.database.databasePort;
                     }
                     self.dialog.step.active = 2;
                     ajax.post('/service/deployment/install', {
@@ -312,6 +323,10 @@ define([
                         if(status !== 200){
                             return;
                         }
+                        self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                        self.dialog.database.ipAndPort = "";
+                        self.dialog.database.databaseIP = "";
+                        self.dialog.database.databasePort = "";
                         self.load(self.table.currentPage);
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
@@ -435,6 +450,7 @@ define([
                 selectUpdatePackages:function(scope){
                     var self = this;
                     var row = scope.row;
+                    self.dialog.updatePackages.deploymentId = row.id;
                     self.dialog.updatePackages.updatePackagesData.splice(0, self.dialog.updatePackages.updatePackagesData.length);
                     ajax.post('/installation/package/load', {
                         serviceTypeId:row.serviceTypeId
@@ -483,15 +499,16 @@ define([
                                 }else if(self.dialog.updateStep.currentDeployment.step == 'CONFIG'){
                                     clearInterval(self.dialog.updateStep.interval);
                                     self.dialog.updateStep.properties.splice(0, self.dialog.updateStep.properties.length);
-                                    ajax.post('/properties/find/by/installation/package/id', {
-                                        installationPackageId:row.id
+                                    ajax.post('/properties/find/update/parameters', {
+                                        installationPackageId:row.id,
+                                        deploymentId:self.dialog.updatePackages.deploymentId
                                     }, function(data){
                                         setTimeout(function(){
                                             self.dialog.updateStep.active = 1;
                                         }, 1000);
                                         if(data && data.length>0){
                                             for(var i=0; i<data.length; i++){
-                                                data[i].value = data[i].propertyDefaultValue;
+                                                //data[i].value = data[i].propertyDefaultValue;
                                                 if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                                 self.dialog.updateStep.properties.push(data[i]);
                                             }
@@ -507,8 +524,10 @@ define([
                     var config = {};
                     if(self.dialog.updateStep.properties.length > 0){
                         for(var i=0; i<self.dialog.updateStep.properties.length; i++){
-                            config[self.dialog.updateStep.properties[i].propertyKey] = self.dialog.updateStep.properties[i].value;
+                            config[self.dialog.updateStep.properties[i].propertyKey] = self.dialog.updateStep.properties[i].propertyValue;
                         }
+                        config["databaseAddr"] = self.dialog.database.databaseIP;
+                        config["databaseport"] = self.dialog.database.databasePort;
                     }
                     self.dialog.addBackup.visible = false;
                     self.dialog.updateStep.active = 2;
@@ -534,6 +553,10 @@ define([
                         }
                         self.dialog.addBackup.isBackup = true;
                         self.dialog.addBackup.notes = '';
+                        self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                        self.dialog.database.ipAndPort = "";
+                        self.dialog.database.databaseIP = "";
+                        self.dialog.database.databasePort = "";
                         self.load(self.table.currentPage);
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
@@ -557,13 +580,14 @@ define([
                 modifyParameters:function(scope){
                     var self = this;
                     var row = scope.row;
+                    self.dialog.modifyParameters.deploymentId = row.id;
                     self.dialog.modifyParameters.visible = true;
                     ajax.post('/properties/find/by/deployment/id', {
                         deploymentId:row.id
                     }, function(data){
                         if(data && data.length>0){
                             for(var i = 0; i < data.length; i++){
-                                data[i].value = data[i].propertyDefaultValue;
+                                //data[i].value = data[i].propertyDefaultValue;
                                 if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                 self.dialog.modifyParameters.properties.push(data[i]);
                             }
@@ -574,9 +598,57 @@ define([
                     var self = this;
                     self.dialog.modifyParameters.visible = false;
                     self.dialog.modifyParameters.properties.splice(0, self.dialog.modifyParameters.properties.length);
+                    self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                    self.dialog.database.ipAndPort = "";
+                    self.dialog.database.databaseIP = "";
+                    self.dialog.database.databasePort = "";
                 },
                 handleModifyParametersSubmit:function(){
-
+                    var self = this;
+                    var config = {};
+                    if(self.dialog.modifyParameters.properties.length > 0){
+                        for(var i = 0; i < self.dialog.modifyParameters.properties.length; i++){
+                            config[self.dialog.modifyParameters.properties[i].propertyKey] = self.dialog.modifyParameters.properties[i].propertyValue;
+                        }
+                        config["databaseAddr"] = self.dialog.database.databaseIP;
+                        config["databaseport"] = self.dialog.database.databasePort;
+                    }
+                    ajax.post('/properties/modifyParameters',{
+                        deploymentId:self.dialog.modifyParameters.deploymentId,
+                        config:$.toJSON(config)
+                    }, function(data){
+                        self.dialog.modifyParameters.visible = false;
+                        self.dialog.modifyParameters.properties.splice(0, self.dialog.modifyParameters.properties.length);
+                        self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                        self.dialog.database.ipAndPort = "";
+                        self.dialog.database.databaseIP = "";
+                        self.dialog.database.databasePort = "";
+                    })
+                },
+                selectDatabase:function(){
+                    var self = this;
+                    self.dialog.database.visible = true;
+                    ajax.post('/server/findAllDatabase', {}, function(data){
+                        if(data && data.length > 0){
+                            for(var i = 0; i < data.length; i++){
+                                self.dialog.database.rows.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleSelectDatabaseClose:function(){
+                    var self = this;
+                    self.dialog.database.visible = false;
+                    self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                },
+                handleSelectDatabaseClick:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.database.ipAndPort = row.databaseIP + ":" + row.databasePort;
+                    self.dialog.database.databaseIP = row.databaseIP;
+                    self.dialog.database.databasePort = row.databasePort;
+                    self.dialog.database.visible = false;
+                    self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
                 }
             },
             mounted:function(){

@@ -167,4 +167,90 @@ public class ServerController {
 		return serverService.modifyIp(id, ip);
 	}
 	
+	/**
+	 * 
+	 * 根据服务器id查询数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午5:26:07
+	 * @param serverId 服务器id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/findDatabase")
+	public Object findDatabase(
+			Long serverId,
+			HttpServletRequest request) throws Exception{
+		
+		return serverQuery.findDatabase(serverId);
+	}
+	
+	/**
+	 * 
+	 * 删除数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午5:55:53
+	 * @param databaseId 数据库id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/deleteDatabase")
+	public Object deleteDatabase(
+			Long databaseId,
+			HttpServletRequest request) throws Exception{
+		
+		serverService.deleteDatabase(databaseId);
+		return null;
+	}
+	
+	/**
+	 * 
+	 * 添加数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午7:13:37
+	 * @param serverId 服务器id
+	 * @param databaseIP 数据库IP
+	 * @param databasePort 数据库端口
+	 * @param username 用户名
+	 * @param password 密码
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/addDatabase")
+	public Object addDatabase(
+			Long serverId,  
+			String databasePort, 
+			String username, 
+			String password,
+			HttpServletRequest request) throws Exception{
+		
+		return serverService.addDatabase(serverId, databasePort, username, password);
+		
+	}
+	
+	/**
+	 * 
+	 * 查询所有数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月3日 下午2:05:38
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/findAllDatabase")
+	public Object findAllDatabase(HttpServletRequest request) throws Exception{
+		
+		return serverQuery.findAllDatabase();
+	}
 }
