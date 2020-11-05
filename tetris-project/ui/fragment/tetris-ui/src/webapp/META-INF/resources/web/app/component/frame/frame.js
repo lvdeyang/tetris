@@ -64,7 +64,7 @@ define([
                         //link:'http://www.sumavision.com/',
                         name:'北京市博汇科技股份有限公司',
                         link:'http://www.bohui.com.cn/',
-                        time:'2018-2060'
+                        time:'2020-2040'
                     },
                     minimize:[
                         /*{

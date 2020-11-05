@@ -43,7 +43,7 @@ public class LoginController {
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
 		String loginIp = loginService.loginIp(request);
- 		String token = loginService.doPasswordLogin(username, password, ip, TERMINAL_TYPE, verifyCode,loginIp);
+ 		String token = loginService.doPasswordLogin(username, password, loginIp, TERMINAL_TYPE, verifyCode);
 		String redirectUrl = loginQuery.queryRedirectUrl(token);
 		response.sendRedirect(redirectUrl);
 	}

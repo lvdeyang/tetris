@@ -1,5 +1,9 @@
 package com.sumavision.tetris.cs.program;
 
+
+
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -78,6 +82,22 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资视频类型 */
 	private String videoType;
 	
+	/**是否必选节目*/
+	private Boolean isRequired;
+	
+	private Date startTime;
+	
+	private Date endTime;
+	
+	@Column(name = "ISREQUIRED")
+	public Boolean getIsRequired() {
+		return isRequired;
+	}
+
+	public void setIsRequired(Boolean isRequired) {
+		this.isRequired = isRequired;
+	}
+
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
 		return programId;
@@ -266,4 +286,22 @@ public class ScreenPO extends AbstractBasePO {
 	public void setVideoType(String videoType) {
 		this.videoType = videoType;
 	}
+	@Column(name = "START_TIME")
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+	@Column(name = "END_TIME")
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
+	}
+	
+	
 }

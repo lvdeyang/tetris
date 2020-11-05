@@ -67,6 +67,32 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制如果是设备，记录bundleId*/
 	private String bundleId;
 	
+	/** 录制最大时长*/
+	private Long time_duration;
+	 
+	/** 录制最大存储容量*/
+	private Long total_size_mb; 
+	
+	private Long alarm_size_mb;
+	
+	public Long getTime_duration() {
+		return time_duration;
+	}
+
+	public MonitorRecordTaskVO setTime_duration(Long time_duration) {
+		this.time_duration = time_duration;
+		return this;
+	}
+
+	public Long getTotal_size_mb() {
+		return total_size_mb;
+	}
+
+	public MonitorRecordTaskVO setTotal_size_mb(Long total_size_mb) {
+		this.total_size_mb = total_size_mb;
+		return this;
+	}
+
 	public String getBundleId() {
 		return bundleId;
 	}
@@ -237,6 +263,15 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 		this.previewUrl = previewUrl;
 		return this;
 	}
+	
+	public Long getAlarm_size_mb() {
+		return alarm_size_mb;
+	}
+
+	public MonitorRecordTaskVO setAlarm_size_mb(Long alarm_size_mb) {
+		this.alarm_size_mb = alarm_size_mb;
+		return this;
+	}
 
 	@Override
 	public MonitorRecordTaskVO set(MonitorRecordPO entity) throws Exception {
@@ -260,16 +295,25 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setNickname(entity.getNickname()==null?"":entity.getNickname())
 			.setTaskId(entity.getTaskId()==null?null:entity.getTaskId())
 			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
-			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId());
+			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId())
+			.setTotal_size_mb(entity.getTotal_size_mb())
+			.setTime_duration(entity.getTime_duration())
+			.setAlarm_size_mb(entity.getAlarm_size_mb());
 		return this;
 	}
 	
+	/**
+	 * 扩展下载权限<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月27日 下午5:37:58
+	 * @param entity
+	 * @param bo
+	 * @return
+	 * @throws Exception
+	 */
 	public MonitorRecordTaskVO set(MonitorRecordPO entity,ResourceIdListBO bo) throws Exception {
 		set(entity);
-//		/** 所属任务id*/
-//		private Long taskId;
-//		/** 所属任务名字*/
-//		private String taskName;
 		
 		if(bo!=null&&bo.getResourceCodes()!=null&&bo.getResourceCodes().size()>0){
 			if(entity.getType().equals(MonitorRecordType.LOCAL_DEVICE)&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){

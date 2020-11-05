@@ -16,17 +16,17 @@
       </el-col>
     </el-row>
     <el-dialog title="初始化" :visible.sync="dialogVisible" width="40%">
-      <el-form :model="initForm" label-width="200px">
-        <el-form-item label="图像信息接入总路数">
+      <el-form :model="initForm" label-width="200px" ref="initForm">
+        <el-form-item label="图像信息接入总路数" prop="vedioCapacity">
           <el-input v-model="initForm.vedioCapacity" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="在线用户总人数">
+        <el-form-item label="在线用户总人数" prop="userCapacity">
           <el-input v-model="initForm.userCapacity" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="当前转发总路数">
+        <el-form-item label="当前转发总路数" prop="turnCapacity">
           <el-input v-model="initForm.turnCapacity" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="当前回放总路数">
+        <el-form-item label="当前回放总路数" prop="replayCapacity">
           <el-input v-model="initForm.replayCapacity" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -61,6 +61,20 @@ export default {
         replayCapacity: ''
 
       },
+      // rules: {
+      //   vedioCapacity:
+      //     [{ required: true, message: '不能为空' },
+      //     { type: 'number', message: '必须为数字值' }],
+      //   userCapacity:
+      //     [{ required: true, message: '不能为空' },
+      //     { type: 'number', message: '必须为数字值' }],
+      //   turnCapacity:
+      //     [{ required: true, message: '不能为空' },
+      //     { type: 'number', message: '必须为数字值' }],
+      //   replayCapacity:
+      //     [{ required: true, message: '不能为空' },
+      //     { type: 'number', message: '必须为数字值' }],
+      // },
       legend: {
         ImageAccess: ['已接入', '空闲'],
         onLine: ['在线', '空闲'],
@@ -102,14 +116,56 @@ export default {
     },
     initSubmit () {
       var self = this;
+      // this.$refs.initForm.validate((valid) => {
+      //   if (valid) {
+      if (!/^\d{1,5}$/.test(this.initForm.vedioCapacity)) {
+        self.$message({
+          type: "waring",
+          message: "图像信息接入总路数为1-5位数字！"
+        })
+        return
+      }
+      if (!/^\d{1,5}$/.test(this.initForm.userCapacity)) {
+        self.$message({
+          type: "waring",
+          message: "图像信息接入总路数为1-5位数字！"
+        })
+        return
+      }
+      if (!/^\d{1,5}$/.test(this.initForm.turnCapacity)) {
+        self.$message({
+          type: "waring",
+          message: "在线用户总人数为1-5位数字！"
+        })
+        return
+      }
+      if (!/^\d{1,5}$/.test(this.initForm.replayCapacity)) {
+        self.$message({
+          type: "waring",
+          message: "当前回放总路数为1-5位数字！"
+        })
+        return
+      }
       initCapacity(this.initForm).then(res => {
         self.$message({
           type: "success",
           message: "设置成功！"
         })
         self.dialogVisible = false;
+        queryCapacityDatas({ 'id': 1 }).then(res => {
+          self.resData = res;
+          self.initForm.vedioCapacity = res.vedioCapacity
+          self.initForm.userCapacity = res.userCapacity
+          self.initForm.turnCapacity = res.turnCapacity
+          self.initForm.replayCapacity = res.replayCapacity
 
+        })
       })
+      // } else {
+      //   return false;
+      // }
+      // });
+
     }
   },
   mounted () {
@@ -121,7 +177,6 @@ export default {
       this.initForm.replayCapacity = res.replayCapacity
 
     })
-    console.log(this.optionData)
   }
 }
 </script>

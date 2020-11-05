@@ -313,6 +313,7 @@ public class UserController {
             String companyName,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles,
             String worknodeUid) throws Exception{
 		
@@ -321,12 +322,12 @@ public class UserController {
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, bindRoles, true,worknodeUid);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp,isLoginIp, bindRoles, true,worknodeUid);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}
 		}
 		return null;

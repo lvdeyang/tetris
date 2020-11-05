@@ -43,9 +43,11 @@
             <span style="font-size:16px;" class="el-icon-video-pause"></span>
           </el-button>
 
+          <!-- TODO
           <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="handleShowDetail(scope.$index, scope.row)">
                 <span style="font-size:16px;" class="el-icon-document"></span>
           </el-button>
+          -->
           <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="handleDel(scope.$index, scope.row)">
                 <span style="font-size:16px;" class="el-icon-delete"></span>
           </el-button>
@@ -271,7 +273,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <!-- <el-button size="small" @click="handleEdit()" v-if="editBtnVisible">修改</el-button>-->
-        <el-button size="small" @click="handleQuerySourceFromMims()" v-if="addBtnVisible">查询源测试</el-button>
+        <!-- <el-button size="small" @click="handleQuerySourceFromMims()" v-if="addBtnVisible">查询源测试</el-button>-->
         <el-button size="small" @click="handleAddRecordStrategy()" v-if="addBtnVisible">确认</el-button>
         <el-button size="small" @click.native="addStrategyFormVisible = false">关闭</el-button>
       </div>

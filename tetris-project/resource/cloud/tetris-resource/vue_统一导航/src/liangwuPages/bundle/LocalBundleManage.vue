@@ -15,10 +15,10 @@
         <el-option v-for="item in sourceTypeOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <!-- <el-select size="small" v-model="filters.userId" filterable placeholder="选择用户" style="float: left;margin-left:10px;width:200px;">
-        <el-option v-for="item in users" :key="item.id" :label="item.name" :value="item.id">
+      <el-select size="small" v-model="filters.region" placeholder="选择域" style="float: left;margin-left:10px;width:200px;">
+        <el-option v-for="item in regionOption" :key="item.identity" :label="item.stationName" :value="item.identity" v-if="item.originType!='OUTER'">
         </el-option>
-      </el-select> -->
+      </el-select>
       <el-input size="small" v-model="filters.keyword" style="float: left;margin-left: 15px;width:200px;" placeholder="关键字"></el-input>
       <el-button size="small" @click="getResources(1)" style="float: left;margin-left: 10px;">查询</el-button>
 
@@ -55,9 +55,8 @@
             <el-button type="primary" size="small" v-on:click="handleSyncFromLdap()" style="float: right;margin-right: 10px;">从LDAP下载</el-button>
             -->
     </div>
-
     <!--资源列表-->
-    <el-table :data="resources" v-loading="resourceTableLoading" @selection-change="handleSelectionChange" style="float: left;width: 100%;margin-top: 20px;">
+    <el-table :data="tableData" v-loading="resourceTableLoading" @selection-change="handleSelectionChange" style="float: left;width: 100%;margin-top: 20px;">
       <el-table-column width="50" type="selection"></el-table-column>
       <el-table-column prop="bundleName" label="名称" width="120" sortable>
       </el-table-column>
@@ -82,6 +81,9 @@
         </template>
       </el-table-column>
 
+      <el-table-column label="IP端口" width="200" :formatter="handleIPFormatter">
+
+      </el-table-column>
       <el-table-column width="100" label="使用状态">
         <template slot-scope="scope">
           <div v-if="scope.row.lockStatus=='IDLE'">未使用</div>
@@ -119,7 +121,7 @@
     <!--工具条-->
     <el-col :span="24" class="toolbar">
       <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" @change="pageChange"></el-input>
-      <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :current-page="pageNum" :page-size="countPerPage" :total="total" style="float:right;">
+      <el-pagination layout="total,prev, pager, next" @current-change="handleCurrentPageChange" :current-page="pageNum" :page-size="countPerPage" :total="total" style="float:right;">
       </el-pagination>
     </el-col>
 
@@ -186,7 +188,7 @@
 <script type="text/ecmascript-6">
 import {
   getAllUsers, getDeviceModels, getBundles, getBundleDetailInfo, deleteBundle, getBundleChannels, logoutBundle, clearBundle, setAccessLayer, syncLdap, syncEquipInfoFromLdap,
-  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser
+  syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser, getStationList
 } from '../../api/api';
 // let requestIP = document.location.host.split(":")[0];
 
@@ -210,7 +212,8 @@ export default {
         keyword: '',
         userId: '',
         sourceType: '',
-        countPerPage: ''
+        countPerPage: '',
+        region: 'self'
       },
       users: [],
       resourceTableLoading: false,
@@ -246,12 +249,21 @@ export default {
           label: "LDAP" //LDAP
         }
       ],
-      multipleSelection: []
+      multipleSelection: [],
+      regionOption: [],
+      activeName: 'self',
+      tableList: []
     }
+  },
+  computed: {
+    tableData: function () {
+      return this.resources.slice((this.pageNum - 1) * this.countPerPage, this.pageNum * this.countPerPage);
+    },
   },
   methods: {
     pageChange: function () {
-      this.getResources(this.pageNum);
+      this.pageNum = 1;
+      this.countPerPage = this.filters.countPerPage;
     },
     handleSelectLayerNode: function () {
       var self = this;
@@ -328,8 +340,8 @@ export default {
     },
     //获取资源列表
     getResources: function (pageNum) {
-
-      this.countPerPage = 20
+      var self = this;
+      // this.countPerPage = 99999
       if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
         this.countPerPage = parseInt(this.filters.countPerPage)
       }
@@ -343,20 +355,50 @@ export default {
         keyword: this.filters.keyword,
         sourceType: this.filters.sourceType,
         userId: this.filters.userId,
-        pageNum: pageNum,
-        countPerPage: this.countPerPage
+        pageNum: 1,
+        countPerPage: 9999999
       };
       this.resourceTableLoading = true;
+      // 初始化域设备数组；
+      for (var j = 0; j < self.regionOption.length; j++) {
+        var item = self.regionOption[j];
+        if (!item.originType) {
+          item.originType = "INNER"
+        }
+        self.tableList[item.identity] = [];
+      }
       getBundles(param).then((res) => {
+
         if (res.errMsg) {
           this.$message({
             message: res.errMsg,
             type: 'error'
           });
         } else {
-          this.pageNum = pageNum;
-          this.total = res.total;
-          this.resources = res.resources;
+          var rows = res.resources
+          if (rows && rows.length > 0) {
+            for (var i = 0; i < rows.length; i++) {
+              // self.table.data.push(rows[i]);
+              var parseExtend = ""
+              if (rows[i].param) {
+                parseExtend = rows[i].param
+                if (parseExtend.extend_param) {
+                  parseExtend = JSON.parse(parseExtend.extend_param).region
+
+                }
+              }
+              for (var j = 0; j < self.regionOption.length; j++) {
+                var item = self.regionOption[j];
+                if (item.identity == parseExtend) {
+                  self.tableList[item.identity].push(rows[i])
+                }
+              }
+            }
+          }
+          console.log(self.tableList)
+          // this.pageNum = pageNum;
+          this.total = self.tableList[self.filters.region].length;
+          this.resources = self.tableList[self.filters.region];
         }
 
         this.resourceTableLoading = false;
@@ -366,7 +408,7 @@ export default {
     //资源列表分页
     handleCurrentPageChange (val) {
       this.pageNum = val;
-      this.getResources(this.pageNum);
+      // this.getResources(this.pageNum);
     }
     ,
     //资源详情
@@ -410,7 +452,9 @@ export default {
           bundleFolderId: row.bundleFolderId,
           transcod: row.transcod,
           multicastSourceIp: row.multicastSourceIp,
-
+          accessNodeName: row.accessNodeUid,
+          accessNodeUid: row.accessNodeUid,
+          deviceModel: row.deviceModel
         }
       });
     }
@@ -786,37 +830,6 @@ export default {
     }
     ,
 
-    /*
-     handleSyncToLdap: function(){
-     this.$confirm("确认将本地未同步信息同步到LDAP服务器么？", "提示", {}).then(() => {
-     this.resourceTableLoading = true;
-     //NProgress.start();
-
-     let para = {};
-
-     syncEquipInfToLdap(para).then(res => {
-     if (null !== res.errMsg && res.errMsg !== "") {
-     this.$message({
-     message: res.errMsg,
-     type: "error",
-     duration: 3000
-     });
-     } else {
-     this.$message({
-     message: "同步成功, 共上传" + res.successCnt + "条信息",
-     type: "success"
-     });
-
-     this.getResources(1);
-     }
-     });
-
-     this.resourceTableLoading = false;
-     });
-
-     },
-     */
-
     showHandleSyncToLdapDialog: function () {
       this.confirmSyncToLdapVisible = true;
     }
@@ -880,9 +893,75 @@ export default {
 
         this.resourceTableLoading = false;
       });
+    },
+    handleClick (tab, event) {
+      var self = this;
+      // self.tableCurrgenData = self.tableList[tab.name];
+      // self.table.page.currentPage = 1;
+      // self.table.page.total = self.tableList[tab.name].length;
+    },
+    queryStationList () {
+      var self = this;
+      getStationList().then(res => {
+        if (res.errMsg) {
+          self.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        } else {
 
-    }
-    ,
+          self.regionOption = res.data.rows;
+          self.regionOption.unshift({
+            id: 99999,
+            identity: "self",
+            stationName: "本域",
+          })
+          for (var j = 0; j < self.regionOption.length; j++) {
+            var item = self.regionOption[j];
+            if (!item.originType) {
+              item.originType = "INNER"
+            }
+            self.tableList[item.identity] = [];
+          }
+
+
+          self.getResources(1);
+        }
+      });
+    },
+    // 拼接列表ip端口项
+    handleIPFormatter (row, column, cellValue, index) {
+      var IP_URL = ''
+      if (row.param.extend_param) {
+        var extendsParams = JSON.parse(row.param.extend_param);
+        var param = extendsParams.param || {};
+        if (extendsParams.dev_type == "ts_enc") {
+          if (!param.is_multi) {
+            IP_URL = `udp://${param.local_ip}:${param.port}`
+          } else {
+            IP_URL = `udp://${param.multi_ip}:${param.port}`
+          }
+        } else if (extendsParams.dev_type == "ts_dec") {
+          IP_URL = `udp://${param.dest_ip}:${param.dest_port}`
+
+        } else if (extendsParams.dev_type == "rtp_passby_enc") {
+          if (!param.is_multi) {
+            IP_URL = `udp://${param.local_ip}:${param.video_port}`
+          } else {
+            IP_URL = `udp://${param.multi_ip}:${param.video_port}`
+          }
+        } else if (extendsParams.dev_type == "rtp_passby_dec") {
+          IP_URL = `udp://${param.dest_ip}:${param.video_port}`
+        } else if (extendsParams.dev_type == "onvif_enc") {
+          IP_URL = `udp://${param.onvif_ip}:${param.onvif_port}`
+        } else {
+          IP_URL = param.url
+        }
+        return IP_URL
+      } else {
+        return ''
+      }
+    },
 
 
   },
@@ -890,11 +969,12 @@ export default {
     var self = this;
     this.$nextTick(function () {
       self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
+
+      this.queryStationList()
     });
     this.getResourcesTotle(1);
     // this.getDeviceModels();
     this.getAllUsers();
-    this.getResources(1);
 
     if (this.uploadUrl.indexOf('__requestIP__') !== -1) {
       var requestIP = document.location.host.split(':')[0]

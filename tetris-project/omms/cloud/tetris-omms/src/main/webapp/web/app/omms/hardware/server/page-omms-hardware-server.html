@@ -1,17 +1,17 @@
 <mi-frame id="page-omms-hardware-server-wrapper" :menus="menus" :user="user" :groups="groups">
 
-    <template slot="title">服务器管理</template>
+    <template slot="title">服务器管�?</template>
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>服务器管理</el-breadcrumb-item>
+        <el-breadcrumb-item>服务器管�?</el-breadcrumb-item>
     </template>
 
     <template>
 
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加服务器</el-button>
-            <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务器</el-button>-->
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加服务�?</el-button>
+            <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务�?</el-button>-->
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -32,7 +32,7 @@
                                 prop="ip">
                         </el-table-column>
                         <el-table-column
-                                label="小工具端口"
+                                label="小工具端�?"
                                 prop="gadgetPort">
                         </el-table-column>
                         <el-table-column
@@ -40,11 +40,11 @@
                                 prop="gadgetUsername">
                         </el-table-column>
                         <el-table-column
-                                label="小工具密码"
+                                label="小工具密�?"
                                 prop="gadgetPassword">
                         </el-table-column>
                         <el-table-column
-                                label="创建者"
+                                label="创建�?"
                                 prop="creator">
                         </el-table-column>
                         <el-table-column
@@ -53,7 +53,7 @@
                                 prop="createTime">
                         </el-table-column>
                         <el-table-column
-                                label="ftp用户名"
+                                label="ftp用户�?"
                                 prop="ftpUsername">
                         </el-table-column>
                         <el-table-column
@@ -79,22 +79,22 @@
                                 label="操作"
                                 width="280px">
                             <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="修改服务�?" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="修改ip" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-cloud" style="font-size:20px; padding:0;" @click="handleModifyIp(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="状态查看" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="状�?�查�?" placement="bottom-end">
                                     <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoStatus(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="部署服务" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-server" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDeployment(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="数据库管理" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="数据库管�?" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-database" style="font-size:20px; padding:0; margin-left:20px; position:relative; top:1px;" @click="gotoDatabase(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="删除服务�?" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
                             </template>
@@ -124,7 +124,7 @@
     <template>
 
         <el-dialog
-                title="添加服务器"
+                title="添加服务�?"
                 :visible.sync="dialog.addServer.visible"
                 width="500px"
                 :before-close="handleAddServerClose">
@@ -138,19 +138,19 @@
                         <el-form-item label="ip:">
                             <el-input v-model="dialog.addServer.ip"></el-input>
                         </el-form-item>
-                        <el-form-item label="小工具端口:">
+                        <el-form-item label="小工具端�?:">
                             <el-input v-model="dialog.addServer.gadgetPort"></el-input>
                         </el-form-item>
                         <el-form-item label="小工具用户名:">
                             <el-input v-model="dialog.addServer.gadgetUsername"></el-input>
                         </el-form-item>
-                        <el-form-item label="小工具密码:">
+                        <el-form-item label="小工具密�?:">
                             <el-input v-model="dialog.addServer.gadgetPassword"></el-input>
                         </el-form-item>
-                        <el-form-item label="创建者:">
+                        <el-form-item label="创建�?:">
                             <el-input v-model="dialog.addServer.creator"></el-input>
                         </el-form-item>
-                        <el-form-item label="ftp用户名:">
+                        <el-form-item label="ftp用户�?:">
                             <el-input v-model="dialog.addServer.ftpUsername"></el-input>
                         </el-form-item>
                         <el-form-item label="ftp端口:">
@@ -173,7 +173,7 @@
         </el-dialog>
 
         <el-dialog
-                title="修改服务器"
+                title="修改服务�?"
                 :visible.sync="dialog.editServer.visible"
                 width="500px"
                 :before-close="handleEditServerClose">
@@ -184,19 +184,19 @@
                         <el-form-item label="名称:">
                             <el-input v-model="dialog.editServer.name"></el-input>
                         </el-form-item>
-                        <el-form-item label="小工具端口:">
+                        <el-form-item label="小工具端�?:">
                             <el-input v-model="dialog.editServer.gadgetPort"></el-input>
                         </el-form-item>
                         <el-form-item label="小工具用户名:">
                             <el-input v-model="dialog.editServer.gadgetUsername"></el-input>
                         </el-form-item>
-                        <el-form-item label="小工具密码:">
+                        <el-form-item label="小工具密�?:">
                             <el-input v-model="dialog.editServer.gadgetPassword"></el-input>
                         </el-form-item>
-                        <el-form-item label="创建者:">
+                        <el-form-item label="创建�?:">
                             <el-input v-model="dialog.editServer.creator"></el-input>
                         </el-form-item>
-                        <el-form-item label="ftp用户名:">
+                        <el-form-item label="ftp用户�?:">
                             <el-input v-model="dialog.editServer.ftpUsername"></el-input>
                         </el-form-item>
                         <el-form-item label="ftp端口:">

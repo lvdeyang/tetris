@@ -1,26 +1,18 @@
 package com.suma.venus.alarmoprlog.service.alarm.notify;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
+import org.springframework.web.client.RestTemplate;
 import com.suma.venus.alarmoprlog.orm.dao.IAlarmDAO;
 import com.suma.venus.alarmoprlog.orm.dao.ISubscribeAlarmDAO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmPO.EAlarmStatus;
 import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO;
-import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO.EAlarmNotifyMethod;
 import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO.EAlarmNotifyPattern;
-import com.suma.venus.alarmoprlog.websocket.WebSocketServer;
-import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
+import com.suma.venus.alarmoprlog.service.alarm.vo.AlarmRetryNotifyVO;
 
 /**
  * 告警HTTP通知 线程
@@ -28,7 +20,7 @@ import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
  * <p>
  * 新的告警产生后，通知所有订阅此类告警的终端，请求。
  * 
- * @author 陈默 2014-3-17
+ * @author 陈默
  * @see
  * @since 1.0
  */
@@ -42,17 +34,24 @@ public class HttpAlarmNotifyThread implements Runnable {
 
 	private AlarmPO alarmPO;
 
+	private SubscribeAlarmPO subscribeAlarmPO;
+
 	private RestTemplate loadBalancedRestTemplate;
 
 	private RestTemplate restTemplate;
 
-	public HttpAlarmNotifyThread(AlarmPO alarmPO, ISubscribeAlarmDAO subscribeAlarmDAO, IAlarmDAO alarmDAO,
-			RestTemplate loadBalancedRestTemplate, RestTemplate restTemplate) {
+	private boolean isRetry = false;
+
+	public HttpAlarmNotifyThread(AlarmPO alarmPO, SubscribeAlarmPO subscribeAlarmPO,
+			ISubscribeAlarmDAO subscribeAlarmDAO, IAlarmDAO alarmDAO, RestTemplate loadBalancedRestTemplate,
+			RestTemplate restTemplate, boolean isRetry) {
 		this.alarmPO = alarmPO;
 		this.subscribeAlarmDAO = subscribeAlarmDAO;
 		this.alarmDAO = alarmDAO;
 		this.loadBalancedRestTemplate = loadBalancedRestTemplate;
 		this.restTemplate = restTemplate;
+		this.isRetry = isRetry;
+		this.subscribeAlarmPO = subscribeAlarmPO;
 	}
 
 	/**
@@ -60,7 +59,12 @@ public class HttpAlarmNotifyThread implements Runnable {
 	 */
 	@Override
 	public void run() {
-		httpAlarmNotify(alarmPO);
+
+		if (isRetry) {
+			retryHttpNotify(new AlarmRetryNotifyVO(alarmPO, subscribeAlarmPO));
+		} else {
+			httpAlarmNotify(alarmPO);
+		}
 	}
 
 	/**
@@ -76,7 +80,7 @@ public class HttpAlarmNotifyThread implements Runnable {
 	 */
 	private void httpAlarmNotify(AlarmPO alarmPO) {
 		try {
-			pushWebSoketMsg(alarmPO);
+			AlarmNotifyUtils.pushWebSoketAlarm(alarmPO);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -106,14 +110,24 @@ public class HttpAlarmNotifyThread implements Runnable {
 				if ((alarmPO.getAlarmCount() > 1 && alarmNotifyExp(alarmPO)) || alarmPO.getAlarmCount() == 1) {
 					// 已超时旧告警或者新告警通知
 					for (SubscribeAlarmPO subscribeAlarmPO : subscribeAlarmPOs) {
-						// TODO 如果收不到 怎么办
-						startNotify(alarmPO, subscribeAlarmPO);
+
+						if (!AlarmNotifyUtils.startNotify(alarmPO, subscribeAlarmPO, alarmDAO, restTemplate,
+								loadBalancedRestTemplate)) {
+							// 告警没发出去
+							HttpAlarmNotifyRetryHandler
+									.putAlarmRetryNotifyVO(new AlarmRetryNotifyVO(alarmPO, subscribeAlarmPO));
+						}
 					}
 				} else {
 					// 每次都通知模式的告警通知
 					for (SubscribeAlarmPO subscribeAlarmPO : subscribeAlarmPOs) {
 						if (subscribeAlarmPO.getAlarmNotifyPattern().equals(EAlarmNotifyPattern.NOTIFY_EVERYTIME)) {
-							startNotify(alarmPO, subscribeAlarmPO);
+							if (!AlarmNotifyUtils.startNotify(alarmPO, subscribeAlarmPO, alarmDAO, restTemplate,
+									loadBalancedRestTemplate)) {
+								// 告警没发出去
+								HttpAlarmNotifyRetryHandler
+										.putAlarmRetryNotifyVO(new AlarmRetryNotifyVO(alarmPO, subscribeAlarmPO));
+							}
 						}
 					}
 				}
@@ -121,7 +135,12 @@ public class HttpAlarmNotifyThread implements Runnable {
 				// 告警恢复等的通知
 			} else {
 				for (SubscribeAlarmPO subscribeAlarmPO : subscribeAlarmPOs) {
-					startNotify(alarmPO, subscribeAlarmPO);
+					if (!AlarmNotifyUtils.startNotify(alarmPO, subscribeAlarmPO, alarmDAO, restTemplate,
+							loadBalancedRestTemplate)) {
+						// 告警没发出去
+						HttpAlarmNotifyRetryHandler
+								.putAlarmRetryNotifyVO(new AlarmRetryNotifyVO(alarmPO, subscribeAlarmPO));
+					}
 				}
 			}
 
@@ -130,39 +149,13 @@ public class HttpAlarmNotifyThread implements Runnable {
 		}
 	}
 
-	private void pushWebSoketMsg(AlarmPO alarmPO) {
-
-		LOGGER.info(
-				"----------pushWebSoketMsg start, alarmCode==" + alarmPO.getLastAlarm().getAlarmInfo().getAlarmCode());
-
-		// 页面通知 暂时只处理新告警
-		if (alarmPO.getAlarmCount() == 1 && alarmPO.getAlarmStatus().equals(EAlarmStatus.UNTREATED)) {
-			try {
-				WebSocketServer.sendInfo("new", "alarm");
-			} catch (IOException e) {
-				LOGGER.error("pushWebSoketMsg error: " + e);
-			}
+	private void retryHttpNotify(AlarmRetryNotifyVO alarmRetryNotifyVO) {
+		if (!AlarmNotifyUtils.startNotify(alarmRetryNotifyVO.getAlarmPO(), alarmRetryNotifyVO.getSubscribeAlarmPO(),
+				alarmDAO, restTemplate, loadBalancedRestTemplate)) {
+			// 再次失败
+			alarmRetryNotifyVO.setRetryNum(alarmRetryNotifyVO.getRetryNum() + 1);
+			HttpAlarmNotifyRetryHandler.putAlarmRetryNotifyVO(alarmRetryNotifyVO);
 		}
-		LOGGER.info("----------pushWebSoketMsg finish");
-	}
-
-	private boolean RibbonRestTemplateNotify(Object obj, String serviceName, String callbackUrl) {
-
-		try {
-			loadBalancedRestTemplate.postForObject("http://" + serviceName + callbackUrl, obj, String.class);
-		} catch (Exception e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private boolean HttpRestTemplateNotify(Object obj, String callbackUrl) {
-
-		String str = restTemplate.postForObject(callbackUrl, obj, String.class);
-		System.out.println("test 1 str = " + str);
-
-		return true;
 	}
 
 	/**
@@ -187,63 +180,6 @@ public class HttpAlarmNotifyThread implements Runnable {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * 更新alarm状态，发出http请求
-	 *
-	 * <p>
-	 * 
-	 * @param alarmPO
-	 * @param subscribeAlarmPO
-	 * @throws UnsupportedEncodingException
-	 * @see
-	 * @since
-	 * 
-	 */
-	private boolean startNotify(AlarmPO alarmPO, SubscribeAlarmPO subscribeAlarmPO) {
-		alarmPO.setLastNotifyTime(new Date());
-		alarmDAO.save(alarmPO);
-
-		if (subscribeAlarmPO.getAlarmNotifyMethod().equals(EAlarmNotifyMethod.HTTP)) {
-
-			return HttpRestTemplateNotify(transFromPO(alarmPO), subscribeAlarmPO.getCallbackUrl());
-
-		} else if (subscribeAlarmPO.getAlarmNotifyMethod().equals(EAlarmNotifyMethod.RIBBON_LOADBALANCED)) {
-
-			return RibbonRestTemplateNotify(transFromPO(alarmPO), subscribeAlarmPO.getSubServiceName(),
-					subscribeAlarmPO.getCallbackUrl());
-
-		} else if (subscribeAlarmPO.getAlarmNotifyMethod().equals(EAlarmNotifyMethod.MESSAGE_SERVICE)) {
-
-			// TODO 不该走到这里
-			return true;
-
-		} else {
-			// 默认走普通HTTP
-			return HttpRestTemplateNotify(transFromPO(alarmPO), subscribeAlarmPO.getCallbackUrl());
-
-		}
-
-	}
-
-	private AlarmNotifyBO transFromPO(AlarmPO alarmPO) {
-
-		if (alarmPO != null && alarmPO.getLastAlarm() != null) {
-			AlarmNotifyBO alarmNotifyBO = new AlarmNotifyBO();
-			alarmNotifyBO.setAlarmCode(alarmPO.getLastAlarm().getAlarmInfo().getAlarmCode());
-			alarmNotifyBO.setAlarmTime(alarmPO.getLastAlarm().getCreateTime());
-			alarmNotifyBO.setAlarmStatus(alarmPO.getAlarmStatus().toString());
-			alarmNotifyBO.setSourceServiceIP(alarmPO.getLastAlarm().getSourceServiceIP());
-			alarmNotifyBO.setSourceService(alarmPO.getLastAlarm().getSourceService());
-			alarmNotifyBO.setAlarmDevice(alarmPO.getLastAlarm().getAlarmDevice());
-			alarmNotifyBO.setAlarmObj(alarmPO.getLastAlarm().getAlarmObj());
-			alarmNotifyBO.setAlarmId(alarmPO.getId());
-			alarmNotifyBO.setParams(AlarmNotifyBO.formatParams(alarmPO.getLastAlarm().getAlarmParams()));
-			return alarmNotifyBO;
-		}
-
-		return null;
 	}
 
 	public void setSubscribeAlarmService(ISubscribeAlarmDAO subscribeAlarmDAO) {

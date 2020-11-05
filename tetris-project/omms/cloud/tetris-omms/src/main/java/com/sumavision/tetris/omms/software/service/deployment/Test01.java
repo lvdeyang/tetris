@@ -6,13 +6,11 @@ package com.sumavision.tetris.omms.software.service.deployment;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -31,11 +29,26 @@ public class Test01 {
 //		if(!file.exists()){
 //			file.mkdir();
 //		}
-		List<String> list = new ArrayList<String>();
+		/*List<String> list = new ArrayList<String>();
 		list.add("a");
 		list.add("b");
 		list.add("c");
-		System.out.println(list.toString());
+		System.out.println(list.toString());*/
+		HashMap<String, String> map = new HashMap<String,String>(); 
+        //添加元素到集合 
+        map.put("胡歌", "霍建华"); 
+        map.put("郭德纲", "于谦"); 
+        map.put("薛之谦", "大张伟"); 
+        //获取所有的键 获取键集
+        Set<String> keys = map.keySet(); 
+        System.out.println(keys);
+        // 遍历键集 得到每一个键 
+        for (String key : keys) { 
+        	//key 就是键 
+        	//获取对应值 
+            String value = map.get(key); 
+            System.out.println(key+"的CP是："+value); 
+        } 
 	}
 	
 	/**

@@ -1,0 +1,78 @@
+<div class="forword-outer-control"
+  style="width:100%; height:95%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;"
+  v-loading="loading">
+  <div class="col">
+    <div class="title">编码器</div>
+    <div class="custom-tree-container">
+      <div class="">
+        <el-input placeholder="输入关键字过滤" size="mini" clearable v-model="filterText">
+          <span slot="prefix" class="el-input__icon el-icon-search"></span>
+        </el-input>
+      </div>
+      <div>
+        <el-tree ref="tree" :data="encodetree" node-key="id" highlight-current :expand-on-click-node="true"
+          :props="defaultProps" :default-checked-keys="checked" :default-expand-all="defaultExpandAll"
+          :filter-node-method="filterNode" :render-content="renderContent" @node-expand="nodeExpand"
+          @node-collapse="nodeCollapse" draggable :allow-drop="allowDrop" :allow-drag="allowDrag"
+          @node-drag-start="handleDragStart">
+        </el-tree>
+      </div>
+    </div>
+  </div>
+  <div class="bvc2-auto-layout-wrapper liangwu-forword" @drop="treeDrop" @dragover="dragover">
+    <el-row>
+      <el-select size="mini" v-model="region" placeholder="选择域"
+        style="float: left;margin-left:10px;width:200px;margin-right: 10px;" @change="handleRegionChange">
+        <el-option v-for="item in regionOption" :key="item.identity" :label="item.stationName" :value="item.identity">
+        </el-option>
+      </el-select>
+      <el-button size="mini" type="success">开始</el-button>
+      <el-button size="mini" type="warning">停止</el-button>
+      <el-button size="mini" type="danger">删除</el-button>
+
+      <el-tag type="danger" size="small" style="margin-left: 10px;">已占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
+      <el-tag type="danger" size="small" style="margin-left: 10px;">当前转发/最大转发：{{forwordTotal}}/{{currentWidthTotleNum}}
+      </el-tag>
+    </el-row>
+    <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 90%"
+      @selection-change="handleSelectionChange" :row-class-name="rowClassName">
+      <el-table-column type="selection" width="55">
+      </el-table-column>
+      <el-table-column label="编码器（源）" prop="videoBundleName">
+      </el-table-column>
+      <el-table-column label="解码器（目标）" prop="name">
+      </el-table-column>
+      <el-table-column label="状态" prop="status">
+      </el-table-column>
+      <el-table-column label="操作" width="120">
+        <template slot-scope="scope" v-if="scope.row.videoBundleName">
+          <el-tooltip v-if="scope.row.status !=='已停止'" class="item" effect="dark" content="停止转发" placement="bottom">
+            <el-button type="text" icon="el-icon-circle-close-outline" style="padding:0; font-size:18px;cursor:pointer"
+              @click="rowStop(scope,true)">
+            </el-button>
+          </el-tooltip>
+          <el-tooltip v-if="scope.row.status !=='已停止'" class="item" effect="dark" content="停止并删除转发" placement="bottom">
+            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;cursor:pointer"
+              @click="rowDelete(scope)">
+            </el-button>
+          </el-tooltip>
+          <el-tooltip v-if="scope.row.status =='已停止'" class="item" effect="dark" content="开始转发" placement="bottom">
+            <el-button type="text" icon="el-icon-caret-right" style="padding:0; font-size:18px;cursor:pointer"
+              @click="rowStart(scope)">
+            </el-button>
+          </el-tooltip>
+          <el-tooltip v-if="scope.row.status =='已停止'" class="item" effect="dark" content="删除转发" placement="bottom">
+            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;cursor:pointer"
+              @click="rowStop(scope,false)">
+            </el-button>
+          </el-tooltip>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+      :page-sizes="[10, 20, 50]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total"
+      :pager-count="5">
+    </el-pagination>
+  </div>
+</div>

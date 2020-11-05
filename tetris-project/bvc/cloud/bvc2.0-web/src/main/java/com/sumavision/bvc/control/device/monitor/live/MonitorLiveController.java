@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceRemoteService;
@@ -32,6 +34,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveService;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveSplitConfigDAO;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveSplitConfigPO;
@@ -93,6 +96,9 @@ public class MonitorLiveController {
 	
 	@Autowired
 	private MonitorLiveSplitConfigDAO monitorLiveSplitConfigDAO;
+	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
 	
 	@Autowired
 	private BundleService bundleService;
@@ -178,15 +184,32 @@ public class MonitorLiveController {
 			entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
 		}
 		
+		
 //		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
 		
+		//外部点播本地的外部用户id集合
+		Set<Long> outerUserIds = new HashSet<Long>();		
 		List<String> bundleIds=new ArrayList<String>();
-		entities.stream().forEach(entity->{bundleIds.add(entity.getAudioBundleId());bundleIds.add(entity.getDstAudioBundleId());});
+		entities.stream().forEach(entity->{
+			if(entity.getVideoBundleId() != null) bundleIds.add(entity.getVideoBundleId());
+			if(entity.getDstVideoBundleId() != null) bundleIds.add(entity.getDstVideoBundleId());
+			if(LiveType.XT_LOCAL.equals(entity.getType())) outerUserIds.add(entity.getUserId());
+		});
 		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+		List<FolderUserMap> outerUserMaps = folderUserMapDao.findByUserIdIn(outerUserIds);
 		
 		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
-			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getAudioBundleId());
-			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstAudioBundleId());
+			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getVideoBundleId());
+			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstVideoBundleId());
+			if(LiveType.XT_LOCAL.equals(entity.getType())){
+				//外部点播本地编码器，造一个ExtraInfoPO给dstExtraInfo设置值使用
+				FolderUserMap userMap = queryUtil.queryUserMapByUserId(outerUserMaps, entity.getUserId());
+				ExtraInfoPO extraInfo = new ExtraInfoPO();
+				extraInfo.setName("extend_param");
+				extraInfo.setValue("{\"region\":\"" + userMap.getUserNode() + "\"}");
+				dstExtraInfos = new ArrayList<ExtraInfoPO>();
+				dstExtraInfos.add(extraInfo);
+			}
 			try {
 				return new MonitorLiveDeviceVO().set(entity,extraInfos,dstExtraInfos);
 			} catch (Exception e) {
@@ -907,17 +930,19 @@ public class MonitorLiveController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月27日 上午10:03:40
 	 * @param @PathVariable Long id 点播设备任务id
+	 * @param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/device/{id}")
 	public Object stopLiveDevice(
 			@PathVariable Long id,
+			Boolean stopAndDelete,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno());
+		monitorLiveDeviceService.stop(id, user.getId(), user.getUserno(), stopAndDelete);
 		
 		return null;
 	}
@@ -991,4 +1016,24 @@ public class MonitorLiveController {
 		return prop.getProperty("udpPortStart");
 	}
 	
+	/**
+	 * 停止转发重新开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月28日 上午11:28:22
+	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/to/restart")
+	public Object stopToRestart(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		MonitorLiveDevicePO entity = monitorLiveDeviceService.stopToRestart(id, user);
+		
+		return new MonitorLiveDeviceVO().set(entity);
+	}
 }

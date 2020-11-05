@@ -3,7 +3,7 @@
     <el-scrollbar style="height:100%;">
       <div class="logo-wrapper">
         <img class="logo-img" src="~assets/logo.png" />
-        <div class="platform-title">融媒体平台</div>
+        <div class="platform-title">任务监视系统</div>
       </div>
       <!--导航菜单-->
       <el-menu v-if="menurouter" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect" :collapse="isCollapse" :default-active="active" router background-color="#37404f" text-color="#fff" active-text-color="#ffd04b">

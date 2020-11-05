@@ -78,3 +78,4 @@ export const delDevice = params => { return axiosInstance.post(`${basePath}/reco
 export const queryRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/query`, qs.stringify(params)).then(res => res.data) }
 export const delRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/del`, qs.stringify(params)).then(res => res.data) }
 export const previewRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/preview`, qs.stringify(params)).then(res => res.data) }
+export const uploadFileToMims = params => { return axiosInstance.post(`${basePath}/record/file/uploadToMims`, qs.stringify(params)).then(res => res.data) }

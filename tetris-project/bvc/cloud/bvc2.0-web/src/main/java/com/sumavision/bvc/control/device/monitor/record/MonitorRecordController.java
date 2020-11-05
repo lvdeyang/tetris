@@ -3,6 +3,7 @@ package com.sumavision.bvc.control.device.monitor.record;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -275,13 +278,14 @@ public class MonitorRecordController {
 	
 	/**
 	 * 根据条件分页查询所有状态录制任务<br/>
-	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月17日 下午7:35:49
 	 * @param String mode 录制模式
 	 * @param String fileName 文件名称
 	 * @param String deviceType 如果为user device为用户id
 	 * @param String device 设备id
+	 * @param String taskName 所属任务taskName
 	 * @param String startTime 开始录制时间下限
 	 * @param String endTime 开始录制时间上限
 	 * @param int currentPage 当前页码
@@ -297,10 +301,12 @@ public class MonitorRecordController {
 			String fileName,
 			String deviceType,
 			String device,
+			String taskName,
 			String startTime,
 			String endTime,
 			int currentPage,
 			int pageSize,
+//			Pageable pageAble,
 			String status,
 			HttpServletRequest request) throws Exception{
 		
@@ -329,6 +335,18 @@ public class MonitorRecordController {
 		long total = 0;
 		List<MonitorRecordPO> entities = null;
 		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Integer totalSizeMb=(systemConfigurationDao.findByTotalSizeMbNotNull()==null?null:systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb());
+
+		
+		//根据下载权限查找设备
+		Set<String> bundleIds = resourceQueryUtil.queryUseableBundleIds(userId,new ArrayListWrapper().add("DOWNLOAD").getList(),Boolean.TRUE);
+		
+		if(bundleIds == null|| bundleIds.size()==0){
+			return new HashMapWrapper<String, Object>().put("total", total)
+					   .put("rows", null)
+					   .put("totalSizeMb", totalSizeMb)
+					   .getMap();
+		}
 		
 		if("user".equals(deviceType)){
 			if("ALL".equals(mode)){
@@ -365,45 +383,55 @@ public class MonitorRecordController {
 		}else{
 			if("ALL".equals(mode)){
 				if(userId.longValue()==1l || user.getIsGroupCreator()){
-					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
-							fileNameReg, device, parsedStartTime, parsedEndTime, 
-														null, status, null, page);
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatusAndBundleIdIn(
+														null, device, parsedStartTime, parsedEndTime,
+														fileNameReg, status, null, taskName, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}else{
-					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatus(
-							fileNameReg, device, parsedStartTime, parsedEndTime, 
-														userId, status, null, page);
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatusAndBundleIdIn(
+														null, device, parsedStartTime, parsedEndTime, 
+														bundleIds, status, null, fileNameReg, taskName, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}
 			}else{
 				if(userId.longValue()==1l || user.getIsGroupCreator()){
-					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findAllByConditionsAndStatusAndBundleIdIn(
 														mode, device, parsedStartTime, parsedEndTime, 
-														null,status, null, fileNameReg, page);
+														fileNameReg, status, null, taskName, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}else{
-					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatus(
+					Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditionsAndStatusAndBundleIdIn(
 														mode, device, parsedStartTime, parsedEndTime, 
-														userId, status, null, fileNameReg, page);
+														bundleIds, status, null, fileNameReg, taskName, page);
 					total = pagedEntities.getTotalElements();
 					entities = pagedEntities.getContent();
 				}
 			}
 		}
 		
+//		.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 		
 //		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		List<MonitorRecordTaskVO> rows = new ArrayList<MonitorRecordTaskVO>();
 		for(MonitorRecordPO recordPo:entities){
+			List<AccessNodeBO> layers =resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(recordPo.getStoreLayerId()).getList());
 			MonitorRecordTaskVO recordTaskVo = new MonitorRecordTaskVO();
-			rows.add(recordTaskVo.set(recordPo, bo));
+			if(layers==null || layers.size()<=0) {
+				rows.add(recordTaskVo.set(recordPo, bo));
+				continue;
+			}
+			AccessNodeBO targetLayer = layers.get(0);
+			rows.add(recordTaskVo.set(recordPo, bo).setPreviewUrl(new StringBufferWrapper()
+																			.append("http://").append(targetLayer==null?"0.0.0.0":targetLayer.getIp())
+					                                                        .append(":")
+					                                                        .append(targetLayer==null?"0":targetLayer.getPort())
+					                                                        .append("/")
+					                                                        .append(recordPo.getPreviewUrl()).toString()));
 		}
-		
-		Integer totalSizeMb=(systemConfigurationDao.findByTotalSizeMbNotNull()==null?null:systemConfigurationDao.findByTotalSizeMbNotNull().getTotalSizeMb());
 		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
@@ -511,6 +539,9 @@ public class MonitorRecordController {
 	 * @param String startTime 开始录制时间
 	 * @param String endTime 结束录制时间
 	 * @param String bundleId 传channel信息时有这个字段，代表录制设备（当前设备只有一个音频编码和一个视频编码）
+	 * @param Long total_size_mb 此任务可占用的磁盘大小，单位兆，0代表无限大。
+	 * @param Long time_duration 此任务可录制的时长，单位：小时，0代表物无限长
+	 * @param Long alarm_size_mb 告警值
 	 * @param String videoBundleId 视频设备id
 	 * @param String videoBundleName 视频设备名称
 	 * @param String videoBundleType 视频设备类型
@@ -525,6 +556,8 @@ public class MonitorRecordController {
 	 * @param String audioChannelId 音频通道id
 	 * @param String audioBaseType 音频通道类型
 	 * @param String audioChannelName 音频通道名称
+	 * @param storeMode 当mode为TIMESEGMENT时：day、week或者month
+	 * @param timeQuantum mode为TIMESEGMENT时，开始和结束时间的String。（举例：day:{11:00:00，12:00:00}或者week:{1-11:00:00，7-11:00:00}或者month:{1-11:00:00，10-11:00:00}）
 	 * @return MonitorRecordTaskVO 录制任务
 	 */
 	@JsonBody
@@ -536,6 +569,9 @@ public class MonitorRecordController {
 			String startTime, 
 			String endTime,
 			String bundleId,
+			Long total_size_mb,
+			Long time_duration,
+			Long alarm_size_mb,
 			String videoBundleId,
 			String videoBundleName,
 			String videoBundleType,
@@ -611,25 +647,19 @@ public class MonitorRecordController {
 		
 		if(MonitorRecordMode.TIMESEGMENT.equals(MonitorRecordMode.valueOf(mode))){
 			
-			SystemConfigurationPO configuration=systemConfigurationDao.findByTotalSizeMbNotNull();
-			if(configuration==null){
-				throw new BaseException(StatusCode.FORBIDDEN, "还没有设置磁盘大小");
-			}
-			Integer totalSizeMb =configuration.getTotalSizeMb();
-			
 			MonitorRecordPO task = monitorRecordService.addDeviceTimeSegment(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
 					user.getId(), user.getUserno(), user.getName(), storeMode,
-					timeQuantum, totalSizeMb);
+					timeQuantum, total_size_mb, time_duration, alarm_size_mb);
 			return new MonitorRecordTaskVO().set(task);
 		}else{
 			MonitorRecordPO task = monitorRecordService.addDevice(
 					mode, fileName, startTime, endTime, 
 					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-					user.getId(), user.getUserno(), user.getName());
+					user.getId(), user.getUserno(), user.getName(), total_size_mb, time_duration, alarm_size_mb);
 			return new MonitorRecordTaskVO().set(task);
 		}
 	}
@@ -762,10 +792,14 @@ public class MonitorRecordController {
 	
 	/**
 	 * 删除录制文件<br/>
-	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年4月25日 上午10:10:55
-	 * @param @PathVariable Long id 文件id
+	 * <b>日期：</b>2020年10月21日 下午4:31:50
+	 * @param id Long id 文件id
+	 * @param timeSegmentId
+	 * @param request
+	 * @return
+	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody

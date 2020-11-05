@@ -30,10 +30,10 @@
         <el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable
           size="small"></el-input>
       </div>
-      <div class="condition-item">
+      <!-- <div class="condition-item">
         <el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable
           size="small"></el-input>
-      </div>
+      </div> -->
       <el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">{{i18n.load}}</el-button>
 
       <div class="div_user_list">
@@ -47,8 +47,8 @@
             </el-table-column>
             <el-table-column :label="i18n.tableColumnUsername" prop="username">
             </el-table-column>
-            <el-table-column :label="i18n.tableColumnUserno" prop="userno">
-            </el-table-column>
+            <!-- <el-table-column :label="i18n.tableColumnUserno" prop="userno">
+            </el-table-column> -->
             <!-- <el-table-column
                                 label="状态"
                                 prop="status">
@@ -115,14 +115,14 @@
 
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
-        <el-form label-width="120px" size="small">
+        <el-form label-width="120px" size="mini">
           <el-form-item :label="i18n.labelCreateUserNickname">
             <el-input v-model="dialog.createUser.nickname"></el-input>
           </el-form-item>
           <el-form-item :label="i18n.labelCreateUserUsername">
             <el-input v-model="dialog.createUser.username"></el-input>
           </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserUserno">
+          <el-form-item v-show="false" :label="i18n.labelCreateUserUserno">
             <el-input v-model="dialog.createUser.userno"></el-input>
           </el-form-item>
           <el-form-item :label="i18n.labelCreateUserPassword">
@@ -132,30 +132,21 @@
             <el-input type="password" v-model="dialog.createUser.repeat"
               :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
           </el-form-item>
-          <!-- <el-form-item :label="i18n.labelCreateUserMobile">
-            <el-input v-model="dialog.createUser.mobile"></el-input>
-          </el-form-item> -->
-          <!-- <el-form-item :label="i18n.labelCreateUserMail">
-            <el-input v-model="dialog.createUser.mail"></el-input>
-          </el-form-item> -->
-          <!-- <el-form-item :label="i18n.labelCreateUserLevel">
-            <el-input-number v-model="dialog.createUser.level" :min="1" :max="1000" :label="i18n.labelCreateUserNumber">
-            </el-input-number>
-          </el-form-item> -->
-          <!-- <el-form-item :label="i18n.labelCreateUserClassify">
-            <el-input v-model="dialog.createUser.classify" disabled></el-input>
-          </el-form-item>
-          <el-form-item :label="i18n.labelCreateUserCompanyName">
-            <el-input v-model="dialog.createUser.company.name" disabled></el-input>
-          </el-form-item> -->
           <!-- 备注 -->
           <el-form-item :label="i18n.labelCreateUserRemark">
             <el-input v-model="dialog.createUser.remark"></el-input>
           </el-form-item>
           <!-- 绑定ip -->
-          <el-form-item :label="i18n.labelCreateUserBindIp">
-            <el-input v-model="dialog.createUser.loginIp"></el-input>
-          </el-form-item>
+            <el-form-item :label="i18n.labelCreateUserBindIp">
+              <el-col :span="13">
+              <el-input :disabled="isLoginIpDisabled" v-model="dialog.createUser.loginIp"></el-input>
+            </el-col>
+            <el-col :span="5" :offset="2">
+                <el-checkbox v-model="dialog.createUser.isLoginIp" @change="isLoginIpChange">是否首次登录记录IP</el-checkbox>
+            </el-col>
+            </el-form-item>
+          
+      
           <!-- 绑定角色 -->
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
@@ -193,15 +184,14 @@
     </el-dialog>
 
     <!-- 绑定接入层 -->
-    <el-dialog title="绑定接入层" :visible.sync="bindAccessNodeUidVisable">
-
+    <el-dialog title="绑定接入层" :visible.sync="bindAccessNodeUidVisable" width="500px">
       <el-table ref="accessNodeTable" :data="accessNodeTable"  :row-key="roleOption.id"
-        width="100%"  @current-change="currentRowChange">
+        width="100%"  height="400" @current-change="currentRowChange" highlight-current-row>
         <!-- <el-table-column type="selection" width="55"></el-table-column> -->
         <el-table-column prop="name" label="名称" width="200"></el-table-column>
         <el-table-column prop="ip" label="ip" width="200"></el-table-column>
       </el-table>
-      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit"><span class="icon-plus"
+      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit" style="margin-top:15px"><span class="icon-plus"
           style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
 
       <!-- <div>弹框</div> -->
@@ -215,13 +205,6 @@
           <el-form-item :label="i18n.labelEditUserNickname">
             <el-input v-model="dialog.editUser.nickname"></el-input>
           </el-form-item>
-          <!-- <el-form-item :label="i18n.labelEditUserMobile">
-            <el-input v-model="dialog.editUser.mobile"></el-input>
-          </el-form-item>
-          <el-form-item :label="i18n.labelEditUserMail">
-            <el-input v-model="dialog.editUser.mail"></el-input>
-          </el-form-item> -->
-
 
           <!-- 备注 -->
           <el-form-item :label="i18n.labelCreateUserRemark">
@@ -237,6 +220,10 @@
 
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.editUser.bindrole" @click.native="handleChangeFolder"></el-input>
+          </el-form-item>
+          <!-- 绑定接入层 -->
+          <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
+            <el-input v-model="dialog.editUser.bindAccessNodeUidName" @click.native="handleChangeNodeUid"></el-input>
           </el-form-item>
           <div class="div_change_pw">
             <el-button class="bt_change_pw" type="text"

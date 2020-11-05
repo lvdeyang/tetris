@@ -12,6 +12,7 @@ require.config({
     'sortablejs': window.LIBPATH + 'frame/draggable/sortable',
     'vue-draggable': window.LIBPATH + 'frame/draggable/vue-draggable',
     'extral': window.LIBPATH + 'extral/extral',
+    'echarts': window.LIBPATH + 'echarts/echarts.min',
 
     /* commons */
     'context': window.COMMONSPATH + 'context/context',
@@ -52,12 +53,19 @@ require.config({
     'bvc2-update-spokesman': window.APPPATH + 'component/bvc2-update-spokesman/bvc2-update-spokesman',
     'bvc2-update-roles': window.APPPATH + 'component/bvc2-update-roles/bvc2-update-roles',
     'bvc2-preview-layout': window.APPPATH + 'component/bvc2-preview-layout/bvc2-preview-layout',
+    // 两五项目
     'bvc2-monitor-record': window.APPPATH + 'component/bvc2-monitor-record/bvc2-monitor-record',
     'bvc2-monitor-record-liangwu': window.APPPATH + 'component/bvc2-monitor-record-liangwu/bvc2-monitor-record-liangwu',
     'bvc2-monitor-forword': window.APPPATH + 'component/bvc2-monitor-forword/bvc2-monitor-forword',
     'bvc2-monitor-forword-list': window.APPPATH + 'component/bvc2-monitor-forword-list/bvc2-monitor-forword-list',
     'bvc2-monitor-forword-bandwidth': window.APPPATH + 'component/bvc2-monitor-forword-bandwidth/bvc2-monitor-forword-bandwidth',
     'bvc2-monitor-currenttask': window.APPPATH + 'component/bvc2-monitor-currenttask/bvc2-monitor-currenttask',
+    'bvc2-liangwu-forword-list': window.APPPATH + 'component/bvc2-liangwu-forword-list/bvc2-liangwu-forword-list',
+    'forword-inner-control': window.APPPATH + 'component/bvc2-liangwu-forword-list/forword-inner-control/forword-inner-control',
+    'forword-outer-control': window.APPPATH + 'component/bvc2-liangwu-forword-list/forword-outer-control/forword-outer-control',
+    'decode-bind-screen': window.APPPATH + 'component/bvc2-liangwu-forword-list/decode-bind-screen/decode-bind-screen',
+
+
     'native-record-player': window.APPPATH + 'component/jQuery/zk_Player/zk_RecordPlayer/js/zk_RecordPlayer',
     'native-sip-player': window.APPPATH + 'component/jQuery/zk_Player/zk_SipPlayer/js/zk_SipPlayer',
     'player': window.APPPATH + 'component/jQuery/player/js/Tetris.player',
@@ -166,7 +174,13 @@ require.config({
     'page-monitor-external-folder': window.APPPATH + 'monitor/external-folder/page-monitor-external-folder',
     'page-monitor-currenttask': window.APPPATH + 'monitor/currenttask/page-monitor-currenttask',
     'page-monitor-forword-list': window.APPPATH + 'monitor/forword-list/page-monitor-forword-list',
-    'page-guide-control': window.APPPATH + 'guide/control/page-guide-control'
+    'page-liangwu-forword': window.APPPATH + 'liangwu/forword/page-liangwu-forword',
+    'page-between-domain-list': window.APPPATH + 'monitor/between-domain-list/page-between-domain-list',
+    'page-guide-control': window.APPPATH + 'guide/control/page-guide-control',
+    'DiskPieChart': window.APPPATH + 'statistics/echarts/DiskPieChart',
+    'HistogramChart': window.APPPATH + 'statistics/echarts/HistogramChart',
+    'LineChart': window.APPPATH + 'statistics/echarts/LineChart',
+    'page-bvc-statistics': window.APPPATH + 'statistics/page-bvc-statistics'
 
   },
   shim: {
@@ -268,7 +282,7 @@ require([
   });
 
   //生成path，用于active
-  function generatePath(menus) {
+  function generatePath (menus) {
     if (menus && menus.length > 0) {
       for (var i = 0; i < menus.length; i++) {
         var menu = menus[i];
@@ -356,7 +370,7 @@ require([
           var deviceArray = [];
           self.deviceLoop[id] = deviceArray;
 
-          function loop(root, deviceArray) {
+          function loop (root, deviceArray) {
             if (root.type === 'FOLDER') {
               if (root.children && root.children.length > 0) {
                 for (var i = 0; i < root.children.length; i++) {

@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
 import com.suma.application.ldap.equip.po.LdapEquipPo;
 
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.SerNodeDao;
@@ -23,6 +25,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 
@@ -36,6 +39,9 @@ public class EquipSyncLdapUtils {
 
 	@Autowired
 	private BundleDao bundleDao;
+	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
 
 	@Autowired
 	private LdapEquipInfoUtil ldapEquipInfoUtil;
@@ -64,6 +70,7 @@ public class EquipSyncLdapUtils {
 	public int handleSyncFromLdap() {
 		List<LdapEquipPo> ldapEquips = ldapEquipDao.queryAllEquips();
 		List<BundlePO> successBundles = new ArrayList<BundlePO>();
+		List<ExtraInfoPO> successExtraInfos = new ArrayList<ExtraInfoPO>();
 		if (!CollectionUtils.isEmpty(ldapEquips)) {
 
 			List<String> allBundleIdsInLdap = new ArrayList<String>();
@@ -118,6 +125,13 @@ public class EquipSyncLdapUtils {
 							bundleService.configDefaultAbility(bundle);
 						}
 						successBundles.add(bundle);
+						ExtraInfoPO extraInfo = new ExtraInfoPO();
+						extraInfo.setName("extend_param");
+						JSONObject params = new JSONObject();
+						params.put("region", bundle.getEquipNode());
+						extraInfo.setValue(params.toJSONString());
+						extraInfo.setBundleId(bundle.getBundleId());
+						successExtraInfos.add(extraInfo);
 					}
 
 				} catch (Exception e) {
@@ -128,6 +142,9 @@ public class EquipSyncLdapUtils {
 		}
 		if (!successBundles.isEmpty()) {
 			bundleDao.save(successBundles);
+		}
+		if(!successExtraInfos.isEmpty()){
+			extraInfoDao.save(successExtraInfos);
 		}
 		return successBundles.size();
 	}

@@ -21,7 +21,7 @@ public class RecordCapacityService {
 	@Autowired
 	private DeviceDAO deviceDAO;
 
-	public void addRecordTask(RecordTimerBO recordTimerBO) {
+	public void addRecordTask(RecordTimerBO recordTimerBO) throws Exception {
 
 		DevicePO devicePO;
 
@@ -67,6 +67,7 @@ public class RecordCapacityService {
 			// TODO Auto-generated catch block
 			LOGGER.error("RecordCapacityService addRecordTask() exception, e=" + e.toString());
 			e.printStackTrace();
+			throw e;
 		}
 	}
 

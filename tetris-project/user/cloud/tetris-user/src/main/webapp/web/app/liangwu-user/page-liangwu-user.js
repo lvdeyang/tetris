@@ -85,7 +85,8 @@ define([
             loginIp: '',
             lastlogintime: '',
             bindrole: '',
-            bindRoles: ''
+            bindRoles: '',
+            isLoginIp:true
           },
           editUser: {
             visible: false,
@@ -102,7 +103,9 @@ define([
             remark: '',
             loginIp: '',
             bindrole: '',
-            bindRoles: ''
+            bindRoles: '',
+            bindAccessNodeUidName:'',
+            bindAccessNodeUid:''
           },
           import: {
             requireType: ['csv'],
@@ -114,7 +117,8 @@ define([
         accessNodeTable:[],
         bindAccessNodeUid:'',
         bindAccessNodeUidName:'',
-        bindAccessNodeUidRow:undefined
+        bindAccessNodeUidRow:undefined,
+        isLoginIpDisabled:true
       },
       methods: {
         rowKey: function (row) {
@@ -146,7 +150,7 @@ define([
           // self.$refs.roleTable.clearSelection()
           var self = this;
           self.accessNodeTable =[];
-          self.table.rows.splice(0, self.table.rows.length);
+          // self.table.rows.splice(0, self.table.rows.length);
           ajax.post('/user/load', {
             currentPage: 1,
             pageSize: 10000,
@@ -166,13 +170,12 @@ define([
     currentRowChange: function (currentRow, oldRow) {
       var self = this;
       self.tbindAccessNodeUidRow = currentRow;
-      console.log(currentRow)
     },
 
     handleBindAccessNodeUidSubmit: function () {
       this.bindAccessNodeUidVisable = false;
-      this.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
-      this.bindAccessNodeUid = this.tbindAccessNodeUidRow.nodeUid
+      this.bindAccessNodeUidName= this.dialog.editUser.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
+      this.bindAccessNodeUid = this.dialog.editUser.bindAccessNodeUid =this.tbindAccessNodeUidRow.nodeUid
     },
     handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
@@ -186,13 +189,13 @@ define([
           this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
           // this.dialogBindRole.bindRoleSelection = [];
           this.$refs.roleTable.clearSelection()
-        },
-        gotoBindBusinessRole: function (scope) {
+     },
+    gotoBindBusinessRole: function (scope) {
           var slef = this;
           var row = scope.row;
           window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
         },
-        load: function (currentPage) {
+    load: function (currentPage) {
           var self = this;
           var param = {
             currentPage: currentPage,
@@ -220,9 +223,10 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                self.roleOption.push(rows[i]);
+                if(rows[i].id != 7||rows[i].id != 6){
+                  self.roleOption.push(rows[i]);
+                }
               }
-              console.log(self.roleOption)
             }
           });
         },
@@ -318,8 +322,10 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            rolesName.push(businessRoles[i].name)
-            rolesId.push(businessRoles[i].id)
+            if(businessRoles[i].id != '7'||businessRoles[i].id != '6'){//去掉媒资用户
+              rolesName.push(businessRoles[i].name)
+              rolesId.push(businessRoles[i].id)
+            }
           }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;
@@ -351,22 +357,23 @@ define([
         },
         handleEditUserSubmit: function () {
           var self = this;
+          if(!self.dialog.editUser.bindAccessNodeUid){
+            self.$message({
+              'type':'waring',
+              'message':"服务节点不能为空"
+            })
+            return
+          }
+          if(!self.dialog.editUser.bindrole){
+            self.$message({
+              'type':'waring',
+              'message':"绑定角色不能为空"
+            })
+            return
+          }
           self.dialog.editUser.loading = true;
-          ajax.post('/user/edit/' + self.dialog.editUser.id, {
-            nickname: self.dialog.editUser.nickname,
-            mobile: self.dialog.editUser.mobile,
-            mail: self.dialog.editUser.mail,
-            level: self.dialog.editUser.level,
-            editPassword: self.dialog.editUser.editPassword,
-            oldPassword: self.dialog.editUser.oldPassword,
-            newPassword: self.dialog.editUser.newPassword,
-            repeat: self.dialog.editUser.repeat,
-            remark: self.dialog.editUser.remark,
-            loginIp: self.dialog.editUser.loginIp,
-            bindrole: self.dialog.editUser.bindrole,
-            bindRoles: self.dialog.editUser.bindRoles,
-            resetPermissions: true
-          }, function (data, status) {
+          self.dialog.editUser.resetPermissions = true;
+          ajax.post('/user/edit/' + self.dialog.editUser.id, self.dialog.editUser, function (data, status) {
             self.dialog.editUser.loading = false;
             if (status !== 200) return;
             for (var i = 0; i < self.table.rows.length; i++) {
@@ -438,11 +445,26 @@ define([
         },
         handleCreateUserSubmit: function () {
           var self = this;
+          if(!self.bindAccessNodeUid){
+            self.$message({
+              'type':'waring',
+              'message':"服务节点不能为空"
+            })
+            return
+          }
+          if(!self.dialog.createUser.bindRoles){
+            self.$message({
+              'type':'waring',
+              'message':"绑定角色不能为空"
+            })
+            return
+          }
+          var rundemNum = self.randomString(11);
           self.dialog.createUser.loading = true;
           var params = {
             nickname: self.dialog.createUser.nickname,
             username: self.dialog.createUser.username,
-            userno: self.dialog.createUser.userno,
+            userno: rundemNum,
             password: self.dialog.createUser.password,
             repeat: self.dialog.createUser.repeat,
             mobile: self.dialog.createUser.mobile,
@@ -454,7 +476,8 @@ define([
             loginIp: self.dialog.createUser.loginIp,
             bindrole: self.dialog.createUser.bindrole,
             bindRoles: self.dialog.createUser.bindRoles,
-            worknodeUid:self.bindAccessNodeUid
+            worknodeUid:self.bindAccessNodeUid,
+            isLoginIp:self.dialog.createUser.isLoginIp,
           };
 
           ajax.post('/user/add', params, function (data, status) {
@@ -511,6 +534,27 @@ define([
             }
             str = a[0] + '-' + a[1] + '-' + a[2] + ' ' + a[3] + ':' + a[4] + ':' + a[5];
             return str;
+          }
+        },
+        randomString: function (len) {
+          len = len || 11;
+          var $chars = '0123456789';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+          var maxPos = $chars.length;
+          var pwd = '';
+          for (var i = 0; i < len; i++) {
+            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+    
+          }
+          return pwd;
+    
+        },
+        isLoginIpChange:function(val){
+          if(val){
+            this.dialog.createUser.loginIp = "";
+            this.isLoginIpDisabled = true
+          }else{
+            this.isLoginIpDisabled = false
+
           }
         }
       },
