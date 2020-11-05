@@ -18,6 +18,7 @@ import javax.management.relation.Relation;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.omg.stub.java.rmi._Remote_Stub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -644,7 +645,7 @@ public class CommandQueryController {
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
 		
-		//处理：返回设备集合   //此处没有分内部系统、外部系统。后边需要就分开
+		//处理：返回设备集合  
 		if(Boolean.TRUE.equals(returnBundleList)){
 			
 			JSONObject info =new JSONObject();
@@ -659,8 +660,12 @@ public class CommandQueryController {
 					
 				});
 				
-				_roots.add(_root);
+				if(_root.getBundleList().size()>0){
+					_roots.add(_root);
+				}
+				
 			}
+			
 			return _roots;
 		}
 		

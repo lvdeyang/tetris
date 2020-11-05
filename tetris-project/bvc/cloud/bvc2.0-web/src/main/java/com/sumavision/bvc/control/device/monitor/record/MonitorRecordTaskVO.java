@@ -73,6 +73,8 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 	/** 录制最大存储容量*/
 	private Long total_size_mb; 
 	
+	private Long alarm_size_mb;
+	
 	public Long getTime_duration() {
 		return time_duration;
 	}
@@ -261,6 +263,15 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 		this.previewUrl = previewUrl;
 		return this;
 	}
+	
+	public Long getAlarm_size_mb() {
+		return alarm_size_mb;
+	}
+
+	public MonitorRecordTaskVO setAlarm_size_mb(Long alarm_size_mb) {
+		this.alarm_size_mb = alarm_size_mb;
+		return this;
+	}
 
 	@Override
 	public MonitorRecordTaskVO set(MonitorRecordPO entity) throws Exception {
@@ -286,7 +297,8 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 			.setTaskName(entity.getTaskName()==null?null:entity.getTaskName())
 			.setBundleId(entity.getAudioBundleId()==null?"":entity.getAudioBundleId())
 			.setTotal_size_mb(entity.getTotal_size_mb())
-			.setTime_duration(entity.getTime_duration());
+			.setTime_duration(entity.getTime_duration())
+			.setAlarm_size_mb(entity.getAlarm_size_mb());
 		return this;
 	}
 	
