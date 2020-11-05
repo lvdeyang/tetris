@@ -31,17 +31,16 @@ public class LocationOfScreenWallController {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月4日 下午1:16:26
-	 * @param id 屏幕id
-	 * @return
-	 * @throws Exception
+	 * @param locationTemplateLayoutId 屏幕墙id
+	 * @return List<LocationOfScreenWallPO>
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value="/information")
-	public Object information(
-			Long id) throws Exception{
+	@RequestMapping(value="all/screen/information")
+	public Object allScreenInformation(
+			Long locationTemplateLayoutId) throws Exception{
 		
-//		locationOfScreenWallService.unbindEncoder(id);
+		locationOfScreenWallService.allScreenInformation(locationTemplateLayoutId);
 		
 		return null;
 	}
@@ -94,6 +93,27 @@ public class LocationOfScreenWallController {
 		return null;
 	}
 	
+	/**
+	 * 解绑所有未执行转发解码器<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月3日 上午11:08:55
+	 * @param locationTemplateLayoutId 屏幕墙的id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/unbind/all/decoder")
+	public Object unbindAllDecoder(
+			Long locationTemplateLayoutId) throws Exception{
+		
+		if(locationTemplateLayoutId == null){
+			return null;
+		}
+		
+		locationOfScreenWallService.unbindAllDecoder(locationTemplateLayoutId);
+		
+		return null;
+	}
 	
 	/**
 	 * 绑定编码器<br/>
@@ -176,10 +196,29 @@ public class LocationOfScreenWallController {
 			idList = JSONArray.parseArray(ids, Long.class);
 		}
 		
-		
 		locationOfScreenWallService.unbindALLEncoder(idList, LocationTemplateLayoutId, unbindAll, user);
 		
 		return null;
+	}
+	
+	/**
+	 * 更新对应屏幕的转发状态<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 下午2:07:34
+	 * @param id 屏幕的id
+	 * @param monitorLiveDeviceId
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/exchange/location/Status")
+	public Object exchangeLocationStatus(
+			Long id,
+			Long monitorLiveDeviceId) throws Exception{
+		
+		return locationOfScreenWallService.exchangeLocationStatus(id, monitorLiveDeviceId);
 	}
 	
 }

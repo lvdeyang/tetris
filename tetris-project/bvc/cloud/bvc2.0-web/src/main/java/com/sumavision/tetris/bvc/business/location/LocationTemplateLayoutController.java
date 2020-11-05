@@ -39,10 +39,8 @@ public class LocationTemplateLayoutController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		
-		locationTemplateLayoutService.add(templateName, screenNumberOfX, screenNumberOfY, userId);
-		
-		return null;
+				
+		return locationTemplateLayoutService.add(templateName, screenNumberOfX, screenNumberOfY, userId);
 	}
 
 	/**
@@ -85,9 +83,23 @@ public class LocationTemplateLayoutController {
 			Integer screenNumberOfX,
 			Integer screenNumberOfY) throws Exception{
 		
-		locationTemplateLayoutService.edit(id, templateName, screenNumberOfX, screenNumberOfY);
+		return locationTemplateLayoutService.edit(id, templateName, screenNumberOfX, screenNumberOfY);
 		
-		return null;
+	}
+	
+	/**
+	 * 查询屏幕墙模板<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月3日 上午10:40:26
+	 * @return List<LocationTemplateLayoutVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value="/query/all")
+	public Object queryAll() throws Exception{
+		
+		return locationTemplateLayoutService.queryAll();
 		
 	}
 	
@@ -97,20 +109,18 @@ public class LocationTemplateLayoutController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月3日 上午10:40:26
 	 * @param templateName 屏幕墙模板名称
-	 * @return List<LocationTemplateLayoutPO>
+	 * @return List<LocationTemplateLayoutVO>
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value="/query")
-	public Object query(
-			String templateName,
-			HttpServletRequest request) throws Exception{
-		
-		Long userId = userUtils.getUserIdFromSession(request);
-		
-		locationTemplateLayoutService.query(templateName, userId);
-		
-		return null;
-		
-	}
+//	@JsonBody
+//	@ResponseBody
+//	@RequestMapping(value="/query")
+//	public Object query(
+//			String templateName,
+//			HttpServletRequest request) throws Exception{
+//		
+//		Long userId = userUtils.getUserIdFromSession(request);
+//		
+//		return locationTemplateLayoutService.query(templateName, userId);
+//		
+//	}
 }
