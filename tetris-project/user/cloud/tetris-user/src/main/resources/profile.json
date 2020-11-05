@@ -3,6 +3,6 @@
 	"dataWarehousePort": "8090",
 	"dataWarehouseUsername": "testUser",
 	"dataWarehousePassword": "test@@123456",
-	"bossAddUserUrl":"http://192.165.56.64/mims/user/add"
-	
+	"bossAddUserUrl":"http://10.10.60.30:6050/user/add",
+	"bossPlayRecordUrl":"http://10.10.60.30:6050/user/play"
  }

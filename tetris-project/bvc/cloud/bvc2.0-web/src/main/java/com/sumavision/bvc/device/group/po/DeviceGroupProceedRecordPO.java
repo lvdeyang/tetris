@@ -41,6 +41,9 @@ public class DeviceGroupProceedRecordPO extends AbstractBasePO{
 	
 	/** 会议名称 */
 	private String groupName;
+	
+	/** 建会人员id*/
+	private Long userId;
 
 	public Date getStartTime() {
 		return startTime;
@@ -104,5 +107,14 @@ public class DeviceGroupProceedRecordPO extends AbstractBasePO{
 
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
+	}
+	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public DeviceGroupProceedRecordPO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
 	}
 }

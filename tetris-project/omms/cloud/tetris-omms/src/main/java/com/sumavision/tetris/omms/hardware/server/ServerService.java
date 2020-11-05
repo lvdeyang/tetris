@@ -242,6 +242,8 @@ public class ServerService {
 		basicInfo.setSystemTime("");
 		basicInfo.setLastRebootTime("");
 		basicInfo.setUpTime("");
+		basicInfo.setTemperature(serverInfo.getJSONObject("cpu").getString("temperature"));
+		basicInfo.setFanspeed(serverInfo.getJSONObject("power").getLong("fanspeed"));
 		
 		//小工具升级之后支持的参数
 		if(serverInfo.containsKey("pid")){

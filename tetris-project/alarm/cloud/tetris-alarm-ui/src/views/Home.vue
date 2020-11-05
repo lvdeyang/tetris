@@ -15,11 +15,7 @@
 
             <!-- 侧边栏导航 -->
             <template v-for="(menu, index) in menus">
-              <el-menu-item
-                v-if="!menu.sub || menu.sub.length<=0"
-                :index="menu.uuid"
-                @click="goto(menu)"
-              >
+              <el-menu-item v-if="!menu.sub || menu.sub.length<=0" :index="menu.uuid" @click="goto(menu)">
                 <i :class="menu.icon" :style="menu.style"></i>
                 <span slot="title">{{menu.title}}</span>
               </el-menu-item>
@@ -29,11 +25,7 @@
                   <span slot="title">{{menu.title}}</span>
                 </template>
                 <template v-for="(sub0, index0) in menu.sub">
-                  <el-menu-item
-                    v-if="!sub0.sub || sub0.sub.length<=0"
-                    :index="sub0.uuid"
-                    @click="goto(sub0)"
-                  >
+                  <el-menu-item v-if="!sub0.sub || sub0.sub.length<=0" :index="sub0.uuid" @click="goto(sub0)">
                     <i :class="sub0.icon" :style="sub0.style"></i>
                     <span slot="title">{{sub0.title}}</span>
                   </el-menu-item>
@@ -58,20 +50,8 @@
 
       <el-main style="padding:0; position:relative;">
         <div class="frame-header">
-          <el-menu
-            class="header-menu"
-            background-color="#37404f"
-            text-color="#fff"
-            active-text-color="#ffd04b"
-            mode="horizontal"
-            @select="menuSelect"
-          >
-            <el-menu-item
-              v-if="user.classify==='COMPANY_ADMIN' || user.classify==='COMPANY_USER'"
-              @click="userGroupToggle"
-              class="no-border-bottom-style right item-message"
-              index="1"
-            >
+          <el-menu class="header-menu" background-color="#37404f" text-color="#fff" active-text-color="#ffd04b" mode="horizontal" @select="menuSelect">
+            <el-menu-item v-if="user.classify==='COMPANY_ADMIN' || user.classify==='COMPANY_USER'" @click="userGroupToggle" class="no-border-bottom-style right item-message" index="1">
               <span class="el-icon-message" style="position:relative; left:4px;"></span>
               <span class="tag error" v-if="numberOfMessage>0">{{numberOfMessage}}</span>
             </el-menu-item>
@@ -90,16 +70,10 @@
               <span class="el-icon-bell" style="position:relative; left:3px; bottom:1px;"></span>
             </el-menu-item>
             <el-menu-item class="no-border-bottom-style right" index="5" @click="gotoportal">
-              <a
-                class="feather-icon-globe"
-                style="position:relative; left:0px; bottom:1px;"
-              >&nbsp;门户首页</a>
+              <a class="feather-icon-globe" style="position:relative; left:0px; bottom:1px;">&nbsp;门户首页</a>
             </el-menu-item>
             <el-menu-item class="no-border-bottom-style" index="5" @click="sideMenuToggle">
-              <span
-                class="icon-reorder"
-                style="font-size:18px; position:relative; top:1px; padding:0 5px;"
-              ></span>
+              <span class="icon-reorder" style="font-size:18px; position:relative; top:1px; padding:0 5px;"></span>
             </el-menu-item>
           </el-menu>
         </div>
@@ -140,16 +114,12 @@
               &nbsp;版权归<a :href="footer.company.link" class="company" target="_blank">{{footer.company.name}}</a>所有.-->
               <strong>Copyright © {{footer.company.time}}</strong>
               &nbsp;版权归
-              <a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>所有.
+              <a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>
             </div>
             <div class="minimize">
               <el-breadcrumb separator style="float:right;">
                 <el-breadcrumb-item v-for="item in footer.minimize" :key="item.key">
-                  <el-button
-                    class="single"
-                    v-if="item.type==='single'"
-                    @click="minimizeClick(item)"
-                  >
+                  <el-button class="single" v-if="item.type==='single'" @click="minimizeClick(item)">
                     <span :class="item.icon" :style="item.style"></span>
                   </el-button>
                   <el-button class="multiple" v-if="item.type==='multiple'">
@@ -166,19 +136,11 @@
         </div>
 
         <!-- 组织机构成员 -->
-        <transition
-          enter-active-class="animated bounceInRight"
-          leave-active-class="animated bounceOutRight"
-        >
+        <transition enter-active-class="animated bounceInRight" leave-active-class="animated bounceOutRight">
           <div v-if="userGroupShow" class="userGroup">
             <el-scrollbar style="height:100%;">
               <el-collapse>
-                <el-collapse-item
-                  v-for="group in groups"
-                  :title="group.name+'('+group.numbersOfOnline+'/'+group.numbersObTotal+')'"
-                  :name="group.uuid"
-                  :key="group.uuid"
-                >
+                <el-collapse-item v-for="group in groups" :title="group.name+'('+group.numbersOfOnline+'/'+group.numbersObTotal+')'" :name="group.uuid" :key="group.uuid">
                   <template v-if="group.users && group.users.length>0">
                     <div class="user-item" v-for="user in group.users" :key="user.uuid">
                       <div class="user-icon">
@@ -189,10 +151,7 @@
                         <div class="user-status">[ {{user.status}} ]</div>
                       </div>
                       <div class="user-badge">
-                        <span
-                          v-if="!isNaN(user.numbersOfMessage) && user.numbersOfMessage>0"
-                          class="el-badge__content el-badge__content--success"
-                        >{{user.numbersOfMessage}}</span>
+                        <span v-if="!isNaN(user.numbersOfMessage) && user.numbersOfMessage>0" class="el-badge__content el-badge__content--success">{{user.numbersOfMessage}}</span>
                       </div>
                     </div>
                   </template>
@@ -258,7 +217,7 @@ export default {
           // link:'http://www.sumavision.com/',
           name: '北京市博汇科技股份有限公司',
           link: 'http://www.bohui.com.cn/',
-          time: '2018-2060'
+          time: '2020-2040'
         },
         minimize: [
           /* {
@@ -430,7 +389,7 @@ export default {
             }
           }
         })
-        .catch(function () {})
+        .catch(function () { })
     },
 
     isHash: function (test) {

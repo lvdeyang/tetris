@@ -420,7 +420,20 @@ define([
                     row.duration = null;
                 }
             },
-
+            handleStartTimeChange(row, value){
+            	if (value) {
+                    row.startTime = value;
+                } else {
+                    row.startTime = null;
+                }
+            },
+            handleEndTimeChange(row, value){
+            	if (value) {
+                    row.endTime = value;
+                } else {
+                    row.endTime = null;
+                }
+            },
             handleCommit: function () {
                 var self = this;
                 self.loading = true;

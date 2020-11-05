@@ -6,7 +6,7 @@
         </el-table-column>
       </el-table>
     </el-card>
-    <el-card style="float:left;margin-left:50px;margin-top:10px;width:80%;" body-style="padding:0px">
+    <el-card style="float:left;margin-left:20px;margin-top:10px;width:80%;" body-style="padding-left:30px">
       <div slot="header" class="clearfix">
         <!--
         <span style="float: left;font-size: 18px;">设备资源</span>
@@ -33,7 +33,7 @@
       </div>
 
       <!--资源列表-->
-      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="480">
+      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="450">
         <!-- <el-table-column type="index" width="100"></el-table-column> -->
         <el-table-column prop="name" label="名称" width="100" sortable>
         </el-table-column>
@@ -461,7 +461,15 @@ export default {
             type: 'error'
           })
         } else {
-          this.roles = res.roles
+          for (let i = 0; i < res.roles.length; i++) {
+            const item = res.roles[i];
+            if (item.id == 7 || item.id == 4 || item.id == 6) {
+
+            } else {
+              this.roles.push(item)
+            }
+
+          }
         }
 
         this.roleTableLoading = false

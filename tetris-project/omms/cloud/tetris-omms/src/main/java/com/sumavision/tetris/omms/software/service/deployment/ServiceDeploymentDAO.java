@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
 
+import com.sumavision.tetris.omms.software.service.installation.InstallationPackagePO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = ServiceDeploymentPO.class, idClass = Long.class)
@@ -28,4 +29,8 @@ public interface ServiceDeploymentDAO extends BaseDAO<ServiceDeploymentPO>{
 	public List<ServiceDeploymentPO> findByServiceTypeId(Long serviceTypeId);
 	
 	public ServiceDeploymentPO findByServerIdAndServiceTypeId(Long serverId,Long serviceTypeId);
+	
+	public List<ServiceDeploymentPO> findByServerIdAndStatus(Long serverId, String status);
+
+//	public List<Long> findByIdIn(List<ServiceDeploymentPO> list);
 }

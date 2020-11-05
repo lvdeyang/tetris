@@ -85,7 +85,8 @@ define([
             loginIp: '',
             lastlogintime: '',
             bindrole: '',
-            bindRoles: ''
+            bindRoles: '',
+            isLoginIp:true
           },
           editUser: {
             visible: false,
@@ -116,7 +117,8 @@ define([
         accessNodeTable:[],
         bindAccessNodeUid:'',
         bindAccessNodeUidName:'',
-        bindAccessNodeUidRow:undefined
+        bindAccessNodeUidRow:undefined,
+        isLoginIpDisabled:true
       },
       methods: {
         rowKey: function (row) {
@@ -187,13 +189,13 @@ define([
           this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
           // this.dialogBindRole.bindRoleSelection = [];
           this.$refs.roleTable.clearSelection()
-        },
-        gotoBindBusinessRole: function (scope) {
+     },
+    gotoBindBusinessRole: function (scope) {
           var slef = this;
           var row = scope.row;
           window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
         },
-        load: function (currentPage) {
+    load: function (currentPage) {
           var self = this;
           var param = {
             currentPage: currentPage,
@@ -221,9 +223,10 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                self.roleOption.push(rows[i]);
+                if(rows[i].id != 7||rows[i].id != 6){
+                  self.roleOption.push(rows[i]);
+                }
               }
-              console.log(self.roleOption)
             }
           });
         },
@@ -319,8 +322,10 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            rolesName.push(businessRoles[i].name)
-            rolesId.push(businessRoles[i].id)
+            if(businessRoles[i].id != '7'||businessRoles[i].id != '6'){//去掉媒资用户
+              rolesName.push(businessRoles[i].name)
+              rolesId.push(businessRoles[i].id)
+            }
           }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;
@@ -472,6 +477,7 @@ define([
             bindrole: self.dialog.createUser.bindrole,
             bindRoles: self.dialog.createUser.bindRoles,
             worknodeUid:self.bindAccessNodeUid,
+            isLoginIp:self.dialog.createUser.isLoginIp,
           };
 
           ajax.post('/user/add', params, function (data, status) {
@@ -542,6 +548,15 @@ define([
           return pwd;
     
         },
+        isLoginIpChange:function(val){
+          if(val){
+            this.dialog.createUser.loginIp = "";
+            this.isLoginIpDisabled = true
+          }else{
+            this.isLoginIpDisabled = false
+
+          }
+        }
       },
       created: function () {
         var self = this;

@@ -68,6 +68,9 @@ import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+import com.sumavision.tetris.websocket.message.WebsocketMessageType;
+import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 @Controller
 @RequestMapping("/resource")
@@ -119,6 +122,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private TetrisDispatchService tetrisDispatchService;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -757,6 +763,7 @@ public class BindResourceController extends ControllerBase {
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
 					
+					List<Long> consumeIds = new ArrayList<Long>();
 					for (UserBO userBO : userBOs) {
 						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
 						if ("ldap".equals(userBO.getCreater())) {
@@ -781,8 +788,14 @@ public class BindResourceController extends ControllerBase {
 								
 								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 							}
+						}else{
+							JSONObject message = new JSONObject();
+							message.put("businessType", "AuthUpdate");
+							WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+							consumeIds.add(ws.getId());
 						}
 					}
+					websocketMessageService.consumeAll(consumeIds);
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);

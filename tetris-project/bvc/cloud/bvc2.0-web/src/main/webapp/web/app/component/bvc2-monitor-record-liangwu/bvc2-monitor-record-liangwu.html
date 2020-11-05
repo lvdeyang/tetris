@@ -7,10 +7,10 @@
       <el-input size="mini" v-model="condition.fileName" placeholder="请输入任务名称" style="width:150px; margin-left:10px;"></el-input>
       <el-select size="mini" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
         <el-option key="ALL" label="全部" value="ALL"></el-option>
-        <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
+        <el-option key="MANUAL" label="长期录制" value="MANUAL"></el-option>
         <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
         <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
-        <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
+        <!-- <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option> -->
       </el-select>
       <el-select size="mini" v-model="condition.status" placeholder="任务状态" style="width:150px; margin-left:10px;">
         <el-option key="" label="全部" value=""></el-option>
@@ -25,9 +25,9 @@
         end-placeholder="结束日期" :default-time="['12:00:00']" style="margin-left:10px;">
       </el-date-picker>
       <el-button type="primary" size="mini" @click="handleReset">重置</el-button>
-      <el-button type="primary" size="mini" @click="handleTotalSizeMb">设置磁盘大小</el-button>
+      <!-- <el-button type="primary" size="mini" @click="handleTotalSizeMb">设置磁盘大小</el-button> -->
       <el-button size="mini" @click="handleAddRecord" type="success">添加录制</el-button>
-      <el-tag type="success" size="mini" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag>
+      <!-- <el-tag type="success" size="mini" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag> -->
       <el-tag type="danger" size="mini" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
     </div>
     <div style="width:100%;height: calc(100% - 150px);  left:0; bottom:52px; background-color:#fff;overflow: auto;">
@@ -52,28 +52,28 @@
           <template slot-scope="scope">
             <el-tooltip v-if="scope.row.status != '已完成'" class="item" effect="dark" content="停止任务" placement="bottom">
               <el-button type="text" icon="el-icon-circle-close-outline"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="rowDelete(scope)"></el-button>
             </el-tooltip>
             <el-tooltip v-else class="item" effect="dark" content="删除" placement="bottom">
               <el-button type="text" icon="el-icon-delete"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDelete(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDelete(scope.row)">
               </el-button>
             </el-tooltip>
             <el-tooltip v-if="scope.row.mode == '排期'" class="item" effect="dark" content="详情" placement="bottom">
               <el-button type="text" icon="el-icon-tickets"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDetail(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDetail(scope.row)">
               </el-button>
             </el-tooltip>
 
             <el-tooltip v-if="scope.row.mode == '排期' && scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="openDownload(scope)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="openDownload(scope)">
               
               </el-button>
             </el-tooltip>
             <el-tooltip v-else-if="scope.row.privilegeOfDownload" class="item" effect="dark" content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
-                style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleDownload(scope.row)">
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer" @click="handleDownload(scope.row)">
               </el-button>
             </el-tooltip>
           </template>
@@ -96,7 +96,7 @@
     </div> -->
   </div>
   <template>
-    <el-dialog title="添加录制任务" :visible.sync="dialog.addRecord.visible" width="872px"
+    <el-dialog title="添加录制任务" :visible.sync="dialog.addRecord.visible" width="950px"
       :before-close="handleAddRecordClose">
       <div style="width:100%; height:400px; position:relative;">
         <div style="position:absolute; top:-30px; bottom:-30px; left:-20px; right:-20px;">
@@ -122,29 +122,35 @@
             <div class="monitor92-top10"
               style="position:absolute; left:420px; right:10px; top:0; bottom:0; border:1px solid #ebebeb;">
               <div style="width:100%; height:100%; position:relative; padding:10px 15px;">
-                <el-form label-width="0" ref="addRecordForm">
-                  <el-form-item style="margin-bottom:10px;">
+                <el-form label-width="80px" ref="addRecordForm">
+                  <el-form-item style="margin-bottom:10px;" label="录制模式">
                     <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式"
-                      @change="addRecordModeChange" style="width:400px;">
-                      <!-- <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option> -->
+                      @change="addRecordModeChange" style="width: 400px;">
+                      <el-option key="MANUAL" label="长期录制" value="MANUAL"></el-option>
                       <el-option key="SCHEDULING" label="定时录制" value="SCHEDULING"></el-option>
                       <el-option key="TIMESEGMENT" label="排期录制" value="TIMESEGMENT"></el-option>
-                      <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option>
+                      <!-- <el-option key="CYCLE" label="循环录制" value="CYCLE"></el-option> -->
                     </el-select>
                   </el-form-item>
-                  <el-form-item style="margin-bottom:10px;width: 400px;" prop="fileName">
+                  <el-form-item style="margin-bottom:10px;width: 480px;" prop="fileName" label="任务名称">
                     <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入任务名称"></el-input>
+                  </el-form-item> 
+                  <el-form-item style="margin-bottom:10px;width: 480px;" prop="total_size_mb" label="最大容量">
+                    <el-input size="medium" v-model.number="dialog.addRecord.total_size_mb" placeholder="单位：GB，0代表不限制" ></el-input>
+                  </el-form-item>
+                  <el-form-item style="margin-bottom:10px;width: 480px;" prop="time_duration" label="最大时长">
+                    <el-input size="medium" v-model.number="dialog.addRecord.time_duration" placeholder="单位：小时，0代表不限制"></el-input>
                   </el-form-item>
 
-                  <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px">
+                  <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px" label="时间">
                     <el-date-picker size="medium" v-model="dialog.addRecord.timeScope" type="datetimerange"
-                      start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+                      start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00'] " :picker-options="pickerOptions">
                     </el-date-picker>
                   </el-form-item>
                   <div v-if="dialog.addRecord.mode==='TIMESEGMENT'">
                     <el-form-item>
                       <el-input :disabled="dialog.addRecord.startTimeDisabled"
-                        v-model="dialog.addRecord.timeSegmentmodeStartDay" style="width: 230px;">
+                        v-model="dialog.addRecord.timeSegmentmodeStartDay" style="width: 230px;" >
                         <el-select slot="prepend" size="medium" v-model="dialog.addRecord.timeSegmentmode"
                           @change="timeModeChange" style="width:100px;" placeholder="时间段">
                           <el-option key="month" label="每月" value="month"></el-option>

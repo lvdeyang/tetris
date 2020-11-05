@@ -58,6 +58,9 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 	/** 异常信息 */
 	private String errorMessage;
 	
+	/** 服务状态 */
+	private String status;
+	
 	@Column(name = "SERVICE_TYPE_ID")
 	public Long getServiceTypeId() {
 		return serviceTypeId;
@@ -159,5 +162,13 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
-	
+
+	@Column(name = "STATUS")
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }

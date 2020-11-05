@@ -25,7 +25,7 @@
       </el-form-item>
       <el-form-item size="small" label="域类型" v-if="deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity">
+          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
       <!-- <el-form-item size="small" label="设备IP" prop="deviceIp">

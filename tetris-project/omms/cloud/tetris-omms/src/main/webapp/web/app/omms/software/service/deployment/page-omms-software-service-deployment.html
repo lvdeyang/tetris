@@ -17,6 +17,23 @@
                             :data="table.rows"
                             :row-key="rowKey"
                             style="width:100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-form label-position="left" inline class="demo-table-expand">
+                                    <div v-for="p in scope.row.processDeployments" style="height: 30px">
+                                        <span style="padding-left: 30px"><i class="feather-icon-activity"></i></span>
+                                        <span style="padding-right: 70px; display:inline-block; width:80px;">{{p.processName}}</span>
+                                        <span style="padding-right: 70px; display:inline-block; width:80px;">{{p.processId}}</span>
+                                        <!--<span style="display:inline-block; width:15px; height:15px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>-->
+                                        <span v-if="p.status === '在线'" style="display:inline-block; width:15px; height:15px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                                        <span v-if="p.status === '离线'" style="display:inline-block; width:15px; height:15px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+                                        <el-tooltip class="item" effect="dark" content="重启进程" placement="bottom-end" style="padding-left: 70px; display:inline-block; width:80px;">
+                                            <el-button type="text" icon="el-icon-refresh" @click.stop="restart(p)"></el-button>
+                                        </el-tooltip>
+                                    </div>
+                                </el-form>
+                            </template>
+                        </el-table-column>
                         <el-table-column
                                 label="服务名称"
                                 prop="name">
@@ -34,8 +51,8 @@
                                 prop="installFullPath">
                         </el-table-column>
                         <el-table-column
-                                label="运行状态"
-                                prop="">
+                                label="服务状态"
+                                prop="status">
                         </el-table-column>
                         <el-table-column
                                 label="运行时间"
@@ -43,16 +60,30 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                width="240">
+                                width="300px">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="修改参数" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="editDeployment(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="modifyParameters(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="modifyParameters(scope)" disabled></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="查看状态" placement="bottom-end">
-                                    <el-button type="text" icon="icon-bar-chart" style="font-size:20px; padding:0; margin-left:20px;" @click="deploymentStatus(scope)"></el-button>
+                                <el-tooltip class="item" effect="dark" content="备份管理" placement="bottom-end">
+                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="feather-icon-hard-drive" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoBackup(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="feather-icon-hard-drive" style="font-size:20px; padding:0; margin-left:20px;" @click="gotoBackup(scope)" disabled></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="备份恢复" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-file-text" style="font-size:20px; padding:0; margin-left:20px;" @click="backupRestore(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="升级" placement="bottom-end">
+                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="feather-icon-trending-up" style="font-size:20px; padding:0; margin-left:20px;" @click="selectUpdatePackages(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="feather-icon-trending-up" style="font-size:20px; padding:0; margin-left:20px;" @click="selectUpdatePackages(scope)" disabled></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除部署数据" placement="bottom-end">
+                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="feather-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="deleteDeploymentData(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="feather-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="deleteDeploymentData(scope)" disabled></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="卸载部署" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)"></el-button>
+                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)" disabled></el-button>
                                 </el-tooltip>
                             </template>
                         </el-table-column>
@@ -191,6 +222,197 @@
             </span>
         </el-dialog>
 
+        <el-dialog
+                title="选择备份"
+                :visible.sync="dialog.backups.visible"
+                width="600px"
+                :before-close="handleSelectBackupClose">
+
+            <el-table :data="dialog.backups.backupData" border style="width: 100%">
+                <el-table-column fixed prop = "backupTime" label="备份时间" width="200px"></el-table-column>
+                <el-table-column fixed prop = "notes" label="备注信息" width="200px"></el-table-column>
+                <el-table-column fixed="right" label="操作" width="100px">
+                    <template slot-scope="scope">
+                        <el-button @click="handleSelectBackupClick(scope)" type="text" size="small">恢复</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+        </el-dialog>
+
+        <el-dialog
+                title="选择升级包"
+                :visible.sync="dialog.updatePackages.visible"
+                width="600px"
+                :before-close="handleSelectUpdatePackageClose">
+
+            <el-table :data="dialog.updatePackages.updatePackagesData" border style="width: 100%">
+                <el-table-column fixed prop = "fileName" label="名称" width="200px"></el-table-column>
+                <el-table-column fixed prop = "version" label="版本号" width="200px"></el-table-column>
+                <el-table-column fixed="right" label="操作" width="100px">
+                    <template slot-scope="scope">
+                        <el-button @click="handleSelectUpdatePackageSubmit(scope)" type="text" size="small">选择</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+        </el-dialog>
+
+        <el-dialog
+                :title="dialog.updatePackages.name+'-'+dialog.updatePackages.version"
+                :visible.sync="dialog.updateStep.visible"
+                width="740px"
+                :before-close="handleUpdateStepClose"
+                :close-on-click-modal="false">
+
+            <el-steps :active="dialog.updateStep.active" finish-status="success">
+                <el-step title="上传升级包"></el-step>
+                <el-step title="设置参数"></el-step>
+                <el-step title="升级"></el-step>
+            </el-steps>
+
+            <div v-if="dialog.updateStep.active===0" style="max-height:426px;">
+                <div v-if="dialog.updateStep.currentDeployment.error" style="margin-top:20px;">
+                    <div style="margin-bottom:10px;">上传失败!</div>
+                    <div style="margin-bottom:10px;">{{dialog.updateStep.currentDeployment.errorMessage}}</div>
+                    <div style="width:300px;">
+                        <el-progress :percentage="dialog.updateStep.currentDeployment.progress" status="exception"></el-progress>
+                    </div>
+                </div>
+                <div v-else style="margin-top:20px;">
+                    <div style="margin-bottom:10px;">上传中...</div>
+                    <div style="width:300px;">
+                        <el-progress :percentage="dialog.updateStep.currentDeployment.progress" :color="dialog.updateStep.currentDeployment.progress==100?'#67c23a':'#409eff'"></el-progress>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="dialog.updateStep.active===1" style="max-height:426px;">
+                <el-scrollbar v-if="dialog.updateStep.properties.length>0" style="height: 400px;">
+                    <div style="margin-top:20px; margin-bottom:20px;">
+                        <el-row>
+                            <el-col :span="11" v-for="(property, index) in dialog.updateStep.properties" :offset="index%2==0?0:1" :key="property.id">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item :label="property.propertyName">
+                                        <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
+                                            <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
+                                        </el-select>
+                                        <el-switch v-else-if="property.valueType==='BOOLEAN'" v-model="property.value" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                                        <el-input v-else v-model="property.value"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-scrollbar>
+                <div v-else style="margin-top:20px; margin-bottom:20px;">
+                    无配置!
+                </div>
+            </div>
+
+            <div v-if="dialog.updateStep.active===2" style="max-height:426px;">
+                <div style="margin-top:20px;">
+                    <div v-if="dialog.updateStep.properties.length>0" style="margin-bottom:10px;">config.ini</div>
+                    <div v-if="dialog.updateStep.properties.length>0" style="margin-bottom:10px;">
+                        <div v-for="property in dialog.updateStep.properties">{{property.propertyKey}}={{property.value}}</div>
+                    </div>
+                    <div>安装中...</div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" v-if="dialog.updateStep.currentDeployment.error || dialog.updateStep.active===3" @click="handleUpdateStepClose">关闭</el-button>
+                <!--v-if="dialog.step.active===1"-->
+                <el-button size="small" v-if="dialog.updateStep.active===1" type="primary" @click="handleAddBackup">升级</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="添加备份"
+                :visible.sync="dialog.addBackup.visible"
+                width="500px"
+                :before-close="handleAddBackupClose">
+            <el-form label-width="100px">
+                <el-form-item label="是否备份">
+                    <el-radio v-model="dialog.addBackup.isBackup" :label="true">是</el-radio>
+                    <el-radio v-model="dialog.addBackup.isBackup" :label="false">否</el-radio>
+                </el-form-item>
+
+                <el-form-item label="添加备注" v-if="dialog.addBackup.isBackup === true">
+                    <el-input
+                            type="textarea"
+                            :rows="2"
+                            placeholder="请输入内容"
+                            v-model="dialog.addBackup.notes">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddBackupClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleUpdate">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="卸载服务"
+                :visible.sync="dialog.uninstallService.visible"
+                width="520px"
+                :before-close="handleUninstallServiceClose">
+            <el-form label-width="80px">
+                <el-form-item label="卸载类型" style="margin-top: 12px">
+                    <el-radio size="medium" v-model="dialog.uninstallService.type" label="uninstall">卸载（不删部署数据）</el-radio>
+                    <el-radio size="medium" v-model="dialog.uninstallService.type" label="delete">彻底删除（删除部署数据）</el-radio>
+                </el-form-item>
+
+                <el-form-item label="备份备注" v-if="dialog.uninstallService.type ==='uninstall'">
+                    <el-input
+                            type="textarea"
+                            :rows="2"
+                            placeholder="请输入内容"
+                            v-model="dialog.uninstallService.notes">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="handleUninstallServiceClose">取消</el-button>
+                <el-button size="small" type="primary" @click="handleRowDelete()">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="修改参数"
+                :visible.sync="dialog.modifyParameters.visible"
+                width="740px"
+                :before-close="handleModifyParametersClose">
+            <div style="max-height:526px;">
+                <el-scrollbar v-if="dialog.modifyParameters.properties.length > 0" style="height: 500px;">
+                    <div style="margin-top:20px; margin-bottom:20px;">
+                        <el-row>
+                            <el-col :span="11" v-for="(property, index) in dialog.modifyParameters.properties" :offset="index%2==0?0:1" :key="property.id">
+                                <el-form label-position="top" label-width="300px">
+                                    <el-form-item :label="property.propertyName">
+                                        <el-select v-if="property.valueType==='ENUM'" v-model="property.value" style="width:100%;">
+                                            <el-option v-for="item in property.valueSelect" :label="item.name" :value="item.value" :key="item.value"></el-option>
+                                        </el-select>
+                                        <el-switch v-else-if="property.valueType==='BOOLEAN'" v-model="property.value" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                                        <el-input v-else v-model="property.value"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-scrollbar>
+                <div v-else style="margin-top:20px; margin-bottom:20px;">
+                    无配置!
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="handleModifyParametersClose">取消</el-button>
+                <el-button size="small" type="primary" @click="handleModifyParametersSubmit()">确定</el-button>
+            </span>
+        </el-dialog>
     </template>
 
 </mi-frame>

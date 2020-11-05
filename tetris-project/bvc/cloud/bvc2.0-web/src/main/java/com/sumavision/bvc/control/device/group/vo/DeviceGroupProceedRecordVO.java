@@ -27,6 +27,8 @@ public class DeviceGroupProceedRecordVO{
 	/** 会议名称 */
 	private String groupName;
 	
+	/** 创建会议人员id*/
+	private Long userId;
 	
 	public String getStartTime() {
 		return startTime;
@@ -99,6 +101,15 @@ public class DeviceGroupProceedRecordVO{
 		this.groupName = groupName;
 		return this;
 	}
+	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public DeviceGroupProceedRecordVO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
 
 	public DeviceGroupProceedRecordVO set(DeviceGroupProceedRecordPO entity) throws Exception {
 		this.setStartTime(entity.getStartTime()==null?"":DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
@@ -108,7 +119,8 @@ public class DeviceGroupProceedRecordVO{
 			.setOnlineMemberNumber(entity.getOnlineMemberNumber())
 			.setAuthorizationMemberNumber(entity.getAuthorizationMemberNumber())
 			.setGroupId(entity.getGroupId())
-			.setGroupName(entity.getGroupName());
+			.setGroupName(entity.getGroupName())
+			.setUserId(entity.getUserId());
 		return this;
 	}
 	

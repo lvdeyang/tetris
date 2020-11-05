@@ -154,6 +154,7 @@ define([
       },
       handleClick(tab, event) {
         this.isExterior = tab.name
+        this.decodeTitle =tab.label +'解码器'
 
       },
       loadStation: function () {
@@ -163,9 +164,17 @@ define([
             self.stationList = data.rows;
             self.stationList.unshift({
               id: 999,
+              originType:"INNER",
               identity: "self",
               stationName: "本域",
             })
+            for(var j=0;j<self.stationList.length;j++){
+              var item = self.stationList[j];
+                  if(!item.originType){
+                    item.originType = "INNER"
+                  }
+                  // self.tableList[item.identity]=[];
+            }
           }
         })
       },

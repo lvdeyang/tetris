@@ -3,6 +3,7 @@ package com.sumavision.bvc.control.device.command.group.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -525,6 +526,7 @@ public class CommandQueryController {
 	 * @param @PathVariable boolean filterMode 过滤器模式 0全部，1在线，2离线
 	 * @param privilegesStr 数组类型的权限{@Code BUSINESS_OPR_TYPE的value}
 	 * @param satisfyAll true需要满足privilegesStr全部权限，false只需满足一个即可。为null的时候按默认查询
+	 * @param returnBundleList true返回设备集合，false返回设备树
 	 * @return List<TreeNodeVO> 设备通道树
 	 */
 	@JsonBody
@@ -536,6 +538,7 @@ public class CommandQueryController {
 			@PathVariable int filterMode,
 			String privilegesStr,
 			Boolean satisfyAll,
+			Boolean returnBundleList,
 			HttpServletRequest request) throws Exception{
 		
 		//获取userId
@@ -608,6 +611,9 @@ public class CommandQueryController {
 			return folderMap.get(folderId);
 		}).collect(Collectors.toList());
 		
+		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		
 		//根据bundleIds从资源层查询channels
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);
 		if(queryChannels != null){
@@ -637,6 +643,28 @@ public class CommandQueryController {
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
+		
+		//处理：返回设备集合   //此处没有分内部系统、外部系统。后边需要就分开
+		if(Boolean.TRUE.equals(returnBundleList)){
+			
+			JSONObject info =new JSONObject();
+			List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+			
+			for(FolderBO root:roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root).setBundleList(new ArrayList<TreeNodeVO>());
+				filteredBundles.stream().forEach(bundle->{
+					List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, bundle.getBundleId());
+					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle, extraInfos);
+					_root.getBundleList().add(bundleNode);
+					
+				});
+				
+				_roots.add(_root);
+			}
+			return _roots;
+		}
+		
+		//组件文件夹
 		for(FolderBO root:roots){
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
@@ -1248,7 +1276,7 @@ public class CommandQueryController {
 		
 		return privilegesWapper;
 	}
-	
+ 	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/all/privilege")
