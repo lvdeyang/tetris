@@ -94,6 +94,7 @@ define([
                         autoBroadShuffle: false,
                         autoBroadDuration: 1,
                         autoBroadStart: "",
+                        autoBroadTemplateId:'',
                         date: "",
                         level: '',
                         hasFile: true,
@@ -120,6 +121,7 @@ define([
                         autoBroadShuffle: false,
                         autoBroadDuration: 1,
                         autoBroadStart: "",
+                        autoBroadTemplateId:'',
                         level: '',
                         hasFile: true,
                         taskTemple:'',
@@ -142,7 +144,9 @@ define([
                         data: {},
                         autoBroadShuffle: false,
                         autoBroadDuration: 1,
-                        autoBroadStart: ""
+                        autoBroadStart: "",
+                        autoBroadTemplateId:'',
+                        autoBroadTemplateOptions:[]
                     },
                     setOutput: {
                         visible: false,
@@ -449,6 +453,14 @@ define([
                          }
                     });
                 },
+                initTemplate:function(){
+                	var self = this;
+                	ajax.post('/cs/channel/template/get', null, function (data, status) {
+                         if (status == 200) {
+                        	 self.dialog.setAutoBroad.autoBroadTemplateOptions=data;
+                         }
+                    });
+                },
                 handleResetZoneUrl: function () {
                     var self = this;
                     self.showTip('', '此操作将重置所有终端补包地址，是否继续?', function (callback) {
@@ -500,6 +512,7 @@ define([
                     self.dialog.addProgram.autoBroad = false;
                     self.dialog.addProgram.autoBroadShuffle = false;
                     self.dialog.addProgram.autoBroadDuration = 1;
+                    self.dialog.addProgram.autoBroadTemplateId='';
                     self.dialog.addProgram.autoBroadStart = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
@@ -553,6 +566,7 @@ define([
                         autoBroadShuffle: self.dialog.addProgram.autoBroadShuffle,
                         autoBroadDuration: self.dialog.addProgram.autoBroadDuration,
                         autoBroadStart: self.dialog.addProgram.autoBroadStart,
+                        autoBroadTemplateId:self.dialog.addProgram.autoBroadTemplateId,
                         remark: self.dialog.addProgram.remark,
                         level: self.dialog.addProgram.broadWay == self.broadWayTerminal ? self.dialog.addProgram.level : '',
                         hasFile: self.dialog.addProgram.hasFile,
@@ -613,6 +627,7 @@ define([
                     self.dialog.editChannel.autoBroadShuffle = row.autoBroadShuffle;
                     self.dialog.editChannel.autoBroadDuration = row.autoBroadDuration;
                     self.dialog.editChannel.autoBroadStart = row.autoBroadStart;
+                    self.dialog.editChannel.autoBroadTemplateId=row.autoBroadTemplateId;
                     self.dialog.editChannel.taskTemple = row.taskTemple;
                     self.dialog.editChannel.rateCtrl = row.rateCtrl;
                     self.dialog.editChannel.rate = row.rate;
@@ -639,6 +654,7 @@ define([
                     self.dialog.editChannel.autoBroadShuffle = false;
                     self.dialog.editChannel.autoBroadDuration = 1;
                     self.dialog.editChannel.autoBroadStart = "";
+                    self.dialog.editChannel.autoBroadTemplateId='';
                     self.dialog.editChannel.taskTemple = "";
                     self.dialog.editChannel.rate = "";
                     self.dialog.editChannel.rateCtrl = "";
@@ -739,10 +755,12 @@ define([
                     var autoBroadShuffle = self.dialog.editChannel.autoBroadShuffle;
                     var autoBroadDuration = self.dialog.editChannel.autoBroadDuration;
                     var autoBroadStart = self.dialog.editChannel.autoBroadStart;
+                    var autoBroadTemplateId=self.dialog.editChannel.autoBroadTemplateId;
                     var taskTemple = self.dialog.editChannel.taskTemple
                     var rate = self.dialog.editChannel.rate
                     var rateCtrl = self.dialog.editChannel.rateCtrl
                     var rotation = self.dialog.editChannel.rotation;
+                    
                     var questData = {
                         id: self.dialog.editChannel.data.id,
                         name: newName,
@@ -755,6 +773,7 @@ define([
                         autoBroadShuffle: autoBroadShuffle,
                         autoBroadDuration: autoBroadDuration,
                         autoBroadStart: autoBroadStart,
+                        autoBroadTemplateId:autoBroadTemplateId,
                         remark: newRemark,
                         level: level,
                         hasFile: hasFile,
@@ -784,6 +803,7 @@ define([
                         self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;
                         self.dialog.editChannel.data.autoBroadDuration = autoBroadDuration;
                         self.dialog.editChannel.data.autoBroadStart = autoBroadStart;
+                        self.dialog.editChannel.data.autoBroadTemplateId=autoBroadTemplateId;
                         self.dialog.editChannel.data.rateCtrl = rateCtrl;
                         self.dialog.editChannel.data.taskTemple = taskTemple;
                         self.dialog.editChannel.data.rate = rate;
@@ -844,6 +864,7 @@ define([
                     self.dialog.setAutoBroad.autoBroadShuffle = data.autoBroadShuffle;
                     self.dialog.setAutoBroad.autoBroadStart = data.autoBroadStart;
                     self.dialog.setAutoBroad.autoBroadDuration = data.autoBroadDuration;
+                    self.dialog.setAutoBroad.autoBroadTemplateId=data.autoBroadTemplateId;
                 },
                 handleSetAutoBroadClose: function () {
                     var self = this;
@@ -853,12 +874,14 @@ define([
                     self.dialog.setAutoBroad.autoBroadShuffle = false;
                     self.dialog.setAutoBroad.autoBroadStart = '';
                     self.dialog.setAutoBroad.autoBroadDuration = 1;
+                    self.dialog.setAutoBroad.autoBroadTemplateId=data.autoBroadTemplateId;
                 },
                 handleSetAutoBroadCommit: function () {
                     var self = this;
                     self.dialog.setAutoBroad.data.autoBroadShuffle = self.dialog.setAutoBroad.autoBroadShuffle;
                     self.dialog.setAutoBroad.data.autoBroadStart = self.dialog.setAutoBroad.autoBroadStart;
                     self.dialog.setAutoBroad.data.autoBroadDuration = self.dialog.setAutoBroad.autoBroadDuration;
+                    self.dialog.setAutoBroad.data.autoBroadTemplateId =self.dialog.setAutoBroad.autoBroadTemplateId;
                     self.handleSetAutoBroadClose();
                 },
 
@@ -2144,6 +2167,7 @@ define([
             created: function () {
                 var self = this;
                 self.initNetcard();
+                self.initTemplate();
                 self.getServerTime();
                 self.getChannelList();
             },

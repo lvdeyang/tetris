@@ -120,27 +120,25 @@
                                        icon="el-icon-edit"> 选择媒资</el-button>
                         </el-form-item>
                         <el-form-item label="开始时间">
-                            <el-date-picker
+                            <el-time-picker
                                     style="width:100%;"
                                     v-model="dialog.addTemplatepro.startTime"
-                                    type="datetime"
-                                    placeholder="选择日期时间"
+                                    placeholder="选择时间"
                                     align="right"
                                     :picker-options="dialog.addTemplatepro.startTime"
-                                    value-format="yyyy-MM-dd HH:mm:ss">
-                            </el-date-picker>
+                                    value-format="HH:mm:ss">
+                            </el-time-picker>
                         </el-form-item>
                         
                         <el-form-item label="结束时间">
-                            <el-date-picker
+                            <el-time-picker
                                     style="width:100%;"
                                     v-model="dialog.addTemplatepro.endTime"
-                                    type="datetime"
-                                    placeholder="选择日期时间"
+                                    placeholder="选择时间"
                                     align="right"
                                     :picker-options="dialog.addTemplatepro.endTime"
-                                    value-format="yyyy-MM-dd HH:mm:ss">
-                            </el-date-picker>
+                                    value-format="HH:mm:ss">
+                            </el-time-picker>
                         </el-form-item>
                     </el-form>
                 </el-scrollbar>

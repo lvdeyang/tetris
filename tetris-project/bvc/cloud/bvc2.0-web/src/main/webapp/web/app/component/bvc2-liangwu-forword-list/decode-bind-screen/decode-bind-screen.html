@@ -1,4 +1,4 @@
-<div class="forword-inner-control"
+<div class="decode-bind-screen"
   style="width:100%; height:95%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
   <div class="col">
     <div class="title">编码器</div>
@@ -19,21 +19,18 @@
     </div>
   </div>
   <div class="bvc2-auto-layout-wrapper liangwu-forword">
-    <template>
-      <span class="tool-bar-item">
-        <el-select size="small" v-model="layout.row" @change="rowChange">
-          <el-option v-for="rowOption in options.rowOptions" :key="rowOption.value" :label="rowOption.label"
-            :value="rowOption.value" />
-        </el-select>
-      </span>
-      <span class="tool-bar-item-times">&times;</span>
-      <span class="tool-bar-item">
-        <el-select size="small" v-model="layout.column" @change="columnChange">
-          <el-option v-for="columnOption in options.columnOptions" :key="columnOption.value" :label="columnOption.label"
-            :value="columnOption.value" />
-        </el-select>
-      </span>
-    </template>
+    <el-form :inline="true" style="margin-bottom: 10px;">
+      屏幕布局：
+      <el-select size="mini" v-model="layout.row" @change="rowChange" style="width: 60px;">
+        <el-option v-for="rowOption in options.rowOptions" :key="rowOption.value" :label="rowOption.label"
+          :value="rowOption.value" />
+      </el-select>
+      x
+      <el-select size="mini" v-model="layout.column" @change="columnChange" style="width: 60px;">
+        <el-option v-for="columnOption in options.columnOptions" :key="columnOption.value" :label="columnOption.label"
+          :value="columnOption.value" />
+      </el-select>
+    </el-form>
     <div class="bvc2-auto-layout-container"></div>
   </div>
 </div>

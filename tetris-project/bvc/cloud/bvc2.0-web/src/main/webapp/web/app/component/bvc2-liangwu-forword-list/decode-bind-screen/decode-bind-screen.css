@@ -1,34 +1,29 @@
-.forword-inner-control .bvc2-auto-layout-wrapper{
+.decode-bind-screen .bvc2-auto-layout-wrapper{
   position: relative;
     width: 65%;
     height: 95%;
-    background-color: #16191E;
-    left: 33%;
+    /* background-color: #16191E; */
+    float: left;
+    margin-left: 20px;
     top: 0;
-    padding-top: 40px;
 }
-.forword-inner-control .liangwu-forword .bvc2-auto-layout-container{
+.decode-bind-screen .liangwu-forword .bvc2-auto-layout-container{
   position: relative;
 }
-.forword-inner-control .liangwu-forword .layout-auto{
+.decode-bind-screen .liangwu-forword .layout-auto{
   position: absolute;
   top: 0;
   left: 0;
 }
-.forword-inner-control .col{
+.decode-bind-screen .col{
   width: 30%;
   min-height: calc(100% - 40px);
 }
-.forword-inner-control .liangwu-forword .el-select input {
+.decode-bind-screen .liangwu-forword .el-select input {
   background: transparent;
   border-radius: 2px;
-  /* border-color: #5C676D; */
-  border-color: #FFF;
-  color: #fff;
+  border-color: #5C676D;
+  color: #666;
 }
-.forword-inner-control .liangwu-forword .el-select{
-  /* margin-top: 3px; */
-  position: absolute;
-  left: 10px;
-  top: 10px;
+.decode-bind-screen .liangwu-forword .el-select{
 }

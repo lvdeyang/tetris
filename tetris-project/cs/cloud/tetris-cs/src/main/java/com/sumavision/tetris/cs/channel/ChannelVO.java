@@ -39,6 +39,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private String autoBroadStart;
 	
+	private long autoBroadTemplateId;
+	
 	private String outputUserPort;
 	
 	private String outputUserEndPort;
@@ -392,4 +394,14 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		this.audioType = audioType;
 		return this;
 	}
+
+	public long getAutoBroadTemplateId() {
+		return autoBroadTemplateId;
+	}
+
+	public ChannelVO setAutoBroadTemplateId(long autoBroadTemplateId) {
+		this.autoBroadTemplateId = autoBroadTemplateId;
+		return this;
+	}
+	
 }

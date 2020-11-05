@@ -39,6 +39,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String audioType;
 	private String videoType;
 	private Boolean isRequired;
+	private String startTime;
+	private String endTime;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -67,6 +69,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setVideoType(entity.getVideoType())
 		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId())
+		.setStartTime(DateUtil.format(entity.getStartTime(),"yyyy-MM-dd HH:mm:ss"))
+		.setEndTime(DateUtil.format(entity.getEndTime(),"yyyy-MM-dd HH:mm:ss"))
 		.setIsRequired(entity.getIsRequired());
 		return this;
 	}
@@ -181,6 +185,12 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setAudioType(vo.getAudioType());
 		screenPO.setVideoType(vo.getVideoType());
 		screenPO.setUpdateTime(new Date());
+		if(vo.getStartTime()!=null&&!vo.getStartTime().isEmpty()){
+			screenPO.setStartTime(DateUtil.parse(vo.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
+		}
+		if(vo.getEndTime()!=null&&!vo.getEndTime().isEmpty()){
+			screenPO.setEndTime(DateUtil.parse(vo.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+		}
 		screenPO.setIsRequired(vo.getIsRequired() == null ? false:vo.getIsRequired());
 		return screenPO;
 	}
@@ -406,6 +416,28 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		this.isRequired = isRequired;
 		return this;
 	}
+
+
+	
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public ScreenVO setStartTime(String startTime) {
+		this.startTime = startTime;
+		return this;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public ScreenVO setEndTime(String endTime) {
+		this.endTime = endTime;
+		return this;
+	}
+
 
 
 

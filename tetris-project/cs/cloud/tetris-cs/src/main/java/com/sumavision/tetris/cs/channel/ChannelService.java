@@ -208,6 +208,7 @@ public class ChannelService {
 			autoBroadInfoPO.setDuration(autoBroadBO.getAutoBroadDuration());
 			autoBroadInfoPO.setStartTime(autoBroadBO.getAutoBroadStart());
 			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
+			autoBroadInfoPO.setTemplateId(autoBroadBO.getAutoBroadTemplateId());
 			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
 		}
 
@@ -377,6 +378,7 @@ public class ChannelService {
 			autoBroadInfoPO.setDuration(autoBroadBO.getAutoBroadDuration());
 			autoBroadInfoPO.setStartTime(autoBroadBO.getAutoBroadStart());
 			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
+			autoBroadInfoPO.setTemplateId(autoBroadBO.getAutoBroadTemplateId());
 			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
 		} else {
 			if (autoBroadInfoPO != null) channelAutoBroadInfoDAO.delete(autoBroadInfoPO);

@@ -1371,7 +1371,7 @@ public class MonitorLiveDeviceService {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年10月28日 上午11:37:29
-	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 * @param id 点播监控设备任务MonitorLiveDevicePO的主键
 	 * @param userId 业务用户
 	 * @throws Exception 
 	 */

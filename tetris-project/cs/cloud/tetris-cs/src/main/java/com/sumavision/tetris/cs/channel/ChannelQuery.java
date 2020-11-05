@@ -86,6 +86,7 @@ public class ChannelQuery {
 					channelVO.setAutoBroadDuration(channelAutoBroadInfoPO.getDuration());
 					channelVO.setAutoBroadStart(channelAutoBroadInfoPO.getStartTime());
 					channelVO.setAutoBroadShuffle(channelAutoBroadInfoPO.getShuffle());
+				    channelVO.setAutoBroadTemplateId(channelAutoBroadInfoPO.getTemplateId());
 				}
 			}
 			

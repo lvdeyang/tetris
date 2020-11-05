@@ -13,11 +13,18 @@ define([
 
   //组件名称
   var pluginName = 'decode-bind-screen';
+  var getLayoutContainer = function (el) {
+    return $(el).find('.bvc2-auto-layout-container');
+  };
   Vue.component(pluginName, {
     template: tpl,
     data: function () {
       return {
-        layout: '',
+        layout: {
+          row: 3,
+          column: 3
+
+        },
         decodetree: [],
         checked: [],
         defaultExpandAll: true,
@@ -69,7 +76,10 @@ define([
     watch: {
       filterText: function (val) {
         this.$refs.tree.filter(val);
-      }
+      },
+      layout: function () {
+        this.refreshLayout();
+      },
     },
     methods: {
       initTree: function (keepExpand) {
@@ -330,7 +340,39 @@ define([
       },
       initLayoutAuto: function (params) {
 
-      }
+      },
+
+      refreshLayout: function () {
+        var instance = this;
+        VueComponent = this;
+        var $container = getLayoutContainer(instance.$el);
+        var options = instance.layout;
+        if (options) {
+          $container['layout-auto']('create', {
+            cell: {
+              column: options.column,
+              row: options.row,
+              // html: tdHtml
+            },
+            cellspan: options.cellspan,
+            theme: 'dark',
+            name: options.name,
+            editable: false,
+            event: {
+              drop: function (e) {
+                var data = $.parseJSON(e.dataTransfer.getData('data'));
+                console.log(data);
+                var $cell = $(this);
+                var od = $cell['layout-auto']('getData');
+
+                $cell['layout-auto']('setData', od);
+              }
+            }
+          });
+        } else {
+          $container['layout-auto']('destroy');
+        }
+      },
     },
     mounted: function () {
       var self = this;
@@ -340,16 +382,10 @@ define([
       console.log(self.resourceApiUrl + '/vedioCapacity/query')
       this.initTree()
 
-      var getLayoutContainer = function (el) {
-        return $(el).find('.bvc2-auto-layout-container');
-      };
+
       var $container = getLayoutContainer(this.$el);
       $container['layout-auto']('create', {
-        cell: {
-          column: 3,
-          row: 3,
-          // html:tdHtml
-        },
+        cell: self.layout,
         name: 'split_4x4_c3x3_lt',
         theme: 'dark',
         editable: false,
