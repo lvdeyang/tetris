@@ -68,7 +68,12 @@
                 @click="handleDetail(scope.row)">
               </el-button>
             </el-tooltip>
-
+            <el-tooltip v-else class="item" effect="dark" content="详情" placement="bottom">
+              <el-button type="text" icon="el-icon-tickets"
+                style="padding:0; font-size:20px; position:relative; top:1px;cursor:pointer"
+                @click="handleDetailElse(scope.row)">
+              </el-button>
+            </el-tooltip>
             <el-tooltip v-if="scope.row.mode == '排期' && scope.row.privilegeOfDownload" class="item" effect="dark"
               content="导出" placement="bottom">
               <el-button type="text" icon="el-icon-download"
@@ -271,7 +276,7 @@
 
 
     <el-dialog title="详情" :visible.sync="dialog.detail.visible" width="700px" class="dialog-detail">
-      <el-form label-width="100px" class="demo-ruleForm" v-model="dialog.detail.form">
+      <el-form label-width="130px" class="demo-ruleForm" v-model="dialog.detail.form">
         <el-form-item label="任务名 :">
           <el-input v-model="dialog.detail.form.fileName" readonly></el-input>
         </el-form-item>
@@ -289,6 +294,39 @@
         </el-form-item>
         <el-form-item label="结束时间 :">
           <el-input v-model="dialog.detail.form.timeSegmentEndDay" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="最大容量 (MB):">
+          <el-input v-model="dialog.detail.form.total_size_mb" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="最大时长 (小时):">
+          <el-input v-model="dialog.detail.form.time_duration" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="告警容量  (MB):">
+          <el-input v-model="dialog.detail.form.alarm_size_mb" readonly></el-input>
+        </el-form-item>
+      </el-form>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog title="详情" :visible.sync="dialog.detailelse.visible" width="700px" class="dialog-detail">
+      <el-form label-width="130px" class="demo-ruleForm" v-model="dialog.detail.form">
+        <el-form-item label="任务名 :">
+          <el-input v-model="dialog.detailelse.form.fileName" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="录制模式 :">
+          <el-input v-model="dialog.detailelse.form.mode" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="录制设备 :">
+          <el-input v-model="dialog.detailelse.form.bundle" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="最大容量 (MB) :">
+          <el-input v-model="dialog.detailelse.form.total_size_mb" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="最大时长  (小时):">
+          <el-input v-model="dialog.detailelse.form.time_duration" readonly></el-input>
+        </el-form-item>
+        <el-form-item label="告警容量 (MB) :">
+          <el-input v-model="dialog.detailelse.form.alarm_size_mb" readonly></el-input>
         </el-form-item>
       </el-form>
     </el-dialog>
