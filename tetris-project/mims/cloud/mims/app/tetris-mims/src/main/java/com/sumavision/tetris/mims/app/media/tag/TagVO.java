@@ -19,6 +19,8 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 	private int subMediaNum;
 	
 	private Long downloadCount;
+	
+	private Long hotCount;
 
 	public String getName() {
 		return name;
@@ -88,11 +90,22 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 		this.setId(entity.getId())
 		.setUuid(entity.getUuid())
 		.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-		.setName(entity.getName())
+		.setName(entity.getName()+"("+(entity.getHotCount()==null?"0":entity.getHotCount())+")")
 		.setParentId(entity.getParentId())
 		.setRemark(entity.getRemark())
 		.setSubMediaNum(0)
+		.setHotCount(hotCount)
 		.setDownloadCount(0l);
 		return this;
 	}
+
+	public Long getHotCount() {
+		return hotCount;
+	}
+
+	public TagVO setHotCount(Long hotCount) {
+		this.hotCount = hotCount;
+		return this;
+	}
+	
 }
