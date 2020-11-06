@@ -15,7 +15,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -34,6 +32,8 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
@@ -125,7 +125,7 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
-
+	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getAllUser() {
@@ -759,43 +759,48 @@ public class BindResourceController extends ControllerBase {
 					UserBO oprUserBO = userQueryService.current();
 					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList,prevCloudCheckList,prevLocalReadCheckList,prevDownloadCheckList, new ArrayList<String>(), new ArrayList<String>(),new ArrayList<String>(),
 							readCheckList, writeCheckList,cloudCheckList,localReadCheckList,downloadCheckList, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>());
-					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					String connectCenterLayerID = null;
+					try{
+						connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					}catch(Exception e){e.printStackTrace();}
+					
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
-					
-					List<Long> consumeIds = new ArrayList<Long>();
-					for (UserBO userBO : userBOs) {
-						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
-						if ("ldap".equals(userBO.getCreater())) {
-							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
-								BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
-								if (null == bundle) {
-									continue;
+					if (connectCenterLayerID != null) {
+						List<Long> consumeIds = new ArrayList<Long>();
+						for (UserBO userBO : userBOs) {
+							String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
+							if ("ldap".equals(userBO.getCreater())) {
+								for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
+									BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
+									if (null == bundle) {
+										continue;
+									}
+									AuthNotifyXml authNotifyXml = new AuthNotifyXml();
+									authNotifyXml.setAuthnodeid(self.getNodeUuid());
+									authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
+									authNotifyXml.setUserid(userBO.getUserNo());
+									authNotifyXml.setOperation(entry.getValue().getDevOprType());
+									String authCode = null;
+									if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
+										authCode = entry.getValue().getDevAuthCode();
+									}
+									authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
+									// 发送消息
+									JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+									PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
+									
+									tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 								}
-								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-								authNotifyXml.setAuthnodeid(self.getNodeUuid());
-								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
-								authNotifyXml.setUserid(userBO.getUserNo());
-								authNotifyXml.setOperation(entry.getValue().getDevOprType());
-								String authCode = null;
-								if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
-									authCode = entry.getValue().getDevAuthCode();
-								}
-								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
-								// 发送消息
-								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
-								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
-								
-								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+							}else{
+								JSONObject message = new JSONObject();
+								message.put("businessType", "AuthUpdate");
+								WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+								consumeIds.add(ws.getId());
 							}
-						}else{
-							JSONObject message = new JSONObject();
-							message.put("businessType", "AuthUpdate");
-							WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
-							consumeIds.add(ws.getId());
 						}
+						websocketMessageService.consumeAll(consumeIds);
 					}
-					websocketMessageService.consumeAll(consumeIds);
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
@@ -1242,6 +1247,7 @@ public class BindResourceController extends ControllerBase {
 		bundlePrivilege.setDeviceModel(po.getDeviceModel());
 		bundlePrivilege.setName(po.getBundleName());
 		bundlePrivilege.setUsername(po.getUsername());
+		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
 		return bundlePrivilege;
 	}
 

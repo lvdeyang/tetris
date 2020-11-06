@@ -22,6 +22,16 @@ public class BundlePrivilegeBO {
 	
 	private String username;
 	
+	private String codec;
+	
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
+	}
+
 	public Long getId() {
 		return id;
 	}

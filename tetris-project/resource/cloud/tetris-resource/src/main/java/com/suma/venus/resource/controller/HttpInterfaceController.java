@@ -868,13 +868,16 @@ public class HttpInterfaceController {
 			log.setSourceServiceIP("");
 			log.setOprDetail(bundleId);
 			log.setOprlogType(EOprlogType.DEVICE_ONLINE);
-			alarmFeign.sendOprlog(log);
+//			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 			if (null == po) {
 				respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 				return resp;
 			}
 
+			if(!po.getDeviceModel().equalsIgnoreCase("player")){
+				alarmFeign.sendOprlog(log);
+			}
 			boolean status_change = (ONLINE_STATUS.ONLINE != po.getOnlineStatus()) ? true : false;
 
 			if (SOURCE_TYPE.SYSTEM == po.getSourceType()) {
@@ -921,8 +924,10 @@ public class HttpInterfaceController {
 			log.setSourceServiceIP("");
 			log.setOprDetail(bundleId);
 			log.setOprlogType(EOprlogType.DEVICE_OFFLINE);
-			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
+			if(null != po && !po.getDeviceModel().equalsIgnoreCase("player")){
+				alarmFeign.sendOprlog(log);
+			}
 
 			if (null != po && po.getOnlineStatus() != ONLINE_STATUS.OFFLINE) {
 				if (SOURCE_TYPE.SYSTEM == po.getSourceType()) {

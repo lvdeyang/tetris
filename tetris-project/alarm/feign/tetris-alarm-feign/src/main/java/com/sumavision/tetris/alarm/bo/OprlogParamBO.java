@@ -28,6 +28,11 @@ public class OprlogParamBO {
 		 * 用户上线
 		 */
 		USER_ONLINE("用户上线"),
+		
+		/**
+		 * 用户上线
+		 */
+		USER_OFFLINE("用户下线"),
 
 		/**
 		 * 设备上线

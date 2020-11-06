@@ -1,5 +1,6 @@
 package com.sumavision.tetris.auth.login;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -272,6 +273,26 @@ public class LoginService {
 		token.setLastModifyTime(null);
 		token.setStatus(UserStatus.OFFLINE);
 		tokenDao.save(token);
+		try{
+			Date day=new Date();    
+			SimpleDateFormat offLineDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-user");
+			log.setUserName(user.getNickname());
+			log.setOprName("用户下线");
+			log.setSourceServiceIP("");
+			log.setOprDetail(new StringBufferWrapper().append("用户“")
+													  .append(user.getNickname())
+													  .append("”下线（")
+													  .append(offLineDateFormat.format(day))
+													  .append("）")
+													  .toString());
+			log.setOprlogType(EOprlogType.USER_OFFLINE);
+			alarmFeign.sendOprlog(log);
+		}catch(Exception e){
+			System.out.println("用户下线日志存储失败！");
+		}
+		
 	}
 	
 	/**
