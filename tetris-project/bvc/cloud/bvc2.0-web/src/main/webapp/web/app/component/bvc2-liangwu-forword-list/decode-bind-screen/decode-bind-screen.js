@@ -26,6 +26,11 @@ define([
           column: 3,
           name: ""
         },
+        createLayout: {
+          row: 0,
+          column: 0,
+          name: ""
+        },
         layOutOptions: [],
         decodetree: [],
         checked: [],
@@ -35,7 +40,7 @@ define([
           label: 'name',
           isLeaf: 'isLeaf'
         },
-        filterText: '',
+        filterText: '0',
         templateId: '',
         options: {
           columnOptions: [
@@ -69,8 +74,8 @@ define([
             }
           ]
         },
-        value8: '',
         screenConfigDialogVisible: false,
+        screenInformation: []
 
       }
     },
@@ -78,7 +83,10 @@ define([
     computed: {},
     watch: {
       filterText: function (val) {
-        this.$refs.tree.filter(val);
+        this.$nextTick(function () {
+          this.$refs.tree.filter(val);
+        })
+        // this.$refs.tree.filter(val);
       },
       layout: function () {
         this.refreshLayout();
@@ -94,24 +102,32 @@ define([
         var self = this;
         ajax.post('/command/query/find/institution/tree/bundle/4/false/0', params, function (data) {
           self.decodetree = data;
+          self.filterText = ''
           self.treeLoading = false;
         });
       },
       handleDragEnd (draggingNode, dropNode, dropType, ev) {
         console.log('tree drag end: ', dropNode && dropNode.label, dropType);
       },
+      // filterNode(value, data) {
+
+      //   var extraInfo = JSON.parse(data.extraInfo)
+      //   if (!extraInfo || !(extraInfo.extend_param)) {
+      //     // return true
+      //   } else {
+      //     var extend_param = JSON.parse(extraInfo.extend_param)
+      //     return (value == extend_param.region)
+      //   }
+      // },
       filterNode: function (value, data, node) {
+        var extraInfo = JSON.parse(data.extraInfo);
+        var extend_param = 'self'
+        if (extraInfo && extraInfo.extend_param) {
+          extend_param = JSON.parse(extraInfo.extend_param)
+        }
         if (data.type === 'BUNDLE') {
-          if (!value) return true;
-          if (data.name.indexOf(value) !== -1) return true;
-        } else if (data.type === 'CHANNEL') {
-          if (JSON.parse(data.param).channelType === 'VenusVideoIn') {
-            if (!value) return true;
-            if ((node.parent && node.parent.level !== 0 && node.parent.data.name.indexOf(value) !== -1)) {
-              node.parent.expanded = false;
-              return true;
-            }
-          }
+          if (!value && extend_param.region == "self") return true;
+          if (data.name.indexOf(value) !== -1 && extend_param.region == "self") return true;
         }
       },
 
@@ -229,90 +245,21 @@ define([
           }
         }
       },
-      layoutChange: function (button) {
-        if (!v_groupControl.config) {
-          v_groupControl.$message({
-            type: 'warning',
-            message: '请先指定要操作的议程或方案！'
-          });
-          return;
-        }
-        if (!v_groupControl.video) {
-          v_groupControl.$message({
-            type: 'warning',
-            message: '还没有要操作的视频！'
-          });
-          return;
-        }
-        v_groupControl.$confirm('此操作将清空屏幕上的配置，并且设置为：' + button.text + ', 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: function (action, instance, done) {
-            if (action === 'confirm') {
-              v_groupControl.$refs.autoLayout.setLayout({
-                column: button.layout.basic.column,
-                row: button.layout.basic.row,
-                cellspan: button.layout.cellspan,
-                name: button.layout.name,
-                editable: true
-              });
-            }
-            done();
-          }
-        });
-      },
       handleScreenConfig: function () {
         var self = this;
         var params = {
-          templateName: self.layout.name,
-          screenNumberOfX: self.layout.row,
-          screenNumberOfY: self.layout.column,
+          templateName: self.createLayout.name,
+          screenNumberOfX: self.createLayout.row,
+          screenNumberOfY: self.createLayout.column,
         }
         ajax.post('/location/template/layout/add', params, function (data, status) {
           if (status == 200) {
-            console.log(data)
+            self.screenConfigDialogVisible = false
+            self.layOutOptions.push(data)
+            self.templateId = data.id
+            self.handleTemplateChange(data.id);
           }
         })
-        var $container = getLayoutContainer(self.$el);
-        var newLayout = $.extend(true, {}, self.layout);
-        newLayout.cellspan = [];
-        self.layout = newLayout;
-        self.refreshLayout();
-        self.screenConfigDialogVisible = false;
-
-        var cells = $container['layout-auto']('getCells');
-        console.log(cells)
-      },
-      saveLayout: function (config, video, websiteDraw, position, dst, roleDst, done, layout, smallScreen) {
-        var _uri = '';
-        if (config.__businessType === 'agenda') {
-          _uri = '/agenda/update/video/' + v_groupControl.video.id;
-        } else if (config.__businessType === 'scheme') {
-          _uri = '/scheme/update/video/' + v_groupControl.video.id;
-        }
-        ajax.post(_uri, {
-          websiteDraw: $.toJSON(websiteDraw),
-          position: $.toJSON(position),
-          dst: $.toJSON(dst),
-          roleDst: $.toJSON(roleDst),
-          layout: layout,
-          smallScreen: $.toJSON(smallScreen)
-        }, function (data) {
-          for (var i = 0; i < v_groupControl.config.videos.length; i++) {
-            if (v_groupControl.config.videos[i].id === data.id) {
-              v_groupControl.config.videos[i] = data;
-              break;
-            }
-          }
-          v_groupControl.video = data;
-          v_groupControl.video.dstsCache = $.extend(true, [], data.dsts);
-          done();
-          v_groupControl.$message({
-            type: 'success',
-            message: '保存成功！'
-          });
-        });
       },
       initLayoutAuto: function (params) {
 
@@ -321,7 +268,7 @@ define([
         var instance = this;
         var $container = getLayoutContainer(instance.$el);
         var options = instance.layout;
-        var tdHtml = `<div><p>编码器：<span  class="encode">无</span></p>
+        var tdHtml = `<div class="cell-box"><p>编码器：<span  class="encode">无</span></p>
                             <p>解码器：<span  class="decode">无</span></p>
                       </div>`
         if (options) {
@@ -368,13 +315,17 @@ define([
             },
           });
           var cells = $container['layout-auto']('getCells');
+          var screenInfo = instance.screenInformation
           for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
-            var d = {
-              x: cell.x,
-              y: cell.y
-            };
-            cell.$cell['layout-auto']('setData', d);
+            var currentScreenInfo = screenInfo.find(function (item) {
+              return (item.locationX == cell.x && item.locationY == cell.y)
+            })
+            cell.$cell['layout-auto']('setData', currentScreenInfo);
+            if (currentScreenInfo) {
+              cell.$cell.find('.encode').text(currentScreenInfo.encoderBundleName)
+              cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName)
+            }
           }
         } else {
           $container['layout-auto']('destroy');
@@ -384,7 +335,9 @@ define([
         var self = this;
         ajax.post('/location/template/layout/query/all', null, function (data, status) {
           if (status == 200) {
-            self.layOutOptions = data
+            self.layOutOptions = data;
+            self.templateId = data[0].id
+            self.handleTemplateChange(data[0].id)
           }
         })
       },
@@ -397,43 +350,50 @@ define([
         var self = this;
         ajax.post('/location/of/screen/wall/all/screen/information', { locationTemplateLayoutId: val }, function (data, status) {
           if (status == 200) {
-
+            self.screenInformation = data;
+            var newLayout = $.extend(true, {}, this.layout);
+            newLayout.row = currgenTempalte.screenNumberOfX
+            newLayout.column = currgenTempalte.screenNumberOfY
+            newLayout.name = currgenTempalte.templateName
+            newLayout.cellspan = [];
+            self.layout = newLayout;
           }
         })
-        var newLayout = $.extend(true, {}, this.layout);
-        newLayout.row = currgenTempalte.screenNumberOfX
-        newLayout.column = currgenTempalte.screenNumberOfY
-        newLayout.name = currgenTempalte.templateName
-        newLayout.cellspan = [];
-        this.layout = newLayout;
       },
+      createdScreen () {
+        this.screenConfigDialogVisible = true
+      },
+      // 删除屏幕
+      deleteScreen () {
+        var self = this;
 
+        this.$confirm('此操作将永久删除该屏幕设置, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function () {
+          ajax.post('/location/template/layout/delete', { id: self.templateId }, function (data, status) {
+            if (status == 200) {
+              self.$message({
+                type: "success",
+                message: "删除成功！"
+              })
+              self.getScreenLayout()
+            }
+          })
+        }).catch(function () {
+          self.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      }
     },
     mounted: function () {
       var self = this;
-      var opcityUrl = '/vedioCapacity/query'
-      var resourceApiUrl = document.location.protocol + "//" + document.location.hostname + ':8213';
-      self.resourceApiUrl = resourceApiUrl;
-      console.log(self.resourceApiUrl + '/vedioCapacity/query')
       this.initTree()
       this.getScreenLayout()
 
-
-      // var $container = getLayoutContainer(this.$el);
-      // $container['layout-auto']('create', {
-      //   cell: self.layout,
-      //   name: 'split_4x4_c3x3_lt',
-      //   theme: 'dark',
-      //   editable: false,
-      //   event: {
-      //     drop: function (e) {
-      //       var $cell = $(this);
-      //       console.log($cell)
-      //       $cell['layout-auto']('setData', e.dataTransfer.getData('id'));
-      //       $cell.text(e.dataTransfer.getData('id'));
-      //     }
-      //   }
-      // });
     },
     updated () {
 

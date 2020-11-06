@@ -19,23 +19,16 @@
     </div>
   </div>
   <div class="bvc2-auto-layout-wrapper liangwu-forword">
-    <!-- <el-form :inline="true" style="margin-bottom: 10px;">
-      屏幕布局：
-      <el-select size="mini" v-model="layout.row" @change="rowChange" style="width: 60px;">
-        <el-option v-for="rowOption in options.rowOptions" :key="rowOption.value" :label="rowOption.label"
-          :value="rowOption.value" />
+    <el-row>
+      屏幕名称：
+      <el-select v-model="templateId" filterable placeholder="请选择" size="mini" style="margin-bottom: 10px;"
+        @change="handleTemplateChange">
+        <el-option v-for="item in layOutOptions" :key="item.uuid" :label="item.templateName" :value="item.id">
+        </el-option>
       </el-select>
-      x
-      <el-select size="mini" v-model="layout.column" @change="columnChange" style="width: 60px;">
-        <el-option v-for="columnOption in options.columnOptions" :key="columnOption.value" :label="columnOption.label"
-          :value="columnOption.value" />
-      </el-select>
-    </el-form> -->
-    <el-select v-model="templateId" filterable placeholder="请选择" size="mini" style="margin-bottom: 10px;"
-      @change="handleTemplateChange">
-      <el-option v-for="item in layOutOptions" :key="item.uuid" :label="item.templateName" :value="item.id">
-      </el-option>
-    </el-select>
+      <el-button type="primary" size="mini" @click="createdScreen">新建屏幕</el-button>
+      <el-button type="danger" size="mini" @click="deleteScreen">删除当前屏幕</el-button>
+    </el-row>
     <div class="bvc2-auto-layout-container"></div>
   </div>
   <el-dialog title="请先设置大屏布局" :visible.sync="screenConfigDialogVisible" width="30%" :show-close="false"
@@ -43,15 +36,15 @@
     <el-form :inline="true" style="margin-bottom: 10px;">
 
       <el-form-item label="屏幕名称: ">
-        <el-input size="mini" v-model="layout.name"></el-input>
+        <el-input size="mini" v-model="createLayout.name"></el-input>
       </el-form-item>
       <el-form-item label="屏幕布局：">
-        <el-select size="mini" v-model="layout.row" style="width: 75px;">
+        <el-select size="mini" v-model="createLayout.row" style="width: 75px;">
           <el-option v-for="rowOption in options.rowOptions" :key="rowOption.value" :label="rowOption.label"
             :value="rowOption.value" />
         </el-select>
         x
-        <el-select size="mini" v-model="layout.column" style="width: 75px;">
+        <el-select size="mini" v-model="createLayout.column" style="width: 75px;">
           <el-option v-for="columnOption in options.columnOptions" :key="columnOption.value" :label="columnOption.label"
             :value="columnOption.value" />
         </el-select>
