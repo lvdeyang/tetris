@@ -68,6 +68,9 @@ public class UserQuery {
 	@Autowired
 	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
 	
+	@Autowired
+	private UserTagsDAO userTagsDAO;
+	
 	/**
 	 * 检查用户号码<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -1159,6 +1162,24 @@ public class UserQuery {
 		List<UserVO> userVOs = UserVO.getConverter(UserVO.class).convert(userOnline, UserVO.class);
 		return userVOs;
 	}
+	/**
+	 * 
+	 * 用户标签查询<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 下午7:44:17
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+	public List<UserTagsVO> queryUserTags(Long userId) throws Exception{
+		List<UserTagsPO> userTagsPOs = userTagsDAO.findByUserId(userId);
+		
+		List<UserTagsVO> userTagsVOs = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
+		return userTagsVOs;
+	}
+	
 	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
@@ -1186,6 +1207,8 @@ public class UserQuery {
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(2))
 														.getList();
+	
+	
 	
 }
 

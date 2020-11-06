@@ -32,15 +32,17 @@
                             </el-form-item>
                             <el-form-item :label="i18n.labelUserInfoTags">
                                 <el-tag
-                                        :key="simple"
-                                        v-for="simple in userInfo.tags"
+                                        :key="index"
+                                        v-for="(simple,index) in tagsInfo"
                                         style="margin-right:10px;"
                                         closable
                                         :disable-transitions="false"
-                                        @close="handleTagRemove(userInfo.tags, simple)">
-                                    {{simple}}
+                                        @close="handleTagRemove(simple)"
+                                        @click.native="handleModifyHotCount(simple)">
+                                    {{simple.tagName}}({{simple.hotCount}})
                                 </el-tag>
                                 <el-button class="button-tag" size="small" @click="handleTagEdit" icon="el-icon-edit"> {{i18n.handleTagEdit}}</el-button>
+                                <span>（点击标签可以修改兴趣值）</span>
                             </el-form-item>
                         </el-form>
                     </el-scrollbar>
@@ -84,6 +86,23 @@
         <!-- 选择标签对话框 -->
         <mi-tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></mi-tag-dialog>
 
+
+        <el-dialog
+                title="修改标签热度"
+                :visible.sync="dialog.editTag.visible"
+                width="500px">
+
+            <el-form ref="form" label-width="70px">
+                <el-form-item label="热度值">
+                    <el-input v-model="dialog.editTag.hotCount"></el-input>
+                </el-form-item>
+            </el-form>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.editTag.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" :loading="dialog.editTag.loading" @click="saveTag">确 定</el-button>
+        </span>
+        </el-dialog>
     </template>
 
 </mi-frame>
