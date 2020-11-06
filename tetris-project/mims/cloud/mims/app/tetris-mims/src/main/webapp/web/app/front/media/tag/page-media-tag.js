@@ -129,10 +129,8 @@ define([
 
                 treeNodeEdit: function (node, data) {
                     var self = this;
-                    var names=data.name.split("(");
-                    names.pop();
-                    var name=names.join('(');
-                    self.dialog.editTag.name = name;
+
+                    self.dialog.editTag.name = data.name;
                     self.dialog.editTag.remark = data.remark;
                     self.dialog.editTag.hotCount=data.hotCount;
                     self.dialog.editTag.visible = true;

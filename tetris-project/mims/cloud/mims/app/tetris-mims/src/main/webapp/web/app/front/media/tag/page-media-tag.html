@@ -27,7 +27,7 @@
 
                             <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
                                 <span style="font-size:14px;">
-                                     <span>{{data.name}}</span>
+                                     <span>{{data.name}}({{data.hotCount}})</span>
                                 </span>
                                 <span v-if="data.id !== -1">
                                     <el-button type="text" size="mini" style="padding:0;" @click.stop="treeNodeEdit(node, data)">
