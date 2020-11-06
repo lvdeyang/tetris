@@ -55,7 +55,7 @@ public class DeviceGroupContactsController{
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月6日 上午9:15:41
-	 * @param hasSelected true或者null查询已经添加的设备,false查询未添加的设备
+	 * @param hasSelected true查询已经添加的设备,false或null查询未添加的设备
 	 */
 	@JsonBody
 	@ResponseBody
