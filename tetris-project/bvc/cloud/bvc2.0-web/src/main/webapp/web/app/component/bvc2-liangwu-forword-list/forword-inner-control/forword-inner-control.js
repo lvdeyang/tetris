@@ -26,7 +26,7 @@ define([
           isLeaf: 'isLeaf'
         },
         filterText: '',
-        options: [{
+        layOutOptions: [{
           value: '1',
           label: '屏幕1'
         }, {
@@ -264,16 +264,20 @@ define([
       },
       initLayoutAuto: function (params) {
 
+      },
+      getScreenLayout: function () {
+        let self = this;
+        ajax.post('/location/template/layout/query/all', null, function (data, status) {
+          if (status == 200) {
+            self.layOutOptions = data
+          }
+        })
       }
     },
     mounted: function () {
       var self = this;
-      var opcityUrl = '/vedioCapacity/query'
-      var resourceApiUrl = document.location.protocol + "//" + document.location.hostname + ':8213';
-      self.resourceApiUrl = resourceApiUrl;
-      console.log(self.resourceApiUrl + '/vedioCapacity/query')
       this.initTree()
-
+      this.getScreenLayout()
       var getLayoutContainer = function (el) {
         return $(el).find('.bvc2-auto-layout-container');
       };
@@ -282,7 +286,7 @@ define([
         cell: {
           column: 3,
           row: 3,
-          // html:tdHtml
+          // html:tdHtml 
         },
         name: 'split_4x4_c3x3_lt',
         theme: 'dark',

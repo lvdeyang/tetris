@@ -26,9 +26,9 @@
         <el-option v-for="item in regionOption" :key="item.identity" :label="item.stationName" :value="item.identity">
         </el-option>
       </el-select>
-      <el-button size="mini" type="success">开始</el-button>
+      <!-- <el-button size="mini" type="success">开始</el-button>
       <el-button size="mini" type="warning">停止</el-button>
-      <el-button size="mini" type="danger">删除</el-button>
+      <el-button size="mini" type="danger">删除</el-button> -->
 
       <el-tag type="danger" size="small" style="margin-left: 10px;">已占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
       <el-tag type="danger" size="small" style="margin-left: 10px;">当前转发/最大转发：{{forwordTotal}}/{{currentWidthTotleNum}}
