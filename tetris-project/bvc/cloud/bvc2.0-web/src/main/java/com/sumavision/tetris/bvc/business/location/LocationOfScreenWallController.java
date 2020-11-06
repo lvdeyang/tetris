@@ -40,9 +40,7 @@ public class LocationOfScreenWallController {
 	public Object allScreenInformation(
 			Long locationTemplateLayoutId) throws Exception{
 		
-		locationOfScreenWallService.allScreenInformation(locationTemplateLayoutId);
-		
-		return null;
+		return locationOfScreenWallService.allScreenInformation(locationTemplateLayoutId);
 	}
 	
 	/**

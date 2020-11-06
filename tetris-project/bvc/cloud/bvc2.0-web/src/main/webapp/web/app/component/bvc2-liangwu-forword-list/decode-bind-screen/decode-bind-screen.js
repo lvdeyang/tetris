@@ -16,15 +16,17 @@ define([
   var getLayoutContainer = function (el) {
     return $(el).find('.bvc2-auto-layout-container');
   };
+
   Vue.component(pluginName, {
     template: tpl,
     data: function () {
       return {
         layout: {
           row: 3,
-          column: 3
-
+          column: 3,
+          name: ""
         },
+        layOutOptions: [],
         decodetree: [],
         checked: [],
         defaultExpandAll: true,
@@ -34,7 +36,7 @@ define([
           isLeaf: 'isLeaf'
         },
         filterText: '',
-
+        templateId: '',
         options: {
           columnOptions: [
             {
@@ -67,7 +69,8 @@ define([
             }
           ]
         },
-        value8: ''
+        value8: '',
+        screenConfigDialogVisible: false,
 
       }
     },
@@ -259,51 +262,27 @@ define([
           }
         });
       },
-
-      columnChange: function (column) {
-        var layout_instance = this;
-        //获取设置前的值
-        var $container = getLayoutContainer(layout_instance.$el);
-        var oldColumn = $container['layout-auto']('queryColumn');
-        layout_instance.$confirm('此操作将清空屏幕上的配置，并且设置为：' + layout_instance.layout.row + '行' + column + '列, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: function (action, instance, done) {
-            if (action === 'confirm') {
-              var newLayout = $.extend(true, {}, layout_instance.layout);
-              newLayout.column = column;
-              newLayout.cellspan = [];
-              layout_instance.layout = newLayout;
-            } else if (action === 'cancel') {
-              layout_instance.layout.column = oldColumn;
-            }
-            done();
+      handleScreenConfig: function () {
+        var self = this;
+        var params = {
+          templateName: self.layout.name,
+          screenNumberOfX: self.layout.row,
+          screenNumberOfY: self.layout.column,
+        }
+        ajax.post('/location/template/layout/add', params, function (data, status) {
+          if (status == 200) {
+            console.log(data)
           }
-        });
-      },
+        })
+        var $container = getLayoutContainer(self.$el);
+        var newLayout = $.extend(true, {}, self.layout);
+        newLayout.cellspan = [];
+        self.layout = newLayout;
+        self.refreshLayout();
+        self.screenConfigDialogVisible = false;
 
-      rowChange: function (row) {
-        var layout_instance = this;
-        //获取设置前的值
-        var $container = getLayoutContainer(layout_instance.$el);
-        var oldRow = $container['layout-auto']('queryRow');
-        layout_instance.$confirm('此操作将清空屏幕上的配置，并且设置为：' + row + '行' + layout_instance.layout.column + '列, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: function (action, instance, done) {
-            if (action === 'confirm') {
-              var newLayout = $.extend(true, {}, layout_instance.layout);
-              newLayout.row = row;
-              newLayout.cellspan = [];
-              layout_instance.layout = newLayout;
-            } else {
-              layout_instance.layout.row = oldRow;
-            }
-            done();
-          }
-        });
+        var cells = $container['layout-auto']('getCells');
+        console.log(cells)
       },
       saveLayout: function (config, video, websiteDraw, position, dst, roleDst, done, layout, smallScreen) {
         var _uri = '';
@@ -335,44 +314,100 @@ define([
           });
         });
       },
-      screenSelectChange: function (val) {
-
-      },
       initLayoutAuto: function (params) {
 
       },
-
       refreshLayout: function () {
         var instance = this;
-        VueComponent = this;
         var $container = getLayoutContainer(instance.$el);
         var options = instance.layout;
+        var tdHtml = `<div><p>编码器：<span  class="encode">无</span></p>
+                            <p>解码器：<span  class="decode">无</span></p>
+                      </div>`
         if (options) {
           $container['layout-auto']('create', {
             cell: {
               column: options.column,
               row: options.row,
-              // html: tdHtml
+              html: tdHtml
             },
-            cellspan: options.cellspan,
+            // cellspan: options.cellspan,
             theme: 'dark',
             name: options.name,
             editable: false,
             event: {
               drop: function (e) {
                 var data = $.parseJSON(e.dataTransfer.getData('data'));
-                console.log(data);
                 var $cell = $(this);
                 var od = $cell['layout-auto']('getData');
+                // $cell['layout-auto']('setData', od);
+                var params = {
+                  bundleId: data.id,
+                  bundleName: data.name,
+                  locationX: od.x,
+                  locationY: od.y,
+                  locationTemplateLayoutId: instance.templateId,
+                }
+                // 屏幕绑定解码器
+                ajax.post('/location/of/screen/wall/bind/decoder', params, function (data, status) {
+                  if (status == 200) {
+                    instance.$message({
+                      type: "success",
+                      message: "解码器绑定成功！"
+                    })
+                    $cell.find('.decode').text(data.decoderBundleName)
+                  } else {
+                    instance.$message({
+                      type: "waring",
+                      message: "解码器绑定失败！"
+                    })
+                  }
+                })
 
-                $cell['layout-auto']('setData', od);
               }
-            }
+            },
           });
+          var cells = $container['layout-auto']('getCells');
+          for (var i = 0; i < cells.length; i++) {
+            var cell = cells[i];
+            var d = {
+              x: cell.x,
+              y: cell.y
+            };
+            cell.$cell['layout-auto']('setData', d);
+          }
         } else {
           $container['layout-auto']('destroy');
         }
       },
+      getScreenLayout: function () {
+        var self = this;
+        ajax.post('/location/template/layout/query/all', null, function (data, status) {
+          if (status == 200) {
+            self.layOutOptions = data
+          }
+        })
+      },
+      handleTemplateChange (val) {
+        console.log(val)
+        var currgenTempalte = this.layOutOptions.find(function (item) {
+          return item.id == val
+        })
+
+        var self = this;
+        ajax.post('/location/of/screen/wall/all/screen/information', { locationTemplateLayoutId: val }, function (data, status) {
+          if (status == 200) {
+
+          }
+        })
+        var newLayout = $.extend(true, {}, this.layout);
+        newLayout.row = currgenTempalte.screenNumberOfX
+        newLayout.column = currgenTempalte.screenNumberOfY
+        newLayout.name = currgenTempalte.templateName
+        newLayout.cellspan = [];
+        this.layout = newLayout;
+      },
+
     },
     mounted: function () {
       var self = this;
@@ -381,23 +416,24 @@ define([
       self.resourceApiUrl = resourceApiUrl;
       console.log(self.resourceApiUrl + '/vedioCapacity/query')
       this.initTree()
+      this.getScreenLayout()
 
 
-      var $container = getLayoutContainer(this.$el);
-      $container['layout-auto']('create', {
-        cell: self.layout,
-        name: 'split_4x4_c3x3_lt',
-        theme: 'dark',
-        editable: false,
-        event: {
-          drop: function (e) {
-            var $cell = $(this);
-            console.log($cell)
-            $cell['layout-auto']('setData', e.dataTransfer.getData('id'));
-            $cell.text(e.dataTransfer.getData('id'));
-          }
-        }
-      });
+      // var $container = getLayoutContainer(this.$el);
+      // $container['layout-auto']('create', {
+      //   cell: self.layout,
+      //   name: 'split_4x4_c3x3_lt',
+      //   theme: 'dark',
+      //   editable: false,
+      //   event: {
+      //     drop: function (e) {
+      //       var $cell = $(this);
+      //       console.log($cell)
+      //       $cell['layout-auto']('setData', e.dataTransfer.getData('id'));
+      //       $cell.text(e.dataTransfer.getData('id'));
+      //     }
+      //   }
+      // });
     },
     updated () {
 
