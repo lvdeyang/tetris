@@ -1229,6 +1229,7 @@ public class MeetingEntity {
 		aOutConnMediaMuxSet.put("channel_param", channel_param);
 		
 		//2020.09 组播和新增的录制模式
+		base_param.put("alarm", aRecordSet.getJSONObject("alarm"));
 		base_param.put("mode", aRecordSet.getString("mode"));
 		base_param.put("multi_video_addr", aRecordSet.getString("multi_video_addr"));
 		base_param.put("multi_audio_addr", aRecordSet.getString("multi_audio_addr"));

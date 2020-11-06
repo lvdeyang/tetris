@@ -21,5 +21,7 @@ public interface LocationOfScreenWallDAO extends MetBaseDAO<LocationOfScreenWall
 	public List<LocationOfScreenWallPO> findByLocationTemplateLayoutId(Long layoutId);
 	
 	public List<LocationOfScreenWallPO> findByIdIn(Collection<Long> ids);
+	
+	public LocationOfScreenWallPO findByIdAndMonitorLiveDeviceId(Long id, Long monitorLiveDeviceId);
 
 }

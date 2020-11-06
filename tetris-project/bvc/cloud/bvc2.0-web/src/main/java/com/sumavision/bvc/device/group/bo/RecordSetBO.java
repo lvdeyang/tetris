@@ -62,6 +62,15 @@ public class RecordSetBO {
 	private CycleBO cycle;
 	
 	private AlarmBO alarm;
+	
+	public AlarmBO getAlarm() {
+		return alarm;
+	}
+
+	public RecordSetBO setAlarm(AlarmBO alarm) {
+		this.alarm = alarm;
+		return this;
+	}
 
 	public CycleBO getCycle() {
 		return cycle;
@@ -69,15 +78,6 @@ public class RecordSetBO {
 
 	public RecordSetBO setCycle(CycleBO cycle) {
 		this.cycle = cycle;
-		return this;
-	}
-
-	public AlarmBO getAlarm() {
-		return alarm;
-	}
-
-	public RecordSetBO setAlarm(AlarmBO alarm) {
-		this.alarm = alarm;
 		return this;
 	}
 

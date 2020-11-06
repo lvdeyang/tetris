@@ -60,13 +60,12 @@ public class LocationTemplateLayoutVO extends AbstractBaseVO<LocationTemplateLay
 	}
 
 	@Override
-	public LocationTemplateLayoutVO set(LocationTemplateLayoutPO entity) throws Exception {
+	public LocationTemplateLayoutVO set(LocationTemplateLayoutPO entity) {
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setTemplateName(entity.getTemplateName()==null?"":entity.getTemplateName())
 			.setScreenNumberOfX(entity.getScreenNumberOfX())
 			.setScreenNumberOfY(entity.getScreenNumberOfY());
-		
 		return this;
 	}
 
