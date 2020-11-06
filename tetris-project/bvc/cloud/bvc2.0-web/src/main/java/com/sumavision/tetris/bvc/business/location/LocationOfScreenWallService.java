@@ -69,7 +69,7 @@ public class LocationOfScreenWallService {
 	 * @param locationTemplateLayoutId 屏幕墙模板id
 	 * @return
 	 */
-	public LocationOfScreenWallPO bindDecoder(String bundleId, 
+	public LocationOfScreenWallVO bindDecoder(String bundleId, 
 			String bundleName, 
 			Integer locationX, 
 			Integer locationY,
@@ -96,7 +96,7 @@ public class LocationOfScreenWallService {
 			searchScreenWall.setLocationX(locationX);
 			searchScreenWall.setLocationY(locationX);
 			locationOfScreenWallDao.save(searchScreenWall);
-			return searchScreenWall;
+			return new LocationOfScreenWallVO().set(screenWall);
 		}else{
 			screenWall.setDecoderBundleId(bundleId)
 			 		  .setDecoderBundleName(bundleName)
@@ -104,7 +104,7 @@ public class LocationOfScreenWallService {
 			 		  .setLocationY(locationY)
 			 		  .setLocationTemplateLayoutId(locationTemplateLayoutId);
 			locationOfScreenWallDao.save(screenWall);
-			return screenWall;
+			return new LocationOfScreenWallVO().set(screenWall);
 		}
 		
 	}
