@@ -80,8 +80,8 @@ define([
             timeModeChangeText: '日',
             startTimeDisabled: false,
             bundleId: '',
-            total_size_mb: 0,
-            time_duration: 0,
+            total_size_mb: '',
+            time_duration: '',
             alarm_size_mb: ""
           },
           selectDevice: {

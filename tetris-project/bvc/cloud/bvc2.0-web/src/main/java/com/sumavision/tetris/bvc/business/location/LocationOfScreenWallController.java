@@ -137,9 +137,7 @@ public class LocationOfScreenWallController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		locationOfScreenWallService.bindEncoder(bundleId, bundleName, locationX, locationY, locationTemplateLayoutId, user);
-		
-		return null;
+		return locationOfScreenWallService.bindEncoder(bundleId, bundleName, locationX, locationY, locationTemplateLayoutId, user);
 	}
 	
 	/**

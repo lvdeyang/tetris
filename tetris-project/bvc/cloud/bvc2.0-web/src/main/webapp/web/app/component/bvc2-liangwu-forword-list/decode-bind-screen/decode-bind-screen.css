@@ -30,4 +30,8 @@
 .decode-bind-screen .layout-auto tbody td{
   font-size: 14px !important;
   color: #fff;
+  text-align: left;
+}
+.decode-bind-screen .layout-auto tbody td .cell-box{
+  padding:10px;
 }
