@@ -477,6 +477,16 @@ public class UserController {
 		return userInfo.get(0);
 	}
 	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/querytags")
+	public Object querytags(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<UserTagsVO> userTagsVOs=userQuery.queryUserTags(user.getId());
+		return userTagsVOs;
+	}
+	
 	/**
 	 * 重定向到个人中心<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -630,6 +640,33 @@ public class UserController {
 	public Object load()throws Exception{
 		return resourceFeign.load();
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editTags")
+	public Object editTags(
+            String tags
+           ) throws Exception{
+		
+		UserVO user = userQuery.current();
+		//TODO 权限校验
+		return userService.editTags(user.getId(), tags);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editTagHotCount")
+	public Object editTagHotCount(
+			String tagName,
+            Long hotCount
+           ) throws Exception{
+		
+		UserVO user = userQuery.current();
+		//TODO 权限校验
+		return userService.editTagHotCount(user.getId(),tagName,hotCount);
+	}
+	
+	
 }
 
 

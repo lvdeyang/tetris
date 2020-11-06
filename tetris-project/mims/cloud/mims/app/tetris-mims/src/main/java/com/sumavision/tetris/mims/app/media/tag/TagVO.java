@@ -90,11 +90,11 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 		this.setId(entity.getId())
 		.setUuid(entity.getUuid())
 		.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-		.setName(entity.getName()+"("+(entity.getHotCount()==null?"0":entity.getHotCount())+")")
+		.setName(entity.getName())
 		.setParentId(entity.getParentId())
 		.setRemark(entity.getRemark())
 		.setSubMediaNum(0)
-		.setHotCount(hotCount)
+		.setHotCount(entity.getHotCount()==null?0:entity.getHotCount())
 		.setDownloadCount(0l);
 		return this;
 	}
