@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -54,6 +55,7 @@ public class DeviceGroupContactsService {
 	 * @param userId 用户Id
 	 * @param bundleId 设备id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void add(
 			Long userId,
 			List<String> bundleIdList) throws Exception {
@@ -84,7 +86,7 @@ public class DeviceGroupContactsService {
 			return false;
 		}).map(folder->{ return new FolderBO().set(folder);}).collect(Collectors.toList());
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
-		List<String> bundleIds = deviceGroupContactsDao.findBundleIdByUserId(userId);
+		List<String> bundleIds = deviceGroupContactsDao.findByUserId(userId).stream().map(DeviceGroupContactsPO::getBundleId).collect(Collectors.toList());
 		List<BundlePO> queryBundles = bundleDao.findByBundleIdIn(bundleIds);
 		
 		if(hasSelected == null || hasSelected.equals(Boolean.FALSE)){
@@ -133,11 +135,14 @@ public class DeviceGroupContactsService {
 	 * @param userId 用户Id
 	 * @param bundleIdList 设备id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void delete(
 			Long userId, 
 			List<String> bundleIdList) {
-		
-		deviceGroupContactsDao.deleteByUserIdAndBundleIdIn(userId, bundleIdList);
+		List<DeviceGroupContactsPO> contacts =  deviceGroupContactsDao.findByUserIdAndBundleIdIn(userId, bundleIdList);
+		if(contacts!=null && contacts.size()>0){
+			deviceGroupContactsDao.deleteInBatch(contacts);
+		}
 	}
 
 	/**
