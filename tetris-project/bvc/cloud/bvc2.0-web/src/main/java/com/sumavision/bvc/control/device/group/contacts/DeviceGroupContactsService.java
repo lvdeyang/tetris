@@ -19,12 +19,14 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 
 @Service
 public class DeviceGroupContactsService {
@@ -40,6 +42,9 @@ public class DeviceGroupContactsService {
 	
 	@Autowired
 	private ExtraInfoService extraInfoService;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 
 	/**
 	 * 添加联系人对应的设备<br/>
@@ -49,15 +54,16 @@ public class DeviceGroupContactsService {
 	 * @param userId 用户Id
 	 * @param bundleId 设备id
 	 */
-	public DeviceGroupContactsVO add(
+	public void add(
 			Long userId,
-			String bundleId) throws Exception {
+			List<String> bundleIdList) throws Exception {
 		//需要在这里加判重么?
-		DeviceGroupContactsPO deviceGroupContactsPo= new DeviceGroupContactsPO().setUserId(userId).setBundleId(bundleId);
+		List<DeviceGroupContactsPO> deviceGroupContactsList= bundleIdList.stream().map(bundleId->{
+			return new DeviceGroupContactsPO().setUserId(userId).setBundleId(bundleId);
+		}).collect(Collectors.toList());
 		
-		deviceGroupContactsDao.save(deviceGroupContactsPo);
+		deviceGroupContactsDao.save(deviceGroupContactsList);
 		
-		return new DeviceGroupContactsVO().set(deviceGroupContactsPo);
 	}
 	
 	/**
@@ -65,17 +71,26 @@ public class DeviceGroupContactsService {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月6日 上午9:56:02
-	 * @param userId
+	 * @param userId 
+	 * @param hasSelected true或者null查询已经添加的设备,false查询未添加的设备
+	 * @throws Exception 
 	 */
-	public List<TreeNodeVO> query(Long userId) {
+	public List<TreeNodeVO> query(
+			Long userId,
+			Boolean hasSelected) throws Exception {
 		
+		List<FolderPO> fold=resourceService.queryAllFolders();
 		List<FolderBO> folders = resourceService.queryAllFolders().stream().filter(folder->{
 			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())) return true;
 			return false;
-		}).map(new FolderBO()::set).collect(Collectors.toList());
+		}).map(folder->{ return new FolderBO().set(folder);}).collect(Collectors.toList());
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 		List<String> bundleIds = deviceGroupContactsDao.findBundleIdByUserId(userId);
 		List<BundlePO> queryBundles = bundleDao.findByBundleIdIn(bundleIds);
+		
+		if(hasSelected != null && hasSelected.equals(Boolean.FALSE)){
+			resourceQueryUtil.queryUseableBundles(userId).removeAll(queryBundles);
+		}
 		
 		List<BundleBO> bundles = queryBundles.stream().map(bundleBody->{
 			return new BundleBO().setId(bundleBody.getBundleId())										
@@ -115,13 +130,13 @@ public class DeviceGroupContactsService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月6日 上午9:15:41
 	 * @param userId 用户Id
-	 * @param bundleId 设备id
+	 * @param bundleIdList 设备id
 	 */
 	public void delete(
 			Long userId, 
-			String bundleId) {
+			List<String> bundleIdList) {
 		
-		deviceGroupContactsDao.deleteByUserIdAndBundleId(userId, bundleId);
+		deviceGroupContactsDao.deleteByUserIdAndBundleIdIn(userId, bundleIdList);
 	}
 
 	/**
