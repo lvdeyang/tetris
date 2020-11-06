@@ -139,7 +139,7 @@ public class LocationTemplateLayoutService {
 	 */
 	public List<LocationTemplateLayoutVO> queryAll() {
 		
-		return locationTemplateLayoutDao.findAll().stream().map(new LocationTemplateLayoutVO()::set).collect(Collectors.toList());
+		return locationTemplateLayoutDao.findAll().stream().map(layout->{return new LocationTemplateLayoutVO().set(layout);}).collect(Collectors.toList());
 	}
 	
 	/**
