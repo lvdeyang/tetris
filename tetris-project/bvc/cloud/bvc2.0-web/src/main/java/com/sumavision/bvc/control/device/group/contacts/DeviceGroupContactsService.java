@@ -72,14 +72,13 @@ public class DeviceGroupContactsService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月6日 上午9:56:02
 	 * @param userId 
-	 * @param hasSelected true或者null查询已经添加的设备,false查询未添加的设备
+	 * @param hasSelected true查询已经添加的设备,false或null查询未添加的设备
 	 * @throws Exception 
 	 */
 	public List<TreeNodeVO> query(
 			Long userId,
 			Boolean hasSelected) throws Exception {
 		
-		List<FolderPO> fold=resourceService.queryAllFolders();
 		List<FolderBO> folders = resourceService.queryAllFolders().stream().filter(folder->{
 			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())) return true;
 			return false;
@@ -88,8 +87,10 @@ public class DeviceGroupContactsService {
 		List<String> bundleIds = deviceGroupContactsDao.findBundleIdByUserId(userId);
 		List<BundlePO> queryBundles = bundleDao.findByBundleIdIn(bundleIds);
 		
-		if(hasSelected != null && hasSelected.equals(Boolean.FALSE)){
-			resourceQueryUtil.queryUseableBundles(userId).removeAll(queryBundles);
+		if(hasSelected == null || hasSelected.equals(Boolean.FALSE)){
+			List<BundlePO> unselectedBundles = resourceQueryUtil.queryUseableBundles(userId);
+			unselectedBundles.removeAll(queryBundles);
+			queryBundles = unselectedBundles;
 		}
 		
 		List<BundleBO> bundles = queryBundles.stream().map(bundleBody->{
@@ -106,7 +107,7 @@ public class DeviceGroupContactsService {
 		}).collect(Collectors.toList());
 		
 		//排除空文件夹
-		excludeEmptyFolder(folders, bundles);
+		folders = excludeEmptyFolder(folders, bundles);
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
@@ -147,7 +148,7 @@ public class DeviceGroupContactsService {
 	 * @param folders 文件夹BO集合
 	 * @param bundles 设备BO集合
 	 */
-	public void  excludeEmptyFolder(
+	public List<FolderBO>  excludeEmptyFolder(
 			List<FolderBO> folders,
 			List<BundleBO> bundles) {
 		
@@ -171,6 +172,8 @@ public class DeviceGroupContactsService {
 		
 		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
 		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		
+		return folders;
 		
 	}
 	
