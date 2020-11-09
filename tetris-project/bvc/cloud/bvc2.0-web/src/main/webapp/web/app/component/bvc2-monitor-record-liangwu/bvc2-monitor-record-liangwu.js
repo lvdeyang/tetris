@@ -399,13 +399,13 @@ define([
         var addRecord = self.dialog.addRecord;
         var timeSegmentStr = '';
         var task = {
-          mode: self.dialog.addRecord.mode,
-          fileName: self.dialog.addRecord.fileName,
-          bundleId: self.dialog.addRecord.bundleId,
-          storeMode: self.dialog.addRecord.timeSegmentmode,
-          total_size_mb: self.dialog.addRecord.total_size_mb,
-          time_duration: self.dialog.addRecord.time_duration,
-          alarm_size_mb: self.dialog.addRecord.alarm_size_mb
+          mode: addRecord.mode,
+          fileName: addRecord.fileName,
+          bundleId: addRecord.bundleId,
+          storeMode: addRecord.timeSegmentmode,
+          total_size_mb: addRecord.total_size_mb,
+          time_duration: addRecord.time_duration,
+          alarm_size_mb: addRecord.alarm_size_mb
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
@@ -418,6 +418,72 @@ define([
           self.$message({
             type: 'warning',
             message: '请输入任务名！'
+          });
+          return;
+        }
+
+        if (self.dialog.addRecord.total_size_mb === '') {
+          self.$message({
+            type: 'warning',
+            message: '最大容量不能为空！'
+          });
+          return;
+        } else if (!/\d/.test(self.dialog.addRecord.total_size_mb)) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大容量只能为数字！'
+          });
+          return;
+        } else if (self.dialog.addRecord.total_size_mb < 0) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大容量不能为负数！'
+          });
+          return;
+        }
+
+        if (self.dialog.addRecord.time_duration === '') {
+          self.$message({
+            type: 'warning',
+            message: '最大时长不能为空！'
+          });
+          return;
+        } else if (!/\d/.test(self.dialog.addRecord.time_duration)) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大时长只能为数字！'
+          });
+          return;
+        } else if (self.dialog.addRecord.time_duration < 0) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大时长不能为负数！'
+          });
+          return;
+        }
+
+        if (self.dialog.addRecord.alarm_size_mb === '') {
+          self.$message({
+            type: 'warning',
+            message: '告警容量不能为空！'
+          });
+          return;
+        } else if (!/\d/.test(self.dialog.addRecord.alarm_size_mb)) {
+
+          self.$message({
+            type: 'warning',
+            message: '告警容量只能为数字！'
+          });
+          return;
+        } else if (self.dialog.addRecord.alarm_size_mb < 0) {
+
+          self.$message({
+            type: 'warning',
+            message: '告警容量不能为负数！'
           });
           return;
         }

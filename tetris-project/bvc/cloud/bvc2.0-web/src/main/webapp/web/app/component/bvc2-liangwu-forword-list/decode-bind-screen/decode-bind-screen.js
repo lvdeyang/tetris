@@ -27,8 +27,8 @@ define([
           name: ""
         },
         createLayout: {
-          row: 0,
-          column: 0,
+          row: 1,
+          column: 1,
           name: ""
         },
         layOutOptions: [],
@@ -56,6 +56,9 @@ define([
             }, {
               value: 4,
               label: 4
+            }, {
+              value: 5,
+              label: 5
             }
           ],
           rowOptions: [
@@ -71,6 +74,9 @@ define([
             }, {
               value: 4,
               label: 4
+            }, {
+              value: 5,
+              label: 5
             }
           ]
         },
@@ -247,6 +253,13 @@ define([
       },
       handleScreenConfig: function () {
         var self = this;
+        if (!self.createLayout.name) {
+          self.$message({
+            type: 'danger',
+            message: "屏幕名称不能为空！"
+          })
+          return
+        }
         var params = {
           templateName: self.createLayout.name,
           screenNumberOfX: self.createLayout.row,
@@ -268,7 +281,7 @@ define([
         var instance = this;
         var $container = getLayoutContainer(instance.$el);
         var options = instance.layout;
-        var tdHtml = `<div class="cell-box"><p>编码器：<span  class="encode">无</span></p>
+        var tdHtml = `<div class="cell-box">
                             <p>解码器：<span  class="decode">无</span></p>
                       </div>`
         if (options) {
@@ -291,8 +304,8 @@ define([
                 var params = {
                   bundleId: data.id,
                   bundleName: data.name,
-                  locationX: od.x,
-                  locationY: od.y,
+                  locationX: od.locationX,
+                  locationY: od.locationY,
                   locationTemplateLayoutId: instance.templateId,
                 }
                 // 屏幕绑定解码器
@@ -302,7 +315,9 @@ define([
                       type: "success",
                       message: "解码器绑定成功！"
                     })
-                    $cell.find('.decode').text(data.decoderBundleName)
+
+                    instance.handleTemplateChange(instance.templateId)
+                    // $cell.find('.decode').text(data.decoderBundleName)
                   } else {
                     instance.$message({
                       type: "waring",
@@ -319,12 +334,13 @@ define([
           for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
             var currentScreenInfo = screenInfo.find(function (item) {
-              return (item.locationX == cell.x && item.locationY == cell.y)
+              return (item.locationX == cell.locationX && item.locationY == cell.locationY)
             })
-            cell.$cell['layout-auto']('setData', currentScreenInfo);
             if (currentScreenInfo) {
-              cell.$cell.find('.encode').text(currentScreenInfo.encoderBundleName)
+              cell.$cell['layout-auto']('setData', currentScreenInfo);
               cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName)
+            } else {
+              cell.$cell['layout-auto']('setData', cell);
             }
           }
         } else {
@@ -366,8 +382,7 @@ define([
       // 删除屏幕
       deleteScreen () {
         var self = this;
-
-        this.$confirm('此操作将永久删除该屏幕设置, 是否继续?', '提示', {
+        self.$confirm('此操作将永久删除该屏幕设置, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -387,7 +402,37 @@ define([
             message: '已取消删除'
           });
         });
-      }
+      },
+      // 解绑所有解码器
+      deleteAllDncode () {
+        var self = this;
+        var params = {
+          locationTemplateLayoutId: self.templateId,
+          unbindAll: true
+        }
+        self.$confirm('此操作将解绑所有未执行转发的解码器, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function () {
+          ajax.post('/location/of/screen/wall/unbind/all/decoder', params, function (data, status) {
+            if (status == 200) {
+              self.$message({
+                type: "success",
+                message: "操作成功！"
+              })
+              self.handleTemplateChange(self.templateId)
+            }
+          })
+        }).catch(function () {
+          self.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+
+      },
     },
     mounted: function () {
       var self = this;

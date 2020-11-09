@@ -60,7 +60,9 @@
       <el-form-item size="small" label="确认密码" prop="checkPass" v-show="isSipShow">
         <el-input type="password" v-model="bundleForm.checkPass" auto-complete="off" style="width: 200px;" required></el-input>
       </el-form-item>
-
+      <el-form-item size="small" label="告警容量" prop="alarmSize" v-show="alarmSizeVisable">
+        <el-input v-model.number="extraParam.alarmSize" auto-complete="off" style="width: 200px;" placeholder="单位：GB"></el-input>
+      </el-form-item>
       <!-- TODO -->
       <el-form-item size="small" v-if="bundleForm.deviceModel =='jv210'" label="接入层UID" prop="accessNodeUid">
         <el-input v-model="bundleForm.accessNodeName" style="width: 200px;" readonly @click.native="handleSelectLayerNode"></el-input>
@@ -655,6 +657,7 @@ export default {
 
         // accessNodeUid : ""
       },
+      alarmSizeVisable: false,
       predefineColors: ['#ffffff', '#000000', '#409EFF', '#E6A23C', '#F56C6C'],
       regionOption: [
         { name: '本域', key: 'self' },
@@ -664,7 +667,8 @@ export default {
       extraParam: {
         dev_type: 'sip_enc',
         region: 'self',
-        address: ''
+        address: '',
+        alarmSize: '',
       },
       rules: {
         deviceModel: [
@@ -689,7 +693,9 @@ export default {
         ],
         bundleFolderName: [
           { required: true, message: '请选择所属分组', trigger: 'change' }
-
+        ],
+        alarmSize: [
+          { type: 'number', message: '年龄必须为数字值' }
         ]
       },
       deviceModelOptions: [
@@ -1342,6 +1348,13 @@ export default {
           // TODO 提交表单
           var newArr = []
           var extraParam = this.extraParam
+          if (!/\d/.test(this.extraParam.alarmSize) || this.extraParam.alarmSize < 0) {
+            this.$message({
+              type: "waring",
+              message: "告警容量必须为数字且大于等于0"
+            })
+            return
+          }
           extraParam.address = this.bundleForm.location
           switch (self.extraParam.dev_type) {
             case 'dh_camera':
@@ -1565,21 +1578,23 @@ export default {
     deviceModelChange (val) {
       if (val == 'jv210') {
         this.isFictitiouVisable = true
+        this.alarmSizeVisable = false
         this.isSipShow = true
         this.bundleForm.username = ''
         this.bundleForm.onlinePassword = ''
         this.bundleForm.checkPass = ''
         this.extraParam.region = 'self'
-        this.bundleForm.deviceModel = []
+        this.devType = []
       } else {
         this.isFictitiouVisable = false
+        this.alarmSizeVisable = true
         this.isSipShow = true
         this.bundleFolderVisable = false
         this.bundleForm.username = ''
         this.bundleForm.onlinePassword = ''
         this.bundleForm.checkPass = ''
         this.extraParam.region = 'self'
-        this.bundleForm.deviceModel = ['enc', 'sip_enc']
+        this.devType = ['enc', 'sip_enc']
       }
     },
     encodeModeChange (val) {

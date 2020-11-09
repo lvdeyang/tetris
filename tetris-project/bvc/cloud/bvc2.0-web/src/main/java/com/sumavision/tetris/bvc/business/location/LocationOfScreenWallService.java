@@ -94,9 +94,9 @@ public class LocationOfScreenWallService {
 		
 		if(searchScreenWall != null){
 			searchScreenWall.setLocationX(locationX);
-			searchScreenWall.setLocationY(locationX);
+			searchScreenWall.setLocationY(locationY);
 			locationOfScreenWallDao.save(searchScreenWall);
-			return new LocationOfScreenWallVO().set(screenWall);
+			return new LocationOfScreenWallVO().set(searchScreenWall);
 		}else{
 			screenWall.setDecoderBundleId(bundleId)
 			 		  .setDecoderBundleName(bundleName)

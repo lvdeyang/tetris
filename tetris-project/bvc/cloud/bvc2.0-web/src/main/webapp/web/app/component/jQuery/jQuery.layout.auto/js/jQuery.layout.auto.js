@@ -225,8 +225,8 @@
           var $td = $($tds[j]);
           if (!$td.is(':hidden')) {
             cells.push({
-              x: i,
-              y: j,
+              locationX: i,
+              locationY: j,
               serialNum: serialNum,
               $cell: $td
             })

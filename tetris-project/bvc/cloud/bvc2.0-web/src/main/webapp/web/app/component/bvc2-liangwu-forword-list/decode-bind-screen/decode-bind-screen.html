@@ -28,11 +28,11 @@
       </el-select>
       <el-button type="primary" size="mini" @click="createdScreen">新建屏幕</el-button>
       <el-button type="danger" size="mini" @click="deleteScreen">删除当前屏幕</el-button>
+      <el-button type="danger" size="mini" @click="deleteAllDncode">解绑所有解码器</el-button>
     </el-row>
     <div class="bvc2-auto-layout-container"></div>
   </div>
-  <el-dialog title="请先设置大屏布局" :visible.sync="screenConfigDialogVisible" width="30%" :show-close="false"
-    :close-on-click-modal="false">
+  <el-dialog title="请先设置大屏布局" :visible.sync="screenConfigDialogVisible" width="30%">
     <el-form :inline="true" style="margin-bottom: 10px;">
 
       <el-form-item label="屏幕名称: ">
