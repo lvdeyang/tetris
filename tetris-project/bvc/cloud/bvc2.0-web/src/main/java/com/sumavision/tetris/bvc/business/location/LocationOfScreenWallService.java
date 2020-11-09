@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 
 /**
@@ -41,9 +44,6 @@ public class LocationOfScreenWallService {
 	
 	@Autowired
 	private MonitorLiveDeviceService monitorLiveDeviceService;
-	
-	@Autowired
-	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
 	
 	/**
 	 * 屏幕墙的编解码信息<br/>
@@ -289,48 +289,42 @@ public class LocationOfScreenWallService {
 			locationOfScreenWallDao.save(screenList);
 		}
 	}
-	
+
 	/**
-	 * 更新对应屏幕的转发状态<br/>
+	 * <br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年11月4日 下午7:17:22
+	 * <b>日期：</b>2020年11月9日 上午9:03:38
 	 * @param id 屏幕的id
-	 * @param monitorLiveDeviceId 录制任务的id
+	 * @param monitorLiveDeviceId 录制任务id
+	 * @param Boolean stopOrStart TRUE停止,FALSE开始
+	 * @param userNo 业务人员名字
+	 * @param userId 业务人员id
 	 */
-	public LocationOfScreenWallVO exchangeLocationStatus(
-			Long screenId,
-			Long monitorLiveDeviceId) throws Exception{
+	
+	public Object exchangeLocationStatus(
+			Long id, 
+			Boolean stopOrStart,
+			String userNo,
+			Long userId) throws Exception {
 		
-		LocationOfScreenWallPO screenPO = locationOfScreenWallDao.findByIdAndMonitorLiveDeviceId(screenId, monitorLiveDeviceId);
+		LocationOfScreenWallPO screenPO = locationOfScreenWallDao.findOne(id);
 		
-		if(screenPO == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "转发状态更新失败");
+		if(screenPO == null || screenPO.getMonitorLiveDeviceId() == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有找到对应的转发");
 		}
 		
-		MonitorLiveDevicePO live = monitorLiveDeviceDao.findOne(monitorLiveDeviceId);
-		
-		if(live == null){
-			screenPO.setEncoderBundleId("");
-			screenPO.setEncoderBundleName("");
+		if(stopOrStart){
+			monitorLiveDeviceService.stop(id, userId, userNo, stopOrStart);
 			screenPO.setStatus(LocationExecuteStatus.STOP);
-			locationOfScreenWallDao.save(screenPO);
-			return new LocationOfScreenWallVO().set(screenPO);
-		}
-		
-		if(MonitorRecordStatus.RUN.equals(live.getStatus())){
-			Optional.ofNullable(screenPO).map(screen->{
-				screen.setStatus(LocationExecuteStatus.RUN);
-				return screen;
-			});
 		}else{
-			Optional.ofNullable(screenPO).map(screen->{
-				screen.setStatus(LocationExecuteStatus.STOP);
-				return screen;
-			});
+			monitorLiveDeviceService.stopToRestart(new ArrayListWrapper<Long>().add(screenPO.getMonitorLiveDeviceId()).getList(), userId);
+			screenPO.setStatus(LocationExecuteStatus.RUN);
 		}
 		
-		return new LocationOfScreenWallVO().set(screenPO); 
+		locationOfScreenWallDao.save(screenPO);
+		
+		return screenPO;
 	}
 
 }
