@@ -56,4 +56,15 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	public List<MonitorLiveDevicePO> findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(
 			String dstVideoBundleId, String dstVideoChannelId, String dstAudioBundleId, String dstAudioChannelId);
 	
+	/**
+	 * 根据解码器id查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月6日 下午4:51:42
+	 * @param videoBundleId
+	 * @param dstVideoBundleId
+	 * @return
+	 */
+	public MonitorLiveDevicePO findByDstVideoBundleId(String dstVideoBundleId);
+	
 }

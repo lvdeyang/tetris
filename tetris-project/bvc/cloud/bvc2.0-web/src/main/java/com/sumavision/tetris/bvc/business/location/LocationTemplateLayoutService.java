@@ -87,6 +87,7 @@ public class LocationTemplateLayoutService {
 	 * @param userId
 	 */
 	@Transactional
+	@Deprecated
 	public LocationTemplateLayoutPO edit(Long id, 
 			String templateName, 
 			Integer screenNumberOfX, 

@@ -198,23 +198,25 @@ public class LocationOfScreenWallController {
 	}
 	
 	/**
-	 * 更新对应屏幕的转发状态<br/>
+	 * 更新转发状态录制任务<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月5日 下午2:07:34
 	 * @param id 屏幕的id
-	 * @param monitorLiveDeviceId
-	 * @return
-	 * @throws Exception
+	 * @param monitorLiveDeviceId 录制任务id
+	 * @param Boolean stopOrStart stopOrRestart TRUE停止,FALSE开始
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value="/exchange/location/Status")
 	public Object exchangeLocationStatus(
 			Long id,
-			Long monitorLiveDeviceId) throws Exception{
+			Boolean stopOrStart,
+			HttpServletRequest request) throws Exception{
 		
-		return locationOfScreenWallService.exchangeLocationStatus(id, monitorLiveDeviceId);
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		return locationOfScreenWallService.exchangeLocationStatus(id, stopOrStart, user.getUserno(), user.getId());
 	}
 	
 }

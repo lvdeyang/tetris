@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -948,6 +949,31 @@ public class MonitorLiveController {
 	}
 	
 	/**
+	 * 批量停止点播设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月9日 上午10:23:32
+	 * @param String ids 点播设备任务id
+	 * @param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/live/device")
+	public Object stopLiveDevice(
+			String ids,
+			Boolean stopAndDelete,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		List<Long> idList = JSONArray.parseArray(ids, Long.class);
+		
+		monitorLiveDeviceService.stop(idList, user.getId(), user.getUserno(), stopAndDelete);
+		
+		return null;
+	}
+	
+	/**
 	 * 停止点播用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -1021,19 +1047,21 @@ public class MonitorLiveController {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年10月28日 上午11:28:22
-	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 * @param ids 点播监控设备MonitorLiveDevicePO的主键集合
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop/to/restart")
 	public Object stopToRestart(
-			Long id,
+			String ids,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		MonitorLiveDevicePO entity = monitorLiveDeviceService.stopToRestart(id, user);
+		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
-		return new MonitorLiveDeviceVO().set(entity);
+		monitorLiveDeviceService.stopToRestart(idList, user.getId());
+		
+		return null;
 	}
 }
