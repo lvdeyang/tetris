@@ -2,7 +2,10 @@ package com.sumavision.bvc.device.command.split;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +15,6 @@ import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
@@ -20,12 +22,17 @@ import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
-import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.page.PageTaskDAO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -73,6 +80,15 @@ public class CommandSplitServiceImpl {
 
 	@Autowired
 	private UserUtils userUtils;
+	
+	@Autowired
+	private PageTaskDAO pageTaskDao;
+	
+	@Autowired
+	private TerminalBundleUserPermissionDAO terminalBundleUserPermissionDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 	
 	/**
 	 * 切换分屏方案<br/>
@@ -262,24 +278,54 @@ public class CommandSplitServiceImpl {
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void exchangeTwoSplit(Long userId, int oldIndex, int newIndex) throws Exception{
+	public void exchangeTwoSplit(Long userId, Integer oldIndex, Integer newIndex) throws Exception{
 
 		synchronized (userId) {
 			
-			/*
-			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-			//当前方案的所有播放器
-			List<CommandGroupUserPlayerPO> players = userInfo.obtainUsingSchemePlayers();
-			for(CommandGroupUserPlayerPO player : players){
-				if(player.getLocationIndex() == oldIndex){
-					player.setLocationIndex(newIndex);
-				}else if(player.getLocationIndex() == newIndex){
-					player.setLocationIndex(oldIndex);
-				}
+			List<String> dstIds = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(userId.toString(), terminalDao.findByType(TerminalType.QT_ZK).getId())
+																 .stream().map(permisssion-> permisssion.getId().toString()).collect(Collectors.toList());
+			//当前屏幕的所有播放器
+			List<PageTaskPO> taskList = pageTaskDao.findByDstIdIn(dstIds).stream()
+												   .filter(index->{return null==index?false:true;})
+												   .collect(Collectors.toList());
+			PageTaskPO task = null;
+			PageTaskPO targetTask = null;
+			
+			for(PageTaskPO pageTask:taskList){
+				if(oldIndex.equals(pageTask.getLocationIndex())){
+					task = pageTask;
+				}else if(newIndex.equals(pageTask.getLocationIndex())){
+					targetTask = pageTask;
+ 				}
 			}
 			
-			commandGroupUserInfoDao.save(userInfo);
-			 */
+			if(task == null && targetTask == null){
+				return;
+			}else if(task == null || targetTask == null){
+				if(task == null){
+					targetTask.setLocationIndex(oldIndex);
+				}else{
+					task.setLocationIndex(newIndex);
+				}
+			}else{
+				int taskIndex = task.getTaskIndex();
+				task.setLocationIndex(newIndex);
+				task.setTaskIndex(targetTask.getTaskIndex());
+				targetTask.setLocationIndex(oldIndex);
+				targetTask.setTaskIndex(taskIndex);
+				pageTaskDao.save(new ArrayListWrapper<PageTaskPO>().add(task).add(targetTask).getList());
+				return;
+			}
+			
+			//重新排序taskIndex
+			int minIndex= taskList.stream().map(PageTaskPO::getTaskIndex).min(Long::compare).get();
+			Collections.sort(taskList, Comparator.comparing(PageTaskPO::getLocationIndex));
+			for(PageTaskPO pageTask:taskList){
+				pageTask.setTaskIndex(minIndex);
+				minIndex++;
+			}
+			
+			pageTaskDao.save(taskList);
 			
 			/*
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);

@@ -258,6 +258,9 @@ public class LocationOfScreenWallService {
 						errorScreenList.add(screen);
 						e.printStackTrace();
 					}
+				}else{
+					screen.setEncoderBundleId("");
+					screen.setEncoderBundleName("");
 				}
 			});
 			
@@ -281,6 +284,9 @@ public class LocationOfScreenWallService {
 						errorScreenList.add(screen);
 						e.printStackTrace();
 					}
+				}else{
+					screen.setEncoderBundleId("");
+					screen.setEncoderBundleName("");
 				}
 			});
 			
