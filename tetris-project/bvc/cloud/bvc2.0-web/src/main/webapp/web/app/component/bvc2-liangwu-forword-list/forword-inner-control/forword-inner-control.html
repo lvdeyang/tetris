@@ -19,12 +19,16 @@
     </div>
   </div>
   <div class="bvc2-auto-layout-wrapper liangwu-forword">
-    屏幕名称：
-    <el-select v-model="templateId" filterable placeholder="请选择" size="mini" style="margin-bottom: 10px;"
-      @change="handleTemplateChange">
-      <el-option v-for="item in layOutOptions" :key="item.id" :label="item.templateName" :value="item.id">
-      </el-option>
-    </el-select>
+    <el-row>
+      屏幕名称：
+      <el-select v-model="templateId" filterable placeholder="请选择" size="mini" style="margin-bottom: 10px;"
+        @change="handleTemplateChange">
+        <el-option v-for="item in layOutOptions" :key="item.id" :label="item.templateName" :value="item.id">
+        </el-option>
+      </el-select>
+      <el-button type="danger" size="mini" @click="deleteAllEncode">解绑所有编码器</el-button>
+    </el-row>
+
     <div class="bvc2-auto-layout-container"></div>
   </div>
 </div>

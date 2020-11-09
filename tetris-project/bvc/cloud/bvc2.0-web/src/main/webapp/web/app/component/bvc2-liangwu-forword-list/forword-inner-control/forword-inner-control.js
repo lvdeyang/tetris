@@ -189,7 +189,6 @@ define([
         // return false;
       },
       allowDrag: function (node) {
-        console.log(node)
         if (node.data.type === 'BUNDLE') {
           return true;
         }
@@ -220,8 +219,10 @@ define([
         var options = instance.layout;
         var tdHtml = `<div class="cell-box"><p>编码器：<span  class="encode">无</span></p>
                             <p>解码器：<span  class="decode">无</span></p>
+                            <p>状态：<span  class="status">无</span></p>
                             <button class="el-button el-button--text screen-config-stop">暂停<span class="icon-stop"></span></button>
                             <button class="el-button el-button--text screen-config-begin">开始<span class="el-icon-caret-right"></span></button>
+                            <button class="el-button el-button--text screen-config-delete"> 删除 <span class="el-icon-delete"></span></button>
                       </div>`
         if (options) {
           $container['layout-auto']('create', {
@@ -240,14 +241,15 @@ define([
                 var $cell = $(this);
                 var od = $cell['layout-auto']('getData');
                 // $cell['layout-auto']('setData', od);
+                console.log(od)
                 var params = {
                   bundleId: data.id,
                   bundleName: data.name,
-                  locationX: od.x,
-                  locationY: od.y,
+                  locationX: od.locationX,
+                  locationY: od.locationY,
                   locationTemplateLayoutId: instance.templateId,
                 }
-                // 屏幕绑定解码器
+                // 屏幕绑定编码器
                 ajax.post('/location/of/screen/wall/bind/encoder', params, function (data, status) {
                   if (status == 200) {
                     instance.$message({
@@ -255,6 +257,9 @@ define([
                       message: "编码器绑定成功！"
                     })
                     $cell.find('.encode').text(data.encoderBundleName)
+                    $cell.find('.screen-config-begin').hide()
+                    $cell.find('.screen-config-stop').show()
+                    $cell.find('.screen-config-delete').show()
                   } else {
                     instance.$message({
                       type: "waring",
@@ -270,26 +275,37 @@ define([
           var screenInfo = instance.screenInformation
           for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
+            // console.log(cell)
             var currentScreenInfo = screenInfo.find(function (item) {
-              return (item.locationX == cell.x && item.locationY == cell.y)
+              return (item.locationX == cell.locationX && item.locationY == cell.locationY)
             })
-            console.log(currentScreenInfo)
+            // console.log(currentScreenInfo)
             // 绑定屏幕信息
-            cell.$cell['layout-auto']('setData', currentScreenInfo);
+            if (currentScreenInfo) {
+              cell.$cell['layout-auto']('setData', currentScreenInfo);
+              cell.$cell.find('.status').text(currentScreenInfo.status)
+            } else {
+              cell.$cell['layout-auto']('setData', cell);
+            }
             // 设置屏幕操作按钮
             if (currentScreenInfo && currentScreenInfo.status == "RUN") {
               cell.$cell.find('.screen-config-begin').hide()
               cell.$cell.find('.screen-config-stop').show()
+              cell.$cell.find('.screen-config-delete').show()
             } else if (currentScreenInfo && currentScreenInfo.status == "STOP" && currentScreenInfo.decoderBundleId && currentScreenInfo.encoderBundleId) {
               cell.$cell.find('.screen-config-begin').show()
               cell.$cell.find('.screen-config-stop').hide()
+              cell.$cell.find('.screen-config-delete').show()
             } else if (!currentScreenInfo) {
               cell.$cell.find('.screen-config-begin').hide()
               cell.$cell.find('.screen-config-stop').hide()
+              cell.$cell.find('.screen-config-delete').hide()
+            } else if (currentScreenInfo && currentScreenInfo.status == "STOP" && !currentScreenInfo.encoderBundleId) {
+              cell.$cell.find('.screen-config-delete').hide()
             }
             if (currentScreenInfo) {
-              cell.$cell.find('.encode').text(currentScreenInfo.encoderBundleName)
-              cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName)
+              cell.$cell.find('.encode').text(currentScreenInfo.encoderBundleName ? currentScreenInfo.encoderBundleName : '无')
+              cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName ? currentScreenInfo.decoderBundleName : '无')
             }
           }
         } else {
@@ -325,6 +341,35 @@ define([
           }
         })
       },
+      // 解绑所有编码器
+      deleteAllEncode () {
+        var self = this;
+        var params = {
+          LocationTemplateLayoutId: self.templateId,
+          unbindAll: true
+        }
+        self.$confirm('此操作将解绑当前屏幕所有的编码器, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function () {
+          ajax.post('/location/of/screen/wall/unbind/all/stop/encoder', params, function (data, status) {
+            if (status == 200) {
+              self.$message({
+                type: "success",
+                message: "操作成功！"
+              })
+              self.handleTemplateChange(self.templateId)
+            }
+          })
+        }).catch(function () {
+          self.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+      },
     },
     mounted: function () {
       var self = this;
@@ -335,6 +380,7 @@ define([
 
     },
   });
+  // 停止按钮
   $(document).on('mousedown', '.screen-config-stop', function (e) {
     e.stopPropagation();
     var $button = $(this);
@@ -342,8 +388,11 @@ define([
       var $td = $button.closest('td');
       var od = $td['layout-auto']('getData');
       console.log(od)
-      ajax.post('/location/of/screen/wall/exchange/location/Status', { locationTemplateLayoutId: val }, function (data, status) {
+      ajax.post('/location/of/screen/wall/exchange/location/Status', { id: od.id, stopOrStart: true }, function (data, status) {
         if (status == 200) {
+          $td.find('.screen-config-begin').show()
+          $td.find('.screen-config-stop').hide()
+          $td.find('.status').text("STOP")
         }
       })
     });
@@ -352,5 +401,50 @@ define([
       $(document).unbind('mouseup');
     });
   });
+  // 开始按钮
+  $(document).on('mousedown', '.screen-config-begin', function (e) {
+    e.stopPropagation();
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/exchange/location/Status', { id: od.id, stopOrStart: false }, function (data, status) {
+        if (status == 200) {
+          $td.find('.screen-config-begin').hide()
+          $td.find('.screen-config-stop').show()
+          $td.find('.status').text("RUN")
+        }
+      })
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
+  // 删除按钮
+  $(document).on('mousedown', '.screen-config-delete', function (e) {
+    e.stopPropagation();
+    var vm = Vue;
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/unbind/encoder', { id: od.id }, function (data, status) {
+        if (status !== 200) return;
+        $td.find('.encode').text("无")
+        $td.find('.screen-config-begin').hide()
+        $td.find('.screen-config-stop').hide()
+        $td.find('.screen-config-delete').hide()
+      }, null, [403, 404, 409, 500]);
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
+
+
   return Vue;
 });

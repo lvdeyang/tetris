@@ -39,7 +39,8 @@ define([
         totalNum: {},
         pageSize: 10,
         currentPage: 0,
-        total: 0
+        total: 0,
+        forwordIds: []
       }
     },
     props: [],
@@ -317,7 +318,11 @@ define([
         }
       },
       handleSelectionChange (val) {
-        this.multipleSelection = val;
+        var forwordIds = [];
+        val.forEach(function (item) {
+          forwordIds.push(item.forwordid)
+        })
+        this.forwordIds = forwordIds
       },
       rowStop (scope, stopAndDelete) {
         var row = scope.row, self = this;
@@ -334,7 +339,7 @@ define([
       rowStart (scope) {
         var row = scope.row
         var self = this;
-        ajax.post('/monitor/live/stop/to/restart', { id: row.forwordid }, function (data, status) {
+        ajax.post('/monitor/live/stop/to/restart', { ids: JSON.stringify([row.forwordid]) }, function (data, status) {
           if (status == 200) {
             self.$message({
               'type': "success",
@@ -425,7 +430,63 @@ define([
       rowClassName: function (row, rowIndex) {
         return row.row.id
       },
+      selectableFun: function (row, index) {
+        if (row.videoBundleName) {
+          return true
+        } else {
+          return false
+        }
+      },
+      handleStart () {
+        var self = this;
+        if (self.forwordIds.length == 0) {
+          self.$message({
+            type: "waring",
+            message: "请选择需要操作的数据！"
+          })
+          return
+        }
+        ajax.post('/monitor/live/stop/to/restart', { ids: JSON.stringify(self.forwordIds) }, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type': "success",
+              'message': "开始成功！"
+            })
+            self.loadStation()
 
+          }
+        })
+      },
+      handleStop (stopAndDelete) {
+        var self = this;
+        if (self.forwordIds.length == 0) {
+          self.$message({
+            type: "waring",
+            message: "请选择需要操作的数据！"
+          })
+          return
+        }
+        //@param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
+        ajax.post('/monitor/live/stop/live/device/', { stopAndDelete: stopAndDelete, ids: JSON.stringify(self.forwordIds) }, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type': "success",
+              'message': "操作成功！"
+            })
+            self.loadStation()
+          }
+        })
+      },
+      handleDelete () {
+        var self = this;
+        if (self.forwordIds.length == 0) {
+          self.$message({
+            type: "waring",
+            message: "请选择需要操作的数据！"
+          })
+          return
+        }
+      },
     },
     mounted: function () {
       var self = this;
