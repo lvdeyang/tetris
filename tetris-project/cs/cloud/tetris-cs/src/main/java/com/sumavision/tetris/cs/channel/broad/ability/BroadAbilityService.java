@@ -399,7 +399,7 @@ public class BroadAbilityService {
 				if (screenVOs.isEmpty()) continue;
 				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
 				//这里重新根据开始，结束时间计算duration
-				templateVO.setData(resetScreenDuration(screenVOs));
+				templateVO.setData(resetScreenDuration(broadDate,screenVOs));
 				long tempScheduleTime=querySchedulePlayTimeByScreens(screenVOs);
 				if(scheduleTime<tempScheduleTime){
 					scheduleTime=tempScheduleTime;
@@ -611,15 +611,26 @@ public class BroadAbilityService {
 	 * @return
 	 * @throws ParseException 
 	 */
-	private List<ScreenVO> resetScreenDuration(List<ScreenVO> screens) throws ParseException{
-		for (ScreenVO screenVO : screens) {
-			if(screenVO.getStartTime()!=null&&screenVO.getEndTime()!=null){
-				//long tempDuration=Long.parseLong(screenVO.getDuration());
-				Date startTime=DateUtil.parse(screenVO.getStartTime(),"yyyy-MM-dd HH:mm:ss");
-			    Date endTime=DateUtil.parse(screenVO.getEndTime(), "yyyy-MM-dd HH:mm:ss");
-			    screenVO.setDuration((endTime.getTime()-startTime.getTime())+"");
+	private List<ScreenVO> resetScreenDuration(Date broadTime,List<ScreenVO> screens) throws ParseException{
+		
+		long current=broadTime.getTime();
+		for(int i=0;i<screens.size();i++){
+			if(screens.get(i).getStartTime()!=null&&screens.get(i).getEndTime()!=null){
+				Date startTime=DateUtil.parse(screens.get(i).getStartTime(),"yyyy-MM-dd HH:mm:ss");
+			    Date endTime=DateUtil.parse(screens.get(i).getEndTime(), "yyyy-MM-dd HH:mm:ss");
+			    if(startTime.getTime()>current&&i>0){
+			    	//这里应该加个备播，但是目前先给上一个直接延长duration
+			    	long tempDuration=startTime.getTime()-current;
+			    	screens.get(i-1).setDuration(Long.parseLong(screens.get(i-1).getDuration())+tempDuration+"");
+			    	current+=tempDuration;
+			    }
+			    screens.get(i).setDuration((endTime.getTime()-startTime.getTime())+"");
+			    current+=endTime.getTime()-startTime.getTime();
+			}else{
+				current+=Long.parseLong(screens.get(i).getDuration());
 			}
 		}
+		
 		//重排插入备播，增加备播设置之后再加
 		return screens;
 	}
