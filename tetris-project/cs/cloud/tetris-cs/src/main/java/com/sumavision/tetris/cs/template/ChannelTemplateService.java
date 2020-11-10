@@ -89,7 +89,8 @@ public class ChannelTemplateService {
 			String labelNames,
 			String mimsId,
 			String mimsName,
-			String url
+			String url,
+			String duration
 			) throws Exception {
 	    TemplateProgramePO templateProgramePO=new TemplateProgramePO();
 	    templateProgramePO.setTemplateId(templateId);
@@ -100,6 +101,7 @@ public class ChannelTemplateService {
 	    templateProgramePO.setLabelNames(labelNames);
 	    templateProgramePO.setMimsId(mimsId);
 	    templateProgramePO.setMimsName(mimsName);
+	    templateProgramePO.setDuration(duration);
 	    templateProgramePO.setUrl(url);
 	    templateProgrameDao.save(templateProgramePO);
 	    return templateProgramePO;

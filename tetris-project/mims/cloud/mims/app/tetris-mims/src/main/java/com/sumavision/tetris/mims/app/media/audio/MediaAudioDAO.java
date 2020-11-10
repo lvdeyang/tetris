@@ -119,6 +119,11 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND tags like CONCAT('%',?2,'%') AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?3) ORDER BY DOWNLOAD_COUNT DESC", nativeQuery = true)
 	public List<MediaAudioPO> findByFolderIdInAndTagByDownloadCountOrderDesc(Collection<Long> folderId, String tag, Collection<String> reviewStatus);
 	
+	
+	
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE tags like CONCAT('%',?1,'%')", nativeQuery = true)
+	public List<MediaAudioPO> findByTag(String tag);
+	
 	/**
 	 * <br/>
 	 * <b>作者:</b>lzp<br/>

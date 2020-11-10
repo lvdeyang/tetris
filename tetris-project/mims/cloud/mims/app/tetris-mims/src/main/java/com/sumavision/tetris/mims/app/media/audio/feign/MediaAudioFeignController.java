@@ -167,6 +167,62 @@ public class MediaAudioFeignController {
 		return audioVOs;
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/recommendnew")
+	public Object loadRecommendnew(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadRecommendWithNew(user);
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		
+		String date = DateUtil.format(new Date(), DateUtil.defaultDatePattern);
+		String groupId = user.getGroupId();
+		Long userId = user.getId();
+		MediaRecommendStatisticsPO recommendStatisticsPO = 
+				mediaRecommendStatisticsDAO.findByDateAndUserId(date, userId);
+		if (recommendStatisticsPO == null) {
+			recommendStatisticsPO = new MediaRecommendStatisticsPO();
+			recommendStatisticsPO.setDate(date);
+			recommendStatisticsPO.setUserId(userId);
+			recommendStatisticsPO.setGroupId(groupId);
+			recommendStatisticsPO.setCount(1l);
+		} else {
+			recommendStatisticsPO.setCount(recommendStatisticsPO.getCount() + 1);
+		}
+		mediaRecommendStatisticsDAO.save(recommendStatisticsPO);
+		
+		return audioVOs;
+	}
+	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/tag/recommend")
+	public Object loadTagRecommend(HttpServletRequest request,String tags) throws Exception{
+		UserVO user = userQuery.current();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadRecommendWithtags(user, tags);
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		
+		String date = DateUtil.format(new Date(), DateUtil.defaultDatePattern);
+		String groupId = user.getGroupId();
+		Long userId = user.getId();
+		MediaRecommendStatisticsPO recommendStatisticsPO = 
+				mediaRecommendStatisticsDAO.findByDateAndUserId(date, userId);
+		if (recommendStatisticsPO == null) {
+			recommendStatisticsPO = new MediaRecommendStatisticsPO();
+			recommendStatisticsPO.setDate(date);
+			recommendStatisticsPO.setUserId(userId);
+			recommendStatisticsPO.setGroupId(groupId);
+			recommendStatisticsPO.setCount(1l);
+		} else {
+			recommendStatisticsPO.setCount(recommendStatisticsPO.getCount() + 1);
+		}
+		mediaRecommendStatisticsDAO.save(recommendStatisticsPO);
+		
+		return audioVOs;
+	}
+	
+	
 	/**
 	 * 根据预览地址查询音频列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>

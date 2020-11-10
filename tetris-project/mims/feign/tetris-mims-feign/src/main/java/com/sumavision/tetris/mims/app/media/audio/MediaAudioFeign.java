@@ -43,6 +43,10 @@ public interface MediaAudioFeign {
 	 */
 	@RequestMapping(value = "/media/audio/feign/load/recommend")
 	public JSONObject loadRecommend() throws Exception;
+	@RequestMapping(value = "/media/audio/feign/load/recommendnew")
+	public JSONObject loadRecommendnew() throws Exception;
+	@RequestMapping(value = "/media/audio/feign/load/tag/recommend")
+	public JSONObject loadTagRecommend(@RequestParam("tags") String tags) throws Exception;
 	
 	/**
 	 * 获取下载量排名列表<br/>

@@ -30,6 +30,8 @@ public class TemplateProgrameVo extends AbstractBaseVO<TemplateProgrameVo, Templ
     
     private String url;
     
+    private String duration;
+    
 	public long getTemplateId() {
 		return templateId;
 	}
@@ -132,7 +134,17 @@ public class TemplateProgrameVo extends AbstractBaseVO<TemplateProgrameVo, Templ
 		this.setStartTimeStr(DateUtil.format(entity.getStartTime(),"HH:mm:ss"));
 		this.setEndTimeStr(DateUtil.format(entity.getEndTime(),"HH:mm:ss"));
 		this.setTemplateId(entity.getTemplateId());
+		this.setDuration(entity.getDuration());
 		return this;
 	}
 
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+
+	
 }
