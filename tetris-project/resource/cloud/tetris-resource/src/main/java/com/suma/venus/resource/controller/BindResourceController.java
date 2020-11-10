@@ -40,6 +40,7 @@ import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.lianwang.auth.AuthNotifyXml;
@@ -52,6 +53,8 @@ import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -125,6 +128,12 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
 	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -766,45 +775,73 @@ public class BindResourceController extends ControllerBase {
 					
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
-					if (connectCenterLayerID != null) {
-						List<Long> consumeIds = new ArrayList<Long>();
-						for (UserBO userBO : userBOs) {
-							String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
-							if ("ldap".equals(userBO.getCreater())) {
-								for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
-									BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
-									if (null == bundle) {
-										continue;
-									}
-									AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-									authNotifyXml.setAuthnodeid(self.getNodeUuid());
-									authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
-									authNotifyXml.setUserid(userBO.getUserNo());
-									authNotifyXml.setOperation(entry.getValue().getDevOprType());
-									String authCode = null;
-									if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
-										authCode = entry.getValue().getDevAuthCode();
-									}
-									authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
-									// 发送消息
+
+					List<Long> consumeIds = new ArrayList<Long>();
+					for (UserBO userBO : userBOs) {
+						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
+						if ("ldap".equals(userBO.getCreater())) {
+							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
+								BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
+								if (null == bundle) {
+									continue;
+								}
+								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
+								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
+								authNotifyXml.setUserid(userBO.getUserNo());
+								authNotifyXml.setOperation(entry.getValue().getDevOprType());
+								String authCode = null;
+								if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
+									authCode = entry.getValue().getDevAuthCode();
+								}
+								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
+								// 发送消息
+								if (connectCenterLayerID != null) {
 									JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
 									PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
 									
 									tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 								}
-							}else{
-								JSONObject message = new JSONObject();
-								message.put("businessType", "AuthUpdate");
-								WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
-								consumeIds.add(ws.getId());
 							}
+						}else{
+							JSONObject message = new JSONObject();
+							message.put("businessType", "AuthUpdate");
+							WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+							consumeIds.add(ws.getId());
 						}
-						websocketMessageService.consumeAll(consumeIds);
 					}
+					websocketMessageService.consumeAll(consumeIds);
+				
+					
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
 			}
+			
+			//添加设备授权
+			SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+			Set<Long> serNodeIds = new HashSet<Long>();
+			if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+				for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+					serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+				}
+			}
+			List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+			PassByBO passByBO = new PassByBO();
+			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+			Map<String, Object> pass_by_content = new HashMap<String, Object>();
+			Map<String, Object> local = new HashMap<String, Object>();
+			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			pass_by_content.put("cmd", "foreignEdit");
+			pass_by_content.put("name", serNodePO.getNodeName());
+			pass_by_content.put("local", local);
+			pass_by_content.put("foreign", foreign);
+			passByBO.setPass_by_content(pass_by_content);
+			if (workNodePOs != null && !workNodePOs.isEmpty()) {
+				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			}
+			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 
 		} catch (Exception e) {
 			LOGGER.error(e.toString());

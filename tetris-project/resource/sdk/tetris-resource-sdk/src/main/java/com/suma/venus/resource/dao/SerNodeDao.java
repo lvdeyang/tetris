@@ -27,4 +27,10 @@ public interface SerNodeDao extends CommonDao<SerNodePO> {
 	
 	@Query(value = "SELECT n.* FROM ser_nodepo n LEFT JOIN ser_infopo f ON f.ser_node = n.node_uuid where f.ser_no = ?1", nativeQuery = true)
 	public SerNodePO findByApplicationId(String applicationId);
+	
+	public List<SerNodePO> findByNodeNameIn(Collection<String> nodeNames);
+	
+	public SerNodePO findByNodeName(String nodeName);
+	
+	public List<SerNodePO> findByIdIn(Collection<Long> ids);
 }

@@ -35,6 +35,15 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 	
 	private SOURCE_TYPE sourceType = SOURCE_TYPE.SYSTEM;
 	
+	/**口令*/
+	private String password;
+	
+	/**连接操作*/
+	private ConnectionStatus operate;
+	
+	/**连接状态*/
+	private ConnectionStatus status;
+	
 	public SerNodePO() {
 		super();
 	}
@@ -47,6 +56,36 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 		this.nodeFather = nodeFather;
 		this.nodeRelations = nodeRelations;
 		this.nodeFactInfo = nodeFactInfo;
+	}
+
+	public enum ConnectionStatus{
+		ON,OFF
+	}
+	
+	public ConnectionStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ConnectionStatus status) {
+		this.status = status;
+	}
+
+	@Column
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	
+	public ConnectionStatus getOperate() {
+		return operate;
+	}
+	
+	public void setOperate(ConnectionStatus operate) {
+		this.operate = operate;
 	}
 
 	@Column(unique=true)

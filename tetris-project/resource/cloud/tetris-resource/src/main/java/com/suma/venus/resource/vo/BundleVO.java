@@ -1,9 +1,14 @@
 package com.suma.venus.resource.vo;
 
 
+import java.util.List;
+
+import org.springframework.data.geo.format.PointFormatter;
+
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.CoderType;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 
 public class BundleVO {
@@ -87,6 +92,14 @@ public class BundleVO {
 	/** 所属分组uuid*/
 	private String institution;
 	
+	/** 所属服务节点*/
+	private String equipFactInfo;
+	
+	/** 在线状态*/
+	private ONLINE_STATUS status;
+	
+	private List<ChannelSchemeVO> channels;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -114,6 +127,8 @@ public class BundleVO {
 		po.setTranscod(this.getTranscod());
 		po.setCoderType(this.getCoderType()==null ? null:this.getCoderType());
 		po.setFolderId(this.folderId);
+		po.setEquipFactInfo(this.getEquipFactInfo());
+		po.setOnlineStatus(this.getStatus()==null?ONLINE_STATUS.OFFLINE:this.getStatus());
 		return po;
 	}
 	
@@ -145,9 +160,36 @@ public class BundleVO {
 		vo.setTranscod(po.getTranscod()==null?false:po.getTranscod());
 		vo.setCoderType(po.getCoderType()==null?null:po.getCoderType());
 		vo.setFolderId(po.getFolderId());
+		vo.setEquipFactInfo(po.getEquipFactInfo());
+		vo.setStatus(po.getOnlineStatus()==null?ONLINE_STATUS.OFFLINE:po.getOnlineStatus());
 		return vo;
 	}
 	
+	
+	public ONLINE_STATUS getStatus() {
+		return status;
+	}
+
+	public void setStatus(ONLINE_STATUS status) {
+		this.status = status;
+	}
+
+	public String getEquipFactInfo() {
+		return equipFactInfo;
+	}
+
+	public void setEquipFactInfo(String equipFactInfo) {
+		this.equipFactInfo = equipFactInfo;
+	}
+
+	public List<ChannelSchemeVO> getChannels() {
+		return channels;
+	}
+
+	public void setChannels(List<ChannelSchemeVO> channels) {
+		this.channels = channels;
+	}
+
 	public String getInstitution() {
 		return institution;
 	}
