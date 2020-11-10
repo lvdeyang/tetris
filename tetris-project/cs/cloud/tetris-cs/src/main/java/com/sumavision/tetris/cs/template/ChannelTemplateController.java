@@ -83,12 +83,12 @@ public class ChannelTemplateController {
 			String labelNames,
 			String mimsId,
 			String mimsName,
-			String url,HttpServletRequest request) throws Exception {
+			String url,String duration,HttpServletRequest request) throws Exception {
 		
 		TemplateProgramePO templateProgramePO=channelTemplateService.addpro(templateId, 
 				DateUtil.parse(startTime,"HH:mm:ss"),
 				DateUtil.parse(endTime, "HH:mm:ss"),
-				ProgrameType.fromName(programeType), labelIds, labelNames, mimsId, mimsName, url);
+				ProgrameType.fromName(programeType), labelIds, labelNames, mimsId, mimsName, url,duration);
 		return new TemplateProgrameVo().set(templateProgramePO);
 		
 	}

@@ -839,6 +839,26 @@ public class UserService{
 		return result;
 	}
 	
+	public List<UserTagsVO> addTagHotCount(
+			Long userId,
+			String tagNames
+            ) throws Exception{
+		List<UserTagsPO> userTagsPOs=new ArrayList<UserTagsPO>();
+		String[] tagNameArr=tagNames.split(",");
+		for (String tagName : tagNameArr) {
+			List<UserTagsPO> tuserTagsPOs=userTagsDAO.findByUserIdAndTagName(userId, tagName);
+			for (UserTagsPO userTagsPO : tuserTagsPOs) {
+				userTagsPO.setHotCount(userTagsPO.getHotCount()==null?0l:userTagsPO.getHotCount()+1);
+			}
+			userTagsPOs.addAll(tuserTagsPOs);
+		}
+		
+		userTagsDAO.save(userTagsPOs);
+		List<UserTagsVO> result = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
+		return result;
+	}
+	
+	
 	/**
 	 * 修改密码<br/>
 	 * <b>作者:</b>ldy<br/>
