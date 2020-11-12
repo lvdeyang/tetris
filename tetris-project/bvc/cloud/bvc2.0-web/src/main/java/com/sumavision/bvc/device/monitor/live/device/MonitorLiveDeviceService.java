@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveDeviceException;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.LiveType;
@@ -128,7 +131,10 @@ public class MonitorLiveDeviceService {
 	
 	@Autowired
 	private OperationLogService operationLogService;
-
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
+	
 	/**
 	 * xt看本地设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -1487,6 +1493,34 @@ public class MonitorLiveDeviceService {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * 失去权限停止转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午3:58:06
+	 * @param userBundleBo
+	 */
+	public void stopLiveByLosePrivilege(
+			UserBundleBO userBundleBo,
+			Long userId,
+			String userNo) throws Exception {
+		
+		Map<String,String> bundleIdMap = resourceQueryUtil.queryUseableBundleIds(userBundleBo.getUserId(), new ArrayListWrapper<String>().add("DIANBO").getList(),Boolean.FALSE)
+												 .stream().collect(Collectors.toMap(String::toString, Function.identity()));
+		
+		List<MonitorLiveDevicePO> monitorLiveDeviceList = monitorLiveDeviceDao.findByUserIdAndStatus(userBundleBo.getUserId(), MonitorRecordStatus.RUN);
+		
+		List<Long> monitorLiveDeviceIds= monitorLiveDeviceList.stream().filter(monitorLiveDevice->{
+			return bundleIdMap.get(monitorLiveDevice.getAudioBundleId()) == null ? true : false;
+		}).map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
+		
+		if(monitorLiveDeviceIds.size()<=0){
+			return;
+		}
+		
+		stop(monitorLiveDeviceIds, userId, userNo, null);
 	}
 	
 }

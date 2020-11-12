@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
+
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.orm.dao.MetBaseDAO;
 
 @RepositoryDefinition(domainClass = MonitorLiveDevicePO.class, idClass = Long.class)
@@ -66,5 +68,16 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @return
 	 */
 	public MonitorLiveDevicePO findByDstVideoBundleId(String dstVideoBundleId);
+	
+	/**
+	 * 根据userId和转发状态查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午4:32:10
+	 * @param userId
+	 * @param status
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByUserIdAndStatus(Long userId, MonitorRecordStatus status);
 	
 }

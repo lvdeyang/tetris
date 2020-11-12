@@ -3,9 +3,9 @@ package com.sumavision.bvc.control.device.monitor.live;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +43,7 @@ import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceQuery;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
+import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserDAO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserPO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
@@ -54,7 +55,6 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 
@@ -1061,6 +1061,38 @@ public class MonitorLiveController {
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
 		monitorLiveDeviceService.stopToRestart(idList, user.getId());
+		
+		return null;
+	}
+	
+	/**
+	 * 失去权限停止转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午3:58:35
+	 * @param userBundleBo UserBundleBO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/live/by/lose/privilege")
+	public Object stopLiveByLosePrivilege(
+			List<UserBundleBO> userBundleBoList,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		Optional<UserBundleBO> userBundleBoOptional = userBundleBoList.stream().filter(userBundleBo->{
+			if(userBundleBo.getUserId().equals(user.getId())){
+				return true;
+			}
+			return false;
+		}).findFirst();
+		
+		if(!userBundleBoOptional.isPresent()){
+			return null;
+		}
+		
+		monitorLiveDeviceService.stopLiveByLosePrivilege(userBundleBoOptional.get(), user.getId(), user.getUserno());
 		
 		return null;
 	}
