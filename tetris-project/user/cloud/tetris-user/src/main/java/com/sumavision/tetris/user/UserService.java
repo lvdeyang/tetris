@@ -124,6 +124,9 @@ public class UserService{
 	@Autowired
 	private BossService bossService;
 	
+	@Autowired
+	private UserTagsDAO userTagsDAO;
+	
 	/**
 	 * 锁定用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -769,6 +772,92 @@ public class UserService{
 		
 		return result;
 	}
+	
+	/**
+	 * 
+	 * 修改标签（新）<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 下午6:50:53
+	 * @param id
+	 * @param tags
+	 * @param tagIds
+	 * @return
+	 * @throws Exception
+	 */
+	public UserVO editTags(
+			Long id, 
+            String tags
+            ) throws Exception{
+		
+		UserPO user = userDao.findOne(id);
+		if(user == null) throw new UserNotExistException(id);
+		if(tags != null) {
+			user.setTags(tags);
+			String[] tagArr=tags.split(",");
+		    userTagsDAO.deleteByUserId(user.getId());
+		    List<UserTagsPO> userTagsPOs=new ArrayList<UserTagsPO>();
+		    for(int i=0;i<tagArr.length;i++){
+		    	UserTagsPO userTagsPO=new UserTagsPO();
+		    	userTagsPO.setUserId(user.getId());
+		    	userTagsPO.setTagName(tagArr[i]);
+		    	userTagsPOs.add(userTagsPO);
+		    }
+		    userTagsDAO.save(userTagsPOs);
+		}
+		userDao.save(user);
+		UserVO result = new UserVO().set(user);
+		return result;
+	}
+	
+	
+	/**
+	 * 
+	 * 修改标签热度<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 下午7:02:05
+	 * @param id
+	 * @param hotCount
+	 * @return
+	 * @throws Exception
+	 */
+	public List<UserTagsVO> editTagHotCount(
+			Long userId,
+			String tagName, 
+            Long hotCount
+            ) throws Exception{
+		
+		List<UserTagsPO> userTagsPOs=userTagsDAO.findByUserIdAndTagName(userId, tagName);
+		for (UserTagsPO userTagsPO : userTagsPOs) {
+			userTagsPO.setHotCount(hotCount);
+		}
+		userTagsDAO.save(userTagsPOs);
+		List<UserTagsVO> result = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
+		return result;
+	}
+	
+	public List<UserTagsVO> addTagHotCount(
+			Long userId,
+			String tagNames
+            ) throws Exception{
+		List<UserTagsPO> userTagsPOs=new ArrayList<UserTagsPO>();
+		String[] tagNameArr=tagNames.split(",");
+		for (String tagName : tagNameArr) {
+			List<UserTagsPO> tuserTagsPOs=userTagsDAO.findByUserIdAndTagName(userId, tagName);
+			for (UserTagsPO userTagsPO : tuserTagsPOs) {
+				userTagsPO.setHotCount(userTagsPO.getHotCount()==null?0l:userTagsPO.getHotCount()+1);
+			}
+			userTagsPOs.addAll(tuserTagsPOs);
+		}
+		
+		userTagsDAO.save(userTagsPOs);
+		List<UserTagsVO> result = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
+		return result;
+	}
+	
 	
 	/**
 	 * 修改密码<br/>

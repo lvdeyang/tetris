@@ -3,20 +3,26 @@ package com.sumavision.tetris.bvc.business.location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sumavision.bvc.control.device.monitor.live.MonitorLiveUtil;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 
 /**
- * <p>详细描述</p>
+ * <p>屏幕墙上某个屏幕</p>
  * <b>作者:</b>lixin<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年11月4日 下午7:16:55
@@ -38,6 +44,18 @@ public class LocationOfScreenWallService {
 	
 	@Autowired
 	private MonitorLiveDeviceService monitorLiveDeviceService;
+	
+	/**
+	 * 屏幕墙的编解码信息<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月5日 下午2:54:51
+	 * @param locationTemplateLayoutId 屏幕墙id
+	 */
+	public List<LocationOfScreenWallPO> allScreenInformation(Long locationTemplateLayoutId) {
+		
+		return locationOfScreenWallDao.findByLocationTemplateLayoutId(locationTemplateLayoutId);
+	} 
 
 	/**
 	 * 绑定解码器<br/>
@@ -51,7 +69,7 @@ public class LocationOfScreenWallService {
 	 * @param locationTemplateLayoutId 屏幕墙模板id
 	 * @return
 	 */
-	public LocationOfScreenWallPO bindDecoder(String bundleId, 
+	public LocationOfScreenWallVO bindDecoder(String bundleId, 
 			String bundleName, 
 			Integer locationX, 
 			Integer locationY,
@@ -76,9 +94,9 @@ public class LocationOfScreenWallService {
 		
 		if(searchScreenWall != null){
 			searchScreenWall.setLocationX(locationX);
-			searchScreenWall.setLocationY(locationX);
+			searchScreenWall.setLocationY(locationY);
 			locationOfScreenWallDao.save(searchScreenWall);
-			return searchScreenWall;
+			return new LocationOfScreenWallVO().set(searchScreenWall);
 		}else{
 			screenWall.setDecoderBundleId(bundleId)
 			 		  .setDecoderBundleName(bundleName)
@@ -86,7 +104,7 @@ public class LocationOfScreenWallService {
 			 		  .setLocationY(locationY)
 			 		  .setLocationTemplateLayoutId(locationTemplateLayoutId);
 			locationOfScreenWallDao.save(screenWall);
-			return screenWall;
+			return new LocationOfScreenWallVO().set(screenWall);
 		}
 		
 	}
@@ -103,7 +121,7 @@ public class LocationOfScreenWallService {
 		
 		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findOne(id);
 		
-		if( screenWall == null || LocationExecuteStatus.RUN.equals(screenWall.getStatus())){
+		if( screenWall == null ){
 			throw new BaseException(StatusCode.FORBIDDEN, "还没有绑定解码器或者正在执行转发,请先停止转发");
 		}
 		
@@ -115,19 +133,19 @@ public class LocationOfScreenWallService {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月3日 上午11:07:48
-	 * @param id 屏幕id
+	 * @param locationTemplateLayoutId 屏幕墙id
 	 */
-	
-//	public void unbindDecoder(Long id) throws BaseException {
-//		
-//		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findOne(id);
-//		
-//		if( screenWall == null || LocationExecuteStatus.RUN.equals(screenWall.getStatus())){
-//			throw new BaseException(StatusCode.FORBIDDEN, "还没有绑定解码器或者正在执行转发,请先停止转发");
-//		}
-//		
-//		locationOfScreenWallDao.delete(id);
-//	}
+	public void unbindAllDecoder(Long locationTemplateLayoutId) throws BaseException {
+		
+		List<LocationOfScreenWallPO> deleteScreenWallList = locationOfScreenWallDao.findByLocationTemplateLayoutId(locationTemplateLayoutId).stream().filter(screen->{
+			if(LocationExecuteStatus.STOP.equals(screen.getStatus())){
+				return true;
+			}
+			return false;
+		}).collect(Collectors.toList());
+		
+		locationOfScreenWallDao.deleteInBatch(deleteScreenWallList);
+	}
 
 	/**
 	 * 绑定编码器<br/>
@@ -240,6 +258,9 @@ public class LocationOfScreenWallService {
 						errorScreenList.add(screen);
 						e.printStackTrace();
 					}
+				}else{
+					screen.setEncoderBundleId("");
+					screen.setEncoderBundleName("");
 				}
 			});
 			
@@ -263,6 +284,9 @@ public class LocationOfScreenWallService {
 						errorScreenList.add(screen);
 						e.printStackTrace();
 					}
+				}else{
+					screen.setEncoderBundleId("");
+					screen.setEncoderBundleName("");
 				}
 			});
 			
@@ -271,31 +295,42 @@ public class LocationOfScreenWallService {
 			locationOfScreenWallDao.save(screenList);
 		}
 	}
-	
+
 	/**
-	 * 切换屏幕的运行状态<br/>
+	 * <br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年11月4日 下午7:17:22
+	 * <b>日期：</b>2020年11月9日 上午9:03:38
 	 * @param id 屏幕的id
-	 * @throws Exception 
+	 * @param monitorLiveDeviceId 录制任务id
+	 * @param Boolean stopOrStart TRUE停止,FALSE开始
+	 * @param userNo 业务人员名字
+	 * @param userId 业务人员id
 	 */
-	public LocationOfScreenWallVO exchangeLocationStatus(Long id, String status) throws Exception{
+	
+	public Object exchangeLocationStatus(
+			Long id, 
+			Boolean stopOrStart,
+			String userNo,
+			Long userId) throws Exception {
 		
 		LocationOfScreenWallPO screenPO = locationOfScreenWallDao.findOne(id);
 		
-		if("运行中".equals(status)){
-			Optional.ofNullable(screenPO).map(screen->{
-				screen.setStatus(LocationExecuteStatus.RUN);
-				return status;
-			});
-		}else{
-			Optional.ofNullable(screenPO).map(screen->{
-				screen.setStatus(LocationExecuteStatus.STOP);
-				return status;
-			});
+		if(screenPO == null || screenPO.getMonitorLiveDeviceId() == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有找到对应的转发");
 		}
 		
-		return screenPO == null?null:new LocationOfScreenWallVO().set(screenPO); 
-	} 
+		if(stopOrStart){
+			monitorLiveDeviceService.stop(id, userId, userNo, stopOrStart);
+			screenPO.setStatus(LocationExecuteStatus.STOP);
+		}else{
+			monitorLiveDeviceService.stopToRestart(new ArrayListWrapper<Long>().add(screenPO.getMonitorLiveDeviceId()).getList(), userId);
+			screenPO.setStatus(LocationExecuteStatus.RUN);
+		}
+		
+		locationOfScreenWallDao.save(screenPO);
+		
+		return screenPO;
+	}
+
 }

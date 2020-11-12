@@ -573,7 +573,7 @@ public class MonitorLiveDevicePO extends AbstractBasePO{
 			Long osdId,
 			String osdUsername) throws Exception{
 		
-		this.setStatus(MonitorRecordStatus.RUN);
+		this.setStatus(MonitorRecordStatus.STOP);
 		this.setUpdateTime(new Date());
 		this.videoBundleId = videoBundleId;
 		this.videoBundleName = videoBundleName;

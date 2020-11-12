@@ -208,6 +208,33 @@ define([
                     avtpls:[],
                     authtpls:[],
                     createrow:'',
+                    group:'',
+                    contacts:{
+                        data:[],
+                        defaultProps:{
+                            children:'children',
+                            label:'name'
+                        }
+                    },
+                    dialog:{
+                        addContacts:{
+                            visible:false,
+                            loading:false,
+                            data:[],
+                            defaultProps:{
+                                children:'children',
+                                label:'name'
+                            }
+                        },
+                        quickStartMeeting:{
+                            visible:false,
+                            loading:false,
+                            name:'',
+                            members:[],
+                            chairman:'',
+                            chairmanName:''
+                        }
+                    },
                     table:{
                         buttonCreate:'新建设备组',
                         buttonRemove:'删除设备组',
@@ -359,7 +386,189 @@ define([
                     /****************
                      * 表格与树联动
                      ****************/
+                    queryContacts:function(){
+                        var self = this;
+                        self.contacts.data.splice(0, self.contacts.data.length);
+                        ajax.post('/device/group/contacts/query', {
+                            hasSelected:true
+                        }, function(data){
+                           if(data && data.length>0){
+                               for(var i=0; i<data.length; i++){
+                                   self.contacts.data.push(data[i]);
+                               }
+                               self.$nextTick(function(){
+                                   self.$refs.contactsTree.filter();
+                               });
+                           }
+                        });
+                    },
+                    handleFilterContacts:function(val, data, node){
+                        if(data.type === 'CHANNEL'){
+                            return false;
+                        }
+                        if(data.type === 'BUNDLE'){
+                            node.isLeaf = true;
+                        }
+                        return true;
+                    },
+                    handleAddContacts:function(){
+                        var self = this;
+                        self.dialog.addContacts.data.splice(0, self.dialog.addContacts.data.length);
+                        ajax.post('/device/group/contacts/query', null, function(data){
+                            if(data && data.length>0){
+                                for(var i=0; i<data.length; i++){
+                                    self.dialog.addContacts.data.push(data[i]);
+                                }
+                            }
+                            self.dialog.addContacts.visible = true;
+                        });
+                    },
+                    handleAddContactsClose:function(){
+                        var self = this;
+                        self.dialog.addContacts.visible = false;
+                        self.dialog.addContacts.loading = false;
+                        self.dialog.addContacts.data.splice(0, self.dialog.addContacts.data.length);
+                    },
+                    handleAddContactsSubmit:function(){
+                        var self = this;
+                        var nodes = self.$refs.totalBundleTree.getCheckedNodes();
+                        var bundleIds = [];
+                        for(var i=0; i<nodes.length; i++){
+                            if(nodes[i].type === 'BUNDLE'){
+                                bundleIds.push(nodes[i].id);
+                            }
+                        }
+                        if(bundleIds.length <= 0){
+                            self.$message({
+                                type:'error',
+                                message:'您没有选择任何联系人'
+                            });
+                            return;
+                        }
+                        self.dialog.addContacts.loading = true;
+                        ajax.post('/device/group/contacts/add', {
+                            bundleIds: $.toJSON(bundleIds)
+                        }, function(data, status, message){
+                            self.dialog.addContacts.loading = false;
+                            if(status !== 200) return;
+                            self.queryContacts();
+                            self.handleAddContactsClose();
+                        }, null, ajax.TOTAL_CATCH_CODE);
+                    },
+                    quickStartMeeting:function(){
+                        var self = this;
+                        var nodes = self.$refs.contactsTree.getCheckedNodes();
+                        self.dialog.quickStartMeeting.members.splice(0, self.dialog.quickStartMeeting.members.length);
+                        if(nodes!=null && nodes.length>0){
+                            for(var i=0; i<nodes.length; i++){
+                                if(nodes[i].type === 'BUNDLE'){
+                                    self.dialog.quickStartMeeting.members.push(nodes[i]);
+                                }
+                            }
+                        }
+                        if(self.dialog.quickStartMeeting.members.length <= 0){
+                            self.$message({
+                                type:'error',
+                                message:'您还没有选择联系人!'
+                            });
+                            return;
+                        }
+                        self.dialog.quickStartMeeting.visible = true;
+                    },
+                    handleQuickStartMeetingClose:function(){
+                        var self = this;
+                        self.dialog.quickStartMeeting.visible = false;
+                        self.dialog.quickStartMeeting.loading = false;
+                        self.dialog.quickStartMeeting.chairman = '';
+                        self.dialog.quickStartMeeting.chairmanName = '';
+                        self.dialog.quickStartMeeting.members.splice(0, self.dialog.quickStartMeeting.members.length);
+                        self.dialog.quickStartMeeting.name = '';
+                    },
+                    handleQuickStartMeetingChairmanChange:function(chairmanId){
+                        var self = this;
+                        for(var i=0; i<self.dialog.quickStartMeeting.members.length; i++){
+                            if(self.dialog.quickStartMeeting.members[i].id === chairmanId){
+                                self.dialog.quickStartMeeting.chairmanName = self.dialog.quickStartMeeting.members[i].name;
+                                break;
+                            }
+                        }
+                    },
+                    handleQuickStartMeetingSubmit:function(){
+                        var self = this;
+                        if(!self.dialog.quickStartMeeting.name){
+                            self.$message({
+                                type:'error',
+                                message:'请设置会议名称！'
+                            });
+                            return;
+                        }
+                        if(!self.dialog.quickStartMeeting.chairman){
+                            self.$message({
+                                type:'error',
+                                message:'请设置主席！'
+                            });
+                            return;
+                        }
+                        var bundleIds = [];
+                        for(var i=0; i<self.dialog.quickStartMeeting.members.length; i++){
+                            bundleIds.push(self.dialog.quickStartMeeting.members[i].id);
+                        }
+                        self.dialog.quickStartMeeting.loading = true;
+                        ajax.post("/device/group/quick/group/save",{
+                            name: self.dialog.quickStartMeeting.name,
+                            chairman: self.dialog.quickStartMeeting.chairman,
+                            sourceList: $.toJSON(bundleIds)
+                        }, function(data, status, message){
+                            self.dialog.quickStartMeeting.loading = false;
+                            if(status !== 200){
+                                self.$message({
+                                    type:'error',
+                                    message:message
+                                });
+                                return;
+                            }
+                            self.handleQuickStartMeetingClose();
+                            if(data){
+                                window.location.hash = '#/page-group-control/' + data.id;
+                            }
+                        }, null, ajax.TOTAL_CATCH_CODE);
 
+                    },
+                    handleRemoveContacts:function(scope){
+                        var self = this;
+                        var data = scope.data;
+
+                        var h = self.$createElement;
+                        self.$msgbox({
+                            title:'提示',
+                            message:h('div', null, [
+                                h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                                h('div', {class:'el-message-box__message'}, [
+                                    h('p', null, ['是否删除当前联系人?'])
+                                ])
+                            ]),
+                            type:'wraning',
+                            showCancelButton: true,
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            beforeClose:function(action, instance, done){
+                                instance.confirmButtonLoading = true;
+                                if(action === 'confirm'){
+                                    ajax.post('/device/group/contacts/delete', {
+                                        bundleIds: $.toJSON([data.id])
+                                    }, function(data, status){
+                                        instance.confirmButtonLoading = false;
+                                        done();
+                                        if(status !== 200) return;
+                                        self.queryContacts();
+                                    }, null, ajax.TOTAL_CATCH_CODE);
+                                }else{
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                }
+                            }
+                        }).catch(function(){});
+                    },
                     //行点击
                     rowClick:function(row, e){
                         var instance = this;
@@ -718,6 +927,10 @@ define([
                             }
                         });
                     }
+                },
+                mounted:function(){
+                    var self = this;
+                    self.queryContacts();
                 }
             });
 

@@ -3,9 +3,9 @@ package com.sumavision.bvc.control.device.monitor.live;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -42,6 +43,7 @@ import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceQuery;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
+import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserDAO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserPO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
@@ -53,7 +55,6 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 
@@ -948,6 +949,31 @@ public class MonitorLiveController {
 	}
 	
 	/**
+	 * 批量停止点播设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月9日 上午10:23:32
+	 * @param String ids 点播设备任务id
+	 * @param Boolean stopAndDelete TRUE停止但不删除、FALSE删除、null停止且删除
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/live/device")
+	public Object stopLiveDevice(
+			String ids,
+			Boolean stopAndDelete,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		List<Long> idList = JSONArray.parseArray(ids, Long.class);
+		
+		monitorLiveDeviceService.stop(idList, user.getId(), user.getUserno(), stopAndDelete);
+		
+		return null;
+	}
+	
+	/**
 	 * 停止点播用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -1021,19 +1047,53 @@ public class MonitorLiveController {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年10月28日 上午11:28:22
-	 * @param id 点播监控设备MonitorLiveDevicePO的主键
+	 * @param ids 点播监控设备MonitorLiveDevicePO的主键集合
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop/to/restart")
 	public Object stopToRestart(
-			Long id,
+			String ids,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		MonitorLiveDevicePO entity = monitorLiveDeviceService.stopToRestart(id, user);
+		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
-		return new MonitorLiveDeviceVO().set(entity);
+		monitorLiveDeviceService.stopToRestart(idList, user.getId());
+		
+		return null;
+	}
+	
+	/**
+	 * 失去权限停止转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午3:58:35
+	 * @param userBundleBo UserBundleBO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/live/by/lose/privilege")
+	public Object stopLiveByLosePrivilege(
+			List<UserBundleBO> userBundleBoList,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		Optional<UserBundleBO> userBundleBoOptional = userBundleBoList.stream().filter(userBundleBo->{
+			if(userBundleBo.getUserId().equals(user.getId())){
+				return true;
+			}
+			return false;
+		}).findFirst();
+		
+		if(!userBundleBoOptional.isPresent()){
+			return null;
+		}
+		
+		monitorLiveDeviceService.stopLiveByLosePrivilege(userBundleBoOptional.get(), user.getId(), user.getUserno());
+		
+		return null;
 	}
 }

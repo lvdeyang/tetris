@@ -355,4 +355,15 @@ public interface UserFeign {
 	
 	@RequestMapping(value = "/user/feign/query/user/online")
 	public JSONObject queryUserOnline();
+	
+	@RequestMapping(value = "/user/feign/add/tag/hotcount")
+	public JSONObject addTagHotcount(
+			@RequestParam("userId") Long userId, 
+			@RequestParam("tagNames") String tagNames);
+	
+	@RequestMapping(value = "/user/feign/query/user/tags")
+	public JSONObject queryUserTags(
+			@RequestParam("userId") Long userId);
+	
+	
 }

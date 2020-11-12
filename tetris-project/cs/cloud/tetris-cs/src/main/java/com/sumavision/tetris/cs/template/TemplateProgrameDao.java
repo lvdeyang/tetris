@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.template;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +17,6 @@ public interface TemplateProgrameDao extends BaseDAO<TemplateProgramePO>{
 			countQuery = "SELECT count(*) FROM TETRIS_CS_TEMPLATE_PROGRAME WHERE template_id = ?1",
 			nativeQuery = true)
 	public Page<TemplateProgramePO> PagefindAllByTemplateId(long templateId, Pageable pageable);
+	
+	public List<TemplateProgramePO> findByTemplateId(long templateId);
 }

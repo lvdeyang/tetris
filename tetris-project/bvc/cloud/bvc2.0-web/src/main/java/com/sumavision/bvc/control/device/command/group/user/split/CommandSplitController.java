@@ -136,8 +136,8 @@ public class CommandSplitController {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月19日 上午9:31:41
-	 * @param serial
-	 * @param toSerial
+	 * @param serial 要移动的窗口
+	 * @param toSerial 移动目的窗口位置
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -150,13 +150,13 @@ public class CommandSplitController {
 			int toSerial,
 			HttpServletRequest request) throws Exception{
 		
-		throw new BaseException(StatusCode.FORBIDDEN, "不能移动窗口");
+//		throw new BaseException(StatusCode.FORBIDDEN, "不能移动窗口");
 		
-//		Long userId = userUtils.getUserIdFromSession(request);
-//		
-//		commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
-//		
-//		return null;
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
+		
+		return null;
 	}
 	
 	/**

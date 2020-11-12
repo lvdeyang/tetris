@@ -3,7 +3,6 @@
     <div style="height:500px; position:relative;">
       <div style="height:50px; width:100%;">
         <el-select v-model="filters.type" placeholder="接入层类型" style="margin-right:10px;">
-          <el-option value="">全部类型</el-option>
           <el-option v-for="layerNodeType in layerNodeTypes" :label="layerNodeType.label" :value="layerNodeType.value" :key="layerNodeType.value"></el-option>
         </el-select>
         <el-input v-model="filters.name" placeholder="接入层名称" style="width:auto; margin-right:10px;"></el-input>

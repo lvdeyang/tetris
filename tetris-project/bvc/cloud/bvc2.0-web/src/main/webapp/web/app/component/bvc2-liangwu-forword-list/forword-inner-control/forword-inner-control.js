@@ -13,10 +13,18 @@ define([
 
   //组件名称
   var pluginName = 'forword-inner-control';
+  var getLayoutContainer = function (el) {
+    return $(el).find('.bvc2-auto-layout-container');
+  };
   Vue.component(pluginName, {
     template: tpl,
     data: function () {
       return {
+        layout: {
+          row: 3,
+          column: 3,
+          name: ""
+        },
         encodetree: [],
         checked: [],
         defaultExpandAll: true,
@@ -26,7 +34,7 @@ define([
           isLeaf: 'isLeaf'
         },
         filterText: '',
-        options: [{
+        layOutOptions: [{
           value: '1',
           label: '屏幕1'
         }, {
@@ -39,7 +47,8 @@ define([
           value: '4',
           label: '屏幕4'
         },],
-        value8: ''
+        templateId: '',
+        screenInformation: []
 
       }
     },
@@ -48,7 +57,10 @@ define([
     watch: {
       filterText: function (val) {
         this.$refs.tree.filter(val);
-      }
+      },
+      layout: function () {
+        this.refreshLayout();
+      },
     },
     methods: {
       initTree: function (keepExpand) {
@@ -177,7 +189,6 @@ define([
         // return false;
       },
       allowDrag: function (node) {
-        console.log(node)
         if (node.data.type === 'BUNDLE') {
           return true;
         }
@@ -195,112 +206,245 @@ define([
           }
         }
       },
-      layoutChange: function (button) {
-        if (!v_groupControl.config) {
-          v_groupControl.$message({
-            type: 'warning',
-            message: '请先指定要操作的议程或方案！'
-          });
-          return;
-        }
-        if (!v_groupControl.video) {
-          v_groupControl.$message({
-            type: 'warning',
-            message: '还没有要操作的视频！'
-          });
-          return;
-        }
-        v_groupControl.$confirm('此操作将清空屏幕上的配置，并且设置为：' + button.text + ', 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          beforeClose: function (action, instance, done) {
-            if (action === 'confirm') {
-              v_groupControl.$refs.autoLayout.setLayout({
-                column: button.layout.basic.column,
-                row: button.layout.basic.row,
-                cellspan: button.layout.cellspan,
-                name: button.layout.name,
-                editable: true
-              });
-            }
-            done();
-          }
-        });
-      },
 
-      saveLayout: function (config, video, websiteDraw, position, dst, roleDst, done, layout, smallScreen) {
-        var _uri = '';
-        if (config.__businessType === 'agenda') {
-          _uri = '/agenda/update/video/' + v_groupControl.video.id;
-        } else if (config.__businessType === 'scheme') {
-          _uri = '/scheme/update/video/' + v_groupControl.video.id;
-        }
-        ajax.post(_uri, {
-          websiteDraw: $.toJSON(websiteDraw),
-          position: $.toJSON(position),
-          dst: $.toJSON(dst),
-          roleDst: $.toJSON(roleDst),
-          layout: layout,
-          smallScreen: $.toJSON(smallScreen)
-        }, function (data) {
-          for (var i = 0; i < v_groupControl.config.videos.length; i++) {
-            if (v_groupControl.config.videos[i].id === data.id) {
-              v_groupControl.config.videos[i] = data;
-              break;
-            }
-          }
-          v_groupControl.video = data;
-          v_groupControl.video.dstsCache = $.extend(true, [], data.dsts);
-          done();
-          v_groupControl.$message({
-            type: 'success',
-            message: '保存成功！'
-          });
-        });
-      },
       screenSelectChange: function (val) {
 
       },
       initLayoutAuto: function (params) {
 
-      }
+      },
+      refreshLayout: function () {
+        var instance = this;
+        var $container = getLayoutContainer(instance.$el);
+        var options = instance.layout;
+        var tdHtml = `<div class="cell-box"><p>编码器：<span  class="encode">无</span></p>
+                            <p>解码器：<span  class="decode">无</span></p>
+                            <p>状态：<span  class="status">无</span></p>
+                            <button class="el-button el-button--text screen-config-stop">暂停<span class="icon-stop"></span></button>
+                            <button class="el-button el-button--text screen-config-begin">开始<span class="el-icon-caret-right"></span></button>
+                            <button class="el-button el-button--text screen-config-delete"> 删除 <span class="el-icon-delete"></span></button>
+                      </div>`
+        if (options) {
+          $container['layout-auto']('create', {
+            cell: {
+              column: options.column,
+              row: options.row,
+              html: tdHtml
+            },
+            // cellspan: options.cellspan,
+            theme: 'dark',
+            name: options.name,
+            editable: false,
+            event: {
+              drop: function (e) {
+                var data = $.parseJSON(e.dataTransfer.getData('data'));
+                var $cell = $(this);
+                var od = $cell['layout-auto']('getData');
+                // $cell['layout-auto']('setData', od);
+                console.log(od)
+                var params = {
+                  bundleId: data.id,
+                  bundleName: data.name,
+                  locationX: od.locationX,
+                  locationY: od.locationY,
+                  locationTemplateLayoutId: instance.templateId,
+                }
+                // 屏幕绑定编码器
+                ajax.post('/location/of/screen/wall/bind/encoder', params, function (data, status) {
+                  if (status == 200) {
+                    instance.$message({
+                      type: "success",
+                      message: "编码器绑定成功！"
+                    })
+                    $cell.find('.encode').text(data.encoderBundleName)
+                    $cell.find('.screen-config-begin').hide()
+                    $cell.find('.screen-config-stop').show()
+                    $cell.find('.screen-config-delete').show()
+                  } else {
+                    instance.$message({
+                      type: "waring",
+                      message: "编码器绑定失败！"
+                    })
+                  }
+                })
+
+              }
+            },
+          });
+          var cells = $container['layout-auto']('getCells');
+          var screenInfo = instance.screenInformation
+          for (var i = 0; i < cells.length; i++) {
+            var cell = cells[i];
+            // console.log(cell)
+            var currentScreenInfo = screenInfo.find(function (item) {
+              return (item.locationX == cell.locationX && item.locationY == cell.locationY)
+            })
+            // console.log(currentScreenInfo)
+            // 绑定屏幕信息
+            if (currentScreenInfo) {
+              cell.$cell['layout-auto']('setData', currentScreenInfo);
+              cell.$cell.find('.status').text(currentScreenInfo.status)
+            } else {
+              cell.$cell['layout-auto']('setData', cell);
+            }
+            // 设置屏幕操作按钮
+            if (currentScreenInfo && currentScreenInfo.status == "RUN") {
+              cell.$cell.find('.screen-config-begin').hide()
+              cell.$cell.find('.screen-config-stop').show()
+              cell.$cell.find('.screen-config-delete').show()
+            } else if (currentScreenInfo && currentScreenInfo.status == "STOP" && currentScreenInfo.decoderBundleId && currentScreenInfo.encoderBundleId) {
+              cell.$cell.find('.screen-config-begin').show()
+              cell.$cell.find('.screen-config-stop').hide()
+              cell.$cell.find('.screen-config-delete').show()
+            } else if (!currentScreenInfo) {
+              cell.$cell.find('.screen-config-begin').hide()
+              cell.$cell.find('.screen-config-stop').hide()
+              cell.$cell.find('.screen-config-delete').hide()
+            } else if (currentScreenInfo && currentScreenInfo.status == "STOP" && !currentScreenInfo.encoderBundleId) {
+              cell.$cell.find('.screen-config-delete').hide()
+            }
+            if (currentScreenInfo) {
+              cell.$cell.find('.encode').text(currentScreenInfo.encoderBundleName ? currentScreenInfo.encoderBundleName : '无')
+              cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName ? currentScreenInfo.decoderBundleName : '无')
+            }
+          }
+        } else {
+          $container['layout-auto']('destroy');
+        }
+      },
+      getScreenLayout: function () {
+        var self = this;
+        ajax.post('/location/template/layout/query/all', null, function (data, status) {
+          if (status == 200) {
+            self.layOutOptions = data
+            self.templateId = data[0].id
+            self.handleTemplateChange(data[0].id)
+          }
+        })
+      },
+      handleTemplateChange (val) {
+        console.log(val)
+        var currgenTempalte = this.layOutOptions.find(function (item) {
+          return item.id == val
+        })
+
+        var self = this;
+        ajax.post('/location/of/screen/wall/all/screen/information', { locationTemplateLayoutId: val }, function (data, status) {
+          if (status == 200) {
+            self.screenInformation = data;
+            var newLayout = $.extend(true, {}, this.layout);
+            newLayout.row = currgenTempalte.screenNumberOfX
+            newLayout.column = currgenTempalte.screenNumberOfY
+            newLayout.name = currgenTempalte.templateName
+            newLayout.cellspan = [];
+            self.layout = newLayout;
+          }
+        })
+      },
+      // 解绑所有编码器
+      deleteAllEncode () {
+        var self = this;
+        var params = {
+          LocationTemplateLayoutId: self.templateId,
+          unbindAll: true
+        }
+        self.$confirm('此操作将解绑当前屏幕所有的编码器, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function () {
+          ajax.post('/location/of/screen/wall/unbind/all/stop/encoder', params, function (data, status) {
+            if (status == 200) {
+              self.$message({
+                type: "success",
+                message: "操作成功！"
+              })
+              self.handleTemplateChange(self.templateId)
+            }
+          })
+        }).catch(function () {
+          self.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+      },
     },
     mounted: function () {
       var self = this;
-      var opcityUrl = '/vedioCapacity/query'
-      var resourceApiUrl = document.location.protocol + "//" + document.location.hostname + ':8213';
-      self.resourceApiUrl = resourceApiUrl;
-      console.log(self.resourceApiUrl + '/vedioCapacity/query')
       this.initTree()
-
-      var getLayoutContainer = function (el) {
-        return $(el).find('.bvc2-auto-layout-container');
-      };
-      var $container = getLayoutContainer(this.$el);
-      $container['layout-auto']('create', {
-        cell: {
-          column: 3,
-          row: 3,
-          // html:tdHtml
-        },
-        name: 'split_4x4_c3x3_lt',
-        theme: 'dark',
-        editable: false,
-        event: {
-          drop: function (e) {
-            var $cell = $(this);
-            console.log($cell)
-            $cell['layout-auto']('setData', e.dataTransfer.getData('id'));
-            $cell.text(e.dataTransfer.getData('id'));
-          }
-        }
-      });
+      this.getScreenLayout()
     },
     updated () {
 
     },
   });
+  // 停止按钮
+  $(document).on('mousedown', '.screen-config-stop', function (e) {
+    e.stopPropagation();
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/exchange/location/Status', { id: od.id, stopOrStart: true }, function (data, status) {
+        if (status == 200) {
+          $td.find('.screen-config-begin').show()
+          $td.find('.screen-config-stop').hide()
+          $td.find('.status').text("STOP")
+        }
+      })
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
+  // 开始按钮
+  $(document).on('mousedown', '.screen-config-begin', function (e) {
+    e.stopPropagation();
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/exchange/location/Status', { id: od.id, stopOrStart: false }, function (data, status) {
+        if (status == 200) {
+          $td.find('.screen-config-begin').hide()
+          $td.find('.screen-config-stop').show()
+          $td.find('.status').text("RUN")
+        }
+      })
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
+  // 删除按钮
+  $(document).on('mousedown', '.screen-config-delete', function (e) {
+    e.stopPropagation();
+    var vm = Vue;
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/unbind/encoder', { id: od.id }, function (data, status) {
+        if (status !== 200) return;
+        $td.find('.encode').text("无")
+        $td.find('.screen-config-begin').hide()
+        $td.find('.screen-config-stop').hide()
+        $td.find('.screen-config-delete').hide()
+      }, null, [403, 404, 409, 500]);
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
+
 
   return Vue;
 });

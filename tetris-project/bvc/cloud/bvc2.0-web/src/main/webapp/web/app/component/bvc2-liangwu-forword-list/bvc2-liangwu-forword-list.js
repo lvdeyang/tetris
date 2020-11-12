@@ -24,8 +24,8 @@ define([
         tabList: [
           // {label:"概况",name:"overview"},
           { label: "上屏", name: "inner" },
-          { label: "外域转发", name: "outer" },
           { label: "大屏设置", name: "screen" },
+          { label: "外域转发", name: "outer" },
         ],
         activeName: "inner",
         overviewTableData: [

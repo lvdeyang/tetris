@@ -36,6 +36,8 @@ public class TemplateProgramePO extends AbstractBasePO {
     private String mimsName;
     
     private String url;
+    
+    private String duration;
 
 	public Date getStartTime() {
 		return startTime;
@@ -107,6 +109,14 @@ public class TemplateProgramePO extends AbstractBasePO {
 
 	public void setTemplateId(long templateId) {
 		this.templateId = templateId;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
 	}
     
     

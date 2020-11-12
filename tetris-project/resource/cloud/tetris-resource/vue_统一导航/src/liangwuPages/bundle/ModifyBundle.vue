@@ -69,6 +69,9 @@
         <el-input v-model="bundleFolderName" style="width: 200px;" readOnly @click.native="handleChangeFolder"></el-input>
       </el-form-item>
 
+      <el-form-item size="small" label="告警容量" v-if="deviceModel =='cdn'">
+        <el-input v-model="alarmSize" auto-complete="off" style="width: 200px;" required></el-input>
+      </el-form-item>
     </el-form>
     <el-card class="box-card" style="margin-top:10px">
       <div slot="header" class="clearfix">
@@ -605,6 +608,7 @@ export default {
         region: '',
         address: ''
       },
+      alarmSize: '',
       deviceModelOptions: [
         { label: "终端设备", value: "jv210" },
         { label: "存储设备", value: "cdn" }
@@ -615,6 +619,7 @@ export default {
         { name: "卫通", key: "weitong" },
       ],
       modelConfig: 'other',
+      alarmSizeVisable: false,
       dahuaFormData: {
         url: "",
         osd_font_size: undefined,
@@ -1037,7 +1042,8 @@ export default {
               var param = JSON.parse(extraInfos[i].value)
               self.params = param.param;
               self.extraParam.dev_type = param.dev_type;
-              self.extraParam.region = param.region
+              self.extraParam.region = param.region;
+              self.alarmSize = param.alarmSize
               self.location = param.address
               self.extraInfos = extraInfos[i];
             }
@@ -1147,7 +1153,8 @@ export default {
       // }
       // var newArr = [];
       var extraParam = this.extraParam;
-      extraParam.address = this.location
+      extraParam.address = this.location;
+      extraParam.alarmSize = this.alarmSize;
       switch (self.extraParam.dev_type) {
         case 'dh_camera':
           extraParam.param = this.dahuaFormData

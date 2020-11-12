@@ -474,6 +474,10 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseArray(userFeign.queryUserOnline(), UserVO.class);
 	}
 	
+	public List<UserTagsVO> queryUserTags(Long userId) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUserTags(userId), UserTagsVO.class);
+	}
+	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
 																        .setNickname("用户1")

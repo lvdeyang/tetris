@@ -27,3 +27,12 @@
 }
 .decode-bind-screen .liangwu-forword .el-select{
 }
+.decode-bind-screen .layout-auto tbody td{
+  font-size: 14px !important;
+  color: #fff;
+  text-align: center;
+}
+.decode-bind-screen .layout-auto tbody td .cell-box{
+  padding:10px;
+  text-align: center;
+}

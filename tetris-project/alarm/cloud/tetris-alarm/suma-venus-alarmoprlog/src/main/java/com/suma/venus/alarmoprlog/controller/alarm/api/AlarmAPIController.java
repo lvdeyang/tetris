@@ -4,10 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/alarm/api/query")
-public class AlarmQueryAPIController {
-	
-	
+@RequestMapping("/api/out/")
+public class AlarmAPIController {
 	
 
 }
