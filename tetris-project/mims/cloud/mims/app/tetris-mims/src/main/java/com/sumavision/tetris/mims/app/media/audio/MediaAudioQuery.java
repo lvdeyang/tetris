@@ -350,6 +350,11 @@ public class MediaAudioQuery {
 			@Override
 			public int compare(MediaAudioVO o1, MediaAudioVO o2) {
 				// TODO Auto-generated method stub
+				if(o1.getIsTop()==1&&o2.getIsTop()==0){
+					return -1;
+				}else if(o1.getIsTop()==0&&o2.getIsTop()==1){
+					return 1;
+				}
 				return Integer.parseInt((o2.getHotWeight()-o1.getHotWeight())+"");
 			}
 		});
@@ -410,6 +415,11 @@ public class MediaAudioQuery {
 				@Override
 				public int compare(MediaAudioVO o1, MediaAudioVO o2) {
 					// TODO Auto-generated method stub
+					if(o1.getIsTop()==1&&o2.getIsTop()==0){
+						return -1;
+					}else if(o1.getIsTop()==0&&o2.getIsTop()==1){
+						return 1;
+					}
 					return Integer.parseInt((o2.getHotWeight()-o1.getHotWeight())+"");
 				}
 			});

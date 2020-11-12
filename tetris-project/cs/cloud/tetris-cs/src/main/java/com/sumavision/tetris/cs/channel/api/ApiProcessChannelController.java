@@ -101,7 +101,7 @@ public class ApiProcessChannelController {
 						ChannelType.REMOTE,
 						encryption == null ? false : encryption,
 						new SetAutoBroadBO().setAutoBroad(false),
-						new SetOutputBO().setOutput(infoVOs),"","","",false);
+						new SetOutputBO().setOutput(infoVOs),"","","","","","",false);
 				
 				if (channel != null) {
 					//保存流程信息和回调地址

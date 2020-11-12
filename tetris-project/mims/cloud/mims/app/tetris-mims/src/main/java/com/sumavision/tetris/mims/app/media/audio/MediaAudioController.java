@@ -271,6 +271,37 @@ public class MediaAudioController {
 	}
 	
 	/**
+	 * 
+	 * 推荐状态设置<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月11日 下午7:51:26
+	 * @param id
+	 * @param status 0 取消推荐 1推荐
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/recomm/{id}")
+	public Object recommStatus(
+			@PathVariable Long id,
+			int status,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+
+		MediaAudioPO audio = mediaAudioDao.findOne(id);
+		audio.setIsTop(status);
+		mediaAudioDao.save(audio);
+		
+		return new MediaAudioVO().set(audio);
+		
+	}
+	
+	/**
 	 * 查询图片媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -758,4 +789,6 @@ public class MediaAudioController {
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
 		return audioVOs;
 	}
+	
+	
 }

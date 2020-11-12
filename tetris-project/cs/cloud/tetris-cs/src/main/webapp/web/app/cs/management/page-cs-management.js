@@ -77,7 +77,27 @@ define([
                     ]
                 },
                 dialog: {
-                    addProgram: {
+                	channel:{
+                		dialog: {
+                			type:'add',
+                            chooseResource: {
+                                visible: false,
+                                loading: false,
+                                tree: {
+                                    props: {
+                                        label: "name",
+                                        children: "children"
+                                    },
+                                    expandOnClickNode: false,
+                                    data: [],
+                                    current: '',
+                                    loading: false
+                                },
+                                chooseNode: []
+                            }
+                        }
+                	},
+                	addProgram: {
                         visible: false,
                         loading: false,
                         name: "",
@@ -101,7 +121,10 @@ define([
                         taskTemple:'',
                         rateCtrl:'',
                         rate:'',
-                        rotation:false
+                        rotation:false,
+                        backfileUrl:'',
+                        backfileDuration:'',
+                        backfileName:''
                     },
                     editChannel: {
                         visible: false,
@@ -127,7 +150,10 @@ define([
                         taskTemple:'',
                         rateCtrl:'',
                         rate:'',
-                        rotation:false
+                        rotation:false,
+                        backfileUrl:'',
+                        backfileDuration:'',
+                        backfileName:''
                     },
                     defaultSchedule: {
                         visible: false,
@@ -520,6 +546,9 @@ define([
                     self.dialog.addProgram.rateCtrl = "";
                     self.dialog.addProgram.rate = "";
                     self.dialog.addProgram.rotation = false;
+                    self.dialog.addProgram.backfileUrl='';
+                    self.dialog.addProgram.backfileDuration='';
+                    self.dialog.addProgram.backfileName='';
                 },
                 //更换优先级监听
                 handleAddProgramLevelOptionsChange: function (data) {
@@ -573,8 +602,10 @@ define([
                         taskTemple:self.dialog.addProgram.taskTemple,
                         rateCtrl:self.dialog.addProgram.rateCtrl,
                         rate:self.dialog.addProgram.rate,
-                        rotation:self.dialog.addProgram.rotation
-
+                        rotation:self.dialog.addProgram.rotation,
+                        backfileUrl:self.dialog.addProgram.backfileUrl,
+                    	backfileDuration:self.dialog.addProgram.backfileDuration,
+                    	backfileName:self.dialog.addProgram.backfileName
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
                         self.dialog.addProgram.loading = false;
@@ -631,6 +662,9 @@ define([
                     self.dialog.editChannel.taskTemple = row.taskTemple;
                     self.dialog.editChannel.rateCtrl = row.rateCtrl;
                     self.dialog.editChannel.rate = row.rate;
+                    self.dialog.editChannel.backfileUrl=row.backfileUrl,
+                	self.dialog.editChannel.backfileDuration=row.backfileDuration;
+                	self.dialog.editChannel.backfileName=row.backfileName;
                     self.dialog.editChannel.rotation = (row.rotation != null) ? row.rotation : false;
                     self.dialog.editChannel.visible = true;
                 },
@@ -658,6 +692,9 @@ define([
                     self.dialog.editChannel.taskTemple = "";
                     self.dialog.editChannel.rate = "";
                     self.dialog.editChannel.rateCtrl = "";
+                    self.dialog.editChannel.backfileUrl="",
+                	self.dialog.editChannel.backfileDuration="";
+                	self.dialog.editChannel.backfileName="";
                     self.dialog.editChannel.rotation = false;
                 },
                 handleDefaultSchedule: function () {
@@ -756,10 +793,13 @@ define([
                     var autoBroadDuration = self.dialog.editChannel.autoBroadDuration;
                     var autoBroadStart = self.dialog.editChannel.autoBroadStart;
                     var autoBroadTemplateId=self.dialog.editChannel.autoBroadTemplateId;
-                    var taskTemple = self.dialog.editChannel.taskTemple
-                    var rate = self.dialog.editChannel.rate
-                    var rateCtrl = self.dialog.editChannel.rateCtrl
+                    var taskTemple = self.dialog.editChannel.taskTemple;
+                    var rate = self.dialog.editChannel.rate;
+                    var rateCtrl = self.dialog.editChannel.rateCtrl;
                     var rotation = self.dialog.editChannel.rotation;
+                    var backfileUrl=self.dialog.editChannel.backfileUrl;
+                	var backfileDuration=self.dialog.editChannel.backfileDuration;
+                	var backfileName=self.dialog.editChannel.backfileName;
                     
                     var questData = {
                         id: self.dialog.editChannel.data.id,
@@ -780,7 +820,10 @@ define([
                         taskTemple:taskTemple,
                         rate:rate,
                         rateCtrl:rateCtrl,
-                        rotation:rotation
+                        rotation:rotation,
+                        backfileUrl:backfileUrl,
+                	    backfileDuration:backfileDuration,
+                	    backfileName:backfileName
                     };
                     ajax.post('/cs/channel/edit', questData, function (data, status) {
                         self.dialog.editChannel.loading = false;
@@ -1270,14 +1313,41 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                handleSetBackFile: function (type) {
+                    var self = this;
+                    self.dialog.channel.dialog.chooseResource.visible = true;
+                    self.dialog.channel.dialog.type=type;
+                    self.dialog.channel.dialog.chooseResource.tree.data.splice(0, self.dialog.editMenu.dialog.chooseResource.tree.data.length);
+                    var questData = {
+                        id: 0,
+                        channelId: 0
+                    };
+                    ajax.post('/cs/menu/resource/get/mims', questData, function (data, status) {
+                        if (status != 200) return;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.channel.dialog.chooseResource.tree.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 handleMenuResourceCheckChange: function (data, checked, indeterminate) {
                     var self = this;
                     self.dialog.editMenu.dialog.chooseResource.chooseNode = this.$refs.menuResourceTree.getCheckedNodes(true, false);
+                },
+                handleChannelResourceCheckChange: function (data, checked, indeterminate) {
+                    var self = this;
+                    self.dialog.channel.dialog.chooseResource.chooseNode = this.$refs.channelResourceTree.getCheckedNodes(true, false);
                 },
                 handleChooseResourceClose: function () {
                     var self = this;
                     self.dialog.editMenu.dialog.chooseResource.chooseNode = [];
                     self.dialog.editMenu.dialog.chooseResource.visible = false;
+                },
+                handleChannelResourceClose: function () {
+                    var self = this;
+                    self.dialog.channel.dialog.chooseResource.chooseNode = [];
+                    self.dialog.channel.dialog.chooseResource.visible = false;
                 },
                 handleChooseResourceCommit: function () {
                     var self = this;
@@ -1302,6 +1372,21 @@ define([
                             type: 'success'
                         });
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleChannelResourceCommit: function () {
+                    var self = this;
+                    
+                    var reslist=self.dialog.channel.dialog.chooseResource.chooseNode;
+                    if(self.dialog.channel.dialog.type=='add'){
+                    	self.dialog.addProgram.backfileUrl=reslist[0].previewUrl;
+                        self.dialog.addProgram.backfileDuration=reslist[0].duration;
+                        self.dialog.addProgram.backfileName=reslist[0].name;
+                    }else{
+                    	self.dialog.editChannel.backfileUrl=reslist[0].previewUrl;
+                        self.dialog.editChannel.backfileDuration=reslist[0].duration;
+                        self.dialog.editChannel.backfileName=reslist[0].name;
+                    }      
+                    self.dialog.channel.dialog.chooseResource.visible = false;
                 },
                 selectMuneResource:function(b){
                     var self = this;

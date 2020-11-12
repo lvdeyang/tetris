@@ -116,29 +116,40 @@ public class CsResourceQuery {
 	}
 	
 	public List<MediaPushLiveVO> getMIMSLiveResources(Long channelId) throws Exception {
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) return new ArrayList<MediaPushLiveVO>();
+		//复用判断，不需要channelID时，传0
+		if(channelId.longValue()!=0){
+			ChannelPO channel = channelQuery.findByChannelId(channelId);
+			if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) return new ArrayList<MediaPushLiveVO>();
+		}
 		List<MediaPushLiveVO> mimsLiveList = mediaPushLiveQuery.loadAll();
 		return mimsLiveList;
 	}
 	
 	public List<MediaPictureVO> getMIMSPictureResources(Long channelId) throws Exception {
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		//ChannelPO channel = channelQuery.findByChannelId(channelId);
 //		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) return new ArrayList<MediaPictureVO>();
 		List<MediaPictureVO> mimsPictureList = mediaPictureQuery.loadAll();
 		return mimsPictureList;
 	}
 	
 	public List<MediaVideoStreamVO> getMIMSVideoStreamResources(Long channelId) throws Exception {
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaVideoStreamVO>();
+		//复用判断，不需要channelID时，传0
+	    if(channelId.longValue()!=0){
+	    	ChannelPO channel = channelQuery.findByChannelId(channelId);
+			if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaVideoStreamVO>();		
+	    }
+		
 		List<MediaVideoStreamVO> mimsVideoStreamList = mediaVideoStreamQuery.loadAll();
 		return mimsVideoStreamList;
 	}
 	
 	public List<MediaAudioStreamVO> getMIMSAudioStreamResources(Long channelId) throws Exception {
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaAudioStreamVO>();
+		//复用判断，不需要channelID时，传0
+	    if(channelId.longValue()!=0){
+	    	ChannelPO channel = channelQuery.findByChannelId(channelId);
+			if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaAudioStreamVO>();
+	    }
+		
 		List<MediaAudioStreamVO> mimsAudioStreamList = mediaAudioStreamQuery.loadAll();
 		return mimsAudioStreamList;
 	}

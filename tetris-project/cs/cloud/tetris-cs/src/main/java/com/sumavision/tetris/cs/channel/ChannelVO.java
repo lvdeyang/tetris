@@ -78,6 +78,15 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	/**是否轮播*/
 	private boolean rotation;
+	
+	/**垫播媒资地址*/
+	private String backfileUrl;
+	
+	/**垫播媒资时长*/
+	private String backfileDuration;
+	
+	/**垫播媒资名称*/
+	private String backfileName;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -100,12 +109,56 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setTaskTemple(entity.getTaskTemple())
 		.setRate(entity.getRate())
 		.setRateCtrl(entity.getRateCtrl())
+		.setBackfileDuration(entity.getBackfileDuration())
+		.setBackfileName(entity.getBackfileName())
+		.setBackfileUrl(entity.getBackfileUrl())
 		.setRotation(entity.isRotation());
 		
 
 		return this;
 	}
 	
+	
+	
+	public String getBackfileUrl() {
+		return backfileUrl;
+	}
+
+
+
+	public ChannelVO setBackfileUrl(String backfileUrl) {
+		this.backfileUrl = backfileUrl;
+		return this;
+	}
+
+
+
+	public String getBackfileDuration() {
+		return backfileDuration;
+	}
+
+
+
+	public ChannelVO setBackfileDuration(String backfileDuration) {
+		this.backfileDuration = backfileDuration;
+		return this;
+	}
+
+
+
+	public String getBackfileName() {
+		return backfileName;
+	}
+
+
+
+	public ChannelVO setBackfileName(String backfileName) {
+		this.backfileName = backfileName;
+		return this;
+	}
+
+
+
 	public String getTaskTemple() {
 		return taskTemple;
 	}

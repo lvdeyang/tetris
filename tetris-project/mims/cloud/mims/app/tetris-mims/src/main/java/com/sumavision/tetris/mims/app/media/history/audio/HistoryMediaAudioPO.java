@@ -78,6 +78,9 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 	/** 媒资图片uuid */
 	private String originUuid;
 	
+	/**是否置顶1是，0否*/
+	private int isTop=0;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -248,6 +251,15 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 
 	public void setOriginUuid(String originUuid) {
 		this.originUuid = originUuid;
+	}
+	
+	@Column(name = "ISTOP")
+	public int getIsTop() {
+		return isTop;
+	}
+
+	public void setIsTop(int isTop) {
+		this.isTop = isTop;
 	}
 	
 }
