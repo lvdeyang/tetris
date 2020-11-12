@@ -162,6 +162,9 @@ public class ChannelService {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
+			String backfileUrl,
+			String backfileDuration,
+			String backfileName,
 			Boolean rotation) throws Exception {
 		UserVO user = userQuery.current();
 		
@@ -181,6 +184,9 @@ public class ChannelService {
 		channel.setRateCtrl(rateCtrl);
 		channel.setRate(rate);
 		channel.setRotation(rotation);
+		channel.setBackfileDuration(backfileDuration);
+		channel.setBackfileName(backfileName);
+		channel.setBackfileUrl(backfileUrl);
 		//校验用户是否被占�?
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
 			broadAbilityBroadInfoService.checkUserUse(null, outputBO.getOutputUsers());
@@ -335,6 +341,9 @@ public class ChannelService {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
+			String backfileUrl,
+			String backfileDuration,
+			String backfileName,
 			Boolean rotation) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(id);
 		
@@ -372,6 +381,9 @@ public class ChannelService {
 		channel.setRateCtrl(rateCtrl);
 		channel.setRate(rate);
 		channel.setRotation(rotation);
+		channel.setBackfileDuration(backfileDuration);
+		channel.setBackfileName(backfileName);
+		channel.setBackfileUrl(backfileUrl);
 		if (encryption != null) channel.setEncryption(encryption);
 		channelDao.save(channel);
 		

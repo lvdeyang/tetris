@@ -144,6 +144,9 @@ public class ChannelController {
 			String rateCtrl,
 			String rate,
 			Boolean rotation,
+			String backfileUrl,
+			String backfileDuration,
+			String backfileName,
 			HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
@@ -162,7 +165,7 @@ public class ChannelController {
 				.setAutoBroad(autoBroad)
 				.setAutoBroadShuffle(autoBroadShuffle)
 				.setAutoBroadDuration(autoBroadDuration)
-				.setAutoBroadTemplateId(autoBroadTemplateId)
+				.setAutoBroadTemplateId(autoBroadTemplateId==null?0:autoBroadTemplateId)
 				.setAutoBroadStart(autoBroadStart);
 		
 		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
@@ -182,6 +185,9 @@ public class ChannelController {
 				taskTemple,
 				rateCtrl,
 				rate,
+				backfileUrl,
+				backfileDuration,
+				backfileName,
 				rotation);
 		
 		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
@@ -237,6 +243,9 @@ public class ChannelController {
 			String rateCtrl,
 			String rate,
 			Boolean rotation,
+			String backfileUrl,
+			String backfileDuration,
+			String backfileName,
 			HttpServletRequest request) throws Exception {
 		
 		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = JSONArray.parseArray(output, BroadAbilityBroadInfoVO.class);
@@ -274,6 +283,9 @@ public class ChannelController {
 				taskTemple,
 				rateCtrl,
 				rate,
+				backfileUrl,
+				backfileDuration,
+				backfileName,
 				rotation);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {

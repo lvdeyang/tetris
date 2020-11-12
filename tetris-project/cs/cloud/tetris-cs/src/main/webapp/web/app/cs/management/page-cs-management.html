@@ -162,7 +162,7 @@
 
         <!-- 资源选择 -->
         <cs-media-picker-dialog ref="mediaPicker" @on-media-picker-close="handleMediaPickerClose"></cs-media-picker-dialog>
-
+        
         <!--地区选择-->
         <cs-area-picker-dialog ref="areaPicker" @on-area-picker-close="handleAreaPickerClose"></cs-area-picker-dialog>
 
@@ -296,9 +296,14 @@
                                 <el-switch v-model="dialog.addProgram.autoBroad"></el-switch>
                                 <el-button v-if="dialog.addProgram.autoBroad" @click="handleSetAutoBroad(dialog.addProgram)" type="primary" size="small" style="margin-left: 20px">设置播发参数</el-button>
                             </el-form-item>
+                            
                         </template>
                         <el-form-item label="输出设置" v-if="dialog.addProgram.broadWay == broadWayStream || dialog.addProgram.broadWay == broadWayFile">
                             <el-button @click="handleSetOutput(dialog.addProgram)" type="primary" size="small">设置输出</el-button>
+                        </el-form-item>
+                        <el-form-item label="垫播资源">
+                            <el-button @click="handleSetBackFile('add')" type="primary" size="small">选择媒资</el-button>
+                            {{dialog.addProgram.backfileName}}
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input v-model="dialog.addProgram.remark"></el-input>
@@ -314,6 +319,40 @@
                 </el-button>
             </span>
         </el-dialog>
+        
+         <el-dialog
+                    title="资源选择"
+                    :visible.sync="dialog.channel.dialog.chooseResource.visible"
+                    width="500px"
+                    append-to-body
+                    :before-close="handleChannelResourceClose">
+                <el-tree
+                        v-loading="dialog.channel.dialog.chooseResource.tree.loading"
+                        :props="dialog.channel.dialog.chooseResource.tree.props"
+                        :data="dialog.channel.dialog.chooseResource.tree.data"
+                        node-key="type + id"
+                        ref="channelResourceTree"
+                        :check-strictly=false
+                        show-checkbox
+                        @check="handleChannelResourceCheckChange"
+                        :expand-on-click-node="false"
+                        default-expand-all
+                        highlight-current
+                        style="padding: 20px;max-height: 400px;overflow-y:auto">
+                        <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                              slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                     <span>{{data.name}}</span>
+                                </span>
+                        </span>
+                </el-tree>
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleChannelResourceClose">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="handleChannelResourceCommit"
+                               :loading="dialog.channel.dialog.chooseResource.loading">确 定
+                    </el-button>
+                </span>
+            </el-dialog>
 
         <el-dialog
                 title="修改频道"
@@ -359,6 +398,10 @@
                 </template>
                 <el-form-item label="输出设置" v-if="dialog.editChannel.broadWay == broadWayStream || dialog.editChannel.broadWay == broadWayFile">
                     <el-button @click="handleSetOutput(dialog.editChannel)" type="primary" size="small">设置输出</el-button>
+                </el-form-item>
+                <el-form-item label="垫播资源">
+                    <el-button @click="handleSetBackFile('edit')" type="primary" size="small">选择媒资</el-button>
+                    {{dialog.editChannel.backfileName}}
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input v-model="dialog.editChannel.remark"></el-input>
@@ -635,6 +678,9 @@
                     </el-button>
                 </span>
             </el-dialog>
+            
+            
+           
 
             <el-container style="height:500px">
                 <el-container style="border-right: 1px solid #eee;width: 550px">

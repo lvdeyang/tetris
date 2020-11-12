@@ -388,6 +388,22 @@ define([
                             self.$refs.copyMediaAudioDialog.open('/folder/permission/media/tree/audio');
                             self.$refs.copyMediaAudioDialog.setBuffer(row);
                         }
+                    }else if(command === '4'){
+                    	ajax.post('/media/audio/task/recomm/' + row.id, {
+                            status:1
+                        }, function(data, status, message){
+                            if(status === 200){
+                               row.isTop=1;
+                            }
+                        }, null, ajax.NO_ERROR_CATCH_CODE)
+                    }else if(command === '5'){
+                    	ajax.post('/media/audio/task/recomm/' + row.id, {
+                            status:0
+                        }, function(data, status, message){
+                            if(status === 200){
+                               row.isTop=0;
+                            }
+                        }, null, ajax.NO_ERROR_CATCH_CODE)
                     }
                 },
                 //重命名素材库文件夹
