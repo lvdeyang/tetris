@@ -628,4 +628,23 @@ public class UserFeignController {
 	public Object queryUserOnline() throws Exception{
 		return userQuery.queryUserOnline();
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/tags")
+	public Object queryUserTags(Long userId) throws Exception{
+		return userQuery.queryUserTags(userId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/tag/hotcount")
+	public Object addTagHotcount(
+			Long userId, 
+			String tagNames,
+			HttpServletRequest request) throws Exception{
+		
+		
+		return userService.addTagHotCount(userId,tagNames);
+	}
 }

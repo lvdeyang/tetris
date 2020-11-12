@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -42,8 +44,14 @@ import com.sumavision.tetris.cs.menu.CsMenuPO;
 import com.sumavision.tetris.cs.menu.CsMenuService;
 import com.sumavision.tetris.cs.menu.CsResourceService;
 import com.sumavision.tetris.cs.menu.CsResourceVO;
+import com.sumavision.tetris.cs.program.ScreenPO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
+import com.sumavision.tetris.cs.template.ChannelTemplateDao;
+import com.sumavision.tetris.cs.template.ChannelTemplatePO;
+import com.sumavision.tetris.cs.template.ProgrameType;
+import com.sumavision.tetris.cs.template.TemplateProgrameDao;
+import com.sumavision.tetris.cs.template.TemplateProgramePO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
@@ -549,6 +557,9 @@ public class ChannelService {
 		}
 	}
 	
+	@Autowired
+	TemplateProgrameDao templateProgrameDao;
+	
 	public void autoSetSchedule(Long channelId) throws Exception {
 		Long now = DateUtil.getLongDate();
 		scheduleService.removeFromNowByChannelId(channelId);
@@ -558,8 +569,9 @@ public class ChannelService {
 		if (autoBroadInfoPO == null) return;
 		
 		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
-		
-		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
+		//更改算法
+		//List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
+		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommendnew();
 		if (recommends != null && !recommends.isEmpty()){
 			List<MediaAVideoVO> medias = JSONArray.parseArray(JSONArray.toJSONString(recommends), MediaAVideoVO.class);
 			csMenuService.autoAddMenuAndSource(channelId, "audioCommend", medias);
@@ -571,7 +583,9 @@ public class ChannelService {
 				.toString();
 		Long broadStartTimeLong = DateUtil.parse(broadStartTime, DateUtil.dateTimePattern).getTime() + 30000;
 		Boolean fromToday = now < broadStartTimeLong;
+		//获取模板信息
 		
+		List<TemplateProgramePO> templateProgramePOs=templateProgrameDao.findByTemplateId(autoBroadInfoPO.getTemplateId());
 		for (int i = 0; i < autoBroadInfoPO.getDuration(); i++) {
 			String broadTime = new StringBufferWrapper()
 					.append(DateUtil.addDateStr(autoBroadInfoPO.getStartDate(), i + (fromToday ? 0 : 1)))
@@ -579,13 +593,49 @@ public class ChannelService {
 					.append(autoBroadInfoPO.getStartTime())
 					.toString();
 			List<ScreenVO> screens = new ArrayList<ScreenVO>();
-			if (recommends != null && !recommends.isEmpty()) {
-				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
-				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
-				for (MediaAudioVO audio : audios) {
-					screens.add(new ScreenVO().getFromAudioVO(audio));
+			//从模板中获取节目信息 如果是媒资直接放入自动生成节目单，如果是标签，从推荐列表中查找该标签的媒资，如果找不到直接去媒资库查找该标签下的热门媒资。
+			for (TemplateProgramePO templateProgramePO : templateProgramePOs) {
+				if(templateProgramePO.getProgrameType().equals(ProgrameType.MIMS)){
+					ScreenVO screenVO=new ScreenVO();
+					screenVO.setStartTime(DateUtil.format(templateProgramePO.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
+					screenVO.setEndTime(DateUtil.format(templateProgramePO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+					screenVO.setPreviewUrl(templateProgramePO.getUrl());
+					screenVO.setName(templateProgramePO.getMimsName());
+					screenVO.setDuration(templateProgramePO.getDuration());
+					screens.add(screenVO);
+				}else{
+					boolean befind=false;
+					for (MediaAudioVO audio : recommends) {
+						String[] tempProtags=templateProgramePO.getLabelNames().split(",");
+						for (String tag : tempProtags) {
+							if(audio.getTags().contains(tag)){
+								screens.add(new ScreenVO().getFromAudioVO(audio));
+								recommends.remove(audio);
+								befind=true;
+						        break;
+							}
+						}
+						
+					}
+					if(!befind){
+						//从媒资库中查找符合模板媒资的最热媒资
+						List<MediaAudioVO> hotMediaAudioVOs=mediaAudioQuery.loadTagRecommend(templateProgramePO.getLabelNames());
+						if(hotMediaAudioVOs.size()>0){
+							//随机取一个
+							Random ran = new Random();
+						    int random = ran.nextInt(hotMediaAudioVOs.size());
+							screens.add(new ScreenVO().getFromAudioVO(hotMediaAudioVOs.get(random)));
+						}
+					}
 				}
 			}
+			//if (recommends != null && !recommends.isEmpty()) {
+				//if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
+				//List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
+				//for (MediaAudioVO audio : audios) {
+					//screens.add(new ScreenVO().getFromAudioVO(audio));
+				//}
+			//}
 			scheduleService.addSchedule(channelId, broadTime, screens);
 		}
 	}

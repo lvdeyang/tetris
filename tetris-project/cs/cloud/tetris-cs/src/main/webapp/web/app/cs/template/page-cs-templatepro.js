@@ -135,10 +135,12 @@ define([
                     var mimsId=0;
                     var mimsName='';
                     var mimsUrl='';
+                    var duration='';
                     if(self.dialog.addTemplatepro.mims.length>0){
                     	mimsId=self.dialog.addTemplatepro.mims[0].id;
                         mimsName=self.dialog.addTemplatepro.mims[0].name;
                         mimsUrl=self.dialog.addTemplatepro.mims[0].previewUrl;
+                        duration=self.dialog.addTemplatepro.mims[0].duration;
                     }
                     var newData = {
                 		templateId:p.tempId,
@@ -148,6 +150,7 @@ define([
                         mimsId:mimsId,
                         mimsName:mimsName,
                         url:mimsUrl,
+                        duration:duration,
                         labelIds:'',
                         labelNames:labelNames.join(',')
                     };

@@ -62,6 +62,20 @@ public class TagService {
 		return new TagVO().set(tag);
 	}
 	
+	
+	public void addHotCount(List<TagVO> tags) throws Exception{
+		
+		List<TagPO> tagPOs=new ArrayList<TagPO>();
+		for (TagVO tagVO : tags) {
+			TagPO tagPO=tagDAO.findOne(tagVO.getId());
+			tagPO.setHotCount(tagPO.getHotCount()==null?1l:tagPO.getHotCount()+1);
+			tagPOs.add(tagPO);
+		}
+		tagDAO.save(tagPOs);
+		
+		
+	}
+	
 	public void remove(UserVO user, Long id) throws Exception{
 		TagPO tag = tagDAO.findByIdAndGroupId(id, user.getGroupId());
 		
