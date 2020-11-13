@@ -385,7 +385,7 @@ public class MediaAudioQuery {
 			}
 		}
 		//总推荐个数，暂时写死，后续增加到系统配置页面
-		int count=100;
+		int count=5;
 		List<UserTagsVO> userTagsVOs=userQuery.queryUserTags(user.getId());
 		long totalWeiht=0l;
 		for (UserTagsVO userTagsVO : userTagsVOs) {
@@ -408,6 +408,7 @@ public class MediaAudioQuery {
 					tempHotCount+=tagMaps.get(mediaAudioTag).getHotCount();
 				}
 				mediaAudioVO.setHotWeight(tempHotCount);
+				
 			}
 		    //按照媒资权重值排序，取出来 tagMediaCountMap中该标签推荐媒资个数那么多的媒资。
 			Collections.sort(audioVOs, new Comparator<MediaAudioVO>() {
@@ -415,6 +416,8 @@ public class MediaAudioQuery {
 				@Override
 				public int compare(MediaAudioVO o1, MediaAudioVO o2) {
 					// TODO Auto-generated method stub
+				    o1.setIsTop(o1.getIsTop()==null?0:o1.getIsTop());
+				    o2.setIsTop(o2.getIsTop()==null?0:o2.getIsTop());
 					if(o1.getIsTop()==1&&o2.getIsTop()==0){
 						return -1;
 					}else if(o1.getIsTop()==0&&o2.getIsTop()==1){
