@@ -41,6 +41,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Boolean isRequired;
 	private String startTime;
 	private String endTime;
+	private int count=0;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -436,6 +437,17 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	public ScreenVO setEndTime(String endTime) {
 		this.endTime = endTime;
 		return this;
+	}
+
+
+
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 

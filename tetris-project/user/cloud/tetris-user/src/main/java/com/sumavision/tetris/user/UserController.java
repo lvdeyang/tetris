@@ -639,18 +639,20 @@ public class UserController {
 	@RequestMapping(value = "/load")
 	public Object load()throws Exception{
 		return resourceFeign.load();
+		return null;
 	}
 	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/editTags")
 	public Object editTags(
-            String tags
+            String tags,
+            String hotCounts
            ) throws Exception{
 		
 		UserVO user = userQuery.current();
 		//TODO 权限校验
-		return userService.editTags(user.getId(), tags);
+		return userService.editTags(user.getId(), tags,hotCounts);
 	}
 	
 	@JsonBody
