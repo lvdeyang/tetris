@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,9 @@ import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.group.TransmissionMode;
+import com.sumavision.tetris.bvc.business.location.LocationExecuteStatus;
+import com.sumavision.tetris.bvc.business.location.LocationOfScreenWallDAO;
+import com.sumavision.tetris.bvc.business.location.LocationOfScreenWallPO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -135,6 +139,8 @@ public class MonitorLiveDeviceService {
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
 	
+	@Autowired
+	private LocationOfScreenWallDAO locationOfScreenWallDao;
 	/**
 	 * xt看本地设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -1520,7 +1526,38 @@ public class MonitorLiveDeviceService {
 			return;
 		}
 		
+		//处理屏幕墙
+		List<LocationOfScreenWallPO> locationOfScreenWallPOList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(monitorLiveDeviceIds);
+		locationOfScreenWallPOList.stream().forEach(screenWall->{
+			screenWall.setEncoderBundleId("");
+			screenWall.setEncoderBundleName("");
+			screenWall.setStatus(LocationExecuteStatus.STOP);
+		});
+		locationOfScreenWallDao.save(locationOfScreenWallPOList);
+		
 		stop(monitorLiveDeviceIds, userId, userNo, null);
 	}
-	
+
+	/**
+	 * 重置设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:15:15
+	 * @param bundleIds 设备bundleIds集合
+	 */
+	public void resetBundles(List<String> bundleIds, Long userId) throws Exception {
+		
+		List<DisconnectBundleBO> disconnectBundleBoList=bundleDao.findByBundleIdIn(bundleIds).stream().map(bundle->{
+			DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBundleId(bundle.getBundleId())
+																			   .setBundle_type(bundle.getBundleType())
+																			   .setDevice_model(bundle.getDeviceModel())
+																			   .setLayerId(bundle.getAccessNodeUid());
+			return disconnectVideoBundle;
+		}).collect(Collectors.toList());
+		
+		LogicBO logic = new LogicBO().setUserId(userId.toString())
+				 .setDisconnectBundle(disconnectBundleBoList);
+		
+		executeBusiness.execute(logic, "重置设备");
+	}
 }

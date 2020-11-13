@@ -1096,4 +1096,25 @@ public class MonitorLiveController {
 		
 		return null;
 	}
+	
+	/**
+	 * 重置设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param bundleIds 设备bundleId的集合
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/reset/bundles")
+	public Object resetBundles(
+			List<String> bundleIds,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		monitorLiveDeviceService.resetBundles(bundleIds, userId);
+		
+		return null;
+	}
 }

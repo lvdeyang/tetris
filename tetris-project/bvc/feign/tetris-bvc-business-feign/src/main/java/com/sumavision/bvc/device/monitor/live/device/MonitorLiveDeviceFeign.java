@@ -34,4 +34,15 @@ public interface MonitorLiveDeviceFeign {
 	@RequestMapping(value="/monitor/live/stop/live/by/lose/privilege", method = RequestMethod.POST)
 	public JSONObject stopLiveByLosePrivilege(
 			@RequestParam(value="userBundleBoList") List<UserBundleBO> userBundleBoList) throws Exception;
+	
+	/**
+	 * 重置设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:10:07
+	 * @return
+	 */
+	@RequestMapping(value="/monitor/live/reset/bundles", method = RequestMethod.POST)
+	public JSONObject resetBundles(
+			@RequestParam(value="bundleIds")List<Long> bundleIds) throws Exception;
 }
