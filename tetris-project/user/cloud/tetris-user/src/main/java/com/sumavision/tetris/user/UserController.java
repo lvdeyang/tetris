@@ -639,7 +639,7 @@ public class UserController {
 	@RequestMapping(value = "/load")
 	public Object load()throws Exception{
 		return resourceFeign.load();
-		return null;
+		//return null;
 	}
 	
 	@JsonBody
