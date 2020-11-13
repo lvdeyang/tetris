@@ -116,6 +116,9 @@ export default {
         value: 'USER_ONLINE',
         label: '用户上线'
       }, {
+        value: 'USER_OFFLINE',
+        label: '用户下线'
+      }, {
         value: 'DEVICE_ONLINE',
         label: '设备上线'
       }, {
@@ -242,7 +245,7 @@ export default {
       json.push({ dataName: '日志类型', dataContent: this.detailForm.oprlogType })
       json.push({ dataName: '用户名', dataContent: this.detailForm.userName })
       json.push({ dataName: '操作名称', dataContent: this.detailForm.oprName })
-      json.push({ dataName: '操作时间', dataContent: util.formatDate.formatString(this.detailForm.oprTime, 'yyyy/MM/dd hh:mm:ss') })
+      json.push({ dataName: '操作时间', dataContent: this.detailForm.oprTime })
       json.push({ dataName: '操作详情', dataContent: this.detailForm.oprDetail })
       json.push({ dataName: '来源服务', dataContent: this.detailForm.sourceService })
       json.push({ dataName: '来源IP', dataContent: this.detailForm.ip })
@@ -288,6 +291,11 @@ export default {
 .el-table {
   height: calc(100% - 135px);
   overflow: auto;
+}
+.el-table--border:after,
+.el-table--group:after,
+.el-table:before {
+  background-color: transparent;
 }
 </style>
 

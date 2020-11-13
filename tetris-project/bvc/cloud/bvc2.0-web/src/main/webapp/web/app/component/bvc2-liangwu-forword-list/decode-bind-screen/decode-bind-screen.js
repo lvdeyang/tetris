@@ -283,6 +283,7 @@ define([
         var options = instance.layout;
         var tdHtml = `<div class="cell-box">
                             <p>解码器：<span  class="decode">无</span></p>
+                            <button class="el-button el-button--text screen-config-unbind-decoder"> 删除 <span class="el-icon-delete"></span></button>
                       </div>`
         if (options) {
           $container['layout-auto']('create', {
@@ -340,6 +341,7 @@ define([
               cell.$cell['layout-auto']('setData', currentScreenInfo);
               cell.$cell.find('.decode').text(currentScreenInfo.decoderBundleName)
             } else {
+              cell.$cell.find('.screen-config-unbind-decoder').hide()
               cell.$cell['layout-auto']('setData', cell);
             }
           }
@@ -434,6 +436,7 @@ define([
 
       },
     },
+
     mounted: function () {
       var self = this;
       this.initTree()
@@ -444,6 +447,28 @@ define([
 
     },
   });
-
+  // 删除按钮
+  $(document).on('mousedown', '.screen-config-unbind-decoder', function (e) {
+    e.stopPropagation();
+    var vm = Vue;
+    var $button = $(this);
+    $button.on('mouseup', function () {
+      var $td = $button.closest('td');
+      var od = $td['layout-auto']('getData');
+      console.log(od)
+      ajax.post('/location/of/screen/wall/unbind/decoder', { id: od.id }, function (data, status) {
+        if (status !== 200) return;
+        $td.find('.decode').text("无")
+        // $td.find('.screen-config-begin').hide()
+        // $td.find('.screen-config-stop').hide()
+        $td.find('.screen-config-unbind-decoder').hide()
+        // $td.find('.status').text("STOP")
+      }, null, [403, 404, 409, 500]);
+    });
+    $(document).on('mouseup', function () {
+      $button.unbind('mouseup');
+      $(document).unbind('mouseup');
+    });
+  });
   return Vue;
 });

@@ -1,6 +1,6 @@
 .decode-bind-screen .bvc2-auto-layout-wrapper{
   position: relative;
-    width: 65%;
+    width: 75%;
     height: 95%;
     /* background-color: #16191E; */
     float: left;
@@ -16,8 +16,8 @@
   left: 0;
 }
 .decode-bind-screen .col{
-  width: 30%;
-  min-height: calc(100% - 40px);
+  width: 20%;
+height: calc(100% - 25px);
 }
 .decode-bind-screen .liangwu-forword .el-select input {
   background: transparent;

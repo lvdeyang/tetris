@@ -25,7 +25,7 @@
       </el-form-item>
       <el-form-item size="small" label="域类型" v-if="deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
+          <el-option disabled v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
       <!-- <el-form-item size="small" label="设备IP" prop="deviceIp">
@@ -473,6 +473,96 @@
             </el-form>
           </el-row>
         </div>
+
+        <div v-show="extraParam.dev_type == 'bq_encoder'">
+          <el-row :gutter="15">
+            <el-form ref="bqEncForm" :model="bqEncoderFormData" :rules="bqEncoderRules" size="mini" label-width="135px">
+              <el-col :span="7">
+                <el-form-item label="设备类型" prop="bq_type">
+                  <el-select v-model="bqEncoderFormData.bq_type" placeholder="请选择设备类型" :style="{width: '100%'}">
+                    <el-option label="6931S" value="6931S"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="ip地址" prop="bq_ip">
+                  <el-input v-model="bqEncoderFormData.bq_ip" placeholder="请输入ip" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="端口号" prop="bq_port">
+                  <el-input v-model="bqEncoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="设备账号" prop="bq_user">
+                  <el-input v-model="bqEncoderFormData.bq_user" placeholder="请输入设备账号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="设备密码" prop="bq_passwd">
+                  <el-input v-model="bqEncoderFormData.passwd" placeholder="请输入设备密码" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="通道序号" prop="index">
+                  <el-input v-model="bqEncoderFormData.index" placeholder="请输入通道序号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+        </div>
+        <div v-show="extraParam.dev_type == 'bq_decoder'">
+          <el-row :gutter="15">
+            <el-form ref="bqEncForm" :model="bqDecoderFormData" :rules="bqDecoderRules" size="mini" label-width="135px">
+              <el-col :span="7">
+                <el-form-item label="类型" prop="bq_type">
+                  <el-select v-model="bqDecoderFormData.bq_type" placeholder="请选择设备类型" :style="{width: '100%'}" @change="bqTypeChange">
+                    <el-option disabled label="D1" value="D1"></el-option>
+                    <el-option disabled label="D8" value="D8"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="ip地址" prop="bq_ip">
+                  <el-input v-model="bqDecoderFormData.bq_ip" placeholder="请输入ip" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="端口号" prop="bq_port">
+                  <el-input v-model="bqDecoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="设备账号" prop="bq_user">
+                  <el-input v-model="bqDecoderFormData.bq_user" placeholder="请输入设备账号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="设备密码" prop="passwd">
+                  <el-input v-model="bqDecoderFormData.bq_passwd" placeholder="请输入设备密码" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="通道序号" prop="index">
+                  <el-select v-model="bqDecoderFormData.index" placeholder="请选择通道序号" :style="{width: '100%'}">
+                    <el-option disabled v-for="item in bqDecoderOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
+                    <!-- <el-option label="D8" value="D8"></el-option> -->
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+        </div>
       </div>
     </el-card>
     <el-button v-show="false" type="info" size="small" @click="addExtraInfo" style="margin-top:20px; margin-left: 30px">新增扩展字段</el-button>
@@ -600,6 +690,8 @@ export default {
         { label: "北清编码器输入", value: "bq_enc" },
         { label: "28181编码器输入", value: "28181_enc" },
         { label: "转码输出(虚解码)", value: "transcode_dec" },
+        { label: '北清接入编码器', value: 'bq_encoder' },
+        { label: '北清接入解码器', value: 'bq_decoder' },
       ],
       params: {},
       extraInfosEdit: [],
@@ -1014,7 +1106,80 @@ export default {
         { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
         { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
       ],
-
+      bqEncoderFormData: {
+        "bq_type": "6931S",// 北清接入的编码器目前只有6931S
+        "bq_ip": "192.168.1.123",//北清设备的ip地址
+        "bq_port": 8088,//北清设备的控制端口
+        "bq_user": "admin",//编码器目前无需校验，将此固定为admin
+        "bq_passwd": "admin",//编码器目前无需校验，将此固定为admin
+        "index": 1
+      },
+      bqEncoderRules: {
+        'bq_ip': [{
+          required: true,
+          message: '请输入ip',
+          trigger: 'blur'
+        }],
+        'bq_port': [{
+          required: true,
+          message: '请输入端口',
+          trigger: 'blur'
+        }],
+      },
+      bqDecoderFormData: {
+        "bq_type": "D1",//D1和D8种
+        "bq_ip": "192.168.1.123",//北清设备的ip地址
+        "bq_port": 8088,//北清设备的控制端口
+        "bq_user": "admin",
+        "bq_passwd": "admin",
+        "index": 1
+      },
+      bqDecoderRules: {
+        'bq_ip': [{
+          required: true,
+          message: '请输入ip',
+          trigger: 'blur'
+        }],
+        'bq_port': [{
+          required: true,
+          message: '请输入端口',
+          trigger: 'blur'
+        }],
+        'bq_user': [{
+          required: true,
+          message: '请输入设备账号',
+          trigger: 'blur'
+        }],
+        'bq_passwd': [{
+          required: true,
+          message: '请输入设备密码',
+          trigger: 'blur'
+        }],
+        'index': [
+          {
+            required: true,
+            message: '请输入设备序号',
+            trigger: 'blur'
+          }
+        ],
+      },
+      bqDecoderOption: [{
+        label: 1, value: 1
+      }, {
+        label: 2, value: 2
+      }, {
+        label: 3, value: 3
+      }, {
+        label: 4, value: 4
+      }, {
+        label: 5, value: 5
+      }, {
+        label: 6, value: 6
+      }, {
+        label: 7, value: 7
+      }, {
+        label: 8, value: 8
+      },]
     };
   },
   methods: {
@@ -1097,6 +1262,12 @@ export default {
               break
             case 'transcode_dec':
               self.transcodeEecFormData = self.params
+              break
+            case 'bq_encoder':
+              self.bqEncoderFormData = self.params
+              break
+            case 'bq_decoder':
+              self.bqDecoderFormData = self.params
               break
           }
         }
@@ -1197,6 +1368,12 @@ export default {
           break
         case 'transcode_dec':
           extraParam.param = this.transcodeEecFormData
+          break
+        case 'bq_encoder':
+          extraParam.param = this.bqEncoderFormData
+          break
+        case 'bq_decoder':
+          extraParam.param = this.bqDecoderFormData
           break
       }
 
@@ -1368,6 +1545,7 @@ export default {
     }
   },
   mounted () {
+    var self = this
     this.queryBundleExtraInfo();
     this.row = JSON.parse(sessionStorage.getItem('row'))
     getStationList().then(res => {

@@ -55,7 +55,7 @@ export default {
     },
 
     formatString: function (dateString, pattern) {
-      var date = new Date(Date.parse(dateString))
+      var date = new Date(Date.parse(dateString.replace(/-/g, "/")))
       return this.format(date, pattern)
     }
   }
