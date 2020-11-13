@@ -788,7 +788,8 @@ public class UserService{
 	 */
 	public UserVO editTags(
 			Long id, 
-            String tags
+            String tags,
+            String hotCounts
             ) throws Exception{
 		
 		UserPO user = userDao.findOne(id);
@@ -796,12 +797,20 @@ public class UserService{
 		if(tags != null) {
 			user.setTags(tags);
 			String[] tagArr=tags.split(",");
+			String[] hotCountArr=null;
+			if(hotCounts!=null){
+				hotCountArr=hotCounts.split(",");
+			}
 		    userTagsDAO.deleteByUserId(user.getId());
 		    List<UserTagsPO> userTagsPOs=new ArrayList<UserTagsPO>();
 		    for(int i=0;i<tagArr.length;i++){
 		    	UserTagsPO userTagsPO=new UserTagsPO();
 		    	userTagsPO.setUserId(user.getId());
 		    	userTagsPO.setTagName(tagArr[i]);
+		    	if(hotCounts!=null){
+		    		userTagsPO.setHotCount(Long.parseLong(hotCountArr[i]));
+		    	}
+		    	
 		    	userTagsPOs.add(userTagsPO);
 		    }
 		    userTagsDAO.save(userTagsPOs);
