@@ -60,6 +60,15 @@ public class ChannelPO extends AbstractBasePO {
 	/**是否轮播*/
 	private boolean rotation;
 	
+	/**垫播媒资地址*/
+	private String backfileUrl;
+	
+	/**垫播媒资时长*/
+	private String backfileDuration;
+	
+	/**垫播媒资名称*/
+	private String backfileName;
+	
 	public boolean isRotation() {
 		return rotation;
 	}
@@ -197,4 +206,30 @@ public class ChannelPO extends AbstractBasePO {
 	public void setChannelUuid(String channelUuid) {
 		this.channelUuid = channelUuid;
 	}
+	@Column(name = "BACKFILE_NAME")
+	public String getBackfileName() {
+		return backfileName;
+	}
+
+	public void setBackfileName(String backfileName) {
+		this.backfileName = backfileName;
+	}
+	@Column(name = "BACKFILE_URL")
+	public String getBackfileUrl() {
+		return backfileUrl;
+	}
+
+	public void setBackfileUrl(String backfileUrl) {
+		this.backfileUrl = backfileUrl;
+	}
+	@Column(name = "BACKFILE_DURATION")
+	public String getBackfileDuration() {
+		return backfileDuration;
+	}
+
+	public void setBackfileDuration(String backfileDuration) {
+		this.backfileDuration = backfileDuration;
+	}
+	
+	
 }

@@ -78,12 +78,17 @@
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
                                             <el-dropdown-item command="1" v-if="scope.row.type==='AUDIO'">编辑</el-dropdown-item>
+                                            <el-dropdown-item command="4" v-if="scope.row.type==='AUDIO' && (scope.row.isTop==0 || scope.row.isTop==null)">置顶</el-dropdown-item>
+                                            <el-dropdown-item command="5" v-if="scope.row.type==='AUDIO' && scope.row.isTop==1">取消置顶</el-dropdown-item>
                                             <!--<el-dropdown-item command="2">移动</el-dropdown-item>
                                             <el-dropdown-item command="3">复制</el-dropdown-item>-->
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
                             </template>
+                        </el-table-column>
+                        <el-table-column label="是否置顶" width="180">
+                            <template slot-scope="scope">{{scope.row.isTop==1?'已置顶':'否'}}</template>
                         </el-table-column>
                         <el-table-column label="大小" width="180">
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
