@@ -60,8 +60,6 @@
       <el-table-column width="50" type="selection"></el-table-column>
       <el-table-column prop="bundleName" label="名称" width="120" sortable>
       </el-table-column>
-      <el-table-column prop="bundleId" label="bundleId" width="200" sortable>
-      </el-table-column>
       <el-table-column prop="location" label="地点" width="120" sortable>
       </el-table-column>
       <el-table-column prop="deviceModel" label="类型" width="120" sortable>

@@ -35,7 +35,7 @@
       <el-form-item size="small" label="地点" prop="bundleAlias">
         <el-input v-model="location" style="width: 200px;"></el-input>
       </el-form-item>
-      <el-form-item size="small" label="接入层" v-if="deviceModel =='jv210'" prop="accessNodeName">
+      <el-form-item size="small" label="接入层" prop="accessNodeName">
         <el-input v-model="accessNodeName" style="width: 200px;" readOnly></el-input>
       </el-form-item>
       <!-- <el-form-item size="small" label="设备端口" prop="devicePort">

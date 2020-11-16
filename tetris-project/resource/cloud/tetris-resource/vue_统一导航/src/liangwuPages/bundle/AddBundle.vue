@@ -64,7 +64,7 @@
         <el-input v-model.number="extraParam.alarmSize" auto-complete="off" style="width: 200px;" placeholder="单位：GB"></el-input>
       </el-form-item>
       <!-- TODO -->
-      <el-form-item size="small" v-if="bundleForm.deviceModel =='jv210'" label="接入层UID" prop="accessNodeUid">
+      <el-form-item size="small" label="接入层UID" prop="accessNodeUid">
         <el-input v-model="bundleForm.accessNodeName" style="width: 200px;" readonly @click.native="handleSelectLayerNode"></el-input>
         <el-input v-show="false" v-model="bundleForm.accessNodeUid"></el-input>
       </el-form-item>
@@ -533,7 +533,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="端口号" prop="bq_port">
-                  <el-input v-model="bqEncoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  <el-input v-model.number="bqEncoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
                   </el-input>
                 </el-form-item>
               </el-col>
@@ -577,7 +577,7 @@
               </el-col>
               <el-col :span="7">
                 <el-form-item label="端口号" prop="bq_port">
-                  <el-input v-model="bqDecoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  <el-input v-model.number="bqDecoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
                   </el-input>
                 </el-form-item>
               </el-col>
@@ -591,14 +591,6 @@
                 <el-form-item label="设备密码" prop="bq_passwd">
                   <el-input v-model="bqDecoderFormData.bq_passwd" placeholder="请输入设备密码" clearable :style="{width: '100%'}">
                   </el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="7">
-                <el-form-item label="通道序号" prop="index">
-                  <el-select v-model="bqDecoderFormData.index" placeholder="请选择通道序号" :style="{width: '100%'}">
-                    <el-option v-for="item in bqDecoderOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
-                    <!-- <el-option label="D8" value="D8"></el-option> -->
-                  </el-select>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -758,6 +750,7 @@ export default {
         region: 'self',
         address: '',
         alarmSize: '',
+        param: {},
       },
       rules: {
         deviceModel: [
@@ -1372,9 +1365,9 @@ export default {
           }
         ],
       },
-      bqDecoderOption: [{
-        label: 1, value: 1
-      }]
+      // bqDecoderOption: [{
+      //   label: 1, value: 1
+      // }]
     }
   },
   computed: {
@@ -1507,7 +1500,7 @@ export default {
           // TODO 提交表单
           var newArr = []
           var extraParam = this.extraParam
-          if (this.extraParam.deviceModel == 'cdn') {
+          if (this.bundleForm.deviceModel == 'cdn') {
 
             if (!/\d/.test(this.extraParam.alarmSize) || this.extraParam.alarmSize < 0) {
               this.$message({
@@ -1515,6 +1508,10 @@ export default {
                 message: "告警容量必须为数字且大于等于0"
               })
               return
+            } else {
+              extraParam.param = { alarmSize: extraParam.alarmSize }
+              self.extraParam.dev_type = 'cdn'
+              console.log(extraParam)
             }
           }
           extraParam.address = this.bundleForm.location
@@ -1568,46 +1565,88 @@ export default {
               extraParam.param = this.bqDecoderFormData
               break
           }
+          //北清D8类型的批量添加设备 index 不同
+          if (self.extraParam.dev_type == 'bq_decoder' && self.bqDecoderFormData.bq_type == "D8") {
+            for (let i = 1; i <= 8; i++) {
+              var extraParam = {
+                dev_type: self.extraParam.dev_type,
+                region: self.extraParam.region,
+                address: self.bundleForm.location,
+              }
 
-          newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
-          let param = {
-            bundle: JSON.stringify(this.bundleForm),
-            extraInfoVOList: JSON.stringify(newArr)
+              self.bqDecoderFormData.index = i
+              extraParam.param = self.bqDecoderFormData
+              var bundleForm = {
+                deviceModel: self.bundleForm.deviceModel,
+                bundleType: self.bundleForm.bundleType,
+                bundleName: self.bundleForm.bundleName + '-' + i,
+                location: self.bundleForm.location,
+                username: self.bundleForm.username + '-' + i,
+                onlinePassword: self.bundleForm.onlinePassword + '-' + i,
+                checkPass: self.bundleForm.checkPass + '-' + i,
+                bundleAlias: self.bundleForm.bundleAlias + '-' + i,
+                accessNodeUid: self.bundleForm.accessNodeUid,
+                accessNodeName: self.bundleForm.accessNodeName,
+                bundleFolderId: self.bundleForm.bundleFolderId,
+                bundleFolderName: self.bundleForm.bundleFolderName,
+                transcod: self.bundleForm.transcod,
+                coderType: 'DECODER',
+                multicastSourceIp: self.bundleForm.multicastSourceIp,
+                deviceAddr: {
+                  deviceIp: '',
+                  devicePort: 5060
+                },
+              }
+              newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
+              let param = {
+                bundle: JSON.stringify(bundleForm),
+                extraInfoVOList: JSON.stringify(newArr)
+              }
+              addBundle(param).then(res => {
+                if (res.errMsg) {
+                  this.$message({
+                    message: res.errMsg,
+                    type: 'error'
+                  })
+                } else {
+                  this.handleConfigBundle(res.bundleId)
+                }
+              })
+            }
+            self.bqDecoderFormData.index = 1;
+          } else {
+            newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
+            let param = {
+              bundle: JSON.stringify(this.bundleForm),
+              extraInfoVOList: JSON.stringify(newArr)
+            }
+            addBundle(param).then(res => {
+              if (res.errMsg) {
+                this.$message({
+                  message: res.errMsg,
+                  type: 'error'
+                })
+              } else {
+                this.handleConfigBundle(res.bundleId)
+              }
+            })
           }
 
-          addBundle(param).then(res => {
-            if (res.errMsg) {
-              this.$message({
-                message: res.errMsg,
-                type: 'error'
-              })
-            } else {
-              this.$message({
-                message: '添加成功',
-                type: 'success'
-              })
-              this.handleConfigBundle(res.bundleId)
-              // setTimeout(() => {
-              //   window.location.reload();
-              // }, 1000);
-
-              // this.$confirm('添加资源成功, 是否跳转至配置页面进行能力方案配置?', '提示', {
-              //   confirmButtonText: '确定',
-              //   cancelButtonText: '取消',
-              //   type: 'info'
-              // }).then(() => {
-              //   //跳转至配置页面
-              //   this.$router.push({
-              //     path: '/ConfigBundle',
-              //     query: {
-              //       bundleId: res.bundleId
-              //     }
-              //   });
-              // }).catch(() => {
-              // });
-            }
-          })
         }
+      })
+    },
+    handleConfigBundle: function (bundleId) {
+      let param = {
+        bundleId: bundleId,
+        configChannels: JSON.stringify(this.configChannels),
+        configEditableAttrs: JSON.stringify([])
+      }
+
+      configBundle(param).then(res => {
+        this.$message({
+          message: '添加成功',
+          type: 'success'
+        })
       })
     },
     validateBaseInfo: function () {
@@ -1708,27 +1747,7 @@ export default {
     resetForm () {
       this.$refs['dahuaForm'].resetFields()
     },
-    handleConfigBundle: function (bundleId) {
-      let param = {
-        bundleId: bundleId,
-        configChannels: JSON.stringify(this.configChannels),
-        configEditableAttrs: JSON.stringify([])
-      }
 
-      configBundle(param).then(res => {
-        // if (res.errMsg) {
-        //   this.$message({
-        //     message: res.errMsg,
-        //     type: 'error'
-        //   });
-        // } else {
-        //   this.$message({
-        //     message: "配置成功",
-        //     type: 'success'
-        //   });
-        // }
-      })
-    },
     TSencFormIsMultiChange (val) {
       if (!val) {
         this.TSencFormMultiIpDis = true
@@ -1774,29 +1793,6 @@ export default {
         this.bitrateDisable = true
       } else {
         this.bitrateDisable = false
-      }
-    },
-    bqTypeChange (val) {
-      if (val == 'D1') {
-        this.bqDecoderOption = [{ label: 1, value: 1 }]
-      } else {
-        this.bqDecoderOption = [{
-          label: 1, value: 1
-        }, {
-          label: 2, value: 2
-        }, {
-          label: 3, value: 3
-        }, {
-          label: 4, value: 4
-        }, {
-          label: 5, value: 5
-        }, {
-          label: 6, value: 6
-        }, {
-          label: 7, value: 7
-        }, {
-          label: 8, value: 8
-        },]
       }
     }
   },

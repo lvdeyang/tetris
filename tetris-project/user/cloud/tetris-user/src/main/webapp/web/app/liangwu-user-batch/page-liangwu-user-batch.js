@@ -2,8 +2,8 @@
  * Created by lzp on 2019/5/29.
  */
 define([
-  'text!' + window.APPPATH + 'liangwu-user/page-liangwu-user.html',
-  window.APPPATH + 'liangwu-user/page-liangwu-user.i18n',
+  'text!' + window.APPPATH + 'liangwu-user-batch/page-liangwu-user-batch.html',
+  window.APPPATH + 'liangwu-user-batch/page-liangwu-user.i18n',
   'config',
   'restfull',
   'jquery',
@@ -15,13 +15,13 @@ define([
   'mi-sub-title',
   'mi-user-dialog',
   'mi-upload-dialog',
-  'css!' + window.APPPATH + 'liangwu-user/page-liangwu-user.css'
+  'css!' + window.APPPATH + 'liangwu-user-batch/page-liangwu-user-batch.css'
 ], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
 
   var locale = context.getProp('locale');
   var i18n = !locale ? i18n.default : i18n[locale] ? i18n[locale] : i18n.default;
 
-  var pageId = 'page-liangwu-user';
+  var pageId = 'page-liangwu-user-batch';
 
   var vueInstance = null;
 
@@ -40,7 +40,11 @@ define([
         user: context.getProp('user'),
         groups: context.getProp('groups'),
         i18n: i18n,
+        username: 'guanliyuan',
+        passwordEncode: '',
+        passwordInput: '12345',
         roleOption: [],
+        createNumber: 1,
         activeId: window.BASEPATH + 'index#/page-liangwu-user',
         dialogBindRole: {
           bindRoleDialogTableVisible: false,
@@ -107,6 +111,13 @@ define([
             bindAccessNodeUidName: '',
             bindAccessNodeUid: ''
           },
+          batchLogin: {
+            visible: false,
+            userName: '',
+            passward: '',
+            endNumber: '',
+            beginNumber: ''
+          },
           import: {
             requireType: ['csv'],
             multiple: false
@@ -120,12 +131,24 @@ define([
         bindAccessNodeUidRow: undefined,
         isLoginIpDisabled: true
       },
+      watch: {
+        // passwordInput: function () {
+        //   var self = this;
+        //   self.passwordEncode = self.encodePassword(self.passwordInput);
+        // }
+      },
       methods: {
         rowKey: function (row) {
           return 'user-' + row.uuid;
         },
         rowKeyBindRole: function (row) {
           return 'role-' + row.id;
+        },
+        encodePassword: function (text) {
+          for (var i = 0; i < 5; i++) {
+            text = window.btoa(text);
+          }
+          return text;
         },
         handleChangeFolder: function () {
           var self = this;
@@ -234,7 +257,13 @@ define([
             }
           });
         },
+        batchLogin () {
+          this.dialog.batchLogin.visible = true;
+        },
+        handlebatchLoginSubmit () {
+          console.log($('.login-submit-button'))
 
+        },
         handleSelectionChange (val) {
           this.dialogBindRole.bindRoleSelection = val;
         },
@@ -463,33 +492,62 @@ define([
             })
             return
           }
-          var rundemNum = self.randomString(11);
-          self.dialog.createUser.loading = true;
-          var params = {
-            nickname: self.dialog.createUser.nickname,
-            username: self.dialog.createUser.username,
-            userno: rundemNum,
-            password: self.dialog.createUser.password,
-            repeat: self.dialog.createUser.repeat,
-            mobile: self.dialog.createUser.mobile,
-            mail: self.dialog.createUser.mail,
-            level: self.dialog.createUser.level,
-            classify: self.dialog.createUser.classify,
-            companyId: self.dialog.createUser.company.id,
-            remark: self.dialog.createUser.remark,
-            loginIp: self.dialog.createUser.loginIp,
-            bindrole: self.dialog.createUser.bindrole,
-            bindRoles: self.dialog.createUser.bindRoles,
-            worknodeUid: self.bindAccessNodeUid,
-            isLoginIp: self.dialog.createUser.isLoginIp,
-          };
+          for (let i = 1; i <= self.createNumber; i++) {
+            var rundemNum = self.randomString(11);
+            self.dialog.createUser.loading = true;
+            var params = {
+              nickname: self.dialog.createUser.nickname + '-' + i,
+              username: self.dialog.createUser.username + '-' + i,
+              userno: rundemNum,
+              password: self.dialog.createUser.password,
+              repeat: self.dialog.createUser.repeat,
+              mobile: self.dialog.createUser.mobile,
+              mail: self.dialog.createUser.mail,
+              level: self.dialog.createUser.level,
+              classify: self.dialog.createUser.classify,
+              companyId: self.dialog.createUser.company.id,
+              remark: self.dialog.createUser.remark + '-' + i,
+              loginIp: self.dialog.createUser.loginIp,
+              bindrole: self.dialog.createUser.bindrole,
+              bindRoles: self.dialog.createUser.bindRoles,
+              worknodeUid: self.bindAccessNodeUid,
+              isLoginIp: self.dialog.createUser.isLoginIp,
+            };
 
-          ajax.post('/user/add', params, function (data, status) {
-            self.dialog.createUser.loading = false;
-            if (status !== 200) return;
-            self.table.rows.push(data);
-            self.handleCreateUserClose();
-          }, null, ajax.NO_ERROR_CATCH_CODE);
+            ajax.post('/user/add', params, function (data, status) {
+              self.dialog.createUser.loading = false;
+              if (status !== 200) return;
+              self.table.rows.push(data);
+              self.handleCreateUserClose();
+            }, null, ajax.NO_ERROR_CATCH_CODE);
+
+          }
+
+        },
+        loginSubmit: function () {
+          var self = this;
+          self.passwordEncode = self.encodePassword(self.dialog.batchLogin.password);
+          var begin = self.dialog.batchLogin.beginNumber;
+          var end = self.dialog.batchLogin.endNumber;
+          // for (let i = self.dialog.batchLogin.beginNumber; i <= self.dialog.batchLogin.endNumber; i++) {
+          //   setTimeout(function () {
+          //     self.username = self.dialog.batchLogin.userName + '-' + i
+          //     console.log(self.username, 'username')
+          //     console.log(self.passwordEncode, 'password')
+          //     $('.login-submit-button').trigger("click")
+          //   }, 500 * i)
+          // }
+          var timeIndex = setInterval(function () {
+            if (begin <= end) {
+              self.username = self.dialog.batchLogin.userName + '-' + begin
+              console.log(self.username, 'username')
+              console.log(self.passwordEncode, 'password')
+              $('.login-submit-button').trigger("click")
+              begin++
+            } else {
+              clearInterval(timeIndex)
+            }
+          }, 300)
         },
         handleSizeChange: function (size) {
           var self = this;
@@ -568,6 +626,17 @@ define([
         self.loadCompany();
         self.importStatus();
         self.loadRoleList(1)
+      },
+      mounted: function () {
+        this.$nextTick(function () {
+          console.log($("#form"))
+          $("#form").load(function () {
+            var text = $(this).contents().find("body").text();      //获取到的是json的字符串
+            var j = $.parseJSON(text);                                         //json字符串转换成json对象
+            console.log(j)
+
+          })
+        })
       }
     });
   };

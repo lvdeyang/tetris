@@ -15,7 +15,9 @@
       </el-table-column>
       <el-table-column prop="operate" label="操作状态" sortable>
         <template slot-scope="scope">
-
+          <el-tag size="mini" v-if="scope.row.operate == 'ON'">正在连接...</el-tag>
+          <el-tag size="mini" v-if="scope.row.operate == 'OFF'" type="warning">正在断开...</el-tag>
+          <el-tag size="mini" v-if="scope.row.operate == 'DONE'" type="info">无操作</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="操作">
