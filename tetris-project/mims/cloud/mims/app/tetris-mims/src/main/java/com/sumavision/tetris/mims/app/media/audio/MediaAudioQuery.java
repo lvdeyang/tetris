@@ -350,6 +350,8 @@ public class MediaAudioQuery {
 			@Override
 			public int compare(MediaAudioVO o1, MediaAudioVO o2) {
 				// TODO Auto-generated method stub
+			    o1.setIsTop(o1.getIsTop()==null?0:o1.getIsTop());
+			    o2.setIsTop(o2.getIsTop()==null?0:o2.getIsTop());
 				if(o1.getIsTop()==1&&o2.getIsTop()==0){
 					return -1;
 				}else if(o1.getIsTop()==0&&o2.getIsTop()==1){

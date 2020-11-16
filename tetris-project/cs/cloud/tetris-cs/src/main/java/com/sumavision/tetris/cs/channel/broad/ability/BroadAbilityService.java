@@ -396,7 +396,7 @@ public class BroadAbilityService {
 			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
 			for (TemplateScreenVO templateVO : templateScreenVOs) {
 				List<ScreenVO> screenVOs = templateVO.getData();
-				if (screenVOs.isEmpty()) continue;
+				if (screenVOs==null||screenVOs.isEmpty()) continue;
 				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
 				//这里重新根据开始，结束时间计算duration
 				templateVO.setData(resetScreenDuration(broadDate,screenVOs,channel));
