@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 
 public class SerNodeVO {
 
@@ -34,6 +35,15 @@ public class SerNodeVO {
 	private SYNC_STATUS syncStatus;
 
 	private SOURCE_TYPE sourceType;
+	
+	private String password;
+	
+	private ConnectionStatus operate;
+	
+	/**连接状态*/
+	private ConnectionStatus status;
+	
+	private String BusinessRoles;
 
 	public static SerNodeVO transFromPO(SerNodePO po) {
 
@@ -59,6 +69,39 @@ public class SerNodeVO {
 		}
 
 		return vos;
+	}
+
+	public ConnectionStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ConnectionStatus status) {
+		this.status = status;
+	}
+
+	public String getBusinessRoles() {
+		return BusinessRoles;
+	}
+
+	public void setBusinessRoles(String businessRoles) {
+		BusinessRoles = businessRoles;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+
+	public ConnectionStatus getOperate() {
+		return operate;
+	}
+
+	public void setOperate(ConnectionStatus operate) {
+		this.operate = operate;
 	}
 
 	public Long getId() {

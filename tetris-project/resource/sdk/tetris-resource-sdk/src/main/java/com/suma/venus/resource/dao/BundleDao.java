@@ -204,4 +204,6 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	@Query("select b from BundlePO b where b.deviceModel=?1 and b.onlineStatus='ONLINE'")
 	public List<BundlePO> findOnlineDevicesByDeviceModel(String deviceModel);
+	
+	public List<BundlePO> findByEquipFactInfo(String equipFactInfo);
 }

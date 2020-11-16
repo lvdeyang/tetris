@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,9 +76,12 @@ import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.VirtualResourceDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceToResource;
@@ -96,8 +101,12 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
@@ -117,6 +126,9 @@ import com.suma.venus.resource.vo.WsVO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
@@ -206,6 +218,17 @@ public class HttpInterfaceController {
 	
 	@Autowired
 	private AlarmFeign alarmFeign;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -899,6 +922,58 @@ public class HttpInterfaceController {
 			// bundleId, null, new Date());
 
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
+			
+			//设备状态变动
+			try {
+				List<BundleVO> devices = new ArrayList<BundleVO>();
+				BundleVO bundleVO = BundleVO.fromPO(po);
+				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
+				devices.add(bundleVO);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				Set<Long> privilegelLongs = new HashSet<Long>();
+				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						privilegelLongs.add(privilegePO.getId());
+					}
+				}
+				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
+				Set<Long> serNodeIds = new HashSet<Long>();
+				Long roleId = null;
+				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
+					roleId = rolePrivilegeMaps.get(0).getRoleId();
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+						}
+					}
+				}
+				List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+				SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+				Map<String, Object> local = new HashMap<String, Object>();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				PassByBO passByBO = new PassByBO();
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				local.put("name", serNodePO.getNodeName());
+				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+				for (int i = 0; i < serNodePOs.size(); i++) {
+					foreign.add(new HashMap<String, Object>());
+					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+					foreign.get(i).put("devices", devices);
+					foreign.get(i).put("role", roleId);
+				}
+				pass_by_content.put("cmd", "deviceStatusChange");
+				pass_by_content.put("local", local);
+				pass_by_content.put("foreign", foreign);
+				passByBO.setPass_by_content(pass_by_content);
+				if (workNodePOs != null && !workNodePOs.isEmpty()) {
+					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+				}
+				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
@@ -949,10 +1024,63 @@ public class HttpInterfaceController {
 			// bundleId, null, new Date());
 
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
+			
+			//设备状态变动
+			try {
+				List<BundleVO> devices = new ArrayList<BundleVO>();
+				BundleVO bundleVO = BundleVO.fromPO(po);
+				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
+				devices.add(bundleVO);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				Set<Long> privilegelLongs = new HashSet<Long>();
+				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						privilegelLongs.add(privilegePO.getId());
+					}
+				}
+				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
+				Set<Long> serNodeIds = new HashSet<Long>();
+				Long roleId = null;
+				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
+					roleId = rolePrivilegeMaps.get(0).getRoleId();
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+						}
+					}
+				}
+				List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+				SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+				Map<String, Object> local = new HashMap<String, Object>();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				PassByBO passByBO = new PassByBO();
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				local.put("name", serNodePO.getNodeName());
+				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+				for (int i = 0; i < serNodePOs.size(); i++) {
+					foreign.add(new HashMap<String, Object>());
+					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+					foreign.get(i).put("devices", devices);
+					foreign.get(i).put("role", roleId);
+				}
+				pass_by_content.put("cmd", "deviceStatusChange");
+				pass_by_content.put("local", local);
+				pass_by_content.put("foreign", foreign);
+				passByBO.setPass_by_content(pass_by_content);
+				if (workNodePOs != null && !workNodePOs.isEmpty()) {
+					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+				}
+				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 		}
+		
 		return resp;
 	}
 

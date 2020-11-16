@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import com.suma.venus.resource.pojo.BundlePO.CoderType;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
 import com.suma.application.ldap.equip.po.LdapEquipPo;
 import com.suma.venus.resource.constant.VenusParamConstant;
@@ -53,7 +55,12 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
+import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceFromResource;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundleLoginBlackListPO;
@@ -63,10 +70,16 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
+import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
@@ -77,9 +90,14 @@ import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+
+import antlr.collections.impl.LList;
 
 @Controller
 @RequestMapping("/bundle")
@@ -162,6 +180,24 @@ public class BundleManageController extends ControllerBase {
 	
 	@Autowired
 	private ExtraInfoDao extraInfoDao;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	@Autowired
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -621,6 +657,15 @@ public class BundleManageController extends ControllerBase {
 			bundleService.save(bundle);
 
 //			interfaceFromResource.clearBundleRequest(bundle);
+			
+			//重置设备
+			try {
+				List<String> bundleIds = new ArrayList<String>();
+				bundleIds.add(bundleId);
+				monitorLiveDeviceFeign.resetBundles(bundleIds);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to clear Resource : ", e);
 			data.put(ERRMSG, "操作失败");
@@ -648,6 +693,7 @@ public class BundleManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
+			
 			if (!bundleName.equals(bundle.getBundleName())) {
 				bundle.setBundleName(bundleName);
 			}
@@ -710,6 +756,7 @@ public class BundleManageController extends ControllerBase {
 			LOGGER.error(e.toString());
 			data.put(ERRMSG, "内部错误");
 		}
+		
 
 		return data;
 	}

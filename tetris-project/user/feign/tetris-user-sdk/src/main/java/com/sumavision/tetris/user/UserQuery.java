@@ -478,6 +478,14 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseArray(userFeign.queryUserTags(userId), UserTagsVO.class);
 	}
 	
+	public List<UserVO> findAll()throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findAll(), UserVO.class);
+	}
+	
+	public List<UserVO> findByRoleIdIn(List<Long> roleIds) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findByRoleIdIn(roleIds), UserVO.class);
+	}
+	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
 																        .setNickname("用户1")

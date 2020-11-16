@@ -797,4 +797,32 @@ public class UserQueryService {
 		return chose;
 	}
 	
+	/**
+	 * 获取所有用户<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月11日 下午2:00:03
+	 * @return List<UserBO>
+	 */
+	public List<UserBO> findAll() throws Exception{
+		List<UserVO> userVOs = userQuery.findAll();
+		
+		return transferUserVo2Bo(userVOs);
+	}
+	
+	/**
+	 * 查询角色下的用户<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月13日 下午1:21:19
+	 * @param roleIds 角色ids
+	 * @return List<UserBO>
+	 */
+	public List<UserBO> findByRoleIdsIn(List<Long> roleIds) throws Exception{
+		List<UserVO> userVOs = userQuery.findByRoleIdIn(roleIds);
+		return transferUserVo2Bo(userVOs);
+	}
+	
 }

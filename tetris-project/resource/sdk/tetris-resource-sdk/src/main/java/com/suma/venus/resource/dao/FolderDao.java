@@ -69,4 +69,6 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	 */
 	@Query(value = "SELECT * FROM folderpo WHERE parent_id=?1 AND (folder_type IS NULL OR folder_type NOT IN ('ON_DEMAND'))", nativeQuery = true)
 	public List<FolderPO> findByParentIdAndFolderTypeNotIn(Long parentId);
+	
+	public List<FolderPO> findByIdIn(Collection<Long> ids);
 }

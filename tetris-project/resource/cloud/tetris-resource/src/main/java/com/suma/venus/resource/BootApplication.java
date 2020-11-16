@@ -19,7 +19,7 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
 			   basePackages={"com.suma.venus", "com.sumavision.tetris"})
 @ServletComponentScan(basePackages={"com.suma.venus.resource.listener", "com.suma.venus", "com.sumavision.tetris"})
-@EnableFeignClients(basePackages={"com.suma.venus", "com.sumavision.tetris"})
+@EnableFeignClients(basePackages={"com.suma.venus", "com.sumavision.tetris", "com.sumavision.bvc.device.monitor.live.device"})
 @EnableEurekaClient
 @EnableScheduling
 public class BootApplication extends SpringBootServletInitializer {

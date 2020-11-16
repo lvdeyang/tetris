@@ -7,11 +7,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.hibernate.annotations.SourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -40,6 +43,7 @@ import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.lianwang.auth.AuthNotifyXml;
@@ -52,6 +56,8 @@ import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -59,11 +65,16 @@ import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.suma.venus.resource.vo.BundleVO;
+import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
+import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -125,6 +136,18 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private ChannelSchemeDao channelSchemeDao;
+	
+	@Autowired
+	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
 	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -766,45 +789,239 @@ public class BindResourceController extends ControllerBase {
 					
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
-					if (connectCenterLayerID != null) {
-						List<Long> consumeIds = new ArrayList<Long>();
-						for (UserBO userBO : userBOs) {
-							String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
-							if ("ldap".equals(userBO.getCreater())) {
-								for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
-									BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
-									if (null == bundle) {
-										continue;
-									}
-									AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-									authNotifyXml.setAuthnodeid(self.getNodeUuid());
-									authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
-									authNotifyXml.setUserid(userBO.getUserNo());
-									authNotifyXml.setOperation(entry.getValue().getDevOprType());
-									String authCode = null;
-									if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
-										authCode = entry.getValue().getDevAuthCode();
-									}
-									authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
-									// 发送消息
+
+					List<Long> consumeIds = new ArrayList<Long>();
+					for (UserBO userBO : userBOs) {
+						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
+						if ("ldap".equals(userBO.getCreater())) {
+							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
+								BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
+								if (null == bundle) {
+									continue;
+								}
+								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
+								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
+								authNotifyXml.setUserid(userBO.getUserNo());
+								authNotifyXml.setOperation(entry.getValue().getDevOprType());
+								String authCode = null;
+								if (!"remove".equalsIgnoreCase(authNotifyXml.getOperation())) {
+									authCode = entry.getValue().getDevAuthCode();
+								}
+								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
+								// 发送消息
+								if (connectCenterLayerID != null) {
 									JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
 									PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
 									
 									tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 								}
-							}else{
-								JSONObject message = new JSONObject();
-								message.put("businessType", "AuthUpdate");
-								WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
-								consumeIds.add(ws.getId());
 							}
+						}else{
+							JSONObject message = new JSONObject();
+							message.put("businessType", "AuthUpdate");
+							WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+							consumeIds.add(ws.getId());
 						}
-						websocketMessageService.consumeAll(consumeIds);
+					}
+					websocketMessageService.consumeAll(consumeIds);
+				
+					
+				}
+			} catch (Exception e) {
+				LOGGER.error("", e);
+			}
+			
+			//失去权限后停止转发
+			try {
+				List<UserBO> userBOs = userQueryService.queryUsersByRole(roleId);
+				if (toUnbindWriteCheList != null && !toUnbindWriteCheList.isEmpty()&& userBOs != null) {
+					List<String> writeUnbindChecks = new ArrayList<String>();
+					for (String writeCheck : toUnbindWriteCheList) {
+						writeUnbindChecks.add(writeCheck + "-w");
+					}
+					List<PrivilegePO> privilegePOs = privilegeDao.findByResourceIndentityIn(writeUnbindChecks);
+					Set<Long> privilegeIdSet = new HashSet<Long>();
+					if (privilegePOs != null && !privilegePOs.isEmpty()) {
+						for (PrivilegePO privilegePO : privilegePOs) {
+							privilegeIdSet.add(privilegePO.getId());
+						}
+					}
+					Set<Long> roleIdin = new HashSet<Long>();
+					List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDao.findByPrivilegeIdIn(privilegeIdSet);
+					if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+						for (RolePrivilegeMap rolePrivilegeMap : rolePrivilegeMaps) {
+							roleIdin.add(rolePrivilegeMap.getRoleId());
+						}
+					}
+					if (roleIdin != null && !roleIdin.isEmpty()) {
+						List<Long> roleIds = new ArrayList<Long>(roleIdin);
+						List<UserBO> anotherUserBOs = userQueryService.findByRoleIdsIn(roleIds);
+						userBOs.removeAll(anotherUserBOs);
+					}
+					if (userBOs != null && !userBOs.isEmpty()) {
+						List<UserBundleBO> userBundleBOs = new ArrayList<UserBundleBO>();
+						for (UserBO userBO : userBOs) {
+							UserBundleBO userBundleBO = new UserBundleBO();
+							userBundleBO.setUserId(userBO.getId());
+							userBundleBO.setBundleIds(toUnbindWriteCheList);
+							userBundleBOs.add(userBundleBO);
+						}
+						monitorLiveDeviceFeign.stopLiveByLosePrivilege(userBundleBOs);
 					}
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
 			}
+			
+			try {
+				List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+				Set<Long> serNodeIds = new HashSet<Long>();
+				if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+					for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+						serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+					}
+					SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+					List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+					Map<String, Object> local = new HashMap<String, Object>();
+					local.put("name", serNodePO.getNodeName());
+					List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+					//添加设备授权
+					Set<String> toBindBundleIds = new HashSet<String>();
+					toBindBundleIds.addAll(toBindReadCheckList);
+					toBindBundleIds.addAll(toBindWriteCheckList);
+					toBindBundleIds.addAll(toBindCloudCheckList);
+					toBindBundleIds.addAll(toBindLocalReadCheckList);
+					toBindBundleIds.addAll(toBindDownloadCheckList);
+					if (toBindBundleIds != null && !toBindBundleIds.isEmpty()) {
+						Set<Long> folderIds = new HashSet<Long>();
+	 					List<BundlePO> toBindBundlePOs = bundleDao.findByBundleIdIn(toBindBundleIds);
+						List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+						if (toBindBundlePOs != null && !toBindBundlePOs.isEmpty()) {
+							for (BundlePO bundlePO : toBindBundlePOs) {
+								folderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
+								bundlePO.setEquipFactInfo(serNodePO.getNodeName());
+								BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+								bundleVOs.add(bundleVO);
+							}
+						}
+						
+						List<FolderPO> institutions = new ArrayList<FolderPO>();
+						List<FolderPO> allFolderPOs = folderDao.findAll();
+						if(folderIds != null && !folderIds.isEmpty()){
+							List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+							if(folderPOs !=null && !folderPOs.isEmpty()){
+								for (FolderPO folderPO : folderPOs) {
+									StringBufferWrapper parentpath = new StringBufferWrapper();
+									if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
+										String[] parentPathStrings = folderPO.getParentPath().split("/"); 
+										for (int i = 1; i < parentPathStrings.length; i++) {
+											if (allFolderPOs != null && !allFolderPOs.isEmpty()) {
+												for (FolderPO allFolderPO : allFolderPOs) {
+													if(parentPathStrings[i].equals(allFolderPO.getId().toString())){
+														parentpath.append("/").append(allFolderPO.getUuid());
+													}
+												}
+											}
+										}
+									}
+									folderPO.setParentPath(parentpath.toString());
+								}
+							}
+							institutions.addAll(folderPOs);
+						}
+						
+						List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(toBindBundleIds);
+						if (bundleVOs != null && !bundleVOs.isEmpty()) {
+							for (BundleVO bundleVO : bundleVOs) {
+								List<ChannelSchemeVO> inBundleVo = new ArrayList<ChannelSchemeVO>();
+								if (channelSchemePOs != null && !channelSchemePOs.isEmpty()) {
+									for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
+										ChannelSchemeVO channelSchemeVO = ChannelSchemeVO.fromPO(channelSchemePO);
+										if (channelSchemeVO.getBundleId().equals(bundleVO.getBundleId())) {
+											channelSchemeVO.setDeviceModel(bundleVO.getDeviceModel());
+											inBundleVo.add(channelSchemeVO);
+										}
+									}
+								}
+								bundleVO.setChannels(inBundleVo);
+							}
+						}
+						PassByBO passByBO = new PassByBO();
+						Map<String, Object> pass_by_content = new HashMap<String, Object>();
+						List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+						for (int i = 0; i < serNodePOs.size(); i++) {
+							foreign.add(new HashMap<String, Object>());
+							foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+							foreign.get(i).put("institutions", institutions);
+							foreign.get(i).put("devices", toBindBundlePOs);
+							foreign.get(i).put("bindChecks", toBindChecks);
+						}
+						pass_by_content.put("cmd", "devicePermissionAdd");
+						pass_by_content.put("local", local);
+						pass_by_content.put("foreign", foreign);
+						passByBO.setPass_by_content(pass_by_content);
+						if (workNodePOs != null && !workNodePOs.isEmpty()) {
+							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+						}
+						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					}
+					
+					
+					//删除设备授权
+					Set<String> toUnBindBundleIds = new HashSet<String>();
+					toUnBindBundleIds.addAll(toUnbindReadCheckList);
+					toUnBindBundleIds.addAll(toUnbindWriteCheList);
+					toUnBindBundleIds.addAll(toUnbindCloudCheList);
+					toUnBindBundleIds.addAll(toUnbindLocalReadListCheckList);
+					toUnBindBundleIds.addAll(toUnbindDownloadCheList);
+					if (toUnBindBundleIds != null && !toUnBindBundleIds.isEmpty()) {
+						List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+						if (toUnBindBundleIds != null && !toUnBindBundleIds.isEmpty()) {
+							Iterator<String> it = toUnBindBundleIds.iterator();
+							 while(it.hasNext()){
+								 Map<String, Object> map = new HashMap<String, Object>();
+								 map.put("bundleId", it.next());
+								 devices.add(map);
+							}
+						}
+						List<SerNodeRolePermissionPO> serNodeRolePermissionPOsanother = serNodeRolePermissionDAO.findBySerNodeIdIn(serNodeIds);
+						serNodeRolePermissionPOsanother.removeAll(serNodeRolePermissionPOs);
+						Set<Long> uselesSerNodeIds = new HashSet<Long>(); 
+						if (serNodeRolePermissionPOsanother != null && !serNodeRolePermissionPOsanother.isEmpty()) {
+							for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOsanother) {
+								uselesSerNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+							}
+						}
+						List<SerNodePO> uselessserNodePOs = serNodeDao.findByIdIn(uselesSerNodeIds);
+						serNodePOs.removeAll(uselessserNodePOs);
+						PassByBO passByBO = new PassByBO();
+						Map<String, Object> pass_by_content = new HashMap<String, Object>();
+						local.put("name", serNodePO.getNodeName());
+						List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+						for (int i = 0; i < serNodePOs.size(); i++) {
+							foreign.add(new HashMap<String, Object>());
+							foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+							foreign.get(i).put("devices", devices);
+							foreign.get(i).put("unBindChecks", toUnbindChecks);
+							//取消转发的设备
+							foreign.get(i).put("toUnbindWriteCheList", toUnbindWriteCheList);
+						}
+						pass_by_content.put("cmd", "devicePermissionRemove");
+						pass_by_content.put("local", local);
+						pass_by_content.put("foreign", foreign);
+						passByBO.setPass_by_content(pass_by_content);
+						if (workNodePOs != null && !workNodePOs.isEmpty()) {
+							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+						}
+						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					}
+				}
+				
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+			}
+			
 
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
