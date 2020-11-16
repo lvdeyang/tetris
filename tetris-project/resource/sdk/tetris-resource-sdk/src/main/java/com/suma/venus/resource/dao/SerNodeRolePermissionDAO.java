@@ -13,5 +13,7 @@ public interface SerNodeRolePermissionDAO extends CommonDao<SerNodeRolePermissio
 	public List<SerNodeRolePermissionPO> findBySerNodeIdIn(Collection<Long> serNodeIds);
 	
 	public List<SerNodeRolePermissionPO> findByRoleId(Long roleId);
+	
+	public List<SerNodeRolePermissionPO> findBySerNodeId(Long serNodeId);
 
 }

@@ -40,6 +40,9 @@ public class SerNodeVO {
 	
 	private ConnectionStatus operate;
 	
+	/**连接状态*/
+	private ConnectionStatus status;
+	
 	private String BusinessRoles;
 
 	public static SerNodeVO transFromPO(SerNodePO po) {
@@ -66,6 +69,14 @@ public class SerNodeVO {
 		}
 
 		return vos;
+	}
+
+	public ConnectionStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ConnectionStatus status) {
+		this.status = status;
 	}
 
 	public String getBusinessRoles() {

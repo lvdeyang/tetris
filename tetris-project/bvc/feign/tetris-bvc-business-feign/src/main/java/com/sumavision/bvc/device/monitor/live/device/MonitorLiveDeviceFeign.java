@@ -44,5 +44,5 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/reset/bundles", method = RequestMethod.POST)
 	public JSONObject resetBundles(
-			@RequestParam(value="bundleIds")List<Long> bundleIds) throws Exception;
+			@RequestParam(value="bundleIds")List<String> bundleIds) throws Exception;
 }

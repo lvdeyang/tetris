@@ -1,4 +1,4 @@
-package com.suma.venus.resource.controller.api.resource;
+package com.suma.venus.resource.service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,38 +9,44 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonArray;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
+import com.suma.venus.resource.base.bo.UnbindResouceBO;
+import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
+import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
-@Controller
-@RequestMapping(value = "/api/thirdpart/bqlw")
-public class ApiThirdpartBqlw extends ControllerBase{
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class ApiThirdpartBqlwService extends ControllerBase{
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
@@ -56,7 +62,19 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	
 	@Autowired
 	private ChannelSchemeDao channelSchemeDao;
-
+	
+	@Autowired
+	private UserQueryService userQueryService;
+	
+	@Autowired
+	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
 	/**
 	 * 查本域以及外域信息<br/>
 	 * <b>作者:</b>lqxuhv<br/>
@@ -65,9 +83,6 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @return data{"local", serNodeVO 本域信息
 	 *               "foreign", serNodeVOs 外域信息}
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/query/server/node/info")
 	public Map<String, Object> queryServerNodeInfo()throws Exception{
 		Map<String, Object> data = makeAjaxData();
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
@@ -87,9 +102,6 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @param request foreign:[{name:'外域名称'}]
 	 * @return null
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/foreign/server/node/off")
 	public Object foreignServerNodeOff(HttpServletRequest request)throws Exception{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		JSONArray foreignNames = wrapper.getJSONArray("foreign");
@@ -100,9 +112,10 @@ public class ApiThirdpartBqlw extends ControllerBase{
 			serverNodeName.add(name);
 		}
 		List<SerNodePO> serNodePOs = serNodeDao.findByNodeNameIn(serverNodeName);
-		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
+		if (serNodePOs != null && !serNodePOs.isEmpty()) {
 			for (SerNodePO serNodePO : serNodePOs) {
 				serNodePO.setOperate(ConnectionStatus.OFF);
+				serNodePO.setStatus(ConnectionStatus.OFF);
 			}
 		}
 		serNodeDao.save(serNodePOs);
@@ -117,9 +130,6 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * <b>日期：</b>2020年11月4日 下午8:27:24
 	 * @param request
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/foreign/server/node/on")
 	public Object foreignServerNodeOn(HttpServletRequest request) throws Exception{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		JSONArray foreign = wrapper.getJSONArray("foreign");
@@ -137,7 +147,8 @@ public class ApiThirdpartBqlw extends ControllerBase{
 		List<SerNodePO> serNodePOs = serNodeDao.findByNodeNameIn(serverNodeName);
 		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
 			for (SerNodePO serNodePO : serNodePOs) {
-				serNodePO.setOperate(ConnectionStatus.ON);
+				serNodePO.setOperate(ConnectionStatus.DONE);
+				serNodePO.setStatus(ConnectionStatus.ON);
 			}
 		}
 		serNodeDao.save(serNodePOs);
@@ -189,6 +200,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 						}else {
 							folderPO.setParentId(-1l);
 						}
+						folderPO.setSourceType(SOURCE_TYPE.EXTERNAL);
 					}
 				}
 			}
@@ -213,6 +225,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 				}
 			}
 			BundlePO bundlePO = bundleVO.toPO();
+			bundlePO.setSourceType(SOURCE_TYPE.EXTERNAL);
 			bundlePOs.add(bundlePO);
 			if (existedBundlePOs != null && !existedBundlePOs.isEmpty()) {
 				for (BundlePO bundlePO1 : existedBundlePOs) {
@@ -268,7 +281,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 		channelSchemeDao.save(channelSchemePOs);
 		return null;
 	}
-	
+
 	/**
 	 * 添加设备授权通知<br/>
 	 * <b>作者:</b>lqxuhv<br/>
@@ -277,22 +290,47 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/device/permission/add")
 	public Object devicePermissionAdd(HttpServletRequest request)throws Exception{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
 		Set<String> serverNodeName = new HashSet<String>();
+		List<String> toBindChecks = new ArrayList<String>();
 		for (int i = 0; i < foreign.size(); i++) {
 			JSONObject jsonObject = foreign.getJSONObject(i);
 			institutionsArray.add(foreign.getJSONObject(i).getJSONArray("institutions"));
 			devicesaArray.add(foreign.getJSONObject(i).getJSONArray("devices"));
 			String name = jsonObject.getString("name");
+			toBindChecks = JSONObject.parseArray(jsonObject.getJSONArray("bindChecks").toJSONString(), String.class);
 			serverNodeName.add(name);
 		}
+		
+		//授权添加
+		List<PrivilegePO> privilegePOs  = privilegeDAO.findByResourceIndentityIn(toBindChecks);
+		List<String> exiStrings = new ArrayList<String>();
+		if (toBindChecks != null && !toBindChecks.isEmpty()) {
+			for (String toBindCheck : toBindChecks) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						if (privilegePO.getResourceIndentity().equals(toBindCheck)) {
+							exiStrings.add(toBindCheck);
+						}
+					}
+				}
+			}
+		}
+		toBindChecks.removeAll(exiStrings);
+		List<PrivilegePO> newprivilegePos = new ArrayList<PrivilegePO>();
+		if (toBindChecks != null && !toBindChecks.isEmpty()) {
+			for (String toBindCheck : toBindChecks) {
+				PrivilegePO privilegePO = new PrivilegePO();
+				privilegePO.setResourceIndentity(toBindCheck);
+				newprivilegePos.add(privilegePO);
+			}
+		}
+		privilegeDAO.save(newprivilegePos);
+		
 		//外域连接开启
 		List<SerNodePO> serNodePOs = serNodeDao.findByNodeNameIn(serverNodeName);
 		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
@@ -356,6 +394,8 @@ public class ApiThirdpartBqlw extends ControllerBase{
 		folderDao.save(folderPOs);
 		
 		//外域下设备信息
+		Set<String> bundleIds = new HashSet<String>();
+		
 		List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 		List<BundlePO> removeBundlePOs = new ArrayList<BundlePO>();
 		List<BundlePO> existedBundlePOs =  bundleDao.findAll(); 
@@ -373,6 +413,9 @@ public class ApiThirdpartBqlw extends ControllerBase{
 				}
 			}
 			BundlePO bundlePO = bundleVO.toPO();
+			
+			bundleIds.add(bundlePO.getBundleId());
+			
 			bundlePOs.add(bundlePO);
 			if (existedBundlePOs != null && !existedBundlePOs.isEmpty()) {
 				for (BundlePO bundlePO1 : existedBundlePOs) {
@@ -426,6 +469,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 		newchannelSchemePOs.remove(removeChannelSchemePOs);
 		channelSchemeDao.save(newchannelSchemePOs);
 		channelSchemeDao.save(channelSchemePOs);
+		
 		return null;
 	}
 	
@@ -438,21 +482,67 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/device/permission/remove")
 	public Object devicePermissionRemove(HttpServletRequest request)throws Exception{
 		JSONHttpServletRequestWrapper wrapper =new JSONHttpServletRequestWrapper(request);
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> deleteBundleIds = new HashSet<String>();
 		JSONArray devicesArray = new JSONArray();
+		List<String> toUnbindChecks = new ArrayList<String>();
+		List<String> toUnbindWriteCheList = new ArrayList<String>();
+		
 		for (int i = 0; i < foreign.size(); i++) {
+			JSONObject jsonObject = foreign.getJSONObject(i);
+			
 			devicesArray.add(foreign.getJSONObject(i).getJSONArray("devices"));
+			toUnbindChecks = JSONObject.parseArray(jsonObject.getJSONArray("unBindChecks").toJSONString(), String.class);
+			toUnbindWriteCheList = JSONObject.parseArray(jsonObject.getString("toUnbindWriteCheList").toString(),String.class);
 		}
+		
+		//删除权限和授权
+		List<PrivilegePO> unbindprivilegePOs = privilegeDAO.findByResourceIndentityIn(toUnbindChecks);
+		Set<Long> privilegeIds = new HashSet<Long>();
+		if (unbindprivilegePOs != null && !unbindprivilegePOs.isEmpty()) {
+			for (PrivilegePO privilegePO : unbindprivilegePOs) {
+				privilegeIds.add(privilegePO.getId());
+			}
+			List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegeIds);
+			rolePrivilegeMapDAO.delete(rolePrivilegeMaps);
+			privilegeDAO.delete(unbindprivilegePOs);
+		}
+		
+		
+		//失去权限后停止转发
+		List<UserBO> userBOs = userQueryService.findAll();
+		if (toUnbindWriteCheList != null && !toUnbindWriteCheList.isEmpty()&& userBOs != null) {
+			List<UserBundleBO> userBundleBOs = new ArrayList<UserBundleBO>();
+			for (UserBO userBO : userBOs) {
+				UserBundleBO userBundleBO = new UserBundleBO();
+				userBundleBO.setUserId(userBO.getId());
+				userBundleBO.setBundleIds(toUnbindWriteCheList);
+				userBundleBOs.add(userBundleBO);
+			}
+			monitorLiveDeviceFeign.stopLiveByLosePrivilege(userBundleBOs);
+		}
+		
+		//删除没有权限的设备
 		for (int i = 0; i < devicesArray.size(); i++) {
 			String bundleId = devicesArray.getJSONObject(i).getString("bundleId");
 			deleteBundleIds.add(bundleId);
 		}
+		List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(deleteBundleIds);
+		Set<String> bindBundleIds = new HashSet<String>();
+		if (deleteBundleIds != null && !deleteBundleIds.isEmpty()) {
+			for (String deleteBundleId : deleteBundleIds) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						if (deleteBundleId.equals(privilegePO.getResourceIndentity().split("-")[0])) {
+							bindBundleIds.add(deleteBundleId);
+						}
+					}
+				}
+			}
+		}
+		deleteBundleIds.removeAll(bindBundleIds);
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(deleteBundleIds);
 		bundleDao.delete(bundlePOs);
 		return null;
@@ -467,9 +557,6 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @return
 	 * @throws Exception
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/device/permission/change")
 	public Object devicePermissionChange(HttpServletRequest request)throws Exception{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
@@ -486,7 +573,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 				bundleVOs.add(bundleVO);
 			}
 		}
-		folderUpdata(institutions);
+		folderUpdate(institutions);
 		List<FolderPO> folderPOs = folderDao.findAll();
 		Set<String> bundleIds = new HashSet<String>();
 		List<BundlePO> changeBundlePOs = new ArrayList<BundlePO>();
@@ -528,7 +615,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @param institutionsArray
 	 * @throws Exception
 	 */
-	public void folderUpdata(JSONArray institutionsArray)throws Exception{
+	public Object folderUpdate(JSONArray institutionsArray)throws Exception{
 		List<FolderPO> folderPOs = new ArrayList<FolderPO>();
 		List<FolderPO> removeFolderPOs = new ArrayList<FolderPO>();
 		for (int i = 0; i < institutionsArray.size(); i++) {
@@ -580,6 +667,7 @@ public class ApiThirdpartBqlw extends ControllerBase{
 			}
 		}
 		folderDao.save(folderPOs);
+		return null;
 	}
 	
 	//device/status/change
@@ -592,9 +680,6 @@ public class ApiThirdpartBqlw extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/device/status/change")
 	public Object deviceStatusChange(HttpServletRequest request)throws Exception{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
@@ -628,4 +713,23 @@ public class ApiThirdpartBqlw extends ControllerBase{
 		bundleDao.save(bundlePOs);
 		return null;
 	}
+	
+	/**
+	 * 设备绑定权限<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月11日 上午11:25:47
+	 */
+	private boolean bindResourceCodes(Long roleId, List<String> toBindChecks) throws Exception {
+		if (!toBindChecks.isEmpty()) {
+			RoleAndResourceIdBO bo = new RoleAndResourceIdBO();
+			bo.setRoleId(roleId);
+			bo.setResourceCodes(toBindChecks);
+			
+			return userQueryService.bindRolePrivilege(bo);
+		}
+		return true;
+	}
+	
 }

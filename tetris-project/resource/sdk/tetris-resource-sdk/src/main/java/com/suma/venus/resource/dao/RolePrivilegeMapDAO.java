@@ -23,4 +23,6 @@ public interface RolePrivilegeMapDAO extends CommonDao<RolePrivilegeMap>{
 	@Query(value = "SELECT m.* from role_privilege_map m LEFT JOIN privilegepo p on m.privilege_id = p.id where p.resource_indentity in ?1", nativeQuery = true)
 	public List<RolePrivilegeMap> findByResourceIdIn(Collection<String> resourceIds);
 	
+	@Query(value = "SELECT m.* from role_privilege_map m LEFT JOIN privilegepo p on m.privilege_id = p.id where m.role_id = ?1 and p.resource_indentity in ?2", nativeQuery = true)
+	public List<RolePrivilegeMap> findByRoleIdAndResourceIdIn(Long roleId, Collection<String> resourceIds);
 }

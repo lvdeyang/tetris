@@ -59,7 +59,7 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 	}
 
 	public enum ConnectionStatus{
-		ON,OFF
+		ON,OFF,DONE
 	}
 	
 	public ConnectionStatus getStatus() {

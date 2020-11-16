@@ -18,16 +18,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
+import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
+import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.controller.FolderManageController;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
@@ -39,6 +46,7 @@ import com.suma.venus.resource.vo.SerNodeVO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 
@@ -77,25 +85,25 @@ public class OutlandService extends ControllerBase{
 	@Autowired
 	private BundleService bundleService;
 	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
 	/**
-	 * 创建本域<br/>
+	 * 查询本域信息<br/>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月6日 下午4:38:02
-	 * @param name 本域名称
-	 * @param password 本域口令
-	 * @throws Exception
+	 * SerNodeVO 本域信息
 	 */
-	public SerNodeVO createrInland(String name,String password)throws Exception{
+	public SerNodeVO queryInland()throws Exception{
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
-		SerNodePO newserNodePO = new SerNodePO();
-		if (serNodePO == null) {
-			newserNodePO.setNodeName(name);
-			newserNodePO.setPassword(password);
-			newserNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
-			serNodeDao.save(newserNodePO);
-		}else throw new Exception("仅能存在一个本域信息");
-		SerNodeVO serNodeVO = SerNodeVO.transFromPO(newserNodePO);
+		SerNodeVO serNodeVO = new SerNodeVO();
+		if (serNodePO != null) {
+			serNodeVO = SerNodeVO.transFromPO(serNodePO);
+		}
 		return serNodeVO;
 	}
 	
@@ -111,11 +119,27 @@ public class OutlandService extends ControllerBase{
 	 */
 	public SerNodeVO inland(String name,String password)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
+		if(serNodePO == null){
+			SerNodePO newserNodePO = new SerNodePO();
+			newserNodePO.setNodeName(name);
+			newserNodePO.setPassword(password);
+			newserNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
+			serNodePO = newserNodePO;
+		}
 		String oldName = serNodePO.getNodeName();
 		serNodePO.setNodeName(name);
 		serNodePO.setPassword(password);
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
+		
+		List<SerNodePO> serNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
+		if (serNodePOs != null && !serNodePOs.isEmpty()) {
+			for (SerNodePO forserNodePO : serNodePOs) {
+				forserNodePO.setStatus(ConnectionStatus.OFF);
+				forserNodePO.setOperate(ConnectionStatus.OFF);
+			}
+		}
 		
 		//发送消息
 		PassByBO passByBO = new PassByBO();
@@ -157,18 +181,18 @@ public class OutlandService extends ControllerBase{
 				}
 				List<SystemRoleVO> systemRoleVOs= systemRoleQuery.queryAllRoles();
 				for (SerNodeVO serNodeVO : serNodeVOs) {
-					List<SystemRoleVO> bindRoles = new ArrayList<SystemRoleVO>();
+					List<SystemRoleVO> folderSystemRoleVOs = new ArrayList<SystemRoleVO>();
 					for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
 						if(serNodeVO.getId().equals(serNodeRolePermissionPO.getSerNodeId())){
 							for (SystemRoleVO systemRoleVO : systemRoleVOs) {
-								if(serNodeRolePermissionPO.getRoleId().equals(systemRoleVO.getId())){
-									bindRoles.add(systemRoleVO);
+								if(serNodeRolePermissionPO.getRoleId().toString().equals(systemRoleVO.getId())){
+									folderSystemRoleVOs.add(systemRoleVO);
 									break;
 								}
 							}
 						}
 					}
-					serNodeVO.setBusinessRoles(JSON.toJSONString(bindRoles));
+					serNodeVO.setBusinessRoles(JSON.toJSONString(folderSystemRoleVOs));
 				}
 			}
  		}
@@ -184,19 +208,27 @@ public class OutlandService extends ControllerBase{
 	 * @param name 外域名称
 	 * @param password 外域口令
 	 * @param roleIds 外域绑定的角色id
-	 * @return data(成功时返回外域名称，失败时返回错误信息)
+	 * @return data(成功时返回外域信息，失败时返回错误信息)
 	 */
-	public Map<String, Object> addOutland(String name,String password,List<Long> roleIds)throws Exception{
+	public Map<String, Object> addOutland(String name,String password,String roleIds)throws Exception{
 		Map<String, Object> data= new HashMap<String, Object>();
 		try {
 			SerNodePO serNodePO = new SerNodePO();
 			serNodePO.setNodeName(name);
 			serNodePO.setPassword(password);
-			serNodePO.setOperate(ConnectionStatus.OFF);;
+			serNodePO.setSourceType(SOURCE_TYPE.EXTERNAL);
+			serNodePO.setOperate(ConnectionStatus.OFF);
+			serNodePO.setStatus(ConnectionStatus.OFF);
 			serNodeDao.save(serNodePO);
+			List<Long> roleIDs = new ArrayList<Long>();
+			String[] roleString = roleIds.split(",");
+			for (int i = 0; i < roleString.length; i++) {
+				Long roleId = Long.valueOf(roleString[i]);
+				roleIDs.add(roleId);
+			}
 			List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = new ArrayList<SerNodeRolePermissionPO>();
 			if (roleIds != null && !roleIds.isEmpty()) {
-				for (Long roleId : roleIds) {
+				for (Long roleId : roleIDs) {
 					SerNodeRolePermissionPO serNodeRolePermissionPO = new SerNodeRolePermissionPO();
 					serNodeRolePermissionPO.setRoleId(roleId);
 					serNodeRolePermissionPO.setSerNodeId(serNodePO.getId());
@@ -204,6 +236,8 @@ public class OutlandService extends ControllerBase{
 				}
 			}
 			serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
+			
+			SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 			
 			List<SerNodePO> localSerNodePO = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 			SerNodeVO localSerNodeVO = new SerNodeVO();
@@ -214,6 +248,7 @@ public class OutlandService extends ControllerBase{
 			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
 			Map<String, Object> pass_by_content = new HashMap<String, Object>();
 			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			foreign.add(new HashMap<String, Object>());
 			foreign.get(0).put("name", name);
 			foreign.get(0).put("password", password);
 			foreign.get(0).put("operate", ConnectionStatus.ON);
@@ -226,7 +261,7 @@ public class OutlandService extends ControllerBase{
 			}
 			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 			
-			data.put("OutlandName", serNodePO.getNodeName());
+			data.put("serNodeVO", serNodeVO);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			e.printStackTrace();
@@ -246,18 +281,30 @@ public class OutlandService extends ControllerBase{
 	 */
 	public Object queryOutlandBundle(Long serNodeId)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
-		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+//		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+		List<BundlePO> bundlePOs = bundleDao.findAll();
 		Set<Long> folderIds = new HashSet<Long>();
 		if (bundlePOs != null && !bundlePOs.isEmpty()) {
 			for (BundlePO bundlePO : bundlePOs) {
-				folderIds.add(bundlePO.getFolderId());
+				folderIds.add(bundlePO.getFolderId()==null ? 0:bundlePO.getFolderId());
 			}
 		}
 		List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-		List<FolderTreeVO> treefolder = initTree();
-		List<FolderTreeVO> folder = new ArrayList<FolderTreeVO>();
 		if (folderPOs != null && !folderPOs.isEmpty()) {
 			for (FolderPO folderPO : folderPOs) {
+				if (folderPO.getParentPath() != null && !folderPO.getParentPath().equals("")) {
+					String[] parentPath = folderPO.getParentPath().split("/");
+					for (int i = 1; i < parentPath.length; i++) {
+						folderIds.add(Long.valueOf(parentPath[i]));
+					}
+				}
+			}
+		}
+		List<FolderPO> relateFolderPOs = folderDao.findByIdIn(folderIds);
+		List<FolderTreeVO> treefolder = initTree(relateFolderPOs);
+		List<FolderTreeVO> folder = new ArrayList<FolderTreeVO>();
+		if (folderPOs != null && !folderPOs.isEmpty()) {
+			for (FolderPO folderPO : relateFolderPOs) {
 				if (treefolder != null && !treefolder.isEmpty()) {
 					for (FolderTreeVO folderTreeVO : treefolder) {
 						if (folderPO.getId().equals(folderTreeVO.getId())) {
@@ -267,7 +314,7 @@ public class OutlandService extends ControllerBase{
 				}
 			}
 		}
-		return folder;
+		return treefolder;
 	}
 	
 	/**
@@ -298,6 +345,7 @@ public class OutlandService extends ControllerBase{
 		List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
 		Map<String, Object> pass_by_content = makeAjaxData();
 		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+		foreign.add(new HashMap<String, Object>());
 		foreign.get(0).put("name",serNodeVO.getNodeName());
 		foreign.get(0).put("operate", ConnectionStatus.OFF);
 		local.put("name", localSerNodeVO.getNodeName());
@@ -322,14 +370,35 @@ public class OutlandService extends ControllerBase{
 	 * @param password 外域口令
 	 * @return serNodeVO 外域信息
 	 */
-	public Object outlandChange(Long id,String name,String password)throws Exception{
+	public Object outlandChange(Long id,String name,String password,String roleIds)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		String oldname  = serNodePO.getNodeName();
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		serNodePO.setPassword(password);
-		serNodePO.setOperate(ConnectionStatus.ON);
+		serNodePO.setNodeName(name);
+		serNodePO.setOperate(ConnectionStatus.OFF);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		serNodeDao.save(serNodePO);
+		
+		List<SerNodeRolePermissionPO> oldserNodeRolePermissionPOs = serNodeRolePermissionDAO.findBySerNodeId(id);
+		serNodeRolePermissionDAO.delete(oldserNodeRolePermissionPOs);
+		
+		List<Long> roleIDs = new ArrayList<Long>();
+		String[] roleString = roleIds.split(",");
+		for (int i = 0; i < roleString.length; i++) {
+			Long roleId = Long.valueOf(roleString[i]);
+			roleIDs.add(roleId);
+		}
+		List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = new ArrayList<SerNodeRolePermissionPO>();
+		if (roleIds != null && !roleIds.isEmpty()) {
+			for (Long roleId : roleIDs) {
+				SerNodeRolePermissionPO serNodeRolePermissionPO = new SerNodeRolePermissionPO();
+				serNodeRolePermissionPO.setRoleId(roleId);
+				serNodeRolePermissionPO.setSerNodeId(serNodePO.getId());
+				serNodeRolePermissionPOs.add(serNodeRolePermissionPO);
+			}
+		}
+		serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
 		
 		//发送消息
 		PassByBO passByBO = new PassByBO();
@@ -338,10 +407,11 @@ public class OutlandService extends ControllerBase{
 		Map<String, Object> local = new HashMap<String, Object>();
 		local.put("name", localSerNodePOs.get(0).getNodeName());
 		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+		foreign.add(new HashMap<String, Object>());
 		foreign.get(0).put("oldName", oldname);
 		foreign.get(0).put("newName", name);
 		foreign.get(0).put("password", password);
-		foreign.get(0).put("operate", ConnectionStatus.ON);
+		foreign.get(0).put("operate", ConnectionStatus.OFF);
 		
 		pass_by_content.put("cmd", "foreignEdit");
 		pass_by_content.put("local", local);
@@ -377,9 +447,10 @@ public class OutlandService extends ControllerBase{
 		Map<String, Object> local = new HashMap<String, Object>();
 		local.put("name", localSerNodePOs.get(0).getNodeName());
 		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+		foreign.add(new HashMap<String, Object>());
 		foreign.get(0).put("name", serNodePO.getNodeName());
 		foreign.get(0).put("operate", ConnectionStatus.ON);
-		pass_by_content.put("cmd", "foreignEdit");
+		pass_by_content.put("cmd", "foreignOn");
 		pass_by_content.put("local", local);
 		pass_by_content.put("foreign", foreign);
 		passByBO.setPass_by_content(pass_by_content);
@@ -390,20 +461,225 @@ public class OutlandService extends ControllerBase{
 		return serNodeVO;
 	}
 	
+	/**
+	 * 删除外域<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 上午10:59:22
+	 * @param id 外域id
+	 */
+	public Object outlandDelete(Long id)throws Exception{
+		SerNodePO serNodePO = serNodeDao.findOne(id);
+		if (serNodePO != null) {
+			serNodeDao.delete(serNodePO);
+		}
+		return null;
+	}
 	
-	private List<FolderTreeVO> initTree(){
+	/**
+	 * 外域设备授权本域用户查询<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月15日 下午3:15:36
+	 * @param roleId 角色id
+	 * @param serNodeId 外域id
+	 * @param deviceModel 设备类型
+	 * @param keyword 关键字
+	 * @param folderId 目录id
+	 * @param pageNum 页码
+	 * @param countPerPage 每页数量
+	 * @return 
+	 */
+	public Map<String,Object> queryOutlandBundlePrivilege(
+			Long roleId,
+			Long serNodeId, 
+			String deviceModel, 
+			String keyword, 
+			Long folderId, 
+			int pageNum, 
+			int countPerPage) throws Exception{
 		Map<String, Object> data = makeAjaxData();
-		List<FolderPO> rootFolders = folderService.findByParentPath(null);
-		if (rootFolders.isEmpty()) {
-			data.put(ERRMSG, "数据库错误：不存在根节点");
+		try {
+			List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
+			SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
+			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId);
+			Set<String> bundleIds = new HashSet<String>();
+			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+			Set<String> reeourceStrings = new HashSet<String>();
+			if (bundlePOs !=  null&&!bundlePOs.isEmpty()) {
+				for (BundlePO bundlePO : bundlePOs) {
+					bundleIds.add(bundlePO.getBundleId());
+				}
+				bundleIdsall.retainAll(bundleIds);
+				List<BundlePO> selectBundlePOs = bundleDao.findByBundleIdIn(bundleIdsall);
+				if (selectBundlePOs != null && !selectBundlePOs.isEmpty() ) {
+					for (BundlePO bundlePO : selectBundlePOs) {
+						reeourceStrings.add(bundlePO.getBundleId() + "-r");
+						reeourceStrings.add(bundlePO.getBundleId() + "-w");
+						reeourceStrings.add(bundlePO.getBundleId() + "-c");
+						reeourceStrings.add(bundlePO.getBundleId() + "-lr");
+						reeourceStrings.add(bundlePO.getBundleId() + "-d");
+					}
+					List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityIn(reeourceStrings);
+					Set<String> resourcePrivilege = new HashSet<String>();
+					if (privilegePOs != null && !privilegePOs.isEmpty()) {
+						for (PrivilegePO privilegePO : privilegePOs) {
+							resourcePrivilege.add(privilegePO.getResourceIndentity());
+						}
+					}
+					ResourceIdListBO bindResourceIdBO = queryResourceByRoleId(roleId);
+					if (null != bindResourceIdBO && null != bindResourceIdBO.getResourceCodes() && !bindResourceIdBO.getResourceCodes().isEmpty()) {
+						Set<String> privilegeCodes = new HashSet<String>(bindResourceIdBO.getResourceCodes());
+						for (BundlePO bundlePO : selectBundlePOs) {
+							boolean hasReadPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-r");
+							boolean hasWritePrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-w");
+							boolean hasCloudPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-c");
+							boolean hasLocalReadPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-lr");
+							boolean hasDownloadPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-d");
+							
+							boolean canReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-r");
+							boolean canWritePrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-w");
+							boolean canCloudPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-c");
+							boolean canLocalReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-lr");
+							boolean canDownloadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-d");
+							BundlePrivilegeBO bundlePrivilege = getBundlePrivilegefromPO(bundlePO);
+							if (hasReadPrivilege) {
+								bundlePrivilege.setHasReadPrivilege(true);
+							}
+							if (hasWritePrivilege) {
+								bundlePrivilege.setHasWritePrivilege(true);
+							}
+							if (hasCloudPrivilege) {
+								bundlePrivilege.setHasCloudPrivilege(true);
+							}
+							if (hasLocalReadPrivilege) {
+								bundlePrivilege.setHasLocalReadPrivilege(true);
+							}
+							if (hasDownloadPrivilege) {
+								bundlePrivilege.setHasDownloadPrivilege(true);
+							}
+							//-------------*-*---------------------
+							if (canReadPrivilege) {
+								bundlePrivilege.setCanReadPrivilege(true);;
+							}
+							if (canWritePrivilege) {
+								bundlePrivilege.setCanWritePrivilege(true);
+							}
+							if (canCloudPrivilege) {
+								bundlePrivilege.setCanCloudPrivilege(true);
+							}
+							if (canLocalReadPrivilege) {
+								bundlePrivilege.setCanLocalReadPrivilege(true);
+							}
+							if (canDownloadPrivilege) {
+								bundlePrivilege.setCanDownloadPrivilege(true);
+							}
+							bundlePrivileges.add(bundlePrivilege);
+						}
+					}else {
+						for (BundlePO bundlePO : selectBundlePOs) {
+							boolean canReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-r");
+							boolean canWritePrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-w");
+							boolean canCloudPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-c");
+							boolean canLocalReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-lr");
+							boolean canDownloadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-d");
+							
+							BundlePrivilegeBO bundlePrivilege = getBundlePrivilegefromPO(bundlePO);
+							if (canReadPrivilege) {
+								bundlePrivilege.setCanReadPrivilege(true);;
+							}
+							if (canWritePrivilege) {
+								bundlePrivilege.setCanWritePrivilege(true);
+							}
+							if (canCloudPrivilege) {
+								bundlePrivilege.setCanCloudPrivilege(true);
+							}
+							if (canLocalReadPrivilege) {
+								bundlePrivilege.setCanLocalReadPrivilege(true);
+							}
+							if (canDownloadPrivilege) {
+								bundlePrivilege.setCanDownloadPrivilege(true);
+							}
+							bundlePrivileges.add(bundlePrivilege);
+						}
+					}
+					return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
+				}
+				
+			}
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "查询错误");
+			return data;
 		}
-//		FolderPO rootFolderPO = rootFolders.get(0);
+		
+		return data;
+	}
+ 	
+	/**
+	 * 外域设备授权本域用户修改<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月15日 下午5:11:29
+	 * @param roleId 角色id
+	 * @param preBundlePrivilege 修改前的权限状态 
+	 * @param bundleprivilege 修改后的权限状态
+	 * @return data 错误信息
+	 */
+	public Map<String, Object> submitBundlePrivilege(Long roleId, List<String> preBundlePrivilege, List<String> bundleprivilege)throws Exception{
+		Map<String, Object> data = makeAjaxData();
+		try {
+			if (preBundlePrivilege != null && !preBundlePrivilege.isEmpty()) {
+				List<String> unbindprivilege = preBundlePrivilege;
+				unbindprivilege.removeAll(bundleprivilege);
+				List<RolePrivilegeMap> unbindPermission = rolePrivilegeMapDAO.findByRoleIdAndResourceIdIn(roleId, unbindprivilege);
+				rolePrivilegeMapDAO.delete(unbindPermission);
+			}
+			if (bundleprivilege != null && !bundleprivilege.isEmpty()) {
+				List<String> bindPrivilege = bundleprivilege;
+				bindPrivilege.removeAll(preBundlePrivilege);
+				
+				List<RolePrivilegeMap> newbindPermission = new ArrayList<RolePrivilegeMap>();
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityIn(bindPrivilege);
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						RolePrivilegeMap rolePrivilegeMap = new RolePrivilegeMap();
+						rolePrivilegeMap.setPrivilegeId(privilegePO.getId());
+						rolePrivilegeMap.setRoleId(roleId);
+						newbindPermission.add(rolePrivilegeMap);
+					}
+				}
+				rolePrivilegeMapDAO.save(newbindPermission);
+			}
+		} catch (Exception e) {
+			LOGGER.error("", e);
+			data.put(ERRMSG, "权限修改失败");
+			return data;
+		}
+		return data;
+	}
+	
+	private List<FolderTreeVO> initTree(List<FolderPO> relateFolderPOs){
+		Map<String, Object> data = makeAjaxData();
+		List<FolderPO> rootFolders = new ArrayList<FolderPO>();;
+		if (relateFolderPOs != null && !relateFolderPOs.isEmpty()) {
+			for (FolderPO folderPO : relateFolderPOs) {
+				if (folderPO.getParentPath() == null || folderPO.getParentPath().equals("")) {
+					rootFolders.add(folderPO);
+				}
+			}
+		}
 		List<FolderTreeVO> tree = new LinkedList<FolderTreeVO>();
-		for (FolderPO rootFolderPO : rootFolders) {
-			FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);
-			rootTreeVO.setChildren(createChildrenTreeNodes(rootFolderPO.getId()));
-			tree.add(rootTreeVO);
+		if (rootFolders != null && !rootFolders.isEmpty()) {
+			for (FolderPO rootFolderPO : rootFolders) {
+				FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);
+				rootTreeVO.setChildren(createChildrenTreeNodes(rootFolderPO.getId()));
+				tree.add(rootTreeVO);
+			}
 		}
+		
 		data.put("tree", tree);
 		return tree;
 	}
@@ -446,21 +722,6 @@ public class OutlandService extends ControllerBase{
 				children.add(createBundleNode(parentId, bundle));
 			}
 
-			// 添加子用户节点
-//			try {
-//				FolderPO folderPO = folderDao.findOne(parentId);
-//				/**Map<String, List<UserBO>> usersMap = userFeign.queryUsersByFolderUuid(folderPO.getUuid());
-//				for (UserBO userBO : usersMap.get("users")) {
-//					children.add(createUserNode(parentId, userBO));
-//				}*/
-//				List<FolderUserMap> userBOs = folderUserMapDao.findByFolderUuidOrderByFolderIndex(folderPO.getUuid());
-//				for (FolderUserMap userBO : userBOs) {
-//					children.add(createUserNode(parentId, userBO));
-//				}
-//			} catch (Exception e) {
-//				LOGGER.error("", e);
-//			}
-
 		} catch (Exception e) {
 			LOGGER.error("Fail to creat folder tree children", e);
 		}
@@ -481,16 +742,54 @@ public class OutlandService extends ControllerBase{
 		return bundleNodeVO;
 	}
 	
-	private FolderTreeVO createUserNode(Long parentId, FolderUserMap user) {
-		FolderTreeVO userNodeVO = new FolderTreeVO();
-		userNodeVO.setId(user.getUserId());
-		userNodeVO.setParentId(parentId);
-		userNodeVO.setName(user.getUserName());
-		userNodeVO.setBeFolder(false);
-		userNodeVO.setUsername(user.getUserName());
-		userNodeVO.setFolderIndex(user.getFolderIndex() == null ? null: user.getFolderIndex().intValue());
-		userNodeVO.setNodeType("USER");
-		userNodeVO.setSystemSourceType(user.getCreator().equals("ldap") ? false : true);
-		return userNodeVO;
+	private ResourceIdListBO queryResourceByRoleId(Long roleId) throws Exception{
+		
+		List<PrivilegePO> privileges = privilegeDAO.findByRoleId(roleId);
+		
+		ResourceIdListBO bo = new ResourceIdListBO();
+		bo.setResourceCodes(new ArrayList<String>());
+		for(PrivilegePO privilege: privileges){
+			bo.getResourceCodes().add(privilege.getResourceIndentity());
+		}
+		
+		return bo;
 	}
+	
+	private BundlePrivilegeBO getBundlePrivilegefromPO(BundlePO po) {
+		BundlePrivilegeBO bundlePrivilege = new BundlePrivilegeBO();
+		bundlePrivilege.setId(po.getId());
+		bundlePrivilege.setBundleId(po.getBundleId());
+		bundlePrivilege.setDeviceModel(po.getDeviceModel());
+		bundlePrivilege.setName(po.getBundleName());
+		bundlePrivilege.setUsername(po.getUsername());
+		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
+		return bundlePrivilege;
+	}
+	
+	private Map<String, Object> bundlePageResponse(int pageNum, int countPerPage, List<BundlePrivilegeBO> bundlePrivileges) {
+		Map<String, Object> data = makeAjaxData();
+		if (null != bundlePrivileges) {
+			// 排序
+			Collections.sort(bundlePrivileges, new Comparator<BundlePrivilegeBO>() {
+				@Override
+				public int compare(BundlePrivilegeBO o1, BundlePrivilegeBO o2) {
+					return (int) (o2.getId() - o1.getId());
+				}
+			});
+			int from = (pageNum - 1) * countPerPage;
+			int to = (pageNum * countPerPage > bundlePrivileges.size()) ? bundlePrivileges.size() : pageNum * countPerPage;
+			data.put("resources", bundlePrivileges.subList(from, to));
+			data.put("total", bundlePrivileges.size());
+			return data;
+		} else {
+			data.put("resources", new ArrayList<BundlePrivilegeBO>());
+			data.put("total", 0);
+			return data;
+		}
+	}
+
+	
+	public static void  main(String[] args){
+		
+ 	}
 }

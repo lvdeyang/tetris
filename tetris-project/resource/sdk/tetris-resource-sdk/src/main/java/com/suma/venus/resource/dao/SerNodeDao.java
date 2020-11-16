@@ -33,4 +33,11 @@ public interface SerNodeDao extends CommonDao<SerNodePO> {
 	public SerNodePO findByNodeName(String nodeName);
 	
 	public List<SerNodePO> findByIdIn(Collection<Long> ids);
+	
+	@Query(value = "SELECT ser.* FROM ser_nodepo ser LEFT JOIN ser_node_role_permissionpo permission ON ser.id = permission.ser_node_id WHERE permission.role_id = ?1", nativeQuery = true)
+	public List<SerNodePO> findByroleId(Long roleId);
+	
+	@Query(value = "SELECT ser.* FROM ser_nodepo ser LEFT JOIN ser_node_role_permissionpo permission ON ser.id = permission.ser_node_id WHERE permission.role_id IN ?1", nativeQuery = true)
+	public List<SerNodePO> findByroleIdsIn(List<Long> roleIds);
+	
 }

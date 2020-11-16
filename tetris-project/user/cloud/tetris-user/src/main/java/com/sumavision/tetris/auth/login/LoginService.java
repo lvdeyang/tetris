@@ -269,10 +269,24 @@ public class LoginService {
 	public void doLogout() throws Exception{
 		UserVO user = userQuery.current();
 		TokenPO token = tokenDao.findByToken(user.getToken());
-		token.setToken(null);
-		token.setLastModifyTime(null);
-		token.setStatus(UserStatus.OFFLINE);
-		tokenDao.save(token);
+		
+		boolean result = false;
+		if(token != null){
+			try{
+				result = tokenQuery.checkToken(token);
+			}catch(TokenTimeoutException e){
+				result = false;
+			}
+		}
+		if(!result && token!=null){
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
+		}else if(!result && token == null){
+			token = new TokenPO();
+			token.setUserId(user.getId());
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
+		}
 		try{
 			Date day=new Date();    
 			SimpleDateFormat offLineDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
@@ -290,8 +304,13 @@ public class LoginService {
 			log.setOprlogType(EOprlogType.USER_OFFLINE);
 			alarmFeign.sendOprlog(log);
 		}catch(Exception e){
+			e.printStackTrace();
 			System.out.println("用户下线日志存储失败！");
 		}
+		token.setToken(null);
+		token.setLastModifyTime(null);
+		token.setStatus(UserStatus.OFFLINE);
+		tokenDao.save(token);
 		
 	}
 	
