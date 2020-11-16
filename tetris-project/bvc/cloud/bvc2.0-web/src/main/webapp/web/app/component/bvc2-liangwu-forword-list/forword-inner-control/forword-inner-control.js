@@ -257,8 +257,8 @@ define([
                       message: "编码器绑定成功！"
                     })
                     $cell.find('.encode').text(data.encoderBundleName)
-                    $cell.find('.screen-config-begin').hide()
-                    $cell.find('.screen-config-stop').show()
+                    $cell.find('.screen-config-begin').show()
+                    $cell.find('.screen-config-stop').hide()
                     $cell.find('.screen-config-delete').show()
                   } else {
                     instance.$message({
@@ -437,6 +437,7 @@ define([
         $td.find('.screen-config-begin').hide()
         $td.find('.screen-config-stop').hide()
         $td.find('.screen-config-delete').hide()
+        $td.find('.status').text("STOP")
       }, null, [403, 404, 409, 500]);
     });
     $(document).on('mouseup', function () {

@@ -121,7 +121,7 @@ public class LocationOfScreenWallService {
 		
 		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findOne(id);
 		
-		if( screenWall == null ){
+		if( screenWall == null || LocationExecuteStatus.RUN.equals(screenWall.getStatus())){
 			throw new BaseException(StatusCode.FORBIDDEN, "还没有绑定解码器或者正在执行转发,请先停止转发");
 		}
 		
@@ -186,7 +186,7 @@ public class LocationOfScreenWallService {
 		MonitorLiveDevicePO live = monitorLiveUtil.vodDevice(null, "BUNDLE", bundleId, null, null, "BUNDLE", locationScreen.getDecoderBundleId(), null, null, "DEVICE", user.getId(), user.getUserno(), user.getName());
 		locationScreen.setEncoderBundleId(bundleId)
 							  .setEncoderBundleName(bundleName)
-							  .setStatus(LocationExecuteStatus.RUN)
+							  .setStatus(LocationExecuteStatus.STOP)
 							  .setMonitorLiveDeviceId(live.getId());
 		
 		locationOfScreenWallDao.save(locationScreen);
@@ -321,7 +321,7 @@ public class LocationOfScreenWallService {
 		}
 		
 		if(stopOrStart){
-			monitorLiveDeviceService.stop(id, userId, userNo, stopOrStart);
+			monitorLiveDeviceService.stop(screenPO.getMonitorLiveDeviceId(), userId, userNo, stopOrStart);
 			screenPO.setStatus(LocationExecuteStatus.STOP);
 		}else{
 			monitorLiveDeviceService.stopToRestart(new ArrayListWrapper<Long>().add(screenPO.getMonitorLiveDeviceId()).getList(), userId);

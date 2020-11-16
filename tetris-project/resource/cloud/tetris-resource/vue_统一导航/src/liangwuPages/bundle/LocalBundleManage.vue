@@ -212,7 +212,7 @@ export default {
         keyword: '',
         userId: '',
         sourceType: '',
-        countPerPage: '',
+        countPerPage: 20,
         region: 'self'
       },
       users: [],
@@ -225,7 +225,7 @@ export default {
       channelSchemes: [],
       total: 0,
       pageNum: 1,
-      countPerPage: 20,
+      countPerPage: 999999,
       currentRow: {},
       bundleId: "",
       newAccessNodeUid: "",
@@ -954,6 +954,8 @@ export default {
           IP_URL = `udp://${param.dest_ip}:${param.video_port}`
         } else if (extendsParams.dev_type == "onvif_enc") {
           IP_URL = `udp://${param.onvif_ip}:${param.onvif_port}`
+        } else if (extendsParams.dev_type == "bq_encoder" || extendsParams.dev_type == "bq_decoder") {
+          IP_URL = `udp://${param.bq_ip}:${param.bq_port}`
         } else {
           IP_URL = param.url
         }
