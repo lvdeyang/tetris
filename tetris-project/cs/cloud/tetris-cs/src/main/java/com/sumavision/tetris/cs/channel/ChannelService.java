@@ -607,28 +607,40 @@ public class ChannelService {
 			List<ScreenVO> screens = new ArrayList<ScreenVO>();
 			//从模板中获取节目信息 如果是媒资直接放入自动生成节目单，如果是标签，从推荐列表中查找该标签的媒资，如果找不到直接去媒资库查找该标签下的热门媒资。
 			for (TemplateProgramePO templateProgramePO : templateProgramePOs) {
+				String startDate=DateUtil.format(DateUtil.parse(broadTime, "yyyy-MM-dd HH:mm:ss"),"yyyy-MM-dd")+" "+
+								DateUtil.format(templateProgramePO.getStartTime(),"HH:mm:ss");
+				String endDate=DateUtil.format(DateUtil.parse(broadTime, "yyyy-MM-dd HH:mm:ss"),"yyyy-MM-dd")+" "+
+						DateUtil.format(templateProgramePO.getEndTime(),"HH:mm:ss");
 				if(templateProgramePO.getProgrameType().equals(ProgrameType.MIMS)){
 					ScreenVO screenVO=new ScreenVO();
-					screenVO.setStartTime(DateUtil.format(templateProgramePO.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
-					screenVO.setEndTime(DateUtil.format(templateProgramePO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+					screenVO.setStartTime(startDate);
+					screenVO.setEndTime(endDate);
 					screenVO.setPreviewUrl(templateProgramePO.getUrl());
 					screenVO.setName(templateProgramePO.getMimsName());
 					screenVO.setDuration(templateProgramePO.getDuration());
 					screens.add(screenVO);
 				}else{
 					boolean befind=false;
-					for (MediaAudioVO audio : recommends) {
-						String[] tempProtags=templateProgramePO.getLabelNames().split(",");
-						for (String tag : tempProtags) {
-							if(audio.getTags().contains(tag)){
-								screens.add(new ScreenVO().getFromAudioVO(audio));
-								recommends.remove(audio);
-								befind=true;
-						        break;
+					if(!recommends.isEmpty()){
+						for (MediaAudioVO audio : recommends) {
+							String[] tempProtags=templateProgramePO.getLabelNames().split(",");
+							for (String tag : tempProtags) {
+								if(audio.getTags().contains(tag)){
+									ScreenVO screenVO=new ScreenVO().getFromAudioVO(audio);
+									screenVO.setStartTime(startDate);
+									screenVO.setEndTime(endDate);
+									screens.add(screenVO);
+									recommends.remove(audio);
+									befind=true;
+							        break;
+								}
+							}
+							if(befind){
+								break;
 							}
 						}
-						
 					}
+					
 					if(!befind){
 						//从媒资库中查找符合模板媒资的最热媒资
 						List<MediaAudioVO> hotMediaAudioVOs=mediaAudioQuery.loadTagRecommend(templateProgramePO.getLabelNames());
@@ -636,7 +648,10 @@ public class ChannelService {
 							//随机取一个
 							Random ran = new Random();
 						    int random = ran.nextInt(hotMediaAudioVOs.size());
-							screens.add(new ScreenVO().getFromAudioVO(hotMediaAudioVOs.get(random)));
+						    ScreenVO screenVO=new ScreenVO().getFromAudioVO(hotMediaAudioVOs.get(random));
+						    screenVO.setStartTime(startDate);
+							screenVO.setEndTime(endDate);
+							screens.add(screenVO);
 						}
 					}
 				}

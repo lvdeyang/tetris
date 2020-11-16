@@ -89,16 +89,28 @@ define([
                 selectedTags: function (buff, tags, startLoading, endLoading, close) {
                     var self = this;
                     startLoading();
+                    var tempCountMap={};
+                    for(var i=0;i<self.tagsInfo.length;i++){
+                    	tempCountMap[self.tagsInfo[i].tagName]=self.tagsInfo[i].hotCount;
+                    }
                     self.userInfo.tags.splice(0, self.userInfo.tags.length);
                     var tagNames=[];
+                    var hotCounts=[];
                     for (var i = 0; i < tags.length; i++) {
                     	self.userInfo.tags.push(tags[i].name);
                     	tagNames.push(tags[i].name);
+                    	if(tempCountMap[tags[i].name]){
+                    		hotCounts.push(tempCountMap[tags[i].name]);
+                    	}else{
+                    		hotCounts.push(0);
+                    	}
+                    	
                     }
                     //保存标签到用户标签关联表
       
                     var params={
                     	tags:tagNames.join(','),
+                    	hotCounts:hotCounts.join(',')
                     }
                     
                     ajax.post('/user/editTags', params, function (data, status) {
@@ -107,7 +119,11 @@ define([
                         	for(var j=0;j<tags.length;j++){
                             	var tempTag={};
                             	tempTag.tagName=tags[j].name;
-                            	tempTag.hotCount=0;
+                            	if(tempCountMap[tempTag.tagName]){
+                            		tempTag.hotCount=tempCountMap[tempTag.tagName];
+                            	}else{
+                            		tempTag.hotCount=0;
+                            	}
                             	self.tagsInfo.push(tempTag);
                             }
                         }
