@@ -375,6 +375,27 @@ public class UserQuery {
 		List<UserPO> entities = pagedEntities.getContent();
 		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
 		
+		if(rows != null && !rows.isEmpty()){
+			Set<Long> userIds = new HashSet<Long>();
+			for (UserVO userVO : rows) {
+				userIds.add(userVO.getId());
+			}
+			List<TokenPO> tokenPOs = tokenDao.findByUserIdIn(userIds);
+			for (UserVO userVO : rows) {
+				StringBufferWrapper wrapper = new StringBufferWrapper();
+				if (tokenPOs != null && !tokenPOs.isEmpty()) {
+					for (TokenPO tokenPO : tokenPOs) {
+						if (userVO.getId().equals(tokenPO.getUserId()) && (userVO.getStatus() == null || userVO.getStatus().equals("OFFLINE"))) {
+							userVO.setStatus(tokenPO.getStatus().toString());
+							wrapper.append(tokenPO.getId()).append(",");
+						}
+					}
+				}
+				//userVO.setTokenIds(wrapper.toString());
+			}
+		}
+		
+		
 		int total = userDao.countByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression);
 		
 		if(total > 0){
