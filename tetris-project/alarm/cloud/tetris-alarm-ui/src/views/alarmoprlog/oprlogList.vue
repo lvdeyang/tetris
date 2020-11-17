@@ -168,11 +168,11 @@ export default {
 
       if (this.filters.oprTimeRange != undefined) {
         if (typeof (this.filters.oprTimeRange[0]) !== undefined) {
-          timeStart = util.formatDate.format(this.filters.oprTimeRange[0], 'yyyy/MM/dd hh:mm:ss')
+          timeStart = util.formatDate.format(this.filters.oprTimeRange[0], 'yyyy-MM-dd hh:mm:ss')
         };
 
         if (typeof (this.filters.oprTimeRange[1]) !== undefined) {
-          timeEnd = util.formatDate.format(this.filters.oprTimeRange[1], 'yyyy/MM/dd hh:mm:ss')
+          timeEnd = util.formatDate.format(this.filters.oprTimeRange[1], 'yyyy-MM-dd hh:mm:ss')
         };
       };
 
