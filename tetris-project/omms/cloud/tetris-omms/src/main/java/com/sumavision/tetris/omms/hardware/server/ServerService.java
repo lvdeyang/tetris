@@ -1,6 +1,7 @@
 package com.sumavision.tetris.omms.hardware.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -461,6 +462,20 @@ public class ServerService {
             httpPost.setConfig(requestConfig);
 			
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetModifyIniException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
 				throw new HttpGadgetModifyIniException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
@@ -497,12 +512,13 @@ public class ServerService {
 	 * @param password 密码
 	 * @throws Exception 
 	 */
-	public DatabaseVO addDatabase(Long serverId, String databasePort, String username, String password) throws Exception{
+	public DatabaseVO addDatabase(Long serverId, String databasePort, String databaseName, String username, String password) throws Exception{
 		ServerPO server = serverDao.findOne(serverId);
 		DatabasePO database = new DatabasePO();
 		database.setServerId(serverId);
 		database.setDatabaseIP(server.getIp());
 		database.setDatabasePort(databasePort);
+		database.setDatabaseName(databaseName);
 		database.setUsername(username);
 		database.setPassword(password);
 		databaseDAO.save(database);

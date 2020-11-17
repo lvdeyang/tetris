@@ -20,4 +20,5 @@ public interface DatabaseDAO extends BaseDAO<DatabasePO>{
 	
 	public List<DatabasePO> findByServerId(Long serverId);
 
+	public DatabasePO findByDatabaseIP(String databaseIP);
 }
