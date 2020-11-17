@@ -396,10 +396,10 @@ public class BroadAbilityService {
 			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
 			for (TemplateScreenVO templateVO : templateScreenVOs) {
 				List<ScreenVO> screenVOs = templateVO.getData();
-				if (screenVOs.isEmpty()) continue;
+				if (screenVOs==null||screenVOs.isEmpty()) continue;
 				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
 				//这里重新根据开始，结束时间计算duration
-				templateVO.setData(resetScreenDuration(broadDate,screenVOs));
+				templateVO.setData(resetScreenDuration(broadDate,screenVOs,channel));
 				long tempScheduleTime=querySchedulePlayTimeByScreens(screenVOs);
 				if(scheduleTime<tempScheduleTime){
 					scheduleTime=tempScheduleTime;
@@ -431,8 +431,13 @@ public class BroadAbilityService {
 						case "AUDIO":
 						case "VIDEO":
 							BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
-							inputPrevFileVO.setCount(1)
-							.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
+							if(screenVO.getCount()!=0){
+								inputPrevFileVO.setCount(screenVO.getCount());
+							}else{
+								inputPrevFileVO.setCount(1);
+							}
+							
+							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
 							.setDuration(Long.parseLong(screenDuration))
 							.setSeek(0l);
 							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile(inputPrevFileVO));
@@ -611,8 +616,8 @@ public class BroadAbilityService {
 	 * @return
 	 * @throws ParseException 
 	 */
-	private List<ScreenVO> resetScreenDuration(Date broadTime,List<ScreenVO> screens) throws ParseException{
-		
+	private List<ScreenVO> resetScreenDuration(Date broadTime,List<ScreenVO> screens,ChannelPO channel) throws ParseException{
+		List<ScreenVO> resetList=new ArrayList<ScreenVO>();
 		long current=broadTime.getTime();
 		for(int i=0;i<screens.size();i++){
 			if(screens.get(i).getStartTime()!=null&&screens.get(i).getEndTime()!=null){
@@ -621,7 +626,14 @@ public class BroadAbilityService {
 			    if(startTime.getTime()>current&&i>0){
 			    	//这里应该加个备播，但是目前先给上一个直接延长duration
 			    	long tempDuration=startTime.getTime()-current;
-			    	screens.get(i-1).setDuration(Long.parseLong(screens.get(i-1).getDuration())+tempDuration+"");
+			    	//screens.get(i-1).setDuration(Long.parseLong(screens.get(i-1).getDuration())+tempDuration+"");
+			    	ScreenVO screenVO=new ScreenVO();
+			    	screenVO.setPreviewUrl(channel.getBackfileUrl());
+			    	screenVO.setDuration(channel.getBackfileDuration());
+			    	int count=(int) Math.ceil(tempDuration/Long.parseLong(screenVO.getDuration()));
+			    	screenVO.setCount(count);
+			    	screenVO.setType("VIDEO");
+			    	resetList.add(screenVO);
 			    	current+=tempDuration;
 			    }
 			    screens.get(i).setDuration((endTime.getTime()-startTime.getTime())+"");
@@ -629,10 +641,11 @@ public class BroadAbilityService {
 			}else{
 				current+=Long.parseLong(screens.get(i).getDuration());
 			}
+			resetList.add(screens.get(i));
 		}
 		
 		//重排插入备播，增加备播设置之后再加
-		return screens;
+		return resetList;
 	}
 	
 	public void requestAddTask(Long channelId,

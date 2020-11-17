@@ -285,6 +285,8 @@ public class ScheduleService {
 			screen.setResourceId(item.getResourceId());
 			screen.setAudioPid(item.getAudioPid());
 			screen.setVideoPid(item.getVideoPid());
+			screen.setStartTime(item.getStartTime());
+			screen.setEndTime(item.getEndTime());
 			screen.setFreq(item.getFreq());
 			screenVOs.add(screen);
 		}

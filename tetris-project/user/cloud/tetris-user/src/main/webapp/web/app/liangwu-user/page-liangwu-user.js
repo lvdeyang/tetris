@@ -86,7 +86,7 @@ define([
             lastlogintime: '',
             bindrole: '',
             bindRoles: '',
-            isLoginIp:true
+            isLoginIp: true
           },
           editUser: {
             visible: false,
@@ -104,21 +104,21 @@ define([
             loginIp: '',
             bindrole: '',
             bindRoles: '',
-            bindAccessNodeUidName:'',
-            bindAccessNodeUid:''
+            bindAccessNodeUidName: '',
+            bindAccessNodeUid: ''
           },
           import: {
             requireType: ['csv'],
             multiple: false
           },
         },
-        
-        bindAccessNodeUidVisable:false,
-        accessNodeTable:[],
-        bindAccessNodeUid:'',
-        bindAccessNodeUidName:'',
-        bindAccessNodeUidRow:undefined,
-        isLoginIpDisabled:true
+
+        bindAccessNodeUidVisable: false,
+        accessNodeTable: [],
+        bindAccessNodeUid: '',
+        bindAccessNodeUidName: '',
+        bindAccessNodeUidRow: undefined,
+        isLoginIpDisabled: true
       },
       methods: {
         rowKey: function (row) {
@@ -149,7 +149,7 @@ define([
           self.bindAccessNodeUidVisable = true;
           // self.$refs.roleTable.clearSelection()
           var self = this;
-          self.accessNodeTable =[];
+          self.accessNodeTable = [];
           // self.table.rows.splice(0, self.table.rows.length);
           ajax.post('/user/load', {
             currentPage: 1,
@@ -166,36 +166,40 @@ define([
 
 
         },
-        
-    currentRowChange: function (currentRow, oldRow) {
-      var self = this;
-      self.tbindAccessNodeUidRow = currentRow;
-    },
 
-    handleBindAccessNodeUidSubmit: function () {
-      this.bindAccessNodeUidVisable = false;
-      this.bindAccessNodeUidName= this.dialog.editUser.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
-      this.bindAccessNodeUid = this.dialog.editUser.bindAccessNodeUid =this.tbindAccessNodeUidRow.nodeUid
-    },
-    handleBindRoleSubmit: function () {
+        currentRowChange: function (currentRow, oldRow) {
+          var self = this;
+          self.tbindAccessNodeUidRow = currentRow;
+        },
+
+        handleBindAccessNodeUidSubmit: function () {
+          this.bindAccessNodeUidVisable = false;
+          this.bindAccessNodeUidName = this.dialog.editUser.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
+          this.bindAccessNodeUid = this.dialog.editUser.bindAccessNodeUid = this.tbindAccessNodeUidRow.nodeUid
+        },
+        handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
           var bindRoleNameArr = [];
           var bindRoleIdArr = [];
           this.dialogBindRole.bindRoleSelection.map(item => {
-            bindRoleNameArr.push(item.name);
-            bindRoleIdArr.push(item.id)
+            if (item.id == 6 || item.id == 7) {
+
+            } else {
+              bindRoleNameArr.push(item.name);
+              bindRoleIdArr.push(item.id)
+            }
           })
           this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
           this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
           // this.dialogBindRole.bindRoleSelection = [];
           this.$refs.roleTable.clearSelection()
-     },
-    gotoBindBusinessRole: function (scope) {
+        },
+        gotoBindBusinessRole: function (scope) {
           var slef = this;
           var row = scope.row;
           window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
         },
-    load: function (currentPage) {
+        load: function (currentPage) {
           var self = this;
           var param = {
             currentPage: currentPage,
@@ -223,7 +227,7 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                if(rows[i].id != 7||rows[i].id != 6){
+                if (rows[i].id != 7 && rows[i].id != 6 && rows[i].id != 4) {
                   self.roleOption.push(rows[i]);
                 }
               }
@@ -231,7 +235,7 @@ define([
           });
         },
 
-        handleSelectionChange(val) {
+        handleSelectionChange (val) {
           this.dialogBindRole.bindRoleSelection = val;
         },
         loadCompany: function () {
@@ -322,7 +326,7 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            if(businessRoles[i].id != '7'||businessRoles[i].id != '6'){//去掉媒资用户
+            if (businessRoles[i].id != '7' && businessRoles[i].id != '6' && businessRoles[i].id != '4') {//去掉媒资用户
               rolesName.push(businessRoles[i].name)
               rolesId.push(businessRoles[i].id)
             }
@@ -357,17 +361,17 @@ define([
         },
         handleEditUserSubmit: function () {
           var self = this;
-          if(!self.dialog.editUser.bindAccessNodeUid){
+          if (!self.dialog.editUser.bindAccessNodeUid) {
             self.$message({
-              'type':'waring',
-              'message':"服务节点不能为空"
+              'type': 'waring',
+              'message': "服务节点不能为空"
             })
             return
           }
-          if(!self.dialog.editUser.bindrole){
+          if (!self.dialog.editUser.bindrole) {
             self.$message({
-              'type':'waring',
-              'message':"绑定角色不能为空"
+              'type': 'waring',
+              'message': "绑定角色不能为空"
             })
             return
           }
@@ -424,7 +428,7 @@ define([
                 done();
               }
             }
-          }).catch(function () {});
+          }).catch(function () { });
         },
         handleCreateUserClose: function () {
           var self = this;
@@ -445,17 +449,17 @@ define([
         },
         handleCreateUserSubmit: function () {
           var self = this;
-          if(!self.bindAccessNodeUid){
+          if (!self.bindAccessNodeUid) {
             self.$message({
-              'type':'waring',
-              'message':"服务节点不能为空"
+              'type': 'waring',
+              'message': "服务节点不能为空"
             })
             return
           }
-          if(!self.dialog.createUser.bindRoles){
+          if (!self.dialog.createUser.bindRoles) {
             self.$message({
-              'type':'waring',
-              'message':"绑定角色不能为空"
+              'type': 'waring',
+              'message': "绑定角色不能为空"
             })
             return
           }
@@ -476,8 +480,8 @@ define([
             loginIp: self.dialog.createUser.loginIp,
             bindrole: self.dialog.createUser.bindrole,
             bindRoles: self.dialog.createUser.bindRoles,
-            worknodeUid:self.bindAccessNodeUid,
-            isLoginIp:self.dialog.createUser.isLoginIp,
+            worknodeUid: self.bindAccessNodeUid,
+            isLoginIp: self.dialog.createUser.isLoginIp,
           };
 
           ajax.post('/user/add', params, function (data, status) {
@@ -543,16 +547,16 @@ define([
           var pwd = '';
           for (var i = 0; i < len; i++) {
             pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-    
+
           }
           return pwd;
-    
+
         },
-        isLoginIpChange:function(val){
-          if(val){
+        isLoginIpChange: function (val) {
+          if (val) {
             this.dialog.createUser.loginIp = "";
             this.isLoginIpDisabled = true
-          }else{
+          } else {
             this.isLoginIpDisabled = false
 
           }

@@ -474,4 +474,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	@Transactional
 	public void deleteByClassify(UserClassify classify);
 	
+	@Query(value = "SELECT user.* from tetris_user user LEFT JION tetris_user_system_role_permission permission ON user.id=permission.user_id WHERE permission.role_id IN ?1", nativeQuery = true)
+	public List<UserPO> findByRoleIdIn(Collection<Long> roleIds);
+	
 }

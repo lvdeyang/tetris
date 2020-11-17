@@ -137,16 +137,16 @@
             <el-input v-model="dialog.createUser.remark"></el-input>
           </el-form-item>
           <!-- 绑定ip -->
-            <el-form-item :label="i18n.labelCreateUserBindIp">
-              <el-col :span="13">
+          <el-form-item :label="i18n.labelCreateUserBindIp">
+            <el-col :span="13">
               <el-input :disabled="isLoginIpDisabled" v-model="dialog.createUser.loginIp"></el-input>
             </el-col>
             <el-col :span="5" :offset="2">
-                <el-checkbox v-model="dialog.createUser.isLoginIp" @change="isLoginIpChange">是否首次登录记录IP</el-checkbox>
+              <el-checkbox v-model="dialog.createUser.isLoginIp" @change="isLoginIpChange">是否首次登录记录IP</el-checkbox>
             </el-col>
-            </el-form-item>
-          
-      
+          </el-form-item>
+
+
           <!-- 绑定角色 -->
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
@@ -185,14 +185,14 @@
 
     <!-- 绑定接入层 -->
     <el-dialog title="绑定接入层" :visible.sync="bindAccessNodeUidVisable" width="500px">
-      <el-table ref="accessNodeTable" :data="accessNodeTable"  :row-key="roleOption.id"
-        width="100%"  height="400" @current-change="currentRowChange" highlight-current-row>
+      <el-table ref="accessNodeTable" :data="accessNodeTable" :row-key="roleOption.id" width="100%" height="400"
+        @current-change="currentRowChange" highlight-current-row>
         <!-- <el-table-column type="selection" width="55"></el-table-column> -->
         <el-table-column prop="name" label="名称" width="200"></el-table-column>
         <el-table-column prop="ip" label="ip" width="200"></el-table-column>
       </el-table>
-      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit" style="margin-top:15px"><span class="icon-plus"
-          style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
+      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit" style="margin-top:15px"><span
+          class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
 
       <!-- <div>弹框</div> -->
     </el-dialog>
@@ -211,9 +211,9 @@
             <el-input v-model="dialog.editUser.remark"></el-input>
           </el-form-item>
           <!-- 绑定ip -->
-          <el-form-item :label="i18n.labelCreateUserBindIp">
+          <!-- <el-form-item :label="i18n.labelCreateUserBindIp">
             <el-input v-model="dialog.editUser.loginIp"></el-input>
-          </el-form-item>
+          </el-form-item> -->
 
 
           <!-- 绑定角色 -->

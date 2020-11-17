@@ -1,11 +1,14 @@
 package com.sumavision.tetris.user;
 
+import java.util.List;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonFormat.Value;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 /**
@@ -365,5 +368,11 @@ public interface UserFeign {
 	public JSONObject queryUserTags(
 			@RequestParam("userId") Long userId);
 	
+	@RequestMapping(value = "/user/feign/find/all")
+	public JSONObject findAll();
 	
+	@RequestMapping(value = "/user/feign/find/by/roleId/in")
+	public JSONObject findByRoleIdIn(
+			@RequestParam("roleIds") List<Long> roleIds);
+
 }

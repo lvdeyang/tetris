@@ -64,6 +64,9 @@ require.config({
 
     'page-liangwu-user': window.APPPATH + 'liangwu-user/page-liangwu-user',
     'page-liangwu-role': window.APPPATH + 'liangwu-role/page-liangwu-role',
+
+    'page-liangwu-user-batch': window.APPPATH + 'liangwu-user-batch/page-liangwu-user-batch',
+
   },
   shim: {
     'vue': {

@@ -24,6 +24,56 @@ public class BundlePrivilegeBO {
 	
 	private String codec;
 	
+	private boolean canReadPrivilege = false;
+	
+	private boolean canWritePrivilege = false;
+	
+	private boolean canCloudPrivilege = false;
+	
+	private boolean canDownloadPrivilege = false;
+	
+	private boolean canLocalReadPrivilege = false;
+	
+	public boolean isCanReadPrivilege() {
+		return canReadPrivilege;
+	}
+
+	public void setCanReadPrivilege(boolean canReadPrivilege) {
+		this.canReadPrivilege = canReadPrivilege;
+	}
+
+	public boolean isCanWritePrivilege() {
+		return canWritePrivilege;
+	}
+
+	public void setCanWritePrivilege(boolean canWritePrivilege) {
+		this.canWritePrivilege = canWritePrivilege;
+	}
+
+	public boolean isCanCloudPrivilege() {
+		return canCloudPrivilege;
+	}
+
+	public void setCanCloudPrivilege(boolean canCloudPrivilege) {
+		this.canCloudPrivilege = canCloudPrivilege;
+	}
+
+	public boolean isCanDownloadPrivilege() {
+		return canDownloadPrivilege;
+	}
+
+	public void setCanDownloadPrivilege(boolean canDownloadPrivilege) {
+		this.canDownloadPrivilege = canDownloadPrivilege;
+	}
+
+	public boolean isCanLocalReadPrivilege() {
+		return canLocalReadPrivilege;
+	}
+
+	public void setCanLocalReadPrivilege(boolean canLocalReadPrivilege) {
+		this.canLocalReadPrivilege = canLocalReadPrivilege;
+	}
+
 	public String getCodec() {
 		return codec;
 	}
