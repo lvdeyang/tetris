@@ -66,18 +66,25 @@
         <el-input v-model="bundleForm.accessNodeName" style="width: 200px;" readonly @click.native="handleSelectLayerNode"></el-input>
         <el-input v-show="false" v-model="bundleForm.accessNodeUid"></el-input>
       </el-form-item>
-      <el-form-item size="small" label="创建设备个数">
-        <el-input v-model="bundleNumber" style="width: 200px;"></el-input>
-      </el-form-item>
-      <!-- <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
+      <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
         <el-input v-model="bundleForm.multicastSourceIp" style="width: 200px;"></el-input>
       </el-form-item>
-      <el-form-item size="small" label="编码组播地址" v-if="isFictitiouVisable">
+      <el-form-item size="small" label="编码组播ip" v-if="isFictitiouVisable">
+        <el-input v-model="bundleForm.multicastEncodeIps" style="width: 200px;"></el-input>
+      </el-form-item>
+      <el-form-item size="small" label="编码组播端口" v-if="isFictitiouVisable">
+        <el-input v-model.number="bundleForm.multicastEncodeProt" style="width: 200px;"></el-input>
+      </el-form-item>
+      <el-form-item size="small" label="编码组播地址" v-if="false">
         <el-input v-model="bundleForm.multicastEncodeAddr" style="width: 200px;"></el-input>
       </el-form-item>
       <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item> -->
+      </el-form-item>
+
+      <el-form-item size="small" label="创建设备个数">
+        <el-input v-model="bundleNumber" style="width: 200px;"></el-input>
+      </el-form-item>
     </el-form>
     <el-card class="box-card" style="margin-top:10px" v-show="true">
       <div slot="header" class="clearfix">
@@ -277,7 +284,7 @@ export default {
         bundleAlias: '',
         accessNodeUid: '',
         accessNodeName: '',
-        bundleFolderId: null,
+        folderId: null,
         bundleFolderName: '',
         transcod: false,
         multicastSourceIp: '',
@@ -291,7 +298,9 @@ export default {
         coderType: 'ENCODER',
         longitude: '',
         latitude: '',
-        streamUrl: ''
+        streamUrl: '',
+        multicastEncodeProt: 1000,
+        multicastEncodeIps: ''
 
         // accessNodeUid : ""
       },
@@ -581,7 +590,11 @@ export default {
           trigger: 'blur'
         }]
       },
+
       is_multiOptions: [{
+        'label': '单播',
+        'value': false
+      }, {
         'label': '组播',
         'value': true
       }],
@@ -926,11 +939,11 @@ export default {
       //   this.bundleForm.checkPass = defaultPassword
       // }
 
-      // if (isFictitiousArr.indexOf(val) > -1) {
-      //   this.isFictitiouVisable = false
-      // } else {
-      //   this.isFictitiouVisable = true
-      // }
+      if (isFictitiousArr.indexOf(val) > -1) {
+        this.isFictitiouVisable = false
+      } else {
+        this.isFictitiouVisable = true
+      }
       // 判断解码编码设备
       if (isEncArr.indexOf(val) > -1) {
         this.isFictitiouVisable = true
@@ -973,7 +986,7 @@ export default {
     },
     reset: function () {
       // this.$refs["bundleForm"].resetFields();
-      // this.bundleForm.bundleFolderId = null;
+      // this.bundleForm.folderId = null;
       // this.bundleForm.bundleFolderName = '';
     },
     submit: function () {
@@ -1020,7 +1033,7 @@ export default {
             bundleAlias: self.bundleForm.bundleAlias + '-' + i,
             accessNodeUid: self.bundleForm.accessNodeUid,
             accessNodeName: self.bundleForm.accessNodeName,
-            bundleFolderId: self.bundleForm.bundleFolderId,
+            folderId: self.bundleForm.folderId,
             bundleFolderName: self.bundleForm.bundleFolderName,
             transcod: self.bundleForm.transcod,
             coderType: 'ENCODER',
@@ -1029,15 +1042,23 @@ export default {
               deviceIp: '',
               devicePort: 5060
             },
+            multicastEncode: self.bundleForm.multicastEncode,
+            multicastEncodeAddr: self.bundleForm.multicastEncodeIps + ":" + self.bundleForm.multicastEncodeProt,
+            multicastDecode: self.bundleForm.multicastDecode,
+            coderType: self.bundleForm.coderType,
+            longitude: self.bundleForm.longitude,
+            latitude: self.bundleForm.latitude,
+            streamUrl: self.bundleForm.streamUrl,
           }
           self.initPort += 2
+          self.bundleForm.multicastEncodeProt += 2
         } else if (self.extraParam.dev_type == 'rtp_passby_enc') {
           extraParam.param = {
             is_multi: self.rtpPassbyEncFormData.is_multi,
-            multi_ip: self.TSencFormData.multi_ip,
-            local_ip: self.TSencFormData.local_ip,
-            video_port: self.TSencFormData.port,
-            audio_port: self.TSencFormData.port + 2
+            multi_ip: self.rtpPassbyEncFormData.multi_ip,
+            local_ip: self.rtpPassbyEncFormData.local_ip,
+            video_port: self.rtpPassbyEncFormData.video_port,
+            audio_port: self.rtpPassbyEncFormData.video_port + 2
           };
           bundleForm = {
             deviceModel: self.bundleForm.deviceModel,
@@ -1050,7 +1071,7 @@ export default {
             bundleAlias: self.bundleForm.bundleAlias + '-' + i,
             accessNodeUid: self.bundleForm.accessNodeUid,
             accessNodeName: self.bundleForm.accessNodeName,
-            bundleFolderId: self.bundleForm.bundleFolderId,
+            folderId: self.bundleForm.folderId,
             coderType: 'ENCODER',
             bundleFolderName: self.bundleForm.bundleFolderName,
             transcod: self.bundleForm.transcod,
@@ -1059,8 +1080,16 @@ export default {
               deviceIp: '',
               devicePort: 5060
             },
+            multicastEncode: self.bundleForm.multicastEncode,
+            multicastEncodeAddr: self.bundleForm.multicastEncodeIps + ":" + self.bundleForm.multicastEncodeProt,
+            multicastDecode: self.bundleForm.multicastDecode,
+            coderType: self.bundleForm.coderType,
+            longitude: self.bundleForm.longitude,
+            latitude: self.bundleForm.latitude,
+            streamUrl: self.bundleForm.streamUrl,
           }
-          self.TSencFormData.port += 4
+          self.bundleForm.multicastEncodeProt += 4
+          self.rtpPassbyEncFormData.video_port += 4
         }
 
 
@@ -1129,7 +1158,7 @@ export default {
     },
     handleChangeFolderCommit: function () {
       var self = this
-      self.bundleForm.bundleFolderId = self.dialog.changeFolder.tree.current.id
+      self.bundleForm.folderId = self.dialog.changeFolder.tree.current.id
       self.bundleForm.bundleFolderName = self.dialog.changeFolder.tree.current.name
       self.handleChangeFolderClose()
     },
@@ -1295,7 +1324,7 @@ export default {
           })
         }
       })
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage')
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/AddBundleForTest')
     })
 
     // this.getDeviceModels();

@@ -747,6 +747,7 @@ export default {
               type: 'success'
             });
             this.getResources(1);
+            this.getResourcesTotle(1);
             // window.location.reload();
           }
         });

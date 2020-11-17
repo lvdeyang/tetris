@@ -1,4 +1,4 @@
-<mi-frame id="page-liangwu-user-wrapper" :menus="menus" :user="user" :groups="groups" :active-id="activeId">
+<mi-frame id="page-liangwu-user-batch-wrapper" :menus="menus" :user="user" :groups="groups" :active-id="activeId">
 
   <template slot="title">{{i18n.title}}</template>
 
@@ -25,11 +25,11 @@
       <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud"
           style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleImport0}}{{importInfo.importTimes}}{{i18n.handleImport1}}
       </el-button>
-
       <div class="condition-item">
         <el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable
           size="small"></el-input>
       </div>
+      <el-button type="primary" size="small" @click="batchLogin">&nbsp;批量登录</el-button>
       <!-- <div class="condition-item">
         <el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable
           size="small"></el-input>
@@ -67,14 +67,6 @@
 
             <el-table-column :label="i18n.labelCreateUserBindIp" prop="loginIp">
             </el-table-column>
-            <el-table-column width="100" prop="status" label="登录状态">
-              <template slot-scope="scope">
-                <span v-if="scope.row.status === 'ONLINE'"
-                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
-                <span v-else
-                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
-              </template>
-            </el-table-column>
             <!-- <el-table-column :label="i18n.tableColumnLevel">
               <template slot-scope="scope">{{scope.row.level?scope.row.level:1}}</template>
             </el-table-column>
@@ -87,10 +79,6 @@
             </el-table-column> -->
             <el-table-column :label="i18n.tableColumnOperation" width="250">
               <template slot-scope="scope">
-                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleTokens" placement="bottom-end">
-                  <el-button v-if="scope.row.id !== 2" type="text" icon="feather-icon-message-circle"
-                    style="font-size:20px; padding:0;" @click="handleTokens(scope)"></el-button>
-                </el-tooltip>
                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                   <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" class="bt_list_handle"
                     disabled></el-button>
@@ -119,12 +107,47 @@
           :page-size="table.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="table.total">
         </el-pagination>
       </div>
-
     </el-card>
+
+    <el-dialog title="批量登录" :visible.sync="dialog.batchLogin.visible" width="700px">
+      <el-form label-width="120px" size="mini">
+        <el-form-item label="账号前缀">
+          <el-input v-model="dialog.batchLogin.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="dialog.batchLogin.password"></el-input>
+        </el-form-item>
+        <el-form-item label="登录开始序号">
+          <el-input v-model="dialog.batchLogin.beginNumber"></el-input>
+        </el-form-item>
+        <el-form-item label="登录结束序号">
+          <el-input v-model="dialog.batchLogin.endNumber"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <form action="/do/password/login" method="POST" style="margin-top: 20px;" target="_blank">
+        <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号" v-model="username"
+          style="display: none;">
+          <span slot="prefix" class="feather-icon-user" style="font-size:20px; position:relative; top:9px;"></span>
+        </el-input>
+        <el-input type="password" v-model="passwordInput" class="border-radius-2px" placeholder="密码"
+          style="margin-top:20px;display: none;">
+          <span slot="prefix" class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></span>
+        </el-input>
+        <input name="password" type="hidden" v-model="passwordEncode"></input>
+        <button type="submit" style="display:none" class="login-submit-button"></button>
+        </div>
+        <el-button class="el-button el-button--primary" style="margin-top: 20px; width: 100%; border-radius: 2px;"
+          @click="loginSubmit">登录</el-button>
+        <!--  -->
+      </form>
+      <!-- <iframe name="form" id="form"></iframe> -->
+      <!-- <el-button type="primary" size="small" @click="handlebatchLoginSubmit"><span class="icon-plus"
+          style="position:relative; right:1px;"></span>&nbsp;确定</el-button> -->
+    </el-dialog>
 
     <el-dialog :title="i18n.dialogCreateUserTitle" :visible.sync="dialog.createUser.visible" width="700px"
       :before-close="handleCreateUserClose">
-
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
         <el-form label-width="120px" size="mini">
@@ -168,6 +191,10 @@
           <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
             <el-input v-model="bindAccessNodeUidName" @click.native="handleChangeNodeUid"></el-input>
           </el-form-item>
+
+          <el-form-item label="创建用户数">
+            <el-input v-model="createNumber"></el-input>
+          </el-form-item>
         </el-form>
         <!-- </el-scrollbar> -->
       </div>
@@ -175,7 +202,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button size="medium" @click="dialog.createUser.visible = false">{{i18n.handleCreateUserCancel}}</el-button>
         <el-button size="medium" type="primary" @click="handleCreateUserSubmit" :loading="dialog.createUser.loading">
-          {{i18n.handleCreateUserSubmit}}</el-button>
+          批量创建</el-button>
       </span>
 
     </el-dialog>
@@ -263,40 +290,6 @@
         <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">
           {{i18n.handleEditUserSubmit}}</el-button>
       </span>
-
-    </el-dialog>
-
-    <!-- token展示 -->
-    <el-dialog :title="dialog.tokens.currentUser.nickname" :visible.sync="dialog.tokens.visible" width="600px"
-      :before-close="handleTokensClose">
-
-      <el-table :data="dialog.tokens.rows" style="width:100%">
-        <el-table-column width="50" prop="status">
-          <template slot-scope="scope">
-            <span v-if="scope.row.status === 'ONLINE'"
-              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
-            <span v-if="scope.row.status === 'OFFLINE'"
-              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="i18n.tableTokensColumnType">
-          <template slot-scope="scope">
-            <span v-if="scope.row.type == 'qt指控软件'">客户端软件</span>
-            <span v-if="scope.row.type == 'pc平台'">服务器平台</span>
-            <span v-if="scope.row.type != 'qt指控软件'&&scope.row.type != 'pc平台'">{{scope.row.type}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="i18n.tableTokensColumnIp" prop="ip">
-        </el-table-column>
-        <el-table-column :label="i18n.tableTokensColumnOperation" width="80">
-          <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" :content="i18n.tipHandleInvalidToken" placement="bottom-end">
-              <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;"
-                @click="handleInvalidToken(scope)"></el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-      </el-table>
 
     </el-dialog>
 

@@ -247,6 +247,10 @@ define([
         ajax.post('/monitor/record/load/all/status/record', condition, function (data) {
           self.totleRecord = data.total;
         });
+
+        // ajax.post('https://192.165.56.131:8214/tetris-user/api/zk/auth/do/username/password/login', null, function (data) {
+
+        // });
       },
       load: function (currentPage) {
         var self = this;

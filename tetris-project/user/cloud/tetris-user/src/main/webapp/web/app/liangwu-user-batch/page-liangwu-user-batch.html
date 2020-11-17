@@ -77,8 +77,21 @@
                 </el-switch>
               </template>
             </el-table-column> -->
+            <el-table-column width="100" prop="status" label="登录状态">
+              <template slot-scope="scope">
+                <span v-if="scope.row.status === 'ONLINE'"
+                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                <span v-else
+                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+              </template>
+            </el-table-column>
             <el-table-column :label="i18n.tableColumnOperation" width="250">
               <template slot-scope="scope">
+
+                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleTokens" placement="bottom-end">
+                  <el-button v-if="scope.row.id !== 2" type="text" icon="feather-icon-message-circle"
+                    style="font-size:20px; padding:0;" @click="handleTokens(scope)"></el-button>
+                </el-tooltip>
                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                   <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" class="bt_list_handle"
                     disabled></el-button>
@@ -126,7 +139,7 @@
       </el-form>
 
       <form action="/do/password/login" method="POST" style="margin-top: 20px;" target="_blank">
-        <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号" v-model="username"
+        <!-- <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号" v-model="username"
           style="display: none;">
           <span slot="prefix" class="feather-icon-user" style="font-size:20px; position:relative; top:9px;"></span>
         </el-input>
@@ -136,7 +149,7 @@
         </el-input>
         <input name="password" type="hidden" v-model="passwordEncode"></input>
         <button type="submit" style="display:none" class="login-submit-button"></button>
-        </div>
+        </div> -->
         <el-button class="el-button el-button--primary" style="margin-top: 20px; width: 100%; border-radius: 2px;"
           @click="loginSubmit">登录</el-button>
         <!--  -->
@@ -284,12 +297,44 @@
           </el-form-item>
         </el-form>
       </div>
-
       <span slot="footer" class="dialog-footer">
         <el-button size="medium" @click="dialog.editUser.visible = false">{{i18n.handleEditUserCancel}}</el-button>
         <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">
           {{i18n.handleEditUserSubmit}}</el-button>
       </span>
+
+    </el-dialog>
+    <!-- token展示 -->
+    <el-dialog :title="dialog.tokens.currentUser.nickname" :visible.sync="dialog.tokens.visible" width="600px"
+      :before-close="handleTokensClose">
+
+      <el-table :data="dialog.tokens.rows" style="width:100%">
+        <el-table-column width="50" prop="status">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status === 'ONLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+            <span v-if="scope.row.status === 'OFFLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnType">
+          <template slot-scope="scope">
+            <span v-if="scope.row.type == 'qt指控软件'">客户端软件</span>
+            <span v-if="scope.row.type == 'pc平台'">服务器平台</span>
+            <span v-if="scope.row.type != 'qt指控软件'&&scope.row.type != 'pc平台'">{{scope.row.type}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnIp" prop="ip">
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnOperation" width="80">
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" :content="i18n.tipHandleInvalidToken" placement="bottom-end">
+              <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;"
+                @click="handleInvalidToken(scope)"></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
 
     </el-dialog>
 

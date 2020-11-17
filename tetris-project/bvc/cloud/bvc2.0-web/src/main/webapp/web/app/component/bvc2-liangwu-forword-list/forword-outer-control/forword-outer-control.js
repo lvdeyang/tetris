@@ -8,6 +8,7 @@ define([
   'bvc2-dialog-single-osd',
   'bvc2-auto-layout',
   'jquery.layout.auto',
+  'bvc2-monitor-forword-bandwidth',
   'css!' + window.APPPATH + 'component/bvc2-liangwu-forword-list/forword-outer-control/forword-outer-control.css'
 ], function (tpl, ajax, $, Vue) {
 
@@ -17,6 +18,7 @@ define([
     template: tpl,
     data: function () {
       return {
+        originType: 'OUTER',
         loading: false,
         encodetree: [],
         checked: [],
@@ -40,7 +42,8 @@ define([
         pageSize: 10,
         currentPage: 0,
         total: 0,
-        forwordIds: []
+        forwordIds: [],
+        bandwidthVisible: false,
       }
     },
     props: [],
@@ -486,6 +489,17 @@ define([
           })
           return
         }
+      },
+      // 配置站点带宽
+
+      openBandwidth () {
+        this.bandwidthVisible = true;
+      },
+      handlebandwidthClose: function () {
+        this.bandwidthVisible = false;
+        // this.tableList = {};
+        // this.tableCurrgenData = []
+        this.loadStation()
       },
     },
     mounted: function () {

@@ -31,7 +31,7 @@ define([
               stationName: '',
               totalWidth: '',
               singleWidth: '',
-              identity:''
+              identity: ''
             }
           },
 
@@ -69,19 +69,22 @@ define([
         self.title = "新建站点"
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
-            var outerData=[],systemData=[];
-            data.rows.forEach(function(i){
-              if(i.originType == "OUTER"){
-                outerData.push(i)
-              }else{
-                systemData.push(i)
-              }
+            var outerData = [], systemData = [];
+            data.rows.forEach(function (i) {
+              // if(i.originType == "OUTER"){
+              //   outerData.push(i)
+              // }else{
+              //   systemData.push(i)
+              // }
+
+              systemData.push(i)
             })
-            if(self.originType == "OUTER"){
-              self.table.data = outerData;
-            }else{
-              self.table.data = systemData;
-            }
+            // if(self.originType == "OUTER"){
+            //   self.table.data = outerData;
+            // }else{
+            //   self.table.data = systemData;
+            // }
+            self.table.data = systemData
           }
         })
       },
