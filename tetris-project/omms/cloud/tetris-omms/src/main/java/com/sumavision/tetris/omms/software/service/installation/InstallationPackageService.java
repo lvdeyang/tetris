@@ -119,21 +119,6 @@ public class InstallationPackageService {
 				List<PropertiesPO> properties = new ArrayList<PropertiesPO>();
 				List<ProcessPO> processes = new ArrayList<ProcessPO>();
 				String configDescription = FileUtil.readAsString(zipFile.getInputStream(configDescriptionFile));
-				/*JSONArray descriptions = JSON.parseArray(configDescription);
-				for(int i=0; i<descriptions.size(); i++){
-					JSONObject description = descriptions.getJSONObject(i);
-					PropertiesPO property = new PropertiesPO();
-					property.setUpdateTime(now);
-					property.setPropertyKey(description.getString("key"));
-					property.setPropertyName(description.getString("name"));
-					property.setValueType(PropertyValueType.valueOf(description.getString("valueType").toUpperCase()));
-					if(PropertyValueType.ENUM.equals(property.getValueType())){
-						property.setValueSelect(description.getString("valueSelect"));
-					}
-					property.setPropertyDefaultValue(description.getString("defaultValue"));
-					property.setInstallationPackageId(packageEntity.getId());
-					properties.add(property);
-				}*/
 				JSONObject jsonObject = JSONObject.parseObject(configDescription);
 				JSONArray arr1 = jsonObject.getJSONArray("config");
 				for(int i = 0; i < arr1.size(); i++){
@@ -159,6 +144,7 @@ public class InstallationPackageService {
 					process.setProcessId(description2.getString("id"));
 					process.setProcessName(description2.getString("name"));
 					process.setInstallationPackageId(packageEntity.getId());
+					process.setDb(description2.getString("db"));
 					processes.add(process);
 				}
 				processDAO.save(processes);

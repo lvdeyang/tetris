@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.io.InputStream;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -45,13 +46,22 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
+import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.hardware.server.ServerDAO;
 import com.sumavision.tetris.omms.hardware.server.ServerPO;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpCreateFolderFailException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpLoginFailWhenUploadInstallationPackageException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetBackupException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetDisableFtpException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetEnableFtpException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetInstallException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetRestartProcessException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetRestoreException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetUninstallException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetUnzipException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetUpdateException;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationDAO;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationPO;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationVO;
@@ -87,6 +97,9 @@ public class ServiceDeploymentService {
 	
 	@Autowired
 	private BackupInformationDAO backupInformationDAO;
+	
+	@Autowired
+	private DatabaseDAO databaseDAO;
 	
 	/**
 	 * 上传安装包到服务器<br/>
@@ -132,7 +145,7 @@ public class ServiceDeploymentService {
 		Thread uploadThread = new Thread(new Uploader(serverEntity, installationPackageEntity, serviceDeploymentEntity));
 		uploadThread.start();
 		
-		//disableFtp(serviceDeploymentEntity.getId());
+//		disableFtp(serviceDeploymentEntity.getId());
 		
 		return new ServiceDeploymentVO().set(serviceDeploymentEntity)
 										.setVersion(installationPackageEntity.getVersion())
@@ -364,6 +377,7 @@ public class ServiceDeploymentService {
 				processDeployment.setProcessName(processPO.getProcessName());
 				processDeployment.setServiceDeploymentId(deploymentId);
 				processDeployment.setServerId(server.getId());
+				processDeployment.setDb(processPO.getDb());
 				list2.add(processDeployment);
 			}
 			processDeploymentDAO.save(list2);
@@ -405,6 +419,20 @@ public class ServiceDeploymentService {
             httpPost.setConfig(requestConfig);
             
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
 				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
@@ -493,9 +521,23 @@ public class ServiceDeploymentService {
             httpPost.setConfig(requestConfig);
             
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetUpdateException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+						
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetUpdateException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}
 		}finally{
 			if(client != null) client.close();
@@ -540,13 +582,54 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetRestartProcessException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetRestartProcessException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}     
 		}finally{
 			if(client != null) client.close();
 		} 	
+	}
+	
+	/**
+	 * 
+	 * 数据库备份<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月16日 下午5:25:52
+	 * @param id 进程id
+	 * @throws Exception
+	 */
+	public void databaseBackup(Long id) throws Exception{
+		ProcessDeploymentPO processDeployment = processDeploymentDAO.findOne(id);
+		ServiceDeploymentPO serviceDeployment = serviceDeploymentDao.findOne(processDeployment.getServiceDeploymentId());
+		String config = serviceDeployment.getConfig();
+		JSONObject jsonObject = JSON.parseObject(config);
+		String databaseIP = jsonObject.getString("databaseAddr");// 数据库IP
+		DatabasePO database = databaseDAO.findByDatabaseIP(databaseIP);
+		String username = database.getUsername();// 用户名
+		String password = database.getPassword();// 密码
+		String db = processDeployment.getDb();
+		String[] arr = db.split("/");
+		String databaseName = arr[1];// 数据库名称
+		
+		ServiceTypePO serviceType = serviceTypeDao.findOne(serviceDeployment.getServiceTypeId());
+		
+		String serviceTypeName = serviceType.getName();
 	}
 	
 	/**
@@ -603,6 +686,20 @@ public class ServiceDeploymentService {
             httpPost.setConfig(requestConfig);
 			
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetUninstallException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
 				throw new HttpGadgetUninstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
@@ -674,9 +771,23 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetBackupException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetBackupException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}
 			// 将backup文件夹中的xxx.zip文件下载到运维服务器上
 			Date date = new Date();
@@ -766,6 +877,7 @@ public class ServiceDeploymentService {
 				return success;
 			}
 			ftp.changeWorkingDirectory(remotePath);//转移到FTP服务器目录
+			ftp.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPFile[] fs = ftp.listFiles();
 			for(FTPFile ff:fs){
 				if(ff.getName().equals(fileName)){
@@ -896,9 +1008,23 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = decompressionClient.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetUnzipException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetUnzipException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}
 		}finally{
 			if(decompressionClient != null) decompressionClient.close();
@@ -943,9 +1069,23 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetRestoreException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetRestoreException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}
 		}finally{
 			if(client != null) client.close();
@@ -1060,9 +1200,23 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetEnableFtpException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetEnableFtpException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}     
 		}finally{
 			if(client != null) client.close();
@@ -1099,9 +1253,23 @@ public class ServiceDeploymentService {
 	        httpPost.setConfig(requestConfig);
 	        
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetDisableFtpException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
-				throw new HttpGadgetInstallException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				throw new HttpGadgetDisableFtpException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 			}     
 		}finally{
 			if(client != null) client.close();

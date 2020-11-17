@@ -23,6 +23,9 @@ public class ProcessDeploymentVO extends AbstractBaseVO<ProcessDeploymentVO, Pro
 	/** 服务器id */
 	private Long serverId;
 	
+	/** 数据库 */
+	private String db;
+	
 	public String getProcessId() {
 		return processId;
 	}
@@ -68,6 +71,15 @@ public class ProcessDeploymentVO extends AbstractBaseVO<ProcessDeploymentVO, Pro
 		return this;
 	}
 
+	public String getDb() {
+		return db;
+	}
+
+	public ProcessDeploymentVO setDb(String db) {
+		this.db = db;
+		return this;
+	}
+
 	@Override
 	public ProcessDeploymentVO set(ProcessDeploymentPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -75,7 +87,8 @@ public class ProcessDeploymentVO extends AbstractBaseVO<ProcessDeploymentVO, Pro
 			.setProcessName(entity.getProcessName())
 			.setServiceDeploymentId(entity.getServiceDeploymentId())
 			.setStatus(entity.getStatus()!= null ? entity.getStatus().getName(): null)
-			.setServerId(entity.getServerId());
+			.setServerId(entity.getServerId())
+			.setDb(entity.getDb());
 		return this;
 	}
 

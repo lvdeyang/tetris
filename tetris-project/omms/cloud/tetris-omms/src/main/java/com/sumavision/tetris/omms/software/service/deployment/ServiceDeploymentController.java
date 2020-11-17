@@ -262,4 +262,26 @@ public class ServiceDeploymentController {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * 数据库备份<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月16日 下午3:16:19
+	 * @param id 进程id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/database/backup")
+	public Object databaseBackup(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.databaseBackup(id);
+		return null;
+	}
+	
 }
