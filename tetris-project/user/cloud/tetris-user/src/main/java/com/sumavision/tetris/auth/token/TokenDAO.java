@@ -85,4 +85,6 @@ public interface TokenDAO extends BaseDAO<TokenPO>{
 	 */
 	public List<TokenPO> findByTypeInAndStatus(List<TerminalType> types, UserStatus status);
 	
+	public List<TokenPO> findByUserIdIn(Collection<Long> userIds);
+	
 }

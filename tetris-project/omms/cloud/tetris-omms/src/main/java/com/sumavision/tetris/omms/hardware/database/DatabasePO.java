@@ -25,6 +25,9 @@ public class DatabasePO extends AbstractBasePO{
 	/** 数据库端口 */
 	private String databasePort;
 	
+	/** 数据库名称 */
+	private String databaseName;
+	
 	/** 用户名 */
 	private String username;
 	
@@ -77,6 +80,15 @@ public class DatabasePO extends AbstractBasePO{
 
 	public void setServerId(Long serverId) {
 		this.serverId = serverId;
+	}
+
+	@Column(name = "DATABASE_NAME")
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
 	}
 
 }

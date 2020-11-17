@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -303,7 +304,7 @@ public interface UserFeign {
 	 * @return List<UserVO>
 	 */
 	@RequestMapping(value = "/user/feign/find/by/userno/in")
-	public JSONObject findByUsernoIn(@RequestParam("usernos") String usernos);
+	public JSONObject findByUsernoIn(@RequestBody String usernos);
 	
 	/**
 	 * 删除ldap用户<br/>

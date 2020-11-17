@@ -357,7 +357,7 @@ public class OutlandService extends ControllerBase{
 			passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 		}
 		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
-		return null;
+		return serNodeVO;
 	}
 	
 	/**
@@ -471,6 +471,7 @@ public class OutlandService extends ControllerBase{
 	public Object outlandDelete(Long id)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		if (serNodePO != null) {
+			outlandOff(id);
 			serNodeDao.delete(serNodePO);
 		}
 		return null;

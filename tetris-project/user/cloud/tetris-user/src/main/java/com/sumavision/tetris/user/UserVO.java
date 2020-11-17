@@ -123,6 +123,18 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	
 	private String loginIp;
 	
+	/**token多个，仅25*/
+	private String tokenIds;
+	
+	public String getTokenIds() {
+		return tokenIds;
+	}
+
+	public UserVO setTokenIds(String tokenIds) {
+		this.tokenIds = tokenIds;
+		return this;
+	}
+
 	public String getLoginIp() {
 		return loginIp;
 	}

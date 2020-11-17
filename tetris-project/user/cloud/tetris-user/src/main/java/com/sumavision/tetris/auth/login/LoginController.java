@@ -1,5 +1,8 @@
 package com.sumavision.tetris.auth.login;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -90,6 +93,24 @@ public class LoginController {
 	public Object doLogout(HttpServletRequest request) throws Exception{
 		loginService.doLogout();
 		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/do/password/login/test")
+	public Object doPasswordLoginTest(
+			String username,
+			String password,
+			String ip,
+			String equipType,
+			String verifyCode,
+			HttpServletRequest request, 
+			HttpServletResponse response) throws Exception{
+		String loginIp = loginService.loginIp(request);
+ 		String token = loginService.doPasswordLogin(username, password, loginIp, TERMINAL_TYPE, verifyCode);
+ 		Map<String, Object> dataMap = new HashMap<String, Object>();
+ 		dataMap.put("token", token);
+ 		return dataMap;
 	}
 	
 }

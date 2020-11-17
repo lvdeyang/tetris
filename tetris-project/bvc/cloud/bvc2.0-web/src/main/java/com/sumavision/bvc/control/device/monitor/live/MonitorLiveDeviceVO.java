@@ -3,7 +3,6 @@ package com.sumavision.bvc.control.device.monitor.live;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;

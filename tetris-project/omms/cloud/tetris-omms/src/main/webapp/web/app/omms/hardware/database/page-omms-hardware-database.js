@@ -41,6 +41,7 @@ define([
                     database:{
                         visible: false,
                         databasePort: "",
+                        databaseName:"",
                         username: "",
                         password: ""
                     }
@@ -111,6 +112,7 @@ define([
                     var self = this;
                     self.dialog.database.visible = false;
                     self.dialog.database.databasePort = "";
+                    self.dialog.database.databaseName = "";
                     self.dialog.database.username = "";
                     self.dialog.database.password = "";
                 },
@@ -119,12 +121,14 @@ define([
                     ajax.post('/server/addDatabase', {
                         serverId:self.serverId,
                         databasePort:self.dialog.database.databasePort,
+                        databaseName:self.dialog.database.databaseName,
                         username:self.dialog.database.username,
                         password:self.dialog.database.password
                     }, function(data, status){
                         self.rows.push(data);
                         self.dialog.database.visible = false;
                         self.dialog.database.databasePort = "";
+                        self.dialog.database.databaseName = "";
                         self.dialog.database.username = "";
                         self.dialog.database.password = "";
                     }, null, ajax.NO_ERROR_CATCH_CODE);

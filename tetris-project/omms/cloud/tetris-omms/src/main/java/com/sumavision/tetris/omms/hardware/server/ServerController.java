@@ -228,11 +228,12 @@ public class ServerController {
 	public Object addDatabase(
 			Long serverId,  
 			String databasePort, 
+			String databaseName,
 			String username, 
 			String password,
 			HttpServletRequest request) throws Exception{
 		
-		return serverService.addDatabase(serverId, databasePort, username, password);
+		return serverService.addDatabase(serverId, databasePort, databaseName, username, password);
 		
 	}
 	

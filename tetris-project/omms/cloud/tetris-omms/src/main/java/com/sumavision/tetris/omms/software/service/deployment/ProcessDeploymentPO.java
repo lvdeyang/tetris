@@ -11,12 +11,6 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
-/**
- * 绑定部署id的进程<br/>
- * <b>作者:</b>jiajun<br/>
- * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年10月12日 下午4:13:16
- */
 @Entity
 @Table(name = "TETRIS_OMMS_PROCESS_DEPLOYMENT")
 public class ProcessDeploymentPO extends AbstractBasePO{
@@ -37,6 +31,9 @@ public class ProcessDeploymentPO extends AbstractBasePO{
 	
 	/** 服务器id */
 	private Long serverId;
+	
+	/** 数据库 */
+	private String db;
 	
 	@Column(name = "PROCESS_ID")
 	public String getProcessId() {
@@ -82,5 +79,14 @@ public class ProcessDeploymentPO extends AbstractBasePO{
 
 	public void setServerId(Long serverId) {
 		this.serverId = serverId;
+	}
+
+	@Column(name = "DB")
+	public String getDb() {
+		return db;
+	}
+
+	public void setDb(String db) {
+		this.db = db;
 	}
 }
