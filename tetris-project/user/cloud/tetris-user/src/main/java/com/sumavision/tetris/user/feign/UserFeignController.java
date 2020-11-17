@@ -533,7 +533,7 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/find/by/userno/in")
 	public Object findByUsernoIn(
-			String usernos,
+			@RequestBody String usernos,
 			HttpServletRequest request) throws Exception{
 		
 		List<String> usernoList = JSONArray.parseArray(usernos, String.class);
