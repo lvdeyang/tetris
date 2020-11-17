@@ -825,10 +825,12 @@ public class BindResourceController extends ControllerBase {
 						}
 					}
 					websocketMessageService.consumeAll(consumeIds);
+					System.out.println("----------------------------****--------------");
 				
 					
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				LOGGER.error("", e);
 			}
 			
