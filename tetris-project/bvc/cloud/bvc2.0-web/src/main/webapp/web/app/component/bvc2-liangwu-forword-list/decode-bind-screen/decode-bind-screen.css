@@ -27,9 +27,9 @@ height: calc(100% - 25px);
 }
 .decode-bind-screen .liangwu-forword .el-select{
 }
-.decode-bind-screen .layout-auto tbody td{
+.decode-bind-screen .layout-auto tbody td p{
   font-size: 14px !important;
-  color: #fff;
+  color: #fff !important;
   text-align: center;
 }
 .decode-bind-screen .layout-auto tbody td .cell-box{

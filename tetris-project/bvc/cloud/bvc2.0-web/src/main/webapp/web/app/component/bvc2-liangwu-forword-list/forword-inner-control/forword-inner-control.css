@@ -28,9 +28,9 @@
   color: #666;
 }
 
-.forword-inner-control .layout-auto tbody td{
+.forword-inner-control .layout-auto tbody td p{
   font-size: 14px !important;
-  color: #fff;
+  color: #fff !important;
   text-align: left;
 }
 .forword-inner-control .layout-auto tbody td .cell-box{

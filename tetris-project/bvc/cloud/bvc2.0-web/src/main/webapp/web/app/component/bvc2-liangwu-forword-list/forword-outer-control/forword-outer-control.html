@@ -26,6 +26,8 @@
         <el-option v-for="item in regionOption" :key="item.identity" :label="item.stationName" :value="item.identity">
         </el-option>
       </el-select>
+
+      <el-button size='mini' type='primary' @click="openBandwidth">配置站点带宽</el-button>
       <el-button @click="handleStart" size="mini" type="success">批量开始</el-button>
       <el-button @click="handleStop(true)" size="mini" type="warning">批量停止</el-button>
       <el-button @click="handleStop(null)" size="mini" type="danger">批量删除</el-button>
@@ -75,4 +77,8 @@
       :pager-count="5">
     </el-pagination>
   </div>
+  <el-dialog v-if="bandwidthVisible" title="配置站点带宽" :visible.sync="bandwidthVisible" width="80%"
+    :before-close="handlebandwidthClose">
+    <bvc2-monitor-forword-bandwidth :origin-type="originType"></bvc2-monitor-forword-bandwidth>
+  </el-dialog>
 </div>

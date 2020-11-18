@@ -122,11 +122,6 @@ define([
             requireType: ['csv'],
             multiple: false
           },
-          tokens: {
-            visible: false,
-            currentUser: '',
-            rows: []
-          }
         },
 
         bindAccessNodeUidVisable: false,
@@ -497,7 +492,7 @@ define([
             })
             return
           }
-          for (var i = 1; i <= self.createNumber; i++) {
+          for (let i = 1; i <= self.createNumber; i++) {
             var rundemNum = self.randomString(11);
             self.dialog.createUser.loading = true;
             var params = {
@@ -534,41 +529,28 @@ define([
           self.passwordEncode = self.encodePassword(self.dialog.batchLogin.password);
           var begin = self.dialog.batchLogin.beginNumber;
           var end = self.dialog.batchLogin.endNumber;
-          var number = 0;
+          // for (let i = self.dialog.batchLogin.beginNumber; i <= self.dialog.batchLogin.endNumber; i++) {
+          //   setTimeout(function () {
+          //     self.username = self.dialog.batchLogin.userName + '-' + i
+          //     console.log(self.username, 'username')
+          //     console.log(self.passwordEncode, 'password')
+          //     $('.login-submit-button').trigger("click")
+          //   }, 500 * i)
+          // }
+          ajax.post('/do/username/password/login', { username: self.username, passward: self.passwordEncode }, function (data) {
 
-          var timeIndex = setInterval(function () {
-            if (begin <= end) {
-              var username = self.dialog.batchLogin.userName + '-' + begin
-              // ajax.post('/do/password/login/test', { username: username, password: self.passwordEncode }, function (data) {  //管理平台登录
-              ajax.post('/api/zk/auth/do/username/password/login', { username: username, password: self.passwordEncode }, function (data) { //QT客户端登录
-
-                if (data) {
-                  self.$message({
-                    type: "success",
-                    message: "账号" + username + "已成功登录！"
-                  })
-                }
-              });
-              begin++
-            } else {
-              clearInterval(timeIndex)
-
-            }
-          }, 300)
-        },
-        handleTokens: function (scope) {
-          var self = this;
-          var row = scope.row;
-          self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
-          ajax.post('/token/load', { userId: row.id }, function (data) {
-            self.dialog.tokens.visible = true;
-            self.dialog.tokens.currentUser = row;
-            if (data && data.length > 0) {
-              for (var i = 0; i < data.length; i++) {
-                self.dialog.tokens.rows.push(data[i]);
-              }
-            }
           });
+          // var timeIndex = setInterval(function () {
+          //   if (begin <= end) {
+          //     self.username = self.dialog.batchLogin.userName + '-' + begin
+          //     console.log(self.username, 'username')
+          //     console.log(self.passwordEncode, 'password')
+          //     $('.login-submit-button').trigger("click")
+          //     begin++
+          //   } else {
+          //     clearInterval(timeIndex)
+          //   }
+          // }, 300)
         },
         handleSizeChange: function (size) {
           var self = this;
@@ -639,47 +621,7 @@ define([
             this.isLoginIpDisabled = false
 
           }
-        },
-
-        // 下线高级操作
-        handleTokens: function (scope) {
-          var self = this;
-          var row = scope.row;
-          self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
-          ajax.post('/token/load', { userId: row.id }, function (data) {
-            self.dialog.tokens.visible = true;
-            self.dialog.tokens.currentUser = row;
-            if (data && data.length > 0) {
-              for (var i = 0; i < data.length; i++) {
-                self.dialog.tokens.rows.push(data[i]);
-              }
-            }
-          });
-        },
-        // 强制下线
-        handleInvalidToken: function (scope) {
-          var self = this;
-          var row = scope.row;
-          ajax.post('/token/invalid', { id: row.id }, function (data) {
-            for (var i = 0; i < self.dialog.tokens.rows.length; i++) {
-              if (self.dialog.tokens.rows[i].id === row.id) {
-                self.dialog.tokens.rows.splice(i, 1, data);
-                break;
-              }
-            }
-            self.$message({
-              type: 'success',
-              message: '操作成功'
-            });
-          });
-        },
-
-        handleTokensClose: function () {
-          var self = this;
-          self.dialog.tokens.visible = false;
-          self.dialog.tokens.currentUser = '';
-          self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
-        },
+        }
       },
       created: function () {
         var self = this;

@@ -1,6 +1,6 @@
 <template>
   <div class="Echarts">
-    <div :id="echartsId" style="width: 500px;height:350px;"></div>
+    <div :id="echartsId" style="width: 100%;height:350px;"></div>
     <div class="data-box">占用：{{currentNum>=totalNum?totalNum:currentNum}} <br />空闲：{{(totalNum - currentNum)<0?0:(totalNum - currentNum)}}</div>
   </div>
 </template>

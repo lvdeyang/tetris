@@ -61,7 +61,7 @@
         <el-input type="password" v-model="bundleForm.checkPass" auto-complete="off" style="width: 200px;" required></el-input>
       </el-form-item>
       <el-form-item size="small" label="告警容量" prop="alarmSize" v-if="alarmSizeVisable">
-        <el-input v-model.number="extraParam.alarmSize" auto-complete="off" style="width: 200px;" placeholder="单位：GB"></el-input>
+        <el-input v-model.number="alarmSize" auto-complete="off" style="width: 200px;" placeholder="单位：GB"></el-input>
       </el-form-item>
       <!-- TODO -->
       <el-form-item size="small" label="接入层UID" prop="accessNodeUid">
@@ -78,41 +78,6 @@
       <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
-
-      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
-        <el-select v-model="bundleForm.coderType" style="width: 200px;">
-          <el-option v-for="item in coderTypeOptions" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item> -->
-      <!-- <el-form-item size="small" label="解码组播">
-        <el-switch v-model="bundleForm.multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item>
-      <el-form-item size="small" label="是否转码">
-        <el-switch v-model="bundleForm.transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item> -->
-      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
-        <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
-      </el-form-item>
-      <!-- <el-form-item size="small" label="设备IP">
-        <el-input v-model="bundleForm.deviceAddr.deviceIp" style="width: 200px;"></el-input>
-      </el-form-item> -->
-
-      <!-- <el-form-item size="small" label="设备端口">
-        <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标纬度(°)" prop="latitude">
-        <el-input v-model="bundleForm.latitude" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc'" label="流地址" prop="streamUrl">
-        <el-input v-model="bundleForm.streamUrl" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='speaker'" label="标识" prop="identify">
-        <el-input v-model="bundleForm.identify" style="width: 200px;"></el-input>
-      </el-form-item> -->
 
     </el-form>
     <el-card class="box-card" style="margin-top:10px" v-show="cardVisable">
@@ -720,7 +685,7 @@ export default {
         bundleAlias: '',
         accessNodeUid: '',
         accessNodeName: '',
-        bundleFolderId: null,
+        folderId: null,
         bundleFolderName: '',
         transcod: false,
         multicastSourceIp: '',
@@ -749,9 +714,10 @@ export default {
         dev_type: 'sip_enc',
         region: 'self',
         address: '',
-        alarmSize: '',
-        param: {},
+        param: {
+        },
       },
+      alarmSize: '',
       rules: {
         deviceModel: [
           { required: true, message: '请选择设备形态', trigger: 'change' }
@@ -797,7 +763,7 @@ export default {
             { label: 'onvif输入(虚编码)', value: 'onvif_enc' },
             { label: '北清编码器输入', value: 'bq_enc' },
             { label: '28181编码器输入', value: '28181_enc' },
-            { label: '北清接入编码器', value: 'bq_encoder' },
+            // { label: '北清接入编码器', value: 'bq_encoder' },
           ]
 
         },
@@ -1390,19 +1356,6 @@ export default {
         this.$router.push('/' + tab.name)
       }
     },
-    // getDeviceModels: function () {
-    //   getDeviceModels().then(res => {
-    //     if (!res.errMsg && res.deviceModels) {
-    //       for (let deviceModel of res.deviceModels) {
-    //         let deviceModelOption = {
-    //           value: deviceModel,
-    //           label: deviceModel
-    //         };
-    //         this.deviceModelOptions.push(deviceModelOption);
-    //       }
-    //     }
-    //   });
-    // },
     devTypeChange: function (value) {
       var val = this.extraParam.dev_type = value[value.length - 1]
       var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc',] //无特殊扩展参数
@@ -1474,7 +1427,7 @@ export default {
     },
     reset: function () {
       // this.$refs["bundleForm"].resetFields();
-      // this.bundleForm.bundleFolderId = null;
+      // this.bundleForm.folderId = null;
       // this.bundleForm.bundleFolderName = '';
     },
     submit: function () {
@@ -1502,14 +1455,14 @@ export default {
           var extraParam = this.extraParam
           if (this.bundleForm.deviceModel == 'cdn') {
 
-            if (!/\d/.test(this.extraParam.alarmSize) || this.extraParam.alarmSize < 0) {
+            if (!/\d/.test(this.alarmSize) || this.alarmSize < 0) {
               this.$message({
                 type: "waring",
                 message: "告警容量必须为数字且大于等于0"
               })
               return
             } else {
-              extraParam.param = { alarmSize: extraParam.alarmSize }
+              extraParam.param = { alarmSize: self.alarmSize }
               self.extraParam.dev_type = 'cdn'
               console.log(extraParam)
             }
@@ -1587,7 +1540,7 @@ export default {
                 bundleAlias: self.bundleForm.bundleAlias + '-' + i,
                 accessNodeUid: self.bundleForm.accessNodeUid,
                 accessNodeName: self.bundleForm.accessNodeName,
-                bundleFolderId: self.bundleForm.bundleFolderId,
+                folderId: self.bundleForm.folderId,
                 bundleFolderName: self.bundleForm.bundleFolderName,
                 transcod: self.bundleForm.transcod,
                 coderType: 'DECODER',
@@ -1691,7 +1644,7 @@ export default {
     },
     handleChangeFolderCommit: function () {
       var self = this
-      self.bundleForm.bundleFolderId = self.dialog.changeFolder.tree.current.id
+      self.bundleForm.folderId = self.dialog.changeFolder.tree.current.id
       self.bundleForm.bundleFolderName = self.dialog.changeFolder.tree.current.name
       self.handleChangeFolderClose()
     },
