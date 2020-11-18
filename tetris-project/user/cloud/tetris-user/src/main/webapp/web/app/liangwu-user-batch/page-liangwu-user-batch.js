@@ -535,19 +535,13 @@ define([
           var begin = self.dialog.batchLogin.beginNumber;
           var end = self.dialog.batchLogin.endNumber;
           var number = 0;
-          // for (let i = self.dialog.batchLogin.beginNumber; i <= self.dialog.batchLogin.endNumber; i++) {
-          //   setTimeout(function () {
-          //     self.username = self.dialog.batchLogin.userName + '-' + i
-          //     console.log(self.username, 'username')
-          //     console.log(self.passwordEncode, 'password')
-          //     $('.login-submit-button').trigger("click")
-          //   }, 500 * i)
-          // }
 
           var timeIndex = setInterval(function () {
             if (begin <= end) {
               var username = self.dialog.batchLogin.userName + '-' + begin
-              ajax.post('/do/password/login/test', { username: username, password: self.passwordEncode }, function (data) {
+              // ajax.post('/do/password/login/test', { username: username, password: self.passwordEncode }, function (data) {  //管理平台登录
+              ajax.post('/api/zk/auth/do/username/password/login', { username: username, password: self.passwordEncode }, function (data) { //QT客户端登录
+
                 if (data) {
                   self.$message({
                     type: "success",
