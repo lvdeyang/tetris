@@ -128,7 +128,6 @@ public class ResourceRemoteService {
 			}
 		}
 		
-		
 		List<String> nodeUuids = new ArrayList<String>();
 		if(deviceCodes.size() > 0){
 			List<BundlePO> bundles = bundleDao.findByUsernameIn(deviceCodes);

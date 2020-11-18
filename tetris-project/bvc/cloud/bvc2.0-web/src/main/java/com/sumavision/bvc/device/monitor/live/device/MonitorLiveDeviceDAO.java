@@ -80,4 +80,14 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 */
 	public List<MonitorLiveDevicePO> findByUserIdAndStatus(Long userId, MonitorRecordStatus status);
 	
+	/**
+	 * 根据执行状态查询 <br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月17日 上午10:13:44
+	 * @param status 状态RUN/STOP
+	 * @return Long 正在执行的转发条数
+	 */
+	public Long countByStatus(MonitorRecordStatus status);
+	
 }

@@ -8,11 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.PtzctrlPassByContent;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -23,6 +32,23 @@ public class MonitorPtzctrlService {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness = new ExecuteBusinessProxy();
 	
+	@Autowired
+	private QueryUtil queryUtil;
+	
+	@Autowired
+	private BundleDao bundleDao;
+	
+	@Autowired
+	private CommandCascadeUtil commandCascadeUtil;
+	
+	@Autowired
+	private CommandCascadeService commandCascadeService;
+	
+	@Autowired
+	private UserUtils userUtils;
+	
+	@Autowired
+	private UserQuery userQuery;
 	/**
 	 * 透传云镜控制协议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -69,22 +95,33 @@ public class MonitorPtzctrlService {
 			Direction direction, 
 			String speed, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
+		
 		StringBufferWrapper control = new StringBufferWrapper();
 		control.append("<tiltservo>")
 			   .append(new StringBufferWrapper().append("<direction>").append(direction.getProtocol()).append("</direction>").toString())
 			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
 			   .append("</tiltservo>");
 		String xml = generateProtocal("start", control.toString());
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：云台控制");
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+			}
+		}
 	}
 	
 	/**
@@ -250,7 +287,7 @@ public class MonitorPtzctrlService {
 		String xml = generateProtocal("stop", null);
 		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：停止云台控制");
+//		executeBusiness.execute(logic, "点播系统：停止云台控制");
 	}
 	
 	/**
