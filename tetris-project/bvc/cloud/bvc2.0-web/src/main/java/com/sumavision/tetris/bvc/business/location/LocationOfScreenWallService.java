@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sumavision.bvc.control.device.monitor.live.MonitorLiveUtil;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.monitor.live.MonitorLiveDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
@@ -44,6 +45,9 @@ public class LocationOfScreenWallService {
 	
 	@Autowired
 	private MonitorLiveDeviceService monitorLiveDeviceService;
+	
+	@Autowired
+	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
 	
 	/**
 	 * 屏幕墙的编解码信息<br/>
@@ -215,6 +219,8 @@ public class LocationOfScreenWallService {
 		
 		if(LocationExecuteStatus.RUN.equals(locationScreen.getStatus())){
 			monitorLiveDeviceService.stop(locationScreen.getMonitorLiveDeviceId(), user.getId(), user.getUserno(), null);
+		}else{
+			monitorLiveDeviceDao.delete(locationScreen.getMonitorLiveDeviceId());
 		}
 		
 		locationScreen.setEncoderBundleId("");

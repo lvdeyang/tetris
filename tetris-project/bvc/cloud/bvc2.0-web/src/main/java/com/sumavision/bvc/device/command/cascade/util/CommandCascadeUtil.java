@@ -20,6 +20,7 @@ import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -971,6 +972,33 @@ public class CommandCascadeUtil {
 			userIdList.add(user.getId());
 		}
 		return userIdList;
+	}
+	
+	/**
+	 * 为云台级联创建GroupBO<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月18日 上午9:52:40
+	 * @param bundleId 要操作的设备的bundleId
+	 * @param xml 真正要执行的命令
+	 * @param targetUserName 要发送命令的成员名称：来自BundlePO的username
+	 * @param opUserName 业务用户的name
+	 * @return GroupBO 
+	 */
+	public GroupBO generateCloudControll(
+			String bundleId,
+			String xml,
+			String targetUserName,
+			String opUserName){
+		MinfoBO minfoBo = new MinfoBO().setMid(targetUserName)
+									   .setMtype("device");
+		GroupBO groupBO = new GroupBO()
+				.setOp(opUserName)
+				.setMid(bundleId)
+				.setSubject(xml)
+				.setMlist(new ArrayListWrapper<MinfoBO>().add(minfoBo).getList());//发送目标成员列表
+		
+		return groupBO;
 	}
 	
 	private String generateUuid(){

@@ -712,7 +712,10 @@ public class CommonForwardPO extends AbstractBasePO{
 				&& (audioSourceType == null || audioSourceType.equals(forward.getAudioSourceType()))
 //				&& (combineAudioUuid == null || combineAudioUuid.equals(forward.getCombineAudioUuid()))
 				&& (srcMemberId == null || srcMemberId.equals(forward.getSrcMemberId()))
-				&& (dstMemberId == null || dstMemberId.equals(forward.getDstMemberId()))){
+				&& (dstMemberId == null || dstMemberId.equals(forward.getDstMemberId()))
+				&& (srcBundleId == null || srcBundleId.equals(forward.getSrcBundleId()))
+				&& (srcLayerId == null || srcLayerId.equals(forward.getSrcLayerId()))
+				&& (srcChannelId == null || srcChannelId.equals(forward.getSrcChannelId()))){
 			return true;
 		}
 		return false;
