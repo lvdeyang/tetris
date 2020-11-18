@@ -15,6 +15,9 @@ public class DatabaseVO extends AbstractBaseVO<DatabaseVO, DatabasePO>{
 	/** 数据库端口 */
 	private String databasePort;
 	
+	/** 数据库名称 */
+	private String databaseName;
+	
 	/** 用户名 */
 	private String username;
 	
@@ -78,11 +81,21 @@ public class DatabaseVO extends AbstractBaseVO<DatabaseVO, DatabasePO>{
 		return this;
 	}
 
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public DatabaseVO setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+		return this;
+	}
+
 	@Override
 	public DatabaseVO set(DatabasePO entity) throws Exception {
 		this.setId(entity.getId())
 			.setDatabaseIP(entity.getDatabaseIP())
 			.setDatabasePort(entity.getDatabasePort())
+			.setDatabaseName(entity.getDatabaseName())
 			.setUsername(entity.getUsername())
 			.setPassword(entity.getPassword())
 			.setServerId(entity.getServerId());

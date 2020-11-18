@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
@@ -23,7 +22,6 @@ import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficD
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataVO;
-import com.sumavision.tetris.omms.software.service.installation.BackupInformationVO;
 
 @Component
 public class ServerQuery {

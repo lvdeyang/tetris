@@ -25,11 +25,14 @@ public class ProcessPO extends AbstractBasePO{
 	/** 进程名称 */
 	private String processId;
 	
-	/* 进程别名 */
+	/** 进程别名 */
 	private String processName;
 	
-	/* 安装包id */
+	/** 安装包id */
 	private Long installationPackageId;
+	
+	/** 数据库 */
+	private String db;
 
 	@Column(name = "PROCESS_ID")
 	public String getProcessId() {
@@ -57,6 +60,13 @@ public class ProcessPO extends AbstractBasePO{
 	public void setInstallationPackageId(Long installationPackageId) {
 		this.installationPackageId = installationPackageId;
 	}
-	
-	
+
+	@Column(name = "DB")
+	public String getDb() {
+		return db;
+	}
+
+	public void setDb(String db) {
+		this.db = db;
+	}
 }
