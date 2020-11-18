@@ -42,35 +42,6 @@ public class CloudControlService {
 	private ExecuteBusinessProxy executeBusiness = new ExecuteBusinessProxy();
 	
 	/**
-	 * 透传云镜控制协议<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月11日 下午1:22:17
-	 * @param String userId 用户id
-	 * @param String bundleId 设备id
-	 * @param String layerId 设备接入层id
-	 * @param String xml xml协议
-	 */
-	public void passBy(
-			String userId, 
-			String bundleId,
-			String layerId,
-			String xml) throws Exception{
-		
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId);
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：xt通过联网云台控制");
-		
-	}
-	
-	/**
 	 * 竖直方向移动镜头<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

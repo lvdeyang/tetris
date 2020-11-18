@@ -24,6 +24,7 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -46,6 +47,9 @@ public class CommandCascadeUtil {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private Base64 base64;
 	
 	/**
 	 * 发送即时消息<br/>
@@ -995,7 +999,7 @@ public class CommandCascadeUtil {
 		GroupBO groupBO = new GroupBO()
 				.setOp(opUserName)
 				.setMid(bundleId)
-				.setSubject(xml)
+				.setSubject(base64.encode(xml))
 				.setMlist(new ArrayListWrapper<MinfoBO>().add(minfoBo).getList());//发送目标成员列表
 		
 		return groupBO;

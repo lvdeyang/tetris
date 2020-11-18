@@ -79,6 +79,36 @@ public class MonitorPtzctrlService {
 	}
 	
 	/**
+	 * 收到级联命令执行<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月18日 下午2:59:39
+	 * @param bundleId 设备id
+	 * @param xml 真正下发的控制命令
+	 * @param userId 业务用户id
+	 * @throws Exception
+	 */
+	public void outCloudControll(
+			String bundleId, 
+			String xml, 
+			Long userId) throws Exception{
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		
+		LogicBO logic = new LogicBO();
+		logic.setUserId(userId.toString());
+		logic.setPass_by(new ArrayList<PassByBO>());
+		PassByBO ptzctrl = new PassByBO();
+		ptzctrl.setBundle_id(bundleId);
+		ptzctrl.setLayer_id(bundlePo.getAccessNodeUid());
+		ptzctrl.setType(PASSBY_TYPE);
+		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+		logic.getPass_by().add(ptzctrl);
+		executeBusiness.execute(logic, "点播系统：级联云台控制");
+		
+	}
+	
+	/**
 	 * 竖直方向移动镜头<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -106,6 +136,7 @@ public class MonitorPtzctrlService {
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
 			if(queryUtil.isLdapBundle(bundlePo)){
+				//给外部系统发送级联命令
 				UserBO userBO = userUtils.queryUserById(userId);
 				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
 				commandCascadeService.cloudControll(groupBO);
@@ -141,22 +172,34 @@ public class MonitorPtzctrlService {
 			Direction direction, 
 			String speed, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
+		
 		StringBufferWrapper control = new StringBufferWrapper();
 		control.append("<panservo>")
 			   .append(new StringBufferWrapper().append("<direction>").append(direction.getProtocol()).append("</direction>").toString())
 			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
 			   .append("</panservo>");
 		String xml = generateProtocal("start", control.toString());
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：云台控制");
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//给外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+			}
+		}
 	}
 	
 	/**
@@ -176,22 +219,34 @@ public class MonitorPtzctrlService {
 			ZoomControl direction, 
 			String speed, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
+		
 		StringBufferWrapper control = new StringBufferWrapper();
 		control.append("<zoom>")
 			   .append(new StringBufferWrapper().append("<zoomctrl>").append(direction.getProtocol()).append("</zoomctrl>").toString())
 			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
 			   .append("</zoom>");
 		String xml = generateProtocal("start", control.toString());
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：云台控制");
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//给外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+			}
+		}
 	}
 	
 	/**
@@ -211,22 +266,33 @@ public class MonitorPtzctrlService {
 			FocusControl direction, 
 			String speed, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
 		StringBufferWrapper control = new StringBufferWrapper();
 		control.append("<focus>")
 			   .append(new StringBufferWrapper().append("<focusctrl>").append(direction.getProtocol()).append("</focusctrl>").toString())
 			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
 			   .append("</focus>");
 		String xml = generateProtocal("start", control.toString());
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：云台控制");
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//给外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+			}
+		}
 	}
 	
 	/**
@@ -246,22 +312,36 @@ public class MonitorPtzctrlService {
 			ApertureControl direction, 
 			String speed, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
+		
 		StringBufferWrapper control = new StringBufferWrapper();
 		control.append("<aperture>")
 			   .append(new StringBufferWrapper().append("<aperturectrl>").append(direction.getProtocol()).append("</aperturectrl>").toString())
 			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
 			   .append("</aperture>");
 		String xml = generateProtocal("start", control.toString());
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-		executeBusiness.execute(logic, "点播系统：云台控制");
+		
+		
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//是外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+			}
+		}
 	}
 	
 	/**
@@ -277,17 +357,29 @@ public class MonitorPtzctrlService {
 			String bundleId, 
 			String layerId, 
 			Long userId) throws Exception{
-		LogicBO logic = new LogicBO();
-		logic.setUserId(userId.toString());
-		logic.setPass_by(new ArrayList<PassByBO>());
-		PassByBO ptzctrl = new PassByBO();
-		ptzctrl.setBundle_id(bundleId);
-		ptzctrl.setLayer_id(layerId);
-		ptzctrl.setType(PASSBY_TYPE);
+		
 		String xml = generateProtocal("stop", null);
-		ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
-		logic.getPass_by().add(ptzctrl);
-//		executeBusiness.execute(logic, "点播系统：停止云台控制");
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//是外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：停止云台控制");
+			}
+		}
 	}
 	
 	/**
