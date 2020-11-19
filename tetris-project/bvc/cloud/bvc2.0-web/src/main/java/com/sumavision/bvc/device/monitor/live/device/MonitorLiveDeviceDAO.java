@@ -25,6 +25,16 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	public Page<MonitorLiveDevicePO> findByUserId(Long userId, Pageable page);
 	
 	/**
+	 * 获取用户的点播设备任务<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 上午10:33:32
+	 * @param Long userId 用户id
+	 * @return List<MonitorLiveDevicePO>
+	 */
+	public List<MonitorLiveDevicePO> findByUserId(Long userId);
+	
+	/**
 	 * 统计用户的点播设备任务数量<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -89,5 +99,14 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @return Long 正在执行的转发条数
 	 */
 	public Long countByStatus(MonitorRecordStatus status);
+	
+	/**
+	 * 通过视频源id或者目标设备id查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 下午1:08:00
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByVideoBundleIdInOrDstVideoBundleIdIn(Collection<String> videoBundleIdList, Collection<String> dstVideoBundleIdList);
 	
 }

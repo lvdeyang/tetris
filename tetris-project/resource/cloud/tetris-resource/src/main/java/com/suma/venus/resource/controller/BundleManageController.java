@@ -438,8 +438,14 @@ public class BundleManageController extends ControllerBase {
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
 				}
+				
 			}
-
+			try{
+				monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
+			}catch(Exception e) {
+				
+			}
+			
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete bundle : ", e);
 			data.put(ERRMSG, "内部错误");
@@ -662,7 +668,7 @@ public class BundleManageController extends ControllerBase {
 			try {
 				List<String> bundleIds = new ArrayList<String>();
 				bundleIds.add(bundleId);
-				monitorLiveDeviceFeign.resetBundles(bundleIds);
+				monitorLiveDeviceFeign.resetBundles(JSONArray.toJSONString(bundleIds));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
