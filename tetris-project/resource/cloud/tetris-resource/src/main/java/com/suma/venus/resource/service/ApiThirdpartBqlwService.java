@@ -515,7 +515,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 				userBundleBO.setBundleIds(toUnbindWriteCheList);
 				userBundleBOs.add(userBundleBO);
 			}
-			monitorLiveDeviceFeign.stopLiveByLosePrivilege(userBundleBOs);
+			monitorLiveDeviceFeign.stopLiveByLosePrivilege(JSONArray.toJSONString(userBundleBOs));
 		}
 		
 		//删除没有权限的设备
