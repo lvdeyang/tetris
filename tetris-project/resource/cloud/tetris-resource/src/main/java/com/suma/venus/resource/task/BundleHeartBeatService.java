@@ -65,20 +65,18 @@ public class BundleHeartBeatService {
 			LOGGER.warn("removeBundleStatus, cannot find budlePO, ip=" + bundle_ip);
 		}
 
-		if (bunldeStatusMap.size() == 0 && t != null) {
-			// TODO
-			t.cancel(true);
-		}
+		// if (bunldeStatusMap.size() == 0 && t != null) {
+		// TODO
+		// t.cancel(true);
+		// }
 
 	}
 
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
 
-		boolean threadFlag = false;
+		// boolean threadFlag = false;
 
-		if (bunldeStatusMap.size() == 0) {
-			threadFlag = true;
-		}
+		// startBundleHeartBeatMonitor();
 
 		if (bunldeStatusMap.get(bundle_ip) == null) {
 			// TODO 设备从离线变为上线，更新数据库status
@@ -108,14 +106,32 @@ public class BundleHeartBeatService {
 		bunldeStatusMap.put(bundle_ip, currentTime);
 
 		// TODO 判断是否需要启动线程
-		if (threadFlag) {
-			startBundleHeartBeatMonitor();
+		// if (threadFlag) {
+		// startBundleHeartBeatMonitor();
+		// }
+	}
+
+	public void initBundleStatus(BundlePO po) {
+
+		// startBundleHeartBeatMonitor();
+
+		if (bunldeStatusMap.get(po.getDeviceIp()) == null) {
+			if (po.getOnlineStatus().equals(ONLINE_STATUS.ONLINE)) {
+				bunldeStatusMap.put(po.getDeviceIp(), Calendar.getInstance().getTimeInMillis());
+			}
+
+		}
+
+	}
+
+	public synchronized void startBundleHeartBeatMonitor() {
+
+		if (bunldeStatusMap.size() == 0) {
+			LOGGER.info("new thread for bundle monitor");
+			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService,
+					timeout);
+			t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
 		}
 	}
 
-	public void startBundleHeartBeatMonitor() {
-		LOGGER.info("new thread for bundle monitor");
-		BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService, timeout);
-		t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
-	}
 }

@@ -1,5 +1,6 @@
 package com.suma.venus.resource.listener;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.mq.MQCallBackService;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.task.BundleHeartBeatService;
 
 /**
  * 启动listener
@@ -39,28 +41,31 @@ public class InitListener implements ApplicationRunner {
 	@Autowired
 	private BundleDao bundleDao;
 
+	@Autowired
+	private BundleHeartBeatService bundleHeartBeatService;
+
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		// 默认就把node的名称写入到消息服务的配置里然后只要重启就重新注册
-		//messageService.recoveryMessageService(new MQCallBackService());
+		// messageService.recoveryMessageService(new MQCallBackService());
 
 		// 初始化告警客户端
 		// AlarmOprlogClientService.initClient("suma-venus-resource",
 		// RegisterStatus.getNodeId(), localIp, messageService);
 
-		// LOGGER.info("==============InitListener resource finish with localIp : " +
-		// localIp + "=================");
-
 		List<BundlePO> bundlePOs = bundleDao.findByDeviceModel("transcode");
+
+		LOGGER.info("==============InitListener" + "================= " + bundlePOs.size());
 
 		if (CollectionUtils.isEmpty(bundlePOs)) {
 
 			for (BundlePO po : bundlePOs) {
-				po.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+				// po.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+				bundleHeartBeatService.startBundleHeartBeatMonitor();
+				bundleHeartBeatService.initBundleStatus(po);
 			}
 
-			bundleDao.save(bundlePOs);
-
+			// bundleDao.save(bundlePOs);
 		}
 
 		LOGGER.info("init transcode device done");
