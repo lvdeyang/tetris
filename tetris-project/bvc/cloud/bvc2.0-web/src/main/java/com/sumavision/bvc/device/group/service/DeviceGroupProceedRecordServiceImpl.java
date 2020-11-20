@@ -263,6 +263,12 @@ public class DeviceGroupProceedRecordServiceImpl {
 			DeviceGroupPO group
 			) throws Exception{
 		
+		DeviceGroupProceedRecordPO deviceGroupProceedRecordPO = deviceGroupProceedRecordDao.findByGroupIdAndFinished(group.getId(), false);
+		
+		if(deviceGroupProceedRecordPO != null){
+			return ;
+		}
+		
 		Set<DeviceGroupMemberPO> members = group.getMembers();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
 		for(DeviceGroupMemberPO member: members){

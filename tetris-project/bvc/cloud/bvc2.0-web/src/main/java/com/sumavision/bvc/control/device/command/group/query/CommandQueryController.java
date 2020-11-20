@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.TreeNode;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
@@ -681,6 +682,9 @@ public class CommandQueryController {
 			}
 		}
 		
+		//将同一个文件夹下的设备按照名称排序
+		orderBundleByName(_roots);
+		
 		return _roots;
 		
 	}
@@ -1292,6 +1296,40 @@ public class CommandQueryController {
 		Map<String, List<com.suma.venus.resource.service.ResourceService.Relation>> privileges = resourceService.hasPrivilegesOfAll(userId,null);
 		
 		return privileges;
+	}
+	
+	/**
+	 * 将同一个文件夹下的设备按照名称排序<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月20日 下午3:51:31
+	 * @param _roots 树
+	 */
+	private void orderBundleByName(List<TreeNodeVO> roots){
+		for(TreeNodeVO node:roots){
+			List<TreeNodeVO> childTreeNodeList= node.getChildren();
+			if(childTreeNodeList!=null){
+				List<TreeNodeVO> folderTreeNodeList =childTreeNodeList.stream().filter(treeNode->{
+					if(TreeNodeType.FOLDER.equals(treeNode.getType())){
+						return true;
+					}
+					return false;
+				}).collect(Collectors.toList());
+				
+				List<TreeNodeVO> bunldeTreeNodeList = childTreeNodeList.stream().filter(treeNode->{
+					if(TreeNodeType.BUNDLE.equals(treeNode.getType())){
+						return true;
+					}
+					return false;
+				}).collect(Collectors.toList());
+				Collections.sort(bunldeTreeNodeList, Comparator.comparing(TreeNodeVO::getName));
+				node.getChildren().removeAll(bunldeTreeNodeList);
+				node.getChildren().addAll(bunldeTreeNodeList);
+				if(folderTreeNodeList != null && folderTreeNodeList.size() > 0){
+					orderBundleByName(folderTreeNodeList);
+				}
+			}
+		}
 	}
 	
 }
