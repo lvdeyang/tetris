@@ -779,12 +779,12 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 任务与任务是否相同 TODO:完善判断条件，判空等 */
 	public boolean equalsTask(PageTaskPO task){
 		if(this.getId().equals(task.getId())) return true;
-		if(this.businessId.equals(task.getBusinessId())
+		/*if(this.businessId.equals(task.getBusinessId())
 				&& this.srcVideoId.equals(task.getSrcVideoId())&&this.srcVideoChannelId.equals(task.getSrcVideoChannelId())){
 			if(this.srcAudioId==null && task.getSrcAudioId()==null) return true;
 			if(this.srcAudioId!=null && this.srcAudioId.equals(task.getSrcAudioId())) return true;
 			return false;
-		}
+		}*/
 		return false;
 	}
 	

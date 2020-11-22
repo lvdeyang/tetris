@@ -323,12 +323,12 @@ public class MonitorRecordController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		Date parsedStartTime = null;
-		if(startTime != null && !"".equals(fileName)){
+		if(startTime != null && !"".equals(startTime)){
 			parsedStartTime = DateUtil.parse(startTime, DateUtil.dateTimePattern);
 		}
 		
 		Date parsedEndTime = null;
-		if(endTime != null && !"".equals(fileName)){
+		if(endTime != null && !"".equals(endTime)){
 			parsedEndTime = DateUtil.parse(endTime, DateUtil.dateTimePattern);
 		}
 		
