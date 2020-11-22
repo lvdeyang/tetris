@@ -84,6 +84,17 @@ public enum BusinessInfoType {
 			return false;
 		}
 	}
+	
+	public boolean isPlayFile(){
+		switch(this){
+		case PLAY_COMMAND_RECORD:
+		case PLAY_FILE:
+		case PLAY_RECORD:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	/**
 	 * @Title: 根据名称获取转发目的类型 
@@ -100,5 +111,7 @@ public enum BusinessInfoType {
 		}
 		throw new ErrorTypeException("name", name);
 	}
+	
+	
 	
 }
