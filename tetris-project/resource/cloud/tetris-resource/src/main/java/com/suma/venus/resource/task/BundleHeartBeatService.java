@@ -66,7 +66,7 @@ public class BundleHeartBeatService {
 		}
 
 		// if (bunldeStatusMap.size() == 0 && t != null) {
-		// TODO
+		//
 		// t.cancel(true);
 		// }
 
@@ -75,8 +75,6 @@ public class BundleHeartBeatService {
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
 
 		// boolean threadFlag = false;
-
-		// startBundleHeartBeatMonitor();
 
 		if (bunldeStatusMap.get(bundle_ip) == null) {
 			// TODO 设备从离线变为上线，更新数据库status
@@ -104,6 +102,7 @@ public class BundleHeartBeatService {
 		}
 
 		bunldeStatusMap.put(bundle_ip, currentTime);
+		startBundleHeartBeatMonitor();
 
 		// TODO 判断是否需要启动线程
 		// if (threadFlag) {
@@ -126,7 +125,7 @@ public class BundleHeartBeatService {
 
 	public synchronized void startBundleHeartBeatMonitor() {
 
-		if (bunldeStatusMap.size() == 0) {
+		if (t == null || t.isCancelled()) {
 			LOGGER.info("new thread for bundle monitor");
 			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService,
 					timeout);
