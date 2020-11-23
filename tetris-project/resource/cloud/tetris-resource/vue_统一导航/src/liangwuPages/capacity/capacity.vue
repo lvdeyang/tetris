@@ -170,6 +170,21 @@ export default {
   },
   mounted () {
     queryCapacityDatas({ 'id': 1 }).then(res => {
+      // var res = {
+      //   id: 5,
+      //   reCount: 10,
+      //   reIdleCount: 10,
+      //   replayCapacity: 20,
+      //   turnCapacity: 200,
+      //   turnCount: 0,
+      //   turnIdleCount: 200,
+      //   userCapacity: 200,
+      //   userCount: 2,
+      //   userIdleCount: 198,
+      //   vedioCapacity: 1024,
+      //   vedioCount: 1025,
+      //   vedioIdleCount: 0,
+      // };
       this.resData = res
       this.initForm.vedioCapacity = res.vedioCapacity
       this.initForm.userCapacity = res.userCapacity

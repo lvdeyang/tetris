@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
@@ -869,7 +870,7 @@ public class BindResourceController extends ControllerBase {
 							userBundleBO.setBundleIds(toUnbindWriteCheList);
 							userBundleBOs.add(userBundleBO);
 						}
-						monitorLiveDeviceFeign.stopLiveByLosePrivilege(userBundleBOs);
+						monitorLiveDeviceFeign.stopLiveByLosePrivilege(JSONArray.toJSONString(userBundleBOs));
 					}
 				}
 			} catch (Exception e) {

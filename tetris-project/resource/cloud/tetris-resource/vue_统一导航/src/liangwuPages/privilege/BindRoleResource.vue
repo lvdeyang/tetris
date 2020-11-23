@@ -81,7 +81,7 @@
       <!--工具条-->
       <el-col :span="24" class="toolbar">
         <el-button size="small" type="primary" @click="submitPrivilege">提交</el-button>
-        <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20"></el-input>
+        <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" @change="pageChange"></el-input>
         <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :current-page="pageNum" :total="total" style="float:right;">
         </el-pagination>
       </el-col>
@@ -176,6 +176,12 @@ export default {
     }
   },
   methods: {
+
+    pageChange: function () {
+      this.pageNum = 1;
+      this.countPerPage = this.filters.countPerPage;
+      this.getResources()
+    },
     dataFilter: function (value) {
       this.$refs.tree.filter(value);
     },

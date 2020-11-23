@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.service.ApiThirdpartBqlwService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 @Controller
 @RequestMapping(value = "/api/thirdpart/bqlw")
@@ -48,7 +49,9 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/foreign/server/node/off")
 	public Object foreignServerNodeOff(HttpServletRequest request)throws Exception{
 		
-		return apiThirdpartBqlwService.foreignServerNodeOff(request);
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartBqlwService.foreignServerNodeOff(wrapper);
 	}
 	
 	/**
@@ -64,7 +67,9 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/foreign/server/node/on")
 	public Object foreignServerNodeOn(HttpServletRequest request) throws Exception{
 		
-		return apiThirdpartBqlwService.foreignServerNodeOn(request);
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartBqlwService.foreignServerNodeOn(wrapper);
 	}
 	
 	/**
@@ -79,8 +84,10 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@ResponseBody
 	@RequestMapping(value = "/device/permission/add")
 	public Object devicePermissionAdd(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 
-		return apiThirdpartBqlwService.devicePermissionAdd(request);
+		return apiThirdpartBqlwService.devicePermissionAdd(wrapper);
 	}
 	
 	/**
@@ -97,7 +104,9 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/device/permission/remove")
 	public Object devicePermissionRemove(HttpServletRequest request)throws Exception{
 		
-		return apiThirdpartBqlwService.devicePermissionRemove(request);
+		JSONHttpServletRequestWrapper wrapper =new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartBqlwService.devicePermissionRemove(wrapper);
 	}
 	
 	/**
@@ -114,21 +123,9 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/device/permission/change")
 	public Object devicePermissionChange(HttpServletRequest request)throws Exception{
 		
-		return apiThirdpartBqlwService.devicePermissionChange(request);
-	}
-	
-	/**
-	 * 外域下组织机构更新<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>lqxuhv<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年11月6日 上午10:28:19
-	 * @param institutionsArray
-	 * @throws Exception
-	 */
-	public Object folderUpdate(JSONArray institutionsArray)throws Exception{
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.folderUpdate(institutionsArray);
+		return apiThirdpartBqlwService.devicePermissionChange(wrapper);
 	}
 	
 	//device/status/change
@@ -146,6 +143,8 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/device/status/change")
 	public Object deviceStatusChange(HttpServletRequest request)throws Exception{
 		
-		return apiThirdpartBqlwService.deviceStatusChange(request);
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartBqlwService.deviceStatusChange(wrapper);
 	}
 }

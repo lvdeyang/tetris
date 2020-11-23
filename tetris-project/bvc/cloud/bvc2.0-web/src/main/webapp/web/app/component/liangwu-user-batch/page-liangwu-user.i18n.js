@@ -61,11 +61,7 @@ define(function () {
     placeholderEditUserRepeat: '再次输入新密码！',
     handleEditUserCancel: '取消',
     handleEditUserSubmit: '确定',
-    tableTokensColumnType: '终端',
-    tableTokensColumnIp: 'ip',
-    tableTokensColumnOperation: '操作',
-    tipHandleInvalidToken: '强制下线',
-    tipHandleTokens: '登录状态',
+
   };
 
   return {

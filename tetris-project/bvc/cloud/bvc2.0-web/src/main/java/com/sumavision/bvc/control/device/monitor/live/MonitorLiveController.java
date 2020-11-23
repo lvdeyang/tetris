@@ -3,10 +3,10 @@ package com.sumavision.bvc.control.device.monitor.live;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -1064,6 +1065,29 @@ public class MonitorLiveController {
 		
 		return null;
 	}
+
+	/**
+	 * 删除设备停止点播设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 上午11:43:20
+	 * @param ids 被删除的设备id集合
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop/live/device/by/delete")
+	public Object stopLiveDeviceByDeleteDevice(
+			String ids,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		List<String> bundleIdList =Stream.of(ids.split(",")).collect(Collectors.toList());
+		
+		monitorLiveDeviceService.stopLiveDeviceByDeleteDevice(bundleIdList, user.getId(), user.getUserno());
+		
+		return null;
+	}
 	
 	/**
 	 * 失去权限停止转发<br/>
@@ -1076,23 +1100,17 @@ public class MonitorLiveController {
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/by/lose/privilege")
 	public Object stopLiveByLosePrivilege(
-			List<UserBundleBO> userBundleBoList,
+			@RequestParam String userBundleBoList,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		Optional<UserBundleBO> userBundleBoOptional = userBundleBoList.stream().filter(userBundleBo->{
-			if(userBundleBo.getUserId().equals(user.getId())){
-				return true;
-			}
-			return false;
-		}).findFirst();
-		
-		if(!userBundleBoOptional.isPresent()){
+		if(userBundleBoList == null || "".equals(userBundleBoList)){
 			return null;
 		}
+		List<UserBundleBO> userBundleBos= JSONArray.parseArray(userBundleBoList, UserBundleBO.class);
 		
-		monitorLiveDeviceService.stopLiveByLosePrivilege(userBundleBoOptional.get(), user.getId(), user.getUserno());
+		monitorLiveDeviceService.stopLiveByLosePrivilege(userBundleBos, user.getId(), user.getUserno());
 		
 		return null;
 	}
@@ -1108,12 +1126,18 @@ public class MonitorLiveController {
 	@ResponseBody
 	@RequestMapping(value = "/reset/bundles")
 	public Object resetBundles(
-			List<String> bundleIds,
+			String bundleIds,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		monitorLiveDeviceService.resetBundles(bundleIds, userId);
+		if(bundleIds == null || "".equals(bundleIds)){
+			return null;
+		}
+		
+		List<String> bundleIdList = JSONArray.parseArray(bundleIds, String.class);
+		
+		monitorLiveDeviceService.resetBundles(bundleIdList, userId);
 		
 		return null;
 	}

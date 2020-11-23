@@ -75,7 +75,7 @@ public class VedioCapacityController {
 			}
 		}
 		Long turnCapacity = commandSystemQueryService.queryCountOfTransmit();
-		Long replayCapacity = commandSystemQueryService.queryCountOfTransmit();
+		Long replayCapacity = commandSystemQueryService.queryCountOfReview();
 		vedioCapacityVO.setTurnCount(turnCapacity);
 		vedioCapacityVO.setReCount(replayCapacity);
 		Integer bundle = bundleCountList.size();

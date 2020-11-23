@@ -1380,9 +1380,12 @@ public class MonitorLiveDeviceService {
 		BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId().indexOf("_")>=0?live.getVideoBundleId().split("_")[0]:live.getVideoBundleId());
 		
 		//先发清除字幕
-		connectDstVideoChannel.setOsds(monitorOsdService.clearProtocol(videoBundle.getUsername(), live.getVideoBundleName()));
-		executeBusiness.execute(logic, "点播系统：清除字幕");
-		
+		try{
+				connectDstVideoChannel.setOsds(monitorOsdService.clearProtocol(videoBundle.getUsername(), live.getVideoBundleName()));
+				executeBusiness.execute(logic, "点播系统：清除字幕");
+		}catch (Exception e) {
+			System.out.println();
+		}
 		return logic;
 	}
 	
@@ -1508,34 +1511,49 @@ public class MonitorLiveDeviceService {
 	 * <b>日期：</b>2020年11月12日 下午3:58:06
 	 * @param userBundleBo
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void stopLiveByLosePrivilege(
-			UserBundleBO userBundleBo,
+			List<UserBundleBO> userBundleBoList,
 			Long userId,
 			String userNo) throws Exception {
 		
-		Map<String,String> bundleIdMap = resourceQueryUtil.queryUseableBundleIds(userBundleBo.getUserId(), new ArrayListWrapper<String>().add("DIANBO").getList(),Boolean.FALSE)
-												 .stream().collect(Collectors.toMap(String::toString, Function.identity()));
-		
-		List<MonitorLiveDevicePO> monitorLiveDeviceList = monitorLiveDeviceDao.findByUserIdAndStatus(userBundleBo.getUserId(), MonitorRecordStatus.RUN);
-		
-		List<Long> monitorLiveDeviceIds= monitorLiveDeviceList.stream().filter(monitorLiveDevice->{
-			return bundleIdMap.get(monitorLiveDevice.getAudioBundleId()) == null ? true : false;
-		}).map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
-		
-		if(monitorLiveDeviceIds.size()<=0){
-			return;
-		}
-		
-		//处理屏幕墙
-		List<LocationOfScreenWallPO> locationOfScreenWallPOList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(monitorLiveDeviceIds);
-		locationOfScreenWallPOList.stream().forEach(screenWall->{
+		//这里可以再优化，但是会写的很复杂 //这里可以加一个功能，那些用户的哪些设备没有点播权限
+		for(UserBundleBO userBundleBo : userBundleBoList){
+			
+			Map<String,String> bundleIdMap = resourceQueryUtil.queryUseableBundleIds(userBundleBo.getUserId(), new ArrayListWrapper<String>().add("DIANBO").getList(),Boolean.FALSE)
+					 .stream().collect(Collectors.toMap(String::toString, Function.identity()));
+			
+			List<MonitorLiveDevicePO> monitorLiveDeviceList = monitorLiveDeviceDao.findByUserId(userBundleBo.getUserId());
+			
+			List<Long> needStopMonitorLiveDeviceIds = new ArrayList<Long>();
+			
+			List<Long> needDeleteMonitorLiveDeviceIds= monitorLiveDeviceList.stream().filter(monitorLiveDevice->{
+				return bundleIdMap.get(monitorLiveDevice.getAudioBundleId()) == null ? true : false;
+			}).map(monitorLiveDevice->{
+				if(MonitorRecordStatus.RUN.equals(monitorLiveDevice.getStatus())){
+					needStopMonitorLiveDeviceIds.add(monitorLiveDevice.getId());
+				}
+				return monitorLiveDevice;
+			}).map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
+			
+			if(needDeleteMonitorLiveDeviceIds.size()<=0){
+				continue;
+			}
+			
+			//处理屏幕墙
+			List<LocationOfScreenWallPO> locationOfScreenWallPOList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(needStopMonitorLiveDeviceIds);
+			locationOfScreenWallPOList.stream().forEach(screenWall->{
 			screenWall.setEncoderBundleId("");
 			screenWall.setEncoderBundleName("");
 			screenWall.setStatus(LocationExecuteStatus.STOP);
-		});
-		locationOfScreenWallDao.save(locationOfScreenWallPOList);
+			});
+			locationOfScreenWallDao.save(locationOfScreenWallPOList);
+			
+			stop(needStopMonitorLiveDeviceIds, userId, userNo, null);
+			
+			monitorLiveDeviceDao.deleteByIdIn(needDeleteMonitorLiveDeviceIds);
+		}
 		
-		stop(monitorLiveDeviceIds, userId, userNo, null);
 	}
 
 	/**
@@ -1559,5 +1577,55 @@ public class MonitorLiveDeviceService {
 				 .setDisconnectBundle(disconnectBundleBoList);
 		
 		executeBusiness.execute(logic, "重置设备");
+	}
+	
+	/**
+	 * 删除设备停止点播设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 上午11:55:22
+	 * @param bundleIdList 要删除的设备id
+	 * @param userId 业务人员id
+	 * @param userNo 业务人员no
+	 * @throws Exception 
+	 */
+	@Transactional(rollbackFor = Exception.class )
+	public void stopLiveDeviceByDeleteDevice(
+			List<String> bundleIdList,
+			Long userId,
+			String userNo) throws Exception{
+		
+		//找到转发
+		List<MonitorLiveDevicePO> monitorLiveDeviceList = monitorLiveDeviceDao.findByVideoBundleIdInOrDstVideoBundleIdIn(bundleIdList, bundleIdList);
+		List<Long> needStopMonitorLiveDeviceIds = new ArrayList<Long>();
+		//如果删除的设备是解码器还需要删除屏幕墙
+		List<Long> needDeleteScreenWall = new ArrayList<Long>();
+		
+		List<Long> needDeleteMonitorLiveDeviceIds= monitorLiveDeviceList.stream().map(monitorLiveDevice->{
+			if(MonitorRecordStatus.RUN.equals(monitorLiveDevice.getStatus())){
+				needStopMonitorLiveDeviceIds.add(monitorLiveDevice.getId());
+			}if(bundleIdList.contains(monitorLiveDevice.getDstVideoBundleId())){
+				needDeleteScreenWall.add(monitorLiveDevice.getId());
+			}
+			return monitorLiveDevice;
+		}).map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
+		
+		if(needDeleteMonitorLiveDeviceIds.size()<=0){
+			return;
+		}
+		
+		//处理屏幕墙
+		List<LocationOfScreenWallPO> locationOfScreenWallPOList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(needStopMonitorLiveDeviceIds);
+		locationOfScreenWallPOList.stream().forEach(screenWall->{
+		screenWall.setEncoderBundleId("");
+		screenWall.setEncoderBundleName("");
+		screenWall.setStatus(LocationExecuteStatus.STOP);
+		});
+		locationOfScreenWallDao.save(locationOfScreenWallPOList);
+		
+		stop(needStopMonitorLiveDeviceIds, userId, userNo, null);
+		
+		monitorLiveDeviceDao.deleteByIdIn(needDeleteMonitorLiveDeviceIds);
+		locationOfScreenWallDao.deleteByMonitorLiveDeviceIdIn(needDeleteScreenWall);
 	}
 }

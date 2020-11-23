@@ -21,7 +21,7 @@
       </el-col>
       <el-col :span="24" class="toolbar" style="padding-top: 0px; padding-bottom: 5px; margin:0px">
         <el-form-item label="日志时间" prop="oprTimeRange" :span="12">
-          <el-date-picker v-model="filters.oprTimeRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+          <el-date-picker v-model="filters.oprTimeRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '23:59:59']"></el-date-picker>
         </el-form-item>
         <el-form-item :span="3">
           <el-button type="primary" v-on:click="queryOprlogList">查询</el-button>
@@ -166,7 +166,7 @@ export default {
     queryOprlogList () {
       var timeStart, timeEnd
 
-      if (this.filters.oprTimeRange != undefined) {
+      if (this.filters.oprTimeRange != undefined && this.filters.oprTimeRange[0] != undefined) {
         if (typeof (this.filters.oprTimeRange[0]) !== undefined) {
           timeStart = util.formatDate.format(this.filters.oprTimeRange[0], 'yyyy-MM-dd hh:mm:ss')
         };

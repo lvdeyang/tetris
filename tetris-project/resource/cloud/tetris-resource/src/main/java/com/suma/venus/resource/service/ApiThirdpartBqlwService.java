@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
-import com.suma.venus.resource.base.bo.UnbindResouceBO;
-import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.dao.BundleDao;
@@ -102,8 +100,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * @param request foreign:[{name:'外域名称'}]
 	 * @return null
 	 */
-	public Object foreignServerNodeOff(HttpServletRequest request)throws Exception{
-		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+	public Object foreignServerNodeOff(JSONHttpServletRequestWrapper wrapper)throws Exception{
 		JSONArray foreignNames = wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
 		for (int i = 0; i < foreignNames.size(); i++) {
@@ -130,8 +127,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * <b>日期：</b>2020年11月4日 下午8:27:24
 	 * @param request
 	 */
-	public Object foreignServerNodeOn(HttpServletRequest request) throws Exception{
-		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+	public Object foreignServerNodeOn(JSONHttpServletRequestWrapper wrapper) throws Exception{
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -290,8 +286,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	public Object devicePermissionAdd(HttpServletRequest request)throws Exception{
-		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+	public Object devicePermissionAdd(JSONHttpServletRequestWrapper wrapper)throws Exception{
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -482,8 +477,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	public Object devicePermissionRemove(HttpServletRequest request)throws Exception{
-		JSONHttpServletRequestWrapper wrapper =new JSONHttpServletRequestWrapper(request);
+	public Object devicePermissionRemove(JSONHttpServletRequestWrapper wrapper)throws Exception{
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> deleteBundleIds = new HashSet<String>();
 		JSONArray devicesArray = new JSONArray();
@@ -521,7 +515,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 				userBundleBO.setBundleIds(toUnbindWriteCheList);
 				userBundleBOs.add(userBundleBO);
 			}
-			monitorLiveDeviceFeign.stopLiveByLosePrivilege(userBundleBOs);
+			monitorLiveDeviceFeign.stopLiveByLosePrivilege(JSONArray.toJSONString(userBundleBOs));
 		}
 		
 		//删除没有权限的设备
@@ -557,8 +551,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * @return
 	 * @throws Exception
 	 */
-	public Object devicePermissionChange(HttpServletRequest request)throws Exception{
-		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+	public Object devicePermissionChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray institutions = new JSONArray();
 		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
@@ -680,8 +673,7 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	 * @param request
 	 * @return
 	 */
-	public Object deviceStatusChange(HttpServletRequest request)throws Exception{
-		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+	public Object deviceStatusChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> bundleIds = new HashSet<String>(); 
 		List<BundlePO> changeBundlePOs = new ArrayList<BundlePO>();
