@@ -161,6 +161,8 @@ public class ColumnRelationArticleController {
 			throw new UserHasNotPermissionForArticleException(articleId, user);
 		}
 		
+		System.out.println("send push");
+		
 		columnRelationArticleService.inform(columnId, articleId);
 		
 		return null;
