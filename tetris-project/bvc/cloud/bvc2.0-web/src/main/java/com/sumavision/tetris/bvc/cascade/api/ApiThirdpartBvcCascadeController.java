@@ -16,8 +16,10 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
+import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
@@ -65,6 +67,9 @@ public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
 	private CommandUserServiceImpl commandUserServiceImpl;
+	
+	@Autowired
+	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
 	
 	/**
 	 * 查询服务节点<br/>
@@ -414,7 +419,7 @@ public class ApiThirdpartBvcCascadeController {
 		HttpServletRequestParser parser = new HttpServletRequestParser(request);
 		JSONObject params = parser.parseJSON();
 		System.out.println("*******************************************");
-		System.out.println("******/xt/business*******************");
+		System.out.println("******BQ/xt/business：通过bundleId操作外域点播*******************");
 		System.out.println("*******************************************");
 		System.out.println(params.toJSONString());
 		
@@ -446,7 +451,8 @@ public class ApiThirdpartBvcCascadeController {
 			
 		}else if("stop".equals(status)){
 			//停止点播设备
-//			monitorLiveDeviceService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
+			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findByVideoBundleIdAndType(bundleid, LiveType.XT_LOCAL);
+			monitorLiveDeviceService.stopXtSeeLocal(liveList, true);
 		}
 		
 		JSONObject JSONobject = new JSONObject();
@@ -455,4 +461,6 @@ public class ApiThirdpartBvcCascadeController {
 		
 		return JSONobject;
 	}
+	
+
 }

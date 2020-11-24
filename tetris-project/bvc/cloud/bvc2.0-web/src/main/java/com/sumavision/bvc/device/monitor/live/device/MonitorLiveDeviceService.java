@@ -808,6 +808,67 @@ public class MonitorLiveDeviceService {
 	}
 	
 	/**
+	 * 停止xt点播本地设备任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 下午3:09:28
+	 * @param MonitorLiveDevicePO live xt点播本地设备任务
+	 * @param Long userId 发起用户id
+	 * @param String userno 发起用户号码
+	 */
+	/**
+	 * BQ项目给按bundleId停止外域看本地<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月24日 下午3:16:53
+	 * @param liveList 点播任务集合
+	 * @param stopAndDelete 默认true
+	 */
+	public void stopXtSeeLocal(List<MonitorLiveDevicePO> liveList, Boolean stopAndDelete) throws Exception{
+		
+		//本地编码器
+		for(MonitorLiveDevicePO live : liveList){
+			BundlePO localEncoder = bundleDao.findByBundleId(live.getVideoBundleId());
+			
+			AvtplPO targetAvtpl = avtplDao.findOne(live.getAvTplId());
+			AvtplGearsPO targetGear = avtplGearsDao.findOne(live.getGearId());
+			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+			codec = live.getAudioChannelId() == null?codec.setAudio_param(null):codec;
+			
+			String networkLayerId = commons.queryNetworkLayerId();
+			
+			LogicBO logic = closeBundle(live);
+			
+			logic.setPass_by(new ArrayList<PassByBO>());
+			
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
+																					 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+																					 .setUuid(live.getUuid())
+																					 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", live.getVideoLayerId())
+																							 											   .put("bundleid", live.getVideoBundleId())	
+																							 											   .put("video_channelid", live.getVideoChannelId())
+																							 											   .put("audio_channelid", live.getAudioChannelId())
+																							 											   .getMap())
+																					 .setDst_number(localEncoder.getUsername())
+																					 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
+											.setType(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
+											.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
+			
+			if(Boolean.TRUE.equals(stopAndDelete)){
+				monitorLiveDeviceDao.delete(live);
+			}
+			
+			resourceServiceClient.removeLianwangPassby(live.getUuid());
+			
+			executeBusiness.execute(logic, "点播系统：停止xt点播本地设备 " + live.getVideoBundleName());
+		}
+	}
+	
+	/**
 	 * 停止本地点播本地设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

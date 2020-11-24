@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
 
+import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.orm.dao.MetBaseDAO;
 
@@ -108,5 +109,16 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @return
 	 */
 	public List<MonitorLiveDevicePO> findByVideoBundleIdInOrDstVideoBundleIdIn(Collection<String> videoBundleIdList, Collection<String> dstVideoBundleIdList);
+	
+	/**
+	 * 通过视频源和点播设备任务类型查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月24日 下午3:14:43
+	 * @param videoBundleId
+	 * @param type
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByVideoBundleIdAndType(String videoBundleId, LiveType type);
 	
 }
