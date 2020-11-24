@@ -1,6 +1,7 @@
 package com.suma.venus.resource.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.bouncycastle.jcajce.provider.symmetric.AES.Wrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,20 +33,24 @@ import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ApiThirdpartBqlwService extends ControllerBase{
+public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
@@ -120,22 +126,20 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 	}
 	
 	/**
-	 * 外域连接通知（批量，会通知对方域的组织机构以及设备信息）<br/>
+	 * 外域连接通知（批量、不会同步对方域组织机构和设备信息）<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年11月4日 下午8:27:24
-	 * @param request
+	 * <b>日期：</b>2020年11月23日 下午2:35:00
+	 * @param wrapper
+	 * @return
+	 * @throws Exception
 	 */
-	public Object foreignServerNodeOn(JSONHttpServletRequestWrapper wrapper) throws Exception{
-		JSONArray foreign = wrapper.getJSONArray("foreign");
-		JSONArray institutionsArray = new JSONArray();
-		JSONArray devicesaArray = new JSONArray();
+	public Object foreignServerNodeOn(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		JSONArray foreignNames =  wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
-		for (int i = 0; i < foreign.size(); i++) {
-			JSONObject jsonObject = foreign.getJSONObject(i);
-			institutionsArray.add(foreign.getJSONObject(i).getJSONArray("institutions"));
-			devicesaArray.add(foreign.getJSONObject(i).getJSONArray("devices"));
+		for (int i = 0; i < foreignNames.size(); i++) {
+			JSONObject jsonObject = foreignNames.getJSONObject(i);
 			String name = jsonObject.getString("name");
 			serverNodeName.add(name);
 		}
@@ -148,6 +152,38 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 			}
 		}
 		serNodeDao.save(serNodePOs);
+		return null;
+	}
+	
+	/**
+	 * 通知对方域的组织机构以及设备信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月4日 下午8:27:24
+	 * @param request
+	 */
+	public Object foreignServerNodeMessage(JSONHttpServletRequestWrapper wrapper) throws Exception{
+		JSONArray foreign = wrapper.getJSONArray("foreign");
+		JSONArray institutionsArray = new JSONArray();
+		JSONArray devicesaArray = new JSONArray();
+		Set<String> serverNodeName = new HashSet<String>();
+		for (int i = 0; i < foreign.size(); i++) {
+			JSONObject jsonObject = foreign.getJSONObject(i);
+			institutionsArray.add(foreign.getJSONObject(i).getJSONArray("institutions"));
+			devicesaArray.add(foreign.getJSONObject(i).getJSONArray("devices"));
+			String name = jsonObject.getString("name");
+			serverNodeName.add(name);
+		}
+		//外域连接开启
+//		List<SerNodePO> serNodePOs = serNodeDao.findByNodeNameIn(serverNodeName);
+//		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
+//			for (SerNodePO serNodePO : serNodePOs) {
+//				serNodePO.setOperate(ConnectionStatus.DONE);
+//				serNodePO.setStatus(ConnectionStatus.ON);
+//			}
+//		}
+//		serNodeDao.save(serNodePOs);
 		
 		//外域下组织机构信息
 		List<FolderPO> folderPOs = new ArrayList<FolderPO>();
@@ -724,4 +760,74 @@ public class ApiThirdpartBqlwService extends ControllerBase{
 		return true;
 	}
 	
+	/**
+	 * 查询外域下有权限的设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月23日 下午4:53:38
+	 * @param wrapper 
+	 */
+	public List<Map<String, Object>> foreignServerInformation(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		
+		String foreignName = wrapper.getString("foreign");
+		SerNodePO serNodePO = serNodeDao.findByNodeName(foreignName);
+		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(foreignName);
+		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+		Set<String> bundleIds = new HashSet<String>();
+		Set<Long> folderIds = new HashSet<Long>();
+		if (bundlePOs != null && !bundlePOs.isEmpty()) {
+			for (BundlePO bundlePO : bundlePOs) {
+				folderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
+				bundleIds.add(bundlePO.getBundleId());
+				BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+				bundleVOs.add(bundleVO);
+			}
+		}
+		List<FolderPO> institutions = new ArrayList<FolderPO>();
+		List<FolderPO> allFolderPOs = folderDao.findAll();
+		if(folderIds != null && !folderIds.isEmpty()){
+			List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+			if(folderPOs !=null && !folderPOs.isEmpty()){
+				for (FolderPO folderPO : folderPOs) {
+					StringBufferWrapper parentpath = new StringBufferWrapper();
+					if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
+						String[] parentPathStrings = folderPO.getParentPath().split("/"); 
+						for (int i = 1; i < parentPathStrings.length; i++) {
+							if (allFolderPOs != null && !allFolderPOs.isEmpty()) {
+								for (FolderPO allFolderPO : allFolderPOs) {
+									if(parentPathStrings[i].equals(allFolderPO.getId().toString())){
+										parentpath.append("/").append(allFolderPO.getUuid());
+									}
+								}
+							}
+						}
+					}
+					folderPO.setParentPath(parentpath.toString());
+				}
+			}
+			institutions.addAll(folderPOs);
+		}
+		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundleIds);
+		if (bundleVOs != null && !bundleVOs.isEmpty()) {
+			for (BundleVO bundleVO : bundleVOs) {
+				List<ChannelSchemeVO> inBundleVo = new ArrayList<ChannelSchemeVO>();
+				if (channelSchemePOs != null && !channelSchemePOs.isEmpty()) {
+					for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
+						ChannelSchemeVO channelSchemeVO = ChannelSchemeVO.fromPO(channelSchemePO);
+						if (channelSchemeVO.getBundleId().equals(bundleVO.getBundleId())) {
+							channelSchemeVO.setDeviceModel(bundleVO.getDeviceModel());
+							inBundleVo.add(channelSchemeVO);
+						}
+					}
+				}
+				bundleVO.setChannels(inBundleVo);
+			}
+		}
+		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			foreign.add(new HashMap<String, Object>());
+			foreign.get(0).put("name", serNodePO.getNodeName());
+			foreign.get(0).put("institutions", institutions);
+			foreign.get(0).put("devices", bundleVOs);
+		return foreign;
+	}
 }

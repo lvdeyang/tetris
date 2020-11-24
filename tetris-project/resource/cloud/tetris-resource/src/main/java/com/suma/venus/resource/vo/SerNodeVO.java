@@ -44,6 +44,28 @@ public class SerNodeVO {
 	private ConnectionStatus status;
 	
 	private String BusinessRoles;
+	
+	/**外域ip*/
+	private String ip;
+	
+	/**外域端口*/
+	private String port;
+	
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
 
 	public static SerNodeVO transFromPO(SerNodePO po) {
 
