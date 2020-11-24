@@ -70,7 +70,7 @@ public class MenuQuery {
 			String xmlString = memoryQuery.findAll();
 			for (MenuPO menuPO : menus) {
 				if(menuPO.getLink() == null) continue;
-				String appName = menuPO.getLink().split("//")[1].split("/")[0].toLowerCase();
+				String appName = menuPO.getLink().split("//")[1].split("/")[0];
 				
 				XMLReader reader = new XMLReader(xmlString);
 				List<Node> nodes = reader.readNodeList("applications.application");
@@ -81,15 +81,20 @@ public class MenuQuery {
 					Random r = new Random();
 					int i = r.nextInt(nodesto.size());
 					Node instanceNode = nodesto.get(i);
-					ip = reader.readString("instance.hostName",instanceNode);
-					if(menuPO.getLink().startsWith("http://")){
-						port = reader.readString("instance.port",instanceNode);
-					}else {
-						port = reader.readString("instance.securePort",instanceNode);
-					}
-					String nodePort = new StringBufferWrapper().append(ip).append(":").append(port).toString();
+					ip = reader.readString("instance.hostName",instanceNode);				
 					String name = reader.readString("application.name", node).toLowerCase();
-					if(name.equals(appName)){
+					if(name.equalsIgnoreCase(appName)){
+						if(menuPO.getLink().startsWith("http://")){
+							port = reader.readString("instance.port",instanceNode);
+						}else {
+							String instanceId=reader.readString("instance.instanceId",instanceNode);
+							String[] securePortStrs=instanceId.split("\\*");
+							if(securePortStrs!=null&&securePortStrs.length>0){
+								port = securePortStrs[securePortStrs.length-1];
+							}
+							
+						}
+						String nodePort = new StringBufferWrapper().append(ip).append(":").append(port).toString();
 						menuPO.setLink(menuPO.getLink().replaceAll(appName,nodePort ));
 						break;
 					}
