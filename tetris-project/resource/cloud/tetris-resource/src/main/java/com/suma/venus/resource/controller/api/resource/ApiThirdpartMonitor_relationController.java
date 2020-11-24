@@ -7,18 +7,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.controller.ControllerBase;
-import com.suma.venus.resource.service.ApiThirdpartBqlwService;
+import com.suma.venus.resource.service.ApiThirdpartMonitor_relationService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 @Controller
-@RequestMapping(value = "/api/thirdpart/bqlw")
-public class ApiThirdpartBqlwController extends ControllerBase{
+@RequestMapping(value = "/api/thirdpart/monitor_relation")
+public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	
 	@Autowired
-	private ApiThirdpartBqlwService apiThirdpartBqlwService;
+	private ApiThirdpartMonitor_relationService apiThirdpartMonitor_relationService;
 
 	/**
 	 * 查本域以及外域信息<br/>
@@ -33,7 +32,7 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	@RequestMapping(value = "/query/server/node/info")
 	public Object queryServerNodeInfo()throws Exception{
 		
-		return apiThirdpartBqlwService.queryServerNodeInfo();
+		return apiThirdpartMonitor_relationService.queryServerNodeInfo();
 	}
 	
 	/**
@@ -51,11 +50,11 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.foreignServerNodeOff(wrapper);
+		return apiThirdpartMonitor_relationService.foreignServerNodeOff(wrapper);
 	}
 	
 	/**
-	 * 外域连接通知（批量，会通知对方域的组织机构以及设备信息）<br/>
+	 * 通知对方域的组织机构以及设备信息<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -64,12 +63,12 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/foreign/server/node/on")
-	public Object foreignServerNodeOn(HttpServletRequest request) throws Exception{
+	@RequestMapping(value = "/foreign/server/node/message")
+	public Object foreignServerNodeMessage(HttpServletRequest request) throws Exception{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.foreignServerNodeOn(wrapper);
+		return apiThirdpartMonitor_relationService.foreignServerNodeMessage(wrapper);
 	}
 	
 	/**
@@ -87,7 +86,7 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 
-		return apiThirdpartBqlwService.devicePermissionAdd(wrapper);
+		return apiThirdpartMonitor_relationService.devicePermissionAdd(wrapper);
 	}
 	
 	/**
@@ -106,7 +105,7 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper =new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.devicePermissionRemove(wrapper);
+		return apiThirdpartMonitor_relationService.devicePermissionRemove(wrapper);
 	}
 	
 	/**
@@ -125,7 +124,7 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.devicePermissionChange(wrapper);
+		return apiThirdpartMonitor_relationService.devicePermissionChange(wrapper);
 	}
 	
 	//device/status/change
@@ -145,6 +144,41 @@ public class ApiThirdpartBqlwController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartBqlwService.deviceStatusChange(wrapper);
+		return apiThirdpartMonitor_relationService.deviceStatusChange(wrapper);
+	}
+	
+	/**
+	 * 外域连接通知（批量、不会同步对方域组织机构和设备信息）<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月23日 下午2:35:00
+	 * @param wrapper
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/foreign/server/node/on")
+	public Object foreignServerNodeOn(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartMonitor_relationService.foreignServerNodeOn(wrapper);
+	}
+	
+	/**
+	 * 查询外域下有权限的设备<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月23日 下午4:53:38
+	 * @param wrapper
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "foreign/server/information")
+	public Object foreignServerInformation(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartMonitor_relationService.foreignServerInformation(wrapper);
 	}
 }

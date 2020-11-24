@@ -1,6 +1,5 @@
 package com.suma.venus.resource.controller;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,7 +31,7 @@ public class OutlandController extends ControllerBase{
 		return outlandService.queryInland();
 	}
 	/**
-	 * 修改本域名称及口令<br/>
+	 * 修改本域名称<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -44,8 +43,8 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/inland")
-	public Object inland(String name,String password)throws Exception{
-		return outlandService.inland(name, password);
+	public Object inland(String name)throws Exception{
+		return outlandService.inland(name);
 	}
 	
 	/**
@@ -77,9 +76,9 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/outland")
-	public Object addOutland(String name,String password,String roleIds)throws Exception{
+	public Object addOutland(String name,String password,String roleIds,String ip,String port)throws Exception{
 		
-		return outlandService.addOutland(name, password, roleIds);
+		return outlandService.addOutland(name, password, roleIds,ip,port);
 	}
 
 	/**
@@ -130,8 +129,8 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/outland/change")
-	public Object outlandChange(Long serNodeId,String name,String password,String roleIds)throws Exception{
-		return outlandService.outlandChange(serNodeId,name,password,roleIds);
+	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port)throws Exception{
+		return outlandService.outlandChange(serNodeId,name,password,roleIds,ip,port);
 	}
 
 	/**
@@ -210,8 +209,8 @@ public class OutlandController extends ControllerBase{
 	@RequestMapping(value = "/submit/bundle/privilege")
 	public Object submitBundlePrivilege(
 			Long roleId, 
-			List<String> preBundlePrivilege, 
-			List<String> bundleprivilege)throws Exception{
+			String preBundlePrivilege, 
+			String bundleprivilege)throws Exception{
 		
 		return outlandService.submitBundlePrivilege(roleId, preBundlePrivilege, bundleprivilege);
 	}
