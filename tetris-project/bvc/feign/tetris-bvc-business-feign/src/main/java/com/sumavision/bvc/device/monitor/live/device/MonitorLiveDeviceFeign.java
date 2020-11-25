@@ -20,7 +20,7 @@ public interface MonitorLiveDeviceFeign {
 	 * <b>日期：</b>2020年11月10日 上午9:51:56
 	 * @param ids 设备的id集合
 	 */
-	@RequestMapping(value="/monitor/live/stop/live/device", method = RequestMethod.POST)
+	@RequestMapping(value="/monitor/live/stop/live/device/by/delete", method = RequestMethod.POST)
 	public JSONObject stopLiveDevice(
 			@RequestParam(value="ids") String ids) throws Exception;
 	
@@ -33,7 +33,7 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/stop/live/by/lose/privilege", method = RequestMethod.POST)
 	public JSONObject stopLiveByLosePrivilege(
-			@RequestParam(value="userBundleBoList") List<UserBundleBO> userBundleBoList) throws Exception;
+			@RequestParam(value="userBundleBoList") String userBundleBoList) throws Exception;
 	
 	/**
 	 * 重置设备<br/>
@@ -44,5 +44,5 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/reset/bundles", method = RequestMethod.POST)
 	public JSONObject resetBundles(
-			@RequestParam(value="bundleIds")List<Long> bundleIds) throws Exception;
+			@RequestParam(value="bundleIds")String bundleIds) throws Exception;
 }

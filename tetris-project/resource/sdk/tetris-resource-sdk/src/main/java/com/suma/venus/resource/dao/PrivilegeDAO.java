@@ -47,5 +47,10 @@ public interface PrivilegeDAO extends CommonDao<PrivilegePO>{
 	public List<PrivilegePO> findByNotIndentify(List<String> resources);
 	
 	@Query(value = "select * from privilegepo where SUBSTRING_INDEX(resource_indentity,'-',1) in ?1", nativeQuery = true)
-	public List<PrivilegePO> findByIndentify(List<String> resources);
+	public List<PrivilegePO> findByIndentify(Collection<String> resources);
+	
+	public List<PrivilegePO> findByResourceIndentityLike(String bundleId);
+	
+//	public List<PrivilegePO> findByResourceIndentityIn(List<String> resourceIndentity);
+	
 }

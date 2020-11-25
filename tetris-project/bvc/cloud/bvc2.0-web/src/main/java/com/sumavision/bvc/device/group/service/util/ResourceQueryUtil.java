@@ -123,7 +123,7 @@ public class ResourceQueryUtil {
 			return bundles;
 		}
 		
-		return null;
+		return new ArrayList<BundlePO>();
 	}
 	
 	/**

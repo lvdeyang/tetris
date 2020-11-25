@@ -869,7 +869,8 @@ public class PageTaskService {
 		 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(PageTaskPO openTask : openTasks){
-			//TODO:播放文件不需要呼叫
+			//播放文件不需要呼叫
+			if(openTask.getBusinessInfoType().isPlayFile()) continue;
 			ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 //			  													        .setOperateType(ConnectBundleBO.OPERATE_TYPE)
 			  													        .setLock_type("write")
@@ -918,6 +919,7 @@ public class PageTaskService {
 		}
 		
 		for(PageTaskPO closeTask : closeTasks){
+			if(closeTask.getBusinessInfoType().isPlayFile()) continue;
 			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 //																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																           	 .setBundleId(closeTask.getDstBundleId())

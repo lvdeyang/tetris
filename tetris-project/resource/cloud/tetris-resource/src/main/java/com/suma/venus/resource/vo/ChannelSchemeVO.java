@@ -19,11 +19,22 @@ public class ChannelSchemeVO {
 	
 	private String channelName;
 	
+	private String deviceModel;
+	
 	public static ChannelSchemeVO fromPO(ChannelSchemePO po){
 		ChannelSchemeVO vo= new ChannelSchemeVO();
 		BeanUtils.copyProperties(po, vo, "channelStatus");
 		vo.setChannelStatus(po.getChannelStatus().toString());
 		return vo;
+	}
+
+	
+	public String getDeviceModel() {
+		return deviceModel;
+	}
+
+	public void setDeviceModel(String deviceModel) {
+		this.deviceModel = deviceModel;
 	}
 
 	public String getBundleId() {

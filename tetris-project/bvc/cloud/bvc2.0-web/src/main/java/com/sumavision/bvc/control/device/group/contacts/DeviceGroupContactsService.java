@@ -91,8 +91,10 @@ public class DeviceGroupContactsService {
 		
 		if(hasSelected == null || hasSelected.equals(Boolean.FALSE)){
 			List<BundlePO> unselectedBundles = resourceQueryUtil.queryUseableBundles(userId);
-			unselectedBundles.removeAll(queryBundles);
-			queryBundles = unselectedBundles;
+			if(unselectedBundles != null){
+				unselectedBundles.removeAll(queryBundles);
+				queryBundles = unselectedBundles;
+			}
 		}
 		
 		List<BundleBO> bundles = queryBundles.stream().map(bundleBody->{

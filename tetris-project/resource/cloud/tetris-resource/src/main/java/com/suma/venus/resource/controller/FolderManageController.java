@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +50,11 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
+import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
@@ -56,15 +62,24 @@ import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.FolderUserMap.FolderUserComparator;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.FolderService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.util.DepartSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
@@ -114,6 +129,24 @@ public class FolderManageController extends ControllerBase {
 	
 	@Autowired
 	private Path path;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	@Autowired
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
 
 	@RequestMapping(value = "add", method = RequestMethod.POST)
 	@ResponseBody
@@ -211,6 +244,7 @@ public class FolderManageController extends ControllerBase {
 			String[] bundleIdArr = bundleIds.split(",");
 			FolderPO folderPO = folderDao.findOne(folderId);
 
+			List<String> bundleIdStrings = new ArrayList<String>();
 			int maxIndex = caculateMaxIndex(folderPO);
 			for (String bundleId : bundleIdArr) {
 				BundlePO bundle = bundleService.findByBundleId(bundleId);
@@ -222,9 +256,86 @@ public class FolderManageController extends ControllerBase {
 
 				bundleService.save(bundle);
 				bundleNodes.add(createBundleNode(folderId, bundle));
+				
+				bundleIdStrings.add(bundleId);
 			}
 
 			data.put("bundleNodes", bundleNodes);
+			
+			//设备修改组织机构外域
+			try {
+				PassByBO passByBOnew = new PassByBO();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+				Map<String, Object> local = new HashMap<String, Object>();
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				local.put("name", serNodePO.getNodeName());
+				//处理组织机构
+				
+				List<FolderPO> allFolderPOs = folderDao.findAll();
+				
+				FolderPO newFolderPO = folderDao.findOne(folderId);
+				if(newFolderPO.getParentPath() != null && !newFolderPO.getParentPath().equals("")){
+					StringBufferWrapper newFolderBufferWrapper = new StringBufferWrapper();
+					String[] newFolderStrings = newFolderPO.getParentPath().split("/");
+					for (int i = 1; i < newFolderStrings.length; i++) {
+						for (FolderPO allFolderPO : allFolderPOs) {
+							if(newFolderStrings[i].equals(allFolderPO.getId().toString())){
+								newFolderBufferWrapper.append("/").append(allFolderPO.getUuid());
+							}
+						}
+					}
+					newFolderPO.setParentPath(newFolderBufferWrapper.toString());
+				}
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIdStrings);
+				Set<Long> privilegelLongs = new HashSet<Long>();
+				List<FolderPO> institutions = new ArrayList<FolderPO>();
+				institutions.add(newFolderPO);
+				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+					for (PrivilegePO privilegePO : privilegePOs) {
+						privilegelLongs.add(privilegePO.getId());
+					}
+				}
+				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
+				Set<Long> serNodeIds = new HashSet<Long>();
+				if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+					Long roleId = rolePrivilegeMaps.get(0).getRoleId();
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+						}
+					}
+				}
+				List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				
+				for (int i = 0; i < bundleIdStrings.size(); i++) {
+					devices.add(new HashMap<String, Object>());
+					devices.get(i).put("bundleId", bundleIdStrings.get(i));
+					devices.get(i).put("institution", newFolderPO.getUuid());
+				}
+				
+				if (serNodePOs != null && !serNodePOs.isEmpty()) {
+					List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("institutions", institutions);
+					}
+					pass_by_content.put("cmd", "deviceInstitutionChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBOnew.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
+				}
+				
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to set folder : ", e);
 			data.put(ERRMSG, "内部错误");

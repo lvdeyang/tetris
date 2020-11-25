@@ -18,11 +18,14 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 	/** 进程名称 */
 	private String processId;
 	
-	/* 进程名称 */
+	/** 进程名称 */
 	private String processName;
 	
-	/* 安装包id */
+	/** 安装包id */
 	private Long installationPackageId;
+	
+	/** 数据库 */
+	private String db;
 	
 	public String getProcessId() {
 		return processId;
@@ -51,12 +54,22 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 		return this;
 	}
 
+	public String getDb() {
+		return db;
+	}
+
+	public ProcessVO setDb(String db) {
+		this.db = db;
+		return this;
+	}
+
 	@Override
 	public ProcessVO set(ProcessPO entity) throws Exception {
 		this.setId(entity.getId())
 			.setProcessId(entity.getProcessId())
 			.setProcessName(entity.getProcessName())
-			.setInstallationPackageId(entity.getInstallationPackageId());
+			.setInstallationPackageId(entity.getInstallationPackageId())
+			.setDb(entity.getDb());
 		return this;
 	}
 

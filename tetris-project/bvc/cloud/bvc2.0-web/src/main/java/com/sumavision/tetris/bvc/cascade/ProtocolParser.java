@@ -25,6 +25,7 @@ import com.sumavision.bvc.device.command.cascade.CommandCascadeServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.bvc.device.command.message.CommandMessageServiceImpl;
+import com.sumavision.bvc.device.monitor.ptzctrl.MonitorPtzctrlService;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.bvc.cascade.bo.AuthCommandBO;
 import com.sumavision.tetris.bvc.cascade.bo.CrossCommandBO;
@@ -32,6 +33,7 @@ import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.bvc.cascade.bo.ReplaceCommandBO;
 import com.sumavision.tetris.bvc.cascade.bo.SecretCommandBO;
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XMLReader;
@@ -81,6 +83,12 @@ public class ProtocolParser {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private MonitorPtzctrlService monitorPtzctrlService;
+	
+	@Autowired
+	private Base64 base64;
 	
 	/**
 	 * 重新绑定当前线程的请求，写入用户登录信息爱<br/>
@@ -254,6 +262,8 @@ public class ProtocolParser {
 				discussStart(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "discstop".equals(operation)){
 				discussStop(reader, rootNodeName, srcNo);
+			}else if("cloudControll".equals(commandname) && "controll".equals(operation)){
+				cloudControll(reader, rootNodeName, srcNo);
 			}
 		}
 		
@@ -1197,4 +1207,20 @@ public class ProtocolParser {
 		commandMeetingSpeakServiceImpl.discussStop(operator.getId(), groupId);
 	}
 	
+	/**
+	 * 云台相关的控制<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月18日 下午1:37:04
+	 * @param XMLReader reader 协议 
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void cloudControll(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+//		Long userId = userQuery.current().getId();
+		String bundleId = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
+		String xml = base64.decode(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".content").toString()));
+		//级联来的用户id为-1
+		monitorPtzctrlService.outCloudControll(bundleId, xml, -1L);
+	}
 }

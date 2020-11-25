@@ -1,0 +1,71 @@
+/**
+ * Created by lvdeyang on 2020/4/16 0016.
+ */
+define(function () {
+
+  var zhCN = {
+    title: '用户管理',
+    homePage: '首页',
+    currentPage: '用户管理',
+    handleCreate: '添加用户',
+    handleExportDisabled: '导出数据',
+    handleExport: '导出数据',
+    handleImportDisabled0: '正在处理第',
+    handleImportDisabled1: '条数据，总共',
+    handleImport0: '导入数据(已导入',
+    handleImport1: '次)',
+    placeholderConditionNickname: '用户昵称过滤',
+    placeholderConditionUserno: '用户号码过滤',
+    load: '查询',
+    tableColumnNickname: '昵称',
+    tableColumnUsername: '账号',
+    tableColumnUserno: '号码',
+    tableColumnMobile: '手机号',
+    tableColumnMail: '邮箱',
+    tableColumnLevel: '用户级别',
+    tableColumnLock: '锁定状态',
+    tableColumnOperation: '操作',
+    tipHandleRowEdit: '修改用户',
+    tipGotoBindBusinessRole: '绑定角色',
+    tipHandleRowDelete: '删除用户',
+    dialogCreateUserTitle: '新建用户',
+    labelCreateUserNickname: '昵称:',
+    labelCreateUserUsername: '账号:',
+    labelCreateUserUserno: '号码:',
+    labelCreateUserRemark: '备注',
+    labelCreateUserLastLoginTime: '上次登录时间',
+    labelCreateUserBindIp: '绑定ip',
+    labelCreateUserBindRole: '绑定角色',
+    labelCreateUserBindAccessNodeUid: '绑定服务节点',
+    labelCreateUserPassword: '密码:',
+    labelCreateUserRepeat: '确认:',
+    placeholderCreateUserRepeat: '请再次输入密码！',
+    labelCreateUserMobile: '手机:',
+    labelCreateUserMail: '邮箱:',
+    labelCreateUserLevel: '用户级别:',
+    labelCreateUserNumber: '用户级别',
+    labelCreateUserClassify: '类型:',
+    labelCreateUserCompanyName: '组织名称:',
+    handleCreateUserCancel: '取消',
+    handleCreateUserSubmit: '确定',
+    dialogEditUserTitle: '修改用户',
+    labelEditUserNickname: '昵称:',
+    labelEditUserMobile: '手机:',
+    labelEditUserMail: '邮箱:',
+    labelEditUserLevel: '用户级别:',
+    labelEditUserLevelNumber: '用户级别',
+    labelEditUserEditPassword: '修改密码',
+    labelEditUserOldPassword: '旧密码:',
+    labelEditUserNewPassword: '新密码:',
+    labelEditUserRepeat: '确认:',
+    placeholderEditUserRepeat: '再次输入新密码！',
+    handleEditUserCancel: '取消',
+    handleEditUserSubmit: '确定',
+
+  };
+
+  return {
+    'default': zhCN,
+    'zh-CN': zhCN
+  }
+});

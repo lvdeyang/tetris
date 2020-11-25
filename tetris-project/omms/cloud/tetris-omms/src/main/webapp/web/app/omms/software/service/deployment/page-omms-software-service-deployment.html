@@ -30,6 +30,12 @@
                                         <el-tooltip class="item" effect="dark" content="重启进程" placement="bottom-end" style="padding-left: 70px; display:inline-block; width:80px;">
                                             <el-button type="text" icon="el-icon-refresh" @click.stop="restart(p)"></el-button>
                                         </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="数据库备份" placement="bottom-end" style="padding-left: 70px; display:inline-block; width:80px;">
+                                            <el-button type="text" icon="feather-icon-inbox" @click = "databaseBackup(p)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="数据库恢复" placement="bottom-end" style="padding-left: 70px; display:inline-block; width:80px;">
+                                            <el-button type="text" icon="feather-icon-folder" @click.stop="databaseRestore(p)"></el-button>
+                                        </el-tooltip>
                                     </div>
                                 </el-form>
                             </template>

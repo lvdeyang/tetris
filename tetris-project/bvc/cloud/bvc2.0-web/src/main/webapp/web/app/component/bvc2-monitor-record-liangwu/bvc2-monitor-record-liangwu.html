@@ -159,11 +159,11 @@
                     </el-input>
                   </el-form-item>
 
-                  <el-form-item style="margin-bottom:10px;width: 480px;" prop="time_duration" label="告警容量">
+                  <!-- <el-form-item style="margin-bottom:10px;width: 480px;" prop="alarm_size_mb" label="告警容量">
                     <el-input size="medium" v-model.number="dialog.addRecord.alarm_size_mb"
                       placeholder="单位：MB,达到该容量后系统发送告警">
                     </el-input>
-                  </el-form-item>
+                  </el-form-item> -->
                   <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;width:320px"
                     label="时间">
                     <el-date-picker size="medium" v-model="dialog.addRecord.timeScope" type="datetimerange"

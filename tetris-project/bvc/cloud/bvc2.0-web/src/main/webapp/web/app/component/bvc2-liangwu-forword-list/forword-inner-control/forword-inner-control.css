@@ -1,7 +1,7 @@
 
 .forword-inner-control .bvc2-auto-layout-wrapper{
   position: relative;
-    width: 65%;
+    width: 75%;
     height: 95%;
     /* background-color: #16191E; */
     float: left;
@@ -17,8 +17,8 @@
   left: 0;
 }
 .forword-inner-control .col{
-  width: 30%;
-  min-height: calc(100% - 40px);
+  width: 20%;
+  height: calc(100% - 25px);
 }
 
 .forword-inner-control .liangwu-forword .el-select input {
@@ -27,11 +27,10 @@
   border-color: #5C676D;
   color: #666;
 }
-.forword-inner-control .liangwu-forword .el-select{
-}
-.forword-inner-control .layout-auto tbody td{
+
+.forword-inner-control .layout-auto tbody td p{
   font-size: 14px !important;
-  color: #fff;
+  color: #fff !important;
   text-align: left;
 }
 .forword-inner-control .layout-auto tbody td .cell-box{
@@ -67,4 +66,8 @@
   color:#F56C6C;
   font-size: 12px;
   margin-left: 0;
+}
+.tree-box{
+  height: calc(100% -120px);
+  overflow: auto;
 }

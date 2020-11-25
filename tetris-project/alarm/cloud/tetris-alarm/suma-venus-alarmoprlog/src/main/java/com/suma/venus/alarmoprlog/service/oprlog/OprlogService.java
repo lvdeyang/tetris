@@ -86,7 +86,7 @@ public class OprlogService {
 				if (queryOprlogVO.getQueryTimeStart() != null) {
 					try {
 						predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("oprTime").as(Date.class),
-								DateUtil.parse(queryOprlogVO.getQueryTimeStart(), "yyyy-MM-dd hh:mm:ss")));
+								DateUtil.parse(queryOprlogVO.getQueryTimeStart(), "yyyy-MM-dd HH:mm:ss")));
 					} catch (ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -96,7 +96,7 @@ public class OprlogService {
 				if (queryOprlogVO.getQueryTimeEnd() != null) {
 					try {
 						predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("oprTime").as(Date.class),
-								DateUtil.parse(queryOprlogVO.getQueryTimeEnd(), "yyyy-MM-dd hh:mm:ss")));
+								DateUtil.parse(queryOprlogVO.getQueryTimeEnd(), "yyyy-MM-dd HH:mm:ss")));
 					} catch (ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

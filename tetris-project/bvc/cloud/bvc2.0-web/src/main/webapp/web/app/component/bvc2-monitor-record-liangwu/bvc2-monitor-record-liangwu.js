@@ -82,7 +82,7 @@ define([
             bundleId: '',
             total_size_mb: '',
             time_duration: '',
-            alarm_size_mb: ""
+            // alarm_size_mb: ""
           },
           selectDevice: {
             visible: false,
@@ -122,7 +122,7 @@ define([
               bundle: "",
               total_size_mb: 0,
               time_duration: 0,
-              alarm_size_mb: ""
+              // alarm_size_mb: ""
             }
           }
         },
@@ -247,6 +247,10 @@ define([
         ajax.post('/monitor/record/load/all/status/record', condition, function (data) {
           self.totleRecord = data.total;
         });
+
+        // ajax.post('https://192.165.56.131:8214/tetris-user/api/zk/auth/do/username/password/login', null, function (data) {
+
+        // });
       },
       load: function (currentPage) {
         var self = this;
@@ -403,9 +407,9 @@ define([
           fileName: addRecord.fileName,
           bundleId: addRecord.bundleId,
           storeMode: addRecord.timeSegmentmode,
-          total_size_mb: addRecord.total_size_mb,
-          time_duration: addRecord.time_duration,
-          alarm_size_mb: addRecord.alarm_size_mb
+          total_size_mb: Math.floor(addRecord.total_size_mb),
+          time_duration: Math.floor(addRecord.time_duration),
+          // alarm_size_mb: addRecord.alarm_size_mb
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
@@ -466,27 +470,6 @@ define([
           return;
         }
 
-        if (self.dialog.addRecord.alarm_size_mb === '') {
-          self.$message({
-            type: 'warning',
-            message: '告警容量不能为空！'
-          });
-          return;
-        } else if (!/\d/.test(self.dialog.addRecord.alarm_size_mb)) {
-
-          self.$message({
-            type: 'warning',
-            message: '告警容量只能为数字！'
-          });
-          return;
-        } else if (self.dialog.addRecord.alarm_size_mb < 0) {
-
-          self.$message({
-            type: 'warning',
-            message: '告警容量不能为负数！'
-          });
-          return;
-        }
         if (addRecord.mode == 'TIMESEGMENT') {
 
           if (addRecord.timeSegmentmode == "month") {
@@ -630,7 +613,7 @@ define([
         this.dialog.detail.form.bundle = rows.videoSource;
         this.dialog.detail.form.total_size_mb = rows.total_size_mb;
         this.dialog.detail.form.time_duration = rows.time_duration;
-        this.dialog.detail.form.alarm_size_mb = rows.alarm_size_mb;
+        // this.dialog.detail.form.alarm_size_mb = rows.alarm_size_mb;
 
       },
       handleDetailElse (rows) {
@@ -640,7 +623,7 @@ define([
         this.dialog.detailelse.form.bundle = rows.videoSource;
         this.dialog.detailelse.form.total_size_mb = rows.total_size_mb;
         this.dialog.detailelse.form.time_duration = rows.time_duration;
-        this.dialog.detailelse.form.alarm_size_mb = rows.alarm_size_mb;
+        // this.dialog.detailelse.form.alarm_size_mb = rows.alarm_size_mb;
 
       },
       loadByDownload (id) {

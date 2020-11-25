@@ -649,6 +649,15 @@ define([
                     self.dialog.database.databasePort = row.databasePort;
                     self.dialog.database.visible = false;
                     self.dialog.database.rows.splice(0, self.dialog.database.rows.length);
+                },
+                databaseBackup:function(p){
+                    var self = this;
+                    ajax.post('/service/deployment/database/backup', { id: p.id }, function(data){
+
+                    });
+                },
+                databaseRestore:function(p){
+                    var self = this;
                 }
             },
             mounted:function(){

@@ -33,6 +33,7 @@ import LwCapacity from './liangwuPages/capacity/capacity.vue'
 import LwFolderManage from './liangwuPages/folder/FolderManage.vue'
 import LwSerInfoAndNode from './liangwuPages/serInfo/SerInfoAndNode.vue'
 import LwRegionManage from './liangwuPages/region/regionManage.vue'
+import LwAddBundleForTest from './liangwuPages/bundle/AddBundleForTest.vue'
 
 let routes = [{
   path: '/404',
@@ -230,6 +231,12 @@ let routes = [{
     path: '/LwRegionManage',
     component: LwRegionManage,
     name: '级联管理',
+    hidden: true
+  },
+  {
+    path: '/LwAddBundleForTest',
+    component: LwAddBundleForTest,
+    name: '添加设备测试',
     hidden: true
   }
   ]

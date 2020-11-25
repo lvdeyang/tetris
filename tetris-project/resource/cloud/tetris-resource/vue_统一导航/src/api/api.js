@@ -8,7 +8,7 @@ console.log(requestIP)
 //let basePath = process.env.RESOURCE_ROOT
 let basePath = document.location.origin;
 let loginUrl = process.env.USER_ROOT + '/vue';
-let bvcPath = document.location.protocol +"//"+document.location.hostname+':8214';
+let bvcPath = document.location.protocol + "//" + document.location.hostname + ':8214';
 
 if (basePath.indexOf('__requestIP__') !== -1) {
   basePath = basePath.replace('__requestIP__', requestIP)
@@ -355,3 +355,43 @@ console.log(bvcPath)
 export const getStationList = params => {
   return axiosInstance.post(`${bvcPath}/command/station/bandwidth/query`, qs.stringify(params)).then(res => res.data)
 }
+// 级联管理
+export const editInland = params => {
+  return axiosInstance.post(`${basePath}/outland/inland`, qs.stringify(params)).then(res => res.data)
+}
+
+// 查询外域信息
+export const queryOutland = params => {
+  return axiosInstance.post(`${basePath}/outland/query/outland`, qs.stringify(params)).then(res => res.data)
+}
+//创建外域	
+export const createOutload = params => {
+  return axiosInstance.post(`${basePath}/outland/add/outland`, qs.stringify(params)).then(res => res.data)
+}
+//连接外域	
+export const linkOutland = params => {
+  return axiosInstance.post(`${basePath}/outland/outland/on`, qs.stringify(params)).then(res => res.data)
+}
+//断开外域	
+export const unLinkOutland = params => {
+  return axiosInstance.post(`${basePath}/outland/outland/off`, qs.stringify(params)).then(res => res.data)
+}
+// 查询本域
+
+export const queryInland = params => {
+  return axiosInstance.post(`${basePath}/outland/query/inland`, qs.stringify(params)).then(res => res.data)
+}
+// 修改外域
+
+export const editOutland = params => {
+  return axiosInstance.post(`${basePath}/outland/outland/change`, qs.stringify(params)).then(res => res.data)
+}
+// 删除外域
+export const deleteOutland = params => {
+  return axiosInstance.post(`${basePath}/outland/outland/delete`, qs.stringify(params)).then(res => res.data)
+}
+// 查询外域设备
+export const queryOutlandBundle = params => {
+  return axiosInstance.post(`${basePath}/outland/query/outland/bundle`, qs.stringify(params)).then(res => res.data)
+}
+

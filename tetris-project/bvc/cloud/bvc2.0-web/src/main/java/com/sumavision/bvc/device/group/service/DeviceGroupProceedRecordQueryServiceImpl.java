@@ -59,7 +59,7 @@ public class DeviceGroupProceedRecordQueryServiceImpl {
 
 		for (DeviceGroupProceedRecordPO proceedRecord : proceedRecords) {
 			if (proceedRecord.getEndTime() == null) {
-				time += System.currentTimeMillis() - proceedRecord.getEndTime().getTime();
+				time += System.currentTimeMillis() - proceedRecord.getStartTime().getTime();
 			} else {
 				time += proceedRecord.getEndTime().getTime() - proceedRecord.getStartTime().getTime();
 			}

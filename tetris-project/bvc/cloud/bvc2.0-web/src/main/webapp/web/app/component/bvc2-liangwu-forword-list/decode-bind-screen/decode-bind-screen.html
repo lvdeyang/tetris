@@ -8,7 +8,7 @@
           <span slot="prefix" class="el-input__icon el-icon-search"></span>
         </el-input>
       </div>
-      <div>
+      <div class="tree-box">
         <el-tree ref="tree" :data="decodetree" node-key="id" highlight-current :expand-on-click-node="true"
           :props="defaultProps" :default-checked-keys="checked" :default-expand-all="defaultExpandAll"
           :filter-node-method="filterNode" :render-content="renderContent" @node-expand="nodeExpand"
