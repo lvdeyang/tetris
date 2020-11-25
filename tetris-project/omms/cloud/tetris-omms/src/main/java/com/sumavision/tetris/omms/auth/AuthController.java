@@ -121,14 +121,14 @@ public class AuthController {
 		AuthPO entity = authDAO.findOne(id);
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-type", new MediaType(MediaType.TEXT_PLAIN, Charset.forName("utf-8")).toString());
-        headers.add("Content-Disposition", "attchement;filename=auth("+entity.getName()+").csv");
-        byte[] csvBytes = entity.getContent().getBytes();
-        byte[] utf8Bytes = new byte[csvBytes.length+3];
+        headers.add("Content-Disposition", "attchement;filename=auth("+entity.getName()+").ini");
+        byte[] fileBytes = entity.getContent().getBytes();
+        byte[] utf8Bytes = new byte[fileBytes.length+3];
         utf8Bytes[0] = (byte)0xEF;
         utf8Bytes[1] = (byte)0xBB;
         utf8Bytes[2] = (byte)0xBF;
-        for(int i=0; i<csvBytes.length; i++){
-        	utf8Bytes[i+3] = csvBytes[i];
+        for(int i=0; i<fileBytes.length; i++){
+        	utf8Bytes[i+3] = fileBytes[i];
         }
         return new ResponseEntity<byte[]>(utf8Bytes, headers, HttpStatus.OK);
 	}

@@ -210,12 +210,13 @@ define([
                      self.dialog.setAuth.visible = true;
                      self.dialog.setAuth.id=row.id;
                      self.dialog.setAuth.deviceId=row.deviceId;
-                     var contentJson=JSON.parse(row.content);
-                     self.dialog.setAuth.bvc=contentJson.bvc;
-                     self.dialog.setAuth.transSystem=contentJson.transSystem;
-                     self.dialog.setAuth.mediaTransform=contentJson.mediaTransform;
-                     self.dialog.setAuth.jv210Joiner=contentJson.jv210Joiner;
-                     
+                     if(row.content){
+                    	 var contentJson=JSON.parse(row.content);
+                         self.dialog.setAuth.bvc=contentJson.bvc;
+                         self.dialog.setAuth.transSystem=contentJson.transSystem;
+                         self.dialog.setAuth.mediaTransform=contentJson.mediaTransform;
+                         self.dialog.setAuth.jv210Joiner=contentJson.jv210Joiner;
+                     }   
                 },
                 handleSetAuthClose:function(){
                     var self = this;
