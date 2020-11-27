@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.*;
+
 /**
  * 帧率变换参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -50,5 +52,14 @@ public class FpsConvertBO {
 	public void setMode(String mode) {
 		this.mode = mode;
 	}
-	
+
+	public FpsConvertBO() {
+	}
+
+	public FpsConvertBO(ProcessVO processVO) {
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.fps = processVO.getFps();
+		this.mode = processVO.getMode().name().toLowerCase();
+	}
 }

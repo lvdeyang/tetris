@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sumavision.tetris.business.common.service.TaskService;
+import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +58,10 @@ public class RecordService {
 	
 	@Autowired
 	private CapacityService capacityService;
-	
+
+	@Autowired
+	private TaskService taskService;
+
 	@Autowired
 	private TaskOutputDAO taskOutputDao;
 	
@@ -98,8 +103,8 @@ public class RecordService {
 		
 		System.out.println("删除收录:" + id);
 		
-		TaskOutputPO output = delete(id);
-		
+		TaskOutputPO output = taskService.delete(id,BusinessType.RECORD);
+
 		if(output != null){
 			taskOutputDao.delete(output);
 		}
@@ -146,6 +151,7 @@ public class RecordService {
 				input.setUniq(uniq);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -209,6 +215,7 @@ public class RecordService {
 				
 				if(input.getCount().equals(0)){
 					input.setInput(JSON.toJSONString(inputBO));
+					input.setNodeId(inputBO.getId());
 					input.setTaskUuid(taskUuid);
 					input.setType(businessType);
 				}
@@ -261,71 +268,67 @@ public class RecordService {
 		}
 	}
 		
-	/**
-	 * 删除任务流程 -- 输入计数减 一（并发）
-	 * 			        输出返回，上层删除（不管并发）
-	 * 			        数据没有清除，起线程清除<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月3日 上午9:28:35
-	 * @param String taskUuid 任务流程标识
-	 * @return TaskOutputPO 任务输出
-	 */
-	public TaskOutputPO delete(String taskUuid) throws Exception {
-		
-		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.RECORD);
-		
-		if(output != null){
-			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
-			
-			if(input != null){
-				
-				try {
-
-					input.setUpdateTime(new Date());
-					if(input.getCount() >= 1){
-						input.setCount(input.getCount() - 1);
-					}
-					taskInputDao.save(input);
-					
-					AllRequest allRequest = new AllRequest();
-					
-					OutputBO outputBO = JSONObject.parseObject(output.getOutput(), OutputBO.class);
-					List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
-					InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-					
-					if(input.getCount().equals(0) && input.getInput() != null){
-						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
-					}
-					if(tasks != null){
-						allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
-					}
-					if(outputBO != null){
-						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
-					}
-				
-					capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
-					
-					output.setOutput(null);
-					output.setTask(null);
-					
-					taskOutputDao.save(output);
-					
-				} catch (ObjectOptimisticLockingFailureException e) {
-					
-					// 版本不对，version校验
-					System.out.println("delete校验version版本不对");
-					Thread.sleep(300);
-					output = delete(taskUuid);
-				}
-			}
-			
-		}
-		
-		return output;
-	}
-	
+//	/**
+//	 * 删除任务流程 -- 输入计数减 一（并发）
+//	 * 			        输出返回，上层删除（不管并发）
+//	 * 			        数据没有清除，起线程清除<br/>
+//	 * <b>作者:</b>wjw<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年12月3日 上午9:28:35
+//	 * @param String taskUuid 任务流程标识
+//	 * @return TaskOutputPO 任务输出
+//	 */
+//	public TaskOutputPO delete(String taskUuid) throws Exception {
+//
+//		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.RECORD);
+//
+//		if(output != null){
+//
+//			TaskInputPO input = taskInputDao.findOne(output.getInputId());
+//
+//			if(input != null){
+//
+//				try {
+//					AllRequest allRequest = new AllRequest();
+//					OutputBO outputBO = JSONObject.parseObject(output.getOutput(), OutputBO.class);
+//					List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
+//
+//					if (!transcodeTaskService.beUseForInputWithoutTask(input.getId(), taskUuid)) {
+//						InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
+//						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
+//						input.setUpdateTime(new Date());
+//						input.setCount(0);
+//					}else{
+//						input.setCount(input.getCount()-1);
+//					}
+//
+//					if(tasks != null){
+//						allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
+//					}
+//					if(outputBO != null){
+//						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
+//					}
+//
+//					capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
+//					taskInputDao.save(input);
+//					output.setOutput(null);
+//					output.setTask(null);
+//					taskOutputDao.save(output);
+//
+//				} catch (ObjectOptimisticLockingFailureException e) {
+//
+//					// 版本不对，version校验
+//					System.out.println("delete校验version版本不对");
+//					Thread.sleep(300);
+//					output = delete(taskUuid);
+//				}
+//			}
+//
+//		}
+//
+//		return output;
+//	}
+//
 	/**
 	 * 收录信息转input<br/>
 	 * <b>作者:</b>wjw<br/>

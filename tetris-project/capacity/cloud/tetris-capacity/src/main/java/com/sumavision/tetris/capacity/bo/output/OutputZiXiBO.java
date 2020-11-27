@@ -1,5 +1,10 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.application.template.ProgramVO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,32 +25,36 @@ public class OutputZiXiBO {
 	
 	private Integer max_bitrate;
 	
-	private boolean rtp;
+	private Integer rtp;
 	
-	private Integer limited;
+	private String limited;
 	
-	private boolean stop_on_drop;
+	private Integer stop_on_drop;
 	
-	private boolean reconnect;
+	private Integer reconnect;
 	
 	private Integer fec_overhead;
 	
 	private Integer fec_block_ms;
 	
-	private boolean content_aware_fec;
+	private Integer content_aware_fec;
 	
-	private Integer enc_type;
+	private String enc_type;
 	
 	private Integer enc_key;
 	
-	private boolean use_compression;
+	private Integer use_compression;
 	
-	private boolean fast_connect;
+	private Integer fast_connect;
 	
 	private Integer smoothing_latency;
 	
 	private Integer timeout;
-	
+
+	private Integer force_bonding;
+
+	private Integer auto_nics_update_interval;
+
 	private String local_ip;
 	
 	private Integer enforce_bitrate;
@@ -58,13 +67,13 @@ public class OutputZiXiBO {
 	
 	private Integer elementary_streams_max_va_diff_ms;
 	
-	private boolean expect_high_jitter;
+	private Integer expect_high_jitter;
 	
-	private boolean ignore_dtls_cert_error;
+	private Integer ignore_dtls_cert_error;
 	
-	private boolean replaceable;
+	private Integer replaceable;
 	
-	private Integer protocol;
+	private String protocol;
 	
 	private Integer pcr_int;
 	
@@ -105,9 +114,11 @@ public class OutputZiXiBO {
 	private String send_control;
 	
 	private Integer send_gap_min;
+
+	private String pcr_clock;
 	
-	private List<OutputZiXiMediaBO> media_array;
-	
+	private List<OutputProgramBO> program_array;
+
 	public String getStream_id() {
 		return stream_id;
 	}
@@ -148,37 +159,8 @@ public class OutputZiXiBO {
 		this.max_bitrate = max_bitrate;
 	}
 
-	public boolean isRtp() {
-		return rtp;
-	}
 
-	public void setRtp(boolean rtp) {
-		this.rtp = rtp;
-	}
 
-	public Integer getLimited() {
-		return limited;
-	}
-
-	public void setLimited(Integer limited) {
-		this.limited = limited;
-	}
-
-	public boolean isStop_on_drop() {
-		return stop_on_drop;
-	}
-
-	public void setStop_on_drop(boolean stop_on_drop) {
-		this.stop_on_drop = stop_on_drop;
-	}
-
-	public boolean isReconnect() {
-		return reconnect;
-	}
-
-	public void setReconnect(boolean reconnect) {
-		this.reconnect = reconnect;
-	}
 
 	public Integer getFec_overhead() {
 		return fec_overhead;
@@ -196,21 +178,7 @@ public class OutputZiXiBO {
 		this.fec_block_ms = fec_block_ms;
 	}
 
-	public boolean isContent_aware_fec() {
-		return content_aware_fec;
-	}
 
-	public void setContent_aware_fec(boolean content_aware_fec) {
-		this.content_aware_fec = content_aware_fec;
-	}
-
-	public Integer getEnc_type() {
-		return enc_type;
-	}
-
-	public void setEnc_type(Integer enc_type) {
-		this.enc_type = enc_type;
-	}
 
 	public Integer getEnc_key() {
 		return enc_key;
@@ -220,21 +188,7 @@ public class OutputZiXiBO {
 		this.enc_key = enc_key;
 	}
 
-	public boolean isUse_compression() {
-		return use_compression;
-	}
 
-	public void setUse_compression(boolean use_compression) {
-		this.use_compression = use_compression;
-	}
-
-	public boolean isFast_connect() {
-		return fast_connect;
-	}
-
-	public void setFast_connect(boolean fast_connect) {
-		this.fast_connect = fast_connect;
-	}
 
 	public Integer getSmoothing_latency() {
 		return smoothing_latency;
@@ -300,35 +254,115 @@ public class OutputZiXiBO {
 		this.elementary_streams_max_va_diff_ms = elementary_streams_max_va_diff_ms;
 	}
 
-	public boolean isExpect_high_jitter() {
+	public Integer getRtp() {
+		return rtp;
+	}
+
+	public void setRtp(Integer rtp) {
+		this.rtp = rtp;
+	}
+
+	public String getLimited() {
+		return limited;
+	}
+
+	public void setLimited(String limited) {
+		this.limited = limited;
+	}
+
+	public Integer getStop_on_drop() {
+		return stop_on_drop;
+	}
+
+	public void setStop_on_drop(Integer stop_on_drop) {
+		this.stop_on_drop = stop_on_drop;
+	}
+
+	public Integer getReconnect() {
+		return reconnect;
+	}
+
+	public void setReconnect(Integer reconnect) {
+		this.reconnect = reconnect;
+	}
+
+	public Integer getContent_aware_fec() {
+		return content_aware_fec;
+	}
+
+	public void setContent_aware_fec(Integer content_aware_fec) {
+		this.content_aware_fec = content_aware_fec;
+	}
+
+	public String getEnc_type() {
+		return enc_type;
+	}
+
+	public void setEnc_type(String enc_type) {
+		this.enc_type = enc_type;
+	}
+
+	public Integer getUse_compression() {
+		return use_compression;
+	}
+
+	public void setUse_compression(Integer use_compression) {
+		this.use_compression = use_compression;
+	}
+
+	public Integer getFast_connect() {
+		return fast_connect;
+	}
+
+	public void setFast_connect(Integer fast_connect) {
+		this.fast_connect = fast_connect;
+	}
+
+	public Integer getForce_bonding() {
+		return force_bonding;
+	}
+
+	public void setForce_bonding(Integer force_bonding) {
+		this.force_bonding = force_bonding;
+	}
+
+	public Integer getAuto_nics_update_interval() {
+		return auto_nics_update_interval;
+	}
+
+	public void setAuto_nics_update_interval(Integer auto_nics_update_interval) {
+		this.auto_nics_update_interval = auto_nics_update_interval;
+	}
+
+	public Integer getExpect_high_jitter() {
 		return expect_high_jitter;
 	}
 
-	public void setExpect_high_jitter(boolean expect_high_jitter) {
+	public void setExpect_high_jitter(Integer expect_high_jitter) {
 		this.expect_high_jitter = expect_high_jitter;
 	}
 
-	public boolean isIgnore_dtls_cert_error() {
+	public Integer getIgnore_dtls_cert_error() {
 		return ignore_dtls_cert_error;
 	}
 
-	public void setIgnore_dtls_cert_error(boolean ignore_dtls_cert_error) {
+	public void setIgnore_dtls_cert_error(Integer ignore_dtls_cert_error) {
 		this.ignore_dtls_cert_error = ignore_dtls_cert_error;
 	}
 
-	public boolean isReplaceable() {
+	public Integer getReplaceable() {
 		return replaceable;
 	}
 
-	public void setReplaceable(boolean replaceable) {
+	public void setReplaceable(Integer replaceable) {
 		this.replaceable = replaceable;
 	}
 
-	public Integer getProtocol() {
+	public String getProtocol() {
 		return protocol;
 	}
 
-	public void setProtocol(Integer protocol) {
+	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
 
@@ -492,12 +526,25 @@ public class OutputZiXiBO {
 		this.send_gap_min = send_gap_min;
 	}
 
-	public List<OutputZiXiMediaBO> getMedia_array() {
-		return media_array;
+	public String getPcr_clock() {
+		return pcr_clock;
 	}
 
-	public void setMedia_array(List<OutputZiXiMediaBO> media_array) {
-		this.media_array = media_array;
+	public void setPcr_clock(String pcr_clock) {
+		this.pcr_clock = pcr_clock;
 	}
-	
+
+	public List<OutputProgramBO> getProgram_array() {
+		return program_array;
+	}
+
+	public void setProgram_array(List<OutputProgramBO> program_array) {
+		this.program_array = program_array;
+	}
+
+	public OutputZiXiBO() {
+	}
+
+
+
 }

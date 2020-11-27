@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.ProcessVO;
+
 /**
  * 图像滤波<br/>
  * <b>作者:</b>wjw<br/>
@@ -51,5 +53,14 @@ public class ImageFilterBO {
 		this.sharpen = sharpen;
 		return this;
 	}
-	
+
+	public ImageFilterBO() {
+	}
+
+	public ImageFilterBO(ProcessVO processVO) {
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.denoise = processVO.getDenoise();
+		this.sharpen = processVO.getSharpen();
+	}
 }

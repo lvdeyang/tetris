@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.vo.SyncResponseVO;
+import com.sumavision.tetris.business.common.vo.SyncVO;
+import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +51,9 @@ public class SyncService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
+
+	@Autowired
+	private TaskService taskService;
 	
 	/**
 	 * 转换模块同步<br/>
@@ -54,7 +64,7 @@ public class SyncService {
 	 */
 	public void sync(String deviceIp) throws Exception{
 
-		LOG.info("sync start, deviceIp :{}",deviceIp);
+		LOG.info("sync start between capacity and transform, deviceIp :{}",deviceIp);
 		//获取转换模块上全部信息
 		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp);
 		
@@ -85,19 +95,24 @@ public class SyncService {
 				if(!StringUtils.isEmpty(outputPO.getInputId())){
 					//单源
 					inputIds.add(outputPO.getInputId());
-				}else if(!StringUtils.isEmpty(outputPO.getInputList())){
+				}
+				if(!StringUtils.isEmpty(outputPO.getInputList())){
 					//备份源
 					inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
-				}else if(!StringUtils.isEmpty(outputPO.getCoverId())){
+				}
+				if(!StringUtils.isEmpty(outputPO.getCoverId())){
 					//盖播
 					inputIds.add(outputPO.getCoverId());
-				}else if(!StringUtils.isEmpty(outputPO.getScheduleId())){
+				}
+				if(!StringUtils.isEmpty(outputPO.getScheduleId())){
 					//排期
 					inputIds.add(outputPO.getScheduleId());
-				}else if(!StringUtils.isEmpty(outputPO.getPrevId())){
+				}
+				if(!StringUtils.isEmpty(outputPO.getPrevId())){
 					//追加排期prev
 					inputIds.add(outputPO.getPrevId());
-				}else if(!StringUtils.isEmpty(outputPO.getNextId())){
+				}
+				if(!StringUtils.isEmpty(outputPO.getNextId())){
 					//追加排期next
 					inputIds.add(outputPO.getNextId());
 				}
@@ -233,6 +248,55 @@ public class SyncService {
 			}
 			capacityService.deleteAllAddMsgId(delete, deviceIp, capacityProps.getPort());
 		}
-		LOG.info("sync end, deviceIp :{}",deviceIp);
+		LOG.info("sync end between capacity and transform, deviceIp :{}",deviceIp);
+	}
+
+	public String sync(SyncVO syncVO, BusinessType businessType) throws Exception {
+		SyncResponseVO syncResponseVO = new SyncResponseVO();
+		String deviceIp = syncVO.getDeviceIp();
+		if (deviceIp==null || deviceIp.isEmpty()){
+			throw new BaseException(StatusCode.ERROR,"fail to sync, not found deviceIp");
+		}
+		sync(deviceIp);//先保证能力服务和转换的同步
+		List<String> jobIds = syncVO.getJobIds();
+		List<String> lessJobIds = new ArrayList<>();
+		List<String> moreJobIds = new ArrayList<>();
+
+		//计算能力服务缺失的任务
+		for (int i = 0; i < jobIds.size(); i++) {
+			String jobId = jobIds.get(i);
+			TaskOutputPO taskOutputPO = taskOutputDao.findByCapacityIpAndTaskUuidAndType(deviceIp,jobId, businessType);
+			if (taskOutputPO==null){
+				lessJobIds.add(jobId);
+			}
+		}
+		//计算能力服务多余的任务
+		List<TaskOutputPO> capJobPOs = taskOutputDao.findByCapacityIpAndType(deviceIp,businessType);
+		for (int i = 0; i < capJobPOs.size(); i++) {
+			TaskOutputPO taskOutputPO = capJobPOs.get(i);
+			if (!jobIds.contains(taskOutputPO.getTaskUuid())) {
+                taskService.deleteTranscodeTask(taskOutputPO.getTaskUuid());
+				moreJobIds.add(taskOutputPO.getTaskUuid());
+			}
+		}
+		//删除多余的任务
+		syncResponseVO.setLessJobIds(lessJobIds);
+		return JSONObject.toJSONString(syncResponseVO);
+	}
+
+	public void syncInputs(String deviceIp, List<TaskInputPO> inputs) throws Exception {
+		GetInputsResponse getInputsResponse = capacityService.getInputs(deviceIp);
+		List tInputIds = getInputsResponse.getInput_array().stream().map(InputBO::getId).collect(Collectors.toList());
+		for (int i = 0; i < inputs.size(); i++) {
+			TaskInputPO inputPO = inputs.get(i);
+			if (0==inputPO.getCount()) {
+				continue;
+			}
+			if (!tInputIds.contains(inputPO.getNodeId())) { //不存在就同步删除
+				inputPO.setCount(0);
+			}
+			inputPO.setSyncStatus(0);
+			taskInputDao.save(inputPO);
+		}
 	}
 }

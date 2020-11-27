@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sumavision.tetris.business.common.service.TaskService;
+import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -50,7 +52,10 @@ public class PackageService {
 	
 	@Autowired
 	private CapacityService capacityService;
-	
+
+	@Autowired
+	private TaskService taskService;
+
 	@Autowired
 	private ResponseService responseService;
 	
@@ -76,55 +81,7 @@ public class PackageService {
 	}
 	
 	public void delete(String taskUuid) throws Exception {
-		
-		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.PACKAGE);
-		
-		if(output != null){
-			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
-			
-			if(input != null){
-				
-				try {
-
-					input.setUpdateTime(new Date());
-					if(input.getCount() >= 1){
-						input.setCount(input.getCount() - 1);
-					}
-					taskInputDao.save(input);
-					
-					AllRequest allRequest = new AllRequest();
-					
-					OutputBO outputBO = JSONObject.parseObject(output.getOutput(), OutputBO.class);
-					List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
-					InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-					
-					if(input.getCount().equals(0) && input.getInput() != null){
-						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
-					}
-					if(tasks != null){
-						allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
-					}
-					if(outputBO != null){
-						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
-					}
-				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
-					
-					output.setOutput(null);
-					output.setTask(null);
-					
-					taskOutputDao.delete(output);
-					
-				} catch (ObjectOptimisticLockingFailureException e) {
-					
-					// 版本不对，version校验
-					System.out.println("delete校验version版本不对");
-					Thread.sleep(300);
-					delete(taskUuid);
-				}
-			}
-		}
+		taskService.delete(taskUuid,BusinessType.PACKAGE);
 	}
 	
 	public void save(
@@ -160,6 +117,7 @@ public class PackageService {
 				input.setUniq(uniq);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -223,6 +181,7 @@ public class PackageService {
 				outputBOs = package2OutputBO(taskUuid, taskBOs, srcIp, dstIp, dstPort);
 				
 				if(input.getCount().equals(0)){
+					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskUuid);
 					input.setType(businessType);

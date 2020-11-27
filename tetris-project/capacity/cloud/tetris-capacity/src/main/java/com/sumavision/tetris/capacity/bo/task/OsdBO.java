@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.TextOsdVO;
+
 /**
  * osd参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -116,5 +118,21 @@ public class OsdBO {
 	public OsdBO setBackground_color(String background_color) {
 		this.background_color = background_color;
 		return this;
+	}
+
+	public OsdBO() {
+	}
+
+	public OsdBO(TextOsdVO osd) {
+		this.track_type = osd.getTrack_type();
+		this.track_speed = osd.getTrack_speed();
+		this.content = osd.getContent();
+		this.x = osd.getX();
+		this.y = osd.getY();
+		this.width = osd.getWidth();
+		this.height = osd.getHeight();
+		this.font = new FontBO();
+		this.has_background = osd.getHas_background();
+		this.background_color = osd.getBackground_color();
 	}
 }

@@ -84,7 +84,7 @@ public class AlarmService {
 				syncService.sync(capacityIp);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("sync fail",e);
 		}
 		
 		JSONObject alarmObj = new JSONObject();

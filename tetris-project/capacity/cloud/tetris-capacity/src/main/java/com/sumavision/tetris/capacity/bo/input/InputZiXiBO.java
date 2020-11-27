@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.sumavision.tetris.application.template.SourceVO;
+
 /**
  * 紫熙参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -22,23 +24,21 @@ public class InputZiXiBO {
 	
 	private Integer max_latency;
 	
-	private Integer latency_mode;
+	private String latency_mode;
 	
-	private Integer fec_mode;
+	private String fec_mode;
 	
 	private Integer fec_overhead;
 	
 	private Integer fec_block_ms;
 	
-	private boolean fec_content_aware;
+	private Integer low_latency;
 	
-	private boolean low_latency;
+	private Integer ignore_dtls_cert_error;
 	
-	private boolean ignore_dtls_cert_error;
+	private String dec_type;
 	
-	private Integer decrypt_type;
-	
-	private String key;
+	private String dec_key;
 
 	public Integer getMode() {
 		return mode;
@@ -96,20 +96,12 @@ public class InputZiXiBO {
 		this.max_latency = max_latency;
 	}
 
-	public Integer getLatency_mode() {
+	public String getLatency_mode() {
 		return latency_mode;
 	}
 
-	public void setLatency_mode(Integer latency_mode) {
+	public void setLatency_mode(String latency_mode) {
 		this.latency_mode = latency_mode;
-	}
-
-	public Integer getFec_mode() {
-		return fec_mode;
-	}
-
-	public void setFec_mode(Integer fec_mode) {
-		this.fec_mode = fec_mode;
 	}
 
 	public Integer getFec_overhead() {
@@ -128,44 +120,64 @@ public class InputZiXiBO {
 		this.fec_block_ms = fec_block_ms;
 	}
 
-	public boolean isFec_content_aware() {
-		return fec_content_aware;
+	public String getFec_mode() {
+		return fec_mode;
 	}
 
-	public void setFec_content_aware(boolean fec_content_aware) {
-		this.fec_content_aware = fec_content_aware;
+	public void setFec_mode(String fec_mode) {
+		this.fec_mode = fec_mode;
 	}
 
-	public boolean isLow_latency() {
+	public Integer getLow_latency() {
 		return low_latency;
 	}
 
-	public void setLow_latency(boolean low_latency) {
+	public void setLow_latency(Integer low_latency) {
 		this.low_latency = low_latency;
 	}
 
-	public boolean isIgnore_dtls_cert_error() {
+	public Integer getIgnore_dtls_cert_error() {
 		return ignore_dtls_cert_error;
 	}
 
-	public void setIgnore_dtls_cert_error(boolean ignore_dtls_cert_error) {
+	public void setIgnore_dtls_cert_error(Integer ignore_dtls_cert_error) {
 		this.ignore_dtls_cert_error = ignore_dtls_cert_error;
 	}
 
-	public Integer getDecrypt_type() {
-		return decrypt_type;
+	public String getDec_type() {
+		return dec_type;
 	}
 
-	public void setDecrypt_type(Integer decrypt_type) {
-		this.decrypt_type = decrypt_type;
+	public void setDec_type(String dec_type) {
+		this.dec_type = dec_type;
 	}
 
-	public String getKey() {
-		return key;
+	public String getDec_key() {
+		return dec_key;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setDec_key(String dec_key) {
+		this.dec_key = dec_key;
 	}
-	
+
+	public InputZiXiBO() {
+	}
+
+	public InputZiXiBO(SourceVO sourceVO) {
+		this.mode = Integer.parseInt(sourceVO.getMode());
+		this.host = sourceVO.getHost();
+		this.port = sourceVO.getPort();
+		this.url = sourceVO.getUrl();
+		this.guid = sourceVO.getGuid();
+		this.session = sourceVO.getSession();
+		this.max_latency = sourceVO.getMax_latency();
+		this.latency_mode = sourceVO.getLatency_mode();
+		this.fec_mode = sourceVO.getFec_mode();
+		this.fec_overhead = sourceVO.getFec_overhead();
+		this.fec_block_ms = sourceVO.getFec_block_ms();
+		this.low_latency = sourceVO.getLow_latency();
+		this.ignore_dtls_cert_error = sourceVO.getIgnore_dtls_cert_error();
+		this.dec_key = sourceVO.getDec_key();
+		this.dec_type = sourceVO.getDec_type();
+	}
 }

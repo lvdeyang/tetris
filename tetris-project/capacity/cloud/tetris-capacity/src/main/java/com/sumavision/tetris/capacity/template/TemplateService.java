@@ -55,12 +55,10 @@ public class TemplateService {
         List<String> libParams = getAllParamsByEncodeTpl(libObj);
         //获取编码参数及对应的默认值
         Map<String,Object> libMap = getParamMapByTpl(libObj,libParams);
-        encodeParamMap.put(libName,JSONObject.toJSONString(libMap));
+        encodeParamMap.put(libName,JSONObject.parseObject(JSON.toJSONString(libMap)));
 
         return JSON.toJSONString(encodeParamMap);
     }
-
-
 
     public String getAudioEncodeMap(String encodeType) throws CommonException {
         TplAudioEncoder audioEncoder = TplAudioEncoder.getTplAudioEncoder(encodeType);

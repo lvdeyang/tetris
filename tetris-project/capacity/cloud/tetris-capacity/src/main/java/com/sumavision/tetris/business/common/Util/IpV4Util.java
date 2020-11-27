@@ -377,6 +377,43 @@ public class IpV4Util {
         return getPort(socketAddr);
     }
 
+    public static String getPathFromUrl(String url){
+        String host = url;
+        if (url.contains("//")){
+          host = url.split("//")[1];
+        }
+        return host.split("/",2)[1];
+    }
+
+    public static String getNameFromUrl(String url){
+        String host = url;
+        if (url.contains("//")){
+            host = url.split("//")[1];
+        }
+        String path = host.split("/",2)[1];
+        String name = path;
+        if (path.contains(".sdp")){
+            name = path.replaceAll(".sdp","");
+        }
+        if (path.contains(".m3u8")){
+            if (path.contains("/")){
+               path = path.substring(path.lastIndexOf("/")+1);
+            }
+            name = path.replaceAll(".m3u8","");
+        }
+        if (path.contains(".mpd")){
+            if (path.contains("/")){
+                path = path.substring(path.lastIndexOf("/")+1);
+            }
+            name = path.replaceAll(".mpd","");
+        }
+        return name;
+    }
+
+    public static void main(String[] args) {
+        String url = "http://10.1.1.1/123/1.m3u8";
+        System.out.println(getNameFromUrl(url));
+    }
 
     public static List<String> getAllIp(String startIp, String endIp) {
         ArrayList<String> ips = new ArrayList<String>();

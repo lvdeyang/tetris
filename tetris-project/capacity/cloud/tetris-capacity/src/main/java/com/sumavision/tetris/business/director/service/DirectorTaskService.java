@@ -142,6 +142,7 @@ public class DirectorTaskService {
 												   .toString());
 			input.setTaskUuid(taskId);
 			input.setInput(JSON.toJSONString(backup));
+			input.setNodeId(backup.getId());
 			input.setType(BusinessType.DIRECTOR);
 			taskInputDao.save(input);
 			
@@ -494,6 +495,7 @@ public class DirectorTaskService {
 				input.setUniq(uniq);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(BusinessType.DIRECTOR);
 				taskInputDao.save(input);
 			
@@ -518,6 +520,7 @@ public class DirectorTaskService {
 				
 				if(input.getCount().equals(0)){
 					inputBO = transformSourceVo2Input(source, taskUuid);
+					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskUuid);
 					input.setType(BusinessType.DIRECTOR);
@@ -1233,7 +1236,7 @@ public class DirectorTaskService {
 	}
 
 	public void delTask(String taskId) throws Exception {
-		TaskOutputPO output = transcodeTaskService.delete(taskId,BusinessType.DIRECTOR);
+		TaskOutputPO output = taskService.delete(taskId,BusinessType.DIRECTOR);
 		if(output != null){
 			taskOutputDao.delete(output);
 		}

@@ -1,5 +1,11 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.application.template.MediaVO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.capacity.bo.task.TaskBO;
+
 /**
  * rtp_es输出参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -84,5 +90,9 @@ public class OutputRtpEsBO {
 		this.media = media;
 		return this;
 	}
-	
+
+	public OutputRtpEsBO() {
+	}
+
+
 }

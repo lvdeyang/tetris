@@ -43,4 +43,17 @@ public class TaskSourceBO {
 		this.element_pid = element_pid;
 		return this;
 	}
+
+	public TaskSourceBO() {
+	}
+
+	public TaskSourceBO(String input_id) {
+		this.input_id = input_id;
+	}
+
+	public TaskSourceBO(String input_id, Integer program_number, Integer element_pid) {
+		this.input_id = input_id;
+		this.program_number = program_number;
+		this.element_pid = element_pid;
+	}
 }

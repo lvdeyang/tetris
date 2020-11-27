@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.PictureOsdVO;
+
 /**
  * 单个图片osd参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -84,5 +86,17 @@ public class PictureOsdObjectBO {
 		this.path = path;
 		return this;
 	}
-	
+
+	public PictureOsdObjectBO() {
+	}
+
+	public PictureOsdObjectBO(PictureOsdVO osd) {
+		this.x = osd.getX();
+		this.y = osd.getY();
+		this.width = osd.getWidth();
+		this.height = osd.getHeight();
+		this.auto_scale = osd.getAuto_scale();
+		this.transparent = osd.getTransparent();
+		this.path = osd.getPath();
+	}
 }

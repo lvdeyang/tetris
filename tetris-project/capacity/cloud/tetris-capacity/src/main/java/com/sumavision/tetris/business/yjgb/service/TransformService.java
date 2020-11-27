@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -73,7 +76,9 @@ import com.sumavision.tetris.user.UserVO;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class TransformService {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransformService.class);
+
 	private static final String INPUT_PREFIX = "input-";
 	
 	private static final String TASK_VIDEO_PREFIX = "task-video-";
@@ -94,9 +99,9 @@ public class TransformService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
-	
+
 	@Autowired
-	private LockService lockService;
+	private TaskService taskService;
 	
 	@Autowired
 	private TaskOutputDAO taskOutputDao;
@@ -236,6 +241,7 @@ public class TransformService {
 				input.setUniq(uniq);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -305,6 +311,7 @@ public class TransformService {
 				System.out.println("temp 1 outputbo:"+JSONObject.toJSONString(taskBOs));
 
 				if(input.getCount().equals(0)){
+					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskUuid);
 					input.setType(businessType);
@@ -426,58 +433,7 @@ public class TransformService {
 	 * @return TaskOutputPO 任务输出
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
-		
-		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.YJGB);
-		
-		if(output != null){
-			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
-			
-			if(input != null){
-				
-				try {
-
-					input.setUpdateTime(new Date());
-					if(input.getCount() >= 1){
-						input.setCount(input.getCount() - 1);
-					}
-					taskInputDao.save(input);
-					
-					AllRequest allRequest = new AllRequest();
-					
-					List<OutputBO> outputs = JSONObject.parseArray(output.getOutput(), OutputBO.class);
-					List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
-					InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-					
-					if(input.getCount().equals(0) && input.getInput() != null){
-						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
-					}
-					if(tasks != null){
-						allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
-					}
-					if(outputs != null){
-						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
-					}
-				
-					capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
-					
-					output.setOutput(null);
-					output.setTask(null);
-					
-					taskOutputDao.save(output);
-					
-				} catch (ObjectOptimisticLockingFailureException e) {
-					
-					// 版本不对，version校验
-					System.out.println("delete校验version版本不对");
-					Thread.sleep(300);
-					output = delete(taskUuid);
-				}
-			}
-			
-		}
-		
-		return output;
+		return  taskService.delete(taskUuid,BusinessType.YJGB);
 	}
 
 	/**

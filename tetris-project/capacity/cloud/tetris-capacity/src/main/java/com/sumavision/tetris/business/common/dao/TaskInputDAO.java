@@ -11,6 +11,8 @@ import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @RepositoryDefinition(domainClass = TaskInputPO.class, idClass = Long.class)
 public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
@@ -43,4 +45,11 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 
 	public List<TaskInputPO> findByTypeAndCapacityIp(BusinessType type, String capacityIp);
 
+	@Modifying
+	@Query("update TaskInputPO input set input.syncStatus = ?2 where input.id = ?1")
+	public void updateSyncStatusById(Long id, Integer syncStatus);
+
+	@Modifying
+	@Query("update TaskInputPO input set input.count= ?2, input.syncStatus = ?3 where input.id = ?1")
+	public void updateCountAndSyncStatusById(Long id, Integer count, Integer syncStatus);
 }

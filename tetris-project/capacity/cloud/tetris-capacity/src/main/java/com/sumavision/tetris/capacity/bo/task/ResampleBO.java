@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.ProcessVO;
+
 /**
  * 重采样参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -57,5 +59,13 @@ public class ResampleBO {
 		this.format = format;
 		return this;
 	}
-	
+
+	public ResampleBO() {
+	}
+
+	public ResampleBO(ProcessVO processVO) {
+		this.sample_rate = processVO.getSample_rate();
+		this.channel_layout = processVO.getChannel_layout();
+		this.format = processVO.getFormat();
+	}
 }

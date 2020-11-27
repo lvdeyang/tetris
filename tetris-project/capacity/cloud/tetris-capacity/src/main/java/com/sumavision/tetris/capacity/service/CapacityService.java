@@ -3,6 +3,7 @@ package com.sumavision.tetris.capacity.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
@@ -110,7 +111,7 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[create-all] request, url: {} \nbody: {}", url,request);
+		LOG.info("[create-all] request, url: {},body: {}", url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-all] response, result: {}" , res);
 		if(res == null) throw new HttpTimeoutException(ip);
@@ -120,7 +121,16 @@ public class CapacityService {
 		return response;
 		
 	}
-	
+
+	public void deleteAllIgnoreTransError(AllRequest all, String ip, Long port){
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		all.setMsg_id(msg_id);
+		try {
+			deleteAll(all, ip, port);
+		} catch (Exception e) {
+			LOG.info("force delete ignore error",e);
+		}
+	}
 	/**
 	 * 删除all加msg_id<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -128,12 +138,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月28日 下午2:47:06
 	 * @param AllRequest all
 	 */
-	public void deleteAllAddMsgId(AllRequest all, String ip, Long port) throws Exception{
+	public AllResponse deleteAllAddMsgId(AllRequest all, String ip, Long port) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 
-		deleteAll(all, ip, port);
+		return deleteAll(all, ip, port); //此处捕获异常
 	}
 	
 	/**
@@ -143,7 +153,7 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月28日 下午3:20:44
 	 * @param AllRequest all
 	 */
-	private void deleteAll(AllRequest all, String ip, Long port) throws Exception{
+	private AllResponse deleteAll(AllRequest all, String ip, Long port) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
 										      .append(ip)
@@ -155,8 +165,11 @@ public class CapacityService {
 		
 		LOG.info("[delete-all] request, url: {}, all: {}",url,request);
 
-		JSONObject result = HttpUtil.httpDelete(url, request);
-		LOG.info("[delete-all] response, result: {}",result);
+		JSONObject res = HttpUtil.httpDelete(url, request);
+		if(res == null) throw new HttpTimeoutException(ip);
+		LOG.info("[delete-all] response, result: {}",res);
+		AllResponse response = JSONObject.parseObject(res.toJSONString(), AllResponse.class);
+		return response;
 	}
 
 	/**
@@ -206,7 +219,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[create-inputs] request, url: {} \n body: {}",url,request );
+		LOG.info("[create-inputs] request, url: {}, body: {}",url,request );
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-inputs] response, result: {}" , res);
 
@@ -263,7 +276,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
-		LOG.info("[delete-inputs] request, url: {} \n body: {}",url,request);
+		LOG.info("[delete-inputs] request, url: {}, body: {}",url,request);
 		JSONObject result = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-inputs] response, result: {}",result);
 	}
@@ -320,9 +333,10 @@ public class CapacityService {
 										      .append(UrlConstant.URL_INPUT_PARAM)
 										      .toString();
 
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
-
-		LOG.info("[modify-inputs] request, url: {} \n body: {}",url,request);
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input.getInput()));
+		request.put("msg_id",input.getMsg_id());
+//		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
+		LOG.info("[modify-inputs] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-inputs] response, result: {}",res);
 
@@ -354,7 +368,7 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(putElementsRequest));
 
-		LOG.info("[modify-elements] request, url: {} \n body: {}",url, request);
+		LOG.info("[modify-elements] request, url: {}, body: {}",url, request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-elements] response, result: {}",res);
 
@@ -420,7 +434,7 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program, SerializerFeature.DisableCircularReferenceDetect));
 		
-		LOG.info("[create-program] request, url: {} \n body: {}",url,request);
+		LOG.info("[create-program] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-program] response, result: {}",res);
 		if(res == null) throw new HttpTimeoutException(ip);
@@ -482,7 +496,7 @@ public class CapacityService {
 										      .toString();
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program));
 
-		LOG.info("[delete-program] request, url: {} \n body: {}",url,request);
+		LOG.info("[delete-program] request, url: {}, body: {}",url,request);
 		JSONObject result = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-program] response, result: {}",result);
 
@@ -563,7 +577,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
-		LOG.info("[modify-program] request, url: {} \n body: {}",url,request);
+		LOG.info("[modify-program] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-program] response, result: {}",res);
 
@@ -614,7 +628,7 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-		LOG.info("[analysis-input] request, url: {} \n body: {}",url,"");
+		LOG.info("[analysis-input] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[analysis-input] response, result: {}",res);
 
@@ -658,7 +672,7 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-		LOG.info("[get-tasks] request, url: {} \n body: {}",url,"");
+		LOG.info("[get-tasks] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-tasks] response, result: {}",res);
 
@@ -722,7 +736,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[create-tasks] request, url: {} \n body: {}",url,request);
+		LOG.info("[create-tasks] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-taks] response, result: {}",res);
 
@@ -783,7 +797,7 @@ public class CapacityService {
 										      .toString();
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task));
 
-		LOG.info("[delete-tasks] request, url: {} \n body: {}",url,request);
+		LOG.info("[delete-tasks] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-tasks] response, result: {}",res);
 
@@ -842,7 +856,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[add-encode] request, url: {} \n body: {}",url,request);
+		LOG.info("[add-encode] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[add-encode] response, result: {}",res);
 
@@ -905,7 +919,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
-		LOG.info("[delete-encode] request, url: {} \n body: {}",url,request);
+		LOG.info("[delete-encode] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-encode] response, result: {}",res);
 
@@ -974,7 +988,7 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
-		LOG.info("[modify-encode] request, url: {} \n body: {}",url,request);
+		LOG.info("[modify-encode] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-encode] response, result: {}",res);
 
@@ -1042,7 +1056,7 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
-		LOG.info("[modify-decode-process] request, url: {} \n body: {}",url,request);
+		LOG.info("[modify-decode-process] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-decode-process] response, result: {}",res);
 
@@ -1110,7 +1124,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(source));
-		LOG.info("[modify-source] request, url: {} \n body: {}",url,request);
+		LOG.info("[modify-source] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-source] response, result: {}",res);
 
@@ -1177,7 +1191,7 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(realIndex));
-		LOG.info("[switch-source] request, url: {} \n body: {}",url,request);
+		LOG.info("[switch-source] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[switch-source] response, result: {}",res);
 
@@ -1225,7 +1239,7 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-		LOG.info("[get-outputs] request, url: {} \n body: {}",url,"");
+		LOG.info("[get-outputs] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-outputs] response, result: {}",res);
 
@@ -1271,7 +1285,7 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect));
-		LOG.info("[create-outputs] request, url: {} \n body: {}",url,request);
+		LOG.info("[create-outputs] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
 		LOG.info("[create-outputs] response, result: {}",res);
 
@@ -1317,7 +1331,7 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output));
 
-		LOG.info("[delete-outputs] request, url: {} \n body: {}",url,request);
+		LOG.info("[delete-outputs] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpDelete(url, request);
 		LOG.info("[delete-outputs] response, result: {}",res);
 
@@ -1360,7 +1374,7 @@ public class CapacityService {
 										      .append("?msg=")
 										      .append(msg_id)
 										      .toString();
-		LOG.info("[get-output] request, url: {} \n body: {}",url,"");
+		LOG.info("[get-output] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-output] response, result: {}",res);
 
@@ -1426,7 +1440,7 @@ public class CapacityService {
 											  .toString();
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output));
 
-		LOG.info("[modify-output] request, url: {} \n body: {}",url,request);
+		LOG.info("[modify-output] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[modify-output] response, result: {}",res);
 
@@ -1473,7 +1487,7 @@ public class CapacityService {
 											  .append("?msg_id=")
 											  .append(msg_id)
 											  .toString();
-		LOG.info("[get-entities] request, url: {} \n body: {}",url,"");
+		LOG.info("[get-entities] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-entities] response, result: {}",res);
 
@@ -1517,7 +1531,7 @@ public class CapacityService {
 		
 		JSONObject json = new JSONObject();
 		json.put("msg_id", msg_id);
-		LOG.info("[remove-all] request, url: {} \n body: {}",url,"");
+		LOG.info("[remove-all] request, url: {}, body: {}",url,"");
 		JSONObject res = HttpUtil.httpDelete(url, json);
 		LOG.info("[remove-all] response, result: {}",res);
 
@@ -1595,7 +1609,7 @@ public class CapacityService {
 		post.put("mode", mode);
 		post.put("select_index", index);
 
-		LOG.info("[change-backup] request, url: {} \n body: {}",url,post);
+		LOG.info("[change-backup] request, url: {}, body: {}",url,post);
 		JSONObject res = HttpUtil.httpPut(url, post);
 		LOG.info("[change-backup] response, result: {}",res);
 
@@ -1634,7 +1648,7 @@ public class CapacityService {
 		put.put("alarm_url", alarmUrl);
 		put.put("max_count", 100);
 
-		LOG.info("[set-alarm-url] request, url: {} \n body: {}",url,put);
+		LOG.info("[set-alarm-url] request, url: {}, body: {}",url,put);
 		JSONObject res = HttpUtil.httpPut(url, put);
 		LOG.info("[set-alarm-url] response, result: {}",res);
 
@@ -1672,7 +1686,7 @@ public class CapacityService {
 		put.put("heartbeat_url", heartbeatUrl);
 		put.put("span_second", 10);
 
-		LOG.info("[set-heartbeat-url] request, url: {} \n body: {}",url,put);
+		LOG.info("[set-heartbeat-url] request, url: {}, body: {}",url,put);
 		JSONObject res = HttpUtil.httpPut(url, put);
 		LOG.info("[set-heartbeat-url] response, result: {}",res);
 
@@ -1711,7 +1725,7 @@ public class CapacityService {
 											  .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
-		LOG.info("[set-schedule] request, url: {} \n body: {}",url,request);
+		LOG.info("[set-schedule] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[set-schedule] response, result: {}",res);
 
@@ -1747,7 +1761,7 @@ public class CapacityService {
 				.toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
-		LOG.info("[clear-schedule] request, url: {} \n body: {}",url,request);
+		LOG.info("[clear-schedule] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpDelete(url, request);
 		LOG.info("[clear-schedule] response, result: {}",res);
 
@@ -1778,7 +1792,7 @@ public class CapacityService {
 											  .append(port)
 											  .append(UrlConstant.URL_ALARMLIST)
 											  .toString();
-		LOG.info("[set-alarm-list] request, url: {} \n body: {}",url,request);
+		LOG.info("[set-alarm-list] request, url: {}, body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
 		LOG.info("[set-alarm-list] response, result: {}",res);
 

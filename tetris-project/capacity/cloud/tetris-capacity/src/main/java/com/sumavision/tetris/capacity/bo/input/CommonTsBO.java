@@ -65,6 +65,10 @@ public class CommonTsBO {
 	public CommonTsBO(String url,String localIp){
 		this.source_ip = IpV4Util.getIpFromUrl(url);
 		this.source_port = IpV4Util.getPortFromUrl(url);
-		this.local_ip = localIp;
+		if (!IpV4Util.isMulticast(this.source_ip)) {
+			this.local_ip = source_ip;
+		}else {
+			this.local_ip = localIp;
+		}
 	}
 }

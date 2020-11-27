@@ -1,5 +1,13 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.application.template.ProgramVO;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * http_ts输出参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -29,5 +37,11 @@ public class OutputHttpTsBO extends BaseTsOutputBO<OutputHttpTsBO>{
 		this.name = name;
 		return this;
 	}
-	
+
+	public OutputHttpTsBO(){
+
+	}
+
+
+
 }

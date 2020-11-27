@@ -2,6 +2,7 @@ package com.sumavision.tetris.capacity.util.http;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -211,11 +212,11 @@ public class HttpUtil {
                     /**把json字符串转换成json对象**/
                     jsonResult = JSONObject.parseObject(str);
                 } catch (Exception e) {
-                    logger.error("delete请求提交失败:" + url, e);
+                    logger.error("delete请求响应解析失败:" + url, e);
                 }
             }
         } catch (IOException e) {
-            logger.error("delete请求提交失败:" + url, e);
+            logger.error("io exception, delete请求提交失败:" + url, e);
         }
         return jsonResult;
     }
@@ -285,7 +286,7 @@ public class HttpUtil {
                 logger.error("get请求提交失败:" + url);
             }
         } catch (IOException e) {
-            logger.error("get请求提交失败:" + url, e);
+            logger.error("io error, get请求提交失败:" + url, e);
         }
         return jsonResult;
     }

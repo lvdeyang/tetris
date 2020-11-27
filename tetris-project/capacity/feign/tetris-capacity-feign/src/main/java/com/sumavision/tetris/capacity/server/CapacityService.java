@@ -215,8 +215,8 @@ public class CapacityService {
 	 * <b>日期：</b>2020年5月8日 下午5:31:15
 	 * @param String deviceIp 转换模块ip
 	 */
-	public void sync(String deviceIp) throws Exception{
-		JsonBodyResponseParser.parseObject(capacityFeign.sync(deviceIp), null);
+	public String sync(String syncObj) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.sync(syncObj), String.class);
 	}
 	
 	/**
