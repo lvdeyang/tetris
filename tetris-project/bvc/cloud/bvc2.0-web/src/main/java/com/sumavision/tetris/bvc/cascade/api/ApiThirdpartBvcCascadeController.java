@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -14,16 +15,16 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.utils.UserUtils;
-import com.sumavision.bvc.device.command.exception.UserDoesNotLoginException;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
-import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
-import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.cascade.ProtocolParser;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -32,8 +33,6 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.util.HttpServletRequestParser;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserClassify;
-
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/api/thirdpart/bvc/cascade")
@@ -68,6 +67,9 @@ public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
 	private CommandUserServiceImpl commandUserServiceImpl;
+	
+	@Autowired
+	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
 	
 	/**
 	 * 查询服务节点<br/>
@@ -388,5 +390,77 @@ public class ApiThirdpartBvcCascadeController {
 		
 		return params;
 	}
+
+	/**
+	 * 本域设备被外域点播:接入能力，主动调用平台。如果是打开的，平台需要向对应的设备发送openbundle命令。<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月23日 下午2:38:14
+	 * @param 
+	 *  bundleid:xxxx，设备的bundleId
+   		video_channel:xxxx
+   		audio_channel:xxxx
+   		status: open //open, close  开始/关闭
+	 * @return
+	 * {
+    	status:200以及其他,
+    	message:'异常信息',
+    	data:{
+        	layer_id:xxx //在本域的接入节点
+        	bundle_id:xxx //被点播的设备bundle id
+    	}
+	 * }
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/device/open/status")
+	public synchronized Object deviceOpenStatus(HttpServletRequest request) throws Exception{
+		
+		HttpServletRequestParser parser = new HttpServletRequestParser(request);
+		JSONObject params = parser.parseJSON();
+		System.out.println("*******************************************");
+		System.out.println("******BQ/xt/business：通过bundleId操作外域点播*******************");
+		System.out.println("*******************************************");
+		System.out.println(params.toJSONString());
+		
+		String bundleid = params.getString("bundleid");
+//		String video_channel = params.getString("video_channel");
+//		String audio_channel = params.getString(" audio_channel");
+		String status = params.getString("ststus");
+		BundlePO bundle = bundleDao.findByUsername(bundleid);
+		
+		if("start".equals(status)){
+			//开始点播设备
+			List<ChannelSchemeDTO> videoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundle.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
+			ChannelSchemeDTO videoChannel = videoChannels.get(0);
+			List<ChannelSchemeDTO> audioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundle.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
+			ChannelSchemeDTO audioChannel = (audioChannels==null||audioChannels.size()<=0)?null:audioChannels.get(0);
+			if(audioChannel != null){
+				monitorLiveDeviceService.startXtSeeLocal(
+						null, null, 
+						bundle.getBundleId(), bundle.getBundleName(), bundle.getBundleType(), bundle.getAccessNodeUid(), videoChannel.getChannelId(), videoChannel.getBaseType(), 
+						bundle.getBundleId(), bundle.getBundleName(), bundle.getBundleType(), bundle.getAccessNodeUid(), audioChannel.getChannelId(), audioChannel.getBaseType(), 
+						-1L, "");
+			}else{
+				monitorLiveDeviceService.startXtSeeLocal(
+						null, null, 
+						bundle.getBundleId(), bundle.getBundleName(), bundle.getBundleType(), bundle.getAccessNodeUid(), videoChannel.getChannelId(), videoChannel.getBaseType(), 
+						null, null, null, null, null, null, 
+						-1L, "");
+			}
+			
+		}else if("stop".equals(status)){
+			//停止点播设备
+			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findByVideoBundleIdAndType(bundleid, LiveType.XT_LOCAL);
+			monitorLiveDeviceService.stopXtSeeLocal(liveList, true);
+		}
+		
+		JSONObject JSONobject = new JSONObject();
+		JSONobject.put("layer_id", bundle.getAccessNodeUid());
+		JSONobject.put("bundle_id", bundleid);
+		
+		return JSONobject;
+	}
 	
+
 }

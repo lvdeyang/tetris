@@ -1,0 +1,164 @@
+<mi-frame id="page-omms-auth-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">授权工具</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>授权工具</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加授权</el-button>
+            <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务�?</el-button>-->
+
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="设备标识"
+                                prop="deviceId">
+                        </el-table-column>
+                        
+                        <el-table-column
+                                label="操作"
+                                width="280px">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="导入设备标识" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-upload2" style="font-size:20px; padding:0;" @click="handleImportDevice(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="配置授权" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleSetAuth(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="导出授权" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-download" style="font-size:20px; padding:0;" @click="exportAuth(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除授权记录" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.page.currentPage"
+                        :page-sizes="table.page.pageSizes"
+                        :page-size="table.page.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.page.total">
+                </el-pagination>
+            </div>
+
+        </el-card>
+ 		<a id="page-export"></a>
+    </template>
+
+    <template>
+
+        <el-dialog
+                title="添加授权记录"
+                :visible.sync="dialog.addAuth.visible"
+                width="500px"
+                :before-close="handleAddAuthClose">
+
+            <div style="height:100px;">
+               <el-form label-width="50px">
+                     <el-form-item label="名称:">
+                         <el-input v-model="dialog.addAuth.name"></el-input>
+                     </el-form-item>
+               </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAuthClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAuthSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+        
+        <el-dialog
+                title="导入设备标识"
+                :visible.sync="dialog.importDevice.visible"
+                width="500px"
+                :before-close="handleImportDeviceClose"
+                :close-on-click-modal="false">
+
+            <el-form label-width="80px">
+                <el-form-item>
+                    <input type="file" id="device" style="display:none;" @change="handleFileSelected"/>
+                    <el-button type="text" @click="handleSelectFile">上传文件</el-button>
+                    <div v-if="dialog.importDevice.file">
+                        <span class="el-icon-document" style="font-size:16px;"></span>
+                        <span>{{dialog.importDevice.file.name}}</span>
+                    </div>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleImportDeviceClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleImportDeviceSubmit" :loading="dialog.importDevice.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+		<el-dialog
+                title="配置授权"
+                :visible.sync="dialog.setAuth.visible"
+                width="600px"
+                :before-close="handleSetAuthClose">
+
+            <div style="height:500px;">
+               <el-form label-width="120px">
+                     <el-form-item label="视频融合平台">
+		                <el-switch v-model="dialog.setAuth.bvc.surpport" active-value="1" inactive-value="0"></el-switch>
+		             </el-form-item>
+		             <el-form-item label="接入能力个数">
+                         <el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum"></el-input>
+                     </el-form-item>
+		             <el-form-item label="转码云平台">
+		                <el-switch v-model="dialog.setAuth.transSystem.surpport" active-value="1" inactive-value="0"></el-switch>
+		             </el-form-item>
+		             <el-form-item label="转码能力个数">
+                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.serverNum"></el-input>
+                     </el-form-item>
+		             <el-form-item label="转码能力">
+		                <el-switch v-model="dialog.setAuth.mediaTransform.surpport" active-value="1" inactive-value="0"></el-switch>
+		             </el-form-item>
+		             <el-form-item label="转码路数(4K)">
+                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v4k"></el-input>
+                     </el-form-item>
+                     <el-form-item label="转码路数(高清)">
+                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v1080"></el-input>
+                     </el-form-item>
+                      <el-form-item label="转码路数(标清)">
+                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v720"></el-input>
+                     </el-form-item>
+		             <el-form-item label="设备接入">
+		                <el-switch v-model="dialog.setAuth.jv210Joiner.surpport" active-value="1" inactive-value="0"></el-switch>
+		             </el-form-item>
+		            
+               </el-form>
+            </div>
+           
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSetAuthClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSetAuthSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+       
+    </template>
+
+</mi-frame>

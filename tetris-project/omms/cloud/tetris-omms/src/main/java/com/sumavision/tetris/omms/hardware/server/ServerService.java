@@ -1,12 +1,15 @@
 package com.sumavision.tetris.omms.hardware.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -36,6 +39,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.omms.auth.AuthPO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
@@ -498,6 +502,16 @@ public class ServerService {
 	public void deleteDatabase(Long databaseId) throws Exception{
 		databaseDAO.delete(databaseId);
 	}
+	
+	
+	public ServerVO importAuth(long id,FileItem authFile) throws IOException{
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(authFile.getInputStream()));
+		reader.readLine();
+		//对接小工具下发授权并修改设备授权状态
+		return new ServerVO();
+	}
+	
 	
 	/**
 	 * 

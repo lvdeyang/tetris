@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.controller.ControllerBase;
@@ -117,19 +116,17 @@ public class OutlandService extends ControllerBase{
 	 * @param password 口令
 	 * @return SerNodeVO 本域节点信息
 	 */
-	public SerNodeVO inland(String name,String password)throws Exception{
+	public SerNodeVO inland(String name)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		
 		if(serNodePO == null){
 			SerNodePO newserNodePO = new SerNodePO();
 			newserNodePO.setNodeName(name);
-			newserNodePO.setPassword(password);
 			newserNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serNodePO = newserNodePO;
 		}
 		String oldName = serNodePO.getNodeName();
 		serNodePO.setNodeName(name);
-		serNodePO.setPassword(password);
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
@@ -210,14 +207,16 @@ public class OutlandService extends ControllerBase{
 	 * @param roleIds 外域绑定的角色id
 	 * @return data(成功时返回外域信息，失败时返回错误信息)
 	 */
-	public Map<String, Object> addOutland(String name,String password,String roleIds)throws Exception{
+	public Map<String, Object> addOutland(String name,String password,String roleIds,String ip,String port)throws Exception{
 		Map<String, Object> data= new HashMap<String, Object>();
 		try {
 			SerNodePO serNodePO = new SerNodePO();
 			serNodePO.setNodeName(name);
 			serNodePO.setPassword(password);
+			serNodePO.setIp(ip);
+			serNodePO.setPort(port);
 			serNodePO.setSourceType(SOURCE_TYPE.EXTERNAL);
-			serNodePO.setOperate(ConnectionStatus.OFF);
+			serNodePO.setOperate(ConnectionStatus.DONE);
 			serNodePO.setStatus(ConnectionStatus.OFF);
 			serNodeDao.save(serNodePO);
 			List<Long> roleIDs = new ArrayList<Long>();
@@ -251,6 +250,8 @@ public class OutlandService extends ControllerBase{
 			foreign.add(new HashMap<String, Object>());
 			foreign.get(0).put("name", name);
 			foreign.get(0).put("password", password);
+			foreign.get(0).put("ip", ip);
+			foreign.get(0).put("port", port);
 			foreign.get(0).put("operate", ConnectionStatus.ON);
 			pass_by_content.put("cmd", "foreignAdd");
 			pass_by_content.put("local", localSerNodeVO);
@@ -370,12 +371,14 @@ public class OutlandService extends ControllerBase{
 	 * @param password 外域口令
 	 * @return serNodeVO 外域信息
 	 */
-	public Object outlandChange(Long id,String name,String password,String roleIds)throws Exception{
+	public Object outlandChange(Long id,String name,String password,String roleIds, String ip, String port)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		String oldname  = serNodePO.getNodeName();
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		serNodePO.setPassword(password);
 		serNodePO.setNodeName(name);
+		serNodePO.setIp(ip);
+		serNodePO.setPort(port);
 		serNodePO.setOperate(ConnectionStatus.OFF);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		serNodeDao.save(serNodePO);
@@ -506,7 +509,9 @@ public class OutlandService extends ControllerBase{
 			SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
 			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId);
 			Set<String> bundleIds = new HashSet<String>();
-			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+//			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+			//测试数据用
+			List<BundlePO> bundlePOs = bundleDao.findAll();
 			Set<String> reeourceStrings = new HashSet<String>();
 			if (bundlePOs !=  null&&!bundlePOs.isEmpty()) {
 				for (BundlePO bundlePO : bundlePOs) {
@@ -539,11 +544,11 @@ public class OutlandService extends ControllerBase{
 							boolean hasLocalReadPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-lr");
 							boolean hasDownloadPrivilege = privilegeCodes.contains(bundlePO.getBundleId() + "-d");
 							
-							boolean canReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-r");
-							boolean canWritePrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-w");
-							boolean canCloudPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-c");
-							boolean canLocalReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-lr");
-							boolean canDownloadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-d");
+							boolean canReadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-r");
+							boolean canWritePrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-w");
+							boolean canCloudPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-c");
+							boolean canLocalReadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-lr");
+							boolean canDownloadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-d");
 							BundlePrivilegeBO bundlePrivilege = getBundlePrivilegefromPO(bundlePO);
 							if (hasReadPrivilege) {
 								bundlePrivilege.setHasReadPrivilege(true);
@@ -580,11 +585,11 @@ public class OutlandService extends ControllerBase{
 						}
 					}else {
 						for (BundlePO bundlePO : selectBundlePOs) {
-							boolean canReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-r");
-							boolean canWritePrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-w");
-							boolean canCloudPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-c");
-							boolean canLocalReadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-lr");
-							boolean canDownloadPrivilege = privilegePOs.contains(bundlePO.getBundleId() + "-d");
+							boolean canReadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-r");
+							boolean canWritePrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-w");
+							boolean canCloudPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-c");
+							boolean canLocalReadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-lr");
+							boolean canDownloadPrivilege = resourcePrivilege.contains(bundlePO.getBundleId() + "-d");
 							
 							BundlePrivilegeBO bundlePrivilege = getBundlePrivilegefromPO(bundlePO);
 							if (canReadPrivilege) {
@@ -629,30 +634,48 @@ public class OutlandService extends ControllerBase{
 	 * @param bundleprivilege 修改后的权限状态
 	 * @return data 错误信息
 	 */
-	public Map<String, Object> submitBundlePrivilege(Long roleId, List<String> preBundlePrivilege, List<String> bundleprivilege)throws Exception{
+	public Map<String, Object> submitBundlePrivilege(Long roleId, String preBundlePrivilege, String bundleprivilege)throws Exception{
 		Map<String, Object> data = makeAjaxData();
 		try {
-			if (preBundlePrivilege != null && !preBundlePrivilege.isEmpty()) {
-				List<String> unbindprivilege = preBundlePrivilege;
-				unbindprivilege.removeAll(bundleprivilege);
-				List<RolePrivilegeMap> unbindPermission = rolePrivilegeMapDAO.findByRoleIdAndResourceIdIn(roleId, unbindprivilege);
-				rolePrivilegeMapDAO.delete(unbindPermission);
-			}
-			if (bundleprivilege != null && !bundleprivilege.isEmpty()) {
-				List<String> bindPrivilege = bundleprivilege;
-				bindPrivilege.removeAll(preBundlePrivilege);
-				
-				List<RolePrivilegeMap> newbindPermission = new ArrayList<RolePrivilegeMap>();
-				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityIn(bindPrivilege);
-				if (privilegePOs != null && !privilegePOs.isEmpty()) {
-					for (PrivilegePO privilegePO : privilegePOs) {
-						RolePrivilegeMap rolePrivilegeMap = new RolePrivilegeMap();
-						rolePrivilegeMap.setPrivilegeId(privilegePO.getId());
-						rolePrivilegeMap.setRoleId(roleId);
-						newbindPermission.add(rolePrivilegeMap);
-					}
+			List<String> preBundlePrivilegeList = new ArrayList<String>();
+			String[]  preBundle = preBundlePrivilege.split(",");
+			if (preBundle != null && preBundle.length > 0) {
+				for (int i = 0; i < preBundle.length; i++) {
+					preBundlePrivilegeList.add(preBundle[i]);
 				}
-				rolePrivilegeMapDAO.save(newbindPermission);
+			}
+			List<String> bundleprivilegeList = new ArrayList<String>();
+			String[]  Bundle = bundleprivilege.split(",");
+			if (Bundle != null && Bundle.length > 0) {
+				for (int i = 0; i < Bundle.length; i++) {
+					bundleprivilegeList.add(Bundle[i]);
+				}
+			}
+			if (preBundlePrivilegeList != null && !preBundlePrivilegeList.isEmpty()) {
+				List<String> unbindprivilege = preBundlePrivilegeList;
+				unbindprivilege.removeAll(bundleprivilegeList);
+				if (unbindprivilege != null && !unbindprivilege.isEmpty()) {
+					List<RolePrivilegeMap> unbindPermission = rolePrivilegeMapDAO.findByRoleIdAndResourceIdIn(roleId, unbindprivilege);
+					rolePrivilegeMapDAO.delete(unbindPermission);
+				}
+			}
+			if (bundleprivilegeList != null && !bundleprivilegeList.isEmpty()) {
+				List<String> bindPrivilege = bundleprivilegeList;
+				bindPrivilege.removeAll(preBundlePrivilegeList);
+				
+				if (bindPrivilege != null && !bindPrivilege.isEmpty()) {
+					List<RolePrivilegeMap> newbindPermission = new ArrayList<RolePrivilegeMap>();
+					List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityIn(bindPrivilege);
+					if (privilegePOs != null && !privilegePOs.isEmpty()) {
+						for (PrivilegePO privilegePO : privilegePOs) {
+							RolePrivilegeMap rolePrivilegeMap = new RolePrivilegeMap();
+							rolePrivilegeMap.setPrivilegeId(privilegePO.getId());
+							rolePrivilegeMap.setRoleId(roleId);
+							newbindPermission.add(rolePrivilegeMap);
+						}
+					}
+					rolePrivilegeMapDAO.save(newbindPermission);
+				}
 			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
