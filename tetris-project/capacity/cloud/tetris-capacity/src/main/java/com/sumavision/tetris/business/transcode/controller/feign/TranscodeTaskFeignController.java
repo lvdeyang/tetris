@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.service.TaskService;
+import com.sumavision.tetris.business.common.vo.SyncVO;
 import com.sumavision.tetris.business.transcode.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,9 @@ public class TranscodeTaskFeignController {
 	
 	@Autowired
 	private ExternalTaskService externalTaskService;
+
+	@Autowired
+	private TaskService taskService;
 	
 	@Autowired
 	private SyncService syncService;
@@ -50,14 +56,14 @@ public class TranscodeTaskFeignController {
 			String transcodeInfo,
 			HttpServletRequest request) throws Exception{
 		
-		LOG.info("[sts]<add-task>(req) hash: {}\nbody: {}",transcodeInfo.hashCode(),transcodeInfo);
+		LOG.info("[sts]<add-task>(syn) hash: {}, remoteAddr: {}, params: {}",transcodeInfo.hashCode(),request.getRemoteAddr(), transcodeInfo);
 		TranscodeTaskVO transcode = JSONObject.parseObject(transcodeInfo, TranscodeTaskVO.class);
 		if(transcode.getSystem_type() == null || transcode.getSystem_type().equals(0)){
 			transcodeTaskService.addTranscodeTask(transcode);
 		}else if(transcode.getSystem_type().equals(1)){
 			return externalTaskService.addExternalTask(transcode);
 		}
-		LOG.info("[sts]<add-task>(resp). hash: {}",transcodeInfo.hashCode());
+		LOG.info("[sts]<add-task>(ack). hash: {}",transcodeInfo.hashCode());
 		return null;
 	}
 
@@ -68,10 +74,10 @@ public class TranscodeTaskFeignController {
 			String inputInfo,
 			HttpServletRequest request) throws Exception{
 
-		LOG.info("[sts]<create-inputs>(req) hash: {}\nbody: {}",inputInfo.hashCode(),inputInfo);
+		LOG.info("[sts]<create-inputs>(syn) hash: {}, params: {}",inputInfo.hashCode(),inputInfo);
 		CreateInputsVO inputsVO = JSONObject.parseObject(inputInfo, CreateInputsVO.class);
 		String result = transcodeTaskService.addInputs(inputsVO);
-		LOG.info("[sts]<create-inputs>(resp). hash: {}",inputInfo.hashCode());
+		LOG.info("[sts]<create-inputs>(ack). hash: {}",inputInfo.hashCode());
 		return result;
 	}
 
@@ -105,13 +111,13 @@ public class TranscodeTaskFeignController {
 			HttpServletRequest request) throws Exception{
 		
 		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
-		LOG.info("[sts]<delete-task>(req) \n {}", task);
+		LOG.info("[sts]<delete-task>(syn) params: {}", task);
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
-			transcodeTaskService.deleteTranscodeTask(taskVO.getTask_id());
+			taskService.deleteTranscodeTask(taskVO.getTask_id());
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.deleteExternalTask(taskVO);
 		}
-		LOG.info("[sts]<delete-task>(resp) \n {}", task);
+		LOG.info("[sts]<delete-task>(ack) {}", task);
 		return null;
 	}
 	
@@ -129,10 +135,10 @@ public class TranscodeTaskFeignController {
 	public Object analysisInput(
 			String analysisInput,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<analysis-input>(req) \n input: {}", analysisInput);
+		LOG.info("[sts]<analysis-input>(syn), params: {}", analysisInput);
 		AnalysisInputVO analysisInputVO = JSONObject.parseObject(analysisInput, AnalysisInputVO.class);
 		String response = transcodeTaskService.analysisInput(analysisInputVO);
-		LOG.info("[sts]<analysis-input>(resp) \n  {}", response);
+		LOG.info("[sts]<analysis-input>(ack)   {}", response);
 		return response;
 	}
 	
@@ -154,9 +160,9 @@ public class TranscodeTaskFeignController {
 			String mode,
 			String capacityIp,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<change-backup>(req) \n inputId: {}, index: {}", inputId,index);
+		LOG.info("[sts]<change-backup>(syn), inputId: {}, index: {}", inputId,index);
 		transcodeTaskService.changeBackUp(inputId, index,mode, capacityIp);
-		LOG.info("[sts]<change-backup>(resp) \n inputId: {}, index: {}", inputId,index);
+		LOG.info("[sts]<change-backup>(ack), inputId: {}, index: {}", inputId,index);
 
 		return null;
 	}
@@ -177,10 +183,10 @@ public class TranscodeTaskFeignController {
 			String taskId,
 			String input,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<add-cover>(req) \n taskId: {}, input: {}", taskId,input);
+		LOG.info("[sts]<add-cover>(syn), taskId: {}, input: {}", taskId,input);
 		InputBO inputBO = JSONObject.parseObject(input, InputBO.class);
 		transcodeTaskService.addCover(taskId, inputBO);
-		LOG.info("[sts]<add-cover>(resp) \n taskId: {}", taskId,input);
+		LOG.info("[sts]<add-cover>(ack), taskId: {}", taskId,input);
 		return null;
 	}
 	
@@ -197,9 +203,9 @@ public class TranscodeTaskFeignController {
 	public Object changeBackup(
 			String taskId,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<delete-cover>(req) \n taskId: {}", taskId);
+		LOG.info("[sts]<delete-cover>(syn), taskId: {}", taskId);
 		transcodeTaskService.deleteCover(taskId);
-		LOG.info("[sts]<delete-cover>(resp) \n taskId: {}", taskId);
+		LOG.info("[sts]<delete-cover>(ack), taskId: {}", taskId);
 		return null;
 	}
 	
@@ -216,7 +222,7 @@ public class TranscodeTaskFeignController {
 	public Object reboot(
 			String task,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<restart-task>(req) \n task: {}", task);
+		LOG.info("[sts]<restart-task>(syn), task: {}", task);
 		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
 		
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
@@ -224,7 +230,7 @@ public class TranscodeTaskFeignController {
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.rebootExternalTask(taskVO);
 		}
-		LOG.info("[sts]<restart-task>(resp) \n task: {}", task);
+		LOG.info("[sts]<restart-task>(ack), task: {}", task);
 		return null;
 	}
 	
@@ -241,7 +247,7 @@ public class TranscodeTaskFeignController {
 	public Object stop(
 			String task,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<stop-task>(req) \n task: {}", task);
+		LOG.info("[sts]<stop-task>(syn), task: {}", task);
 		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
 		
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
@@ -249,7 +255,7 @@ public class TranscodeTaskFeignController {
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.stopExternalTask(taskVO);
 		}
-		LOG.info("[sts]<stop-task>(resp) \n task: {}", task);
+		LOG.info("[sts]<stop-task>(ack), task: {}", task);
 		return null;
 	}
 	
@@ -270,14 +276,14 @@ public class TranscodeTaskFeignController {
 			Integer systemType,
 			String output,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<add-output>(req) \n taskId: {}, output: {}", taskId,output);
+		LOG.info("[sts]<add-output>(syn), taskId: {}, output: {}", taskId,output);
 		if(systemType == 0){
 			List<OutputBO> outputs = JSONArray.parseArray(output, OutputBO.class);
 			transcodeTaskService.addOutput(taskId, outputs);
 		}else{
 			//TODO
 		}
-		LOG.info("[sts]<add-output>(resp) \n taskId: {}", taskId);
+		LOG.info("[sts]<add-output>(ack), taskId: {}", taskId);
 		return null;
 	}
 	
@@ -296,9 +302,9 @@ public class TranscodeTaskFeignController {
 			Long taskId,
 			Long outputId,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<delete-output>(req) \n taskId: {}, outputId: {}", taskId,outputId);
+		LOG.info("[sts]<delete-output>(syn), taskId: {}, outputId: {}", taskId,outputId);
 		transcodeTaskService.deleteOutput(taskId, outputId);
-		LOG.info("[sts]<delete-output>(resp) \n taskId: {}, outputId: {}", taskId,outputId);
+		LOG.info("[sts]<delete-output>(ack), taskId: {}, outputId: {}", taskId,outputId);
 		return null;
 	}
 	
@@ -313,12 +319,13 @@ public class TranscodeTaskFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/sync")
 	public Object sync(
-			String deviceIp,
+			String syncObj,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<sync>(req) \n deviceIp: {}", deviceIp);
-		syncService.sync(deviceIp);
-		LOG.info("[sts]<sync>(resp) \n deviceIp: {}", deviceIp);
-		return null;
+		LOG.info("[sts]<sync-all>(syn), syncObj: {}", syncObj);
+		SyncVO syncVO = JSONObject.parseObject(syncObj, SyncVO.class);
+		String result = syncService.sync(syncVO,BusinessType.TRANSCODE);
+		LOG.info("[sts]<sync-all>(ack), result: {}", result);
+		return result;
 	}
 	
 	/**
@@ -336,9 +343,9 @@ public class TranscodeTaskFeignController {
 			String ip,
 			String alarmlist,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<put-alarm-list>(req) \n ip: {}, alarmList: {}", ip,alarmlist);
+		LOG.info("[sts]<put-alarm-list>(syn), ip: {}, alarmList: {}", ip,alarmlist);
 		transcodeTaskService.putAlarmList(ip, alarmlist);
-		LOG.info("[sts]<put-alarm-list>(resp) \n ip: {}", ip);
+		LOG.info("[sts]<put-alarm-list>(ack), ip: {}", ip);
 		return null;
 	}
 	
@@ -355,9 +362,9 @@ public class TranscodeTaskFeignController {
 	public Object removeAll(
 			String ip,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<remove-all>(req) \n ip: {}",ip);
+		LOG.info("[sts]<remove-all>(syn), ip: {}",ip);
 		transcodeTaskService.removeAll(ip);
-		LOG.info("[sts]<remove-all>(resp) \n ip: {}", ip);
+		LOG.info("[sts]<remove-all>(ack), ip: {}", ip);
 		return null;
 	}
 
@@ -374,10 +381,10 @@ public class TranscodeTaskFeignController {
     public Object modifyTask(
             String taskInfo,
             HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<modify-task>(req) hash:{} \n task: {}",taskInfo.hashCode(),taskInfo);
+		LOG.info("[sts]<modify-task>(syn) hash:{}, params: {}",taskInfo.hashCode(),taskInfo);
         TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
         transcodeTaskService.modifyTranscodeTask(taskSetVO);
-		LOG.info("[sts]<modify-task>(resp) hash:{}",taskInfo.hashCode());
+		LOG.info("[sts]<modify-task>(ack) hash:{}",taskInfo.hashCode());
         return null;
     }
 
@@ -387,10 +394,10 @@ public class TranscodeTaskFeignController {
 	public Object modifyInput(
 			String inputInfo,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<modify-input>(req) hash:{} \n task: {}",inputInfo.hashCode(),inputInfo);
+		LOG.info("[sts]<modify-input>(syn) hash:{}, params: {}",inputInfo.hashCode(),inputInfo);
 		InputSetVO inputSetVO = JSONObject.parseObject(inputInfo, InputSetVO.class);
 		transcodeTaskService.modifyTranscodeInput(inputSetVO);
-		LOG.info("[sts]<modify-input>(resp) hash:{}",inputInfo.hashCode());
+		LOG.info("[sts]<modify-input>(ack) hash:{}",inputInfo.hashCode());
 		return null;
 	}
 
@@ -407,9 +414,9 @@ public class TranscodeTaskFeignController {
     public Object getPlatform(
             String ip,
             HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<get-platform>(req) hash:{} \n ip: {}",ip.hashCode(),ip);
+		LOG.info("[sts]<get-platform>(syn) hash:{}, ip: {}",ip.hashCode(),ip);
 		String response = transcodeTaskService.getPlatform(ip);
-		LOG.info("[sts]<get-platform>(resp) hash:{}",ip.hashCode());
+		LOG.info("[sts]<get-platform>(ack) hash:{}",ip.hashCode());
         return response;
     }
 
@@ -419,10 +426,10 @@ public class TranscodeTaskFeignController {
 	public Object streamAnalysis(
 			String analysis,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[sts]<analysis-stream>(req) hash:{} \n analysis: {}",analysis.hashCode(),analysis);
+		LOG.info("[sts]<analysis-stream>(syn) hash:{}, params: {}",analysis.hashCode(),analysis);
 		AnalysisStreamVO analysisStreamVO = JSONObject.parseObject(analysis, AnalysisStreamVO.class);
 		String response = transcodeTaskService.analysisStream(analysisStreamVO);
-		LOG.info("[sts]<analysis-stream>(resp) hash:{}, result:{}",analysis.hashCode(),response);
+		LOG.info("[sts]<analysis-stream>(ack) hash:{}, result:{}",analysis.hashCode(),response);
 		return response;
 	}
 

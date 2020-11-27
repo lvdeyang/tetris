@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.sumavision.tetris.application.template.SourceVO;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+
 /**
  * udp_pcm参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -84,5 +87,16 @@ public class UdpPcmBO {
 		this.channel_layout = channel_layout;
 		return this;
 	}
-	
+
+	public UdpPcmBO() {
+	}
+
+	public UdpPcmBO(SourceVO tmplInputBO) {
+		this.source_ip = IpV4Util.getIpAndPortFromUrl(tmplInputBO.getUrl());
+		this.source_port = IpV4Util.getPortFromUrl(tmplInputBO.getUrl());
+		this.local_ip = tmplInputBO.getLocal_ip();
+		this.sample_rate = tmplInputBO.getSample_rate();
+		this.sample_fmt = tmplInputBO.getSample_fmt();
+		this.channel_layout = tmplInputBO.getChannel_layout();
+	}
 }

@@ -56,6 +56,9 @@ public class SdiBO {
 		this.blackmagic = blackmagic;
 	}
 
+	public SdiBO(){
+
+	}
 
 	public SdiBO(String url){
 		setCard_type(url.substring(url.indexOf(":") + 3, url.indexOf("/",6)));

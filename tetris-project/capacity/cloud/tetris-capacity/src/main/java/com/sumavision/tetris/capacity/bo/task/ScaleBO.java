@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.*;
+
 /**
  * 缩放参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -19,6 +21,8 @@ public class ScaleBO {
 	private Integer nv_card_idx = 0;
 
 	private Integer auto_blackside;
+
+	private String ratio;
 
 	public Integer getWidth() {
 		return width;
@@ -72,5 +76,27 @@ public class ScaleBO {
 	public ScaleBO setAuto_blackside(Integer auto_blackside) {
 		this.auto_blackside = auto_blackside;
 		return this;
+	}
+
+	public String getRatio() {
+		return ratio;
+	}
+
+	public ScaleBO setRatio(String ratio) {
+		this.ratio = ratio;
+		return this;
+	}
+
+	public ScaleBO() {
+	}
+
+	public ScaleBO(ProcessVO processVO) {
+		this.width = processVO.getWidth();
+		this.height = processVO.getHeight();
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.mode = processVO.getMode().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.auto_blackside = processVO.getAuto_blackside();
+		this.ratio = processVO.getRatio();
 	}
 }

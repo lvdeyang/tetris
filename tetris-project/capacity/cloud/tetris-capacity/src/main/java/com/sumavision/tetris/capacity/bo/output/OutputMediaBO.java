@@ -16,6 +16,8 @@ public class OutputMediaBO {
 	
 	private Integer pid;
 
+	private Integer delay;
+
 	public String getTask_id() {
 		return task_id;
 	}
@@ -51,5 +53,13 @@ public class OutputMediaBO {
 		this.pid = pid;
 		return this;
 	}
-	
+
+	public Integer getDelay() {
+		return delay;
+	}
+
+	public OutputMediaBO setDelay(Integer delay) {
+		this.delay = delay;
+		return this;
+	}
 }

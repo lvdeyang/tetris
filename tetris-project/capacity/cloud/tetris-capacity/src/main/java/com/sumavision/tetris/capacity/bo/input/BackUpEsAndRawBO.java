@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.List;
 
 /**
@@ -23,6 +25,8 @@ public class BackUpEsAndRawBO {
 	private List<BackUpProgramBO> program_array;
 	
 	private ProgramOutputBO output_program;
+
+	private JSONObject options;
 	
 	private BackUpFileBO file;
 
@@ -79,5 +83,12 @@ public class BackUpEsAndRawBO {
 		this.trigger_list = trigger_list;
 		return this;
 	}
-	
+
+	public JSONObject getOptions() {
+		return options;
+	}
+
+	public void setOptions(JSONObject options) {
+		this.options = options;
+	}
 }

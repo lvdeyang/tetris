@@ -2,6 +2,7 @@ package com.sumavision.tetris.capacity.bo.input;
 
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.bo.MediaSourceBO;
+import com.sumavision.tetris.application.template.SourceVO;
 
 /**
  * srt_ts参数<br/>
@@ -152,5 +153,11 @@ public class SrtTsBO {
 		}
 		this.passphrase = mediaSourceBO.getPassphrase();
 		this.recv_buffsize = mediaSourceBO.getRecv_buffsize();
+	}
+
+	public SrtTsBO(SourceVO sourceVO){
+		this.source_ip = IpV4Util.getIpFromUrl(sourceVO.getUrl());
+		this.source_port = IpV4Util.getPortFromUrl(sourceVO.getUrl());
+		this.mode = "listener";
 	}
 }

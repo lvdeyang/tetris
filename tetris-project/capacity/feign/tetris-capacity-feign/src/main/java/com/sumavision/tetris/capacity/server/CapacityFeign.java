@@ -149,7 +149,7 @@ public interface CapacityFeign{
 	 * @param String deviceIp 转换模块ip
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/sync")
-	public JSONObject sync(@RequestParam("deviceIp") String deviceIp) throws Exception;
+	public JSONObject sync(@RequestParam("syncObj") String syncObj) throws Exception;
 	
 	/**
 	 * 设置告警地址<br/>

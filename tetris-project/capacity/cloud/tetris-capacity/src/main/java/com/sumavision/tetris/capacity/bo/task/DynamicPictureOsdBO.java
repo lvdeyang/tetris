@@ -1,5 +1,9 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.PictureOsdVO;
+import com.sumavision.tetris.application.template.ProcessVO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,5 +46,17 @@ public class DynamicPictureOsdBO {
 		this.dynamic_pic_osds = dynamic_pic_osds;
 		return this;
 	}
-	
+
+	public DynamicPictureOsdBO() {
+	}
+
+	public DynamicPictureOsdBO(ProcessVO processVO) {
+		this.dynamic_pic_osds = new ArrayList<>();
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		for (int i = 0; i < processVO.getPic_osds().size(); i++) {
+			PictureOsdVO pictureOsdVO = processVO.getPic_osds().get(i);
+			this.dynamic_pic_osds.add(new PictureOsdObjectBO(pictureOsdVO));
+		}
+	}
 }

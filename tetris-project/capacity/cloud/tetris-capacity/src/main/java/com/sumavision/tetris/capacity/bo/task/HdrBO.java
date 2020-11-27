@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.ProcessVO;
+
 /**
  * HDR参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -73,5 +75,16 @@ public class HdrBO {
 		this.colorrange = colorrange;
 		return this;
 	}
-	
+
+	public HdrBO() {
+	}
+
+	public HdrBO(ProcessVO processVO) {
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.colorspace = processVO.getColorspace();
+		this.colortransfer = processVO.getColortransfer();
+		this.colorprimaries = processVO.getColorprimaries();
+		this.colorrange = processVO.getColorrange();
+	}
 }

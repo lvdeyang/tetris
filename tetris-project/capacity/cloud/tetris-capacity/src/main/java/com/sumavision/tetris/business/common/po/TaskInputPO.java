@@ -13,18 +13,28 @@ public class TaskInputPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 乐观锁，只在jpa自己实现的save方法下生效
+	 */
 	private Long version;
 	
 	private String taskUuid;
 	
 	private String capacityIp;
+
+	private String nodeId;
 	
 	private String input;
 	
 	/** 保证源的唯一性，yjgb: ip@port; 直播: url; 收录: url */
 	private String uniq;
+
+	/**
+	 * 同步状态，0表示同步，1表示不确定是否与转换上同步
+	 */
+	private Integer syncStatus = 0;
 	
-	/** 计数 */
+	/** 计数 **/
 	private Integer count = 1;
 	
 	private BusinessType type;
@@ -100,4 +110,20 @@ public class TaskInputPO extends AbstractBasePO{
 		this.createTime = createTime;
 	}
 
+	@Column(unique = true)
+	public String getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public Integer getSyncStatus() {
+		return syncStatus;
+	}
+
+	public void setSyncStatus(Integer syncStatus) {
+		this.syncStatus = syncStatus;
+	}
 }

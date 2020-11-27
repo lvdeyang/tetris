@@ -31,5 +31,12 @@ public class SourceUrlBO {
 		this.type = type;
 		return this;
 	}
-	
+
+	public SourceUrlBO() {
+	}
+
+	public SourceUrlBO(String url, String type) {
+		this.url = url;
+		this.type = type;
+	}
 }

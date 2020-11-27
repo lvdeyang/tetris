@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.FuzzyVO;
+import com.sumavision.tetris.application.template.ProcessVO;
+
 /**
  * 重采样参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -30,5 +33,10 @@ public class AudioGainBO {
 	public AudioGainBO setGain_mode(String gain_mode) {
 		this.gain_mode = gain_mode;
 		return this;
+	}
+
+	public AudioGainBO(ProcessVO processVO) {
+		this.volume = processVO.getVolume();
+		this.gain_mode = processVO.getGain_mode();
 	}
 }

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.FuzzyVO;
+
 public class FuzzyObjectBO {
 
 	private String position;
@@ -46,5 +48,14 @@ public class FuzzyObjectBO {
 		this.mosaic_radius = mosaic_radius;
 		return this;
 	}
-	
+
+	public FuzzyObjectBO() {
+	}
+
+	public FuzzyObjectBO(FuzzyVO fuzzy) {
+		this.position = fuzzy.getPosition();
+		this.zone = fuzzy.getZone();
+		this.fuzzy_effect = fuzzy.getFuzzy_effect();
+		this.mosaic_radius = fuzzy.getMosaic_radius();
+	}
 }

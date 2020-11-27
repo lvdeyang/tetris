@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.TextOsdVO;
+
 /**
  * 字体参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -63,5 +65,15 @@ public class FontBO {
 		this.border_color = border_color;
 		return this;
 	}
-	
+
+	public FontBO() {
+	}
+
+	public FontBO(TextOsdVO osd) {
+		this.color = osd.getColor();
+		this.size = osd.getSize();
+		this.family = osd.getFamily();
+		this.has_border = osd.getHas_border();
+		this.border_color = osd.getBorder_color();
+	}
 }

@@ -1,5 +1,17 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.TemplateVO;
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.business.common.Util.IdConstructor;
+import com.sumavision.tetris.business.common.enumeration.MediaType;
+import com.sumavision.tetris.business.common.enumeration.TaskType;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
+import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
+import com.sumavision.tetris.capacity.bo.input.ProgramBO;
+import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+
 import java.util.List;
 
 /**
@@ -111,4 +123,52 @@ public class TaskBO {
 		return this;
 	}
 
+	public TaskBO() {
+	}
+
+	public void setTaskSource(MissionBO missionBO,MediaType mediaType) throws BaseException {
+		Integer taskInputNO = 0;
+		Integer taskProgNO = 0;
+		Integer taskVideoNO = 0;
+		Integer taskAudioNO = 0;
+		InputBO taskInput = missionBO.getInput_array().get(taskInputNO);
+
+		if ("audio".equals(this.getType())) {
+			ProgramBO taskProg = taskInput.getProgram_array().get(taskProgNO);
+			ProgramAudioBO taskAudio = taskProg.getAudio_array().get(taskAudioNO);
+			this.setRaw_source(
+					new TaskSourceBO(missionBO.getIdCtor().getId(taskInputNO, IdConstructor.IdType.INPUT),
+							taskProg.getProgram_number(),
+							taskAudio.getPid()));
+		}else if ("video".equals(this.getType())){
+			ProgramBO taskProg = taskInput.getProgram_array().get(taskProgNO);
+			ProgramVideoBO taskVideo = taskProg.getVideo_array().get(taskVideoNO);
+			this.setRaw_source(
+					new TaskSourceBO(missionBO.getIdCtor().getId(taskInputNO,IdConstructor.IdType.INPUT),
+							taskProg.getProgram_number(),
+							taskVideo.getPid()));
+		}else if ("passby".equals(this.getType())){
+			if (TaskType.PASSBY.equals(missionBO.getTaskType())) {
+				this.setPassby_source(
+						new TaskSourceBO(missionBO.getIdCtor().getId(taskInputNO, IdConstructor.IdType.INPUT)));
+			}else {
+				ProgramBO taskProg = taskInput.getProgram_array().get(taskProgNO);
+				if (MediaType.AUDIO.equals(mediaType)){
+					this.setEs_source(
+							new TaskSourceBO(missionBO.getIdCtor().getId(taskInputNO,IdConstructor.IdType.INPUT),
+									taskProg.getProgram_number(),
+									taskProg.getAudio_array().get(taskAudioNO).getPid()));
+				}else if (MediaType.VIDEO.equals(mediaType)){
+					this.setEs_source(
+							new TaskSourceBO(missionBO.getIdCtor().getId(taskInputNO,IdConstructor.IdType.INPUT),
+									taskProg.getProgram_number(),
+									taskProg.getVideo_array().get(taskVideoNO).getPid()));
+				}
+			}
+		}else if("subtitle".equals(this.getType())) {
+
+		}else{
+			throw new BaseException(StatusCode.ERROR,"not support media type: "+this.getType());
+		}
+	}
 }

@@ -1,5 +1,10 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.capacity.bo.task.TaskBO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,5 +102,8 @@ public class OutputHlsBO {
 		this.i_frames_only = i_frames_only;
 		return this;
 	}
-	
+
+	public OutputHlsBO(){}
+
+
 }

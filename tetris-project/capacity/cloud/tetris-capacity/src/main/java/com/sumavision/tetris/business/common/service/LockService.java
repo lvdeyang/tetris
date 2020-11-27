@@ -185,6 +185,7 @@ public class LockService {
 				input.setUniq(uniq);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -237,6 +238,7 @@ public class LockService {
 			AllRequest allRequest = new AllRequest();
 			try {
 				if(input.getCount().equals(0)){
+					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskUuid);
 					input.setType(businessType);

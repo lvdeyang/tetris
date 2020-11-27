@@ -1,5 +1,10 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.application.template.ProgramVO;
+
 import java.util.List;
 
 /**
@@ -29,14 +34,19 @@ public class BaseTsOutputBO <V extends BaseTsOutputBO>{
 	private String rate_ctrl;
 	
 	private Integer bitrate;
-	
+
+	private String scramble_mode;
+
+	private String scramble_kay;
+	private String scramble_key;
+
 	private String av_mode;
 	
 	private Integer buf_init;
 	
 	private String ts_mode;
 	
-	private Integer Integererlace_depth;
+	private Integer interlace_depth;
 	
 	private String ajust_mode;
 	
@@ -55,6 +65,8 @@ public class BaseTsOutputBO <V extends BaseTsOutputBO>{
 	private String send_control;
 	
 	private Integer send_gap_min;
+
+
 	
 	private List<OutputProgramBO> program_array;
 
@@ -175,13 +187,13 @@ public class BaseTsOutputBO <V extends BaseTsOutputBO>{
 		return (V)this;
 	}
 
-	public Integer getIntegererlace_depth() {
-		return Integererlace_depth;
+	public Integer getInterlace_depth() {
+		return interlace_depth;
 	}
 
-	public V setIntegererlace_depth(Integer Integererlace_depth) {
-		this.Integererlace_depth = Integererlace_depth;
-		return (V)this;
+	public V setInterlace_depth(Integer interlace_depth) {
+		this.interlace_depth = interlace_depth;
+		return (V) this;
 	}
 
 	public String getAjust_mode() {
@@ -273,5 +285,34 @@ public class BaseTsOutputBO <V extends BaseTsOutputBO>{
 		this.program_array = program_array;
 		return (V)this;
 	}
-	
+
+	public String getScramble_mode() {
+		return scramble_mode;
+	}
+
+	public V setScramble_mode(String scramble_mode) {
+		this.scramble_mode = scramble_mode;
+		return (V)this;
+	}
+
+	public String getScramble_kay() {
+		return scramble_kay;
+	}
+
+	public V setScramble_kay(String scramble_kay) {
+		this.scramble_kay = scramble_kay;
+		return (V)this;
+	}
+
+	public String getScramble_key() {
+		return scramble_key;
+	}
+
+	public V setScramble_key(String scramble_key) {
+		this.scramble_key = scramble_key;
+		return (V)this;
+	}
+
+	public BaseTsOutputBO() {
+	}
 }

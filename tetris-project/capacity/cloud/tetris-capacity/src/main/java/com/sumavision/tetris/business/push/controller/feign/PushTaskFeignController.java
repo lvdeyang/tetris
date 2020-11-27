@@ -49,10 +49,10 @@ public class PushTaskFeignController {
 			String task,
 			HttpServletRequest request) throws Exception{
 
-		LOG.info("[push]<add-schedule>(req) hash:{} \n task: {}",task.hashCode(),task);
+		LOG.info("[push]<add-schedule>(syn) hash:{}, params: {}",task.hashCode(),task);
 		ScheduleTaskVO pushTask = JSONObject.parseObject(task, ScheduleTaskVO.class);
 		String result = addPushTaskTrascation(pushTask);
-		LOG.info("[push]<add-schedule>(resp) hash:{}",task.hashCode());
+		LOG.info("[push]<add-schedule>(ack) hash:{}",task.hashCode());
 		return result;
 	}
 	
@@ -69,8 +69,9 @@ public class PushTaskFeignController {
 	public Object deleteTask(
 			String taskId,
 			HttpServletRequest request) throws Exception{
-		
+		LOG.info("[push]<del-schedule>(syn) hash:{}, params: {}",taskId.hashCode(),taskId);
 		scheduleService.deletePushTask(taskId);
+		LOG.info("[push]<del-schedule>(ack) hash:{}",taskId.hashCode());
 		return null;
 	}
 
@@ -80,9 +81,9 @@ public class PushTaskFeignController {
 	public Object clearTask(
 			String taskId,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<clear-schedule>(req) hash:{} \n taskId: {}",taskId.hashCode(),taskId);
+		LOG.info("[push]<clear-schedule>(syn) hash:{}, params: {}",taskId.hashCode(),taskId);
 		scheduleService.clearPushTask(taskId);
-		LOG.info("[push]<clear-schedule>(resp) hash:{} \n taskId: {}",taskId.hashCode());
+		LOG.info("[push]<clear-schedule>(ack) hash:{}",taskId.hashCode());
 		return null;
 	}
 	
@@ -99,12 +100,12 @@ public class PushTaskFeignController {
 	public Object changeSchedule(
 			String changeSchedule,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<change-schedule>(req) hash:{} \n changeSchedule: {}",changeSchedule.hashCode(),changeSchedule);
+		LOG.info("[push]<change-schedule>(syn) hash:{}, params: {}",changeSchedule.hashCode(),changeSchedule);
 		SwitchScheduleVO schedule = JSONObject.parseObject(changeSchedule, SwitchScheduleVO.class);
 		
 		System.out.println(JSON.toJSONString(schedule));
 		changeScheduleTrascation(schedule);
-		LOG.info("[push]<change-schedule>(resp) hash:{}",changeSchedule.hashCode());
+		LOG.info("[push]<change-schedule>(ack) hash:{}",changeSchedule.hashCode());
 		return null;
 	}
 	
@@ -121,9 +122,9 @@ public class PushTaskFeignController {
 	public Object batchDeleteTask(
 			String taskIds,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<delete-schedule>(req) hash:{} \n delete: {}",taskIds.hashCode(),taskIds);
+		LOG.info("[push]<delete-schedules>(syn) hash:{}, params: {}",taskIds.hashCode(),taskIds);
 		List<String> taskUuids = JSONArray.parseArray(taskIds, String.class);
-		LOG.info("[push]<delete-schedule>(resp) hash:{} \n delete: {}",taskIds.hashCode());
+		LOG.info("[push]<delete-schedules>(ack) hash:{}",taskIds.hashCode());
 		scheduleService.batchDeletePushTask(taskUuids);
 		return null;
 	}
