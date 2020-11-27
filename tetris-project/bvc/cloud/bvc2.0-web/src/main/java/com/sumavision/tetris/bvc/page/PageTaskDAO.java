@@ -25,4 +25,6 @@ public interface PageTaskDAO extends MetBaseDAO<PageTaskPO>{
 	public List<PageTaskPO> findByBusinessInfoTypeAndPageInfoId(BusinessInfoType businessInfoType,Long pageInfoId);
 	
 	public Long countByBusinessInfoTypeIn(List<BusinessInfoType> types);
+	
+	public List<PageTaskPO> findByDstIdIn(Collection<String> dstIds);
 }

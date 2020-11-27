@@ -23,6 +23,10 @@ public class BasePush {
     protected static String accessKeyId;
     protected static String accessKeySecret;
     protected static String notificaitonchannel;
+    
+    protected static long iosAppKey;
+    protected static String iosAccessKeyId;
+    protected static String iosAccessKeySecret;
 
     protected static DefaultAcsClient client;
 
@@ -41,8 +45,13 @@ public class BasePush {
         accessKeyId = properties.getProperty("accessKeyId");
 
         accessKeySecret = properties.getProperty("accessKeySecret");
+        
+        iosAccessKeyId = properties.getProperty("iosAccessKeyId");
+
+        iosAccessKeySecret = properties.getProperty("iosAccessKeySecret");
 
         String key = properties.getProperty("appKey");
+        iosAppKey=(Long.valueOf(properties.getProperty("iosAppKey")));
 
         region = properties.getProperty("regionId");
         appKey = Long.valueOf(key);

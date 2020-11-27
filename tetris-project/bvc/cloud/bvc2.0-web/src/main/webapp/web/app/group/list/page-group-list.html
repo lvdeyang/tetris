@@ -11,14 +11,58 @@
                 <el-row :gutter="15" type="flex" style="width:100%; height:100%;">
                     <el-col :xs="6" :sm="6" :md="4" :lg="4" :xl="4">
                         <div class="bvc2-card">
-                            <div class="bvc2-card-head">
+                            <div style="width:100%; height:100%; position:relative;">
+                                <div style="width:100%; height:50%; position:relative; box-sizing:border-box; border-bottom:1px solid #EBEEF5;">
+                                    <div style="height:40px; line-height:40px; text-align:center;">
+                                        <span>设备列表</span>
+                                    </div>
+                                    <div style="position:absolute; left:0; top:31px; right:0; bottom:0;">
+                                        <div style="width:100%; height:100%; position:relative; overflow:auto;">
+                                            <!-- 会议成员树 -->
+                                            <component :is ="sourcelist" ref="$sourceList" :members="members" :checkedmembers="checked" :group="group"></component>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="width:100%; height:50%; position:relative;">
+                                    <div style="height:30px; line-height:30px; text-align:center;">
+                                        <span>常用联系人</span>
+                                    </div>
+                                    <div style="position:absolute; left:0; top:31px; right:0; bottom:40px;">
+                                        <div style="width:100%; height:100%; position:relative; overflow:auto;">
+                                            <el-tree
+                                                ref="contactsTree"
+                                                show-checkbox
+                                                :expand-on-click-node="true"
+                                                :filter-node-method="handleFilterContacts"
+                                                :data="contacts.data"
+                                                :props="contacts.defaultProps"
+                                                default-expand-all>
+                                                <span class="bvc2-tree-node-custom" slot-scope="scope" style="flex:1; display:flex; align-items:center; justify-content:space-between; font-size:14px; padding-right:8px;">
+                                                    <span>
+                                                        <span :class="scope.node.icon + ' ' + scope.data.bundleStatus" style="font-size:16px; position:relative; top:1px; margin-right:5px;"></span>
+                                                        {{scope.node.label}}
+                                                    </span>
+                                                    <el-button v-if="scope.data.type==='BUNDLE'" type="text" style="margin:0; padding:0; float:right; font-size:16px;" icon="el-icon-delete" @click="handleRemoveContacts(scope)"></el-button>
+                                                </span>
+                                            </el-tree>
+                                        </div>
+                                    </div>
+                                    <div style="height:40px; width:100%; position:absolute; left:0; bottom:0;">
+                                        <div style="width:50%; height:100%; float:left; padding-left:10px; padding-right:5px; padding-top:6px; box-sizing:border-box;">
+                                            <el-button size="mini" style="width:100%; border-radius:0;" @click="handleAddContacts">添加联系人</el-button>
+                                        </div>
+                                        <div style="width:50%; height:100%; float:left; padding-right:10px; padding-left:5px; padding-top:6px; box-sizing:border-box;">
+                                            <el-button type="primary" size="mini" style="width:100%; border-radius:0;" @click="quickStartMeeting">联系人组会</el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<div class="bvc2-card-head">
                                 <span>设备列表</span>
                             </div>
                             <div class="bvc2-card-body">
-                                <!-- 会议成员树 -->
-                                <component :is ="sourcelist" ref="$sourceList" :members="members" :checkedmembers="checked" :group="group"></component>
 
-                            </div>
+                            </div>-->
                         </div>
                     </el-col>
                     <el-col :xs="18" :sm="18" :md="20" :lg="20" :xl="20">
@@ -87,6 +131,59 @@
             ref="$quickGroup"
             @quick-group="quickGroupSave"
             ></bvc2-dialog-quick-group>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加联系人"
+                :visible.sync="dialog.addContacts.visible"
+                width="500px"
+                :before-close="handleAddContactsClose">
+
+            <div style="width:100%; height:400px;">
+                <el-tree
+                    style="position:relative; overflow:hidden; min-width:auto;"
+                    ref="totalBundleTree"
+                    show-checkbox
+                    :expand-on-click-node="true"
+                    :data="dialog.addContacts.data"
+                    :props="dialog.addContacts.defaultProps"
+                    default-expand-all>
+                    <span class="bvc2-tree-node-custom" slot-scope="scope">
+                        <span :class="scope.node.icon + ' ' + scope.data.bundleStatus" style="font-size:16px; position:relative; top:1px; margin-right:5px;"></span>
+                        {{scope.node.label}}
+                    </span>
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddContactsClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddContactsSubmit" :loading="dialog.addContacts.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="联系人组会"
+                :visible.sync="dialog.quickStartMeeting.visible"
+                width="450px"
+                :before-close="handleQuickStartMeetingClose">
+
+            <div style="margin-bottom:10px;">主席：{{dialog.quickStartMeeting.chairmanName}}</div>
+            <el-input size="small" v-model="dialog.quickStartMeeting.name" style="margin-bottom:10px;"></el-input>
+            <div style="max-height:300px; width:100%; overflow-y:auto;">
+                <div v-for="(member, i) in dialog.quickStartMeeting.members" :key="i" style="width:50%; float:left; margin-bottom:5px;">
+                    <el-radio v-model="dialog.quickStartMeeting.chairman" :label="member.id" @change="handleQuickStartMeetingChairmanChange">
+                        <span :class="member.icon + ' ' + member.bundleStatus" style="margin-right:2px;"></span>
+                        <span>{{member.name}}</span>
+                    </el-radio>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleQuickStartMeetingClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleQuickStartMeetingSubmit" :loading="dialog.quickStartMeeting.loading">确定</el-button>
+            </span>
+        </el-dialog>
 
     </div>
 </div>

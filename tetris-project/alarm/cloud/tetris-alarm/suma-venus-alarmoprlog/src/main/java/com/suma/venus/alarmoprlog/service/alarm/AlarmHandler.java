@@ -129,8 +129,9 @@ public class AlarmHandler {
 			rawAlarmPO2.setAlarmPOId(alarmPOId);
 			rawAlarmDAO.save(rawAlarmPO2);
 
-			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO,
-					alarmDAO, loadBalanced, restTemplate);
+			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO,
+					null, subscribeAlarmDAO,
+					alarmDAO, loadBalanced, restTemplate, false);
 			// 放入线程池待执行
 			AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
 
@@ -159,8 +160,8 @@ public class AlarmHandler {
 			// 放入线程池待执行
 			// AlarmNotifyThreadPool.getThreadPool().execute(alarmNotifyHandleThread);
 
-			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO,
-					alarmDAO, loadBalanced, restTemplate);
+			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, null, subscribeAlarmDAO,
+					alarmDAO, loadBalanced, restTemplate, false);
 			// 放入线程池待执行
 			AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
 

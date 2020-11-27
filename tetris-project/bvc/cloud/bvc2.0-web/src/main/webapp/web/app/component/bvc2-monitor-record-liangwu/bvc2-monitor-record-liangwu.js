@@ -46,7 +46,7 @@ define([
           deviceName: '',
           timeScope: '',
           status: 'RUN',
-          fileName:''
+          fileName: ''
         },
         dialog: {
           addRecord: {
@@ -66,6 +66,8 @@ define([
             },
             mode: 'SCHEDULING',
             fileName: '',
+            max_size: 0,
+            max_time: 0,
             timeScope: '',
             timing: '',
             totalSizeMb: '',
@@ -77,7 +79,10 @@ define([
             loading: false,
             timeModeChangeText: '日',
             startTimeDisabled: false,
-            bundleId: ''
+            bundleId: '',
+            total_size_mb: '',
+            time_duration: '',
+            // alarm_size_mb: ""
           },
           selectDevice: {
             visible: false,
@@ -108,6 +113,17 @@ define([
               timeSegmentStartTime: "",
               timeSegmentEndTime: "",
             }
+          },
+          detailelse: {
+            visible: false,
+            form: {
+              fileName: '',
+              mode: '',
+              bundle: "",
+              total_size_mb: 0,
+              time_duration: 0,
+              // alarm_size_mb: ""
+            }
           }
         },
         rules: {
@@ -115,6 +131,11 @@ define([
             required: true,
             message: '请输入活动名称',
             trigger: 'blur'
+          }
+        },
+        pickerOptions: {
+          disabledDate: function (time) {
+            return time.getTime() < Date.now() - 8.64e7;
           }
         }
       }
@@ -136,7 +157,7 @@ define([
         var self = this;
         return self.condition.status;
       },
-      condition_fileName:function(){
+      condition_fileName: function () {
         var self = this;
         return self.condition.fileName;
       },
@@ -175,7 +196,7 @@ define([
         var self = this;
         self.load(1);
       },
-      condition_fileName:function(){
+      condition_fileName: function () {
         var self = this;
         self.load(1);
       },
@@ -226,6 +247,10 @@ define([
         ajax.post('/monitor/record/load/all/status/record', condition, function (data) {
           self.totleRecord = data.total;
         });
+
+        // ajax.post('https://192.165.56.131:8214/tetris-user/api/zk/auth/do/username/password/login', null, function (data) {
+
+        // });
       },
       load: function (currentPage) {
         var self = this;
@@ -233,7 +258,7 @@ define([
           mode: self.condition.mode,
           device: self.condition.device,
           status: self.condition.status,
-          fileName:self.condition.fileName,
+          fileName: self.condition.fileName,
           currentPage: currentPage,
           pageSize: self.table.page.pageSize
         };
@@ -272,7 +297,7 @@ define([
           this.dialog.addRecord.timeModeChangeText = ""
           this.dialog.addRecord.timeSegmentmodeStartDay = ""
           this.dialog.addRecord.timeSegmentmodeEndDay = ""
-          this.dialog.addRecord.startTimeDisabled = true;
+          // this.dialog.addRecord.timeSegmentReadonly = true;
         }
       },
       rowDelete: function (scope) {
@@ -321,7 +346,7 @@ define([
               done();
             }
           }
-        }).catch(function () {});
+        }).catch(function () { });
       },
       handleSizeChange: function (pageSize) {
         var self = this;
@@ -356,7 +381,7 @@ define([
       },
       handleAddRecord: function () {
         var self = this;
-        var params = {privilegesStr:"['RECORD','LR']",satisfyAll:false};
+        var params = { privilegesStr: "['RECORD','LR']", satisfyAll: false };
         self.dialog.addRecord.visible = true;
         self.dialog.addRecord.tree.data.splice(0, self.dialog.addRecord.tree.data.length);
         // ajax.post('/monitor/device/find/institution/tree/0/false', null, function (data) {
@@ -378,10 +403,13 @@ define([
         var addRecord = self.dialog.addRecord;
         var timeSegmentStr = '';
         var task = {
-          mode: self.dialog.addRecord.mode,
-          fileName: self.dialog.addRecord.fileName,
-          bundleId: self.dialog.addRecord.bundleId,
-          storeMode: self.dialog.addRecord.timeSegmentmode
+          mode: addRecord.mode,
+          fileName: addRecord.fileName,
+          bundleId: addRecord.bundleId,
+          storeMode: addRecord.timeSegmentmode,
+          total_size_mb: Math.floor(addRecord.total_size_mb),
+          time_duration: Math.floor(addRecord.time_duration),
+          // alarm_size_mb: addRecord.alarm_size_mb
         };
         if (!self.dialog.addRecord.bundleId) {
           self.$message({
@@ -397,6 +425,51 @@ define([
           });
           return;
         }
+
+        if (self.dialog.addRecord.total_size_mb === '') {
+          self.$message({
+            type: 'warning',
+            message: '最大容量不能为空！'
+          });
+          return;
+        } else if (!/\d/.test(self.dialog.addRecord.total_size_mb)) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大容量只能为数字！'
+          });
+          return;
+        } else if (self.dialog.addRecord.total_size_mb < 0) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大容量不能为负数！'
+          });
+          return;
+        }
+
+        if (self.dialog.addRecord.time_duration === '') {
+          self.$message({
+            type: 'warning',
+            message: '最大时长不能为空！'
+          });
+          return;
+        } else if (!/\d/.test(self.dialog.addRecord.time_duration)) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大时长只能为数字！'
+          });
+          return;
+        } else if (self.dialog.addRecord.time_duration < 0) {
+
+          self.$message({
+            type: 'warning',
+            message: '最大时长不能为负数！'
+          });
+          return;
+        }
+
         if (addRecord.mode == 'TIMESEGMENT') {
 
           if (addRecord.timeSegmentmode == "month") {
@@ -479,7 +552,7 @@ define([
         var self = this;
         self.dialog.selectDevice.visible = true;
         self.dialog.selectDevice.tree.data.splice(0, self.dialog.selectDevice.tree.data.length);
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.selectDevice.tree.data.push(data[i]);
@@ -488,7 +561,7 @@ define([
           }
         });
       },
-      handleReset:function(){
+      handleReset: function () {
         var self = this;
         self.condition.device = "";
         self.condition.deviceName = "";
@@ -509,12 +582,12 @@ define([
         }
         self.handleSelectDeviceClose();
       },
-      openDownload(rows) {
+      openDownload (rows) {
         this.taskId = rows.row.id;
         this.loadByDownload(rows.row.id)
         this.dialog.download.visible = true;
       },
-      handleDetail(rows) {
+      handleDetail (rows) {
         var self = this
         ajax.post('/monitor/record//detail/message/of/timesegment', {
           id: rows.id
@@ -538,9 +611,22 @@ define([
         this.dialog.detail.form.fileName = rows.fileName;
         this.dialog.detail.form.mode = rows.mode;
         this.dialog.detail.form.bundle = rows.videoSource;
+        this.dialog.detail.form.total_size_mb = rows.total_size_mb;
+        this.dialog.detail.form.time_duration = rows.time_duration;
+        // this.dialog.detail.form.alarm_size_mb = rows.alarm_size_mb;
 
       },
-      loadByDownload(id) {
+      handleDetailElse (rows) {
+        this.dialog.detailelse.visible = true;
+        this.dialog.detailelse.form.fileName = rows.fileName;
+        this.dialog.detailelse.form.mode = rows.mode;
+        this.dialog.detailelse.form.bundle = rows.videoSource;
+        this.dialog.detailelse.form.total_size_mb = rows.total_size_mb;
+        this.dialog.detailelse.form.time_duration = rows.time_duration;
+        // this.dialog.detailelse.form.alarm_size_mb = rows.alarm_size_mb;
+
+      },
+      loadByDownload (id) {
         var self = this;
         var param = {
           id: id,
@@ -558,10 +644,10 @@ define([
           self.downloadTable.data = rows;
         });
       },
-      handleDownloadClose() {
+      handleDownloadClose () {
         this.dialog.download.visible = false;
       },
-      rowDownload(row) {
+      rowDownload (row) {
         // var self = this;
         // var downloadUrl = row.downloadUrl;
         // var name = row.name;
@@ -570,12 +656,12 @@ define([
         // downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
         window.open(row.downLoadPath);
       },
-      handleDownload(row) {
+      handleDownload (row) {
         var self = this;
         ajax.post('/monitor/record/download/url/' + row.id, null, function (data) {
           var self = this;
           var downloadUrl = data.downloadUrl;
-          var name = row.fileName+".ts";
+          var name = row.fileName + ".ts";
           var startTime = 0;
           var endTime = data.duration;
           downloadUrl = downloadUrl + '&name=' + name + '&start=' + startTime + '&end=' + endTime;
@@ -588,7 +674,7 @@ define([
           // })
         });
       },
-      handleDelete(row) {
+      handleDelete (row) {
         var self = this;
         self.$confirm('此操作将永久删除该任务和该任务下所有录制文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -613,7 +699,7 @@ define([
 
         self.load(1);
       },
-      handleTotalSizeMb() {
+      handleTotalSizeMb () {
         var self = this;
         this.$prompt('请输入磁盘大小(GB)', '提示', {
           confirmButtonText: '确定',

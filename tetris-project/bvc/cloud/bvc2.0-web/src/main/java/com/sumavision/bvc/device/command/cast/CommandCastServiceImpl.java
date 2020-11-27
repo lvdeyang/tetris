@@ -59,8 +59,7 @@ import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
-import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
-import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -128,6 +127,9 @@ public class CommandCastServiceImpl {
 	
 	@Autowired
 	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	/**
 	 * 全量设置播放器的上屏设备（参数是id，主要供controller调用）<br/>
@@ -759,8 +761,14 @@ public class CommandCastServiceImpl {
 		if(false){//!playerInfoBO.isHasBusiness()){
 			log.info("播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，没有相关业务");
 		}else if(doLogic){
-			executeBusiness.execute(logic, "播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，" + description);
-			executeBusiness.execute(logicOsd, "播放器修改上屏列表，设置字幕" + description);
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+				businessReturnService.add(logicOsd, null, null);
+			}else{
+				executeBusiness.execute(logic, "播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，" + description);
+				executeBusiness.execute(logicOsd, "播放器修改上屏列表，设置字幕" + description);
+			}
 			
 			//存储到资源层
 			for(CommandGroupUserPlayerCastDevicePO removeDevice : removeDevices){				

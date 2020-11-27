@@ -1,6 +1,7 @@
 package com.sumavision.tetris.websocket.message;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -47,7 +48,7 @@ public interface WebsocketMessageFeign {
 	@RequestMapping(value = "/message/send")
 	public JSONObject send(
 			@RequestParam("userId") Long userId,
-			@RequestParam("message") String message,
+			@RequestBody String message,
 			@RequestParam("type") String type);
 	
 	/**

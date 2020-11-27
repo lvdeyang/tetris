@@ -89,19 +89,19 @@ export default {
       var res = this.resData;
       this.optionData.ImageAccess = [
         { value: res.vedioCount ? res.vedioCount : 0, name: '已接入' },
-        { value: res.vedioIdleCount ? res.vedioIdleCount : res.vedioCapacity, name: '空闲' }
+        { value: res.vedioIdleCount, name: '空闲' }
       ];
       this.optionData.onLine = [
         { value: res.userCount ? res.userCount : 0, name: '在线' },
-        { value: res.userIdleCount ? res.userIdleCount : res.userCapacity, name: '空闲' }
+        { value: res.userIdleCount, name: '空闲' }
       ];
       this.optionData.transiter = [
         { value: res.turnCount ? res.turnCount : 0, name: '已占用转发' },
-        { value: res.turnIdleCount ? res.turnIdleCount : res.turnCapacity, name: '空闲' }
+        { value: res.turnIdleCount, name: '空闲' }
       ];
       this.optionData.playback = [
         { value: res.reCount ? res.reCount : 0, name: '同时回放路数' },
-        { value: res.reIdleCount ? res.reIdleCount : res.replayCapacity, name: '空闲' }
+        { value: res.reIdleCount, name: '空闲' }
       ];
       return this.optionData
     }
@@ -170,7 +170,22 @@ export default {
   },
   mounted () {
     queryCapacityDatas({ 'id': 1 }).then(res => {
-      this.resData = res;
+      // var res = {
+      //   id: 5,
+      //   reCount: 10,
+      //   reIdleCount: 10,
+      //   replayCapacity: 20,
+      //   turnCapacity: 200,
+      //   turnCount: 0,
+      //   turnIdleCount: 200,
+      //   userCapacity: 200,
+      //   userCount: 2,
+      //   userIdleCount: 198,
+      //   vedioCapacity: 1024,
+      //   vedioCount: 1025,
+      //   vedioIdleCount: 0,
+      // };
+      this.resData = res
       this.initForm.vedioCapacity = res.vedioCapacity
       this.initForm.userCapacity = res.userCapacity
       this.initForm.turnCapacity = res.turnCapacity

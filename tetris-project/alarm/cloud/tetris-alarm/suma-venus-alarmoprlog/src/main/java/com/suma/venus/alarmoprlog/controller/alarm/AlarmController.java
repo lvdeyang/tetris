@@ -51,7 +51,7 @@ import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
-@RequestMapping("/alarm")
+@RequestMapping(value = { "/alarm", "api/alarm" })
 public class AlarmController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlarmController.class);
@@ -83,15 +83,25 @@ public class AlarmController {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = "/tiggerAlarm", method = RequestMethod.POST)
+	@RequestMapping(value = {"/tiggerAlarm", "triggerAlarm"}, method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> httpTriggerAlarm(@RequestBody AlarmParamBO alarmParamBO) {
 		// ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-		alarmParamBO.setType("alarm");
-		LOGGER.info("receive alarmParamBO=" + JSONObject.toJSONString(alarmParamBO) + ", add to queue");
-		HandleReceiveAlarmThread.push(alarmParamBO);
-		return data;
+		
+		try{
+			alarmParamBO.setType("alarm");
+			LOGGER.info("receive alarmParamBO=" + JSONObject.toJSONString(alarmParamBO) + ", add to queue");
+			HandleReceiveAlarmThread.push(alarmParamBO);
+			
+			data.put("errMsg", "");
+			return data;
+		}catch (Exception e) {
+			// TODO: handle exception
+			data.put("errMsg", "exception");
+			return data;
+		}
+
 	}
 
 	@RequestMapping(value = "/recoverAlarm", method = RequestMethod.POST)
@@ -103,10 +113,19 @@ public class AlarmController {
 		LOGGER.info("----------receive recover alarm, alarmCode==" + alarmParamBO.getAlarmCode() + ", service=="
 				+ alarmParamBO.getSourceService() + ", sourceServiceIP==" + alarmParamBO.getSourceServiceIP()
 				+ ", alarmObj==" + alarmParamBO.getAlarmObj() + ", creatTime==" + alarmParamBO.getCreateTime());
-		alarmParamBO.setType("recover");
-		HandleReceiveAlarmThread.push(alarmParamBO);
-		LOGGER.info("----------handleRecovery finish");
-		return data;
+		try {
+			alarmParamBO.setType("recover");
+			HandleReceiveAlarmThread.push(alarmParamBO);
+			LOGGER.info("----------handleRecovery finish");
+			data.put("errMsg", "");
+			return data;
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			data.put("errMsg", "exception");
+			return data;
+		}
+
 	}
 
 	/**
@@ -203,8 +222,8 @@ public class AlarmController {
 			alarmPO.setRecoverTime(Calendar.getInstance().getTime());
 			alarmDAO.save(alarmPO);
 
-			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO,
-					alarmDAO, loadBalanced, restTemplate);
+			HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, null, subscribeAlarmDAO,
+					alarmDAO, loadBalanced, restTemplate, false);
 			// 放入线程池待执行
 			AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
 

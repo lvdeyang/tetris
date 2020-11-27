@@ -62,6 +62,12 @@ public class MediaAudioQuery {
 	public List<MediaAudioVO> loadRecommend() throws Exception{
 		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadRecommend(), MediaAudioVO.class);
 	}
+	public List<MediaAudioVO> loadRecommendnew() throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadRecommendnew(), MediaAudioVO.class);
+	}
+	public List<MediaAudioVO> loadTagRecommend(String tags) throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadTagRecommend(tags), MediaAudioVO.class);
+	}
 	
 	/**
 	 * 根据预览地址查询音频列表<br/>

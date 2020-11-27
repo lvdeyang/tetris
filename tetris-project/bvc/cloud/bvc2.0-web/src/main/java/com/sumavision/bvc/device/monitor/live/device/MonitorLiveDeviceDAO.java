@@ -6,6 +6,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
+
+import com.sumavision.bvc.device.monitor.live.LiveType;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.orm.dao.MetBaseDAO;
 
 @RepositoryDefinition(domainClass = MonitorLiveDevicePO.class, idClass = Long.class)
@@ -21,6 +24,16 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @return Page<MonitorLiveDevicePO> 点播设备任务列表
 	 */
 	public Page<MonitorLiveDevicePO> findByUserId(Long userId, Pageable page);
+	
+	/**
+	 * 获取用户的点播设备任务<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 上午10:33:32
+	 * @param Long userId 用户id
+	 * @return List<MonitorLiveDevicePO>
+	 */
+	public List<MonitorLiveDevicePO> findByUserId(Long userId);
 	
 	/**
 	 * 统计用户的点播设备任务数量<br/>
@@ -55,5 +68,57 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 */
 	public List<MonitorLiveDevicePO> findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(
 			String dstVideoBundleId, String dstVideoChannelId, String dstAudioBundleId, String dstAudioChannelId);
+	
+	/**
+	 * 根据解码器id查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月6日 下午4:51:42
+	 * @param videoBundleId
+	 * @param dstVideoBundleId
+	 * @return
+	 */
+	public MonitorLiveDevicePO findByDstVideoBundleId(String dstVideoBundleId);
+	
+	/**
+	 * 根据userId和转发状态查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午4:32:10
+	 * @param userId
+	 * @param status
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByUserIdAndStatus(Long userId, MonitorRecordStatus status);
+	
+	/**
+	 * 根据执行状态查询 <br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月17日 上午10:13:44
+	 * @param status 状态RUN/STOP
+	 * @return Long 正在执行的转发条数
+	 */
+	public Long countByStatus(MonitorRecordStatus status);
+	
+	/**
+	 * 通过视频源id或者目标设备id查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月19日 下午1:08:00
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByVideoBundleIdInOrDstVideoBundleIdIn(Collection<String> videoBundleIdList, Collection<String> dstVideoBundleIdList);
+	
+	/**
+	 * 通过视频源和点播设备任务类型查询<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月24日 下午3:14:43
+	 * @param videoBundleId
+	 * @param type
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByVideoBundleIdAndType(String videoBundleId, LiveType type);
 	
 }

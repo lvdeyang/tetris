@@ -86,6 +86,9 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private List<MediaAudioVO> children;
 	
+	/**是否置顶1是，0否*/
+	private Integer isTop=0;
+	
 	public String getName() {
 		return name;
 	}
@@ -365,6 +368,18 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	
+	
+	
+	public Integer getIsTop() {
+		return isTop;
+	}
+
+	public MediaAudioVO setIsTop(Integer isTop) {
+		this.isTop = isTop;
+		return this;
+	}
+
 	@Override
 	public MediaAudioVO set(MediaAudioPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
@@ -392,6 +407,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
+			.setIsTop(entity.getIsTop())
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())

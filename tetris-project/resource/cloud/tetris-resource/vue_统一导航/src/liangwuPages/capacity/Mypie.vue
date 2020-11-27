@@ -1,7 +1,7 @@
 <template>
   <div class="Echarts">
-    <div :id="echartsId" style="width: 500px;height:350px;"></div>
-    <div class="data-box">占用：{{currentNum}} <br />空闲：{{totalNum - currentNum}}</div>
+    <div :id="echartsId" style="width: 100%;height:350px;"></div>
+    <div class="data-box">占用：{{currentNum>=totalNum?totalNum:currentNum}} <br />空闲：{{(totalNum - currentNum)<0?0:(totalNum - currentNum)}}</div>
   </div>
 </template>
 
@@ -52,7 +52,7 @@ export default {
         this.currentNum = this.capacityData.turnCount || 0
         this.totalNum = this.capacityData.turnCapacity
       } else if (this.titleType == "playback") {
-        this.currentNum = this.capacityData.reIdleCount || 0
+        this.currentNum = this.capacityData.reCount || 0
         this.totalNum = this.capacityData.replayCapacity
       }
     },

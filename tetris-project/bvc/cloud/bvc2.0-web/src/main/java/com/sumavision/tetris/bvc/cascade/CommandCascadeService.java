@@ -464,4 +464,18 @@ public class CommandCascadeService {
 		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
+	
+	/**
+	 * 云台控制级联<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月17日 下午4:02:18
+	 * @param group GroupBO
+	 * @throws Exception
+	 */
+	public void cloudControll(GroupBO group) throws Exception{
+		String fullName = generateFullName("cloudControll.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
 }

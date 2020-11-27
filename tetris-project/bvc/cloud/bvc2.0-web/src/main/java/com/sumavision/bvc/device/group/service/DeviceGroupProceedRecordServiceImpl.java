@@ -263,6 +263,12 @@ public class DeviceGroupProceedRecordServiceImpl {
 			DeviceGroupPO group
 			) throws Exception{
 		
+		DeviceGroupProceedRecordPO deviceGroupProceedRecordPO = deviceGroupProceedRecordDao.findByGroupIdAndFinished(group.getId(), false);
+		
+		if(deviceGroupProceedRecordPO != null){
+			return ;
+		}
+		
 		Set<DeviceGroupMemberPO> members = group.getMembers();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
 		for(DeviceGroupMemberPO member: members){
@@ -273,6 +279,7 @@ public class DeviceGroupProceedRecordServiceImpl {
 		DeviceGroupAuthorizationPO auth = deviceGroupAuthorizationDao.findByGroupUuid(group.getUuid());
 		
 		DeviceGroupProceedRecordPO recordPO = new DeviceGroupProceedRecordPO();
+		recordPO.setUserId(group.getUserId());
 		recordPO.setStartTime(new Date());
 		recordPO.setAuthorizationMemberNumber(auth==null?0:auth.getAuthorizationMembers().size());
 		recordPO.setTotalMemberNumber(group.getMembers().size());

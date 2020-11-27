@@ -533,7 +533,7 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/find/by/userno/in")
 	public Object findByUsernoIn(
-			String usernos,
+			@RequestBody String usernos,
 			HttpServletRequest request) throws Exception{
 		
 		List<String> usernoList = JSONArray.parseArray(usernos, String.class);
@@ -627,5 +627,53 @@ public class UserFeignController {
 	@RequestMapping(value = "/query/user/online")
 	public Object queryUserOnline() throws Exception{
 		return userQuery.queryUserOnline();
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/tags")
+	public Object queryUserTags(Long userId) throws Exception{
+		return userQuery.queryUserTags(userId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/tag/hotcount")
+	public Object addTagHotcount(
+			Long userId, 
+			String tagNames,
+			HttpServletRequest request) throws Exception{
+		
+		
+		return userService.addTagHotCount(userId,tagNames);
+	}
+	
+	/**
+	 * 查询所有角色<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午5:24:10
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/all")
+	public Object findAll()throws Exception{
+		return userDAO.findAll();
+	}
+	
+	/**
+	 * 查询角色下的用户<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月13日 下午12:30:34
+	 * @param roleIds 角色ids
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/roleId/in")
+	public Object findByRoleIdIn(List<Long> roleIds) throws Exception{
+		return userDAO.findByRoleIdIn(roleIds);
 	}
 }

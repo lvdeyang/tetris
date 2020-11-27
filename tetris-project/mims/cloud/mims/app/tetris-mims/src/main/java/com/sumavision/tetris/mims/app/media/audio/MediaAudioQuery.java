@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.servo.tag.Tags;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -46,6 +48,7 @@ import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserTagsVO;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -311,6 +314,130 @@ public class MediaAudioQuery {
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
 	}
 	
+	
+    public List<MediaAudioVO> loadRecommendWithtags(UserVO user,String tags) throws Exception{
+    	//总推荐个数，暂时写死，后续增加到系统配置页面
+    	int count=20;
+    	Map<String, TagVO> tagMaps=new HashMap<String, TagVO>();
+    	List<TagVO> tagVOs=tagQuery.getTagTree(user);
+		for (TagVO tagVO : tagVOs) {
+			for (TagVO subTagVO : tagVO.getSubColumns()) {
+				tagMaps.put(subTagVO.getName(), subTagVO);
+			}
+		}
+    	
+    	
+		List<MediaAudioVO> allAudioVOs=new ArrayList<MediaAudioVO>();
+		List<MediaAudioVO> result=new ArrayList<MediaAudioVO>();
+		String[] tagarr=tags.split(",");
+		for (String tag : tagarr) {
+			List<MediaAudioPO> tagMedia=mediaAudioDao.findByTag(tag);
+			List<MediaAudioVO> audioVOs = MediaAudioVO.getConverter(MediaAudioVO.class).convert(tagMedia, MediaAudioVO.class);
+			allAudioVOs.addAll(audioVOs);
+		}
+		//按照标签热度重新计算媒资分数
+		for (MediaAudioVO mediaAudioVO : allAudioVOs) {
+			long tempHotCount=mediaAudioVO.getDownloadCount();
+			for (String mediaAudioTag : mediaAudioVO.getTags()) {
+				tempHotCount+=tagMaps.get(mediaAudioTag).getHotCount();
+			}
+			mediaAudioVO.setHotWeight(tempHotCount);
+		}
+		
+		//按照媒资权重值排序，取出来 tagMediaCountMap中该标签推荐媒资个数那么多的媒资。
+		Collections.sort(allAudioVOs, new Comparator<MediaAudioVO>() {
+
+			@Override
+			public int compare(MediaAudioVO o1, MediaAudioVO o2) {
+				// TODO Auto-generated method stub
+			    o1.setIsTop(o1.getIsTop()==null?0:o1.getIsTop());
+			    o2.setIsTop(o2.getIsTop()==null?0:o2.getIsTop());
+				if(o1.getIsTop()==1&&o2.getIsTop()==0){
+					return -1;
+				}else if(o1.getIsTop()==0&&o2.getIsTop()==1){
+					return 1;
+				}
+				return Integer.parseInt((o2.getHotWeight()-o1.getHotWeight())+"");
+			}
+		});
+		
+		count=allAudioVOs.size()>count?count:allAudioVOs.size();
+		
+		for(int i=0;i<count;i++){
+			result.add(allAudioVOs.get(i));
+		}
+
+		return result;
+	
+	}
+	
+	
+	public List<MediaAudioVO> loadRecommendWithNew(UserVO user) throws Exception{
+		
+		List<MediaAudioVO> result=new ArrayList<MediaAudioVO>();
+		
+		
+		List<TagVO> tagVOs=tagQuery.getTagTree(user);
+
+		Map<String, TagVO> tagMaps=new HashMap<String, TagVO>();
+		
+		for (TagVO tagVO : tagVOs) {
+			for (TagVO subTagVO : tagVO.getSubColumns()) {
+				tagMaps.put(subTagVO.getName(), subTagVO);
+			}
+		}
+		//总推荐个数，暂时写死，后续增加到系统配置页面
+		int count=5;
+		List<UserTagsVO> userTagsVOs=userQuery.queryUserTags(user.getId());
+		long totalWeiht=0l;
+		for (UserTagsVO userTagsVO : userTagsVOs) {
+			totalWeiht+=userTagsVO.getHotCount();
+		}
+		//保存的是用户标签下的媒体推荐个数
+		Map<String, Long> tagMediaCountMap=new HashMap<String, Long>();
+		
+		for (UserTagsVO userTagsVO : userTagsVOs) {
+			tagMediaCountMap.put(userTagsVO.getTagName(), count*userTagsVO.getHotCount()/totalWeiht);
+		}
+		//循环用户标签，按照个数获取推荐个数的媒资
+		for (String key : tagMediaCountMap.keySet()) {
+
+			List<MediaAudioPO> tagMedia=mediaAudioDao.findByTag(key);
+			List<MediaAudioVO> audioVOs = MediaAudioVO.getConverter(MediaAudioVO.class).convert(tagMedia, MediaAudioVO.class);
+			for (MediaAudioVO mediaAudioVO : audioVOs) {
+				long tempHotCount=mediaAudioVO.getDownloadCount();
+				for (String mediaAudioTag : mediaAudioVO.getTags()) {
+					tempHotCount+=tagMaps.get(mediaAudioTag).getHotCount();
+				}
+				mediaAudioVO.setHotWeight(tempHotCount);
+				
+			}
+		    //按照媒资权重值排序，取出来 tagMediaCountMap中该标签推荐媒资个数那么多的媒资。
+			Collections.sort(audioVOs, new Comparator<MediaAudioVO>() {
+
+				@Override
+				public int compare(MediaAudioVO o1, MediaAudioVO o2) {
+					// TODO Auto-generated method stub
+				    o1.setIsTop(o1.getIsTop()==null?0:o1.getIsTop());
+				    o2.setIsTop(o2.getIsTop()==null?0:o2.getIsTop());
+					if(o1.getIsTop()==1&&o2.getIsTop()==0){
+						return -1;
+					}else if(o1.getIsTop()==0&&o2.getIsTop()==1){
+						return 1;
+					}
+					return Integer.parseInt((o2.getHotWeight()-o1.getHotWeight())+"");
+				}
+			});
+			int getCount=(int) ((audioVOs.size()>tagMediaCountMap.get(key))?tagMediaCountMap.get(key):audioVOs.size());
+			for(int i=0;i<getCount;i++){
+				result.add(audioVOs.get(i));
+			}
+			
+		}
+		return result;
+	
+	}
+	
 	public List<MediaAudioVO> loadRecommendWithWeight(UserVO user) throws Exception{
 		JSONObject tagAndParent = tagQuery.queryTagAndParent(user, null, null);
 		
@@ -449,6 +576,11 @@ public class MediaAudioQuery {
 		
 		return new HashMapWrapper<String, List<MediaAudioVO>>().put("tree", audiosTree.getList()).put("list", audiosList.getList()).getMap();
 	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * 获取标签的音频媒资数<br/>

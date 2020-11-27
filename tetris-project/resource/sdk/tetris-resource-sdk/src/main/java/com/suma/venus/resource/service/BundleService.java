@@ -431,6 +431,7 @@ public class BundleService extends CommonService<BundlePO> {
 	 * @param String username 用户名
 	 * @param String userNo 用户号码
 	 */
+    @Transactional(rollbackFor = Exception.class)
 	public void createUserBundle(String userId, String username, String userNo, String worknodeUid) throws Exception{
 		
 		try {

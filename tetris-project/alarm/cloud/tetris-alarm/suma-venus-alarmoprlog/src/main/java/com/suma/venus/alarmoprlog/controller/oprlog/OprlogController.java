@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.alarmoprlog.orm.dao.IOprlogDAO;
 import com.suma.venus.alarmoprlog.orm.entity.OprlogPO;
@@ -46,6 +46,7 @@ public class OprlogController {
 	@RequestMapping(value = "/triggerOprlog", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> triggerOprlog(@RequestBody OprlogParamBO oprlogParamBO) {
+		LOGGER.info("receive oprlog, " + JSON.toJSONString(oprlogParamBO));
 
 		// ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();

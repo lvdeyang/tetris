@@ -56,6 +56,7 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
+import com.sumavision.tetris.mims.app.media.tag.TagService;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
@@ -145,8 +146,11 @@ public class MediaAudioService {
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
 	
-	//@Autowired
+	@Autowired
 	private QdBossService bossService;
+	
+	@Autowired
+	TagService tagService;
 	
 	/**
 	 * 音频媒资上传审核通过<br/>
@@ -1051,10 +1055,13 @@ public class MediaAudioService {
 					userAddTag.add(tagVO.getName());
 				}
 				permission.setDownloadCount(tagDownloadCount);
-				savePO.add(permission);
+				savePO.add(permission);			   
+				
 			}
-			tagDownloadPermissionDAO.save(savePO);
 			
+			tagDownloadPermissionDAO.save(savePO);
+			//增加关联标签热度值
+			tagService.addHotCount(allTag);
 //			if (!userAddTag.isEmpty()) {
 //				userTag.addAll(userAddTag);
 //				String newUserTag = StringUtils.join(userTag.toArray(), ",");

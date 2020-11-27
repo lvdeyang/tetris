@@ -61,7 +61,10 @@ require.config({
         'page-omms-software-service-installation-package':window.APPPATH + 'omms/software/service/installation-package/page-omms-software-service-installation-package',
         'page-omms-software-service-installation-package-history':window.APPPATH + 'omms/software/service/installation-package/history/page-omms-software-service-installation-package-history',
         'page-omms-software-service-properties':window.APPPATH + 'omms/software/service/installation-package/page-omms-software-service-properties',
-        'page-omms-software-service-deployment':window.APPPATH + 'omms/software/service/deployment/page-omms-software-service-deployment'
+        'page-omms-software-service-deployment':window.APPPATH + 'omms/software/service/deployment/page-omms-software-service-deployment',
+        'page-omms-software-service-backup':window.APPPATH + 'omms/software/service/backup/page-omms-software-service-backup',
+        'page-omms-hardware-database':window.APPPATH + 'omms/hardware/database/page-omms-hardware-database',
+        'page-omms-auth':window.APPPATH + 'omms/auth/page-omms-auth'
     },
     shim:{
         'vue':{

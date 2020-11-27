@@ -313,6 +313,7 @@ public class UserController {
             String companyName,
             String remark,
             String loginIp,
+            Boolean isLoginIp,
             String bindRoles,
             String worknodeUid) throws Exception{
 		
@@ -321,12 +322,12 @@ public class UserController {
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp, bindRoles, true,worknodeUid);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp,isLoginIp, bindRoles, true,worknodeUid);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}
 		}
 		return null;
@@ -474,6 +475,16 @@ public class UserController {
 		if (userInfo == null || userInfo.isEmpty()) throw new UserNotExistException(user.getId()); 
 		
 		return userInfo.get(0);
+	}
+	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/querytags")
+	public Object querytags(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<UserTagsVO> userTagsVOs=userQuery.queryUserTags(user.getId());
+		return userTagsVOs;
 	}
 	
 	/**
@@ -628,7 +639,36 @@ public class UserController {
 	@RequestMapping(value = "/load")
 	public Object load()throws Exception{
 		return resourceFeign.load();
+		//return null;
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editTags")
+	public Object editTags(
+            String tags,
+            String hotCounts
+           ) throws Exception{
+		
+		UserVO user = userQuery.current();
+		//TODO 权限校验
+		return userService.editTags(user.getId(), tags,hotCounts);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/editTagHotCount")
+	public Object editTagHotCount(
+			String tagName,
+            Long hotCount
+           ) throws Exception{
+		
+		UserVO user = userQuery.current();
+		//TODO 权限校验
+		return userService.editTagHotCount(user.getId(),tagName,hotCount);
+	}
+	
+	
 }
 
 

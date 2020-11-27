@@ -319,7 +319,7 @@ public class ApiResourceService extends ControllerBase{
 					continue;
 				}
 			}
-		}else throw new BaseException(StatusCode.ERROR, "暂无可查询到的设备");
+		}
 		return bundleVOs;
 	}
 

@@ -85,7 +85,8 @@ define([
             loginIp: '',
             lastlogintime: '',
             bindrole: '',
-            bindRoles: ''
+            bindRoles: '',
+            isLoginIp: true
           },
           editUser: {
             visible: false,
@@ -103,20 +104,26 @@ define([
             loginIp: '',
             bindrole: '',
             bindRoles: '',
-            bindAccessNodeUidName:'',
-            bindAccessNodeUid:''
+            bindAccessNodeUidName: '',
+            bindAccessNodeUid: ''
           },
           import: {
             requireType: ['csv'],
             multiple: false
           },
+          tokens: {
+            visible: false,
+            currentUser: '',
+            rows: []
+          }
         },
-        
-        bindAccessNodeUidVisable:false,
-        accessNodeTable:[],
-        bindAccessNodeUid:'',
-        bindAccessNodeUidName:'',
-        bindAccessNodeUidRow:undefined
+
+        bindAccessNodeUidVisable: false,
+        accessNodeTable: [],
+        bindAccessNodeUid: '',
+        bindAccessNodeUidName: '',
+        bindAccessNodeUidRow: undefined,
+        isLoginIpDisabled: true
       },
       methods: {
         rowKey: function (row) {
@@ -147,7 +154,7 @@ define([
           self.bindAccessNodeUidVisable = true;
           // self.$refs.roleTable.clearSelection()
           var self = this;
-          self.accessNodeTable =[];
+          self.accessNodeTable = [];
           // self.table.rows.splice(0, self.table.rows.length);
           ajax.post('/user/load', {
             currentPage: 1,
@@ -164,24 +171,27 @@ define([
 
 
         },
-        
-    currentRowChange: function (currentRow, oldRow) {
-      var self = this;
-      self.tbindAccessNodeUidRow = currentRow;
-    },
 
-    handleBindAccessNodeUidSubmit: function () {
-      this.bindAccessNodeUidVisable = false;
-      this.bindAccessNodeUidName= this.dialog.editUser.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
-      this.bindAccessNodeUid = this.dialog.editUser.bindAccessNodeUid =this.tbindAccessNodeUidRow.nodeUid
-    },
-    handleBindRoleSubmit: function () {
+        currentRowChange: function (currentRow, oldRow) {
+          var self = this;
+          self.tbindAccessNodeUidRow = currentRow;
+        },
+        handleBindAccessNodeUidSubmit: function () {
+          this.bindAccessNodeUidVisable = false;
+          this.bindAccessNodeUidName = this.dialog.editUser.bindAccessNodeUidName = this.tbindAccessNodeUidRow.name
+          this.bindAccessNodeUid = this.dialog.editUser.bindAccessNodeUid = this.tbindAccessNodeUidRow.nodeUid
+        },
+        handleBindRoleSubmit: function () {
           this.dialogBindRole.bindRoleDialogTableVisible = false;
           var bindRoleNameArr = [];
           var bindRoleIdArr = [];
           this.dialogBindRole.bindRoleSelection.map(item => {
-            bindRoleNameArr.push(item.name);
-            bindRoleIdArr.push(item.id)
+            if (item.id == 6 || item.id == 7) {
+
+            } else {
+              bindRoleNameArr.push(item.name);
+              bindRoleIdArr.push(item.id)
+            }
           })
           this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
           this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
@@ -221,14 +231,15 @@ define([
             var rows = data.rows;
             if (rows && rows.length > 0) {
               for (var i = 0; i < rows.length; i++) {
-                self.roleOption.push(rows[i]);
+                if (rows[i].id != 7 && rows[i].id != 6 && rows[i].id != 4) {
+                  self.roleOption.push(rows[i]);
+                }
               }
-              console.log(self.roleOption)
             }
           });
         },
 
-        handleSelectionChange(val) {
+        handleSelectionChange (val) {
           this.dialogBindRole.bindRoleSelection = val;
         },
         loadCompany: function () {
@@ -319,8 +330,10 @@ define([
             rolesName = [],
             rolesId = [];
           for (var i = 0; i < businessRoles.length; i++) {
-            rolesName.push(businessRoles[i].name)
-            rolesId.push(businessRoles[i].id)
+            if (businessRoles[i].id != '7' && businessRoles[i].id != '6' && businessRoles[i].id != '4') {//去掉媒资用户
+              rolesName.push(businessRoles[i].name)
+              rolesId.push(businessRoles[i].id)
+            }
           }
           self.dialog.editUser.id = row.id;
           self.dialog.editUser.nickname = row.nickname;
@@ -352,17 +365,17 @@ define([
         },
         handleEditUserSubmit: function () {
           var self = this;
-          if(!self.dialog.editUser.bindAccessNodeUid){
+          if (!self.dialog.editUser.bindAccessNodeUid) {
             self.$message({
-              'type':'waring',
-              'message':"服务节点不能为空"
+              'type': 'waring',
+              'message': "服务节点不能为空"
             })
             return
           }
-          if(!self.dialog.editUser.bindrole){
+          if (!self.dialog.editUser.bindrole) {
             self.$message({
-              'type':'waring',
-              'message':"绑定角色不能为空"
+              'type': 'waring',
+              'message': "绑定角色不能为空"
             })
             return
           }
@@ -419,7 +432,7 @@ define([
                 done();
               }
             }
-          }).catch(function () {});
+          }).catch(function () { });
         },
         handleCreateUserClose: function () {
           var self = this;
@@ -440,17 +453,17 @@ define([
         },
         handleCreateUserSubmit: function () {
           var self = this;
-          if(!self.bindAccessNodeUid){
+          if (!self.bindAccessNodeUid) {
             self.$message({
-              'type':'waring',
-              'message':"服务节点不能为空"
+              'type': 'waring',
+              'message': "服务节点不能为空"
             })
             return
           }
-          if(!self.dialog.createUser.bindRoles){
+          if (!self.dialog.createUser.bindRoles) {
             self.$message({
-              'type':'waring',
-              'message':"绑定角色不能为空"
+              'type': 'waring',
+              'message': "绑定角色不能为空"
             })
             return
           }
@@ -471,7 +484,8 @@ define([
             loginIp: self.dialog.createUser.loginIp,
             bindrole: self.dialog.createUser.bindrole,
             bindRoles: self.dialog.createUser.bindRoles,
-            worknodeUid:self.bindAccessNodeUid,
+            worknodeUid: self.bindAccessNodeUid,
+            isLoginIp: self.dialog.createUser.isLoginIp,
           };
 
           ajax.post('/user/add', params, function (data, status) {
@@ -537,10 +551,62 @@ define([
           var pwd = '';
           for (var i = 0; i < len; i++) {
             pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-    
+
           }
           return pwd;
-    
+
+        },
+        isLoginIpChange: function (val) {
+          if (val) {
+            this.dialog.createUser.loginIp = "";
+            this.isLoginIpDisabled = true
+          } else {
+            this.isLoginIpDisabled = false
+
+          }
+        },
+        // 下线高级操作
+        handleTokens: function (scope) {
+          var self = this;
+          var row = scope.row;
+          self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
+          ajax.post('/token/load', { userId: row.id }, function (data) {
+            self.dialog.tokens.visible = true;
+            self.dialog.tokens.currentUser = row;
+            if (data && data.length > 0) {
+              for (var i = 0; i < data.length; i++) {
+                self.dialog.tokens.rows.push(data[i]);
+              }
+            }
+          });
+        },
+        // 强制下线
+        handleInvalidToken: function (scope) {
+          var self = this;
+          var row = scope.row;
+          ajax.post('/token/invalid', { id: row.id }, function (data) {
+            for (var i = 0; i < self.dialog.tokens.rows.length; i++) {
+              if (self.dialog.tokens.rows[i].id === row.id) {
+                self.dialog.tokens.rows.splice(i, 1, data);
+                break;
+              }
+            }
+            self.$message({
+              type: 'success',
+              message: '操作成功'
+            });
+          });
+        },
+
+        handleTokensClose: function () {
+          var self = this;
+          self.dialog.tokens.visible = false;
+          self.dialog.tokens.currentUser = '';
+          self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
+        },
+        // tab key值
+        rowKey: function (row) {
+          return 'user-' + row.uuid;
         },
       },
       created: function () {

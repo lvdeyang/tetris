@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 
 /**
@@ -134,6 +133,23 @@ public class BundlePO extends CommonPO<BundlePO> {
 	/**是否转码*/
 	private Boolean transcod;
 	
+	private CoderType coderType;
+	
+	public enum CoderType{
+		DEFAULT,
+		ENCODER,
+		DECODER
+	}
+	
+	@Column(name = "coderType")
+	public CoderType getCoderType() {
+		return coderType;
+	}
+
+	public void setCoderType(CoderType coderType) {
+		this.coderType = coderType;
+	}
+
 	@Column(name = "transcod")
 	public Boolean getTranscod() {
 		return transcod;

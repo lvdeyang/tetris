@@ -61,6 +61,9 @@ public class MediaAudioVO {
 	
 	private List<MediaAudioVO> children;
 	
+	/**是否置顶1是，0否*/
+	private int isTop=0;
+	
 	public Long getId() {
 		return id;
 	}
@@ -302,5 +305,15 @@ public class MediaAudioVO {
 		this.children = children;
 		return this;
 	}
+
+	public int getIsTop() {
+		return isTop;
+	}
+
+	public void setIsTop(int isTop) {
+		this.isTop = isTop;
+	}
+	
+	
 
 }

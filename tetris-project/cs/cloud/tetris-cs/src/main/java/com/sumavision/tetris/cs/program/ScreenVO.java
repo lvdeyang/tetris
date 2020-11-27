@@ -26,6 +26,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String type;
 	private String mimetype;
 	private String previewUrl;
+	private String downloadUrl;
 	private String encryption;
 	private String encryptionUrl;
 	private Integer hotWeight;
@@ -37,6 +38,10 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String videoPid;
 	private String audioType;
 	private String videoType;
+	private Boolean isRequired;
+	private String startTime;
+	private String endTime;
+	private int count=0;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -64,7 +69,10 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setAudioType(entity.getAudioType())
 		.setVideoType(entity.getVideoType())
 		.setMimsUuid(entity.getMimsUuid())
-		.setResourceId(entity.getResourceId());
+		.setResourceId(entity.getResourceId())
+		.setStartTime(DateUtil.format(entity.getStartTime(),"yyyy-MM-dd HH:mm:ss"))
+		.setEndTime(DateUtil.format(entity.getEndTime(),"yyyy-MM-dd HH:mm:ss"))
+		.setIsRequired(entity.getIsRequired());
 		return this;
 	}
 	
@@ -178,7 +186,24 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setAudioType(vo.getAudioType());
 		screenPO.setVideoType(vo.getVideoType());
 		screenPO.setUpdateTime(new Date());
+		if(vo.getStartTime()!=null&&!vo.getStartTime().isEmpty()){
+			screenPO.setStartTime(DateUtil.parse(vo.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
+		}
+		if(vo.getEndTime()!=null&&!vo.getEndTime().isEmpty()){
+			screenPO.setEndTime(DateUtil.parse(vo.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+		}
+		screenPO.setIsRequired(vo.getIsRequired() == null ? false:vo.getIsRequired());
 		return screenPO;
+	}
+	
+
+	public String getDownloadUrl() {
+		return downloadUrl;
+	}
+
+	public ScreenVO setDownloadUrl(String downloadUrl) {
+		this.downloadUrl = downloadUrl;
+		return this;
 	}
 
 	public Long getProgramId() {
@@ -382,6 +407,51 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		this.videoType = videoType;
 		return this;
 	}
+	
+
+	public Boolean getIsRequired() {
+		return isRequired;
+	}
+
+	public ScreenVO setIsRequired(Boolean isRequired) {
+		this.isRequired = isRequired;
+		return this;
+	}
+
+
+	
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public ScreenVO setStartTime(String startTime) {
+		this.startTime = startTime;
+		return this;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public ScreenVO setEndTime(String endTime) {
+		this.endTime = endTime;
+		return this;
+	}
+
+
+
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
+
+
+
 
 	public static final class ScreenVOOrderComparator implements Comparator<ScreenVO>{
 		@Override

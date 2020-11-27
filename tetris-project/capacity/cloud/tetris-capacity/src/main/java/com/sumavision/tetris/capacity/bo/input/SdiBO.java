@@ -55,6 +55,10 @@ public class SdiBO {
 	public void setBlackmagic(JSONObject blackmagic) {
 		this.blackmagic = blackmagic;
 	}
+	
+	public SdiBO() {
+		
+	}
 
 	public SdiBO(){
 

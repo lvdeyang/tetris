@@ -1,11 +1,15 @@
 package com.sumavision.tetris.omms.hardware.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -35,6 +39,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.omms.auth.AuthPO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
+import com.sumavision.tetris.omms.hardware.database.DatabasePO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataDAO;
@@ -63,6 +71,9 @@ public class ServerService {
 	
 	@Autowired
 	private ServiceDeploymentDAO serviceDeploymentDao;
+	
+	@Autowired
+	private DatabaseDAO databaseDAO;
 	
 	/**
 	 * 添加一个服务器<br/>
@@ -242,6 +253,8 @@ public class ServerService {
 		basicInfo.setSystemTime("");
 		basicInfo.setLastRebootTime("");
 		basicInfo.setUpTime("");
+		basicInfo.setTemperature(serverInfo.getJSONObject("cpu").getString("temperature"));
+		basicInfo.setFanspeed(serverInfo.getJSONObject("power").getLong("fanspeed"));
 		
 		//小工具升级之后支持的参数
 		if(serverInfo.containsKey("pid")){
@@ -453,6 +466,20 @@ public class ServerService {
             httpPost.setConfig(requestConfig);
 			
 			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetModifyIniException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
 			int code = response.getStatusLine().getStatusCode();
 			if(code != 200){
 				throw new HttpGadgetModifyIniException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
@@ -463,4 +490,52 @@ public class ServerService {
 		}
 	}
 	
+	/**
+	 * 
+	 * 删除数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午6:02:04
+	 * @param databaseId 数据库id
+	 * @throws Exception
+	 */
+	public void deleteDatabase(Long databaseId) throws Exception{
+		databaseDAO.delete(databaseId);
+	}
+	
+	
+	public ServerVO importAuth(long id,FileItem authFile) throws IOException{
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(authFile.getInputStream()));
+		reader.readLine();
+		//对接小工具下发授权并修改设备授权状态
+		return new ServerVO();
+	}
+	
+	
+	/**
+	 * 
+	 * 添加数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午7:13:37
+	 * @param serverId 服务器id
+	 * @param databaseIP 数据库IP
+	 * @param databasePort 数据库端口
+	 * @param username 用户名
+	 * @param password 密码
+	 * @throws Exception 
+	 */
+	public DatabaseVO addDatabase(Long serverId, String databasePort, String databaseName, String username, String password) throws Exception{
+		ServerPO server = serverDao.findOne(serverId);
+		DatabasePO database = new DatabasePO();
+		database.setServerId(serverId);
+		database.setDatabaseIP(server.getIp());
+		database.setDatabasePort(databasePort);
+		database.setDatabaseName(databaseName);
+		database.setUsername(username);
+		database.setPassword(password);
+		databaseDAO.save(database);
+		return new DatabaseVO().set(database);
+	}
 }

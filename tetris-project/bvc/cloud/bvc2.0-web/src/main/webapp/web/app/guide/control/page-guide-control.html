@@ -15,9 +15,9 @@
 							   :label="guide.taskName"
 							   :name="guide.id+''">
 
-				    <div style="width:49%;height:300px;float:left">
-						<div style="float:left;">直播时长: 01:13:14</div>
-						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
+				    <div style="width:49%;height:300px;float:left;display:none;">
+						<div style="float:left;"></div>
+						<div style="float:left;margin-left:40px;"></div>
 					    <div style="width:100%;margin-top:40px;">
 					        <div style="width:49%;float:left;height:200px;background:black;"></div>
 					        <div style="margin-left:1%;width:49%;float:left;height:200px;background:black;"></div>
@@ -26,46 +26,46 @@
 					    </div>
 					
 					</div>
-				    <div style="width:49%;height:300px;float:left;margin-left:1%">
+				    <div style="width:100%;height:300px;float:left;margin-left:1%">
 							<div style="width:100%">
-						        <el-button style="float:right" @click="startGuide" type="primary" round size="mini">开始直播</el-button>
-								<el-button style="float:right;margin-right:10px;" @click="stopGuide" type="primary" round size="mini">停止直播</el-button>
+						        <el-button style="float:right;width:100px;height:40px;" @click="startGuide" type="primary" round size="mini">开始直播</el-button>
+								<el-button style="float:right;margin-right:10px;width:100px;height:40px;" @click="stopGuide" type="primary" round size="mini">停止直播</el-button>
 						        <!--<el-button type="primary" round size="mini">配置视频源</el-button>-->
-						        <el-button style="float:right" @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
+						        <el-button style="float:right;width:100px;height:40px;" @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
 					        </div>
-				        <div style="width:560px;float:left;">
+				        <div style="width:860px;float:left;">
 					        
-					        <div style="width:620px;background:#f2f2f2;padding-left:15px; padding-top:10px; padding-bottom:10px; margin-top:10px;">
-								<div style="width:620px;">
+					        <div style="width:900px;background:#f2f2f2;padding-left:15px; padding-top:10px; padding-bottom:10px; margin-top:10px;">
+								<div style="width:900px;">
 									<div style="color:#339999;font-weight:bold;text-align:center;padding-bottom:10px;">PVM</div>
-									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPvm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getPvmBackcolor(source)">{{source.index}}</el-button>
+									<el-button style="width:60px;height:60px;" v-for = "source in sources.list" :key = "source.id" @click="handleSelPvm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getPvmBackcolor(source)">{{source.index}}</el-button>
 								</div>
-								<div style="width:620px;margin-top:10px;">
+								<div style="width:900px;margin-top:10px;">
 									<div style="color:#cc0033;font-weight:bold;text-align:center;padding-bottom:10px;">PGM</div>
-									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
+									<el-button style="width:60px;height:60px;" v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
 								</div>
-								<div style="width:620px;margin-top:10px;">
-									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; height:28px;float:left; white-space:nowrap;">{{source.sourceName}}</div>
+								<div style="width:900px;margin-top:10px;">
+									<div v-for = "source in sources.list" :key="source.id" style="width:60px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; height:28px;float:left; white-space:nowrap;">{{source.sourceName}}</div>
 									<div style="clear:both;"></div>
 								</div>
-								<div style="width:620px; margin-top:10px;">
-									<el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(2)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(3)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(4)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(5)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(6)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(7)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(8)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(9)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(10)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(11)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
-									<el-button @click="handleSetSource(12)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+								<div style="width:900px; margin-top:10px;">
+									<el-button style="width:60px;" @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(2)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(3)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(4)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(5)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(6)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(7)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(8)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(9)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(10)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(11)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button style="width:60px;" @click="handleSetSource(12)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
 									<div style="clear:both;"></div>
 								</div>
 							</div>
 				       </div>
-				       <div style="width:200px;float:right;">
+				       <div style="width:200px;float:left;margin-left:100px;">
 				       		<div>
 					       		<el-button type="primary"  size="mini" style="margin-top:75px;background:#FFF;font-size:18px;color:black;width:50px;height:50px;border:0px;margin-left:50px;">
 					       			<i class="feather-icon-lock"></i>
@@ -82,7 +82,7 @@
 				      
 				        
 				    </div>
-				    <div style="width:49%;height:400px;float:left">
+				    <div style="width:49%;height:400px;float:left;display:none;">
 					    <el-card class="box-card" style="height:390px;background:#f2f2f2">
 						  <div slot="header" class="clearfix">
 							<span>台标字幕</span>
@@ -110,7 +110,7 @@
 					
 					
 					</div>
-				    <div style="width:42%;height:400px;float:left;margin-left:1%">
+				    <div style="width:42%;height:400px;float:left;margin-left:1%;display:none;">
 					    <el-card class="box-card" style="height:390px;background:#f2f2f2">
 						  <div slot="header" class="clearfix">
 							<span>音频控制</span>

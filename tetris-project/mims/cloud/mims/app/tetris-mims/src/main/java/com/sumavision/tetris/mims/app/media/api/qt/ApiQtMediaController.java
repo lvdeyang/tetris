@@ -61,7 +61,8 @@ public class ApiQtMediaController {
 		
 		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
-		List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommendWithWeight(user);
+		//List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommendWithWeight(user);
+		List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommendWithNew(user);
 		mediaAudioQuery.queryEncodeUrl(recommend);
 		mediaAudioQuery.queryEncodeUrl(audioVOs);
 		

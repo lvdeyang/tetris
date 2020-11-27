@@ -8,26 +8,25 @@ const _import = require('../../router/_import_' + process.env.NODE_ENV) // 获�
 
 // TODO
 let requestIP = document.location.host.split(':')[0]
-let queryRouterUrl = process.env.ALARM_ROOT + '/prepare/app'
+
+
+let basePath
 let useLocalRoute = process.env.USELOCALROUTE
-let loginUrl = process.env.ALARM_ROOT + '/web/app/login/login.html'
-let errorUrl = process.env.ALARM_ROOT + 'web/app/error/request-fail.html'
+let showMenuHeader = process.env.SHOWMENUHEADER
 
-// console.log('queryRouterUrl=' + queryRouterUrl + ',useLocalRoute=' + useLocalRoute + ',loginUrl=' + loginUrl)
-
-// console.log('routerData=' + JSON.stringify(routerData))
-
-if (queryRouterUrl.indexOf('__requestIP__') !== -1) {
-  console.log(useLocalRoute)
-  console.log('queryRouterUrl=' + queryRouterUrl)
-  queryRouterUrl = queryRouterUrl.replace('__requestIP__', requestIP)
-  console.log('queryRouterUrl=' + queryRouterUrl)
+if (useLocalRoute === true) {
+  basePath = document.location.origin
+} else {
+  basePath = process.env.ALARM_ROOT
 }
 
-if (loginUrl.indexOf('__requestIP__') !== -1) {
-  console.log(useLocalRoute)
-  loginUrl = loginUrl.replace('__requestIP__', requestIP)
-}
+let queryRouterUrl = basePath + '/prepare/app'
+// let useLocalRoute = process.env.USELOCALROUTE
+let loginUrl = basePath + '/web/app/login/login.html'
+let errorUrl = basePath + '/web/app/error/request-fail.html'
+
+console.log('queryRouterUrl=' + queryRouterUrl)
+
 
 // 获取后台拿到的菜单数据
 var getRouter
@@ -86,70 +85,73 @@ if (!getRouter) {
     localStorage.setItem('tetris-001', newTokenInUrl)
   }
 
-  console.log('queryRouterUrl=' + queryRouterUrl)
   axiosInstance.get(queryRouterUrl).then(res => {
-    getRouter = res.data.data.menus || []
+    if (res.data.status === 408) {
+      window.location.href = loginUrl
+    } else if (res.data.status === 200) {
+      getRouter = res.data.data.menus || []
 
-    // 解析模板
-    parseUrlTemplate(getRouter)
+      // 解析模板
+      parseUrlTemplate(getRouter)
 
-    // 初始化上下文环境（暂时不用）
-    // context.setProp('app', app)
-    //  .setProp('router', router)
-    //  .setProp('user', appInfo.user)
-    //  .setProp('groups', appInfo.groups || [])
-    //  .setProp('token', window.TOKEN)
-    global.antRouter = getRouter
-    global.user = res.data.data.user
-    global.groups = res.data.data.groups || []
-    global.loginUrl = loginUrl
-    // global.alarmroot = process.env.ALARM_ROOT
+      // 初始化上下文环境（暂时不用）
+      // context.setProp('app', app)
+      //  .setProp('router', router)
+      //  .setProp('user', appInfo.user)
+      //  .setProp('groups', appInfo.groups || [])
+      //  .setProp('token', window.TOKEN)
+      global.antRouter = getRouter
+      global.user = res.data.data.user
+      global.groups = res.data.data.groups || []
+      global.loginUrl = loginUrl
+      // global.alarmroot = process.env.ALARM_ROOT
 
-    // console.log('global.menus=' + JSON.stringify(global.antRouter))
+      // console.log('global.menus=' + JSON.stringify(global.antRouter))
 
-    router.addRoutes(assembleVueRouter(routerData))
+      router.addRoutes(assembleVueRouter(routerData))
 
-    // 获取活动页
-    var activeMenu = getActiveMenu(getRouter)
+      // 获取活动页
+      var activeMenu = getActiveMenu(getRouter)
 
-    console.log('activeMenu=' + JSON.stringify(activeMenu))
+      // console.log('activeMenu=' + JSON.stringify(activeMenu))
 
-    // 重置首页
-    if (activeMenu) {
-      // config.redirect.home = activeMenu.link.split('#/')[1]
+      // 重置首页
+      if (activeMenu) {
+        // config.redirect.home = activeMenu.link.split('#/')[1]
 
-      // var testhome = activeMenu.link.split('#/')[1]
-      // console.log('config.redirect.home=' + JSON.stringify(testhome))
+        // var testhome = activeMenu.link.split('#/')[1]
+        // console.log('config.redirect.home=' + JSON.stringify(testhome))
+      }
+
+      // var homeUrl = window.location.href.split('#/')[1]
+      var tempUrl = window.location.href
+      var homeUrl
+      // 结尾是#号表示url带token
+      if (tempUrl.endsWith('#')) {
+        homeUrl = tempUrl.substring(tempUrl.indexOf('#') + 1, tempUrl.lastIndexOf('\/'))
+      } else {
+        homeUrl = tempUrl.substring(tempUrl.indexOf('#') + 1, tempUrl.length)
+      }
+
+      // console.log('homeUrl=' + homeUrl)
+
+      // 跳转首页
+      // if (!window.location.hash || window.location.hash === '#/') {
+      // router.push('/' + config.redirect.home)
+
+      // console.log('router.push')
+      // }
+
+      // console.log('window.location.hash=' + window.location.hash)
+
+      // this.$router.push('/' + 'BundleManage')
+
+      if (!homeUrl.startsWith('/')) {
+        homeUrl = '/' + homeUrl
+      }
+
+      router.push(homeUrl)
     }
-
-    // var homeUrl = window.location.href.split('#/')[1]
-    var tempUrl = window.location.href
-    var homeUrl
-    // 结尾是#号表示url带token
-    if (tempUrl.endsWith('#')) {
-      homeUrl = tempUrl.substring(tempUrl.indexOf('#') + 1, tempUrl.lastIndexOf('\/'))
-    } else {
-      homeUrl = tempUrl.substring(tempUrl.indexOf('#') + 1, tempUrl.length)
-    }
-
-    console.log('homeUrl=' + homeUrl)
-
-    // 跳转首页
-    // if (!window.location.hash || window.location.hash === '#/') {
-    // router.push('/' + config.redirect.home)
-
-    // console.log('router.push')
-    // }
-
-    // console.log('window.location.hash=' + window.location.hash)
-
-    // this.$router.push('/' + 'BundleManage')
-
-    if (!homeUrl.startsWith('/')) {
-      homeUrl = '/' + homeUrl
-    }
-
-    router.push(homeUrl)
   })
 }
 
@@ -201,11 +203,10 @@ function getObjArr (name) {
 }
 
 function getTokenFromUrl (name) {
-  // console.log('getTokenFromUrl in')
   try {
     var tempStr = window.location.href.split('/')
     var tokenStr = tempStr[tempStr.length - 1]
-    console.log('tokenStr=' + tokenStr)
+    // console.log('tokenStr=' + tokenStr)
 
     if (tokenStr != null) {
       return unescape(tokenStr)

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.auth.login;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
@@ -119,63 +121,13 @@ public class LoginService {
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
 		
-		if(UserClassify.LDAP.equals(user.getClassify())){
-			throw new DonotSupportRoamLoginException();
+		if(user.getIsLoginIp() != null && user.getIsLoginIp() == true && (user.getLoginIp() == null || user.getLoginIp().isEmpty())){
+			user.setLoginIp(ip);
 		}
-		
-		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
-			throw new TooManyAbnormalLoginTimesException();
-		} 
-		if(!TerminalType.ANDROID_TVOS.equals(terminalType)){
-			for(int i=0; i<5; i++){
-				password = base64.decode(password);
-			}
-		}
-		password = sha256Encoder.encode(password);
-		if(!user.getPassword().equals(password)){
-			user.setErrorLoginTimes((user.getErrorLoginTimes()==null?1:(user.getErrorLoginTimes()+1)));
-			userDao.saveAndFlush(user);
-			throw new PasswordErrorException(username, password);
-		} 
-		if(TerminalType.QT_ZK.equals(terminalType)){
-			//指控终端重复登录校验
-			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
-			if(token!=null && UserStatus.ONLINE.equals(token.getStatus())){
-				//重复登录踢人下线
-				websocketMessageService.push(user.getId().toString(), "forceOffLine", null, user.getId().toString(), user.getNickname());
-			}
-		}
-		return doPasswordLoginTransactional(user, terminalType, ip);
-	}
-	
-	/**
-	 * 用户名密码登录-支持多终端登录<br/>
-	 * <b>作者:</b>lqxuhv<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年9月15日 下午1:44:24
-	 *@param String username 用户名
-	 * @param String password 密码
-	 * @param String ip 登录ip
-	 * @param TerminalType terminalType 终端类型
-	 * @param String verifyCode 验证码
-	 * @param String loginIp 登录地址ip
-	 * @return String token
-	 */
-	public String doPasswordLogin(
-			String username,
-			String password,
-			String ip,
-			TerminalType terminalType,
-			String verifyCode,
-			String loginIp) throws Exception{
-		
-		if(username==null || "".equals(username)) throw new UsernameCannotBeNullException();
-		
-		UserPO user = userDao.findByUsername(username);
-		if(user == null) throw new UsernameNotExistException(username);
 		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
-			if(!loginIp.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(loginIp);
+			if(!ip.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(ip);
 		}
+		
 		if(UserClassify.LDAP.equals(user.getClassify())){
 			throw new DonotSupportRoamLoginException();
 		}
@@ -258,6 +210,7 @@ public class LoginService {
 													  .append(DateUtil.format(user.getUpdateTime(), DateUtil.dateTimePattern))
 													  .append("）")
 													  .toString());
+			log.setOprlogType(EOprlogType.USER_ONLINE);
 			alarmFeign.sendOprlog(log);
 		}catch(Exception e){
 			System.out.println("用户登录日志存储失败！");
@@ -316,10 +269,49 @@ public class LoginService {
 	public void doLogout() throws Exception{
 		UserVO user = userQuery.current();
 		TokenPO token = tokenDao.findByToken(user.getToken());
+		
+		boolean result = false;
+		if(token != null){
+			try{
+				result = tokenQuery.checkToken(token);
+			}catch(TokenTimeoutException e){
+				result = false;
+			}
+		}
+		if(!result && token!=null){
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
+		}else if(!result && token == null){
+			token = new TokenPO();
+			token.setUserId(user.getId());
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
+		}
+		try{
+			Date day=new Date();    
+			SimpleDateFormat offLineDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-user");
+			log.setUserName(user.getNickname());
+			log.setOprName("用户下线");
+			log.setSourceServiceIP("");
+			log.setOprDetail(new StringBufferWrapper().append("用户“")
+													  .append(user.getNickname())
+													  .append("”下线（")
+													  .append(offLineDateFormat.format(day))
+													  .append("）")
+													  .toString());
+			log.setOprlogType(EOprlogType.USER_OFFLINE);
+			alarmFeign.sendOprlog(log);
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("用户下线日志存储失败！");
+		}
 		token.setToken(null);
 		token.setLastModifyTime(null);
 		token.setStatus(UserStatus.OFFLINE);
 		tokenDao.save(token);
+		
 	}
 	
 	/**

@@ -43,6 +43,9 @@ import com.suma.venus.resource.service.router.RouterService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.NodeInfoVO;
 import com.suma.venus.resource.vo.NodeVO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -84,6 +87,9 @@ public class ResourceRemoteService {
 	
 	@Autowired
 	private UserQueryService userService;
+	
+	@Autowired
+	private AlarmFeign alarmFeign;
 
 	/**
 	 * 获取联网接入id<br/>
@@ -121,7 +127,6 @@ public class ResourceRemoteService {
 				userCodes.add(info.getCode());
 			}
 		}
-		
 		
 		List<String> nodeUuids = new ArrayList<String>();
 		if(deviceCodes.size() > 0){
@@ -348,17 +353,29 @@ public class ResourceRemoteService {
 				routers = new ArrayList<String>();
 			}
 			
+			OprlogParamBO log = new OprlogParamBO();
+			log.setSourceService("tetris-resource");
+			log.setUserName("");
+			log.setSourceServiceIP("");
+			
 			if(status.equals("online")){
 				if(!routers.contains(other_node.getNodeUuid())){
 					routers.add(other_node.getNodeUuid());
 				}
+				log.setOprName(EOprlogType.EXTERNAL_CONNECT.getEnumName());
+				log.setOprDetail("外域节点 " + other_node.getNodeName() + " 连接成功");
+				log.setOprlogType(EOprlogType.EXTERNAL_CONNECT);
 			}else if(status.equals("offline")){
 				if(routers.contains(other_node.getNodeUuid())){
 					routers.remove(other_node.getNodeUuid());
 				}
+				log.setOprName(EOprlogType.EXTERNAL_DISCONNECT.getEnumName());
+				log.setOprDetail("外域节点 " + other_node.getNodeName() + " 连接断开");
+				log.setOprlogType(EOprlogType.EXTERNAL_DISCONNECT);
 			}
 			local_node.setNodeRouter(JSON.toJSONString(routers));
 			serNodeDao.save(local_node);
+			alarmFeign.sendOprlog(log);
 			
 			//同步路由 -- 联网主动来获取
 			/*List<SerNodePO> serNodePOs = serNodeDao.findAll();

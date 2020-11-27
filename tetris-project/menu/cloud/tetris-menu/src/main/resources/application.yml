@@ -3,7 +3,8 @@ spring:
     #type: ehcache
     #ehcache:
       #config: classpath:ehcache.xml
-  #activiti:    #check-process-definitions: true
+  #activiti:
+    #check-process-definitions: true
     #database-schema-update: true
     #这里保存全部历史记录
     #history-level: full
@@ -14,14 +15,14 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.85
+      ipAddress: 192.165.56.123
 #  profiles:
 #    active: pro
   datasource:
     base:
-      url: jdbc:mysql://192.165.56.85:3306/menu?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://localhost:3306/menu?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: root
-      password: sumavisionrd
+      password: root
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -83,10 +84,10 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.85:8081/eureka/
+      defaultZone: http://192.165.56.123:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
-    ip-address: 192.165.56.85
+    ip-address: 192.165.56.123
     prefer-ip-address: true
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务

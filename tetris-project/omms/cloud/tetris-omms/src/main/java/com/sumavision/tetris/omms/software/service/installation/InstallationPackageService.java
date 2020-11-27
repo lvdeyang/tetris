@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.file.FileUtil;
@@ -42,6 +40,9 @@ public class InstallationPackageService {
 	
 	@Autowired
 	private Path path;
+	
+	@Autowired
+	private ProcessDAO processDAO;
 	
 	/**
 	 * 添加版本<br/>
@@ -116,10 +117,12 @@ public class InstallationPackageService {
 			ZipEntry configDescriptionFile = zipFile.getEntry(new StringBufferWrapper().append(zipRoot).append("config.description.json").toString());
 			if(configDescriptionFile != null){
 				List<PropertiesPO> properties = new ArrayList<PropertiesPO>();
+				List<ProcessPO> processes = new ArrayList<ProcessPO>();
 				String configDescription = FileUtil.readAsString(zipFile.getInputStream(configDescriptionFile));
-				JSONArray descriptions = JSON.parseArray(configDescription);
-				for(int i=0; i<descriptions.size(); i++){
-					JSONObject description = descriptions.getJSONObject(i);
+				JSONObject jsonObject = JSONObject.parseObject(configDescription);
+				JSONArray arr1 = jsonObject.getJSONArray("config");
+				for(int i = 0; i < arr1.size(); i++){
+					JSONObject description = arr1.getJSONObject(i);
 					PropertiesPO property = new PropertiesPO();
 					property.setUpdateTime(now);
 					property.setPropertyKey(description.getString("key"));
@@ -133,6 +136,18 @@ public class InstallationPackageService {
 					properties.add(property);
 				}
 				propertiesDao.save(properties);
+				
+				JSONArray arr2 = jsonObject.getJSONArray("process");
+				for(int i = 0; i < arr2.size(); i++){
+					JSONObject description2 = arr2.getJSONObject(i);
+					ProcessPO process = new ProcessPO();
+					process.setProcessId(description2.getString("id"));
+					process.setProcessName(description2.getString("name"));
+					process.setInstallationPackageId(packageEntity.getId());
+					process.setDb(description2.getString("db"));
+					processes.add(process);
+				}
+				processDAO.save(processes);
 			}
 			
 			return new InstallationPackageVO().set(packageEntity);

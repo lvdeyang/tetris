@@ -1,11 +1,13 @@
 package com.sumavision.tetris.cs.channel.broad.ability;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -22,6 +24,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.capacity.server.PushService;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
@@ -58,11 +61,17 @@ import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeTa
 import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeType;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
+import com.sumavision.tetris.cs.program.ProgramDAO;
+import com.sumavision.tetris.cs.program.ProgramPO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenDAO;
+import com.sumavision.tetris.cs.program.ScreenPO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.program.TemplateScreenVO;
 import com.sumavision.tetris.cs.program.TemplateVO;
+import com.sumavision.tetris.cs.schedule.ScheduleDAO;
+import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
@@ -74,10 +83,12 @@ import com.sumavision.tetris.easy.process.stream.transcode.TaskVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
-import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
-import com.sumavision.tetris.resouce.feign.bundle.BundleFeignVO;
+//import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
+//import com.sumavision.tetris.resouce.feign.bundle.BundleFeignVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -149,8 +160,23 @@ public class BroadAbilityService {
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
 	
+	//@Autowired
+	//private BundleFeignService bundleFeignService;
+	
 	@Autowired
-	private BundleFeignService bundleFeignService;
+	private BroadAbilityBroadInfoDAO broadAbilityBroadInfoDAO;
+	
+	@Autowired
+	private ScheduleDAO scheduleDAO;
+	
+	@Autowired
+	private ProgramDAO programDAO;
+	
+	@Autowired
+	private ScreenDAO screenDAO;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 	
 	private Map<Long, List<ScheduledFuture<?>>> channelScheduleMap = new HashMapWrapper<Long, List<ScheduledFuture<?>>>().getMap();
 	
@@ -345,10 +371,11 @@ public class BroadAbilityService {
 		StreamTranscodeProfileVO streamTranscodeProfileVO = streamTranscodeQuery.getProfile();
 		String abilityIp = streamTranscodeProfileVO.getToolIp();
 //		从资源微服务feign获取能力ip
-//		List<BundleFeignVO> abilityList = bundleFeignService.queryTranscodeDevice();
-//		if (abilityList != null && !abilityList.isEmpty()) abilityIp = abilityList.get(0).getDeviceIp();
+		//List<BundleFeignVO> abilityList = bundleFeignService.queryTranscodeDevice();
+		//if (abilityList != null && !abilityList.isEmpty()) abilityIp = abilityList.get(0).getDeviceIp();
 		
-		Boolean broad = false;
+//		Boolean broad = false;
+		Boolean broad = true;
 		//遍历排期单
 		for (int i = 0; i < scheduleVOs.size(); i++) {
 			final ScheduleVO scheduleVO = scheduleVOs.get(i);
@@ -359,27 +386,40 @@ public class BroadAbilityService {
 			//开始播发long时间
 			final Long broadDateLong = broadDate.getTime();
 			//单节目单结束时间
-			Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
-					: broadDateLong + querySchedulePlayTime(scheduleVO.getId());
 			
-			if (finishTime < now) continue;
 			
-			//获取分屏信息
-//			JSONObject useTemplate = adapter.screenTemplate(scheduleVO.getProgram().getScreenId());
-//			JSONArray screens = useTemplate.getJSONArray("screen");
 			TemplateVO template = programQuery.getScreen2Template(scheduleVO.getId(), adapter.getAllTemplate());
 			if (template == null) return;
+			
+			
+			long scheduleTime=0;
+			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
+			for (TemplateScreenVO templateVO : templateScreenVOs) {
+				List<ScreenVO> screenVOs = templateVO.getData();
+				if (screenVOs==null||screenVOs.isEmpty()) continue;
+				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
+				//这里重新根据开始，结束时间计算duration
+				templateVO.setData(resetScreenDuration(broadDate,screenVOs,channel));
+				long tempScheduleTime=querySchedulePlayTimeByScreens(screenVOs);
+				if(scheduleTime<tempScheduleTime){
+					scheduleTime=tempScheduleTime;
+				}
+			}
+			//计算整体结束时间
+			Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
+							: broadDateLong + scheduleTime;
+			//Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
+			//		: broadDateLong + querySchedulePlayTime(scheduleVO.getId());
+			
+			if (finishTime < now) continue;
 			
 			List<BroadAbilityBroadRequestVO> broadRequestVOs = new ArrayList<BroadAbilityBroadRequestVO>();
 			Integer outputIndex = 0;
 			//遍历分屏，获取各分屏信息和节目单数组
-			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
 			for (TemplateScreenVO templateVO : templateScreenVOs) {
 				List<ScreenVO> screenVOs = templateVO.getData();
 				BroadAbilityBroadRequestVO broadRequestVO = new BroadAbilityBroadRequestVO();
 				List<BroadAbilityBroadRequestInputPrevVO> requestInputPrevVOs = new ArrayList<BroadAbilityBroadRequestInputPrevVO>();
-				if (screenVOs.isEmpty()) continue;
-				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
 				String mediaType = "";
 				//遍历节目单数组，添加任务输入
 				for (ScreenVO screenVO : screenVOs) {
@@ -391,8 +431,13 @@ public class BroadAbilityService {
 						case "AUDIO":
 						case "VIDEO":
 							BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
-							inputPrevFileVO.setCount(1)
-							.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
+							if(screenVO.getCount()!=0){
+								inputPrevFileVO.setCount(screenVO.getCount());
+							}else{
+								inputPrevFileVO.setCount(1);
+							}
+							
+							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
 							.setDuration(Long.parseLong(screenDuration))
 							.setSeek(0l);
 							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile(inputPrevFileVO));
@@ -552,7 +597,55 @@ public class BroadAbilityService {
 		if (broad) {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
 			channelDao.save(channel);
+			//将节目单下发给声纹比对系统
+			List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+			for (SchedulePO schedulePO : schedulePOs) {
+				startVoiceprint(schedulePO.getId());
+			}
 		}
+	}
+	
+	/**
+	 * 
+	 * 重置duration<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月10日 下午6:17:39
+	 * @param screens
+	 * @return
+	 * @throws ParseException 
+	 */
+	private List<ScreenVO> resetScreenDuration(Date broadTime,List<ScreenVO> screens,ChannelPO channel) throws ParseException{
+		List<ScreenVO> resetList=new ArrayList<ScreenVO>();
+		long current=broadTime.getTime();
+		for(int i=0;i<screens.size();i++){
+			if(screens.get(i).getStartTime()!=null&&screens.get(i).getEndTime()!=null){
+				Date startTime=DateUtil.parse(screens.get(i).getStartTime(),"yyyy-MM-dd HH:mm:ss");
+			    Date endTime=DateUtil.parse(screens.get(i).getEndTime(), "yyyy-MM-dd HH:mm:ss");
+			    if(startTime.getTime()>current&&i>0){
+			    	//这里应该加个备播，但是目前先给上一个直接延长duration
+			    	long tempDuration=startTime.getTime()-current;
+			    	//screens.get(i-1).setDuration(Long.parseLong(screens.get(i-1).getDuration())+tempDuration+"");
+			    	ScreenVO screenVO=new ScreenVO();
+			    	screenVO.setPreviewUrl(channel.getBackfileUrl());
+			    	screenVO.setDuration(channel.getBackfileDuration());
+			    	int count=(int) Math.ceil(tempDuration/Long.parseLong(screenVO.getDuration()));
+			    	screenVO.setCount(count);
+			    	screenVO.setType("VIDEO");
+			    	resetList.add(screenVO);
+			    	current+=tempDuration;
+			    }
+			    screens.get(i).setDuration((endTime.getTime()-startTime.getTime())+"");
+			    current+=endTime.getTime()-startTime.getTime();
+			}else{
+				current+=Long.parseLong(screens.get(i).getDuration());
+			}
+			resetList.add(screens.get(i));
+		}
+		
+		//重排插入备播，增加备播设置之后再加
+		return resetList;
 	}
 	
 	public void requestAddTask(Long channelId,
@@ -982,7 +1075,7 @@ public class BroadAbilityService {
 									seekPlayTime = (int)(different / duration);
 									firstFileSeek = different - (duration * seekPlayTime);
 								}
-								taskId = streamTranscodeQuery.addFileTask(fileDealVO.getFileUrl(), screenVOs.size() - seekPlayTime, firstFileSeek, false, null, screen.getType().equals("AUDIO_STREAM") ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
+								taskId = streamTranscodeQuery.addFileTask(fileDealVO.getFileUrl(), screenVOs.size() - seekPlayTime, firstFileSeek, false, null, (screen.getType().equals("AUDIO_STREAM")||screen.getType().equals("AUDIO")) ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
 								System.out.println(new Date() + ": create finish: " + taskId);
 							} else if (broadWay == BroadStreamWay.ABILITY_STREAM_TRANSCODE) {
 								taskId = streamTranscodeQuery.addTask(null, assetPath, false, null, screen.getType().equals("AUDIO_STREAM") ? "audio" : "video", null, null, abilityRemotePO != null ? abilityRemotePO.getDeviceIp() : "", JSONObject.toJSONString(taskVO), null);
@@ -1411,6 +1504,21 @@ public class BroadAbilityService {
 		return playTime;
 	}
 	
+	
+	private Long querySchedulePlayTimeByScreens(List<ScreenVO> screenVOs) throws Exception {
+		Long playTime = 0l;
+
+		if (screenVOs == null || screenVOs.isEmpty()) return playTime;
+		for (ScreenVO screenVO : screenVOs) {
+			if (screenVO.getDuration() != null && !screenVO.getDuration().isEmpty() && !screenVO.getDuration().equals("-")) {
+				playTime += Long.parseLong(screenVO.getDuration());
+			}
+		}
+		
+		
+		return playTime;
+	}
+	
 	/**
 	 * 获取加密密钥(密钥在这里再加密)<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -1715,7 +1823,51 @@ public class BroadAbilityService {
 		}
 	}
 	
-	
+	private Map<String , Object> startVoiceprint (Long scheduleId) throws Exception{
+		Map<String, Object> data = new HashMap<String, Object>();
+		SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
+		ChannelPO channelPO = channelDao.findOne(schedulePO.getChannelId());
+		List<BroadAbilityBroadInfoPO> broadAbilityBroadInfoPOs = broadAbilityBroadInfoDAO.findByChannelId(channelPO.getId());
+		List<Long> broadUserIds = new ArrayList<Long>();
+		if (! broadAbilityBroadInfoPOs.isEmpty()) {
+			for (BroadAbilityBroadInfoPO broadAbilityBroadInfoPO : broadAbilityBroadInfoPOs) {
+				if (broadAbilityBroadInfoPO.getUserId() != null ) {
+					broadUserIds.add(broadAbilityBroadInfoPO.getUserId());
+				}
+			}
+		}
+		StringBufferWrapper dUrl = new StringBufferWrapper().append("ftp://").append(mimsServerPropsQuery.queryProps().getFtpUsername())
+				  .append(":")
+				  .append(mimsServerPropsQuery.queryProps().getFtpPassword())
+				  .append("@")
+				  .append(mimsServerPropsQuery.queryProps().getFtpIp())
+				  .append(":")
+				  .append(mimsServerPropsQuery.queryProps().getFtpPort());
+		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		if(broadUserIds.size()>0){
+			ProgramPO programPO = programDAO.findByScheduleId(scheduleId);
+			List<ScreenPO> screenPOs = screenDAO.findByProgramId(programPO.getId());
+			for (ScreenPO screenPO : screenPOs) {
+				ScreenVO screenVO = new ScreenVO();
+				screenVO.setPreviewUrl(screenPO.getPreviewUrl());
+				String downloadUrl = null;
+				String[] urlString = screenPO.getPreviewUrl().split("/");
+				for(int i = 3;i < urlString.length;i++){
+					downloadUrl = dUrl.append("/").append(urlString[i]).toString();
+				}
+				screenVO.setDownloadUrl(downloadUrl);
+				screenVO.setUuid(screenPO.getMimsUuid());
+				screenVO.setName(screenPO.getName());
+				screenVO.setIsRequired(screenPO.getIsRequired());
+				screenVOs.add(screenVO);
+			}
+		}
+		data.put("program", screenVOs);
+		data.put("effectTime",schedulePO.getBroadDate());
+		data.put("userId", broadUserIds);
+		data.put("uuid",schedulePO.getUuid());
+		return data;
+	}
 	
 	
 	

@@ -1,7 +1,9 @@
 <div class="bvc2-monitor-forword " style="background-color:#fff; ">
   <el-tabs v-model="activeName" @tab-click="handleClick"  >
-    <el-tab-pane v-for="item in stationList" :label="item.stationName" :name="item.identity" ::key="item.identity">
+    <template v-for="item in stationList">    
+    <el-tab-pane  :label="item.stationName" :name="item.identity" :key="item.identity" v-if="item.originType == 'INNER'">
     </el-tab-pane>
+    </template>
   </el-tabs>
   <!-- <el-button size='small' type='primary' :autofocus='true' plain @click="isExterior = 'false'">本域转发</el-button>
   <el-button size='small' type='primary' plain @click="isExterior = 'true'">外域转发</el-button> -->

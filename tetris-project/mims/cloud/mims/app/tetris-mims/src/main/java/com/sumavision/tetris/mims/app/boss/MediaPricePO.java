@@ -21,13 +21,21 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class MediaPricePO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
-	private long mediaId;
+	private Long mediaId;
 	private MediaType mediaType;
 	private long price;
-	public long getMediaId() {
+	private long truePrice;
+	
+	public long getTruePrice() {
+		return truePrice;
+	}
+	public void setTruePrice(long truePrice) {
+		this.truePrice = truePrice;
+	}
+	public Long getMediaId() {
 		return mediaId;
 	}
-	public void setMediaId(long mediaId) {
+	public void setMediaId(Long mediaId) {
 		this.mediaId = mediaId;
 	}
 	public MediaType getMediaType() {

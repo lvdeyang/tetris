@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.LiveType;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -160,6 +161,20 @@ public class MonitorLiveDevicePO extends AbstractBasePO{
 	
 	/** osd创建用户 */
 	private String osdUsername;
+	
+	/** 使用MonitorRecordStatus中的RUN代表在执行，STOP表示停止*/
+	private MonitorRecordStatus status;
+
+	@Enumerated(value=EnumType.STRING)
+	@Column(name="STATUS")
+	public MonitorRecordStatus getStatus() {
+		return status;
+	}
+
+	public MonitorLiveDevicePO setStatus(MonitorRecordStatus status) {
+		this.status = status;
+		return this;
+	}
 
 	@Column(name = "UDP_URL")
 	public String getUdpUrl() {
@@ -558,6 +573,7 @@ public class MonitorLiveDevicePO extends AbstractBasePO{
 			Long osdId,
 			String osdUsername) throws Exception{
 		
+		this.setStatus(MonitorRecordStatus.STOP);
 		this.setUpdateTime(new Date());
 		this.videoBundleId = videoBundleId;
 		this.videoBundleName = videoBundleName;

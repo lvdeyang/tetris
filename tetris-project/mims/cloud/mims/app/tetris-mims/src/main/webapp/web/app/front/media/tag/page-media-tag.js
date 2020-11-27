@@ -48,6 +48,7 @@ define([
                         loading: false,
                         name: "",
                         remark: "",
+                        hotCount:"",
                         data: {}
                     },
                     editTag: {
@@ -55,6 +56,7 @@ define([
                         loading: false,
                         name: "",
                         remark: "",
+                        hotCount:"",
                         data: {}
                     }
                 }
@@ -70,6 +72,7 @@ define([
                         id: -1,
                         name: "标签列表",
                         remark: "",
+                        hotCount:"",
                         parentId: null
                     });
                     ajax.post('/media/tag/list/get', null, function (data, status) {
@@ -90,6 +93,7 @@ define([
                     self.dialog.addRoot.visible = false;
                     self.dialog.addRoot.name = "";
                     self.dialog.addRoot.remark = "";
+                    self.dialog.addRoot.hotCount="";
                     self.dialog.addRoot.data = {};
                 },
                 handleAddRootCommit: function () {
@@ -97,7 +101,8 @@ define([
                     self.loading.addRoot = true;
                     var requestData = {
                         name: self.dialog.addRoot.name,
-                        remark: self.dialog.addRoot.remark
+                        remark: self.dialog.addRoot.remark,
+                        hotCount:self.dialog.addRoot.hotCount
                     };
                     var parentId = self.dialog.addRoot.data.id;
                     if (parentId) requestData.parentId = parentId;
@@ -124,8 +129,10 @@ define([
 
                 treeNodeEdit: function (node, data) {
                     var self = this;
+
                     self.dialog.editTag.name = data.name;
                     self.dialog.editTag.remark = data.remark;
+                    self.dialog.editTag.hotCount=data.hotCount;
                     self.dialog.editTag.visible = true;
                     self.dialog.editTag.data = data;
                 },
@@ -134,6 +141,7 @@ define([
                     self.dialog.editTag.visible = false;
                     self.dialog.editTag.name = "";
                     self.dialog.editTag.remark = "";
+                    self.dialog.editTag.hotCount="";
                     self.dialog.editTag.data = {};
                 },
                 treeNodeEditCommit: function () {
@@ -142,12 +150,14 @@ define([
                     var requestData = {
                         id: self.dialog.editTag.data.id,
                         name: self.dialog.editTag.name,
-                        remark: self.dialog.editTag.remark
+                        remark: self.dialog.editTag.remark,
+                        hotCount:self.dialog.editTag.hotCount
                     };
                     ajax.post('/media/tag/edit', requestData, function (data, status) {
                         if (status == 200) {
                             self.dialog.editTag.data.name = data.name;
                             self.dialog.editTag.data.remark = data.remark;
+                            self.dialog.editTag.data.hotCount=data.hotCount;
                             self.treeNodeEditClose();
                         }
                         self.dialog.editTag.loading = false;

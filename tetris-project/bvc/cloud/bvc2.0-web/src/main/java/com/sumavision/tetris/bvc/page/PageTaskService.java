@@ -137,17 +137,18 @@ public class PageTaskService {
 		JSONObject message = new JSONObject();
 		message.put("businessType", "refreshPage");
 		message.put("pageInfo", schemeVO);
-		log.info("推送" + userInfo.getUserName() + "用户的当前分页layout: " + JSON.toJSONString(schemeVO));
+//		log.info("推送" + userInfo.getUserName() + "用户的当前分页layout: " + JSON.toJSONString(schemeVO));
 		
 		MessageSendCacheBO cache = new MessageSendCacheBO(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
 	
-//		businessReturnService.add(null, cache);
-		
-		
 		//发送消息
 		if(doWebsocket){
-			WebsocketMessageVO ws = websocketMessageService.send(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
-			websocketMessageService.consume(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(null, cache, "推送" + userInfo.getUserName() + "用户的当前分页layout: " + JSON.toJSONString(schemeVO));
+			}else{
+				WebsocketMessageVO ws = websocketMessageService.send(userInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+				websocketMessageService.consume(ws.getId());
+			}
 		}
 		
 		return cache;
@@ -161,7 +162,7 @@ public class PageTaskService {
 		
 		Integer currentPage = pageInfo.getCurrentPage();
 		
-		//新添加的应该是同一个groupPO下的任务。
+		//新添加的是同一个groupPO下的任务。
 		if(newTasks.size()>0){
 			String businessId=newTasks.get(0).getBusinessId();
 			if(businessId.matches("\\d+")){
@@ -180,7 +181,7 @@ public class PageTaskService {
 		//获取当前分页下的任务
 		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, currentPage, true);
 		
-		//解绑解码器
+		//解绑解码器      //TODO 合并里边的命令 （已完成）
 		for(PageTaskPO removeTask : removeTasks){
 			commandCastServiceImpl.setCastDevices(removeTask, new ArrayList<String>());
 		}
@@ -194,11 +195,7 @@ public class PageTaskService {
 //		for(PageTaskBO newTaskBO : newTasks){
 //			newTaskPOs.add(new PageTaskPO().set(newTaskBO));
 //		}
-		PageTaskPO jumpTo=null;
-		
-		jumpTo = newAddTask(pageInfo, newTasks);
-		
-		
+		PageTaskPO jumpTo= newAddTask(pageInfo, newTasks);
 		
 		//总页数
 		int newPageCount = pageInfo.obtainTotalPageCount();
@@ -226,14 +223,14 @@ public class PageTaskService {
 		if(pageInfo.getGroupMemberType().equals(GroupMemberType.MEMBER_USER)){
 			newPageTasks = getPageTasks(pageInfo, newCurrentPage, true);
 		}
-		comparePage(pageInfo, oldTaskPOs, newPageTasks, true);
+		comparePage(pageInfo, oldTaskPOs, newPageTasks, true); //TODO 需要合并下发命令（已完成）
 		
 		//notifyUser，后续要改
 		GroupMemberType groupMemberType = pageInfo.getGroupMemberType();
 		if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
 			Long userId = Long.parseLong(pageInfo.getOriginId());
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-			notifyUser(userInfo, pageInfo, true);
+			notifyUser(userInfo, pageInfo, true);  //TODO 需要合并命令下发（已完成）
 		}
 		
 	}
@@ -272,7 +269,6 @@ public class PageTaskService {
 		//对比新旧页，下发协议
 		comparePage(pageInfo, oldTaskPOs, newTaskPOs, true);
 		
-		//notifyUser，后续要改
 		Long userId = Long.parseLong(pageInfo.getOriginId());
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 		notifyUser(userInfo, pageInfo, true);
@@ -646,7 +642,7 @@ public class PageTaskService {
 					}
 				}
 				
-				//呼叫所有的newTaskPlayers，挂断所有的NONE的needClosePlayers；进行相应的上屏处理；字幕下发
+				//呼叫所有的newTaskPlayers，挂断所有的NONE的needClosePlayers；进行相应的上屏处理；字幕下发   
 				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();			
 				logic = openAndCloseDecoder_Rect(addTasks, needCloseTasks, codec);
 							
@@ -658,8 +654,13 @@ public class PageTaskService {
 				//持久化
 				pageInfoDao.save(pageInfo);
 				
-//				businessReturnService.add(logic, null);
-				if(doProtocal) executeBusiness.execute(logic, "刷新会场分页上屏");
+				if(doProtocal) {
+					if(businessReturnService.getSegmentedExecute()){
+						businessReturnService.add(logic, null, null);
+					}else{
+						executeBusiness.execute(logic, "刷新会场分页上屏");
+					}
+				}
 				
 			}else if(GroupMemberType.MEMBER_USER.equals(pageInfo.getGroupMemberType())){
 				
@@ -738,9 +739,13 @@ public class PageTaskService {
 				//持久化
 				pageInfoDao.save(pageInfo);
 				
-//				businessReturnService.add(logic, null);
-				if(doProtocal) executeBusiness.execute(logic, "刷新用户播放器分页");
-				
+				if(doProtocal){
+					if(businessReturnService.getSegmentedExecute()){
+						businessReturnService.add(logic, null, null);
+					}else{
+						executeBusiness.execute(logic, "刷新用户播放器分页");
+					}
+				} 
 			}
 			
 			return logic;
@@ -763,8 +768,11 @@ public class PageTaskService {
 		LogicBO logic = openAndCloseDecoder_Rect(pageTasks, null, codec);
 		
 		if(doProtocol){
-//			businessReturnService.add(logic, null);
-			executeBusiness.execute(logic, "改变执行状态后，重呼解码器");
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+			}else{
+				executeBusiness.execute(logic, "改变执行状态后，重呼解码器");
+			}
 		}
 		
 		return logic;
@@ -861,7 +869,8 @@ public class PageTaskService {
 		 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		for(PageTaskPO openTask : openTasks){
-			//TODO:播放文件不需要呼叫
+			//播放文件不需要呼叫
+			if(openTask.getBusinessInfoType().isPlayFile()) continue;
 			ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 //			  													        .setOperateType(ConnectBundleBO.OPERATE_TYPE)
 			  													        .setLock_type("write")
@@ -910,6 +919,7 @@ public class PageTaskService {
 		}
 		
 		for(PageTaskPO closeTask : closeTasks){
+			if(closeTask.getBusinessInfoType().isPlayFile()) continue;
 			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 //																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																           	 .setBundleId(closeTask.getDstBundleId())

@@ -1,11 +1,15 @@
 package com.sumavision.tetris.user;
 
+import java.util.List;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonFormat.Value;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 /**
@@ -300,7 +304,7 @@ public interface UserFeign {
 	 * @return List<UserVO>
 	 */
 	@RequestMapping(value = "/user/feign/find/by/userno/in")
-	public JSONObject findByUsernoIn(@RequestParam("usernos") String usernos);
+	public JSONObject findByUsernoIn(@RequestBody String usernos);
 	
 	/**
 	 * 删除ldap用户<br/>
@@ -355,4 +359,21 @@ public interface UserFeign {
 	
 	@RequestMapping(value = "/user/feign/query/user/online")
 	public JSONObject queryUserOnline();
+	
+	@RequestMapping(value = "/user/feign/add/tag/hotcount")
+	public JSONObject addTagHotcount(
+			@RequestParam("userId") Long userId, 
+			@RequestParam("tagNames") String tagNames);
+	
+	@RequestMapping(value = "/user/feign/query/user/tags")
+	public JSONObject queryUserTags(
+			@RequestParam("userId") Long userId);
+	
+	@RequestMapping(value = "/user/feign/find/all")
+	public JSONObject findAll();
+	
+	@RequestMapping(value = "/user/feign/find/by/roleId/in")
+	public JSONObject findByRoleIdIn(
+			@RequestParam("roleIds") List<Long> roleIds);
+
 }

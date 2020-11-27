@@ -41,7 +41,7 @@ public class ApiServerMediaTagController {
 		
 		if (user.getGroupId() == null) throw new UserHasNoGroupException(user.getNickname());
 		
-		return tagService.add(user, name, parentId, "");
+		return tagService.add(user, name, parentId, "",0l);
 	}
 	/**
 	 * 根据父id获取标签树<br/>

@@ -1,0 +1,73 @@
+
+.forword-inner-control .bvc2-auto-layout-wrapper{
+  position: relative;
+    width: 75%;
+    height: 95%;
+    /* background-color: #16191E; */
+    float: left;
+    margin-left: 20px;
+    top: 0;
+}
+.forword-inner-control .liangwu-forword .bvc2-auto-layout-container{
+  position: relative;
+}
+.forword-inner-control .liangwu-forword .layout-auto{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.forword-inner-control .col{
+  width: 20%;
+  height: calc(100% - 25px);
+}
+
+.forword-inner-control .liangwu-forword .el-select input {
+  background: transparent;
+  border-radius: 2px;
+  border-color: #5C676D;
+  color: #666;
+}
+
+.forword-inner-control .layout-auto tbody td p{
+  font-size: 14px !important;
+  color: #fff !important;
+  text-align: left;
+}
+.forword-inner-control .layout-auto tbody td .cell-box{
+  padding:10px;
+}
+.forword-inner-control .screen-config-stop{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  padding: 0;
+  color:#E6A23C;
+  font-size: 12px;
+  display: none;
+}
+.forword-inner-control .screen-config-begin{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  padding: 0;
+  color: #67C23A;
+  font-size: 12px;
+  display: none;
+}
+.forword-inner-control .screen-config-stop .icon-stop{
+  margin-left: 5px;
+}
+
+.forword-inner-control .screen-config-delete {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  padding: 0;
+  color:#F56C6C;
+  font-size: 12px;
+  margin-left: 0;
+}
+.tree-box{
+  height: calc(100% -120px);
+  overflow: auto;
+}

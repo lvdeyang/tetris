@@ -17,10 +17,10 @@ define([
   var pluginName = 'bvc2-monitor-forword-list';
 
   Vue.component(pluginName, {
-    props: [],
     template: tpl,
     data: function () {
       return {
+        resourceApiUrl: '',
         table: {
           data: [],
           page: {
@@ -35,7 +35,7 @@ define([
           }
 
         },
-        stationList:[],
+        stationList: [],
         // tableData:[],
         totleForword: '0',
         dialog: {
@@ -47,31 +47,33 @@ define([
           }
         },
         buttonIsShow: true,
-        extendForwordList:[],
-        selfForwordList:[],
-        activeName:"self",
-        totalWidth:'',
-        singleWidth:'',
-        tableList:{},
-        tableCurrgenData:[]
+        extendForwordList: [],
+        selfForwordList: [],
+        activeName: "self",
+        totalWidth: '',
+        singleWidth: '',
+        tableList: {},
+        tableCurrgenData: [],
+        outerDataLength: 0
       }
     },
+    props: ['originType'],
     computed: {
       tableData: function () {
-          return this.tableCurrgenData.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
+        return this.tableCurrgenData.slice((this.table.page.currentPage - 1) * this.table.page.pageSize, this.table.page.currentPage * this.table.page.pageSize);
       },
-      currentWidth:function(){
+      currentWidth: function () {
         return this.table.page.total * this.singleWidth
       },
-      currentWidthTotleNum:function(){
-        return Math.floor(this.totalWidth/this.singleWidth)
+      currentWidthTotleNum: function () {
+        return Math.floor(this.totalWidth / this.singleWidth)
       }
     },
     watch: {},
     methods: {
       load: function (currentPage) {
         var self = this;
-        var extendForwordList=[]
+        var extendForwordList = []
         self.table.data.splice(0, self.table.data.length);
         ajax.post('/monitor/live/load/device/lives', {
           currentPage: currentPage,
@@ -79,60 +81,103 @@ define([
         }, function (data) {
           var total = data.total;
           var rows = data.rows;
-          self.totleForword = total;
+          var currentTotle = 0;
+          // if(self.originType == "OUTER"){
+          //   self.totleForword = self.outerDataLength;
+          // }else{
+          //   self.totleForword = total - self.outerDataLength;
+          // }
           if (rows && rows.length > 0) {
             for (var i = 0; i < rows.length; i++) {
               // self.table.data.push(rows[i]);
               var parseExtend = ""
-              if(rows[i].dstExtraInfo){
+              if (rows[i].dstExtraInfo) {
                 parseExtend = JSON.parse(rows[i].dstExtraInfo)
-                if(parseExtend.extend_param){
+                if (parseExtend.extend_param) {
                   parseExtend = JSON.parse(parseExtend.extend_param).region
 
                 }
               }
-              for(var j=0;j<self.stationList.length;j++){
+              for (var j = 0; j < self.stationList.length; j++) {
                 var item = self.stationList[j];
-                  if(!self.tableList[item.identity]){
-                    self.tableList[item.identity]=[];
-                  }else{
-                    if(item.identity == parseExtend){
-                    self.tableList[item.identity].push(rows[i])
-                  }
+                if (item.identity == parseExtend) {
+                  self.tableList[item.identity].push(rows[i])
                 }
               }
             }
+            for (var i = 0; i < self.stationList.length; i++) {
+              var item = self.stationList[i];
+              if (item.originType == self.originType) {
+                currentTotle += self.tableList[item.identity].length;
+              }
+            }
           }
-          self.tableCurrgenData = self.tableList.self;
-          self.table.page.total = self.tableList.self.length;
+          self.totleForword = currentTotle;
+          self.tableCurrgenData = self.tableList[self.activeName];
+          self.table.page.total = self.tableList[self.activeName].length;
+          // self.getCapacity()
           // self.table.page.total = self.selfForwordList.length;
         });
       },
       loadStation: function () {
         var self = this;
-        self.title = "新建站点"
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
             self.stationList = data.rows;
             self.stationList.unshift({
               id: 999,
+              originType: "INNER",
               identity: "self",
               stationName: "本域",
             })
-            // window.localStorage.setItem('stationList',JSON.stringify(self.stationList));
+            for (var j = 0; j < self.stationList.length; j++) {
+              var item = self.stationList[j];
+              if (!item.originType) {
+                item.originType = "INNER"
+              }
+              self.tableList[item.identity] = [];
+            }
+            // 设置tab栏初始选中值,和带宽初始值
+            var outerData = [], systemData = [];
+            self.stationList.forEach(function (i) {
+              if (i.originType == "OUTER") {
+                outerData.push(i)
+              } else {
+                systemData.push(i)
+              }
+            })
+            if (self.originType == "OUTER") {
+              self.activeName = outerData[0].identity
+              self.singleWidth = outerData[0].singleWidth
+              self.totalWidth = outerData[0].totalWidth
+            } else {
+              self.activeName = systemData[0].identity
+            }
+
+            self.outerDataLength = outerData.length;
             self.load(1);
+            // self.getCapacity()
           }
         })
       },
-      handleClick(tab, event) {
+      getCapacity () {
+        console.log(this.resourceApiUrl + '/vedioCapacity/query')
+        ajax.post(this.resourceApiUrl + '/vedioCapacity/query', null, function (data, status) {
+          if (status == 200) {
+
+
+          }
+        })
+      },
+      handleClick (tab, event) {
         var self = this;
         self.tableCurrgenData = self.tableList[tab.name];
         self.table.page.currentPage = 1;
         self.table.page.total = self.tableList[tab.name].length;
-       
-        for(var i=0;i<self.stationList.length;i++){
+
+        for (var i = 0; i < self.stationList.length; i++) {
           var item = self.stationList[i];
-          if(item.identity == tab.name){
+          if (item.identity == tab.name) {
             self.singleWidth = item.singleWidth
             self.totalWidth = item.totalWidth
           }
@@ -182,7 +227,7 @@ define([
               done();
             }
           }
-        }).catch(function () {});
+        }).catch(function () { });
       },
       changeOsd: function (scope) {
         var self = this;
@@ -225,29 +270,58 @@ define([
       },
       handleforwordClose: function () {
         this.dialog.forword.visible = false;
+        this.loadStation()
 
       },
       handlebandwidthClose: function () {
         this.dialog.bandwidth.visible = false;
-        this.tableList={};
-        this.tableCurrgenData=[]
+        this.tableList = {};
+        this.tableCurrgenData = []
         this.loadStation()
       },
-      openForword() {
+      openForword () {
         this.dialog.forword.visible = true;
       },
-      openBandwidth() {
+      openBandwidth () {
         this.dialog.bandwidth.visible = true;
       },
-      
+      rowStop (scope, stopAndDelete) {
+        var row = scope.row, self = this;
+        ajax.post('/monitor/live/stop/live/device/' + row.id, { stopAndDelete: stopAndDelete }, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type': "success",
+              'message': "操作成功！"
+            })
+            self.loadStation()
+          }
+        })
+      },
+      rowStart (scope) {
+        var row = scope.row
+        var self = this;
+        ajax.post('/monitor/live/stop/to/restart', { id: row.id }, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              'type': "success",
+              'message': "开始成功！"
+            })
+            self.loadStation()
+
+          }
+        })
+      },
     },
     mounted: function () {
       var self = this;
-     
+      console.log(self.originType)
+      var resourceApiUrl = document.location.protocol + "//" + document.location.hostname + ':8213';
+      self.resourceApiUrl = resourceApiUrl;
+      console.log(resourceApiUrl)
       self.loadStation()
-
+      // self.getCapacity()
     },
-    updated() {
+    updated () {
 
     },
   });

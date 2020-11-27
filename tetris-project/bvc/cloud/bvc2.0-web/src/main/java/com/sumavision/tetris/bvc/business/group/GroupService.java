@@ -68,6 +68,7 @@ import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.bo.MemberTerminalBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.common.MulticastService;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDemandDAO;
@@ -276,6 +277,9 @@ public class GroupService {
 	
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	/**
 	 * 根据用户id和bundleType查找会场id<br/>
@@ -1065,7 +1069,7 @@ public class GroupService {
 			
 			groupDao.save(group);
 			
-			membersResponse(group, members, acceptMembers);
+			membersResponse(group, members, acceptMembers);  //TODO 合并logic (已完成)
 			
 			//执行默认议程
 			AgendaPO commandAgenda = null;
@@ -1109,6 +1113,11 @@ public class GroupService {
 			
 			result.put("splits", chairSplits);
 			operationLogService.send(user.getNickname(), "开启指挥", user.getNickname() + "开启指挥groupId:" + groupId);
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
 			return result;
 			
 		}
@@ -1330,7 +1339,12 @@ public class GroupService {
 			LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
 			LogicBO logicStopRecord = groupRecordService.stop(null, groupId, false);
 			logic.merge(logicStopRecord);
-			executeBusiness.execute(logic, group.getName() + " 会议停止");
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logic, null, null);
+			}else{
+				executeBusiness.execute(logic, group.getName() + " 会议停止");
+			}
+			
 			
 			//删除合屏混音
 			List<CombineVideoPO> combineVideoPOs = combineVideoDao.findByBusinessIdAndBusinessType(groupId, CombineBusinessType.GROUP);
@@ -1343,7 +1357,12 @@ public class GroupService {
 			for(com.sumavision.bvc.device.group.po.CombineVideoPO vCombineVideoPO : vCombineVideoPOs){
 				deviceGroupCombineVideoDao.delete(vCombineVideoPO);//deleteInBatch会报错
 			}
-			executeBusiness.execute(logicStopVirtualSource, group.getName() + " 删除虚拟源的合屏");
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.add(logicStopVirtualSource, null, null);
+			}else{
+				executeBusiness.execute(logicStopVirtualSource, group.getName() + " 删除虚拟源的合屏");
+			}
+			
 			
 			/*
 			//删除协同会议的forwardPO
@@ -1397,13 +1416,23 @@ public class GroupService {
 			}
 			
 			//发消息
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, null);
+				}
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
 			}
-			websocketMessageService.consumeAll(consumeIds);
 			
 			operationLogService.send(user.getNickname(), "停止指挥", user.getNickname() + "停止指挥groupId:" + groupId);
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
 			return returnSplits;
 		}
 	}
@@ -1741,11 +1770,19 @@ public class GroupService {
 			}
 			
 			//发消息，主要是“邀请”消息，自动接听则没有
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, null);
+				}
+				businessReturnService.execute();
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
 			}
-			websocketMessageService.consumeAll(consumeIds);
+			
 			
 			//呼叫主席（此处不呼叫主席的播放器，待成员接听后通过forward呼叫，测试是否可行）
 //			List<GroupMemberPO> acceptMembers = new ArrayList<GroupMemberPO>();
@@ -1992,7 +2029,12 @@ public class GroupService {
 				List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(connectRemoveMembers, group.getId().toString(), BusinessInfoType.BASIC_COMMAND);
 				CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 				LogicBO logic = closeEncoder(group,sourceBOs, codec, -1L);
-				executeBusiness.execute(logic, group.getName() + " " + description);
+				
+				if(businessReturnService.getSegmentedExecute()){
+					businessReturnService.add(logic, null, null);
+				}else{
+					executeBusiness.execute(logic, group.getName() + " " + description);
+				}
 								
 				//录制更新
 //				LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
@@ -2097,11 +2139,19 @@ public class GroupService {
 			}
 
 			//发消息
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, null);
+				}
+				businessReturnService.execute();
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
 			}
-			websocketMessageService.consumeAll(consumeIds);
+			
 			operationLogService.send(user.getNickname(), "成员退出", user.getNickname() + "成员退出groupId:" + groupId + "memberIdList:" + memberIdList.toString());
 			//所有情况都给主席返回chairSplits
 			//if(mode == 0) return exitMemberSplits;
@@ -2157,8 +2207,14 @@ public class GroupService {
 				message.put("businessInfo", exitMember.getName() + "申请退出" + group.getName());
 				message.put("businessId", group.getId().toString() + "-" + exitMember.getId());
 				
-				WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
-				websocketMessageService.consume(ws.getId());
+				if(businessReturnService.getSegmentedExecute()){
+					businessReturnService.add(null, new MessageSendCacheBO(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND), group.getName() + "申请退出");
+					businessReturnService.execute();
+				}else{
+					WebsocketMessageVO ws = websocketMessageService.send(Long.parseLong(chairmanMember.getOriginId()), message.toJSONString(), WebsocketMessageType.COMMAND);
+					websocketMessageService.consume(ws.getId());
+					log.info(group.getName() + "申请退出");
+				}
 			}else{
 				//主席在外部系统（那么申请人在该系统）
 				/*if(GroupType.BASIC.equals(groupType)){
@@ -2170,7 +2226,7 @@ public class GroupService {
 				}*/
 			}
 			
-			log.info(group.getName() + "申请退出");
+//			log.info(group.getName() + "申请退出");
 		}
 		operationLogService.send(user.getNickname(), "申请退出", user.getNickname() + "申请退出groupId:" + groupId);
 	}
@@ -2225,13 +2281,22 @@ public class GroupService {
 				}
 			}			
 			
-			for(MessageSendCacheBO cache : messageCaches){
-				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
-				consumeIds.add(ws.getId());
+			if(businessReturnService.getSegmentedExecute()){
+				for(MessageSendCacheBO cache : messageCaches){
+					businessReturnService.add(null, cache, group.getName() + " 主席拒绝了 " + exitMembers.get(0).getName() + " 等人退出");
+				}
+				
+				businessReturnService.execute();
+			}else{
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
+				
+				log.info(group.getName() + " 主席拒绝了 " + exitMembers.get(0).getName() + " 等人退出");
 			}
-			websocketMessageService.consumeAll(consumeIds);
 			
-			log.info(group.getName() + " 主席拒绝了 " + exitMembers.get(0).getName() + " 等人退出");
 		}
 		operationLogService.send(user.getNickname(), "拒绝申请退出", user.getNickname() + "拒绝申请退出groupId:" + groupId + ", memberIds" + memberIds.toString());
 	}
@@ -2351,7 +2416,11 @@ public class GroupService {
 		LogicBO logic = openEncoder(group,sourceBOs, codec, -1L);
 		
 		//执行logic，打开编码通道
-		executeBusiness.execute(logic, group.getName() + " 会议成员进会，打开编码");
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+		}else{
+			executeBusiness.execute(logic, group.getName() + " 会议成员进会，打开编码");
+		}
 		
 		//生成connectBundle和disconnectBundle，携带转发信息
 //		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
@@ -2396,11 +2465,18 @@ public class GroupService {
 //		commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
 
 		//发消息
-		for(MessageSendCacheBO cache : messageCaches){
-			WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
-			consumeIds.add(ws.getId());
+		if(businessReturnService.getSegmentedExecute()){
+			for(MessageSendCacheBO cache : messageCaches){
+				businessReturnService.add(null, cache, null);
+			}
+		}else{
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 		}
-		websocketMessageService.consumeAll(consumeIds);
+		
 	}
 	
 	/**
@@ -2661,8 +2737,9 @@ public class GroupService {
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月24日 下午1:16:42
-	 * @param videoAudioMap
+	 * <b>日期：</b>2020年10月20日 下午3:23:26
+	 * @param group
+	 * @param sourceBOs
 	 * @param codec
 	 * @param userId
 	 * @return
@@ -2683,8 +2760,8 @@ public class GroupService {
 			OriginType originType = sourceBO.getOriginType();
 			if(OriginType.INNER.equals(originType)){
 				ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
-				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
-	//			BundlePO bundlePO = sourceBO.getVideoBundle();//后续改成这个
+//				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
+				BundlePO bundlePO = sourceBO.getVideoBundle();//后续改成这个
 				PassByBO passBy = new PassByBO().setIncomingCall(group, video.getBundleId() , bundlePO.getAccessNodeUid());
 				ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 						            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
@@ -2742,23 +2819,48 @@ public class GroupService {
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);
+				}else if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
+					//点播外部用户，passby拉流
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
 				}
 			}
 		}
 		
 		return logic;
 	}
-
+	
 	/**
-	 * 点播挂断协议<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * 关闭编码器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月24日 下午5:23:22
-	 * @param vod 点播信息
-	 * @param codec 点播信息
-	 * @param userId adminId
-	 * @param closeDecoder 是否关闭播放器/解码器，通常true，在换源业务时使用false
-	 * @return LogicBO 协议
+	 * <b>日期：</b>2020年10月20日 下午3:23:44
+	 * @param group
+	 * @param sourceBOs
+	 * @param codec
+	 * @param userId
+	 * @return
+	 * @throws Exception
 	 */
 	//TODO:检索设备或通道是否还在使用
 	public LogicBO closeEncoder(
@@ -2808,6 +2910,28 @@ public class GroupService {
 					
 					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
 					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}else if(GroupMemberType.MEMBER_USER.equals(groupMemberType)){
+					if(localLayerId == null) localLayerId = resourceRemoteService.queryLocalLayerId();
+					BundlePO bundlePO = sourceBO.getVideoBundle();
+					ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
+					ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+										 .setUuid(sourceBO.getMemberUuid())
+										 .setSrc_user(group.getUserCode())//发起人、目的号码
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", localLayerId)
+												 											.put("bundleid", bundlePO.getBundleId())
+												 											.put("video_channelid", video.getChannelId())
+												 											.put("audio_channelid", audio.getChannelId())
+												 											.getMap())
+										 .setDst_number(bundlePO.getUsername())//被点播、源号码
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);

@@ -1,17 +1,24 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.management.relation.Relation;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.omg.stub.java.rmi._Remote_Stub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.TreeNode;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
@@ -520,6 +528,7 @@ public class CommandQueryController {
 	 * @param @PathVariable boolean filterMode 过滤器模式 0全部，1在线，2离线
 	 * @param privilegesStr 数组类型的权限{@Code BUSINESS_OPR_TYPE的value}
 	 * @param satisfyAll true需要满足privilegesStr全部权限，false只需满足一个即可。为null的时候按默认查询
+	 * @param returnBundleList true返回设备集合，false返回设备树
 	 * @return List<TreeNodeVO> 设备通道树
 	 */
 	@JsonBody
@@ -531,6 +540,7 @@ public class CommandQueryController {
 			@PathVariable int filterMode,
 			String privilegesStr,
 			Boolean satisfyAll,
+			Boolean returnBundleList,
 			HttpServletRequest request) throws Exception{
 		
 		//获取userId
@@ -553,7 +563,6 @@ public class CommandQueryController {
 		
 		//查询有权限的设备
 		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
-		
 		if(queryBundles==null || queryBundles.size()<=0) return _roots;
 		List<String> bundleIds = new ArrayList<String>();
 		for(BundlePO bundleBody:queryBundles){
@@ -580,6 +589,32 @@ public class CommandQueryController {
 				}
 			}
 		}
+		
+		//没有文件的文件夹不显示
+		/*1.通过设备集合拿到文件夹id
+		 * 2.通过文件夹id找文件夹路径，分离出父文件夹id
+		 * 3找到所有不为空文件夹给folders
+		 * */
+		Set<Long> folderIds=new HashSet<Long>();//所有文件夹id
+		Map<Long,FolderBO> folderMap=folders.stream().collect(Collectors.toMap(FolderBO::getId, Function.identity()));
+		bundles.stream().map(BundleBO::getFolderId).collect(Collectors.toSet()).stream().map(folderId->{
+			Optional<FolderBO> folderBo=Optional.ofNullable(folderMap).map(folderMAP->{return folderMAP.get(folderId);});
+			if(folderBo.isPresent()){//空值校验
+				folderIds.add(folderId);
+				String parentPath=folderBo.get().getParentPath();
+				if(parentPath!=null && !"".equals(parentPath)){
+					folderIds.addAll(Arrays.asList(parentPath.replaceFirst("/", "").split("/")).stream().map(Long::valueOf).collect(Collectors.toList()));
+				} 
+			}
+			return  folderId;
+		}).collect(Collectors.toSet());
+		
+		folders =folderIds.stream().map(folderId->{
+			return folderMap.get(folderId);
+		}).collect(Collectors.toList());
+		
+		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//根据bundleIds从资源层查询channels
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);
@@ -610,6 +645,32 @@ public class CommandQueryController {
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
+		
+		//处理：返回设备集合  
+		if(Boolean.TRUE.equals(returnBundleList)){
+			
+			JSONObject info =new JSONObject();
+			List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+			
+			for(FolderBO root:roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root).setBundleList(new ArrayList<TreeNodeVO>());
+				filteredBundles.stream().forEach(bundle->{
+					List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, bundle.getBundleId());
+					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle, extraInfos);
+					_root.getBundleList().add(bundleNode);
+					
+				});
+				
+				if(_root.getBundleList().size()>0){
+					_roots.add(_root);
+				}
+				
+			}
+			
+			return _roots;
+		}
+		
+		//组件文件夹
 		for(FolderBO root:roots){
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
@@ -620,6 +681,9 @@ public class CommandQueryController {
 				recursionFolder(_root, folders, filteredBundles, null, null, null);
 			}
 		}
+		
+		//将同一个文件夹下的设备按照名称排序
+		orderBundleByName(_roots);
 		
 		return _roots;
 		
@@ -1221,7 +1285,7 @@ public class CommandQueryController {
 		
 		return privilegesWapper;
 	}
-	
+ 	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/all/privilege")
@@ -1232,6 +1296,40 @@ public class CommandQueryController {
 		Map<String, List<com.suma.venus.resource.service.ResourceService.Relation>> privileges = resourceService.hasPrivilegesOfAll(userId,null);
 		
 		return privileges;
+	}
+	
+	/**
+	 * 将同一个文件夹下的设备按照名称排序<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月20日 下午3:51:31
+	 * @param _roots 树
+	 */
+	private void orderBundleByName(List<TreeNodeVO> roots){
+		for(TreeNodeVO node:roots){
+			List<TreeNodeVO> childTreeNodeList= node.getChildren();
+			if(childTreeNodeList!=null){
+				List<TreeNodeVO> folderTreeNodeList =childTreeNodeList.stream().filter(treeNode->{
+					if(TreeNodeType.FOLDER.equals(treeNode.getType())){
+						return true;
+					}
+					return false;
+				}).collect(Collectors.toList());
+				
+				List<TreeNodeVO> bunldeTreeNodeList = childTreeNodeList.stream().filter(treeNode->{
+					if(TreeNodeType.BUNDLE.equals(treeNode.getType())){
+						return true;
+					}
+					return false;
+				}).collect(Collectors.toList());
+				Collections.sort(bunldeTreeNodeList, Comparator.comparing(TreeNodeVO::getName));
+				node.getChildren().removeAll(bunldeTreeNodeList);
+				node.getChildren().addAll(bunldeTreeNodeList);
+				if(folderTreeNodeList != null && folderTreeNodeList.size() > 0){
+					orderBundleByName(folderTreeNodeList);
+				}
+			}
+		}
 	}
 	
 }

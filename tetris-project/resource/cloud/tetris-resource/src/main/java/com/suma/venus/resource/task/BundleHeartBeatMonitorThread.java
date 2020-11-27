@@ -48,6 +48,7 @@ public class BundleHeartBeatMonitorThread implements Runnable {
 			if ((System.currentTimeMillis() - bunldeStatusMap.get(e.getKey())) > timeout) {
 
 				try {
+					LOGGER.info("send offline alarm, ip=" + e.getKey());
 					alarmFeignClientService.triggerAlarm("11011000", e.getKey(), e.getKey(), null, false,
 							Calendar.getInstance().getTime());
 				} catch (Exception e1) {

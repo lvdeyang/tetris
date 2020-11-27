@@ -343,5 +343,8 @@ public class ColumnRelationArticleService {
 		param.put("url", article.getPreviewUrl());
  		
 		aliPushService.sendMessage(article.getName(), article.getRemark(), param.toJSONString());		
+		System.out.println("where is ios?");
+		aliPushService.sendIosMessage(article.getName(), article.getRemark(), param.toJSONString());		
+
 	}
 }

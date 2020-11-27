@@ -2,6 +2,7 @@ package com.sumavision.tetris.bvc.business.group.cooperate;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -40,11 +42,11 @@ import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -61,6 +63,9 @@ public class GroupCooperateService {
 	
 	/** synchronized锁的前缀 */
 	private static final String lockProcessPrefix = "tetris-group-";
+	
+	@Autowired
+	private BusinessReturnService businessReturnService;
 	
 	@Autowired
 	private PageInfoDAO pageInfoDao;
@@ -228,6 +233,10 @@ public class GroupCooperateService {
 				}
 			}*/
 			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
 			operationLogService.send(user.getNickname(), "开启协同指挥", user.getNickname() + "开启协同指挥，groupId:" + groupId + "，memberIds:" + memberIds.toString());
 			return chairSplits;
 		}
@@ -325,6 +334,11 @@ public class GroupCooperateService {
 				}
 			}
 			*/
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
 			operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", memberIds:" + memberIds.toString());
 		}
 	}

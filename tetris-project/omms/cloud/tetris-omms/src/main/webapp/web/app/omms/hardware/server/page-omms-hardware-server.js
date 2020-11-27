@@ -74,6 +74,12 @@ define([
                         loading:false,
                         id:'',
                         ip:''
+                    },
+                    importAuth:{
+                        visible:false,
+                        loading:false,
+                        id:0,
+                        file:''
                     }
                 }
             },
@@ -276,6 +282,11 @@ define([
                     var row = scope.row;
                     window.location.hash = '#/page-omms-software-service-deployment/' + row.id + '/' + row.name;
                 },
+                gotoDatabase:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    window.location.hash = '#/page-omms-hardware-database/' + row.id + '/' + row.name;
+                },
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
@@ -318,6 +329,56 @@ define([
                             }
                         }
                     }).catch(function(){});
+                },
+                importAuth:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.importAuth.visible = true;
+                    self.dialog.importAuth.id=row.id;
+                },
+                handleSelectFile:function(){
+                    var self = this;
+                    document.querySelector('#auth').click();
+                },
+                handleFileSelected:function(){
+                    var self = this;
+                    var file = document.querySelector('#auth').files[0];
+                    self.dialog.importAuth.file = file;
+                
+                },
+                handleImportAuthClose:function(){
+                    var self = this;
+                    self.dialog.importAuth.visible = false;
+                    self.dialog.importAuth.loading = false;
+                    self.dialog.importAuth.id = 0;
+                    self.dialog.importAuth.file = '';
+                },
+                handleImportAuthSubmit:function(){
+                    var self = this;
+                    self.dialog.importAuth.loading = true;
+                    var params = new FormData();
+                    params.append('id', self.dialog.importAuth.id);
+                    params.append('authFile', self.dialog.importAuth.file);
+                    ajax.upload('/server/importauth', params, function(data, status){
+                        self.dialog.importAuth.loading = false;
+                        if(status !== 200) return;
+                        self.load(self.table.page.currentPage);
+                        self.handleImportAuthClose();
+                    }, ajax.TOTAL_CATCH_CODE);
+                },
+                exportDevice:function(scope){
+                	var self = this;
+                    var row = scope.row;
+                    ajax.download('/server/export/'+row.id, null, function (data) {
+                        var $a = $('#page-export');
+                        $a[0].download = 'deviceId('+row.name+').ini';
+                        $a[0].href = window.URL.createObjectURL(data);
+                        $a[0].click();
+                        self.$message({
+                          type: 'success',
+                          message: '操作成功'
+                        });
+                    });	
                 },
                 handleSizeChange:function(pageSize){
                     var self = this;

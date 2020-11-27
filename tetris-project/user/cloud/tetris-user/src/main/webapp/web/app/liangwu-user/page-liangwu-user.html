@@ -67,6 +67,14 @@
 
             <el-table-column :label="i18n.labelCreateUserBindIp" prop="loginIp">
             </el-table-column>
+            <el-table-column width="100" prop="status" label="登录状态">
+              <template slot-scope="scope">
+                <span v-if="scope.row.status === 'ONLINE'"
+                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                <span v-else
+                  style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+              </template>
+            </el-table-column>
             <!-- <el-table-column :label="i18n.tableColumnLevel">
               <template slot-scope="scope">{{scope.row.level?scope.row.level:1}}</template>
             </el-table-column>
@@ -79,6 +87,10 @@
             </el-table-column> -->
             <el-table-column :label="i18n.tableColumnOperation" width="250">
               <template slot-scope="scope">
+                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleTokens" placement="bottom-end">
+                  <el-button v-if="scope.row.id !== 2" type="text" icon="feather-icon-message-circle"
+                    style="font-size:20px; padding:0;" @click="handleTokens(scope)"></el-button>
+                </el-tooltip>
                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                   <el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" class="bt_list_handle"
                     disabled></el-button>
@@ -115,7 +127,7 @@
 
       <div class="div_create">
         <!-- <el-scrollbar style="height:100%;"> -->
-        <el-form label-width="120px" size="small">
+        <el-form label-width="120px" size="mini">
           <el-form-item :label="i18n.labelCreateUserNickname">
             <el-input v-model="dialog.createUser.nickname"></el-input>
           </el-form-item>
@@ -138,8 +150,15 @@
           </el-form-item>
           <!-- 绑定ip -->
           <el-form-item :label="i18n.labelCreateUserBindIp">
-            <el-input v-model="dialog.createUser.loginIp"></el-input>
+            <el-col :span="13">
+              <el-input :disabled="isLoginIpDisabled" v-model="dialog.createUser.loginIp"></el-input>
+            </el-col>
+            <el-col :span="5" :offset="2">
+              <el-checkbox v-model="dialog.createUser.isLoginIp" @change="isLoginIpChange">是否首次登录记录IP</el-checkbox>
+            </el-col>
           </el-form-item>
+
+
           <!-- 绑定角色 -->
           <el-form-item :label="i18n.labelCreateUserBindRole">
             <el-input v-model="dialog.createUser.bindrole" @click.native="handleChangeFolder"></el-input>
@@ -178,14 +197,14 @@
 
     <!-- 绑定接入层 -->
     <el-dialog title="绑定接入层" :visible.sync="bindAccessNodeUidVisable" width="500px">
-      <el-table ref="accessNodeTable" :data="accessNodeTable"  :row-key="roleOption.id"
-        width="100%"  height="400" @current-change="currentRowChange" highlight-current-row>
+      <el-table ref="accessNodeTable" :data="accessNodeTable" :row-key="roleOption.id" width="100%" height="400"
+        @current-change="currentRowChange" highlight-current-row>
         <!-- <el-table-column type="selection" width="55"></el-table-column> -->
         <el-table-column prop="name" label="名称" width="200"></el-table-column>
         <el-table-column prop="ip" label="ip" width="200"></el-table-column>
       </el-table>
-      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit" style="margin-top:15px"><span class="icon-plus"
-          style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
+      <el-button type="primary" size="small" @click="handleBindAccessNodeUidSubmit" style="margin-top:15px"><span
+          class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
 
       <!-- <div>弹框</div> -->
     </el-dialog>
@@ -204,9 +223,9 @@
             <el-input v-model="dialog.editUser.remark"></el-input>
           </el-form-item>
           <!-- 绑定ip -->
-          <el-form-item :label="i18n.labelCreateUserBindIp">
+          <!-- <el-form-item :label="i18n.labelCreateUserBindIp">
             <el-input v-model="dialog.editUser.loginIp"></el-input>
-          </el-form-item>
+          </el-form-item> -->
 
 
           <!-- 绑定角色 -->
@@ -215,9 +234,9 @@
             <el-input v-model="dialog.editUser.bindrole" @click.native="handleChangeFolder"></el-input>
           </el-form-item>
           <!-- 绑定接入层 -->
-          <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
+          <!-- <el-form-item :label="i18n.labelCreateUserBindAccessNodeUid">
             <el-input v-model="dialog.editUser.bindAccessNodeUidName" @click.native="handleChangeNodeUid"></el-input>
-          </el-form-item>
+          </el-form-item> -->
           <div class="div_change_pw">
             <el-button class="bt_change_pw" type="text"
               @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">
@@ -244,6 +263,40 @@
         <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">
           {{i18n.handleEditUserSubmit}}</el-button>
       </span>
+
+    </el-dialog>
+
+    <!-- token展示 -->
+    <el-dialog :title="dialog.tokens.currentUser.nickname" :visible.sync="dialog.tokens.visible" width="600px"
+      :before-close="handleTokensClose">
+
+      <el-table :data="dialog.tokens.rows" style="width:100%">
+        <el-table-column width="50" prop="status">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status === 'ONLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+            <span v-if="scope.row.status === 'OFFLINE'"
+              style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnType">
+          <template slot-scope="scope">
+            <span v-if="scope.row.type == 'qt指控软件'">客户端软件</span>
+            <span v-if="scope.row.type == 'pc平台'">服务器平台</span>
+            <span v-if="scope.row.type != 'qt指控软件'&&scope.row.type != 'pc平台'">{{scope.row.type}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnIp" prop="ip">
+        </el-table-column>
+        <el-table-column :label="i18n.tableTokensColumnOperation" width="80">
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" :content="i18n.tipHandleInvalidToken" placement="bottom-end">
+              <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;"
+                @click="handleInvalidToken(scope)"></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
 
     </el-dialog>
 

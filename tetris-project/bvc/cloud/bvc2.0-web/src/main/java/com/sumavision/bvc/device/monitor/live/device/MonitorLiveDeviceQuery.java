@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 
 @Component
@@ -70,7 +71,7 @@ public class MonitorLiveDeviceQuery {
 	 */
 	public Long queryCountOfTransmit(){
 		
-		return monitorLiveDeviceDao.count();
+		 return monitorLiveDeviceDao.countByStatus(MonitorRecordStatus.RUN);
 	}
 	
 }

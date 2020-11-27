@@ -58,6 +58,24 @@ public class ServiceDeploymentController {
 	}
 	
 	/**
+	 * 删除部署数据<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月30日 上午10:53:28
+	 * @param serviceDeploymentId 部署id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/deployment/data")
+	public Object deleteDeploymentData(
+			Long deploymentId,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.deleteDeploymentData(deploymentId);
+		return null;
+	}
+	
+	/**
 	 * 根据服务器查询部署服务<br/>
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -97,6 +115,27 @@ public class ServiceDeploymentController {
 	}
 	
 	/**
+	 * 重启进程<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月14日 下午2:03:25
+	 * @param deploymentId 部署id
+	 * @param processId 进程名称
+	 * @param request
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/restart")
+	public Object restart(
+			Long deploymentId, 
+			String processId,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.restart(deploymentId, processId);
+		return null;
+	}
+	
+	/**
 	 * 执行卸载<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -108,9 +147,140 @@ public class ServiceDeploymentController {
 	@RequestMapping(value = "/uninstall")
 	public Object uninstall(
 			Long deploymentId,
+			String type,
+			String notes,
 			HttpServletRequest request) throws Exception{
 		
-		serviceDeploymentService.uninstall(deploymentId);
+		serviceDeploymentService.uninstall(deploymentId, type, notes);
+		return null;
+	}
+	
+	/**
+	 * 安装包备份<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月15日 下午5:23:51
+	 * @param deploymentId 部署id
+	 * @param request
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/backup")
+	public Object backup(
+			Long deploymentId,
+			String deploymentName,
+			String notes,
+			HttpServletRequest request) throws Exception{
+		
+		return serviceDeploymentService.backup(deploymentId, deploymentName, notes);
+	}
+	
+	/**
+	 * 根据部署id查询所有备份信息<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月16日 下午4:18:51
+	 * @param deploymentId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/findBackup")
+	public Object findBackup(
+			Long deploymentId,
+			HttpServletRequest request) throws Exception{
+		
+		return serviceDeploymentQuery.findBackup(deploymentId);
+	}
+	
+	/**
+	 * 删除备份信息<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月19日 下午4:13:30
+	 * @param backupId 备份id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/deleteBackup")
+	public Object deleteBackup(
+			Long backupId,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.deleteBackup(backupId);
+		return null;
+	}
+	
+	/**
+	 * 备份恢复<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月20日 上午11:47:00
+	 * @param backupId 备份id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/restore")
+	public Object restore(
+			Long backupId,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.restore(backupId);
+		return null;
+	}
+	
+	/**
+	 * 升级<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年10月22日 下午3:00:03
+	 * @param Long deploymentId 部署id
+	 * @param JSONString config config.ini json形式
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/update")
+	public Object update(
+			Long deploymentId, 
+			Long updatePackageId,
+			String config,
+			Boolean isBackup, 
+			String notes,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.update(deploymentId, updatePackageId, config, isBackup, notes);
+		return null;
+	}
+	
+	/**
+	 * 
+	 * 数据库备份<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月16日 下午3:16:19
+	 * @param id 进程id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/database/backup")
+	public Object databaseBackup(
+			Long id,
+			HttpServletRequest request) throws Exception{
+		
+		serviceDeploymentService.databaseBackup(id);
 		return null;
 	}
 	

@@ -10,7 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
+import com.sumavision.tetris.omms.hardware.database.DatabasePO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataVO;
@@ -35,6 +37,9 @@ public class ServerQuery {
 	
 	@Autowired
 	private ServerNetworkCardTrafficDataDAO serverNetworkCardTrafficDataDao;
+	
+	@Autowired
+	private DatabaseDAO databaseDAO;
 	
 	/**
 	 * 分页查询服务器<br/>
@@ -85,4 +90,32 @@ public class ServerQuery {
 		return serverStatus;
 	}
 	
+	/**
+	 * 
+	 * 根据服务器id查询数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月2日 下午5:40:08
+	 * @param serverId 服务器id
+	 * @return
+	 * @throws Exception
+	 */
+	public List<DatabaseVO> findDatabase(Long serverId) throws Exception{
+		List<DatabasePO> list = databaseDAO.findByServerId(serverId);
+		return DatabaseVO.getConverter(DatabaseVO.class).convert(list, DatabaseVO.class);
+	}
+	
+	/**
+	 * 
+	 * 查询所有数据库<br/>
+	 * <b>作者:</b>jiajun<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月3日 下午2:07:47
+	 * @return
+	 * @throws Exception
+	 */
+	public List<DatabaseVO> findAllDatabase() throws Exception{
+		List<DatabasePO> list = databaseDAO.findAll();
+		return DatabaseVO.getConverter(DatabaseVO.class).convert(list, DatabaseVO.class);
+	}
 }

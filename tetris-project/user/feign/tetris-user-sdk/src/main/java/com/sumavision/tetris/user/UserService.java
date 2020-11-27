@@ -74,4 +74,8 @@ public class UserService {
 		userFeign.deleteLdapUsers();
 	}
 	
+	public void addTagHotcount(Long userId,String tagNames){
+		userFeign.addTagHotcount(userId, tagNames);
+	}
+	
 }

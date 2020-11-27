@@ -46,7 +46,7 @@ define([
         row: '',
         curTask: "", //当前任务
         curId: 2,
-        addDisabled:false,
+        addDisabled: false,
       }
     },
     methods: {
@@ -64,18 +64,24 @@ define([
             message: "开始时间不能为空！"
           })
           return
+        } else if (self.dialog.form.titleName.length > 20) {
+          self.$message({
+            type: "waring",
+            message: "任务名不能大于20个字符！"
+          })
+          return
         }
         self.addDisabled = true;
         if (self.dialog.isCreate) {
-          
+
           ajax.post('/command/system/title/add', self.dialog.form, function (data) {
             // self.table.data.push(data)
             self.$message({
               type: 'success',
               message: "新建任务成功！"
             })
-           
-            self.dialog.form ={
+
+            self.dialog.form = {
               id: '',
               titleName: '',
               beginTime: '',
@@ -92,7 +98,7 @@ define([
               type: 'success',
               message: "修改任务成功！"
             })
-            self.dialog.form ={
+            self.dialog.form = {
               id: '',
               titleName: '',
               beginTime: '',

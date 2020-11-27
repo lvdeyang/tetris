@@ -1,5 +1,7 @@
 package com.sumavision.tetris.omms.software.service.deployment;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -42,6 +44,10 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 	private String fileName;
 	
 	private String version;
+	
+	private List<ProcessDeploymentVO> processDeployments;
+	
+	private String status;
 	
 	public String getName() {
 		return name;
@@ -205,6 +211,24 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 		return this;
 	}
 
+	public List<ProcessDeploymentVO> getProcessDeployments() {
+		return processDeployments;
+	}
+
+	public ServiceDeploymentVO setProcessDeployments(List<ProcessDeploymentVO> processDeployments) {
+		this.processDeployments = processDeployments;
+		return this;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public ServiceDeploymentVO setStatus(String status) {
+		this.status = status;
+		return this;
+	}
+
 	@Override
 	public ServiceDeploymentVO set(ServiceDeploymentPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -220,7 +244,8 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 			.setStepName(entity.getStep().getName())
 			.setProgress(entity.getProgress())
 			.setError(entity.getError())
-			.setErrorMessage(entity.getErrorMessage());
+			.setErrorMessage(entity.getErrorMessage())
+			.setStatus(entity.getStatus());
 		return this;
 	}
 

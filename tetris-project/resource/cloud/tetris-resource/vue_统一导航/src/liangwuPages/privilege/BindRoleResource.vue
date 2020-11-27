@@ -6,7 +6,7 @@
         </el-table-column>
       </el-table>
     </el-card>
-    <el-card style="float:left;margin-left:50px;margin-top:10px;width:80%;" body-style="padding:0px">
+    <el-card style="float:left;margin-left:20px;margin-top:10px;width:80%;" body-style="padding-left:30px">
       <div slot="header" class="clearfix">
         <!--
         <span style="float: left;font-size: 18px;">设备资源</span>
@@ -21,7 +21,7 @@
             <el-tree ref="tree" :data="treeData" :props="defaultProps" :default-expand-all="defaultExpandAll" :filter-node-method="filterNode" :expand-on-click-node="expandOnClickNode" @node-click="handleNodeClick"></el-tree>
           </el-option>
         </el-select>
-        <el-select v-model="filters.deviceModel" size="medium" placeholder="选择资源类型" style="float: left;margin-left:10px;width:120px;">
+        <el-select v-model="filters.deviceModel" size="medium" placeholder="选择资源类型" style="float: left;margin-left:10px;width:120px;" @change="deviceModelChange">
           <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
@@ -33,7 +33,7 @@
       </div>
 
       <!--资源列表-->
-      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="480">
+      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;" max-height="450">
         <!-- <el-table-column type="index" width="100"></el-table-column> -->
         <el-table-column prop="name" label="名称" width="100" sortable>
         </el-table-column>
@@ -81,7 +81,7 @@
       <!--工具条-->
       <el-col :span="24" class="toolbar">
         <el-button size="small" type="primary" @click="submitPrivilege">提交</el-button>
-        <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20"></el-input>
+        <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" @change="pageChange"></el-input>
         <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :current-page="pageNum" :total="total" style="float:right;">
         </el-pagination>
       </el-col>
@@ -176,6 +176,12 @@ export default {
     }
   },
   methods: {
+
+    pageChange: function () {
+      this.pageNum = 1;
+      this.countPerPage = this.filters.countPerPage;
+      this.getResources()
+    },
     dataFilter: function (value) {
       this.$refs.tree.filter(value);
     },
@@ -213,7 +219,9 @@ export default {
         this.folderTreeSelected.label = "",
         this.$refs.tree.filter("");
     },
-
+    deviceModelChange (val) {
+      this.pageNum = 1
+    },
     handleTabClick (tab, event) {
       if (tab.name !== 'BindResource') {
         this.$router.push('/' + tab.name)
@@ -461,7 +469,15 @@ export default {
             type: 'error'
           })
         } else {
-          this.roles = res.roles
+          for (let i = 0; i < res.roles.length; i++) {
+            const item = res.roles[i];
+            if (item.id == 7 || item.id == 4 || item.id == 6) {
+
+            } else {
+              this.roles.push(item)
+            }
+
+          }
         }
 
         this.roleTableLoading = false
@@ -488,9 +504,7 @@ export default {
     // 获取资源列表
     getResources: function () {
 
-      if (!this.resourceTableShow) {
-        this.pageNum = 1;
-      }
+
 
       if (!this.currentRoleRow) {
         this.$message({
@@ -529,7 +543,7 @@ export default {
       }
 
       if (this.filters.deviceModel != '' || this.filters.keyword != '' || this.folderTreeSelected.value != '') {
-        this.pageNum = 1;
+        // this.pageNum = 1;
       }
 
       let param = {
@@ -601,6 +615,7 @@ export default {
     // 资源列表分页
     handleCurrentPageChange (val) {
       this.pageNum = val
+
       if (this.resourceTableShow) {
         this.getResources()
       } else {

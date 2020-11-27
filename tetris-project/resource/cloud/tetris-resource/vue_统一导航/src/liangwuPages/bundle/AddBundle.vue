@@ -15,21 +15,16 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" v-if="bundleForm.deviceModel =='jv210'">
-        <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
+        <!-- <el-select v-model="extraParam.dev_type" placeholder="请选择" style="width: 200px;" @change="devTypeChange">
           <el-option v-for="item in devTypeOption" :label="item.label" :value="item.value" :key="item.value"></el-option>
-        </el-select>
+        </el-select> -->
+        <el-cascader :options="devTypeOption" v-model="devType" @change="devTypeChange"></el-cascader>
       </el-form-item>
       <el-form-item label="域类型" v-if="bundleForm.deviceModel =='jv210'">
         <el-select v-model="extraParam.region" placeholder="请选择域类型" style="width: 130px;">
-          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity">
+          <el-option v-for="item in regionOption" :key="item.uuid" :label="item.stationName" :value="item.identity"></el-option>
         </el-select>
       </el-form-item>
-      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="编解码类型" prop="coderType">
-        <el-select v-model="bundleForm.coderType" style="width: 200px;">
-          <el-option v-for="item in coderTypeOptions" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item> -->
 
       <el-form-item size="small" v-show="bundleForm.deviceModel=='ws'" label="编解码类型" prop="coderType">
         <el-select v-model="bundleForm.coderType" style="width: 200px;">
@@ -65,20 +60,14 @@
       <el-form-item size="small" label="确认密码" prop="checkPass" v-show="isSipShow">
         <el-input type="password" v-model="bundleForm.checkPass" auto-complete="off" style="width: 200px;" required></el-input>
       </el-form-item>
-
+      <el-form-item size="small" label="告警容量" prop="alarmSize" v-if="alarmSizeVisable">
+        <el-input v-model.number="alarmSize" auto-complete="off" style="width: 200px;" placeholder="单位：GB"></el-input>
+      </el-form-item>
       <!-- TODO -->
-      <el-form-item size="small" v-if="bundleForm.deviceModel =='jv210'" label="接入层UID" prop="accessNodeUid">
+      <el-form-item size="small" label="接入层UID" prop="accessNodeUid">
         <el-input v-model="bundleForm.accessNodeName" style="width: 200px;" readonly @click.native="handleSelectLayerNode"></el-input>
         <el-input v-show="false" v-model="bundleForm.accessNodeUid"></el-input>
       </el-form-item>
-
-      <!-- <el-form-item size="small" label="设备IP">
-        <el-input v-model="bundleForm.deviceAddr.deviceIp" style="width: 200px;"></el-input>
-      </el-form-item> -->
-
-      <!-- <el-form-item size="small" label="设备端口">
-        <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
-      </el-form-item> -->
 
       <el-form-item size="small" label="源组播Ip" v-if="isFictitiouVisable">
         <el-input v-model="bundleForm.multicastSourceIp" style="width: 200px;"></el-input>
@@ -89,27 +78,6 @@
       <el-form-item size="small" label="编码组播" v-if="isFictitiouVisable">
         <el-switch v-model="bundleForm.multicastEncode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
       </el-form-item>
-      <!-- <el-form-item size="small" label="解码组播">
-        <el-switch v-model="bundleForm.multicastDecode" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item>
-      <el-form-item size="small" label="是否转码">
-        <el-switch v-model="bundleForm.transcod" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-      </el-form-item> -->
-      <!-- <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标经度(°)" prop="longitude">
-        <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc' || bundleForm.deviceModel=='speaker'" label="坐标纬度(°)" prop="latitude">
-        <el-input v-model="bundleForm.latitude" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc'" label="流地址" prop="streamUrl">
-        <el-input v-model="bundleForm.streamUrl" style="width: 200px;"></el-input>
-      </el-form-item>
-
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='speaker'" label="标识" prop="identify">
-        <el-input v-model="bundleForm.identify" style="width: 200px;"></el-input>
-      </el-form-item> -->
 
     </el-form>
     <el-card class="box-card" style="margin-top:10px" v-show="cardVisable">
@@ -216,7 +184,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="text_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.text_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
 
@@ -252,7 +220,7 @@
                   </el-col>
                   <el-col :span="7">
                     <el-form-item label="字幕颜色" prop="date_osd.color" required>
-                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium"></el-color-picker>
+                      <el-color-picker v-model="dahuaFormData.date_osd.color" size="medium" :predefine="predefineColors"></el-color-picker>
                     </el-form-item>
                   </el-col>
                   <el-col :span="7">
@@ -512,6 +480,87 @@
             </el-form>
           </el-row>
         </div>
+        <div v-show="extraParam.dev_type == 'bq_encoder'">
+          <el-row :gutter="15">
+            <el-form ref="bqEncForm" :model="bqEncoderFormData" :rules="bqEncoderRules" size="mini" label-width="135px">
+              <el-col :span="7">
+                <el-form-item label="设备类型" prop="bq_type">
+                  <el-select v-model="bqEncoderFormData.bq_type" placeholder="请选择设备类型" :style="{width: '100%'}">
+                    <el-option label="6931S" value="6931S"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="ip地址" prop="bq_ip">
+                  <el-input v-model="bqEncoderFormData.bq_ip" placeholder="请输入ip" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="端口号" prop="bq_port">
+                  <el-input v-model.number="bqEncoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="设备账号" prop="bq_user">
+                  <el-input v-model="bqEncoderFormData.bq_user" placeholder="请输入设备账号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="设备密码" prop="bq_passwd">
+                  <el-input v-model="bqEncoderFormData.bq_passwd" placeholder="请输入设备密码" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7" v-show="false">
+                <el-form-item label="通道序号" prop="index">
+                  <el-input v-model="bqEncoderFormData.index" placeholder="请输入通道序号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+        </div>
+        <div v-show="extraParam.dev_type == 'bq_decoder'">
+          <el-row :gutter="15">
+            <el-form ref="bqEncForm" :model="bqDecoderFormData" :rules="bqDecoderRules" size="mini" label-width="135px">
+              <el-col :span="7">
+                <el-form-item label="类型" prop="bq_type">
+                  <el-select v-model="bqDecoderFormData.bq_type" placeholder="请选择设备类型" :style="{width: '100%'}" @change="bqTypeChange">
+                    <el-option label="D1" value="D1"></el-option>
+                    <el-option label="D8" value="D8"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="ip地址" prop="bq_ip">
+                  <el-input v-model="bqDecoderFormData.bq_ip" placeholder="请输入ip" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="端口号" prop="bq_port">
+                  <el-input v-model.number="bqDecoderFormData.bq_port" placeholder="请输入端口号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="设备账号" prop="bq_user">
+                  <el-input v-model="bqDecoderFormData.bq_user" placeholder="请输入设备账号" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="7">
+                <el-form-item label="设备密码" prop="bq_passwd">
+                  <el-input v-model="bqDecoderFormData.bq_passwd" placeholder="请输入设备密码" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+        </div>
       </div>
     </el-card>
     <el-button v-show="false" style="margin-top:10px; margin-left: 30px" type="info" size="small" @click="addExtraInfo">新增扩展字段</el-button>
@@ -586,84 +635,89 @@
 
 <script type="text/ecmascript-6">
 import {
-  getDeviceModels,
+  // getDeviceModels,
   addBundle,
   queryFolderTree,
-  initFolderTree,
+  // initFolderTree,
   addFolder,
   configBundle,
   getStationList
-} from '../../api/api';
+} from '../../api/api'
 
 import selectLayerNode from '../layernode/SelectLayerNode'
 
 export default {
-  name: "AddBundle",
+  name: 'AddBundle',
   components: { selectLayerNode },
   data: function () {
     var validatePass = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入密码'));
+        callback(new Error('请输入密码'))
       } else {
         if (this.bundleForm.checkPass !== '') {
-          this.$refs.bundleForm.validateField('checkPass');
+          this.$refs.bundleForm.validateField('checkPass')
         }
-        callback();
+        callback()
       }
-    };
+    }
     var validateCheckPass = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请再次输入密码'));
+        callback(new Error('请再次输入密码'))
       } else if (value !== this.bundleForm.onlinePassword) {
-        callback(new Error('两次输入密码不一致!'));
+        callback(new Error('两次输入密码不一致!'))
       } else {
-        callback();
+        callback()
       }
-    };
+    }
     return {
-      activeTabName: "LwAddBundle",
+      activeTabName: 'LwAddBundle',
       extraInfos: [],
       bundleFolderVisable: true,
       bundleForm: {
-        deviceDomain: "",
-        deviceModel: "jv210",
-        bundleType: "",
-        bundleName: "",
-        location: "",
-        username: "",
-        onlinePassword: "",
-        checkPass: "",
-        bundleAlias: "",
-        accessNodeUid: "",
-        accessNodeName: "",
-        bundleFolderId: null,
+        deviceDomain: '',
+        deviceModel: 'jv210',
+        bundleType: '',
+        bundleName: '',
+        location: '',
+        username: '',
+        onlinePassword: '',
+        checkPass: '',
+        bundleAlias: '',
+        accessNodeUid: '',
+        accessNodeName: '',
+        folderId: null,
         bundleFolderName: '',
         transcod: false,
         multicastSourceIp: '',
         deviceAddr: {
-          deviceIp: "",
+          deviceIp: '',
           devicePort: 5060
         },
         multicastEncode: false,
         multicastEncodeAddr: '',
         multicastDecode: false,
-        coderType: "ENCODER",
+        coderType: 'ENCODER',
         longitude: '',
         latitude: '',
-        streamUrl: '',
+        streamUrl: ''
 
         // accessNodeUid : ""
       },
+      alarmSizeVisable: false,
+      predefineColors: ['#ffffff', '#000000', '#409EFF', '#E6A23C', '#F56C6C'],
       regionOption: [
-        { name: "本域", key: "self" },
-        { name: "外域", key: "external" },
-        { name: "卫通", key: "weitong" },
+        { name: '本域', key: 'self' },
+        { name: '外域', key: 'external' },
+        { name: '卫通', key: 'weitong' }
       ],
       extraParam: {
         dev_type: 'sip_enc',
         region: 'self',
-        address: ''
+        address: '',
+        param: {
+        },
       },
+      alarmSize: '',
       rules: {
         deviceModel: [
           { required: true, message: '请选择设备形态', trigger: 'change' }
@@ -687,80 +741,119 @@ export default {
         ],
         bundleFolderName: [
           { required: true, message: '请选择所属分组', trigger: 'change' }
-
+        ],
+        alarmSize: [
+          { type: 'number', message: '年龄必须为数字值' }
         ]
       },
       deviceModelOptions: [
-        { label: "终端设备", value: "jv210" },
-        { label: "存储设备", value: "cdn" }
+        { label: '终端设备', value: 'jv210' },
+        { label: '存储设备', value: 'cdn' }
       ],
       devTypeOption: [
-        { label: "sip编码器", value: "sip_enc" },
-        { label: "sip解码器", value: "sip_dec" },
-        // { label: "sip编解码器", value: "sip_enc_dec" },
-        { label: "大华摄像机", value: "dh_camera" },
-        { label: "ts输入(虚编码)", value: "ts_enc" },
-        { label: "ts输出(虚解码)", value: "ts_dec" },
-        { label: "rtp透传输入(虚编码)", value: "rtp_passby_enc" },
-        { label: "rtp透传输出(虚解码)", value: "rtp_passby_dec" },
-        { label: "rtsp输入(虚编码)", value: "rtsp_enc" },
-        { label: "rtmp输入(虚编码)", value: "rtmp_enc" },
-        { label: "onvif输入(虚编码)", value: "onvif_enc" },
-        { label: "北清编码器输入", value: "bq_enc" },
-        { label: "28181编码器输入", value: "28181_enc" },
-        { label: "转码输出(虚解码)", value: "transcode_dec" },
+        {
+          label: '编码器',
+          value: 'enc',
+          children: [
+            { label: 'sip编码器', value: 'sip_enc' },
+            { label: 'ts输入(虚编码)', value: 'ts_enc' },
+            { label: 'rtp透传输入(虚编码)', value: 'rtp_passby_enc' },
+            { label: 'rtsp输入(虚编码)', value: 'rtsp_enc' },
+            { label: 'rtmp输入(虚编码)', value: 'rtmp_enc' },
+            { label: 'onvif输入(虚编码)', value: 'onvif_enc' },
+            { label: '北清编码器输入', value: 'bq_enc' },
+            { label: '28181编码器输入', value: '28181_enc' },
+            // { label: '北清接入编码器', value: 'bq_encoder' },
+          ]
+
+        },
+        {
+          label: '解码器',
+          value: 'dec',
+          children: [
+            { label: 'sip解码器', value: 'sip_dec' },
+            { label: 'ts输出(虚解码)', value: 'ts_dec' },
+            { label: 'rtp透传输出(虚解码)', value: 'rtp_passby_dec' },
+            { label: '转码输出(虚解码)', value: 'transcode_dec' },
+            { label: '北清接入解码器', value: 'bq_decoder' },
+          ]
+        },
+        {
+          label: '摄像机',
+          value: 'camera',
+          children: [
+            { label: '主流摄像机1', value: 'dh_camera' }
+          ]
+        }
       ],
-      deviceDomainOptions: [, { label: "本域资源", value: "2" }],
+      devType: ['enc', 'sip_enc'],
+      // devTypeOption: [
+      //   { label: "sip编码器", value: "sip_enc" },
+      //   { label: "sip解码器", value: "sip_dec" },
+      //   // { label: "sip编解码器", value: "sip_enc_dec" },
+      //   { label: "大华摄像机", value: "dh_camera" },
+      //   { label: "ts输入(虚编码)", value: "ts_enc" },
+      //   { label: "ts输出(虚解码)", value: "ts_dec" },
+      //   { label: "rtp透传输入(虚编码)", value: "rtp_passby_enc" },
+      //   { label: "rtp透传输出(虚解码)", value: "rtp_passby_dec" },
+      //   { label: "rtsp输入(虚编码)", value: "rtsp_enc" },
+      //   { label: "rtmp输入(虚编码)", value: "rtmp_enc" },
+      //   { label: "onvif输入(虚编码)", value: "onvif_enc" },
+      //   { label: "北清编码器输入", value: "bq_enc" },
+      //   { label: "28181编码器输入", value: "28181_enc" },
+      //   { label: "转码输出(虚解码)", value: "transcode_dec" },
+      // ],
+      deviceDomainOptions: [{ label: '本域资源', value: '2' }],
 
       coderTypeOptions: [
         {
-          label: "编码器",
-          value: "ENCODER"
+          label: '编码器',
+          value: 'ENCODER'
         },
         {
-          label: "解码器",
-          value: "DECODER"
+          label: '解码器',
+          value: 'DECODER'
         },
         {
-          label: "默认",
-          value: "DEFAULT"
-        },
+          label: '默认',
+          value: 'DEFAULT'
+        }
       ],
       wsTypeOptions: [
         {
-          label: "编码器",
-          value: "ENCODER"
+          label: '编码器',
+          value: 'ENCODER'
         },
         {
-          label: "解码器",
-          value: "DECODER"
+          label: '解码器',
+          value: 'DECODER'
         },
         {
-          label: "软终端",
-          value: "DEFAULT"
-        },
+          label: '软终端',
+          value: 'DEFAULT'
+        }
       ],
       bundleTypeOptions: [
         {
-          label: "终端",
-          value: "VenusTerminal"
+          label: '终端',
+          value: 'VenusTerminal'
         },
         {
-          label: "混合器",
-          value: "VenusMixer"
+          label: '混合器',
+          value: 'VenusMixer'
         },
         {
-          label: "转发器",
-          value: "VenusTransporter"
+          label: '转发器',
+          value: 'VenusTransporter'
         },
         {
-          label: "外部输出设备",
-          value: "VenusOutConnection"
+          label: '外部输出设备',
+          value: 'VenusOutConnection'
         },
         {
-          label: "大屏设备",
-          value: "VenusVideoMatrix"
-        },
+          label: '大屏设备',
+          value: 'VenusVideoMatrix'
+        }
       ],
       dialog: {
         changeFolder: {
@@ -773,7 +866,7 @@ export default {
             expandOnClickNode: false,
             data: [],
             current: ''
-          },
+          }
         },
         addFolder: {
           visible: false,
@@ -781,39 +874,39 @@ export default {
           parentNode: '',
           folderName: '',
           toLdap: '否'
-        },
+        }
 
       },
       cardVisable: false,
       isSipShow: true,
       dahuaFormData: {
-        url: "dh://admin:suma123456@10.1.41.234:37777",
+        url: 'dh://admin:suma123456@10.1.41.234:37777',
         modelConfig: 'other',
         osd_font_size: 64,
         enc_param: {
-          br_ctrl: "cbr",
-          codec: "h264",
+          br_ctrl: 'cbr',
+          codec: 'h264',
           quality: 80,
           bitrate: 2048,
           width: 1920,
           frame_rate: 25,
           height: 1080,
-          iframe_interva: 25,
+          iframe_interva: 25
         },
         text_osd: {
           enable: true,
-          content: "指控中心东侧摄像头b-2",
+          content: '指控中心东侧摄像头b-2',
           x: 0,
           y: 0,
-          color: "#5acad3",
+          color: '#5acad3'
         },
         date_osd: {
           enable: true,
-          has_week: true,
-          x: 0,
-          y: 0,
-          color: "#7d59f9",
-        },
+          has_week: false,
+          x: 8192,
+          y: 7168,
+          color: '#7d59f9'
+        }
       },
       dahuaRules: {
         url: [{
@@ -867,53 +960,53 @@ export default {
           message: '请输入iframe_interva',
           trigger: 'blur'
         }],
-        "text_osd.enable": [{
+        'text_osd.enable': [{
           required: true,
           message: '请输入text_osd_enable',
           trigger: 'blur'
         }],
-        "text_osd.content": [{
+        'text_osd.content': [{
           required: true,
           message: '请输入标题内容',
           trigger: 'blur'
         }],
-        "text_osd.x": [{
+        'text_osd.x': [{
           required: true,
           message: '请输入text_osd_x',
           trigger: 'blur'
         }],
-        "text_osd.y": [{
+        'text_osd.y': [{
           required: true,
           message: '请输入text_osd_y',
           trigger: 'blur'
         }],
-        "date_osd.enable": [{
+        'date_osd.enable': [{
           required: true,
           message: '请输入date_osd_enable',
           trigger: 'blur'
         }],
-        "date_osd.has_week": [{
+        'date_osd.has_week': [{
           required: true,
           message: '请输入date_osd_has_week',
           trigger: 'blur'
         }],
-        "date_osd.x": [{
+        'date_osd.x': [{
           required: true,
           message: '请输入date_osd_x',
           trigger: 'blur'
         }],
-        "date_osd.y": [{
+        'date_osd.y': [{
           required: true,
           message: '请输入date_osd_y',
           trigger: 'blur'
-        }],
+        }]
       },
       extraInfosAdd: [],
       TSencFormData: {
         is_multi: true,
-        multi_ip: "224.1.1.2",
-        local_ip: "10.1.41.22",
-        port: 2000,
+        multi_ip: '224.1.1.2',
+        local_ip: '10.1.41.22',
+        port: 2000
       },
       TSencRules: {
         'is_multi': [{
@@ -940,17 +1033,17 @@ export default {
         }]
       },
       is_multiOptions: [{
-        "label": "单播",
-        "value": false
+        'label': '单播',
+        'value': false
       }, {
-        "label": "组播",
-        "value": true
+        'label': '组播',
+        'value': true
       }],
       TSdecFormData: {
-        dest_ip: "224.1.1.2",
-        local_ip: "10.1.41.22",
+        dest_ip: '224.1.1.2',
+        local_ip: '10.1.41.22',
         dest_port: 2000,
-        reset_tm: true,
+        reset_tm: true
       },
       TSdecRules: {
         dest_ip: [],
@@ -964,16 +1057,16 @@ export default {
           required: true,
           message: '请选择重校对时间戳',
           trigger: 'change'
-        }],
+        }]
       },
 
       rtpPassbyDecFormData: {
-        dest_ip: "224.1.1.2",
-        local_ip: "10.1.41.22",
+        dest_ip: '224.1.1.2',
+        local_ip: '10.1.41.22',
         video_port: 2000,
         audio_port: 2002,
         reset_tm: false,
-        aac_out: false,
+        aac_out: false
       },
       rtpPassbyDecRules: {
         dest_ip: [],
@@ -989,28 +1082,28 @@ export default {
           required: true,
           message: '请选择强制aac输出',
           trigger: 'change'
-        }],
+        }]
       },
       reset_tmOptions: [{
-        "label": "是",
-        "value": true
+        'label': '是',
+        'value': true
       }, {
-        "label": "否",
-        "value": false
+        'label': '否',
+        'value': false
       }],
       aac_outOptions: [{
-        "label": "是",
-        "value": true
+        'label': '是',
+        'value': true
       }, {
-        "label": "否",
-        "value": false
+        'label': '否',
+        'value': false
       }],
       rtpPassbyEncFormData: {
         is_multi: true,
-        multi_ip: "224.1.1.2",
-        local_ip: "10.1.41.22",
+        multi_ip: '224.1.1.2',
+        local_ip: '10.1.41.22',
         video_port: 2000,
-        audio_port: 2002,
+        audio_port: 2002
       },
       rtpPassbyEncRules: {
         is_multi: [{
@@ -1031,34 +1124,34 @@ export default {
           }
         ],
         video_port: [],
-        audio_port: [],
+        audio_port: []
       },
       rtspEncFormData: {
-        url: undefined,
+        url: undefined
       },
       rtspEncRules: {
         url: [{
           required: true,
           message: '请输入流地址',
           trigger: 'blur'
-        }],
+        }]
       },
       rtmpEncFormData: {
-        url: undefined,
+        url: undefined
       },
       rtmpEncRules: {
         url: [{
           required: true,
           message: '请输入流地址',
           trigger: 'blur'
-        }],
+        }]
       },
       onvifEncFormData: {
-        onvif_user: "anonymous",
-        onvif_pwd: "anonymous",
-        onvif_ip: "10.1.41.223",
+        onvif_user: 'anonymous',
+        onvif_pwd: 'anonymous',
+        onvif_ip: '10.1.41.223',
         onvif_port: 80,
-        onvif_sel_index: 0,
+        onvif_sel_index: 0
       },
       onvifEncRules: {
         onvif_user: [{
@@ -1081,11 +1174,11 @@ export default {
           required: true,
           message: '请输入选择码率索引',
           trigger: 'blur'
-        }],
+        }]
       },
       bqEncFormData: {
         bq_type: '6931S',
-        url: "sstp+udp://127.0.0.1:8002/68ED6661-A641-4A95-9482-96F0AA024424",
+        url: 'sstp+udp://127.0.0.1:8002/68ED6661-A641-4A95-9482-96F0AA024424'
       },
       bqEncRules: {
         bq_type: [{
@@ -1097,40 +1190,40 @@ export default {
           required: true,
           message: '请输入流地址',
           trigger: 'blur'
-        }],
+        }]
       },
       bq_typeOptions: [{
-        "label": "6501S",
-        "value": "6501S"
+        'label': '6501S',
+        'value': '6501S'
       }, {
-        "label": "6601S",
-        "value": "6601S"
+        'label': '6601S',
+        'value': '6601S'
       }, {
-        "label": "6931S",
-        "value": "6931S"
+        'label': '6931S',
+        'value': '6931S'
       }, {
-        "label": "8201C",
-        "value": "8201C"
+        'label': '8201C',
+        'value': '8201C'
       }, {
-        "label": "8361C",
-        "value": "8361C"
+        'label': '8361C',
+        'value': '8361C'
       }, {
-        "label": "8361P",
-        "value": "8361P"
+        'label': '8361P',
+        'value': '8361P'
       }, {
-        "label": "8601C",
-        "value": "8601C"
+        'label': '8601C',
+        'value': '8601C'
       }, {
-        "label": "ts_stream",
-        "value": "ts_stream"
-      },],
+        'label': 'ts_stream',
+        'value': 'ts_stream'
+      }],
       transcodeEecFormData: {
-        dst_codec: "h264",
+        dst_codec: 'h264',
         width: 720,
         height: 576,
         fps: 25,
         gop_size: 25,
-        url: "",
+        url: ''
       },
       transcodeEecRules: {
         dst_codec: [{
@@ -1162,79 +1255,129 @@ export default {
           required: true,
           message: '请输入url',
           trigger: 'blur'
-        }],
+        }]
       },
       dst_codecOptions: [{
-        "label": "h264",
-        "value": "h264"
+        'label': 'h264',
+        'value': 'h264'
       }, {
-        "label": "h265",
-        "value": "h265"
+        'label': 'h265',
+        'value': 'h265'
       }],
       TSencFormMultiIpDis: false,
       rtpPassbyEncFormMultiIpDis: false,
       isFictitiouVisable: true,
       configChannels: [
-        { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
-        { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
-        { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
-        { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+        { 'channelTemplateID': 1, 'channelCnt': 1, 'channelName': 'VenusAudioIn' },
+        { 'channelTemplateID': 2, 'channelCnt': 0, 'channelName': 'VenusAudioOut' },
+        { 'channelTemplateID': 3, 'channelCnt': 1, 'channelName': 'VenusVideoIn' },
+        { 'channelTemplateID': 4, 'channelCnt': 0, 'channelName': 'VenusVideoOut' }
       ],
-      bitrateDisable: false
+      bitrateDisable: false,
+      bqEncoderFormData: {
+        "bq_type": "6931S",// 北清接入的编码器目前只有6931S
+        "bq_ip": "192.168.1.123",//北清设备的ip地址
+        "bq_port": 8088,//北清设备的控制端口
+        "bq_user": "admin",//编码器目前无需校验，将此固定为admin
+        "bq_passwd": "admin",//编码器目前无需校验，将此固定为admin
+        "index": 1
+      },
+      bqEncoderRules: {
+        'bq_ip': [{
+          required: true,
+          message: '请输入ip',
+          trigger: 'blur'
+        }],
+        'bq_port': [{
+          required: true,
+          message: '请输入端口',
+          trigger: 'blur'
+        }],
+      },
+      bqDecoderFormData: {
+        "bq_type": "D1",//D1和D8种
+        "bq_ip": "192.168.1.123",//北清设备的ip地址
+        "bq_port": 8088,//北清设备的控制端口
+        "bq_user": "admin",
+        "bq_passwd": "admin",
+        "index": 1
+      },
+      bqDecoderRules: {
+        'bq_ip': [{
+          required: true,
+          message: '请输入ip',
+          trigger: 'blur'
+        }],
+        'bq_port': [{
+          required: true,
+          message: '请输入端口',
+          trigger: 'blur'
+        }],
+        'bq_user': [{
+          required: true,
+          message: '请输入设备账号',
+          trigger: 'blur'
+        }],
+        'bq_passwd': [{
+          required: true,
+          message: '请输入设备密码',
+          trigger: 'blur'
+        }],
+        'index': [
+          {
+            required: true,
+            message: '请输入设备序号',
+            trigger: 'blur'
+          }
+        ],
+      },
+      // bqDecoderOption: [{
+      //   label: 1, value: 1
+      // }]
     }
   },
   computed: {
     bundleFormMulticastEncode: function () {
-      var self = this;
-      return self.bundleForm.multicastEncode;
+      var self = this
+      return self.bundleForm.multicastEncode
     }
   },
   watch: {
     bundleFormMulticastEncode: function (v) {
-      var self = this;
+      var self = this
       if (!v) {
-        self.bundleForm.multicastEncodeAddr = '';
+        self.bundleForm.multicastEncodeAddr = ''
       }
     }
   },
   methods: {
     handleTabClick: function (tab, event) {
-      if ("AddBundle" !== tab.name) {
-        this.$router.push('/' + tab.name);
+      if (tab.name !== 'AddBundle') {
+        this.$router.push('/' + tab.name)
       }
     },
-    // getDeviceModels: function () {
-    //   getDeviceModels().then(res => {
-    //     if (!res.errMsg && res.deviceModels) {
-    //       for (let deviceModel of res.deviceModels) {
-    //         let deviceModelOption = {
-    //           value: deviceModel,
-    //           label: deviceModel
-    //         };
-    //         this.deviceModelOptions.push(deviceModelOption);
-    //       }
-    //     }
-    //   });
-    // },
-    devTypeChange: function (val) {
-      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'], isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc'],
-        isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec'], isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc']
+    devTypeChange: function (value) {
+      var val = this.extraParam.dev_type = value[value.length - 1]
+      var hidArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc',] //无特殊扩展参数
+      var isSipArr = ['sip_enc', 'sip_dec', 'sip_enc_dec', '28181_enc']
+      // var isFictitiousArr = ['ts_dec', 'rtp_passby_dec', 'transcode_dec']
+      var isEncArr = ['sip_enc', 'dh_camera', 'ts_enc', 'rtp_passby_enc', 'rtsp_enc', 'rtmp_enc', 'onvif_enc', 'bq_enc', '28181_enc', 'bq_encoder']
       if (hidArr.indexOf(val) > -1) {
-        this.cardVisable = false;
+        this.cardVisable = false
       } else {
-        this.cardVisable = true;
+        this.cardVisable = true
       }
       if (isSipArr.indexOf(val) > -1) {
-        this.isSipShow = true;
-        this.bundleForm.username = '';
-        this.bundleForm.onlinePassword = '';
-        this.bundleForm.checkPass = '';
+        this.isSipShow = true
+        this.bundleForm.username = ''
+        this.bundleForm.onlinePassword = ''
+        this.bundleForm.checkPass = ''
       } else {
-        this.isSipShow = false;
+        this.isSipShow = false
         var defaultPassword = this.randomString(12)
-        this.bundleForm.username = this.randomString(12);
-        this.bundleForm.onlinePassword = defaultPassword;
-        this.bundleForm.checkPass = defaultPassword;
+        this.bundleForm.username = this.randomString(12)
+        this.bundleForm.onlinePassword = defaultPassword
+        this.bundleForm.checkPass = defaultPassword
       }
 
       // if (isFictitiousArr.indexOf(val) > -1) {
@@ -1247,65 +1390,84 @@ export default {
         this.isFictitiouVisable = true
         this.bundleForm.coderType = 'ENCODER'
         this.configChannels = [
-          { "channelTemplateID": 1, "channelCnt": 1, "channelName": "VenusAudioIn" },
-          { "channelTemplateID": 2, "channelCnt": 0, "channelName": "VenusAudioOut" },
-          { "channelTemplateID": 3, "channelCnt": 1, "channelName": "VenusVideoIn" },
-          { "channelTemplateID": 4, "channelCnt": 0, "channelName": "VenusVideoOut" }
+          { 'channelTemplateID': 1, 'channelCnt': 1, 'channelName': 'VenusAudioIn' },
+          { 'channelTemplateID': 2, 'channelCnt': 0, 'channelName': 'VenusAudioOut' },
+          { 'channelTemplateID': 3, 'channelCnt': 1, 'channelName': 'VenusVideoIn' },
+          { 'channelTemplateID': 4, 'channelCnt': 0, 'channelName': 'VenusVideoOut' }
         ]
       } else {
         this.isFictitiouVisable = false
         this.bundleForm.coderType = 'DECODER'
         this.configChannels = [
-          { "channelTemplateID": 1, "channelCnt": 0, "channelName": "VenusAudioIn" },
-          { "channelTemplateID": 2, "channelCnt": 1, "channelName": "VenusAudioOut" },
-          { "channelTemplateID": 3, "channelCnt": 0, "channelName": "VenusVideoIn" },
-          { "channelTemplateID": 4, "channelCnt": 1, "channelName": "VenusVideoOut" }
+          { 'channelTemplateID': 1, 'channelCnt': 0, 'channelName': 'VenusAudioIn' },
+          { 'channelTemplateID': 2, 'channelCnt': 1, 'channelName': 'VenusAudioOut' },
+          { 'channelTemplateID': 3, 'channelCnt': 0, 'channelName': 'VenusVideoIn' },
+          { 'channelTemplateID': 4, 'channelCnt': 1, 'channelName': 'VenusVideoOut' }
         ]
       }
     },
     addExtraInfo: function () {
-      this.extraInfos.push({});
+      this.extraInfos.push({})
     },
     remove: function (item) {
-      var index = this.extraInfos.indexOf(item);
+      var index = this.extraInfos.indexOf(item)
       if (index !== -1) {
         this.extraInfos.splice(index, 1)
       }
     },
     randomString: function (len) {
-      len = len || 32;
-      var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-      var maxPos = $chars.length;
-      var pwd = '';
+      len = len || 32
+      var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678' /** **默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+      var maxPos = $chars.length
+      var pwd = ''
       for (let i = 0; i < len; i++) {
-        pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-
+        pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
       }
-      return pwd;
-
+      return pwd
     },
     reset: function () {
       // this.$refs["bundleForm"].resetFields();
-      // this.bundleForm.bundleFolderId = null;
+      // this.bundleForm.folderId = null;
       // this.bundleForm.bundleFolderName = '';
     },
     submit: function () {
-      var self = this;
+      var self = this
       if (!this.validateBaseInfo()) {
-        return;
+        return
       }
 
       if (!this.validateExtraInfo()) {
-        return;
+        return
+      }
+      // 隐藏设备账号密码随机生成
+      if (!this.isSipShow) {
+        var defaultPassword = this.randomString(12)
+        this.bundleForm.username = this.randomString(12)
+        this.bundleForm.onlinePassword = defaultPassword
+        this.bundleForm.checkPass = defaultPassword
       }
       this.$refs['dahuaForm'].validate(valid => {
         if (!valid) {
-          return
+
         } else {
           // TODO 提交表单
-          var newArr = [];
-          var extraParam = this.extraParam;
-          extraParam.address = this.bundleForm.location;
+          var newArr = []
+          var extraParam = this.extraParam
+          if (this.bundleForm.deviceModel == 'cdn') {
+
+            if (!/\d/.test(this.alarmSize) || this.alarmSize < 0) {
+              this.$message({
+                type: "waring",
+                message: "告警容量必须为数字且大于等于0"
+              })
+              return
+            } else {
+              extraParam.param = { alarmSize: self.alarmSize }
+              self.extraParam.dev_type = 'cdn'
+              console.log(extraParam)
+            }
+          }
+          extraParam.address = this.bundleForm.location
           switch (self.extraParam.dev_type) {
             case 'dh_camera':
               extraParam.param = this.dahuaFormData
@@ -1349,73 +1511,119 @@ export default {
             case 'transcode_dec':
               extraParam.param = this.transcodeEecFormData
               break
+            case 'bq_encoder':
+              extraParam.param = this.bqEncoderFormData
+              break
+            case 'bq_decoder':
+              extraParam.param = this.bqDecoderFormData
+              break
+          }
+          //北清D8类型的批量添加设备 index 不同
+          if (self.extraParam.dev_type == 'bq_decoder' && self.bqDecoderFormData.bq_type == "D8") {
+            for (let i = 1; i <= 8; i++) {
+              var extraParam = {
+                dev_type: self.extraParam.dev_type,
+                region: self.extraParam.region,
+                address: self.bundleForm.location,
+              }
+
+              self.bqDecoderFormData.index = i
+              extraParam.param = self.bqDecoderFormData
+              var bundleForm = {
+                deviceModel: self.bundleForm.deviceModel,
+                bundleType: self.bundleForm.bundleType,
+                bundleName: self.bundleForm.bundleName + '-' + i,
+                location: self.bundleForm.location,
+                username: self.bundleForm.username + '-' + i,
+                onlinePassword: self.bundleForm.onlinePassword + '-' + i,
+                checkPass: self.bundleForm.checkPass + '-' + i,
+                bundleAlias: self.bundleForm.bundleAlias + '-' + i,
+                accessNodeUid: self.bundleForm.accessNodeUid,
+                accessNodeName: self.bundleForm.accessNodeName,
+                folderId: self.bundleForm.folderId,
+                bundleFolderName: self.bundleForm.bundleFolderName,
+                transcod: self.bundleForm.transcod,
+                coderType: 'DECODER',
+                multicastSourceIp: self.bundleForm.multicastSourceIp,
+                deviceAddr: {
+                  deviceIp: '',
+                  devicePort: 5060
+                },
+              }
+              newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
+              let param = {
+                bundle: JSON.stringify(bundleForm),
+                extraInfoVOList: JSON.stringify(newArr)
+              }
+              addBundle(param).then(res => {
+                if (res.errMsg) {
+                  this.$message({
+                    message: res.errMsg,
+                    type: 'error'
+                  })
+                } else {
+                  this.handleConfigBundle(res.bundleId)
+                }
+              })
+            }
+            self.bqDecoderFormData.index = 1;
+          } else {
+            newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
+            let param = {
+              bundle: JSON.stringify(this.bundleForm),
+              extraInfoVOList: JSON.stringify(newArr)
+            }
+            addBundle(param).then(res => {
+              if (res.errMsg) {
+                this.$message({
+                  message: res.errMsg,
+                  type: 'error'
+                })
+              } else {
+                this.handleConfigBundle(res.bundleId)
+              }
+            })
           }
 
-          newArr = [...this.extraInfos, { name: 'extend_param', value: extraParam }]
-          let param = {
-            bundle: JSON.stringify(this.bundleForm),
-            extraInfoVOList: JSON.stringify(newArr)
-          };
-
-          addBundle(param).then(res => {
-            if (res.errMsg) {
-              this.$message({
-                message: res.errMsg,
-                type: 'error'
-              });
-            } else {
-              this.$message({
-                message: "添加成功",
-                type: 'success'
-              });
-              this.handleConfigBundle(res.bundleId)
-              // setTimeout(() => {
-              //   window.location.reload();
-              // }, 1000);
-
-              // this.$confirm('添加资源成功, 是否跳转至配置页面进行能力方案配置?', '提示', {
-              //   confirmButtonText: '确定',
-              //   cancelButtonText: '取消',
-              //   type: 'info'
-              // }).then(() => {
-              //   //跳转至配置页面
-              //   this.$router.push({
-              //     path: '/ConfigBundle',
-              //     query: {
-              //       bundleId: res.bundleId
-              //     }
-              //   });
-              // }).catch(() => {
-              // });
-            }
-          });
-
         }
+      })
+    },
+    handleConfigBundle: function (bundleId) {
+      let param = {
+        bundleId: bundleId,
+        configChannels: JSON.stringify(this.configChannels),
+        configEditableAttrs: JSON.stringify([])
+      }
 
+      configBundle(param).then(res => {
+        this.$message({
+          message: '添加成功',
+          type: 'success'
+        })
       })
     },
     validateBaseInfo: function () {
-      var result = false;
-      this.$refs["bundleForm"].validate((valid) => {
-        result = valid;
-      });
-      return result;
+      var result = false
+      this.$refs['bundleForm'].validate((valid) => {
+        result = valid
+      })
+      return result
     },
     validateExtraInfo: function () {
       for (let extraInfo of this.extraInfos) {
         if (!extraInfo.name || !extraInfo.value) {
           this.$message({
-            message: "扩展字段不能为空",
+            message: '扩展字段不能为空',
             type: 'error'
-          });
-          return false;
+          })
+          return false
         }
       }
-      return true;
+      return true
     },
     handleChangeFolder: function () {
-      var self = this;
-      self.dialog.changeFolder.visible = true;
+      var self = this
+      self.dialog.changeFolder.visible = true
       queryFolderTree().then(res => {
         console.log(res)
         if (res.status === 200) {
@@ -1424,64 +1632,64 @@ export default {
           self.$message({
             type: 'error',
             message: res.message
-          });
+          })
         }
-      });
+      })
     },
     handleChangeFolderClose: function () {
-      var self = this;
-      self.dialog.changeFolder.visible = false;
-      self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
-      self.dialog.changeFolder.tree.current = '';
+      var self = this
+      self.dialog.changeFolder.visible = false
+      self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length)
+      self.dialog.changeFolder.tree.current = ''
     },
     handleChangeFolderCommit: function () {
-      var self = this;
-      self.bundleForm.bundleFolderId = self.dialog.changeFolder.tree.current.id;
-      self.bundleForm.bundleFolderName = self.dialog.changeFolder.tree.current.name;
-      self.handleChangeFolderClose();
+      var self = this
+      self.bundleForm.folderId = self.dialog.changeFolder.tree.current.id
+      self.bundleForm.bundleFolderName = self.dialog.changeFolder.tree.current.name
+      self.handleChangeFolderClose()
     },
     currentTreeNodeChange: function (data, node) {
-      var self = this;
-      self.dialog.changeFolder.tree.current = data;
+      var self = this
+      self.dialog.changeFolder.tree.current = data
     },
     treeNodeAppend: function (node, data) {
-      var self = this;
-      self.dialog.addFolder.parent = data;
-      self.dialog.addFolder.parentNode = node;
-      self.dialog.addFolder.visible = true;
+      var self = this
+      self.dialog.addFolder.parent = data
+      self.dialog.addFolder.parentNode = node
+      self.dialog.addFolder.visible = true
     },
     handleAddFolderClose: function () {
-      var self = this;
-      self.dialog.addFolder.parent = '';
-      self.dialog.addFolder.parentNode = '';
-      self.dialog.addFolder.visible = false;
-      self.dialog.addFolder.folderName = '';
-      self.dialog.addFolder.toLdap = '否';
+      var self = this
+      self.dialog.addFolder.parent = ''
+      self.dialog.addFolder.parentNode = ''
+      self.dialog.addFolder.visible = false
+      self.dialog.addFolder.folderName = ''
+      self.dialog.addFolder.toLdap = '否'
     },
     handleAddFolderCommit: function () {
-      var self = this;
+      var self = this
       addFolder({
         name: self.dialog.addFolder.folderName,
         parentId: self.dialog.addFolder.parent.id,
-        toLdap: self.dialog.addFolder.toLdap === '是' ? true : false
+        toLdap: self.dialog.addFolder.toLdap === '是'
       }).then(res => {
-        self.dialog.addFolder.parent.children = self.dialog.addFolder.parent.children || [];
+        self.dialog.addFolder.parent.children = self.dialog.addFolder.parent.children || []
         if (!res.errMsg) {
-          self.dialog.addFolder.parent.children.push(res.folder);
-          self.$refs.changeFolderTree.append(res.folder, self.dialog.addFolder.parentNode);
-          self.handleAddFolderClose();
+          self.dialog.addFolder.parent.children.push(res.folder)
+          self.$refs.changeFolderTree.append(res.folder, self.dialog.addFolder.parentNode)
+          self.handleAddFolderClose()
         }
-      });
+      })
     },
     handleSelectLayerNode: function () {
-      var self = this;
-      self.$refs.selectLayerNode.show();
+      var self = this
+      self.$refs.selectLayerNode.show()
     },
     layerNodeSelected: function (layerNode, done) {
-      var self = this;
-      self.bundleForm.accessNodeUid = layerNode.nodeUid;
-      self.bundleForm.accessNodeName = layerNode.name;
-      done();
+      var self = this
+      self.bundleForm.accessNodeUid = layerNode.nodeUid
+      self.bundleForm.accessNodeName = layerNode.name
+      done()
     },
     submitForm () {
       this.$refs['dahuaForm'].validate(valid => {
@@ -1492,27 +1700,7 @@ export default {
     resetForm () {
       this.$refs['dahuaForm'].resetFields()
     },
-    handleConfigBundle: function (bundleId) {
-      let param = {
-        bundleId: bundleId,
-        configChannels: JSON.stringify(this.configChannels),
-        configEditableAttrs: JSON.stringify([])
-      };
 
-      configBundle(param).then(res => {
-        // if (res.errMsg) {
-        //   this.$message({
-        //     message: res.errMsg,
-        //     type: 'error'
-        //   });
-        // } else {
-        //   this.$message({
-        //     message: "配置成功",
-        //     type: 'success'
-        //   });
-        // }
-      });
-    },
     TSencFormIsMultiChange (val) {
       if (!val) {
         this.TSencFormMultiIpDis = true
@@ -1528,61 +1716,67 @@ export default {
       }
     },
     deviceModelChange (val) {
-      if (val == "jv210") {
+      if (val == 'jv210') {
         this.isFictitiouVisable = true
-        this.isSipShow = true;
-        this.bundleForm.username = '';
-        this.bundleForm.onlinePassword = '';
-        this.bundleForm.checkPass = '';
+        this.alarmSizeVisable = false
+        this.isSipShow = true
+        this.bundleForm.username = ''
+        this.bundleForm.onlinePassword = ''
+        this.bundleForm.checkPass = ''
+        this.extraParam.region = 'self'
+        this.devType = []
       } else {
         this.isFictitiouVisable = false
-        this.isSipShow = true;
-        this.bundleFolderVisable = false;
-        this.bundleForm.username = '';
-        this.bundleForm.onlinePassword = '';
-        this.bundleForm.checkPass = '';
+        this.alarmSizeVisable = true
+        this.isSipShow = true
+        this.bundleFolderVisable = false
+        this.bundleForm.username = ''
+        this.bundleForm.onlinePassword = ''
+        this.bundleForm.checkPass = ''
+        this.extraParam.region = 'self'
+        this.devType = ['enc', 'sip_enc']
       }
-
     },
     encodeModeChange (val) {
-      if (val == "bitrate_first") {
+      if (val == 'bitrate_first') {
         this.dahuaFormData.enc_param.bitrate = 1024
-        this.bitrateDisable = true;
-      } else if (val == "quality_first") {
+        this.bitrateDisable = true
+      } else if (val == 'quality_first') {
         this.dahuaFormData.enc_param.bitrate = 8192
-        this.bitrateDisable = true;
+        this.bitrateDisable = true
       } else {
-        this.bitrateDisable = false;
+        this.bitrateDisable = false
       }
     }
   },
   mounted: function () {
-    var self = this;
+    var self = this
     this.$nextTick(function () {
-
       getStationList().then(res => {
         if (res.errMsg) {
           self.$message({
             message: res.errMsg,
             type: 'error'
-          });
+          })
         } else {
-
-          self.regionOption = res.data.rows;
+          self.regionOption = res.data.rows
           self.regionOption.unshift({
             id: 99999,
-            identity: "self",
-            stationName: "本域",
+            identity: 'self',
+            stationName: '本域'
           })
         }
-      });
-      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage');
-    });
+      })
+      self.$parent.$parent.$parent.$parent.$parent.setActive('/LwLocalBundleManage')
+    })
 
     // this.getDeviceModels();
   }
 }
 </script>
 
-<style scoped>
+<style>
+.el-color-predefine__color-selector {
+  border: 1px solid #666 !important;
+}
 </style>
