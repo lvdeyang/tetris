@@ -585,7 +585,18 @@
                                 </el-input-number>
                             </el-form-item>
                             <template v-for="i in dialog.setOutput.outputCount">
-                                <el-form-item :label="'流输出地址 ' + i">
+                                <el-form-item :label="'流输出类型 ' + i">
+                                    <el-select v-model="dialog.setOutput.output[i-1].outputType" placeholder="请选择输出类型">
+		                                <el-option
+		                                        v-for="item in dialog.setOutput.outTypeOptions"
+		                                        :value="item">
+		                                </el-option>
+                            		</el-select>
+                                </el-form-item>
+                                <el-form-item :label="'流输出地址 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='RTMP'">
+                                    <el-input v-model="dialog.setOutput.output[i-1].rtmpUrl"></el-input>
+                                </el-form-item>
+                                <el-form-item :label="'流输出地址 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp"></el-input>
                                 </el-form-item>
                                 <el-form-item :label="'本地IP ' + i">
@@ -596,12 +607,14 @@
 		                                </el-option>
                             		</el-select>
                                 </el-form-item>
-                                <el-form-item :label="'可用初始端口 ' + i">
+                                <el-form-item :label="'可用初始端口 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort"></el-input>
                                 </el-form-item>
-                                <el-form-item :label="'可用终止端口 ' + i">
+                                <el-form-item :label="'可用终止端口 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlEndPort"></el-input>
                                 </el-form-item>
+                                
+                                
                             </template>
                         </template>
                     </el-form>

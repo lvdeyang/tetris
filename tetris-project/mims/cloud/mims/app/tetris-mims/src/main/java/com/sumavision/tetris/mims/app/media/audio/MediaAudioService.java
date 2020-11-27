@@ -66,6 +66,7 @@ import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -118,6 +119,9 @@ public class MediaAudioService {
 	
 	@Autowired
 	private MimsServerPropsQuery serverPropsQuery; 
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private FolderQuery folderQuery;
@@ -1071,6 +1075,38 @@ public class MediaAudioService {
 		
 		return audio.set(media);
 	}
+	
+	
+	/**
+	 * 文件刷表
+	 * 文件刷表<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月27日 下午5:59:23
+	 * @param user
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public MediaAudioVO refresh(UserVO user, Long id) throws Exception {
+		MediaAudioVO audio=new MediaAudioVO();
+		
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		if(media == null) throw new MediaAudioNotExistException(id);
+		
+		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("http://")
+				.append(serverPropsQuery.queryProps().getFtpIp())
+				.append(":")
+				.append(serverPropsQuery.queryProps().getFtpPort())
+				.append("/");
+		String url=stringBufferWrapper.append(media.getPreviewUrl()).toString();
+		//调用capacityfeign执行刷表任务
+		//保存刷表数据
+		
+		return audio.set(media);
+	}
+	
 	
 	/**
 	 * 添加文件转码任务<br/>

@@ -67,6 +67,13 @@ public class MediaAudioPO extends AbstractBasePO{
 	/** http mimetype类型 */
 	private String mimetype;
 	
+	
+	private String codec;
+	private Integer channelNum;
+	private Integer sample;
+	private Integer bitrate;//kbps
+	
+	
 	/** 文件大小 */
 	private Long size;
 	
@@ -372,6 +379,40 @@ public class MediaAudioPO extends AbstractBasePO{
 	public void setIsTop(Integer isTop) {
 		this.isTop = isTop;
 	}
+	
+	
+	@Column(name = "CODEC")
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
+	}
+	@Column(name = "CHANNELNUM")
+	public Integer getChannelNum() {
+		return channelNum;
+	}
+
+	public void setChannelNum(Integer channelNum) {
+		this.channelNum = channelNum;
+	}
+	@Column(name = "SAMPLE")
+	public Integer getSample() {
+		return sample;
+	}
+
+	public void setSample(Integer sample) {
+		this.sample = sample;
+	}
+	@Column(name = "BITRATE")
+	public Integer getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(Integer bitrate) {
+		this.bitrate = bitrate;
+	}
 
 	/**
 	 * 转换为历史数据<br/>
@@ -403,6 +444,10 @@ public class MediaAudioPO extends AbstractBasePO{
 		history.setKeyWords(this.getKeyWords());
 		history.setOriginUuid(this.getUuid());
 		history.setIsTop(this.getIsTop());
+		history.setCodec(this.getCodec());
+		history.setChannelNum(this.getChannelNum());
+		history.setSample(this.getSample());
+		history.setBitrate(this.getBitrate());
 		return history;
 	}
 	
@@ -441,6 +486,10 @@ public class MediaAudioPO extends AbstractBasePO{
 		copy_video.setEncryptionUrl(this.getEncryptionUrl());
 		copy_video.setAddition(this.getAddition());
 		copy_video.setIsTop(this.getIsTop());
+		copy_video.setCodec(this.getCodec());
+		copy_video.setChannelNum(this.getChannelNum());
+		copy_video.setSample(this.getSample());
+		copy_video.setBitrate(this.getBitrate());
 		return copy_video;
 	}
 	
