@@ -190,6 +190,7 @@ define([
                         rateCtrl:'',
                         rate:'',
                         rateCtrlOptions:["VBR","CBR"],
+                        outTypeOptions:["RTMP","UDP_TS"],
                         rotation: false
                     },
                     pcversion: {
@@ -567,8 +568,8 @@ define([
                     if (self.dialog.addProgram.broadWay == self.broadWayStream && self.dialog.addProgram.outputQtUsers.length <= 0 && self.dialog.addProgram.outputPushUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.addProgram.output.length; i++) {
-                            if (self.dialog.addProgram.output[i].previewUrlIp.trim()
-                                && self.dialog.addProgram.output[i].previewUrlPort.trim()) {
+                            if ((self.dialog.addProgram.output[i].previewUrlIp.trim()
+                                && self.dialog.addProgram.output[i].previewUrlPort.trim())||self.dialog.addProgram.output[i].rtmpUrl.trim()) {
                                 noOut = false;
                                 break;
                             }
@@ -841,6 +842,7 @@ define([
                         self.dialog.editChannel.data.output = output;
                         self.dialog.editChannel.data.outputUserPort = outputUserPort;
                         self.dialog.editChannel.data.outputUserEndPort = outputUserEndPort;
+                        self.dialog.editChannel.data.outputUserEndPort = outputUserEndPort;
                         self.dialog.editChannel.data.encryption = encryption;
                         self.dialog.editChannel.data.autoBroad = autoBroad;
                         self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;
@@ -867,8 +869,9 @@ define([
                     if (self.dialog.editChannel.broadWay == self.broadWayStream && self.dialog.editChannel.outputQtUsers.length <= 0 && self.dialog.editChannel.outputPushUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.editChannel.output.length; i++) {
-                            if (self.dialog.editChannel.output[i].previewUrlIp.trim()
-                                && self.dialog.editChannel.output[i].previewUrlPort.trim()) {
+                            if ((self.dialog.editChannel.output[i].previewUrlIp&&self.dialog.editChannel.output[i].previewUrlIp.trim()
+                                && self.dialog.editChannel.output[i].previewUrlPort&&self.dialog.editChannel.output[i].previewUrlPort.trim())
+                                ||(self.dialog.editChannel.output[i].rtmpUrl&&self.dialog.editChannel.output[i].rtmpUrl.trim())) {
                                 noOut = false;
                                 break;
                             }
@@ -940,6 +943,8 @@ define([
                     self.dialog.setOutput.outputUserPort = self.dialog.setOutput.data.outputUserPort;
                     self.dialog.setOutput.outputUserEndPort = self.dialog.setOutput.data.outputUserEndPort;
                     self.dialog.setOutput.outputCount = self.dialog.setOutput.data.outputCount;
+                    self.dialog.setOutput.rtmpUrl=self.dialog.setOutput.data.rtmpUrl;
+                    self.dialog.setOutput.outputType=self.dialog.setOutput.data.outputType;
                     self.dialog.setOutput.output = [];
                     self.dialog.setOutput.taskTemple = self.dialog.setOutput.data.taskTemple;
                     self.dialog.setOutput.rateCtrl = self.dialog.setOutput.data.rateCtrl;
@@ -1047,6 +1052,8 @@ define([
                     self.dialog.setOutput.data.outputUserPort = self.dialog.setOutput.outputUserPort;
                     self.dialog.setOutput.data.outputUserEndPort = self.dialog.setOutput.outputUserEndPort;
                     self.dialog.setOutput.data.outputCount = self.dialog.setOutput.outputCount;
+                    self.dialog.setOutput.data.rtmpUrl = self.dialog.setOutput.rtmpUrl;
+                    self.dialog.setOutput.data.outputType = self.dialog.setOutput.outputType;
 
                     self.dialog.setOutput.data.taskTemple = self.dialog.setOutput.taskTemple;
                     self.dialog.setOutput.data.rateCtrl = self.dialog.setOutput.rateCtrl;

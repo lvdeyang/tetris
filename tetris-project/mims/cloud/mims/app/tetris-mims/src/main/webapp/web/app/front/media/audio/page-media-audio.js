@@ -214,6 +214,12 @@ define([
                         row.downloadCount += 1;
                     });
                 },
+                handleRefresh:function(scope){
+                	var row = scope.row;
+                    ajax.post('/media/audio/refresh/uri/' + row.id, null, function(data){
+                        
+                    });
+                },
                 //预览文件
                 handlePreview:function(scope){
                     var self = this;

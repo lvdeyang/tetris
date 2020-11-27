@@ -81,6 +81,11 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 	/**是否置顶1是，0否*/
 	private int isTop=0;
 	
+	private String codec;
+	private Integer channelNum;
+	private Integer sample;
+	private Integer bitrate;//kbps
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -261,5 +266,39 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 	public void setIsTop(int isTop) {
 		this.isTop = isTop;
 	}
+	
+	@Column(name = "CODEC")
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
+	}
+	@Column(name = "CHANNELNUM")
+	public Integer getChannelNum() {
+		return channelNum;
+	}
+
+	public void setChannelNum(Integer channelNum) {
+		this.channelNum = channelNum;
+	}
+	@Column(name = "SAMPLE")
+	public Integer getSample() {
+		return sample;
+	}
+
+	public void setSample(Integer sample) {
+		this.sample = sample;
+	}
+	@Column(name = "BITRATE")
+	public Integer getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(Integer bitrate) {
+		this.bitrate = bitrate;
+	}
+
 	
 }

@@ -469,25 +469,33 @@ public class BroadAbilityService {
 					List<BroadAbilityBroadRequestOutputVO> outputVOs = new ArrayList<BroadAbilityBroadRequestOutputVO>();
 					//获取输出信息
 					for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
-						String ip = broadAbilityBroadInfoVO.getPreviewUrlIp();
-						String port = "";
-						if (outputIndex == 0) {
-							port = broadAbilityBroadInfoVO.getPreviewUrlPort();
-						} else {
-							String endPortString = broadAbilityBroadInfoVO.getPreviewUrlEndPort();
-							if (endPortString == null || endPortString.isEmpty()) continue;
-							Integer startPort = Integer.parseInt(broadAbilityBroadInfoVO.getPreviewUrlPort());
-							Integer endPort = Integer.parseInt(endPortString);
-							if (startPort + outputIndex <= endPort) {
-								port = "" + (startPort + outputIndex);
-							}
-						}
-						if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
+						if(broadAbilityBroadInfoVO.getOutputType().equals(OutputType.RTMP.getName())){
 							outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-									.setUrl(new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString())
+									.setUrl(broadAbilityBroadInfoVO.getRtmpUrl())
 									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
 									.setType("udp"));
+						}else{
+							String ip = broadAbilityBroadInfoVO.getPreviewUrlIp();
+							String port = "";
+							if (outputIndex == 0) {
+								port = broadAbilityBroadInfoVO.getPreviewUrlPort();
+							} else {
+								String endPortString = broadAbilityBroadInfoVO.getPreviewUrlEndPort();
+								if (endPortString == null || endPortString.isEmpty()) continue;
+								Integer startPort = Integer.parseInt(broadAbilityBroadInfoVO.getPreviewUrlPort());
+								Integer endPort = Integer.parseInt(endPortString);
+								if (startPort + outputIndex <= endPort) {
+									port = "" + (startPort + outputIndex);
+								}
+							}
+							if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
+								outputVOs.add(new BroadAbilityBroadRequestOutputVO()
+										.setUrl(new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString())
+										.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
+										.setType("udp"));
+							}
 						}
+						
 					}
 					if (!outputVOs.isEmpty()) {
 						broadRequestVO.setOutput(outputVOs).setMediaType(mediaType).setDeviceIp(abilityIp);

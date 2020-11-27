@@ -98,13 +98,14 @@ public class ChannelQuery {
 				for (BroadAbilityBroadInfoPO broadAbilityBroadInfoPO : broadAbilityBroadInfoPOs) {
 					String previewIp = broadAbilityBroadInfoPO.getPreviewUrlIp();
 					String previewPort = broadAbilityBroadInfoPO.getPreviewUrlPort();
+					String rtmpUrl = broadAbilityBroadInfoPO.getRtmpUrl();
 					Long userId = broadAbilityBroadInfoPO.getUserId();
 					if (userId != null) {
 						outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList()).get(0).setEquipType(TerminalType.QT_MEDIA_EDITOR.toString()));
 						if (channelVO.getOutputUserPort() == null || channelVO.getOutputUserPort().isEmpty()) channelVO.setOutputUserPort(broadAbilityBroadInfoPO.getPreviewUrlPort());
 						if (channelVO.getOutputUserEndPort() == null || channelVO.getOutputUserEndPort().isEmpty()) channelVO.setOutputUserEndPort(broadAbilityBroadInfoPO.getPreviewUrlEndPort());
 					} else {
-						if (previewIp != null && previewPort != null) {
+						if ((previewIp != null && previewPort != null)||rtmpUrl!=null) {
 							broadAbilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO().set(broadAbilityBroadInfoPO));
 						}
 					}
