@@ -778,7 +778,7 @@ public class MediaAudioController {
 		
 		MediaAudioPO media = mediaAudioQuery.loadById(id);
 		
-		return mediaAudioService.refresh(user, id);
+		return mediaAudioService.refresh(id);
 	}
 	
 	

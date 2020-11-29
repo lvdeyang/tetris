@@ -407,6 +407,8 @@ public class ApiServerMediaController {
 				task.setUploadStatus(UploadStatus.COMPLETE);
 				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 				task.setDuration(multimediaInfo.getDuration());
+				//这里刷表
+				mediaAudioService.refresh(task.getId());
 				mediaAudioDao.save(task);
 				mediaAudioService.checkMediaEdit(task);
 			}

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.capacity.server.CapacityService;
 import com.sumavision.tetris.commons.util.audio.DoTTSUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.file.FileUtil;
@@ -155,6 +156,10 @@ public class MediaAudioService {
 	
 	@Autowired
 	TagService tagService;
+	
+	@Autowired
+	CapacityService capacityService;
+	
 	
 	/**
 	 * 音频媒资上传审核通过<br/>
@@ -1089,21 +1094,44 @@ public class MediaAudioService {
 	 * @return
 	 * @throws Exception
 	 */
-	public MediaAudioVO refresh(UserVO user, Long id) throws Exception {
+	public MediaAudioVO refresh(Long id) throws Exception {
 		MediaAudioVO audio=new MediaAudioVO();
 		
 		MediaAudioPO media = mediaAudioDao.findOne(id);
 		if(media == null) throw new MediaAudioNotExistException(id);
 		
-		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("http://")
+		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("ftp://")
+				.append(serverPropsQuery.queryProps().getFtpUsername())
+				.append(":"+serverPropsQuery.queryProps().getFtpPassword()+"@")
 				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverPropsQuery.queryProps().getFtpPort())
 				.append("/");
 		String url=stringBufferWrapper.append(media.getPreviewUrl()).toString();
 		//调用capacityfeign执行刷表任务
+		String result=capacityService.analysisInput(serverPropsQuery.queryProps().getAbilityIp(), url);
+		System.out.println(result);
 		//保存刷表数据
-		
+		JSONObject jsonObj=JSONObject.parseObject(result);
+		if(jsonObj.getInteger("result_code")!=null&&jsonObj.getInteger("result_code").intValue()==-1){
+			System.out.println("分析失败"+url);
+		}else{
+		    JSONArray array=jsonObj.getJSONArray("program_array");
+		    if(array!=null&&array.size()>0){
+		    	//暂时认定只有一个音频轨
+		    	JSONObject audioObj=array.getJSONObject(0);
+		    	JSONArray trackArray=audioObj.getJSONArray("audio_array");
+		    	if(trackArray!=null&&trackArray.size()>0){
+		    		JSONObject trackObj=trackArray.getJSONObject(0);
+		    		media.setBitrate(trackObj.getInteger("bitrate"));
+			    	media.setChannelNum(trackObj.getInteger("channel_num"));
+			    	media.setSample(trackObj.getInteger("sample_rate"));
+			    	media.setCodec(trackObj.getString("type"));
+			    	mediaAudioDao.save(media);
+		    	}
+		    	
+		    }
+		}
 		return audio.set(media);
 	}
 	

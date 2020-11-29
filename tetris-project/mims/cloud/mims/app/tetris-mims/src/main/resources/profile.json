@@ -2,7 +2,7 @@
 	"upload": true,
 	"oldMimsIp": "10.10.40.182",
 	"oldMimsPort": "8480",
-	"ftpIp": "192.165.56.229",
+	"ftpIp": "192.165.58.123",
 	"ftpPort": "",
 	"ftpUsername": "test",
 	"ftpPassword": "123",
@@ -11,5 +11,6 @@
 	"omcftpUsername": "root",
 	"omcftpPassword": "123456",
 	"bossAddMediaUrl":"http://10.10.60.30:6050/product/add",
-	"bossPlayRecordUrl":"http://10.10.60.30:6050/user/play"
+	"bossPlayRecordUrl":"http://10.10.60.30:6050/user/play",
+	"abilityIp":"192.165.56.18"
  }
