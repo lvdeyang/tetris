@@ -32,6 +32,8 @@ public class ServerProps {
 	private String omcftpUsername;
 	
 	private String omcftpPassword;
+	
+	private String abilityIp;
 
 	public String getId() {
 		return id;
@@ -119,6 +121,14 @@ public class ServerProps {
 
 	public void setOmcftpPassword(String omcftpPassword) {
 		this.omcftpPassword = omcftpPassword;
+	}
+
+	public String getAbilityIp() {
+		return abilityIp;
+	}
+
+	public void setAbilityIp(String abilityIp) {
+		this.abilityIp = abilityIp;
 	}
 	
 	

@@ -217,7 +217,10 @@ define([
                 handleRefresh:function(scope){
                 	var row = scope.row;
                     ajax.post('/media/audio/refresh/uri/' + row.id, null, function(data){
-                        
+                    	row.codec=data.codec;
+                    	row.channelNum=data.channelNum;
+                    	row.sample=data.sample;
+                    	row.bitrate=data.bitrate;//kbps
                     });
                 },
                 //预览文件

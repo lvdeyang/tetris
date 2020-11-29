@@ -36,6 +36,8 @@ public class MimsServerPropsQuery {
 		String omcftpUserName = jsonObject.getString("omcftpUsername");
 		String omcftpPassword = jsonObject.getString("omcftpPassword");
 		
+		String abilityIp=jsonObject.getString("abilityIp");
+		
 		serverProps.setFtpIp(ftpIp.isEmpty() ? serverProps.getIp() : ftpIp);
 		serverProps.setFtpPort(ftpPort.isEmpty() ? "21" : ftpPort);
 		serverProps.setFtpUsername(ftpUserName);
@@ -45,6 +47,8 @@ public class MimsServerPropsQuery {
 		serverProps.setOmcftpPort(omcftpPort);
 		serverProps.setOmcftpUsername(omcftpUserName);
 		serverProps.setOmcftpPassword(omcftpPassword);
+		
+		serverProps.setAbilityIp(abilityIp);
 		
 		return serverProps;
 	}
