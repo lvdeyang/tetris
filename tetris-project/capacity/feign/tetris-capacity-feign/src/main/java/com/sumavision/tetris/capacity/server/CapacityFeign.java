@@ -279,7 +279,7 @@ public interface CapacityFeign{
 
 	 /**
 	  * @MethodName: analysisInput
-	  * @Description: 应急广播刷源接口，只刷文件源
+	  * @Description: 媒资刷源接口，只刷文件源（应急广播业务需求）
 	  * @param ip 刷源设备
 	  * @param url 刷源地址
 	  * @Return: 返回刷表信息
