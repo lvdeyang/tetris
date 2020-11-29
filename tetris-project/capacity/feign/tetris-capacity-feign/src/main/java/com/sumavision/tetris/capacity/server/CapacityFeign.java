@@ -276,7 +276,21 @@ public interface CapacityFeign{
 	public JSONObject deleteTransformOutput(
 			@RequestParam("id") String id,
 			@RequestParam("outputParam") String outputParam) throws Exception;
-	
+
+	 /**
+	  * @MethodName: analysisInput
+	  * @Description: 媒资刷源接口，只刷文件源（应急广播业务需求）
+	  * @param ip 刷源设备
+	  * @param url 刷源地址
+	  * @Return: 返回刷表信息
+	  * @Author: Poemafar
+	  * @Date: 2020/11/29 9:44
+	  **/
+	@RequestMapping(value = "/capacity/transform/feign/analysis/input")
+	public JSONObject analysisInput(
+			@RequestParam("deviceIp") String ip,
+			@RequestParam("url") String url) throws Exception;
+
 	/**
 	 * 删除应急广播任务全部输出<br/>
 	 * <b>作者:</b>wjw<br/>

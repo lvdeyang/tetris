@@ -139,7 +139,7 @@ public class CapacityService {
 	}
 	
 	/**
-	 * 刷源<br/>
+	 * 转码刷源<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 下午5:11:50
@@ -148,6 +148,18 @@ public class CapacityService {
 	 */
 	public String analysisInput(String analysisInput) throws Exception{
 		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(analysisInput), String.class);
+	}
+
+	/**
+	 * 媒资刷源，接口从媒资服务调的（应急广播业务需求）<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月29日 上午9:11:50
+	 * @param String analysisInput
+	 * @return String
+	 */
+	public String analysisInput(String deviceIp,String url) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(deviceIp,url), String.class);
 	}
 	
 	/**
