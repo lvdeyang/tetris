@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
 
@@ -81,10 +82,19 @@ public class PropertiesQuery {
 		List<PropertiesPO> propertyEntities =  propertiesDAO.findByInstallationPackageId(installationPackageId);
 		List<PropertiesPO> list = new ArrayList<PropertiesPO>();
 		for (PropertiesPO propertiesPO : propertyEntities) {
-			String propertyKey = propertiesPO.getPropertyKey();
-			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+			if(propertiesPO.getValueType().equals(PropertyValueType.DBIP)){
 				continue;
 			}else{
+				if(propertiesPO.getValueType().equals(PropertyValueType.DBPORT)){
+					for (PropertiesPO propertiesPOip : propertyEntities) {
+						if(propertiesPO.getRef().equals(propertiesPOip.getPropertyKey())){
+							StringBufferWrapper valueBufferWrapper = new StringBufferWrapper().append(propertiesPOip.getPropertyDefaultValue())
+                                    .append(":")
+                                    .append(propertiesPO.getPropertyDefaultValue());
+							propertiesPO.setPropertyDefaultValue(valueBufferWrapper.toString());
+						}
+					}
+				}	
 				list.add(propertiesPO);
 			}
 		}
@@ -184,10 +194,19 @@ public class PropertiesQuery {
 		
 		List<PropertiesVO> updatePropertiesList = new ArrayList<PropertiesVO>();
 		for (PropertiesVO propertiesVO : list) {
-			String propertyKey = propertiesVO.getPropertyKey();
-			if("databaseAddr".equals(propertyKey) || "databaseport".equals(propertyKey)){
+			if(propertiesVO.getValueType().equals(PropertyValueType.DBIP.toString())){
 				continue;
 			}else{
+				if(propertiesVO.getValueType().equals(PropertyValueType.DBPORT.toString())){
+					for (PropertiesVO propertiesPOip : list) {
+						if(propertiesVO.getRef().equals(propertiesPOip.getPropertyKey())){
+							StringBufferWrapper valueBufferWrapper = new StringBufferWrapper().append(propertiesPOip.getPropertyDefaultValue())
+                                    .append(":")
+                                    .append(propertiesVO.getPropertyDefaultValue());
+							propertiesVO.setPropertyDefaultValue(valueBufferWrapper.toString());
+						}
+					}
+				}	
 				updatePropertiesList.add(propertiesVO);
 			}
 		}

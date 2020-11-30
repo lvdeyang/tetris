@@ -128,6 +128,10 @@ public class InstallationPackageService {
 					property.setPropertyKey(description.getString("key"));
 					property.setPropertyName(description.getString("name"));
 					property.setValueType(PropertyValueType.valueOf(description.getString("valueType").toUpperCase()));
+					
+					if(PropertyValueType.DBPORT.equals(property.getValueType())){
+						property.setRef(description.getString("ref"));
+					}
 					if(PropertyValueType.ENUM.equals(property.getValueType())){
 						property.setValueSelect(description.getString("valueSelect"));
 					}

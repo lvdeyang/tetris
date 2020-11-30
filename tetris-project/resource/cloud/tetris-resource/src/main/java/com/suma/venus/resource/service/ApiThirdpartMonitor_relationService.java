@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 
-import org.bouncycastle.jcajce.provider.symmetric.AES.Wrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +24,7 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
@@ -40,11 +39,9 @@ import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
-import com.suma.venus.resource.vo.SerNodeVO;
+import com.suma.venus.resource.vo.LianwangPassbyVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
-import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
@@ -79,6 +76,12 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
 	
+	@Autowired
+	private WorkNodeDao workNodeDao;
+	
+	@Autowired
+	private LianwangPassbyService lianwangPassbyService;
+	
 	/**
 	 * 查本域以及外域信息<br/>
 	 * <b>作者:</b>lqxuhv<br/>
@@ -87,14 +90,36 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return data{"local", serNodeVO 本域信息
 	 *               "foreign", serNodeVOs 外域信息}
 	 */
-	public Map<String, Object> queryServerNodeInfo()throws Exception{
+	public Map<String, Object> queryServerNodeInfo(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		String local_layer_id = wrapper.getString("local_layer_id");
+		WorkNodePO workNodePO = workNodeDao.findByNodeUid(local_layer_id);
+		if (workNodePO == null) {
+			WorkNodePO workNodePO1 = new WorkNodePO();
+			workNodePO1.setNodeUid(local_layer_id);
+			workNodePO1.setName(local_layer_id);
+			workNodePO1.setType(NodeType.ACCESS_QTLIANGWANG);
+			workNodeDao.save(workNodePO1);
+		}
+		
 		Map<String, Object> data = makeAjaxData();
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
-		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
+		Map<String, Object> local = new HashMap<String, Object>();
+		local.put("name", serNodePO.getNodeName());
+		List<Map<String, Object>> foreign = new ArrayList<Map<String,Object>>();
 		List<SerNodePO> serNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
-		List<SerNodeVO> serNodeVOs = SerNodeVO.transFromPOs(serNodePOs);
-		data.put("local", serNodeVO);
-		data.put("foreign", serNodeVOs);
+		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
+			for (SerNodePO serNodePO2 : serNodePOs) {
+				Map<String, Object> fo = new HashMap<String, Object>();
+				fo.put("name", serNodePO2.getNodeName());
+				fo.put("password", serNodePO2.getPassword());
+				fo.put("ip", serNodePO2.getIp());
+				fo.put("port", serNodePO2.getPort());
+				fo.put("operate", serNodePO2.getOperate());
+				foreign.add(fo);
+ 			}
+		}
+		data.put("local", local);
+		data.put("foreign", foreign);
 		return data;
 	}
 	
@@ -147,7 +172,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		List<SerNodePO> serNodePOs = serNodeDao.findByNodeNameIn(serverNodeName);
 		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
 			for (SerNodePO serNodePO : serNodePOs) {
-				serNodePO.setOperate(ConnectionStatus.DONE);
+				serNodePO.setOperate(ConnectionStatus.ON);
 				serNodePO.setStatus(ConnectionStatus.ON);
 			}
 		}
@@ -829,5 +854,18 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			foreign.get(0).put("institutions", institutions);
 			foreign.get(0).put("devices", bundleVOs);
 		return foreign;
+	}
+	
+	/**
+	 * 查询passby消息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月27日 上午10:58:48
+	 * @param layerId 接入id
+	 * @return List<LianwangPassbyVO> passby消息
+	 */
+	public List<LianwangPassbyVO> queryPassbyMessage(String layerId)throws Exception{
+		List<LianwangPassbyVO> passbyVOs = lianwangPassbyService.queryPassby(layerId);
+		return passbyVOs;
 	}
 }
