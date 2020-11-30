@@ -1295,9 +1295,11 @@ public class MonitorRecordService {
 		recordSet.setVideo_source(videoSource);
 		
 		//处理排期额外添加开始
+		RecordTimeSegmentBO timeSegment=new RecordTimeSegmentBO().set(relation);
 		recordSet.setCycle(new CycleBO().setTime_duration(task.getTime_duration()).setTotal_size_mb(task.getTotal_size_mb()))
 				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getAlarm_size_mb())))
-				 .setStore_mode(task.getMode().getCode());
+				 .setStore_mode(task.getMode().getCode())
+				 .setTime_segment(timeSegment);
 		//添加结束
 		
 		if (task.getAudioBundleId() != null) {

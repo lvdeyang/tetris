@@ -73,6 +73,18 @@ public class GroupPO extends AbstractBasePO{
 	
 	/**   固定位置下表 */
 	private Integer locationIndex;
+	
+	/** false表明"如果这个业务需要打开更多分页，则报错"*/
+	private Boolean allowNewPage;
+
+	@Column(name = "ALLOW_NEW_PAGE")
+	public Boolean getAllowNewPage() {
+		return allowNewPage;
+	}
+
+	public void setAllowNewPage(Boolean allowNewPage) {
+		this.allowNewPage = allowNewPage;
+	}
 
 	@Column(name = "name")
 	public String getName() {

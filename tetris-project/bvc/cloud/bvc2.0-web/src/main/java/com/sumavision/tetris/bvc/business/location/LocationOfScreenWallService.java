@@ -88,6 +88,12 @@ public class LocationOfScreenWallService {
 		LocationOfScreenWallPO searchScreenWall = locationOfScreenWallDao.findByLocationTemplateLayoutIdAndDecoderBundleId(locationTemplateLayoutId, bundleId);
 		//查找屏幕现在绑定的解码器.
 		LocationOfScreenWallPO locationScreen = locationOfScreenWallDao.findByLocationTemplateLayoutIdAndLocationXAndLocationY(locationTemplateLayoutId, locationX, locationY);
+		//已经在其他屏幕墙模板绑定过就不能再绑定
+		LocationOfScreenWallPO wallOfOtherLayout = locationOfScreenWallDao.findByLocationTemplateLayoutIdNotAndDecoderBundleId(locationTemplateLayoutId, bundleId);
+		
+		if(wallOfOtherLayout != null){
+			throw new BaseException(StatusCode.FORBIDDEN, "绑定失败:解码器已经被其他屏幕墙模板占用");
+		}
 		
 		if((searchScreenWall != null && LocationExecuteStatus.RUN.equals(searchScreenWall.getStatus())) || 
 		   (locationScreen !=null && LocationExecuteStatus.RUN.equals(locationScreen.getStatus()))){

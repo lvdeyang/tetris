@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
@@ -31,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommandVodController {
 
 	/** 发起业务时，synchronized锁的前缀 */
-	private static final String lockStartPrefix = "controller-vod-or-call-userId-";
+	private static final String lockUserPrefix = "controller-userId-";
 
 	/** 响应、停止业务时，synchronized锁的前缀 */
 	private static final String lockProcessPrefix = "controller-vod-or-call-businessId-";
@@ -76,7 +77,7 @@ public class CommandVodController {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			UserBO admin = new UserBO();
 			admin.setId(-1L);
@@ -115,7 +116,7 @@ public class CommandVodController {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, -1);
@@ -151,7 +152,7 @@ public class CommandVodController {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			businessReturnService.init(Boolean.TRUE);
 			CommandGroupUserPlayerPO player = commandVodService.resourceVodStart(user, resourceFileId, serial);
@@ -183,7 +184,7 @@ public class CommandVodController {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 
 			businessReturnService.init(Boolean.TRUE);
@@ -248,7 +249,7 @@ public class CommandVodController {
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 
 			UserBO user = userUtils.queryUserById(id);
 			UserBO admin = new UserBO();
@@ -283,7 +284,7 @@ public class CommandVodController {
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
@@ -318,7 +319,7 @@ public class CommandVodController {
 		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
@@ -372,7 +373,7 @@ public class CommandVodController {
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 
 			List<Long> userIdList = JSON.parseArray(userIds, Long.class);
@@ -456,11 +457,14 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/start")
-	public Object deviceStart(String deviceId, HttpServletRequest request) throws Exception {
+	public Object deviceStart(
+			String deviceId,
+			@RequestParam(defaultValue="true")Boolean allowNewPage,
+			HttpServletRequest request) throws Exception {
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 
 			// UserBO admin =
@@ -471,7 +475,12 @@ public class CommandVodController {
 			// commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
 			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			businessReturnService.init(Boolean.TRUE);
-			vodService.deviceStart(user, deviceId, null);
+			if(allowNewPage){
+				vodService.deviceStart(user, deviceId, -1);
+			}else {
+				vodService.deviceStart(user, deviceId, null);
+			}
+			
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 
@@ -499,13 +508,17 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/device/start/player")
-	public Object deviceStartSpecifyPlayer(String deviceId, int serial, HttpServletRequest request) throws Exception {
+	public Object deviceStartSpecifyPlayer(
+			String deviceId, 
+			@RequestParam(defaultValue="true")Boolean allowNewPage, 
+			int serial, 
+			HttpServletRequest request) throws Exception {
 
 		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 
 			// UserBO admin =
@@ -517,7 +530,11 @@ public class CommandVodController {
 			// BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 
 			businessReturnService.init(Boolean.TRUE);
-			vodService.deviceStart(user, deviceId, serial);
+			if(allowNewPage){
+				vodService.deviceStart(user, deviceId, -1);
+			}else {
+				vodService.deviceStart(user, deviceId, null);
+			}
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 
@@ -564,7 +581,7 @@ public class CommandVodController {
 
 		Long id = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 
 			List<String> deviceIdList = JSON.parseArray(deviceIds, String.class);
@@ -607,47 +624,54 @@ public class CommandVodController {
 	@ResponseBody
 	@RequestMapping(value = "/device/stop")
 	public Object deviceStop(Long businessId, HttpServletRequest request) throws Exception {
+		
+		synchronized (new StringBuffer().append(lockUserPrefix).append(businessId).toString().intern()) {
+			synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
 
-		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
+				Long id = userUtils.getUserIdFromSession(request);
+				UserBO user = userUtils.queryUserById(id);
 
-			Long id = userUtils.getUserIdFromSession(request);
-			UserBO user = userUtils.queryUserById(id);
+				// UserBO admin =
+				// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+				UserBO admin = new UserBO();
+				admin.setId(-1L);
 
-			// UserBO admin =
-			// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO();
-			admin.setId(-1L);
+				businessReturnService.init(Boolean.TRUE);
+				vodService.deviceStop(businessId);
 
-			businessReturnService.init(Boolean.TRUE);
-			vodService.deviceStop(businessId);
+				return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
+						.getMap();
 
-			return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
-					.getMap();
-
-			// CommandGroupUserPlayerPO player =
-			// commandVodService.deviceStop(user, businessId, admin);
-			//
-			//// vodService.userStop(businessId);
-			//
-			// return new HashMapWrapper<String, Object>().put("serial",
-			// player.getLocationIndex())
-			// .getMap();
+				// CommandGroupUserPlayerPO player =
+				// commandVodService.deviceStop(user, businessId, admin);
+				//
+				//// vodService.userStop(businessId);
+				//
+				// return new HashMapWrapper<String, Object>().put("serial",
+				// player.getLocationIndex())
+				// .getMap();
+			}
 		}
 	}
 
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/record/file/start")
-	public Object recordFileStart(String businessType, String businessInfo, String url, HttpServletRequest request)
+	public Object recordFileStart(
+			String businessType, 
+			String businessInfo, 
+			String url, 
+			@RequestParam(defaultValue="true")Boolean allowNewPage,
+			HttpServletRequest request)
 			throws Exception {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 			
 			businessReturnService.init(Boolean.TRUE);
-			commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
+			commandVodService.recordVodStart(user, businessType, businessInfo, url, -1, allowNewPage);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();// .set(player);
 
@@ -662,7 +686,7 @@ public class CommandVodController {
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
-		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
 			UserBO user = userUtils.queryUserById(userId);
 
 			businessReturnService.init(Boolean.TRUE);

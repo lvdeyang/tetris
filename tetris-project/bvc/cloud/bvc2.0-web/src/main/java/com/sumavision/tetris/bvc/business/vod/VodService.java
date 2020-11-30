@@ -604,7 +604,8 @@ public class VodService {
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
-		if(serial!=null)group.setLocationIndex(serial);
+		if(serial!=null && serial != -1) group.setLocationIndex(serial);
+		if(serial == -1 ) group.setAllowNewPage(false);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
