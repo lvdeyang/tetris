@@ -291,69 +291,69 @@ public class TaskService {
         return false;
     }
 
-    public Boolean beRepeatInput(String transformIp,InputBO inputBO){
+    public InputBO getTransformInput(String transformIp, InputBO inputBO){
 
-        Boolean beRepeat = false;
+        InputBO targetInputBO = null;
 
         try {
             GetInputsResponse inputs = capacityService.getInputs(transformIp);
             if (inputBO.getUdp_ts() != null) {
-                beRepeat = inputs.getInput_array().stream().anyMatch(i-> i.getUdp_ts()!=null
-                        && i.getUdp_ts().getSource_ip()==inputBO.getUdp_ts().getSource_ip()
+                targetInputBO = inputs.getInput_array().stream().filter(i-> i.getUdp_ts()!=null
+                        && i.getUdp_ts().getSource_ip().equals(inputBO.getUdp_ts().getSource_ip())
                         && i.getUdp_ts().getSource_port().equals(inputBO.getUdp_ts().getSource_port())
-                        && i.getUdp_ts().getLocal_ip().equals(inputBO.getUdp_ts().getLocal_ip()));
+                        && i.getUdp_ts().getLocal_ip().equals(inputBO.getUdp_ts().getLocal_ip())).findAny().orElse(null);
             }
             if (inputBO.getRtp_ts() != null) {
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtp_ts()!=null
-                        && i.getRtp_ts().getSource_ip()==inputBO.getRtp_ts().getSource_ip()
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtp_ts()!=null
+                        && i.getRtp_ts().getSource_ip().equals(inputBO.getRtp_ts().getSource_ip())
                         && i.getRtp_ts().getSource_port().equals(inputBO.getRtp_ts().getSource_port())
-                        && i.getRtp_ts().getLocal_ip().equals(inputBO.getRtp_ts().getLocal_ip()));
+                        && i.getRtp_ts().getLocal_ip().equals(inputBO.getRtp_ts().getLocal_ip())).findAny().orElse(null);
             }
             if(inputBO.getHttp_ts() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHttp_ts()!=null && i.getHttp_ts().getUrl()==inputBO.getHttp_ts().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_ts()!=null && i.getHttp_ts().getUrl().equals(inputBO.getHttp_ts().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getSrt_ts() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getSrt_ts()!=null
-                        && i.getSrt_ts().getSource_ip()==inputBO.getSrt_ts().getSource_ip()
-                        && i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port()));
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getSrt_ts()!=null
+                        && i.getSrt_ts().getSource_ip().equals(inputBO.getSrt_ts().getSource_ip())
+                        && i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port())).findAny().orElse(null);
             }
             if(inputBO.getHls() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getDash() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getMss() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getRtmp() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getRtsp() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getHttp_flv() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl()).findAny().orElse(null);
             }
             if(inputBO.getSdi() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getSdi()!=null
-                        && i.getSdi().getCard_no()==inputBO.getSdi().getCard_no()
-                        && i.getSdi().getCard_port()==inputBO.getSdi().getCard_port());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getSdi()!=null
+                        && i.getSdi().getCard_no().equals(inputBO.getSdi().getCard_no())
+                        && i.getSdi().getCard_port().equals(inputBO.getSdi().getCard_port())).findAny().orElse(null);
             }
             if(inputBO.getRtp_es() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getRtp_es()!=null && i.getRtp_es().getLocal_port()==inputBO.getRtp_es().getLocal_port());
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtp_es()!=null && i.getRtp_es().getLocal_port().equals(inputBO.getRtp_es().getLocal_port())).findAny().orElse(null);
             }
             if(inputBO.getFile() != null){
-                beRepeat = false;
+                targetInputBO=null;
             }
             if(inputBO.getUdp_pcm() != null){
-                beRepeat = inputs.getInput_array().stream().anyMatch(i->i.getUdp_pcm()!=null
-                        && i.getUdp_pcm().getSource_ip()==inputBO.getUdp_pcm().getSource_ip()
-                        && i.getUdp_pcm().getSource_port()==inputBO.getUdp_pcm().getSource_port()
-                );
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getUdp_pcm()!=null
+                        && i.getUdp_pcm().getSource_ip().equals(inputBO.getUdp_pcm().getSource_ip())
+                        && i.getUdp_pcm().getSource_port().equals(inputBO.getUdp_pcm().getSource_port())
+                ).findAny().orElse(null);
             }
             if(inputBO.getBack_up_es() != null || inputBO.getBack_up_passby() != null || inputBO.getBack_up_raw() != null){
-                beRepeat = false;
+                targetInputBO=null;
             }
 
         } catch (Exception e) {
@@ -363,7 +363,7 @@ public class TaskService {
 
         }
 
-        return beRepeat;
+        return targetInputBO;
     }
 
 }

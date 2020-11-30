@@ -33,7 +33,7 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public List<TaskInputPO> findByCount(Integer count);
 	
 	public List<TaskInputPO> findByIdIn(Collection<Long> ids);
-	
+
 	//乐观
 	@Modifying
 	@Query("update TaskInputPO input set input.version = ?2 + 1, input.count = ?3 where input.taskUuid = ?1 and input.version = ?2")
