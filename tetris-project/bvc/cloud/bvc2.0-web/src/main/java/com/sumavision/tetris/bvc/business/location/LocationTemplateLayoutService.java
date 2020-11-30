@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 
@@ -18,6 +19,9 @@ public class LocationTemplateLayoutService {
 	
 	@Autowired
 	private LocationOfScreenWallDAO locationOfScreenWallDao;
+	
+	@Autowired
+	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
 
 	/**
 	 * 添加屏幕墙模板<br/>
@@ -52,7 +56,7 @@ public class LocationTemplateLayoutService {
 	 * <b>日期：</b>2020年11月3日 上午10:02:37
 	 * @param id 屏幕墙模板id
 	 */
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void delete(Long id) throws BaseException {
 		
 		String encoderBundleNameList= locationOfScreenWallDao.findByLocationTemplateLayoutId(id).stream().filter(screen->{
@@ -63,8 +67,14 @@ public class LocationTemplateLayoutService {
 		}).map(LocationOfScreenWallPO::getEncoderBundleName).collect(Collectors.joining(","));
 		
 		if(encoderBundleNameList != null && !"".equals(encoderBundleNameList)){
-			throw new BaseException(StatusCode.FORBIDDEN, "请先解绑其屏幕墙 "+encoderBundleNameList+" 编码器");
+			throw new BaseException(StatusCode.FORBIDDEN, "请先解绑或者停止其屏幕墙 "+encoderBundleNameList+" 编码器");
 		}
+		
+		List<Long> liveDeviceIdList= locationOfScreenWallDao.findByLocationTemplateLayoutId(id).stream().map(LocationOfScreenWallPO::getMonitorLiveDeviceId).filter(wall->{
+			return wall != null ? true : false;
+		}).collect(Collectors.toList());
+		
+		monitorLiveDeviceDao.deleteByIdIn(liveDeviceIdList);
 		
 		locationOfScreenWallDao.deleteByLocationTemplateLayoutId(id);
 		

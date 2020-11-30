@@ -822,7 +822,7 @@ public class CommandVodService {
 		commandGroupUserPlayerDao.save(selfPlayer);
 	}
 	
-	public CommandGroupUserPlayerPO recordVodStart(UserBO user, String businessType, String businessInfo, String url, int locationIndex) throws Exception{
+	public CommandGroupUserPlayerPO recordVodStart(UserBO user, String businessType, String businessInfo, String url, int locationIndex, Boolean allowNewPage) throws Exception{
 		
 		String originId = user.getId().toString();
 		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
@@ -832,6 +832,7 @@ public class CommandVodService {
 		task.setBusinessName(businessInfo);
 		task.setBusinessId("-2");
 		task.setPlayUrl(url);
+//		pageTaskService.allowNewPageByAddAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null, allowNewPage);
 		pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
 		
 		if(businessReturnService.getSegmentedExecute()){
@@ -840,25 +841,25 @@ public class CommandVodService {
 		
 		return new CommandGroupUserPlayerPO();
 		
-		/*//占用播放器
-		CommandGroupUserPlayerPO player = null;
-		if(locationIndex == -1){
-			player = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_RECORD);
-		}else{
-			player = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_RECORD, locationIndex);
-		}
-		
-		player.setBusinessName(businessInfo);
-		player.setPlayUrl(url);		
-		player.setBusinessId("-1");
-		
-		commandGroupUserPlayerDao.save(player);
-		
-		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
-		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
-		
-		return player;*/
+//		//占用播放器
+//		CommandGroupUserPlayerPO player = null;
+//		if(locationIndex == -1){
+//			player = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_RECORD);
+//		}else{
+//			player = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_RECORD, locationIndex);
+//		}
+//		
+//		player.setBusinessName(businessInfo);
+//		player.setPlayUrl(url);		
+//		player.setBusinessId("-1");
+//		
+//		commandGroupUserPlayerDao.save(player);
+//		
+//		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+//		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
+//		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
+//		
+//		return player;
 	}
 
 	
