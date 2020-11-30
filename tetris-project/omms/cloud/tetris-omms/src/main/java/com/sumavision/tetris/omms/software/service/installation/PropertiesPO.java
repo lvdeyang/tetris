@@ -37,6 +37,18 @@ public class PropertiesPO extends AbstractBasePO{
 	
 	/** 安装包id */
 	private Long installationPackageId;
+	
+	/** 当valueType取值为DBPORT时标识成对的DBIP和DBPORT */
+	private String ref;
+
+	@Column(name = "REF")
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
+	}
 
 	@Column(name = "PROPERTY_KEY")
 	public String getPropertyKey() {

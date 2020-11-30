@@ -127,6 +127,7 @@ public class ServiceDeploymentService {
 			serviceDeploymentEntity = serviceDeploymentPO;
 			serviceDeploymentEntity.setStep(DeploymentStep.UPLOAD);
 			serviceDeploymentEntity.setProgress(0);
+			
 		}else{
 			Date now = new Date();
 			serviceDeploymentEntity.setUpdateTime(now);
@@ -239,7 +240,8 @@ public class ServiceDeploymentService {
 						server.getFtpPassword());
 			}
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
-			ftpClient.enterLocalPassiveMode();
+			//ftpClient.enterLocalPassiveMode();
+			ftpClient.enterLocalActiveMode();
 			ftpClient.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
 			ftpClient.setControlEncoding("utf-8");
 			ftpClient.setBufferSize(1024*1024*10);
@@ -362,7 +364,7 @@ public class ServiceDeploymentService {
 		CloseableHttpClient client = null;
 		try{
 			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			deployment.setStatus("已安装");
+			deployment.setStatus(ServiceDeploymentStatus.INSTALLED);
 			deployment.setConfig(config);
 			serviceDeploymentDao.save(deployment);
 			ServerPO server = serverDao.findOne(deployment.getServerId());
@@ -459,6 +461,8 @@ public class ServiceDeploymentService {
 		ServiceTypePO serviceType = serviceTypeDao.findOne(deployment.getServiceTypeId());
 		String deploymentName = serviceType.getName();
 		
+		InstallationPackagePO updateInstallationPackagePO = installationPackageDao.findOne(updatePackageId);
+		
 		if(isBackup){
 			backup(deploymentId, deploymentName, notes);
 		}
@@ -467,6 +471,9 @@ public class ServiceDeploymentService {
 		try{
 			
 			deployment.setInstallationPackageId(updatePackageId);
+			Date now = new Date();
+			deployment.setUpdateTime(now);
+			deployment.setInstallFullPath(new StringBufferWrapper().append(RELATIVE_FOLDER).append("/").append(updateInstallationPackagePO.getFileName()).toString());
 			deployment.setConfig(config);
 			serviceDeploymentDao.save(deployment);
 			ServerPO server = serverDao.findOne(deployment.getServerId());
@@ -651,7 +658,7 @@ public class ServiceDeploymentService {
 			
 			if("uninstall".equals(type)){
 				backup(deploymentId, deploymentName, notes);
-				deployment.setStatus("已卸载");
+				deployment.setStatus(ServiceDeploymentStatus.UNINSTALLED);
 				serviceDeploymentDao.save(deployment);
 			}
 			if("delete".equals(type)){
@@ -1304,7 +1311,7 @@ public class ServiceDeploymentService {
 			List<ServerPO> serverList = serverDao.findAll();
 			for (ServerPO server : serverList) {
 				
-				List<ServiceDeploymentPO> deploymentList = serviceDeploymentDao.findByServerIdAndStatus(server.getId(), "已安装");
+				List<ServiceDeploymentPO> deploymentList = serviceDeploymentDao.findByServerIdAndStatus(server.getId(), ServiceDeploymentStatus.INSTALLED);
 				List<ProcessDeploymentPO> processList = new ArrayList<ProcessDeploymentPO>();
 				for (ServiceDeploymentPO deployment : deploymentList) {
 					processList.addAll(processDeploymentDAO.findByServiceDeploymentId(deployment.getId()));

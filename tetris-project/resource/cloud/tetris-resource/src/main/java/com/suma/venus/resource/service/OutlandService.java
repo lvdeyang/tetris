@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.controller.ControllerBase;
@@ -31,7 +31,6 @@ import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
@@ -45,7 +44,6 @@ import com.suma.venus.resource.vo.SerNodeVO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 
@@ -139,17 +137,22 @@ public class OutlandService extends ControllerBase{
 		}
 		
 		//发送消息
-		PassByBO passByBO = new PassByBO();
-		List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
-		Map<String, Object> pass_by_content = makeAjaxData();
-		pass_by_content.put("cmd", "localServerNodeNameChange");
-		pass_by_content.put("oldName", oldName);
-		pass_by_content.put("newName", name);
-		passByBO.setPass_by_content(pass_by_content);
-		if (workNodePOs != null && !workNodePOs.isEmpty()) {
-			passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+		try {
+			PassByBO passByBO = new PassByBO();
+			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+			Map<String, Object> pass_by_content = makeAjaxData();
+			pass_by_content.put("cmd", "localServerNodeNameChange");
+			pass_by_content.put("oldName", oldName);
+			pass_by_content.put("newName", name);
+			passByBO.setPass_by_content(pass_by_content);
+			if (workNodePOs != null && !workNodePOs.isEmpty()) {
+				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			}
+			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		
 		return serNodeVO;
 	}
 
@@ -216,7 +219,7 @@ public class OutlandService extends ControllerBase{
 			serNodePO.setIp(ip);
 			serNodePO.setPort(port);
 			serNodePO.setSourceType(SOURCE_TYPE.EXTERNAL);
-			serNodePO.setOperate(ConnectionStatus.DONE);
+			serNodePO.setOperate(ConnectionStatus.ON);
 			serNodePO.setStatus(ConnectionStatus.OFF);
 			serNodeDao.save(serNodePO);
 			List<Long> roleIDs = new ArrayList<Long>();
@@ -242,25 +245,30 @@ public class OutlandService extends ControllerBase{
 			SerNodeVO localSerNodeVO = new SerNodeVO();
 			localSerNodeVO.setNodeName(localSerNodePO.get(0).getNodeName());
 			
-			//发送消息
-			PassByBO passByBO = new PassByBO();
-			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
-			Map<String, Object> pass_by_content = new HashMap<String, Object>();
-			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-			foreign.add(new HashMap<String, Object>());
-			foreign.get(0).put("name", name);
-			foreign.get(0).put("password", password);
-			foreign.get(0).put("ip", ip);
-			foreign.get(0).put("port", port);
-			foreign.get(0).put("operate", ConnectionStatus.ON);
-			pass_by_content.put("cmd", "foreignAdd");
-			pass_by_content.put("local", localSerNodeVO);
-			pass_by_content.put("foreign", foreign);
-			passByBO.setPass_by_content(pass_by_content);
-			if (workNodePOs != null && !workNodePOs.isEmpty()) {
-				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			try {
+				//发送消息
+				PassByBO passByBO = new PassByBO();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+				foreign.add(new HashMap<String, Object>());
+				foreign.get(0).put("name", name);
+				foreign.get(0).put("password", password);
+				foreign.get(0).put("ip", ip);
+				foreign.get(0).put("port", port);
+				foreign.get(0).put("operate", ConnectionStatus.ON);
+				pass_by_content.put("cmd", "foreignAdd");
+				pass_by_content.put("local", localSerNodeVO);
+				pass_by_content.put("foreign", foreign);
+				passByBO.setPass_by_content(pass_by_content);
+				if (workNodePOs != null && !workNodePOs.isEmpty()) {
+					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+				}
+				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			
 			
 			data.put("serNodeVO", serNodeVO);
 		} catch (Exception e) {
@@ -282,8 +290,8 @@ public class OutlandService extends ControllerBase{
 	 */
 	public Object queryOutlandBundle(Long serNodeId)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
-//		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
-		List<BundlePO> bundlePOs = bundleDao.findAll();
+		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+//		List<BundlePO> bundlePOs = bundleDao.findAll();
 		Set<Long> folderIds = new HashSet<Long>();
 		if (bundlePOs != null && !bundlePOs.isEmpty()) {
 			for (BundlePO bundlePO : bundlePOs) {
@@ -341,23 +349,27 @@ public class OutlandService extends ControllerBase{
 		List<SerNodeVO> serNodeVOs = new ArrayList<SerNodeVO>();
 		serNodeVOs.add(serNodeVO);
 		
-		//发送消息
-		PassByBO passByBO = new PassByBO();
-		List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
-		Map<String, Object> pass_by_content = makeAjaxData();
-		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-		foreign.add(new HashMap<String, Object>());
-		foreign.get(0).put("name",serNodeVO.getNodeName());
-		foreign.get(0).put("operate", ConnectionStatus.OFF);
-		local.put("name", localSerNodeVO.getNodeName());
-		pass_by_content.put("cmd", "foreignOff");
-		pass_by_content.put("local", local);
-		pass_by_content.put("foreign", foreign);
-		passByBO.setPass_by_content(pass_by_content);
-		if (workNodePOs != null && !workNodePOs.isEmpty()) {
-			passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+		try {
+			//发送消息
+			PassByBO passByBO = new PassByBO();
+			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+			Map<String, Object> pass_by_content = makeAjaxData();
+			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			foreign.add(new HashMap<String, Object>());
+			foreign.get(0).put("name",serNodeVO.getNodeName());
+			foreign.get(0).put("operate", ConnectionStatus.OFF);
+			local.put("name", localSerNodeVO.getNodeName());
+			pass_by_content.put("cmd", "foreignOff");
+			pass_by_content.put("local", local);
+			pass_by_content.put("foreign", foreign);
+			passByBO.setPass_by_content(pass_by_content);
+			if (workNodePOs != null && !workNodePOs.isEmpty()) {
+				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			}
+			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 		return serNodeVO;
 	}
 	
@@ -403,27 +415,34 @@ public class OutlandService extends ControllerBase{
 		}
 		serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
 		
-		//发送消息
-		PassByBO passByBO = new PassByBO();
-		List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
-		Map<String, Object> pass_by_content = makeAjaxData();
-		Map<String, Object> local = new HashMap<String, Object>();
-		local.put("name", localSerNodePOs.get(0).getNodeName());
-		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-		foreign.add(new HashMap<String, Object>());
-		foreign.get(0).put("oldName", oldname);
-		foreign.get(0).put("newName", name);
-		foreign.get(0).put("password", password);
-		foreign.get(0).put("operate", ConnectionStatus.OFF);
-		
-		pass_by_content.put("cmd", "foreignEdit");
-		pass_by_content.put("local", local);
-		pass_by_content.put("foreign", foreign);
-		passByBO.setPass_by_content(pass_by_content);
-		if (workNodePOs != null && !workNodePOs.isEmpty()) {
-			passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+		try {
+			//发送消息
+			PassByBO passByBO = new PassByBO();
+			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+			Map<String, Object> pass_by_content = makeAjaxData();
+			Map<String, Object> local = new HashMap<String, Object>();
+			local.put("name", localSerNodePOs.get(0).getNodeName());
+			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			foreign.add(new HashMap<String, Object>());
+			foreign.get(0).put("oldName", oldname);
+			foreign.get(0).put("newName", name);
+			foreign.get(0).put("password", password);
+			foreign.get(0).put("operate", ConnectionStatus.OFF);
+			
+			foreign.get(0).put("ip", ip);
+			foreign.get(0).put("port", port);
+			pass_by_content.put("cmd", "foreignEdit");
+			pass_by_content.put("local", local);
+			pass_by_content.put("foreign", foreign);
+			passByBO.setPass_by_content(pass_by_content);
+			if (workNodePOs != null && !workNodePOs.isEmpty()) {
+				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			}
+			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		
 		return serNodeVO;
 	}
 	
@@ -443,24 +462,28 @@ public class OutlandService extends ControllerBase{
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
-		//发送消息
-		PassByBO passByBO = new PassByBO();
-		List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
-		Map<String, Object> pass_by_content = new HashMap<String, Object>();
-		Map<String, Object> local = new HashMap<String, Object>();
-		local.put("name", localSerNodePOs.get(0).getNodeName());
-		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-		foreign.add(new HashMap<String, Object>());
-		foreign.get(0).put("name", serNodePO.getNodeName());
-		foreign.get(0).put("operate", ConnectionStatus.ON);
-		pass_by_content.put("cmd", "foreignOn");
-		pass_by_content.put("local", local);
-		pass_by_content.put("foreign", foreign);
-		passByBO.setPass_by_content(pass_by_content);
-		if (workNodePOs != null && !workNodePOs.isEmpty()) {
-			passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+		try {
+			//发送消息
+			PassByBO passByBO = new PassByBO();
+			List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+			Map<String, Object> pass_by_content = new HashMap<String, Object>();
+			Map<String, Object> local = new HashMap<String, Object>();
+			local.put("name", localSerNodePOs.get(0).getNodeName());
+			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+			foreign.add(new HashMap<String, Object>());
+			foreign.get(0).put("name", serNodePO.getNodeName());
+			foreign.get(0).put("operate", ConnectionStatus.ON);
+			pass_by_content.put("cmd", "foreignOn");
+			pass_by_content.put("local", local);
+			pass_by_content.put("foreign", foreign);
+			passByBO.setPass_by_content(pass_by_content);
+			if (workNodePOs != null && !workNodePOs.isEmpty()) {
+				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+			}
+			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 		return serNodeVO;
 	}
 	
@@ -509,9 +532,9 @@ public class OutlandService extends ControllerBase{
 			SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
 			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId);
 			Set<String> bundleIds = new HashSet<String>();
-//			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
+			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
 			//测试数据用
-			List<BundlePO> bundlePOs = bundleDao.findAll();
+//			List<BundlePO> bundlePOs = bundleDao.findAll();
 			Set<String> reeourceStrings = new HashSet<String>();
 			if (bundlePOs !=  null&&!bundlePOs.isEmpty()) {
 				for (BundlePO bundlePO : bundlePOs) {

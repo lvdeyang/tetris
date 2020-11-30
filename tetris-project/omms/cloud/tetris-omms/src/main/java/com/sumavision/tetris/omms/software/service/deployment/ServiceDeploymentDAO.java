@@ -30,7 +30,7 @@ public interface ServiceDeploymentDAO extends BaseDAO<ServiceDeploymentPO>{
 	
 	public ServiceDeploymentPO findByServerIdAndServiceTypeId(Long serverId,Long serviceTypeId);
 	
-	public List<ServiceDeploymentPO> findByServerIdAndStatus(Long serverId, String status);
+	public List<ServiceDeploymentPO> findByServerIdAndStatus(Long serverId, ServiceDeploymentStatus status);
 
 //	public List<Long> findByIdIn(List<ServiceDeploymentPO> list);
 }

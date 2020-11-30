@@ -194,8 +194,11 @@
                         <el-row>
                             <el-col :span="11" style="margin-left: 28px">
                                 <el-form label-position="top" label-width="300px">
-                                    <el-form-item label="数据库IP和端口" style="margin-right: 20px">
-                                        <el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>
+                                    <el-form-item v-if="dialog.step.ipAndPortSelect.length !== 0" label="数据库IP和端口" style="margin-right: 20px">
+                                        <el-select v-model="dialog.database.ipAndPort" style="width:100%;">
+                                            <el-option v-for="item in dialog.step.ipAndPortSelect" :label="item.propertyDefaultValue" :value="item.propertyDefaultValue" :key="item.propertyDefaultValue"></el-option>
+                                        </el-select>
+                                        <!--<el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>-->
                                     </el-form-item>
                                 </el-form>
                             </el-col>
@@ -307,8 +310,11 @@
                         <el-row>
                             <el-col :span="11" style="margin-left: 28px">
                                 <el-form label-position="top" label-width="300px">
-                                    <el-form-item label="数据库IP和端口" style="margin-right: 20px">
-                                        <el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>
+                                    <el-form-item v-if="dialog.updateStep.ipAndPortSelect.length !== 0" label="数据库IP和端口" style="margin-right: 20px">
+                                        <el-select v-model="dialog.database.ipAndPort" style="width:100%;">
+                                            <el-option v-for="item in dialog.updateStep.ipAndPortSelect" :label="item.propertyDefaultValue" :value="item.propertyDefaultValue" :key="item.propertyDefaultValue"></el-option>
+                                        </el-select>
+                                        <!--<el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>-->
                                     </el-form-item>
                                 </el-form>
                             </el-col>
@@ -444,23 +450,23 @@
             </span>
         </el-dialog>
 
-        <el-dialog
-                title="选择数据库"
-                :visible.sync="dialog.database.visible"
-                width="600px"
-                :before-close="handleSelectDatabaseClose">
+        <!--<el-dialog-->
+                <!--title="选择数据库"-->
+                <!--:visible.sync="dialog.database.visible"-->
+                <!--width="600px"-->
+                <!--:before-close="handleSelectDatabaseClose">-->
 
-            <el-table :data="dialog.database.rows" border style="width: 100%">
-                <el-table-column fixed prop = "databaseIP" label="数据库IP" width="200px"></el-table-column>
-                <el-table-column fixed prop = "databasePort" label="数据库端口" width="200px"></el-table-column>
-                <el-table-column fixed="right" label="操作" width="100px">
-                    <template slot-scope="scope">
-                        <el-button @click="handleSelectDatabaseClick(scope)" type="text" size="small">选择</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <!--<el-table :data="dialog.database.rows" border style="width: 100%">-->
+                <!--<el-table-column fixed prop = "databaseIP" label="数据库IP" width="200px"></el-table-column>-->
+                <!--<el-table-column fixed prop = "databasePort" label="数据库端口" width="200px"></el-table-column>-->
+                <!--<el-table-column fixed="right" label="操作" width="100px">-->
+                    <!--<template slot-scope="scope">-->
+                        <!--<el-button @click="handleSelectDatabaseClick(scope)" type="text" size="small">选择</el-button>-->
+                    <!--</template>-->
+                <!--</el-table-column>-->
+            <!--</el-table>-->
 
-        </el-dialog>
+        <!--</el-dialog>-->
     </template>
 
 </mi-frame>

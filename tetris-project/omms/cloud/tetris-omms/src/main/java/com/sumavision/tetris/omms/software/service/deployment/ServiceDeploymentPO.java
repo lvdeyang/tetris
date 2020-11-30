@@ -59,7 +59,7 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 	private String errorMessage;
 	
 	/** 服务状态 */
-	private String status;
+	private ServiceDeploymentStatus status;
 	
 	@Column(name = "SERVICE_TYPE_ID")
 	public Long getServiceTypeId() {
@@ -163,12 +163,13 @@ public class ServiceDeploymentPO extends AbstractBasePO{
 		this.errorMessage = errorMessage;
 	}
 
+	@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
-	public String getStatus() {
+	public ServiceDeploymentStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(ServiceDeploymentStatus status) {
 		this.status = status;
 	}
 }

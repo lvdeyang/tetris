@@ -16,4 +16,6 @@ public interface LianwangPassbyDAO extends BaseDAO<LianwangPassbyPO>{
 	@Query(value = "select * from LIANWANG_PASSBY where uuid = ?1", nativeQuery = true)
 	public List<LianwangPassbyPO> findUuid(String uuid);
 	
+	public List<LianwangPassbyPO> findByLayerId(String layerId);
+	
 }

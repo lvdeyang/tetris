@@ -245,7 +245,7 @@ public class ServiceDeploymentVO extends AbstractBaseVO<ServiceDeploymentVO, Ser
 			.setProgress(entity.getProgress())
 			.setError(entity.getError())
 			.setErrorMessage(entity.getErrorMessage())
-			.setStatus(entity.getStatus());
+			.setStatus(entity.getStatus()==null?null:entity.getStatus().getName());
 		return this;
 	}
 

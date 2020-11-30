@@ -26,6 +26,9 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 	/** 配置属性值 */
 	private String propertyValue;
 	
+	/***/
+	private String ref;
+	
 	public String getValueSelect() {
 		return valueSelect;
 	}
@@ -88,6 +91,14 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 		this.propertyValue = propertyValue;
 		return this;
 	}
+	
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
+	}
 
 	@Override
 	public PropertiesVO set(PropertiesPO entity) throws Exception {
@@ -98,7 +109,8 @@ public class PropertiesVO extends AbstractBaseVO<PropertiesVO, PropertiesPO>{
 			.setPropertyDefaultValue(entity.getPropertyDefaultValue())
 			.setValueType(entity.getValueType().toString())
 			.setValueTypeName(entity.getValueType().getName())
-			.setValueSelect(entity.getValueSelect());
+			.setValueSelect(entity.getValueSelect())
+		    .setRef(entity.getRef()==null?"":entity.getRef());
 		return this;
 	}
 
