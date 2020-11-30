@@ -21,6 +21,7 @@ public class InputFileBO {
 	public InputFileBO() {
 	}
 
+
 	public InputFileBO(List<InputFileObjectBO> file_array) {
 		this.file_array = file_array;
 	}

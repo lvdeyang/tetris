@@ -76,7 +76,7 @@ public class SyncService {
 		List<InputBO> inputs = new ArrayList<InputBO>();
 		List<TaskBO> tasks = new ArrayList<TaskBO>();
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
-		
+
 		List<TaskOutputPO> outputPOs = taskOutputDao.findByCapacityIp(deviceIp);
 		if(outputPOs != null && outputPOs.size() > 0){
 			Set<Long> inputIds = new HashSet<Long>();
@@ -121,6 +121,9 @@ public class SyncService {
 			List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);	
 			if(inputPOs != null && inputPOs.size() > 0){
 				for(TaskInputPO inputPO: inputPOs){
+					if (inputPO.getSyncStatus()!=null && inputPO.getSyncStatus()>0){ //如果不同步，更新同步了
+						taskInputDao.updateSyncStatusById(inputPO.getId(),0);
+					}
 					if(inputPO.getCount() > 0){
 						InputBO inputBO = JSONObject.parseObject(inputPO.getInput(), InputBO.class);
 						if(inputBO != null){
