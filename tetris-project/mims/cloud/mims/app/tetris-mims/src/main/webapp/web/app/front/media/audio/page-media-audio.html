@@ -1,4 +1,4 @@
-<mi-frame ref="frame" id="page-media-audio-wrapper" :menus="menus" :user="user" :groups="groups" @task-show="exitTaskViewMinimizeState" :active-id="activeId">
+<mi-frame  ref="frame" id="page-media-audio-wrapper" :menus="menus" :user="user" :groups="groups" @task-show="exitTaskViewMinimizeState" :active-id="activeId">
 
     <template slot="title">{{user.groupName}}（音频库）</template>
 
@@ -8,7 +8,7 @@
     </template>
 
     <template>
-        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+        <el-card v-loading="refreshloading" class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
                 <el-button type="primary" size="small" @click="dialog.addAudio.visible = true" :disabled="!current.id"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
                 <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
@@ -53,8 +53,8 @@
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
                                     
-                                    <el-tooltip  class="item" effect="dark" content="刷源" placement="bottom">
-                                        <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:110px;" @click="handleRefresh(scope)">
+                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="刷源" placement="bottom">
+                                        <el-button size="small" type="text"  style="padding:0; position:absolute; top:1px; right:110px;" @click="handleRefresh(scope)">
                                             <span class="el-icon-refresh" style="font-size:20px; position:relative; top:1px;"></span>
                                         </el-button>
                                     </el-tooltip>

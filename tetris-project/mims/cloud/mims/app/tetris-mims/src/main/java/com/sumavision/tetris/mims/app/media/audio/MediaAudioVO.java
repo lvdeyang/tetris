@@ -92,7 +92,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	private String codec;
 	private Integer channelNum;
 	private Integer sample;
-	private Integer bitrate;//kbps
+	private Integer bitrate;//bps
 	
 	public String getName() {
 		return name;
