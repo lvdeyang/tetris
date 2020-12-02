@@ -197,7 +197,7 @@ public class PageTaskService {
 //			if(businessId.matches("\\d+")){
 				Long groupId=Long.parseLong(businessId);
 				GroupPO group=groupDao.findOne(groupId);
-				if(group!=null&&group.getLocationIndex()!=null){
+				if(group!=null&& group.getLocationIndex()!=null){
 					int taskIndex=(pageInfo.getCurrentPage()-1)*pageInfo.getPageSize()+group.getLocationIndex();
 					for(PageTaskPO newTask:newTasks){
 						newTask.setTaskIndex(taskIndex++);
@@ -205,7 +205,7 @@ public class PageTaskService {
 					}
 				}
 				//获取group中分页标识字段
-				allowNewPage = group.getAllowNewPage();
+				if(group != null && group.getAllowNewPage() != null) allowNewPage = group.getAllowNewPage();
 //			}
 		}
 		
