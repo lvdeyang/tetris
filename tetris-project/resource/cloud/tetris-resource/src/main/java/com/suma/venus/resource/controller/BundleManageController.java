@@ -389,6 +389,7 @@ public class BundleManageController extends ControllerBase {
 			data.put("total", bundlePOs.size());
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			data.put(ERRMSG, "内部错误");
 		}
 
@@ -625,6 +626,15 @@ public class BundleManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
+			
+			//重置设备
+			try {
+				List<String> bundleIds = new ArrayList<String>();
+				bundleIds.add(bundleId);
+				monitorLiveDeviceFeign.resetBundles(JSONArray.toJSONString(bundleIds));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 //			ResponseBO resp = interfaceFromResource.clearBundleRequest(bundle);
 //			if(null == resp || !com.suma.venus.resource.bo.ResponseBody.SUCCESS.equalsIgnoreCase(
@@ -663,14 +673,6 @@ public class BundleManageController extends ControllerBase {
 
 //			interfaceFromResource.clearBundleRequest(bundle);
 			
-			//重置设备
-			try {
-				List<String> bundleIds = new ArrayList<String>();
-				bundleIds.add(bundleId);
-				monitorLiveDeviceFeign.resetBundles(JSONArray.toJSONString(bundleIds));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to clear Resource : ", e);
 			data.put(ERRMSG, "操作失败");

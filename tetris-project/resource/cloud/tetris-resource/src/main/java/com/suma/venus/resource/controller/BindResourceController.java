@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -73,6 +74,7 @@ import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.suma.venus.resource.vo.FolderVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
@@ -898,41 +900,57 @@ public class BindResourceController extends ControllerBase {
 					if (toBindBundleIds != null && !toBindBundleIds.isEmpty()) {
 						Set<Long> folderIds = new HashSet<Long>();
 	 					List<BundlePO> toBindBundlePOs = bundleDao.findByBundleIdIn(toBindBundleIds);
-						List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+	 					List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+	 					Set<Long> allFolderIds = new HashSet<Long>();
 						if (toBindBundlePOs != null && !toBindBundlePOs.isEmpty()) {
 							for (BundlePO bundlePO : toBindBundlePOs) {
 								folderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
 								bundlePO.setEquipFactInfo(serNodePO.getNodeName());
 								BundleVO bundleVO = BundleVO.fromPO(bundlePO);
 								bundleVOs.add(bundleVO);
+								allFolderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
 							}
 						}
 						
-						List<FolderPO> institutions = new ArrayList<FolderPO>();
-						List<FolderPO> allFolderPOs = folderDao.findAll();
-						if(folderIds != null && !folderIds.isEmpty()){
-							List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-							if(folderPOs !=null && !folderPOs.isEmpty()){
-								for (FolderPO folderPO : folderPOs) {
-									StringBufferWrapper parentpath = new StringBufferWrapper();
-									if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
-										String[] parentPathStrings = folderPO.getParentPath().split("/"); 
-										for (int i = 1; i < parentPathStrings.length; i++) {
-											if (allFolderPOs != null && !allFolderPOs.isEmpty()) {
-												for (FolderPO allFolderPO : allFolderPOs) {
-													if(parentPathStrings[i].equals(allFolderPO.getId().toString())){
-														parentpath.append("/").append(allFolderPO.getUuid());
-													}
-												}
-											}
-										}
+						List<FolderPO> bundleFolderPOs = folderDao.findByIdIn(folderIds);
+						if(bundleFolderPOs != null && !bundleFolderPOs.isEmpty()){
+							for (FolderPO folderPO : bundleFolderPOs) {
+								if (null != folderPO.getParentPath() && !"".equals(folderPO.getParentPath())) {
+									String[] allfolderIds = folderPO.getParentPath().split("/");
+									for (int i = 1; i < allfolderIds.length; i++) {
+										allFolderIds.add(Long.parseLong(allfolderIds[i]));
 									}
-									folderPO.setParentPath(parentpath.toString());
 								}
 							}
-							institutions.addAll(folderPOs);
 						}
-						
+						List<FolderPO> allFolderPOs = folderDao.findByIdIn(allFolderIds);
+						Map<Long, String> idUuidMap = new HashMap<Long, String>();
+						List<FolderVO> folderVOs = new ArrayList<FolderVO>();
+						if(allFolderPOs!=null && allFolderPOs.size()>0){
+							for(FolderPO folderPO:allFolderPOs){
+								FolderVO folderVO = FolderVO.fromFolderPO(folderPO);
+								folderVOs.add(folderVO);
+								idUuidMap.put(folderVO.getId(), folderVO.getUuid());
+							}
+							
+							for(FolderVO folderVO:folderVOs){
+//								folderVO.setParentId(idUuidMap.get(folderVO.getId()));
+								String parentPath = folderVO.getParentPath();
+								if(parentPath==null || "".equals(parentPath)) continue;
+								StringBufferWrapper newParentPath = new StringBufferWrapper();
+								String[] parentIds = parentPath.split("/");
+								for(int i=1; i<parentIds.length; i++){
+									newParentPath.append("/").append(idUuidMap.get(Long.valueOf(parentIds[i])));
+								}
+								folderVO.setParentPath(newParentPath.toString());
+							}
+							
+							if (bundleVOs != null && !bundleVOs.isEmpty()) {
+								for (BundleVO bundleVO : bundleVOs) {
+									bundleVO.setInstitution(idUuidMap.get(bundleVO.getFolderId()));
+								}
+							}
+						}
 						List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(toBindBundleIds);
 						if (bundleVOs != null && !bundleVOs.isEmpty()) {
 							for (BundleVO bundleVO : bundleVOs) {
@@ -955,8 +973,8 @@ public class BindResourceController extends ControllerBase {
 						for (int i = 0; i < serNodePOs.size(); i++) {
 							foreign.add(new HashMap<String, Object>());
 							foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-							foreign.get(i).put("institutions", institutions);
-							foreign.get(i).put("devices", toBindBundlePOs);
+							foreign.get(i).put("institutions", folderVOs);
+							foreign.get(i).put("devices", bundleVOs);
 							foreign.get(i).put("bindChecks", toBindChecks);
 						}
 						pass_by_content.put("cmd", "devicePermissionAdd");
@@ -1022,6 +1040,7 @@ public class BindResourceController extends ControllerBase {
 				
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 			
 

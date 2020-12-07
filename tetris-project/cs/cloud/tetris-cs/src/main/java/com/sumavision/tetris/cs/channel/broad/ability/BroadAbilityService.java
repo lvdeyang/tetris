@@ -1915,6 +1915,7 @@ public class BroadAbilityService {
 		data.put("effectTime",schedulePO.getBroadDate());
 		data.put("userId", broadUserIds);
 		data.put("uuid",schedulePO.getUuid());
+		data.put("channelName", channelPO.getName());
 		return data;
 	}
 	
