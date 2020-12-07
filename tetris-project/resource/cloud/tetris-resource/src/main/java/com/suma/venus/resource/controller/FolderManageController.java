@@ -75,6 +75,7 @@ import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.util.DepartSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
+import com.suma.venus.resource.vo.FolderVO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -272,26 +273,41 @@ public class FolderManageController extends ControllerBase {
 				local.put("name", serNodePO.getNodeName());
 				//处理组织机构
 				
-				List<FolderPO> allFolderPOs = folderDao.findAll();
-				
-				FolderPO newFolderPO = folderDao.findOne(folderId);
-				if(newFolderPO.getParentPath() != null && !newFolderPO.getParentPath().equals("")){
-					StringBufferWrapper newFolderBufferWrapper = new StringBufferWrapper();
-					String[] newFolderStrings = newFolderPO.getParentPath().split("/");
-					for (int i = 1; i < newFolderStrings.length; i++) {
-						for (FolderPO allFolderPO : allFolderPOs) {
-							if(newFolderStrings[i].equals(allFolderPO.getId().toString())){
-								newFolderBufferWrapper.append("/").append(allFolderPO.getUuid());
-							}
-						}
+				//------------------
+				Set<Long> allFolderIds = new HashSet<Long>();
+				if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
+					String[] allfolderIds = folderPO.getParentPath().split("/");
+					for (int i = 1; i < allfolderIds.length; i++) {
+						allFolderIds.add(Long.parseLong(allfolderIds[i]));
 					}
-					newFolderPO.setParentPath(newFolderBufferWrapper.toString());
 				}
+				List<FolderPO> allFolderPOs = folderDao.findByIdIn(allFolderIds);
+				Map<Long, String> idUuidMap = new HashMap<Long, String>();
+				List<FolderVO> folderVOs = new ArrayList<FolderVO>();
+				if(allFolderPOs!=null && allFolderPOs.size()>0){
+					for(FolderPO folderPO1:allFolderPOs){
+						FolderVO folderVO = FolderVO.fromFolderPO(folderPO1);
+						folderVOs.add(folderVO);
+						idUuidMap.put(folderVO.getId(), folderVO.getUuid());
+					}
+					
+					for(FolderVO folderVO:folderVOs){
+//						folderVO.setParentId(idUuidMap.get(folderVO.getId()));
+						String parentPath = folderVO.getParentPath();
+						if(parentPath==null || "".equals(parentPath)) continue;
+						StringBufferWrapper newParentPath = new StringBufferWrapper();
+						String[] parentIds = parentPath.split("/");
+						for(int i=1; i<parentIds.length; i++){
+							newParentPath.append("/").append(idUuidMap.get(Long.valueOf(parentIds[i])));
+						}
+						folderVO.setParentPath(newParentPath.toString());
+					}
+				}
+				//----------------------
+				
 				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIdStrings);
 				Set<Long> privilegelLongs = new HashSet<Long>();
-				List<FolderPO> institutions = new ArrayList<FolderPO>();
-				institutions.add(newFolderPO);
-				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
 					for (PrivilegePO privilegePO : privilegePOs) {
 						privilegelLongs.add(privilegePO.getId());
 					}
@@ -313,7 +329,7 @@ public class FolderManageController extends ControllerBase {
 				for (int i = 0; i < bundleIdStrings.size(); i++) {
 					devices.add(new HashMap<String, Object>());
 					devices.get(i).put("bundleId", bundleIdStrings.get(i));
-					devices.get(i).put("institution", newFolderPO.getUuid());
+					devices.get(i).put("institution", folderPO.getUuid());
 				}
 				
 				if (serNodePOs != null && !serNodePOs.isEmpty()) {
@@ -321,7 +337,8 @@ public class FolderManageController extends ControllerBase {
 					for (int i = 0; i < serNodePOs.size(); i++) {
 						foreign.add(new HashMap<String, Object>());
 						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-						foreign.get(i).put("institutions", institutions);
+						foreign.get(i).put("institutions", folderVOs);
+						foreign.get(i).put("devices", devices);
 					}
 					pass_by_content.put("cmd", "deviceInstitutionChange");
 					pass_by_content.put("local", local);
