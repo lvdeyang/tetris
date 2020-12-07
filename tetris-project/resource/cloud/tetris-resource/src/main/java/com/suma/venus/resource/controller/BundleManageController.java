@@ -433,16 +433,12 @@ public class BundleManageController extends ControllerBase {
 						passByBOs.add(passByBO);
 						tetrisDispatchService.dispatch(passByBOs);
 					}
+					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
 					
 					deleteByBundleId(bundleId);
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
 				}
-				
-			}
-			try{
-				monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
-			}catch(Exception e) {
 				
 			}
 			
