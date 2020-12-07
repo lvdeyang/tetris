@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -66,7 +67,7 @@ public class TetrisDispatchController {
 	@ResponseBody
 	@RequestMapping(value = "/passby")
 	public Object passby(
-			String passbyArray,
+			@RequestBody String passbyArray,
 			HttpServletRequest request) throws Exception{
 		
 		List<PassByBO> passbyList = JSONObject.parseArray(passbyArray, PassByBO.class);

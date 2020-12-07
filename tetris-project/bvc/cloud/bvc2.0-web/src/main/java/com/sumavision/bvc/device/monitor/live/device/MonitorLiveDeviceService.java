@@ -797,8 +797,11 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		if(Boolean.TRUE.equals(stopAndDelete)){
+		if(stopAndDelete == null){
 			monitorLiveDeviceDao.delete(live);
+		}if(Boolean.TRUE.equals(stopAndDelete)){
+			live.setStatus(MonitorRecordStatus.STOP);
+			monitorLiveDeviceDao.save(live);
 		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
@@ -858,8 +861,11 @@ public class MonitorLiveDeviceService {
 			
 			logic.getPass_by().add(passby);
 			
-			if(Boolean.TRUE.equals(stopAndDelete)){
+			if(stopAndDelete == null){
 				monitorLiveDeviceDao.delete(live);
+			}if(Boolean.TRUE.equals(stopAndDelete)){
+				live.setStatus(MonitorRecordStatus.STOP);
+				monitorLiveDeviceDao.save(live);
 			}
 			
 			resourceServiceClient.removeLianwangPassby(live.getUuid());
@@ -943,8 +949,11 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		if(Boolean.TRUE.equals(stopAndDelete)){
+		if(stopAndDelete == null){
 			monitorLiveDeviceDao.delete(live);
+		}if(Boolean.TRUE.equals(stopAndDelete)){
+			live.setStatus(MonitorRecordStatus.STOP);
+			monitorLiveDeviceDao.save(live);
 		}
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
@@ -1532,7 +1541,13 @@ public class MonitorLiveDeviceService {
 			try {
 				if(live == null) continue;
 				
-				authorize(live.getVideoBundleId(), live.getAudioBundleId(), userId);
+				if(LiveType.LOCAL_XT.equals(live.getType())){
+					authorize(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")), 
+							  live.getAudioBundleId().substring(0, live.getAudioBundleId().lastIndexOf("_")), 
+							  userId);
+				}else{
+					authorize(live.getVideoBundleId(), live.getAudioBundleId(), userId);
+				}
 				
 				//参数模板
 				Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -1550,6 +1565,10 @@ public class MonitorLiveDeviceService {
 				//视频源和目的
 				BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId());
 				BundlePO dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
+				if(LiveType.LOCAL_XT.equals(live.getType())){
+					videoBundle = bundleDao.findByBundleId(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")));
+					dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
+				}
 				
 				live.setStatus(MonitorRecordStatus.RUN);
 				
@@ -1688,5 +1707,23 @@ public class MonitorLiveDeviceService {
 		
 		monitorLiveDeviceDao.deleteByIdIn(needDeleteMonitorLiveDeviceIds);
 		locationOfScreenWallDao.deleteByMonitorLiveDeviceIdIn(needDeleteScreenWall);
+	}
+
+	/**
+	 * 为了测试需要批量停止或者开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 */
+	public void allStartOrStop(Boolean allStart, Long userId, String userno) throws Exception{
+		
+		if(allStart != null && allStart){
+			List<Long> liveIds = monitorLiveDeviceDao.findByStatus(MonitorRecordStatus.STOP).stream().map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
+			stopToRestart(liveIds, userId);
+		}else if(allStart != null && !allStart){
+			List<Long> liveIds = monitorLiveDeviceDao.findByStatus(MonitorRecordStatus.RUN).stream().map(MonitorLiveDevicePO::getId).collect(Collectors.toList());
+			stop(liveIds, userId, userno, Boolean.TRUE);
+		}
 	}
 }
