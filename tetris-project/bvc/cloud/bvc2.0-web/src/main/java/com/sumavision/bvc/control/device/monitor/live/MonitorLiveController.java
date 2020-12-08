@@ -1141,4 +1141,25 @@ public class MonitorLiveController {
 		
 		return null;
 	}
+	
+	/**
+	 * 为了测试需要批量停止或者开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/all/start/or/stop")
+	public Object allStartOrStop(
+			Boolean allStart,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		monitorLiveDeviceService.allStartOrStop(allStart, user.getId(), user.getUserno());
+		
+		return null;
+	}
 }

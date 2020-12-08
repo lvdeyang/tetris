@@ -121,4 +121,14 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 */
 	public List<MonitorLiveDevicePO> findByVideoBundleIdAndType(String videoBundleId, LiveType type);
 	
+	/**
+	 * 通过状态查询转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月7日 上午9:45:45
+	 * @param status RUN/STOP
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByStatus(MonitorRecordStatus status);
+	
 }
