@@ -54,14 +54,14 @@ public interface LocationOfScreenWallDAO extends MetBaseDAO<LocationOfScreenWall
 	public LocationOfScreenWallPO findByLocationTemplateLayoutIdNotAndDecoderBundleId(Long layoutId, String bundleId);
 	
 	/**
-	 * 通过时候由编码器和状态查询<br/>
+	 * 通过编码器不为空和状态查询，屏幕墙模板id查询<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年11月9日 上午9:06:13
-	 * @param id
-	 * @param monitorLiveDeviceId
+	 * <b>日期：</b>2020年12月8日 上午9:38:19
+	 * @param status
+	 * @param locationTemplateLayoutId
 	 * @return
 	 */
-	public List<LocationOfScreenWallPO> findByEncoderBundleIdNotNullAndStatus(LocationExecuteStatus status);
+	public List<LocationOfScreenWallPO> findByEncoderBundleIdNotNullAndStatusAndLocationTemplateLayoutId(LocationExecuteStatus status, Long locationTemplateLayoutId);
 
 }

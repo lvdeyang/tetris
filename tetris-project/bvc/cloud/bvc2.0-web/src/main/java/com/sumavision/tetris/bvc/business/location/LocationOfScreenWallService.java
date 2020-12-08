@@ -355,13 +355,18 @@ public class LocationOfScreenWallService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月12日 下午7:23:10
 	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 * @param layoutId 屏幕墙模板id
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void allStartOrStop(Boolean allStart, Long userId, String userno) throws Exception{
+	public void allStartOrStop(
+			Boolean allStart, 
+			Long layoutId,
+			Long userId, 
+			String userno) throws Exception{
 		
 		if(allStart != null && allStart){
 			
-			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatus(LocationExecuteStatus.STOP);
+			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatusAndLocationTemplateLayoutId(LocationExecuteStatus.STOP, layoutId);
 			locationOfScreenWalls.forEach(wall->{
 				wall.setStatus(LocationExecuteStatus.RUN);
 			});
@@ -371,7 +376,7 @@ public class LocationOfScreenWallService {
 			monitorLiveDeviceService.stopToRestart(liveIds, userId);
 		}else if(allStart != null && !allStart){
 			
-			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatus(LocationExecuteStatus.RUN);
+			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatusAndLocationTemplateLayoutId(LocationExecuteStatus.RUN, layoutId);
 			locationOfScreenWalls.forEach(wall->{
 				wall.setStatus(LocationExecuteStatus.STOP);
 			});
