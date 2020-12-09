@@ -14,7 +14,6 @@ import java.util.List;
  * @Date 2020/8/31 16:21
  */
 public class AnalysisStreamVO {
-
     private String deviceIp;
 
     private String msg_id;
