@@ -62,6 +62,8 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	/** 排期源id */
 	private Long scheduleId;
+
+	private Integer syncStatus = 0; //0表示同步
 	
 	public String getTaskUuid() {
 		return taskUuid;
@@ -185,5 +187,12 @@ public class TaskOutputPO extends AbstractBasePO{
 	public void setScheduleId(Long scheduleId) {
 		this.scheduleId = scheduleId;
 	}
-	
+
+	public Integer getSyncStatus() {
+		return syncStatus;
+	}
+
+	public void setSyncStatus(Integer syncStatus) {
+		this.syncStatus = syncStatus;
+	}
 }

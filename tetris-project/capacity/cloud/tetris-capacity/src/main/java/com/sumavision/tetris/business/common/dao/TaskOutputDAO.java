@@ -3,11 +3,15 @@ package com.sumavision.tetris.business.common.dao;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
+
+import javax.persistence.criteria.CriteriaBuilder;
 
 @RepositoryDefinition(domainClass = TaskOutputPO.class, idClass = Long.class)
 public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
@@ -22,7 +26,15 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 	public List<TaskOutputPO> findByInputId(Long id);
 	
 	public List<TaskOutputPO> findByCapacityIp(String capacityIp);
+	public List<TaskOutputPO> findByCapacityIpAndSyncStatus(String capacityIp, Integer syncStatus);
 
 	public List<TaskOutputPO> findByTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(String taskId);
+	public List<TaskOutputPO> findByTaskUuidNotNullAndOutputNotNullAndTaskNotNull();
+
 	public Integer countDistinctByInputIdAndTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(Long inputId,String taskId);
+
+	@Modifying
+	@Query("update TaskOutputPO output set output.syncStatus = ?2 where output.id = ?1")
+	public void updateSyncStatusById(Long id, Integer syncStatus);
+
 }

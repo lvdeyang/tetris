@@ -1,9 +1,6 @@
 package com.sumavision.tetris.business.common.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
@@ -62,9 +59,12 @@ public class SyncService {
 	 * <b>日期：</b>2020年5月8日 上午11:48:12
 	 * @param String deviceIp 转换模块ip
 	 */
-	public void sync(String deviceIp) throws Exception{
+	public synchronized void syncTransform(String deviceIp) throws Exception{
 
-		LOG.info("sync start between capacity and transform, deviceIp :{}",deviceIp);
+		LOG.info("[transform-sync] start, deviceIp :{}",deviceIp);
+		//直接清掉不同步的任务
+		deleteUnSyncTasksByDevice(deviceIp);
+
 		//获取转换模块上全部信息
 		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp);
 		
@@ -78,6 +78,7 @@ public class SyncService {
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
 
 		List<TaskOutputPO> outputPOs = taskOutputDao.findByCapacityIp(deviceIp);
+
 		if(outputPOs != null && outputPOs.size() > 0){
 			Set<Long> inputIds = new HashSet<Long>();
 			for(TaskOutputPO outputPO: outputPOs){
@@ -121,9 +122,6 @@ public class SyncService {
 			List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);	
 			if(inputPOs != null && inputPOs.size() > 0){
 				for(TaskInputPO inputPO: inputPOs){
-					if (inputPO.getSyncStatus()!=null && inputPO.getSyncStatus()>0){ //如果不同步，更新同步了
-						taskInputDao.updateSyncStatusById(inputPO.getId(),0);
-					}
 					if(inputPO.getCount() > 0){
 						InputBO inputBO = JSONObject.parseObject(inputPO.getInput(), InputBO.class);
 						if(inputBO != null){
@@ -251,16 +249,67 @@ public class SyncService {
 			}
 			capacityService.deleteAllAddMsgId(delete, deviceIp, capacityProps.getPort());
 		}
-		LOG.info("sync end between capacity and transform, deviceIp :{}",deviceIp);
+		LOG.info("[transform-sync] complete, deviceIp :{}",deviceIp);
 	}
 
-	public String sync(SyncVO syncVO, BusinessType businessType) throws Exception {
+	/**
+	 * @MethodName: deleteUnSyncTasksByDevice
+	 * @Description: 按设备删不同步任务
+	 * @param deviceIp 设备IP
+	 * @Return: void
+	 * @Author: Poemafar
+	 * @Date: 2020/12/3 10:37
+	 **/
+	public void deleteUnSyncTasksByDevice(String deviceIp) throws Exception {
+		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIpAndSyncStatus(deviceIp, 1);
+		if (outputs != null && !outputs.isEmpty()) {
+			for (int i = 0; i < outputs.size(); i++) {
+				TaskOutputPO output = outputs.get(i);
+				List<Long> inputIds = new ArrayList<>();
+				if (output.getCoverId()!=null){
+					inputIds.add(output.getCoverId());
+				}
+				if (output.getInputId()!=null){
+					inputIds.add(output.getInputId());
+				}
+				if (output.getInputList()!=null && !output.getInputList().isEmpty()) {
+					inputIds.addAll(JSONArray.parseArray(output.getInputList(), Long.class));
+				}
+				List<TaskInputPO> inputs = taskInputDao.findByIdIn(inputIds);
+				if (inputs != null && inputs.size() > 0) {
+					for (TaskInputPO input : inputs) {
+						if (!taskService.beUseForInputWithoutTask(input.getId(), output.getTaskUuid())) {
+							input.setUpdateTime(new Date());
+							input.setCount(0);
+							input.setSyncStatus(0);//假设可以删除成功，那此处定是0
+						}else{
+							input.setUpdateTime(new Date());
+							input.setCount(input.getCount()-1);
+						}
+					}
+				}
+				taskInputDao.save(inputs);
+				taskOutputDao.delete(output);
+			}
+		}
+	}
+
+	/**
+	 * @MethodName: syncBusiness
+	 * @Description: 业务同步
+	 * @param syncVO 1
+	 * @param businessType 2
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/2 9:30
+	 **/
+	public synchronized String syncBusiness(SyncVO syncVO, BusinessType businessType) throws Exception {
 		SyncResponseVO syncResponseVO = new SyncResponseVO();
 		String deviceIp = syncVO.getDeviceIp();
 		if (deviceIp==null || deviceIp.isEmpty()){
 			throw new BaseException(StatusCode.ERROR,"fail to sync, not found deviceIp");
 		}
-		sync(deviceIp);//先保证能力服务和转换的同步
+		syncTransform(deviceIp);//先保证能力服务和转换的同步
 		List<String> jobIds = syncVO.getJobIds();
 		List<String> lessJobIds = new ArrayList<>();
 		List<String> moreJobIds = new ArrayList<>();
@@ -285,6 +334,16 @@ public class SyncService {
 		//删除多余的任务
 		syncResponseVO.setLessJobIds(lessJobIds);
 		return JSONObject.toJSONString(syncResponseVO);
+	}
+
+
+	public synchronized void checkAndSyncTask(String taskUuid,BusinessType businessType) throws Exception {
+		TaskOutputPO taskOutput = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.TRANSCODE);
+		if (taskOutput!=null && taskOutput.getSyncStatus()!=null && taskOutput.getSyncStatus()!=0){
+			LOG.info("[task-sync] start, taskUuid: {}",taskUuid);
+			taskService.delete(taskUuid,businessType);
+			LOG.info("[task-sync] complete, taskUuid: {}",taskUuid);
+		}
 	}
 
 	public void syncInputs(String deviceIp, List<TaskInputPO> inputs) throws Exception {
