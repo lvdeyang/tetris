@@ -81,7 +81,7 @@ public class AlarmService {
 		try {
 			if("11070001".equals(alarmCode)){
 				LOG.info("transform online");
-				syncService.sync(capacityIp);
+				syncService.syncTransform(capacityIp);
 			}
 		} catch (Exception e) {
 			LOG.error("sync fail",e);

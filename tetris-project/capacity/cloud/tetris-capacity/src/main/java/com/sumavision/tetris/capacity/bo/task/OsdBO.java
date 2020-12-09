@@ -13,7 +13,9 @@ public class OsdBO {
 	private String track_type = "none";
 	
 	private Integer track_speed = 0;
-	
+
+	private Integer track_times = -1;
+
 	private String content;
 	
 	private Integer x;
@@ -120,12 +122,22 @@ public class OsdBO {
 		return this;
 	}
 
+	public Integer getTrack_times() {
+		return track_times;
+	}
+
+	public OsdBO setTrack_times(Integer track_times) {
+		this.track_times = track_times;
+		return this;
+	}
+
 	public OsdBO() {
 	}
 
 	public OsdBO(TextOsdVO osd) {
 		this.track_type = osd.getTrack_type();
 		this.track_speed = osd.getTrack_speed();
+		this.track_times = osd.getTrack_times();
 		this.content = osd.getContent();
 		this.x = osd.getX();
 		this.y = osd.getY();

@@ -50,6 +50,12 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public void updateSyncStatusById(Long id, Integer syncStatus);
 
 	@Modifying
+	@Query("update TaskInputPO input set input.analysis = ?2 where input.id = ?1")
+	public void updateAnalysisById(Long id, Integer syncStatus);
+
+	@Modifying
 	@Query("update TaskInputPO input set input.count= ?2, input.syncStatus = ?3 where input.id = ?1")
 	public void updateCountAndSyncStatusById(Long id, Integer count, Integer syncStatus);
+
+
 }

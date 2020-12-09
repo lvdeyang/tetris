@@ -1236,7 +1236,7 @@ public class DirectorTaskService {
 	}
 
 	public void delTask(String taskId) throws Exception {
-		TaskOutputPO output = taskService.delete(taskId,BusinessType.DIRECTOR);
+		TaskOutputPO output = taskService.delete(taskId,BusinessType.DIRECTOR,true);
 		if(output != null){
 			taskOutputDao.delete(output);
 		}
