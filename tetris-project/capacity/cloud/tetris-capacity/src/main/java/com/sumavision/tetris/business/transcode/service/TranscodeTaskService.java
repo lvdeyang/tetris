@@ -1790,9 +1790,7 @@ public class TranscodeTaskService {
 		if (asVO == null){
 			return "";
 		}
-
 		String responseBody = "";
-
 		if ("start".equals(asVO.getType())){
 			taskService.addInputsAfterRepeat(asVO.getDeviceIp(),asVO.getInput_array(),busType);
 			String uniq = taskService.generateUniq(asVO.getInput_array().get(0));
