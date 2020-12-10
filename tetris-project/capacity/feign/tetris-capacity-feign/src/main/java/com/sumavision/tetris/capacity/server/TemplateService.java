@@ -21,7 +21,6 @@ public class TemplateService {
     @Autowired
     private CapacityFeign capacityFeign;
 
-
     /**
      * @MethodName: addTask
      * @Description: 通过模板下发任务

@@ -24,7 +24,6 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/template/task/feign/add")
 	public JSONObject addTaskByTemplate(@RequestParam("taskInfo") String taskInfo) throws Exception;
 
-
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
