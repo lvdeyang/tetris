@@ -16,8 +16,8 @@ public interface CapacityFeign{
 	/**
 	 * @MethodName: addTaskByTemplate
 	 * @Description: 通过模板下发业务
-	 * @param taskInfo 1
-	 * @Return: com.alibaba.fastjson.JSONObject
+	 * @param taskInfo 添加任务信息
+	 * @Return: 任务创建完成后返回信息
 	 * @Author: Poemafar
 	 * @Date: 2020/12/10 16:27
 	 **/
