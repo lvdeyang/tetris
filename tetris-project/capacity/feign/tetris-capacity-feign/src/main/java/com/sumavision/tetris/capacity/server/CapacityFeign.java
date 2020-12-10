@@ -12,6 +12,19 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @FeignClient(name = "tetris-capacity", configuration = FeignConfiguration.class)
 public interface CapacityFeign{
 
+
+	/**
+	 * @MethodName: addTaskByTemplate
+	 * @Description: 通过模板下发业务
+	 * @param taskInfo 1
+	 * @Return: com.alibaba.fastjson.JSONObject
+	 * @Author: Poemafar
+	 * @Date: 2020/12/10 16:27
+	 **/
+	@RequestMapping(value = "/template/task/feign/add")
+	public JSONObject addTaskByTemplate(@RequestParam("taskInfo") String taskInfo) throws Exception;
+
+
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
