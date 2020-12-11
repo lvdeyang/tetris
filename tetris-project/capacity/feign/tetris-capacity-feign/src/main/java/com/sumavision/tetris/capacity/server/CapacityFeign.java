@@ -24,6 +24,17 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/template/task/feign/add")
 	public JSONObject addTaskByTemplate(@RequestParam("taskInfo") String taskInfo) throws Exception;
 
+
+	/**
+	 * @MethodName: getAllTemplate
+	 * @Description: 获取所有模板
+	 * @Return: com.alibaba.fastjson.JSONObject
+	 * @Author: Poemafar
+	 * @Date: 2020/12/11 8:30
+	 **/
+	@RequestMapping(value = "/template/task/feign/getAll")
+	public JSONObject getAllTemplate() throws Exception;
+
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
