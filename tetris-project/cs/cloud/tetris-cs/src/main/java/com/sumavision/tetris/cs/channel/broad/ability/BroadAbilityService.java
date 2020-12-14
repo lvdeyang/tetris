@@ -628,28 +628,69 @@ public class BroadAbilityService {
 		List<ScreenVO> resetList=new ArrayList<ScreenVO>();
 		long current=broadTime.getTime();
 		for(int i=0;i<screens.size();i++){
-			if(screens.get(i).getStartTime()!=null&&screens.get(i).getEndTime()!=null){
+			if(screens.get(i).getStartTime()!=null&&!screens.get(i).getStartTime().isEmpty()
+					&&screens.get(i).getEndTime()!=null&&!screens.get(i).getEndTime().isEmpty()){
 				Date startTime=DateUtil.parse(screens.get(i).getStartTime(),"yyyy-MM-dd HH:mm:ss");
 			    Date endTime=DateUtil.parse(screens.get(i).getEndTime(), "yyyy-MM-dd HH:mm:ss");
-			    if(startTime.getTime()>current&&i>0){
-			    	//这里应该加个备播，但是目前先给上一个直接延长duration
+			    long fileduration=Long.parseLong(screens.get(i).getDuration());
+				//前面空白的放入垫播
+			    if(startTime.getTime()>current){
 			    	long tempDuration=startTime.getTime()-current;
-			    	//screens.get(i-1).setDuration(Long.parseLong(screens.get(i-1).getDuration())+tempDuration+"");
-			    	ScreenVO screenVO=new ScreenVO();
-			    	screenVO.setPreviewUrl(channel.getBackfileUrl());
-			    	screenVO.setDuration(channel.getBackfileDuration());
-			    	int count=(int) Math.ceil(tempDuration/Long.parseLong(screenVO.getDuration()));
-			    	screenVO.setCount(count);
-			    	screenVO.setType("VIDEO");
-			    	resetList.add(screenVO);
+					int count=(int) Math.floor(tempDuration/Long.parseLong(channel.getBackfileDuration()));
+					for(int j=0;j<count;j++){
+						ScreenVO screenVO=new ScreenVO();
+						screenVO.setPreviewUrl(channel.getBackfileUrl());
+						screenVO.setDuration(channel.getBackfileDuration());
+						screenVO.setCount(1);
+						screenVO.setType("AUDIO");
+						resetList.add(screenVO);
+					}
+					long left=tempDuration%Long.parseLong(channel.getBackfileDuration());
+					if(left>10){
+						ScreenVO screenVO=new ScreenVO();
+						screenVO.setPreviewUrl(channel.getBackfileUrl());
+						screenVO.setDuration(left+"");
+						screenVO.setCount(1);
+						screenVO.setType("AUDIO");
+						resetList.add(screenVO);
+					}
 			    	current+=tempDuration;
 			    }
-			    screens.get(i).setDuration((endTime.getTime()-startTime.getTime())+"");
-			    current+=endTime.getTime()-startTime.getTime();
+			    //放入当前节目
+				resetList.add(screens.get(i));
+				//后边剩下的加入垫播
+				long progDuration=endTime.getTime()-startTime.getTime();
+				if(fileduration<progDuration){
+					long tempDuration=progDuration-fileduration;
+					int count=(int) Math.ceil(tempDuration/Long.parseLong(channel.getBackfileDuration()));
+					for(int j=0;j<count;j++){
+						ScreenVO screenVO=new ScreenVO();
+						screenVO.setPreviewUrl(channel.getBackfileUrl());
+						screenVO.setDuration(channel.getBackfileDuration());
+						screenVO.setCount(1);
+						screenVO.setType("AUDIO");
+						resetList.add(screenVO);
+					}
+					long left=tempDuration%Long.parseLong(channel.getBackfileDuration());
+					if(left>10){
+						ScreenVO screenVO=new ScreenVO();
+						screenVO.setPreviewUrl(channel.getBackfileUrl());
+						screenVO.setDuration(left+"");
+						screenVO.setCount(1);
+						screenVO.setType("AUDIO");
+						resetList.add(screenVO);
+					}
+				}else{
+					//如果文件时长大于开始结束时间间隔，则设置文件的duration为开始结束时间间隔
+					screens.get(i).setDuration(progDuration+"");
+				}
+
+				current+=endTime.getTime()-startTime.getTime();
 			}else{
 				current+=Long.parseLong(screens.get(i).getDuration());
+				resetList.add(screens.get(i));
 			}
-			resetList.add(screens.get(i));
+
 		}
 		
 		//重排插入备播，增加备播设置之后再加
@@ -1874,6 +1915,7 @@ public class BroadAbilityService {
 		data.put("effectTime",schedulePO.getBroadDate());
 		data.put("userId", broadUserIds);
 		data.put("uuid",schedulePO.getUuid());
+		data.put("channelName", channelPO.getName());
 		return data;
 	}
 	

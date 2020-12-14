@@ -1,5 +1,8 @@
 package com.suma.venus.resource.controller.api.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,12 +179,13 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "foreign/server/information")
+	@RequestMapping(value = "/foreign/server/information")
 	public Object foreignServerInformation(HttpServletRequest request)throws Exception{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartMonitor_relationService.foreignServerInformation(wrapper);
+ 		String foreignName = wrapper.getString("foreign");
+		return apiThirdpartMonitor_relationService.foreignServerInformation(foreignName);
 	}
 	
 	/**

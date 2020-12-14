@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 
@@ -46,6 +47,28 @@ public class MonitorLiveDeviceQuery {
 	 * 分页查询用户点播设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月24日 上午11:55:44
+	 * @param Long userId 业务用户id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<MonitorLiveDevicePO> 点播设备任务列表
+	 */
+	public Page<MonitorLiveDevicePO> findByUserIdAndType(
+			Long userId, 
+			int currentPage, 
+			int pageSize,
+			String type) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		LiveType liveType = LiveType.valueOf(type);
+		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByUserIdAndType(userId, liveType, page);
+		return pagedEntities;
+	}
+	
+	
+	/**
+	 * 分页查询用户点播设备任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月27日 上午10:24:50
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
@@ -60,6 +83,27 @@ public class MonitorLiveDeviceQuery {
 			return null;
 		}
 		return pagedEntities.getContent();
+	}
+	
+	/**
+	 * 分页查询用户点播设备任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 上午10:24:50
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @param String type 点播设备类型{@code LiveType 中的枚举值}
+	 * @return List<MonitorLiveDevicePO> 点播设备任务列表
+	 */
+	public Page<MonitorLiveDevicePO> findByType(
+			int currentPage, 
+			int pageSize,
+			String type) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		LiveType liveType = LiveType.valueOf(type);
+		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByType(liveType, page);
+		return pagedEntities;
+//		return pagedEntities.getContent();
 	}
 	
 	/**

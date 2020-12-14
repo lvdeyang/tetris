@@ -84,7 +84,7 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 	private String codec;
 	private Integer channelNum;
 	private Integer sample;
-	private Integer bitrate;//kbps
+	private Integer bitrate;//bps
 	
 	@Column(name = "NAME")
 	public String getName() {

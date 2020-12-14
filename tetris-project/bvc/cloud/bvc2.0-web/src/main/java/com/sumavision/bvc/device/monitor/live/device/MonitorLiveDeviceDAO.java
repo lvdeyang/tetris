@@ -26,6 +26,18 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	public Page<MonitorLiveDevicePO> findByUserId(Long userId, Pageable page);
 	
 	/**
+	 * 获取用户以及转发类型点播设备任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月24日 上午11:51:10
+	 * @param Long userId 用户id
+	 * @param LiveType type
+	 * @param Pageable page 分页信息
+	 * @return Page<MonitorLiveDevicePO> 点播设备任务列表
+	 */
+	public Page<MonitorLiveDevicePO> findByUserIdAndType(Long userId, LiveType type,Pageable page);
+	
+	/**
 	 * 获取用户的点播设备任务<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -120,5 +132,25 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @return
 	 */
 	public List<MonitorLiveDevicePO> findByVideoBundleIdAndType(String videoBundleId, LiveType type);
+	
+	/**
+	 * 通过状态查询转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月7日 上午9:45:45
+	 * @param status RUN/STOP
+	 * @return
+	 */
+	public List<MonitorLiveDevicePO> findByStatus(MonitorRecordStatus status);
+	
+	/**
+	 * 通过转发类型查询转发<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月7日 上午9:45:45
+	 * @param LiveType type
+	 * @return
+	 */
+	public Page<MonitorLiveDevicePO> findByType(LiveType type, Pageable pageAble);
 	
 }

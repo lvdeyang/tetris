@@ -33,7 +33,11 @@ public class TaskInputPO extends AbstractBasePO{
 	 * 同步状态，0表示同步，1表示不确定是否与转换上同步
 	 */
 	private Integer syncStatus = 0;
-	
+
+	/**
+	 * 是否进行码流分析，0无，1分析中
+	 */
+	private Integer analysis = 0;
 	/** 计数 **/
 	private Integer count = 1;
 	
@@ -125,5 +129,13 @@ public class TaskInputPO extends AbstractBasePO{
 
 	public void setSyncStatus(Integer syncStatus) {
 		this.syncStatus = syncStatus;
+	}
+
+	public Integer getAnalysis() {
+		return analysis;
+	}
+
+	public void setAnalysis(Integer analysis) {
+		this.analysis = analysis;
 	}
 }

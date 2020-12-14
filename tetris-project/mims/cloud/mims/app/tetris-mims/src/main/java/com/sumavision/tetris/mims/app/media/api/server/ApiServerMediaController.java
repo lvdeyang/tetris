@@ -304,8 +304,13 @@ public class ApiServerMediaController {
 		String type = request.getString("type");
 		long beginOffset = request.getLongValue("beginOffset");
 		long endOffset = request.getLongValue("endOffset");
-		Boolean refresh=request.getBoolean("refresh");
-		
+		Boolean refresh=null;
+		try {
+			refresh=request.getBoolean("refresh");
+		}catch (Exception e){
+
+		}
+
 		//参数错误
 		if((beginOffset + endOffset) != blockSize){
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);

@@ -14,6 +14,8 @@ public class TextOsdVO {
 
     private Integer track_speed;
 
+    private Integer track_times;
+
     private String content;
 
     private Integer x;
@@ -149,5 +151,13 @@ public class TextOsdVO {
 
     public void setBackground_color(String background_color) {
         this.background_color = background_color;
+    }
+
+    public Integer getTrack_times() {
+        return track_times;
+    }
+
+    public void setTrack_times(Integer track_times) {
+        this.track_times = track_times;
     }
 }

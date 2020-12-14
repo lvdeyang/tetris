@@ -1,6 +1,7 @@
 package com.sumavision.tetris.bvc.business.dispatch;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +38,6 @@ public interface DispatchFeign {
 	 */
 	@RequestMapping(value = "/tetris/dispatch/passby", method = RequestMethod.POST)
 	public JSONObject passby(
-			@RequestParam(value = "passbyArray") String passbyArray) throws Exception;
+			@RequestBody String passbyArray) throws Exception;
 
 }

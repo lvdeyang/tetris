@@ -308,7 +308,7 @@ public class StreamPassbyService {
 	 * @return TaskOutputPO 任务输出
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
-		return  taskService.delete(taskUuid,BusinessType.LIVE);
+		return  taskService.delete(taskUuid,BusinessType.LIVE,true);
 	}
 	
 	/**

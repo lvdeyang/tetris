@@ -71,7 +71,7 @@ public class MediaAudioPO extends AbstractBasePO{
 	private String codec;
 	private Integer channelNum;
 	private Integer sample;
-	private Integer bitrate;//kbps
+	private Integer bitrate;//bps
 	
 	
 	/** 文件大小 */

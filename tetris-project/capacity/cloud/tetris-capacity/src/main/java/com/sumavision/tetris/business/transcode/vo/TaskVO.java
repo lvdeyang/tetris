@@ -9,6 +9,8 @@ public class TaskVO implements Serializable {
 	private String task_id;
 	
 	private Integer system_type;
+
+	private Boolean beForce;
 	
 	private String url;
 
@@ -38,5 +40,12 @@ public class TaskVO implements Serializable {
 		this.url = url;
 		return this;
 	}
-	
+
+	public Boolean getBeForce() {
+		return beForce;
+	}
+
+	public void setBeForce(Boolean beForce) {
+		this.beForce = beForce;
+	}
 }

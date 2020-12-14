@@ -452,7 +452,7 @@ public class TransformService {
 	 * @return TaskOutputPO 任务输出
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
-		return  taskService.delete(taskUuid,BusinessType.YJGB);
+		return  taskService.delete(taskUuid,BusinessType.YJGB,true);
 	}
 
 	/**
@@ -1245,7 +1245,7 @@ public class TransformService {
 					output.setRtsp(rtsp);
 					
 					outputs.add(output);
-				}else if (task.getEsType().equals(5)){
+				}else if (task.getEsType().equals(5)){ //http_ts
 					String outputId = new StringBufferWrapper().append(OUTPUT_PREFIX)
 							.append(i+1)
 							.append("-")
@@ -1299,7 +1299,7 @@ public class TransformService {
 
 					output.setHttp_ts(httpts);
 					outputs.add(output);
-				}else if (task.getEsType().equals(6)){
+				}else if (task.getEsType().equals(6)){ //rtmp
 					String outputId = new StringBufferWrapper().append(OUTPUT_PREFIX)
 							.append(i+1)
 							.append("-")
