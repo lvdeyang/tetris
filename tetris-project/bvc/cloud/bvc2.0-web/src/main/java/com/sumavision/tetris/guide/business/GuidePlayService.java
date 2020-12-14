@@ -172,7 +172,7 @@ public class GuidePlayService {
 	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null){
 	 		List<OutputSettingPO> outputSources=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
 			if(outputSources==null){
-				throw new BaseException(StatusCode.ERROR,"备份源为空"); 
+				throw new BaseException(StatusCode.FORBIDDEN,"备份源为空"); 
 			}
 			
 			PassByBO passBy=getOutputSettingPassBy(outputGroups.get(0),OutType.SWITCH);
