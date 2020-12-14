@@ -882,8 +882,10 @@ public class ScheduleService {
 			
 			request.setDelete_input(delete);
 		}
-		
-		request.setInput_array(new ArrayListWrapper<InputBO>().addAll(inputs).getList());
+
+		if (inputs!=null&& !inputs.isEmpty()) {
+			request.setInput_array(new ArrayListWrapper<InputBO>().addAll(inputs).getList());
+		}
 		ScheduleRequest scheduleRequest = new ScheduleRequest();
 		scheduleRequest.setSource_array(new ArrayListWrapper<ScheduleProgramBO>().addAll(schedules).getList());
 		request.setSchedule(scheduleRequest);

@@ -55,6 +55,11 @@ public class TemplatePO extends AbstractBasePO {
     private String body;
 
     /**
+     * 模板描述信息
+     */
+    private String description;
+
+    /**
      * 模板转换后的参数
      */
     private String transformParams;
@@ -84,6 +89,15 @@ public class TemplatePO extends AbstractBasePO {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    @Column(columnDefinition = "longtext")
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Column(columnDefinition = "longtext")

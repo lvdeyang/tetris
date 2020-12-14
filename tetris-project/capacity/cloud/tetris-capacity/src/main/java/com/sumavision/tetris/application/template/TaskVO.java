@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class TaskVO {
 
+    private Integer index;
+
     private String codec;
 
     private String resolution;
@@ -477,4 +479,11 @@ public class TaskVO {
         this.ptime = ptime;
     }
 
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
 }

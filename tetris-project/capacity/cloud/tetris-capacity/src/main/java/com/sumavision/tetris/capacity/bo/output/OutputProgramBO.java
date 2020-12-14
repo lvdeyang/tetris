@@ -2,15 +2,19 @@ package com.sumavision.tetris.capacity.bo.output;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.template.TemplateUtil;
 import com.sumavision.tetris.business.common.MissionBO;
 import com.sumavision.tetris.application.template.MediaVO;
 import com.sumavision.tetris.application.template.ProgramVO;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
+import com.sumavision.tetris.commons.exception.BaseException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * 输出节目参数<br/>
@@ -110,7 +114,7 @@ public class OutputProgramBO {
 	}
 
 
-	public OutputProgramBO setOutputMedias(MissionBO missionBO, JSONArray tmplMedias){
+	public OutputProgramBO setOutputMedias(MissionBO missionBO, JSONArray tmplMedias) throws BaseException {
 		List<OutputMediaBO> outputMediaBOS = new ArrayList<>();
 		if (tmplMedias==null||tmplMedias.isEmpty()){
 			AtomicReference<Integer> outPid = new AtomicReference<>(512);
@@ -123,7 +127,11 @@ public class OutputProgramBO {
 				}
 				String outMediaType = "none";
 				if (t.getType().equals("passby")){
-					outMediaType = missionBO.getMediaTypeMap().get(pid);
+					try {
+						outMediaType = TemplateUtil.getInstance().getTaskInputElementType(missionBO.getInputMap().values().stream().collect(Collectors.toList()), pid);
+					} catch (BaseException e) {
+						e.printStackTrace();
+					}
 				}else{
 					outMediaType = t.getType();
 				}
@@ -140,7 +148,7 @@ public class OutputProgramBO {
 		}else {
 			for (int i = 0; i < tmplMedias.size(); i++) {
 				JSONObject mediaObj = tmplMedias.getJSONObject(i);
-				String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getInteger("index"));
+				String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getInteger("track_id"));
 				OutputMediaBO outputMediaBO = new OutputMediaBO().setPid(mediaObj.getInteger("pid")).setEncode_id(encodeId);
 				for (int j = 0; j < missionBO.getTask_array().size(); j++) {
 					TaskBO taskBO = missionBO.getTask_array().get(j);
@@ -152,7 +160,7 @@ public class OutputProgramBO {
 						}else if (taskBO.getRaw_source()!=null){
 							pid = taskBO.getRaw_source().getElement_pid();
 						}
-						outMediaType = missionBO.getMediaTypeMap().get(pid);
+						outMediaType = TemplateUtil.getInstance().getTaskInputElementType(missionBO.getInputMap().values().stream().collect(Collectors.toList()), pid);
 					}else{
 						outMediaType = taskBO.getType();
 					}

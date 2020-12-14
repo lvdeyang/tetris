@@ -31,7 +31,9 @@ public enum ProtocolType {
     ASI,
     MSS,
     SDI,
-    FILE;
+    FILE,
+    BACKUP,
+    SCHEDULE;
     public static ProtocolType getProtocolType(String type) throws BaseException {
         switch (type.toLowerCase(Locale.ENGLISH)){
             case "udp":
@@ -80,6 +82,8 @@ public enum ProtocolType {
                 return SDI;
             case "file":
                 return FILE;
+            case "schedule":
+                return SCHEDULE;
         }
         throw new BaseException(StatusCode.FORBIDDEN,"unknown protocol type:"+type);
     }

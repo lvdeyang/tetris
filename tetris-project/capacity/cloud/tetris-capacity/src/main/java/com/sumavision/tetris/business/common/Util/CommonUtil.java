@@ -5,6 +5,7 @@ package com.sumavision.tetris.business.common.Util;/**
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.template.TaskVO;
 import org.json.JSONTokener;
 
 import java.lang.reflect.Array;
@@ -70,9 +71,9 @@ public class CommonUtil {
     }
 
     /**
-     * source覆盖target
-     * @param source
-     * @param target
+     * 将target覆盖到source
+     * @param source 模板
+     * @param target 任务
      * @return
      */
     public static JSONObject coverJSONObject(JSONObject source,JSONObject target){
@@ -82,12 +83,18 @@ public class CommonUtil {
                     Integer srcLen = source.getJSONArray(tk).size();
                     Integer tarLen = target.getJSONArray(tk).size();
                     for (int i = 0; i < srcLen && i < tarLen; i++) {
-                        coverJSONObject(source.getJSONArray(tk).getJSONObject(i),target.getJSONArray(tk).getJSONObject(i));
+                        JSONObject srcObj = source.getJSONArray(tk).getJSONObject(i);
+                        JSONObject tgtObj = target.getJSONArray(tk).getJSONObject(i);
+
+                        coverJSONObject(srcObj,tgtObj);
                     }
                     //target多出来的加到source里
                     for (int i=srcLen;i<tarLen;i++){
                         source.getJSONArray(tk).add(target.getJSONArray(tk).getJSONObject(i));
                     }
+
+
+
                 }else{
                     source.put(tk,target.get(tk));
                 }

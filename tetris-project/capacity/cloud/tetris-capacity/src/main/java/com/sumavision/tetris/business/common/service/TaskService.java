@@ -381,6 +381,9 @@ public class TaskService {
                     .append(inputBO.getUdp_pcm().getSource_port())
                     .toString();
         }
+        if (inputBO.getSchedule()!=null){
+            uniq = inputBO.getId();
+        }
         //不管是否同源，每个任务一个备份关系
         if(inputBO.getBack_up_es() != null || inputBO.getBack_up_passby() != null || inputBO.getBack_up_raw() != null){
             uniq = inputBO.getId();
@@ -401,7 +404,7 @@ public class TaskService {
         }
         List<TaskOutputPO> existTasks = taskOutputDao.findByTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(taskId);
         if (existTasks==null || existTasks.isEmpty()){
-            return true;
+            return false;
         }
         for (int i = 0; i < existTasks.size(); i++) {
             TaskOutputPO taskOutput = existTasks.get(i);

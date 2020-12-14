@@ -2,6 +2,7 @@ package com.sumavision.tetris.application.template;/**
  * Created by Poemafar on 2020/10/27 14:35
  */
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 
 import java.security.PrivateKey;
@@ -14,6 +15,8 @@ import java.security.PrivateKey;
  * @Date 2020/10/27 14:35
  */
 public class SourceVO {
+
+    private Integer index;
 
     private String type;
 
@@ -65,6 +68,17 @@ public class SourceVO {
     private String sample_fmt;
 
     private String channel_layout;
+
+    //----------schedule-----
+    private String stream_type;
+
+    private Integer prev;
+
+    private Integer next;
+
+    //------input program结构----
+    private JSONArray program_array;
+    private String output_program;
 
     public String getType() {
         return type;
@@ -248,5 +262,53 @@ public class SourceVO {
 
     public void setChannel_layout(String channel_layout) {
         this.channel_layout = channel_layout;
+    }
+
+    public Integer getPrev() {
+        return prev;
+    }
+
+    public void setPrev(Integer prev) {
+        this.prev = prev;
+    }
+
+    public Integer getNext() {
+        return next;
+    }
+
+    public void setNext(Integer next) {
+        this.next = next;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public JSONArray getProgram_array() {
+        return program_array;
+    }
+
+    public void setProgram_array(JSONArray program_array) {
+        this.program_array = program_array;
+    }
+
+    public String getOutput_program() {
+        return output_program;
+    }
+
+    public void setOutput_program(String output_program) {
+        this.output_program = output_program;
+    }
+
+    public String getStream_type() {
+        return stream_type;
+    }
+
+    public void setStream_type(String stream_type) {
+        this.stream_type = stream_type;
     }
 }
