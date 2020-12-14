@@ -100,9 +100,9 @@ public class ResourceRemoteService {
 	 */
 	public String queryLocalLayerId() throws Exception{
 		
-		WorkNodePO workNode = workNodeDao.findTopByType(NodeType.ACCESS_LIANWANG);
+		WorkNodePO workNode = workNodeDao.findTopByType(NodeType.ACCESS_QTLIANGWANG);
 		if(workNode == null || workNode.getNodeUid() == null){
-			throw new BaseException(StatusCode.ERROR, "联网接入未注册！");
+			throw new BaseException(StatusCode.FORBIDDEN, "联网接入未注册！");
 		}
 		
 		return workNode.getNodeUid();
