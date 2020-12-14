@@ -37,4 +37,6 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 	@Query("update TaskOutputPO output set output.syncStatus = ?2 where output.id = ?1")
 	public void updateSyncStatusById(Long id, Integer syncStatus);
 
+
+
 }

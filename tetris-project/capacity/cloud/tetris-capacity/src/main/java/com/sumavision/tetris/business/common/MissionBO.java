@@ -30,14 +30,20 @@ public class MissionBO {
 
     TaskType taskType;
 
-    List<InputBO> input_array = new ArrayList();
+//    List<InputBO> input_array = new ArrayList();
 
     List<TaskBO> task_array = new ArrayList();
 
     List<OutputBO> output_array = new ArrayList();
 
     /**
-     * 用于记录templatevo输出trackid和 转换参数 编码ID的映射关系
+     * 输入索引号和对应的INPUTBO
+     */
+    Map<Integer,InputBO> inputMap = new HashMap<>();
+
+
+    /**
+     * 用于记录templatevo输出 index 和 转换参数 编码ID的映射关系
      */
     Map<Integer,String> outEncodeMap = new HashMap<>();
 
@@ -59,13 +65,13 @@ public class MissionBO {
         this.device_ip = device_ip;
     }
 
-    public List<InputBO> getInput_array() {
-        return input_array;
-    }
-
-    public void setInput_array(List<InputBO> input_array) {
-        this.input_array = input_array;
-    }
+//    public List<InputBO> getInput_array() {
+//        return input_array;
+//    }
+//
+//    public void setInput_array(List<InputBO> input_array) {
+//        this.input_array = input_array;
+//    }
 
     public List<TaskBO> getTask_array() {
         return task_array;
@@ -105,5 +111,13 @@ public class MissionBO {
 
     public void setMediaTypeMap(Map<Integer, String> mediaTypeMap) {
         this.mediaTypeMap = mediaTypeMap;
+    }
+
+    public Map<Integer, InputBO> getInputMap() {
+        return inputMap;
+    }
+
+    public void setInputMap(Map<Integer, InputBO> inputMap) {
+        this.inputMap = inputMap;
     }
 }

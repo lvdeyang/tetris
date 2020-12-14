@@ -11,45 +11,57 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class PreProcessingBO {
 
+	/** 缩放 */
+	@JSONField(ordinal = 1)
+	private ScaleBO scale;
+
+	/** 帧率变换 */
+	@JSONField(ordinal = 2)
+	private FpsConvertBO fps_convert;
+
 	/** 裁剪 */
+	@JSONField(ordinal = 3)
 	private CutBO cut;
 	
 	/** 文本osd */
+	@JSONField(ordinal = 4)
 	private TextOsdBO text_osd;
 	
 	/** 静态图片osd */
+	@JSONField(ordinal = 5)
 	private StaticPictureOsdBO static_pic_osd;
 	
 	/** 动态图片osd */
+	@JSONField(ordinal = 6)
 	private DynamicPictureOsdBO dynamic_pic_osd;
 	
 	/** 模糊 */
+	@JSONField(ordinal = 7)
 	private FuzzyBO fuzzy;
 	
 	/** HDR */
-	@JSONField(name = "SDRHDRConvert")
+	@JSONField(name = "SDRHDRConvert",ordinal = 8)
 	private HdrBO SDRHDRConvert;
 	
 	/** 图像增强 */
+	@JSONField(ordinal = 9)
 	private EnhanceBO enhance;
 	
 	/** 图像滤波 */
+	@JSONField(ordinal = 10)
 	private ImageFilterBO imageFilter;
 
 	/** 音频增益 */
+	@JSONField(ordinal = 11)
 	private AudioGainBO aud_gain;
 
 	/** 重采样 */
+	@JSONField(ordinal = 12)
 	private ResampleBO resample;
 	
-	/** 帧率变换 */
-	private FpsConvertBO fps_convert;
-	
-	/** 缩放 */
-	private ScaleBO scale;
-
 
 	/** 音柱 */
+	@JSONField(ordinal = 13)
 	private AudioColumnBO audiocolumn;
 
 	public ScaleBO getScale() {

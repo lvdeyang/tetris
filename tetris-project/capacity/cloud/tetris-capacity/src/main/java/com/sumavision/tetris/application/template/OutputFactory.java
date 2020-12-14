@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static com.sumavision.tetris.business.common.enumeration.ProtocolType.RTP_TS;
 import static com.sumavision.tetris.business.common.enumeration.ProtocolType.UDP_TS;
@@ -87,7 +88,7 @@ public class OutputFactory {
 
     }
 
-    public CommonTsOutputBO getCommonTsOutputBO(MissionBO missionBO, JSONObject taskOutput){
+    public CommonTsOutputBO getCommonTsOutputBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
 
         CommonTsOutputBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),CommonTsOutputBO.class);
         if (taskOutput.containsKey("bitrate")){
@@ -121,7 +122,7 @@ public class OutputFactory {
         return outputBO;
     }
 
-    public OutputHttpTsBO getOutputHttpTsBO(MissionBO missionBO, JSONObject taskOutput) {
+    public OutputHttpTsBO getOutputHttpTsBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
         OutputHttpTsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputHttpTsBO.class);
         if (taskOutput.containsKey("bitrate")){
             outputBO.setBitrate(taskOutput.getInteger("bitrate")*1000);
@@ -157,7 +158,7 @@ public class OutputFactory {
         return outputBO;
     }
 
-    public OutputSrtTsBO getOutputSrtTsBO(MissionBO missionBO, JSONObject taskOutput) {
+    public OutputSrtTsBO getOutputSrtTsBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
         OutputSrtTsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputSrtTsBO.class);
         if (taskOutput.containsKey("maxbw")){
             outputBO.setMaxbw(taskOutput.getInteger("maxbw")*1000);
@@ -327,7 +328,7 @@ public class OutputFactory {
 
     }
 
-    public OutputRtspBO getOutputRtspBO(MissionBO missionBO, JSONObject taskOutput) {
+    public OutputRtspBO getOutputRtspBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
         OutputRtspBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputRtspBO.class);
         if (outputBO.getIp()==null){
             outputBO.setIp(IpV4Util.getIpFromUrl(taskOutput.getString("url")));
@@ -354,7 +355,11 @@ public class OutputFactory {
                 }
                 String outMediaType = "none";
                 if (t.getType().equals("passby")){
-                    outMediaType = missionBO.getMediaTypeMap().get(pid);
+                    try {
+                        outMediaType = TemplateUtil.getInstance().getTaskInputElementType(missionBO.getInputMap().values().stream().collect(Collectors.toList()), pid);
+                    } catch (BaseException e) {
+                        e.printStackTrace();
+                    }
                 }else{
                     outMediaType = t.getType();
                 }
@@ -383,7 +388,7 @@ public class OutputFactory {
                         }else if (taskBO.getRaw_source()!=null){
                             pid = taskBO.getRaw_source().getElement_pid();
                         }
-                        outMediaType = missionBO.getMediaTypeMap().get(pid);
+                        outMediaType = TemplateUtil.getInstance().getTaskInputElementType(missionBO.getInputMap().values().stream().collect(Collectors.toList()), pid);
                     }else{
                         outMediaType = taskBO.getType();
                     }
@@ -511,7 +516,7 @@ public class OutputFactory {
         return outputBO;
     }
 
-    public OutputZiXiBO getOutputZiXiBO(MissionBO missionBO, JSONObject taskOutput) {
+    public OutputZiXiBO getOutputZiXiBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
         OutputZiXiBO outputBO = JSONObject.parseObject(taskOutput.toJSONString(), OutputZiXiBO.class);
 
         List<OutputProgramBO> outputProgramBOS = new ArrayList();
