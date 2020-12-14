@@ -107,6 +107,12 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 
+		<!--aop-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
     </dependencies>
   	
   	<dependencyManagement>
@@ -138,6 +144,22 @@
 		            <encoding>utf-8</encoding>
 		        </configuration>
 	        </plugin>
+
+			<!--源码-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
     </build>
 </project>

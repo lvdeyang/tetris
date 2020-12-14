@@ -81,7 +81,7 @@ public class PackageService {
 	}
 	
 	public void delete(String taskUuid) throws Exception {
-		taskService.delete(taskUuid,BusinessType.PACKAGE);
+		taskService.delete(taskUuid,BusinessType.PACKAGE,true);
 	}
 	
 	public void save(

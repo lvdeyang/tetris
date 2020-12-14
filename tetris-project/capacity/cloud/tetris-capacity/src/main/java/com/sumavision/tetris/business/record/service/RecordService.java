@@ -103,7 +103,7 @@ public class RecordService {
 		
 		System.out.println("删除收录:" + id);
 		
-		TaskOutputPO output = taskService.delete(id,BusinessType.RECORD);
+		TaskOutputPO output = taskService.delete(id,BusinessType.RECORD,true);
 
 		if(output != null){
 			taskOutputDao.delete(output);

@@ -910,7 +910,7 @@ public class ScheduleService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void deletePushTask(String taskUuid) throws Exception {
-		TaskOutputPO output = taskService.delete(taskUuid,BusinessType.PUSH);
+		TaskOutputPO output = taskService.delete(taskUuid,BusinessType.PUSH,true);
 		taskOutputDao.delete(output);
 	}
 

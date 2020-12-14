@@ -1,4 +1,4 @@
-package com.sumavision.tetris.application.template;/**
+package com.sumavision.tetris.application.template.feign;/**
  * Created by Poemafar on 2020/10/27 14:32
  */
 
@@ -8,30 +8,30 @@ import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import java.util.List;
 
 /**
- * @ClassName: TemplateVO
+ * @ClassName: TemplateTaskVO
  * @Description TODO
  * @Author: Poemafar
  * @Version：1.0
  * @Date 2020/10/27 14:32
  */
-public class TemplateVO {
+public class TemplateTaskVO {
 
     private String task_ip;               //业务必下的参数
 
     private Integer task_port=5656;            //业务必下的参数
 
-    private String template;
+    private String template;             //业务必下的参数
 
     /**
-     * 业务类型
+     * 业务类型,模板参数
      */
     private BusinessType business_type;
 
-    private List<SourceVO> map_sources;   //业务必下的参数
+    private JSONArray map_sources;   //业务必下的参数
 
     private JSONArray map_tasks;
 
-    private JSONArray map_outputs;
+    private JSONArray map_outputs;   //业务必下的参数
 
     public String getTemplate() {
         return template;
@@ -41,11 +41,11 @@ public class TemplateVO {
         this.template = template;
     }
 
-    public List<SourceVO> getMap_sources() {
+    public JSONArray getMap_sources() {
         return map_sources;
     }
 
-    public void setMap_sources(List<SourceVO> map_sources) {
+    public void setMap_sources(JSONArray map_sources) {
         this.map_sources = map_sources;
     }
 

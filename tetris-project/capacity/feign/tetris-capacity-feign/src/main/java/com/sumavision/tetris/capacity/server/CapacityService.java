@@ -12,7 +12,7 @@ public class CapacityService {
 
 	@Autowired
 	private CapacityFeign capacityFeign;
-	
+
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -270,5 +270,27 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.getEncodeTemplate(encodeType), String.class);
 	}
 
+	/**
+	 * @MethodName: addTask
+	 * @Description: 通过模板下发任务
+	 * @param taskInfo 任务参数
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/10 16:27
+	 **/
+	public String addTaskByTemplate(String taskInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addTaskByTemplate(taskInfo), String.class);
+	}
+
+	/**
+	 * @MethodName: getAllTemplate
+	 * @Description: 获取所有模板
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/11 13:18
+	 **/
+	public String getAllTemplate() throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.getAllTemplate(), String.class);
+	}
 
 }

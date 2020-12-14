@@ -1,22 +1,25 @@
-package com.sumavision.tetris.application.template;/**
+package com.sumavision.tetris.application.template.feign;/**
  * Created by Poemafar on 2020/11/3 16:40
  */
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.template.*;
 import com.sumavision.tetris.business.common.MissionBO;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
+import com.sumavision.tetris.business.common.dao.TaskInputDAO;
+import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.MediaType;
 import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.business.common.po.TaskOutputPO;
+import com.sumavision.tetris.business.common.service.TaskService;
+import com.sumavision.tetris.business.push.service.ScheduleService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
-import com.sumavision.tetris.capacity.bo.input.InputBO;
-import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
-import com.sumavision.tetris.capacity.bo.input.ProgramBO;
-import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
+import com.sumavision.tetris.capacity.bo.input.*;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.task.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
@@ -25,15 +28,14 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName: TemplateService
@@ -56,36 +58,220 @@ public class TemplateTaskService {
     @Autowired
     TranscodeTaskService transcodeTaskService;
 
-    public void addTask(TemplateVO taskVO) throws Exception {
-        TemplatePO tmpPO = getTemplateByName(taskVO.getTemplate());
-        TemplateVO templateVO = JSONObject.parseObject(tmpPO.getBody(), TemplateVO.class);
-        LOGGER.info("template params: {}",JSON.toJSONString(templateVO));
-        //组合
-//        TemplateVO tmpBO = CommonUtil.combineSydwCore(templateVO,taskVO);
-        JSONObject templateObj = JSONObject.parseObject(JSON.toJSONString(templateVO));
-        JSONObject taskObj = JSONObject.parseObject(JSON.toJSONString(taskVO));
-        JSONObject combineTaskObj = CommonUtil.coverJSONObject(templateObj,taskObj);
-        LOGGER.info("task and template combine params: {}",combineTaskObj.toJSONString());
+    @Autowired
+    ScheduleService scheduleService;
 
-        TemplateVO tmpBO = JSONObject.parseObject(combineTaskObj.toJSONString(),TemplateVO.class);
+    @Autowired
+    TaskOutputDAO taskOutputDAO;
+
+    @Autowired
+    TaskInputDAO taskInputDAO;
+
+    @Autowired
+    TaskService taskService;
+
+    /**
+     * @MethodName: addTask
+     * @Description: 根据模板下发任务
+     * @param taskBO 业务参数
+     * @Return: java.lang.String
+     * @Author: Poemafar
+     * @Date: 2020/12/11 8:37
+     **/
+    public String addTask(TemplateTaskVO taskBO) throws Exception {
+        TemplatePO tmpPO = getTemplateByName(taskBO.getTemplate());
+        TemplateTaskVO templateTaskVO = JSONObject.parseObject(tmpPO.getBody(), TemplateTaskVO.class);
+        //组合
+//        TemplateTaskVO tmpBO = CommonUtil.combineSydwCore(templateTaskVO,taskVO);
+//        JSONObject templateObj = JSONObject.parseObject(JSON.toJSONString(templateTaskVO));
+//        JSONObject taskObj = JSONObject.parseObject(JSON.toJSONString(taskVO));
+//        JSONObject combineTaskObj = CommonUtil.coverJSONObject(templateObj,taskObj);             // 合并方法1
+//        LOGGER.info("task and template combine params: {}",combineTaskObj.toJSONString());
+//        TemplateTaskVO tmpBO = JSONObject.parseObject(combineTaskObj.toJSONString(),TemplateTaskVO.class);
+        TemplateTaskVO combineJobBO = combine(templateTaskVO,taskBO);             // 合并方法2
+        LOGGER.info("combine params :{}",JSONObject.toJSONString(combineJobBO));
         //开始转换参数
         MissionBO missionBO = new MissionBO();
         missionBO.setIdCtor(new IdConstructor());
         missionBO.setTaskType(tmpPO.getTaskType());
-        missionBO.setDevice_ip(taskVO.getTask_ip());
+        missionBO.setDevice_ip(taskBO.getTask_ip());
 
-        generateInputBOS(missionBO,tmpBO);
+        generateInputBOS(missionBO,combineJobBO);
         if (TaskType.TRANS.equals(tmpPO.getTaskType())) {
-            generateTaskBOS(missionBO, tmpBO);
+            generateTaskBOS(missionBO, combineJobBO);
         }else if (TaskType.PACKAGE.equals(tmpPO.getTaskType())){
             generatePackageTaskBOS(missionBO);
         }else if (TaskType.PASSBY.equals(tmpPO.getTaskType())){
 //            generateTaskBOS();
         }
-        generateOutputBOS(missionBO,tmpBO);
+        generateOutputBOS(missionBO,combineJobBO);
 
-        transcodeTaskService.save(missionBO.getIdCtor().getJobId(), taskVO.getTask_ip(), missionBO.getInput_array()  , missionBO.getTask_array(), missionBO.getOutput_array(), BusinessType.DEFAULT);
+        transcodeTaskService.save(missionBO.getIdCtor().getJobId(), taskBO.getTask_ip(), missionBO.getInputMap().values().stream().collect(Collectors.toList()) , missionBO.getTask_array(), missionBO.getOutput_array(), tmpPO.getBusinessType());
+        try {
+            //如果有排期还需要再发个修改排期的任务
+            decideAndPutSchedule(missionBO,combineJobBO,tmpPO.getBusinessType());
+        } catch (Exception e) {
+            TaskOutputPO output = taskService.delete(missionBO.getIdCtor().getJobId(), tmpPO.getBusinessType(), true);
+            if(output != null){
+                taskOutputDAO.delete(output);
+            }
+            e.printStackTrace();
+        }
+
+        ResponseVO responseVO = new ResponseVO();
+        responseVO.setTaskId(missionBO.getIdCtor().getJobId());
+        return JSON.toJSONString(responseVO);
     }
+
+    /**
+     * @MethodName: combine
+     * @Description: 将模板参数和任务参数进行合并
+     * 通过索引进行对比，任务对象可以比模板对象多，匹配不上的模板对象就清除
+     * @param tmplVO 1 模板参数
+     * @param taskVO 2 任务参数
+     * @Return: com.sumavision.tetris.application.template.feign.TemplateTaskVO
+     * @Author: Poemafar
+     * @Date: 2020/12/10 9:11
+     **/
+    public TemplateTaskVO combine(TemplateTaskVO tmplVO, TemplateTaskVO taskVO) throws BaseException {
+        TemplateTaskVO combineJobBO = new TemplateTaskVO();
+        BeanUtils.copyProperties(taskVO,combineJobBO);
+
+        //匹配输入，任务输入可以比模板输入多，匹配不上的模板就清除
+        JSONArray combineIns = new JSONArray();
+        for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
+            JSONObject tIn = taskVO.getMap_sources().getJSONObject(i);
+            if (!tIn.containsKey("index")){
+                throw new BaseException(StatusCode.ERROR,"not find input index");
+            }
+            Integer tIdx = tIn.getInteger("index");
+            Boolean find = false;
+            for (int j = 0; j < tmplVO.getMap_sources().size(); j++) {
+                JSONObject pIn = tmplVO.getMap_sources().getJSONObject(j);
+                Integer pIdx = pIn.getInteger("index");
+                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
+                    combineIns.add(CommonUtil.coverJSONObject(pIn,tIn));
+                    find=true;
+                    break;
+                }
+            }
+            if (!find){//没找到对应的模板输出则直接加入
+                combineIns.add(tIn);
+            }
+        }
+        combineJobBO.setMap_sources(combineIns);
+
+        JSONArray combineTasks = new JSONArray();
+        for (int i = 0; i < taskVO.getMap_tasks().size(); i++) {
+            JSONObject tTask = taskVO.getMap_tasks().getJSONObject(i);
+            if (!tTask.containsKey("index")){
+                throw new BaseException(StatusCode.ERROR,"not find task index");
+            }
+            Integer tIdx = tTask.getInteger("index");
+            Boolean find = false;
+            for (int j = 0; j < tmplVO.getMap_tasks().size(); j++) {
+                JSONObject pTask = tmplVO.getMap_tasks().getJSONObject(j);
+                Integer pIdx = pTask.getInteger("index");
+                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
+                    combineTasks.add( CommonUtil.coverJSONObject(pTask,tTask));
+                    find=true;
+                    break;
+                }
+            }
+            if (!find){//没找到对应的模板输出则直接加入
+                combineTasks.add(tTask);
+            }
+        }
+        combineJobBO.setMap_tasks(combineTasks);
+
+        //匹配输出，任务输出可以比模板输出多，匹配不上的模板就清除
+        JSONArray combineOuts = new JSONArray();
+        for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
+            JSONObject tOut = taskVO.getMap_outputs().getJSONObject(i);
+            if (!tOut.containsKey("index")){
+                throw new BaseException(StatusCode.ERROR,"not find output index");
+            }
+            Integer tIdx = tOut.getInteger("index");
+            Boolean find = false;
+            for (int j = 0; j < tmplVO.getMap_outputs().size(); j++) {
+                JSONObject pOut = tmplVO.getMap_outputs().getJSONObject(j);
+                Integer pIdx = pOut.getInteger("index");
+                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
+                   combineOuts.add(CommonUtil.coverJSONObject(pOut,tOut));
+                   find=true;
+                   break;
+                }
+            }
+            if (!find){//没找到对应的模板输出则直接加入
+                combineOuts.add(tOut);
+            }
+        }
+        combineJobBO.setMap_outputs(combineOuts);
+
+        return combineJobBO;
+    }
+
+    public void decideAndPutSchedule(MissionBO missionBO, TemplateTaskVO tmplBO, BusinessType businessType) throws Exception {
+        JSONObject schedule = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
+        if (schedule!=null){
+            List<ScheduleProgramBO> schedules = new ArrayList();
+            TaskOutputPO taskOutput = taskOutputDAO.findByTaskUuidAndType(missionBO.getIdCtor().getJobId(), businessType);
+            for (int i = 0; i < tmplBO.getMap_sources().size(); i++) {
+                JSONObject sourceObj = tmplBO.getMap_sources().getJSONObject(i);
+                if (schedule.containsKey("prev") && sourceObj.getInteger("index").equals(schedule.getInteger("prev"))){
+                    InputBO preInputBO = missionBO.getInputMap().get(schedule.getInteger("prev"));
+                    schedules.add(getScheduleProgram(preInputBO,sourceObj));
+                    taskOutput.setPrevId(schedule.getLong("prev"));
+                }
+                if (schedule.containsKey("next")  && sourceObj.getInteger("index").equals(schedule.getInteger("next") )){
+                    InputBO nextInputBO = missionBO.getInputMap().get(schedule.getInteger("next"));
+                    schedules.add(getScheduleProgram(nextInputBO,sourceObj));
+                    taskOutput.setNextId(schedule.getLong("next"));
+                }
+            }
+            if (!schedules.isEmpty()) {
+                scheduleService.sendSchedule(missionBO.getDevice_ip(), missionBO.getInputMap().get(schedule.getInteger("index")).getId(), null, null, schedules);
+                taskOutput.setUpdateTime(new Date());
+                taskOutputDAO.save(taskOutput);
+            }
+        }
+
+    }
+
+    /**
+     * @MethodName: getScheduleProgram
+     * @Description: 生成 schedule program
+     * @param inputBO 1
+     * @param curSource 2
+     * @Return: com.sumavision.tetris.capacity.bo.input.ScheduleProgramBO
+     * @Author: Poemafar
+     * @Date: 2020/12/9 15:32
+     **/
+    public ScheduleProgramBO getScheduleProgram(InputBO inputBO,JSONObject curSource){
+        ScheduleProgramBO scheduleProgram = new ScheduleProgramBO();
+        scheduleProgram.setInput_id(inputBO.getId())
+                .setProgram_number(inputBO.getProgram_array().get(0).getProgram_number())
+                .setElement_array(new ArrayList());
+        List<ProgramVideoBO> videoBOS = inputBO.getProgram_array().get(0).getVideo_array();
+        if (videoBOS != null && !videoBOS.isEmpty()) {
+            ProgramElementBO ele = new ProgramElementBO().setType("video").setPid(videoBOS.get(0).getPid());
+            scheduleProgram.getElement_array().add(ele);
+        }
+        List<ProgramAudioBO> audioBOS = inputBO.getProgram_array().get(0).getAudio_array();
+        if (audioBOS != null && !audioBOS.isEmpty()) {
+            ProgramElementBO ele = new ProgramElementBO().setType("audio").setPid(audioBOS.get(0).getPid());
+            scheduleProgram.getElement_array().add(ele);
+        }
+        if (curSource.getString("type").toLowerCase().equals("file")) {
+            List<ProgramFileBO> fileBOS = JSONArray.parseArray(curSource.getString("file_array"), ProgramFileBO.class) ;
+            scheduleProgram.setFile(fileBOS.get(0));
+        }else{
+            ProgramStreamBO stream = JSONObject.parseObject(curSource.toJSONString(), ProgramStreamBO.class);
+            scheduleProgram.setLive(stream);
+        }
+        return scheduleProgram;
+    }
+
 
 
     public TemplatePO getTemplateByName(String tmpName) throws BaseException {
@@ -96,12 +282,22 @@ public class TemplateTaskService {
         return tmp;
     }
 
+    public String getAllTemplate(){
+        List<TemplateVO> templateVOS = new ArrayList<>();
+        List<TemplatePO> tplPOs = templateDAO.findByNameNotNullAndBusinessTypeNotNullAndTaskTypeNotNullAndBodyNotNull();
+        tplPOs.stream().forEach(t->{
+            TemplateVO tplVO = new TemplateVO(t.getName(),t.getBusinessType().name(),t.getTaskType().name(),t.getBody());
+            templateVOS.add(tplVO);
+        });
+        return JSON.toJSONString(templateVOS);
+    }
+
     /**
      * 添加模板
      * 从前台页面生成
-     * @param templateVO
+     * @param templateTaskVO
      */
-    public void addTemplate(TemplateVO templateVO){
+    public void addTemplate(TemplateTaskVO templateTaskVO){
 
     }
 
@@ -112,15 +308,26 @@ public class TemplateTaskService {
         templateDAO.delete(id);
     }
 
-    public void generateInputBOS(MissionBO missionBO,TemplateVO tmplBO) throws  BaseException{
-        List<InputBO> inputs = new ArrayList();
+    public void generateInputBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws  BaseException{
+        //如果有schedule，则它的输入的媒体类型应该和schedule一样
+        JSONObject schedule = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
+        if (schedule!=null) {
+            tmplBO.getMap_sources().stream().forEach(s->{
+                if (!((JSONObject)s).containsKey("mediaType")) {
+                    ((JSONObject) s).put("mediaType",schedule.getString("mediaType"));
+                }
+            });
+        }
+
+        //生成INPUTBO
         InputFactory inputFactory = new InputFactory();
         for (int i = 0; i < tmplBO.getMap_sources().size(); i++) {
-            SourceVO sourceVO = tmplBO.getMap_sources().get(i);
+            JSONObject inputObj = tmplBO.getMap_sources().getJSONObject(i);
+            SourceVO sourceVO = JSONObject.parseObject(inputObj.toJSONString(),SourceVO.class);
             InputBO inputBO = inputFactory.getInputByTemplateInput(missionBO, sourceVO);
-            inputs.add(inputBO);
+            missionBO.getInputMap().put(sourceVO.getIndex(),inputBO);
         }
-        missionBO.setInput_array(inputs);
+
     }
 
     public void generatePackageTaskBOS(MissionBO missionBO) throws BaseException {
@@ -164,7 +371,7 @@ public class TemplateTaskService {
      * @throws BaseException
      * @throws CommonException
      */
-    public void generateTaskBOS(MissionBO missionBO,TemplateVO tmplBO) throws BaseException, CommonException {
+    public void generateTaskBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws BaseException, CommonException {
         List<TaskBO> taskBOS = new ArrayList();
         TaskBO videoTaskBO = new TaskBO();
         List<EncodeBO> vEncodeBOS = new ArrayList<>();
@@ -405,41 +612,21 @@ public class TemplateTaskService {
         return processingBOS;
     }
 
-    public JSONObject coverNameAndValue(TaskVO taskVO,JSONObject target){
-        Class sourceBeanClass = taskVO.getClass();
-        Field[] sourceFields = sourceBeanClass.getDeclaredFields();
-        for(int i=0; i<sourceFields.length; i++) {
-            Field sourceField = sourceFields[i];
-            if (Modifier.isStatic(sourceField.getModifiers())) {
-                continue;
-            }
-            sourceField.setAccessible(true);
-            try {
-                if (!(sourceField.get(taskVO) == null) && !"serialVersionUID".equals(sourceField.getName().toString())) {
-                    target.put(sourceField.getName(), sourceField.get(taskVO));
-                }
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
 
-        return target;
-    }
 
-    public void generateOutputBOS(MissionBO missionBO, TemplateVO combineTaskObj) throws Exception {
+    public void generateOutputBOS(MissionBO missionBO, TemplateTaskVO combineTaskObj) throws Exception {
 
         List<OutputBO> outputs = new ArrayList();
 
         for (int i = 0; i < combineTaskObj.getMap_outputs().size(); i++) {
             JSONObject taskOutput = combineTaskObj.getMap_outputs().getJSONObject(i);
 
-
             //处理
             OutputFactory outputFactory = new OutputFactory();
             OutputBO outputBO = outputFactory.getOutputByTemplateOutput(missionBO,taskOutput);
             outputs.add(outputBO);
-
         }
+
 
         missionBO.setOutput_array(outputs);
     }

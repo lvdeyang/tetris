@@ -140,7 +140,7 @@ public class OutputProgramBO {
 		}else {
 			for (int i = 0; i < tmplMedias.size(); i++) {
 				JSONObject mediaObj = tmplMedias.getJSONObject(i);
-				String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getInteger("track_id"));
+				String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getInteger("index"));
 				OutputMediaBO outputMediaBO = new OutputMediaBO().setPid(mediaObj.getInteger("pid")).setEncode_id(encodeId);
 				for (int j = 0; j < missionBO.getTask_array().size(); j++) {
 					TaskBO taskBO = missionBO.getTask_array().get(j);
