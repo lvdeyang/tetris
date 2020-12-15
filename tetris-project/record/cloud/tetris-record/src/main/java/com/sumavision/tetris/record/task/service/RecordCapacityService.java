@@ -23,7 +23,7 @@ public class RecordCapacityService {
 	@Autowired
 	private DeviceDAO deviceDAO;
 
-	@Value("${taskTemplateName}")
+	@Value("${taskTemplateName:RECORD_COMMON}")
 	private String templateName;
 
 	public void addRecordTask(RecordTimerBO recordTimerBO) throws Exception {
