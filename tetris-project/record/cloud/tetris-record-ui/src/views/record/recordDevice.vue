@@ -29,6 +29,9 @@
             <el-table-column prop="onlineStatus" label="在线状态" width="80"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
+                  <el-button type="text" size="mini" style="padding:0; margin-left:5px;" @click="handleSync(scope.$index, scope.row)">
+                    <span style="font-size:16px;" class="el-icon-connection"></span>
+                  </el-button>
                     <el-button type="text" size="mini" style="padding:0; margin-left:5px;" @click="handleDel(scope.$index, scope.row)">
                       <span style="font-size:16px;" class="el-icon-delete"></span>
                     </el-button>
@@ -74,7 +77,7 @@
 
 <script>
 import util from '../../common/js/util'
-import { queryRecordDevice, queryDeviceFromFeignAPI, addDevice, delDevice } from '../../api/api'
+import { queryRecordDevice, queryDeviceFromFeignAPI, addDevice, delDevice, syncDevice } from '../../api/api'
 
 export default {
   data () {
@@ -179,6 +182,25 @@ export default {
         }
 
         delDevice(para).then(res => {
+          if (res.errMsg !== null && res.errMsg !== '') {
+            this.$message({
+              message: res.errMsg,
+              type: 'error',
+              duration: 3000
+            })
+          } else {
+            this.queryRecordDeviceList()
+          }
+        })
+      })
+    },
+    handleSync: function (index, row) {
+      this.$confirm('是否确认同步设备？', '提示', {}).then(() => {
+        let para = {
+          id: row.id
+        }
+
+        syncDevice(para).then(res => {
           if (res.errMsg !== null && res.errMsg !== '') {
             this.$message({
               message: res.errMsg,
