@@ -44,7 +44,7 @@ public class MonitorLiveDeviceQuery {
 	}
 	
 	/**
-	 * 分页查询用户点播设备任务<br/>
+	 * 根据用户、执行状态以及任务类型分页查询用户点播设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月24日 上午11:55:44
@@ -53,14 +53,15 @@ public class MonitorLiveDeviceQuery {
 	 * @param int pageSize 每页数据量
 	 * @return List<MonitorLiveDevicePO> 点播设备任务列表
 	 */
-	public Page<MonitorLiveDevicePO> findByUserIdAndType(
+	public Page<MonitorLiveDevicePO> findByUserIdAndTypeAndStatus(
 			Long userId, 
 			int currentPage, 
 			int pageSize,
-			String type) throws Exception{
+			String type,
+			MonitorRecordStatus status) throws Exception{
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		LiveType liveType = LiveType.valueOf(type);
-		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByUserIdAndType(userId, liveType, page);
+		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByUserIdAndTypeAndStatus(userId, liveType, status, page);
 		return pagedEntities;
 	}
 	
@@ -86,7 +87,7 @@ public class MonitorLiveDeviceQuery {
 	}
 	
 	/**
-	 * 分页查询用户点播设备任务<br/>
+	 * 根据执行状态以及任务类型分页查询用户点播设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月27日 上午10:24:50
@@ -95,15 +96,16 @@ public class MonitorLiveDeviceQuery {
 	 * @param String type 点播设备类型{@code LiveType 中的枚举值}
 	 * @return List<MonitorLiveDevicePO> 点播设备任务列表
 	 */
-	public Page<MonitorLiveDevicePO> findByType(
+	public Page<MonitorLiveDevicePO> findByTypeAndStatus(
 			int currentPage, 
 			int pageSize,
-			String type) throws Exception{
+			String type,
+			MonitorRecordStatus status) throws Exception{
+		
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		LiveType liveType = LiveType.valueOf(type);
-		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByType(liveType, page);
+		Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceDao.findByTypeAndStatus(liveType, status,page);
 		return pagedEntities;
-//		return pagedEntities.getContent();
 	}
 	
 	/**
