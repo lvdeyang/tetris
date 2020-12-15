@@ -23,6 +23,9 @@ public class DeviceController {
 	DeviceDAO deviceDAO;
 
 	@Autowired
+	DeviceService deviceService;
+
+	@Autowired
 	private BundleFeignService bundleService;
 
 	@RequestMapping("/query")
@@ -117,6 +120,22 @@ public class DeviceController {
 			deviceDAO.delete(id);
 			data.put("errMsg", "");
 
+		} catch (Exception e) {
+			e.printStackTrace();
+			data.put("errMsg", "内部错误");
+		}
+
+		return data;
+	}
+
+	@RequestMapping("/sync")
+	@ResponseBody
+	public Object syncRecordDevice(Long id) {
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			deviceService.sync(id);
+			data.put("errMsg", "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			data.put("errMsg", "内部错误");
