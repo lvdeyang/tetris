@@ -164,7 +164,13 @@ public class TaskService {
                 }
             }
 
-            List<OutputBO> outputBOs = JSONObject.parseArray(output.getOutput(), OutputBO.class);
+            List<OutputBO> outputBOs = new ArrayList<>();
+            Object outputObj = JSON.parse(output.getOutput());
+            if (outputObj instanceof JSONObject) {
+                outputBOs.add(JSONObject.parseObject(output.getOutput(),OutputBO.class));
+            }else if (outputObj instanceof JSONArray){
+                outputBOs = JSONArray.parseArray(output.getOutput(),OutputBO.class);
+            }
             List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
 
             if (tasks != null) {

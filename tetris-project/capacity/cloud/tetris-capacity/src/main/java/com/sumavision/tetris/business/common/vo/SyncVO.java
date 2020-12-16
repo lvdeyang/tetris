@@ -15,6 +15,8 @@ public class SyncVO {
 
     private String deviceIp;
 
+    private String businessType;
+
     private List<String>  jobIds;
 
     public String getDeviceIp() {
@@ -31,5 +33,13 @@ public class SyncVO {
 
     public void setJobIds(List<String> jobIds) {
         this.jobIds = jobIds;
+    }
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
     }
 }

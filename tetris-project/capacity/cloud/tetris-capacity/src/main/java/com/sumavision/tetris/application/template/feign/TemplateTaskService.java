@@ -139,75 +139,113 @@ public class TemplateTaskService {
 
         //匹配输入，任务输入可以比模板输入多，匹配不上的模板就清除
         JSONArray combineIns = new JSONArray();
+
+        Boolean hasFlag = taskVO.getMap_sources().getJSONObject(0).containsKey("index");
         for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
             JSONObject tIn = taskVO.getMap_sources().getJSONObject(i);
-            if (!tIn.containsKey("index")){
-                throw new BaseException(StatusCode.ERROR,"not find input index");
-            }
-            Integer tIdx = tIn.getInteger("index");
-            Boolean find = false;
-            for (int j = 0; j < tmplVO.getMap_sources().size(); j++) {
-                JSONObject pIn = tmplVO.getMap_sources().getJSONObject(j);
-                Integer pIdx = pIn.getInteger("index");
-                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
-                    combineIns.add(CommonUtil.coverJSONObject(pIn,tIn));
-                    find=true;
-                    break;
-                }
-            }
-            if (!find){//没找到对应的模板输出则直接加入
-                combineIns.add(tIn);
+            if (tIn.containsKey("index") ^ hasFlag) {//index要么都存在，要么都不存在
+                throw new BaseException(StatusCode.ERROR, "not find output index");
             }
         }
-        combineJobBO.setMap_sources(combineIns);
+        if (!hasFlag) { //如果都不存在，就给他手动加个index
+            for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
+                taskVO.getMap_sources().getJSONObject(i).put("index",i+1);
+            }
+        }
+        if (tmplVO.getMap_sources()!=null && !tmplVO.getMap_sources().isEmpty()){
+            for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
+                JSONObject tIn = taskVO.getMap_sources().getJSONObject(i);
+                Integer tIdx = tIn.getInteger("index");
+                Boolean find = false;
+                for (int j = 0; j < tmplVO.getMap_sources().size(); j++) {
+                    JSONObject pIn = tmplVO.getMap_sources().getJSONObject(j);
+                    Integer pIdx = pIn.getInteger("index");
+                    if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
+                        combineIns.add(CommonUtil.coverJSONObject(pIn,tIn));
+                        find=true;
+                        break;
+                    }
+                }
+                if (!find){//没找到对应的模板输出则直接加入
+                    combineIns.add(tIn);
+                }
+            }
+            combineJobBO.setMap_sources(combineIns);
+        }else{
+            combineJobBO.setMap_sources(taskVO.getMap_sources());
+        }
 
+
+        //task合并
         JSONArray combineTasks = new JSONArray();
-        for (int i = 0; i < taskVO.getMap_tasks().size(); i++) {
-            JSONObject tTask = taskVO.getMap_tasks().getJSONObject(i);
-            if (!tTask.containsKey("index")){
-                throw new BaseException(StatusCode.ERROR,"not find task index");
-            }
-            Integer tIdx = tTask.getInteger("index");
-            Boolean find = false;
-            for (int j = 0; j < tmplVO.getMap_tasks().size(); j++) {
-                JSONObject pTask = tmplVO.getMap_tasks().getJSONObject(j);
-                Integer pIdx = pTask.getInteger("index");
-                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
-                    combineTasks.add( CommonUtil.coverJSONObject(pTask,tTask));
-                    find=true;
-                    break;
+        if (taskVO.getMap_tasks()!=null && !taskVO.getMap_tasks().isEmpty()) {
+            for (int i = 0; i < taskVO.getMap_tasks().size(); i++) {
+                JSONObject tTask = taskVO.getMap_tasks().getJSONObject(i);
+                if (tmplVO.getMap_tasks()!=null && !tmplVO.getMap_tasks().isEmpty()) {
+                    if (!tTask.containsKey("index")){
+                        tTask.put("index",i+1);
+//                        throw new BaseException(StatusCode.ERROR,"not find task index");
+                    }
+                    Integer tIdx = tTask.getInteger("index");
+                    Boolean find = false;
+                    for (int j = 0; j < tmplVO.getMap_tasks().size(); j++) {
+                        JSONObject pTask = tmplVO.getMap_tasks().getJSONObject(j);
+                        Integer pIdx = pTask.getInteger("index");
+                        if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
+                            combineTasks.add( CommonUtil.coverJSONObject(pTask,tTask));
+                            find=true;
+                            break;
+                        }
+                    }
+                    if (!find){//没找到对应的模板输出则直接加入
+                        combineTasks.add(tTask);
+                    }
+                }else{
+                    combineTasks.add(tTask);
                 }
             }
-            if (!find){//没找到对应的模板输出则直接加入
-                combineTasks.add(tTask);
-            }
+            combineJobBO.setMap_tasks(combineTasks);
+        }else{
+            combineJobBO.setMap_tasks(tmplVO.getMap_tasks());
         }
-        combineJobBO.setMap_tasks(combineTasks);
+
 
         //匹配输出，任务输出可以比模板输出多，匹配不上的模板就清除
         JSONArray combineOuts = new JSONArray();
-        for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
-            JSONObject tOut = taskVO.getMap_outputs().getJSONObject(i);
-            if (!tOut.containsKey("index")){
-                throw new BaseException(StatusCode.ERROR,"not find output index");
-            }
-            Integer tIdx = tOut.getInteger("index");
-            Boolean find = false;
-            for (int j = 0; j < tmplVO.getMap_outputs().size(); j++) {
-                JSONObject pOut = tmplVO.getMap_outputs().getJSONObject(j);
-                Integer pIdx = pOut.getInteger("index");
-                if (pIdx.equals(tIdx)){//找到对应的模板输出则覆盖
-                   combineOuts.add(CommonUtil.coverJSONObject(pOut,tOut));
-                   find=true;
-                   break;
+        if (taskVO.getMap_outputs()!=null && !taskVO.getMap_outputs().isEmpty()) {
+            Boolean extFlag = taskVO.getMap_outputs().getJSONObject(0).containsKey("index");
+            for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
+                JSONObject tOut = taskVO.getMap_outputs().getJSONObject(i);
+                if (tOut.containsKey("index") ^ extFlag) {//index要么都存在，要么都不存在
+                    throw new BaseException(StatusCode.ERROR, "not find output index");
                 }
             }
-            if (!find){//没找到对应的模板输出则直接加入
-                combineOuts.add(tOut);
+            if (!extFlag) { //如果都不存在，就给他手动加个index
+                for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
+                    taskVO.getMap_outputs().getJSONObject(i).put("index",i+1);
+                }
             }
+            for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
+                JSONObject tOut = taskVO.getMap_outputs().getJSONObject(i);
+                Integer tIdx = tOut.getInteger("index");
+                Boolean find = false;
+                for (int j = 0; j < tmplVO.getMap_outputs().size(); j++) {
+                    JSONObject pOut = tmplVO.getMap_outputs().getJSONObject(j);
+                    Integer pIdx = pOut.getInteger("index");
+                    if (pIdx.equals(tIdx)) {//找到对应的模板输出则覆盖
+                        combineOuts.add(CommonUtil.coverJSONObject(pOut, tOut));
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {//没找到对应的模板输出则直接加入
+                    combineOuts.add(tOut);
+                }
+            }
+            combineJobBO.setMap_outputs(combineOuts);
+        }else{
+            combineJobBO.setMap_outputs(tmplVO.getMap_outputs());
         }
-        combineJobBO.setMap_outputs(combineOuts);
-
         return combineJobBO;
     }
 
@@ -343,9 +381,9 @@ public class TemplateTaskService {
         missionBO.getOutEncodeMap().put(0, missionBO.getIdCtor().getId(0, IdConstructor.IdType.ENCODE));
         vEncodeBOS.add(vEncodeBO);
         videoTaskBO.setId(missionBO.getIdCtor().getId(0, IdConstructor.IdType.TASK))
-                .setType("video")
+                .setType("passby")
                 .setEncode_array(vEncodeBOS);
-        videoTaskBO.setTaskSource(missionBO,null);
+        videoTaskBO.setTaskSource(missionBO,MediaType.VIDEO);
         videoTaskBO.setEncode_array(vEncodeBOS);
         taskBOS.add(videoTaskBO);
 //audio
@@ -354,9 +392,9 @@ public class TemplateTaskService {
                 .setEncode_id(missionBO.getIdCtor().getId(1, IdConstructor.IdType.ENCODE)));
         missionBO.getOutEncodeMap().put(1, missionBO.getIdCtor().getId(1, IdConstructor.IdType.ENCODE));
         audioTaskBO.setId(missionBO.getIdCtor().getId(1, IdConstructor.IdType.TASK))
-                .setType("audio")
+                .setType("passby")
                 .setEncode_array(aEncodeBOS);
-        audioTaskBO.setTaskSource(missionBO,null);
+        audioTaskBO.setTaskSource(missionBO,MediaType.AUDIO);
         audioTaskBO.setEncode_array(aEncodeBOS);
         taskBOS.add(audioTaskBO);
 
