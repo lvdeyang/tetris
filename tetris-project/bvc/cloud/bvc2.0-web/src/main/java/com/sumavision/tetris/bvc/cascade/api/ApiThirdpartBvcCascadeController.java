@@ -511,39 +511,27 @@ public class ApiThirdpartBvcCascadeController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/load/device/lives")
-	public Object loadDeviceLives(
-			int currentPage,
-			int pageSize,
-			String type,
-			HttpServletRequest request) throws Exception{
+	public Object loadDeviceLives(HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
-		com.sumavision.tetris.user.UserVO user = userQuery.current();
+		HttpServletRequestParser parser = new HttpServletRequestParser(request);
+		JSONObject params = parser.parseJSON();
+		
+		Integer currentPage = Integer.valueOf(params.getString("currentPage"));
+		Integer pageSize = Integer.valueOf(params.getString("pageSize"));
+		String type = params.getString("type");
 		
 		long total = 0;
 		
 		List<MonitorLiveDevicePO> entities = null;
 		
 		if(type == null || type.equals("")){
-			if(userId.longValue() == 1l || user.getIsGroupCreator()){
-				total = monitorLiveDeviceDao.count();
-				entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
-			}else{
-				total = monitorLiveDeviceDao.countByUserId(userId);
-				entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
-			}
+			total = monitorLiveDeviceDao.count();
+			entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
 		}else{
-			if(userId.longValue() == 1l || user.getIsGroupCreator()){
-				Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByTypeAndStatus(currentPage, pageSize, type, MonitorRecordStatus.RUN);
-				entities = pagedEntities.getContent();
-				total = pagedEntities.getTotalElements();
-			}else{
-				Page<MonitorLiveDevicePO> pagedEntities  = monitorLiveDeviceQuery.findByUserIdAndTypeAndStatus(userId, currentPage, pageSize, type, MonitorRecordStatus.RUN);
-				entities = pagedEntities.getContent();
-				total = pagedEntities.getTotalElements();
-			}
+			Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByTypeAndStatus(currentPage, pageSize, type, MonitorRecordStatus.RUN);
+			entities = pagedEntities.getContent();
+			total = pagedEntities.getTotalElements();
 		}
-//		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
 		
 		//外部点播本地的外部用户id集合
 		Set<Long> outerUserIds = new HashSet<Long>();		
