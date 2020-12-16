@@ -20,8 +20,12 @@ import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.service.WorkNodeService;
 import com.suma.venus.resource.vo.WorkNodeVO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping("/layernode")
@@ -34,6 +38,12 @@ public class WorkNodeController extends ControllerBase {
 	
 	@Autowired
 	private ExtraInfoService extraInfoService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	@RequestMapping("/query")
 	@ResponseBody
@@ -123,6 +133,10 @@ public class WorkNodeController extends ControllerBase {
 //            	workNodeService.save(po);
 //            }
 			data.put("nodeUid", po.getNodeUid());
+			
+			//添加层节点日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "添加层节点", userVO.getUsername() + "添加层节点:"+po.getNodeUid(), EOprlogType.ACCESSNODE_OPR);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			e.printStackTrace();
@@ -166,6 +180,10 @@ public class WorkNodeController extends ControllerBase {
 				}
 			}
 			data.put("nodeUid", po.getNodeUid());
+			
+			//修改层节点日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "修改层节点", userVO.getUsername() + "修改层节点:"+po.getNodeUid(), EOprlogType.ACCESSNODE_OPR);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			data.put(ERRMSG, "内部错误");
@@ -183,6 +201,9 @@ public class WorkNodeController extends ControllerBase {
 			for (String id : ids) {
 				WorkNodePO node = workNodeService.get(Long.valueOf(id));
 				workNodeService.delete(node);
+				//删除层节点日志
+				UserVO userVO = userQuery.current();
+				operationLogService.send(userVO.getUsername(), "删除层节点", userVO.getUsername() + "删除层节点："+node.getNodeUid(), EOprlogType.ACCESSNODE_OPR);
 				// 通知接入层节点
 //                interfaceFromResource.delLayerNotify(node);
 			}

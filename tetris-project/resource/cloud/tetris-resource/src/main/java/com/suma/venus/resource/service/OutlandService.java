@@ -41,11 +41,14 @@ import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -87,6 +90,13 @@ public class OutlandService extends ControllerBase{
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	
 	/**
 	 * 查询本域信息<br/>
@@ -370,6 +380,11 @@ public class OutlandService extends ControllerBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+		
 		return serNodeVO;
 	}
 	
@@ -443,6 +458,10 @@ public class OutlandService extends ControllerBase{
 			e.printStackTrace();
 		}
 		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+		
 		return serNodeVO;
 	}
 	
@@ -484,6 +503,11 @@ public class OutlandService extends ControllerBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//外域连接成功日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
+		
 		return serNodeVO;
 	}
 	
