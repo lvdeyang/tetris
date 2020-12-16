@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.system.dao.CommandSystemTitleDAO;
 import com.sumavision.bvc.control.utils.UserUtils;
@@ -60,6 +61,8 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.bvc.business.common.MulticastService;
+import com.sumavision.tetris.bvc.business.group.TransmissionMode;
 import com.sumavision.tetris.bvc.system.dao.SystemConfigurationDAO;
 import com.sumavision.tetris.bvc.system.po.SystemConfigurationPO;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -130,7 +133,13 @@ public class MonitorRecordService {
 	private OperationLogService operationLogService;
 	
 	@Autowired
-	private ResourceRemoteService resourceRemoteService;	
+	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private BundleService bundleService;
+	
+	@Autowired
+	private MulticastService multicastService;
 	
 	@Autowired
 	private UserUtils userUtils;
@@ -1134,12 +1143,21 @@ public class MonitorRecordService {
 
 		LogicBO logic = new LogicBO().setUserId(task.getUserId().toString())
 				.setConnectBundle(new ArrayList<ConnectBundleBO>());
+		
+		BundlePO videoBundle = bundleService.findByBundleId(task.getVideoBundleId());
 
 		ConnectBundleBO connectVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 				.setOperateType(ConnectBundleBO.OPERATE_TYPE).setLock_type("write").setBundleId(task.getVideoBundleId())
 				.setLayerId(task.getVideoLayerId()).setBundle_type(task.getVideoBundleType());
 		ConnectBO connectVideoChannel = new ConnectBO().setChannelId(task.getVideoChannelId()).setChannel_status("Open")
 				.setBase_type(task.getVideoBaseType()).setCodec_param(codec);
+		//发组播视频
+		if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+			String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 0);
+			connectVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
+								.setMulti_addr(videoAddr)
+								.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+		}
 		connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
 		logic.getConnectBundle().add(connectVideoBundle);
 
@@ -1147,6 +1165,13 @@ public class MonitorRecordService {
 			if (task.getVideoBundleId().equals(task.getAudioBundleId())) {
 				ConnectBO connectAudioChannel = new ConnectBO().setChannelId(task.getAudioChannelId())
 						.setChannel_status("Open").setBase_type(task.getAudioBaseType()).setCodec_param(codec);
+				//发组播音频
+				if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+					String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+					connectAudioChannel.setMode(TransmissionMode.MULTICAST.getCode())
+										.setMulti_addr(audioAddr)
+										.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+				}
 				connectVideoBundle.getChannels().add(connectAudioChannel);
 			} else {
 				ConnectBundleBO connectAudioBundle = new ConnectBundleBO()
@@ -1263,10 +1288,26 @@ public class MonitorRecordService {
 		}
 		//额外添加结束
 		
+		//收组播视频
+		BundlePO videoBundle = bundleService.findByBundleId(task.getVideoBundleId());
+		if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+			String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 0);
+			recordSet.setMode(TransmissionMode.MULTICAST.getCode())
+								.setMulti_video_addr(videoAddr)
+								.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+		}
+		
 		if (task.getAudioBundleId() != null) {
 			RecordSourceBO audioSource = new RecordSourceBO().setType("channel").setBundle_id(task.getAudioBundleId())
 					.setLayer_id(task.getAudioLayerId()).setChannel_id(task.getAudioChannelId());
 			recordSet.setAudio_source(audioSource);
+			//收组播音频
+			if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+				String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+				recordSet.setMode(TransmissionMode.MULTICAST.getCode())
+									.setMulti_audio_addr(audioAddr)
+									.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+			}
 		}
 		logic.setRecordSet(new ArrayListWrapper<RecordSetBO>().add(recordSet).getList());
 
@@ -1302,10 +1343,26 @@ public class MonitorRecordService {
 				 .setTime_segment(timeSegment);
 		//添加结束
 		
+		//收组播视频
+		BundlePO videoBundle = bundleService.findByBundleId(task.getVideoBundleId());
+		if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+			String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 0);
+			recordSet.setMode(TransmissionMode.MULTICAST.getCode())
+								.setMulti_video_addr(videoAddr)
+								.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+		}
+		
 		if (task.getAudioBundleId() != null) {
 			RecordSourceBO audioSource = new RecordSourceBO().setType("channel").setBundle_id(task.getAudioBundleId())
 					.setLayer_id(task.getAudioLayerId()).setChannel_id(task.getAudioChannelId());
 			recordSet.setAudio_source(audioSource);
+			//收组播音频
+			if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
+				String audioAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+				recordSet.setMode(TransmissionMode.MULTICAST.getCode())
+									.setMulti_audio_addr(audioAddr)
+									.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
+			}
 		}
 		logic.setRecordSet(new ArrayListWrapper<RecordSetBO>().add(recordSet).getList());
 

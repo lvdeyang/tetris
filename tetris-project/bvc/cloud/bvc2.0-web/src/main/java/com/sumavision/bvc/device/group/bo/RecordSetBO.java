@@ -45,6 +45,8 @@ public class RecordSetBO {
 	
 	private String multi_audio_addr="224.1.1.4:2002";
 	
+	private String src_multi_ip="224.1.1.4";
+	
 	//mode:multicast, //single, multicast
 	//先写为String 写死
 	private String mode="single";
@@ -267,6 +269,15 @@ public class RecordSetBO {
 
 	public RecordSetBO setMulti_audio_addr(String multi_audio_addr) {
 		this.multi_audio_addr = multi_audio_addr;
+		return this;
+	}
+
+	public String getSrc_multi_ip() {
+		return src_multi_ip;
+	}
+
+	public RecordSetBO setSrc_multi_ip(String src_multi_ip) {
+		this.src_multi_ip = src_multi_ip;
 		return this;
 	}
 
