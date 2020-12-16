@@ -53,12 +53,7 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
-import com.suma.venus.resource.dao.PrivilegeDAO;
-import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
-import com.suma.venus.resource.dao.SerNodeDao;
-import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
-import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceFromResource;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundleLoginBlackListPO;
@@ -78,18 +73,19 @@ import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.FolderService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.capacity.server.CapacityService;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
-import antlr.collections.impl.LList;
 
 @Controller
 @RequestMapping("/bundle")
@@ -174,22 +170,13 @@ public class BundleManageController extends ControllerBase {
 	private ExtraInfoDao extraInfoDao;
 	
 	@Autowired
-	private WorkNodeDao workNodeDao;
-	
-	@Autowired
-	private SerNodeDao serNodeDao;
-	
-	@Autowired
-	private PrivilegeDAO privilegeDAO;
-	
-	@Autowired
-	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
-	
-	@Autowired
-	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
-	
-	@Autowired
 	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -310,6 +297,10 @@ public class BundleManageController extends ControllerBase {
 			}
 			
 			data.put("bundleId", bundlePO.getBundleId());
+			
+			//添加设备日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "添加设备", userVO.getUsername() + "添加设备：" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			e.printStackTrace();
@@ -429,6 +420,10 @@ public class BundleManageController extends ControllerBase {
 					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
 					
 					deleteByBundleId(bundleId);
+					
+					//删除设备日志
+					UserVO userVO = userQuery.current();
+					operationLogService.send(userVO.getUsername(), "删除设备", userVO.getUsername() + "删除设备：" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
 					data.put(ERRMSG, "内部错误");
@@ -751,6 +746,10 @@ public class BundleManageController extends ControllerBase {
 				passByBOs.add(passByBO);
 				tetrisDispatchService.dispatch(passByBOs);
 			}
+			
+			//修改设备日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "修改设备", userVO.getUsername() + "修改设备:" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
 			
 		} catch (Exception e) {
 			LOGGER.error(e.toString());

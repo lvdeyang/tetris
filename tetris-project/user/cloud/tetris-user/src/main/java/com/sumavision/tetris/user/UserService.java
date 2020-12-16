@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
@@ -126,6 +127,9 @@ public class UserService{
 	
 	@Autowired
 	private UserTagsDAO userTagsDAO;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/**
 	 * 锁定用户<br/>
@@ -431,6 +435,11 @@ public class UserService{
 			}
 		}
 		result.setBusinessRoles(JSON.toJSONString(roles));
+		
+		//添加用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "添加用戶", "用户  " + userVO.getUsername() + " 添加了用户  " + user.getUsername(), EOprlogType.USER_OPR);
+		
 		return result;
 	}
 	
@@ -664,6 +673,10 @@ public class UserService{
 																											   .getList());
 		applicationEventPublisher.publishEvent(event);
 		
+		//删除用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "删除用戶", "用户  " + userVO.getUsername() + " 删除了用户  " + user.getUsername(), EOprlogType.USER_OPR);
+		
 	}
 	
 	/**
@@ -769,6 +782,10 @@ public class UserService{
 			}
 		}
 		result.setBusinessRoles(JSON.toJSONString(roles));
+		
+		//修改用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "修改用户", "用户 " + userVO.getUsername() + "修改了用户 " + user.getUsername() + " 的信息", EOprlogType.USER_OPR);
 		
 		return result;
 	}

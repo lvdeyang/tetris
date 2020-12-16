@@ -128,6 +128,7 @@ import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
@@ -889,14 +890,16 @@ public class HttpInterfaceController {
 			log.setUserName("");
 			log.setOprName("设备上线");
 			log.setSourceServiceIP("");
-			log.setOprDetail(bundleId);
 			log.setOprlogType(EOprlogType.DEVICE_ONLINE);
 //			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
+			
 			if (null == po) {
 				respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 				return resp;
 			}
+			String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+			log.setOprDetail(bundlename);
 
 			if(!po.getDeviceModel().equalsIgnoreCase("player")){
 				alarmFeign.sendOprlog(log);
@@ -1010,9 +1013,11 @@ public class HttpInterfaceController {
 			log.setUserName("");
 			log.setOprName("设备下线");
 			log.setSourceServiceIP("");
-			log.setOprDetail(bundleId);
 			log.setOprlogType(EOprlogType.DEVICE_OFFLINE);
 			BundlePO po = bundleService.findByBundleId(bundleId);
+			
+			String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+			log.setOprDetail(bundlename);
 			if(null != po && !po.getDeviceModel().equalsIgnoreCase("player")){
 				alarmFeign.sendOprlog(log);
 			}

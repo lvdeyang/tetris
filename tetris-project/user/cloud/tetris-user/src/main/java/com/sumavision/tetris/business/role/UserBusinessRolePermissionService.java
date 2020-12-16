@@ -9,14 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionVO;
 import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
+import com.sumavision.tetris.user.OperationLogService;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 
 /**
@@ -37,6 +42,12 @@ public class UserBusinessRolePermissionService {
 	
 	@Autowired
 	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/**
 	 * 用户绑定系统角色<br/>
@@ -117,6 +128,8 @@ public class UserBusinessRolePermissionService {
 		
 		List<UserSystemRolePermissionPO> existPermissions = userSystemRolePermissionDao.findByRoleIdAndUserIdIn(roleId, userIds);
 		
+		StringBufferWrapper userName = new StringBufferWrapper();
+		
 		List<UserSystemRolePermissionPO> permissions = new ArrayList<UserSystemRolePermissionPO>();
 		for(UserPO user:users){
 			boolean finded = false;
@@ -137,6 +150,7 @@ public class UserBusinessRolePermissionService {
 				permission.setRoleType(role.getType());
 				permissions.add(permission);
 			}
+			userName.append(user.getUsername()).append(",");
 		}
 		
 		userSystemRolePermissionDao.save(permissions);
@@ -150,6 +164,10 @@ public class UserBusinessRolePermissionService {
 				}
 			}
 		}
+		
+		//用户绑定角色日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "用户绑定角色", "用户  " + userVO.getUsername() + " 添加用户  " + userName.toString() + " 到 " + role.getName() + " 角色", EOprlogType.USER_ROLE_CHANGE);
 		
 		return view_permissions;
 	}
@@ -166,6 +184,13 @@ public class UserBusinessRolePermissionService {
 		
 		if(permission != null){
 			userSystemRolePermissionDao.delete(permission);
+			
+			UserPO userPO = userDao.findOne(permission.getUserId());
+			SystemRolePO role = systemRoleDao.findOne(permission.getRoleId());
+			
+			//用户解除角色日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "用户解除角色", "用户  " + userVO.getUsername() + " 解除用户  " + userPO.getUsername() + " 的 " + role.getName() + " 角色", EOprlogType.USER_ROLE_CHANGE);
 		}
 	}
 	
