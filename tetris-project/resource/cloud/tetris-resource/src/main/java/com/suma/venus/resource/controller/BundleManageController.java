@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,16 +68,10 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
-import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
-import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
@@ -424,7 +417,7 @@ public class BundleManageController extends ControllerBase {
 					List<PassByBO> passByBOs = new ArrayList<PassByBO>();
 					PassByBO passByBO = new PassByBO();
 					BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
-					if(bundlePO.getAccessNodeUid() != null && !bundlePO.getAccessNodeUid().equals("")){
+					if(bundlePO.getAccessNodeUid() != null && !"".equals(bundlePO.getAccessNodeUid())){
 						passByBO.setLayer_id(bundlePO.getAccessNodeUid());
 						BundleVO bundleVO = new BundleVO();
 						bundleVO.setOperate("delete_bundle");
@@ -438,6 +431,7 @@ public class BundleManageController extends ControllerBase {
 					deleteByBundleId(bundleId);
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
+					data.put(ERRMSG, "内部错误");
 				}
 				
 			}
@@ -689,7 +683,8 @@ public class BundleManageController extends ControllerBase {
 			Long folderId,
 			String location,
 			String multicastSourceIp,
-			Boolean transcod) {
+			Boolean transcod,
+			Boolean ignoreBasicInfo) {
 		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
 				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
 
@@ -697,27 +692,29 @@ public class BundleManageController extends ControllerBase {
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
 			
-			if (!bundleName.equals(bundle.getBundleName())) {
-				bundle.setBundleName(bundleName);
-			}
+			if(ignoreBasicInfo == null || !ignoreBasicInfo.booleanValue()==true){
+				if (!bundleName.equals(bundle.getBundleName())) {
+					bundle.setBundleName(bundleName);
+				}
 
-			if (!deviceIp.equals(bundle.getDeviceIp())) {
-				bundle.setDeviceIp(deviceIp);
-			}
+				if (!deviceIp.equals(bundle.getDeviceIp())) {
+					bundle.setDeviceIp(deviceIp);
+				}
 
-			if (!devicePort.equals(bundle.getDevicePort())) {
-				bundle.setDevicePort(devicePort);
+				if (!devicePort.equals(bundle.getDevicePort())) {
+					bundle.setDevicePort(devicePort);
+				}
+				bundle.setMulticastEncode(multicastEncode);
+				bundle.setMulticastEncodeAddr(multicastEncodeAddr);
+				bundle.setMulticastDecode(multicastDecode);
+				bundle.setFolderId(folderId);
+				bundle.setLocation(location);
+				bundle.setMulticastSourceIp(multicastSourceIp);
+				bundle.setTranscod(transcod);
+				
+				bundle.setSyncStatus(SYNC_STATUS.ASYNC);
+				bundleService.save(bundle);
 			}
-			bundle.setMulticastEncode(multicastEncode);
-			bundle.setMulticastEncodeAddr(multicastEncodeAddr);
-			bundle.setMulticastDecode(multicastDecode);
-			bundle.setFolderId(folderId);
-			bundle.setLocation(location);
-			bundle.setMulticastSourceIp(multicastSourceIp);
-			bundle.setTranscod(transcod);
-			
-			bundle.setSyncStatus(SYNC_STATUS.ASYNC);
-			bundleService.save(bundle);
 
 			// 删除旧数据
 			extraInfoService.deleteByBundleId(bundleId);
@@ -757,6 +754,7 @@ public class BundleManageController extends ControllerBase {
 			
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			data.put(ERRMSG, "内部错误");
 		}
 		

@@ -124,7 +124,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/device/permission/change")
+	@RequestMapping(value = "/device/institution/change")
 	public Object devicePermissionChange(HttpServletRequest request)throws Exception{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);

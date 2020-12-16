@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hibernate.annotations.SourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -37,7 +35,6 @@ import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
-import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
@@ -55,9 +52,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
-import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
@@ -985,6 +980,7 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 					
 					
@@ -1035,6 +1031,8 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 				}
 				
