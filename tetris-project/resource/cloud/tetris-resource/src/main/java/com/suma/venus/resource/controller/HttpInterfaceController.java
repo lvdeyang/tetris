@@ -101,7 +101,6 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
-import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -228,6 +227,7 @@ public class HttpInterfaceController {
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
 	
+	@Autowired
 	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
 
 	// 业务使用方式：vod|meeting
@@ -925,23 +925,32 @@ public class HttpInterfaceController {
 			
 			//设备状态变动
 			try {
-				List<BundleVO> devices = new ArrayList<BundleVO>();
+				//List<BundleVO> devices = new ArrayList<BundleVO>();
 				BundleVO bundleVO = BundleVO.fromPO(po);
 				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-				devices.add(bundleVO);
-				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				//devices.add(bundleVO);
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				Map<String, Object> device = new HashMap<String, Object>();
+				device.put("bundleId", po.getBundleId());
+				device.put("operate", ONLINE_STATUS.ONLINE);
+				devices.add(device);
+				Set<String> bundles = new HashSet<String>();
+				bundles.add(bundleId);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundles);
 				Set<Long> privilegelLongs = new HashSet<Long>();
-				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
 					for (PrivilegePO privilegePO : privilegePOs) {
 						privilegelLongs.add(privilegePO.getId());
 					}
 				}
 				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
 				Set<Long> serNodeIds = new HashSet<Long>();
-				Long roleId = null;
-				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
-					roleId = rolePrivilegeMaps.get(0).getRoleId();
-					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+				Set<Long> roleids = new HashSet<Long>();
+				if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+					for (RolePrivilegeMap long1 : rolePrivilegeMaps) {
+						roleids.add(long1.getRoleId());
+					}
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleids);
 					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
 						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
 							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
@@ -956,23 +965,27 @@ public class HttpInterfaceController {
 				Map<String, Object> pass_by_content = new HashMap<String, Object>();
 				local.put("name", serNodePO.getNodeName());
 				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-				for (int i = 0; i < serNodePOs.size(); i++) {
-					foreign.add(new HashMap<String, Object>());
-					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-					foreign.get(i).put("devices", devices);
-					foreign.get(i).put("role", roleId);
+				if(serNodePOs != null && serNodePOs.size()>0){
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("devices", devices);
+					}
+					pass_by_content.put("cmd", "deviceStatusChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBO.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					
+					System.out.println("------**发送Passby**------" + passByBO) ;
 				}
-				pass_by_content.put("cmd", "deviceStatusChange");
-				pass_by_content.put("local", local);
-				pass_by_content.put("foreign", foreign);
-				passByBO.setPass_by_content(pass_by_content);
-				if (workNodePOs != null && !workNodePOs.isEmpty()) {
-					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
-				}
-				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 				
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -1027,23 +1040,32 @@ public class HttpInterfaceController {
 			
 			//设备状态变动
 			try {
-				List<BundleVO> devices = new ArrayList<BundleVO>();
+				//List<BundleVO> devices = new ArrayList<BundleVO>();
 				BundleVO bundleVO = BundleVO.fromPO(po);
 				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-				devices.add(bundleVO);
-				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				//devices.add(bundleVO);
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				Map<String, Object> device = new HashMap<String, Object>();
+				device.put("bundleId", po.getBundleId());
+				device.put("operate", ONLINE_STATUS.OFFLINE);
+				devices.add(device);
+				Set<String> bundles = new HashSet<String>();
+				bundles.add(bundleId);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundles);
 				Set<Long> privilegelLongs = new HashSet<Long>();
-				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
 					for (PrivilegePO privilegePO : privilegePOs) {
 						privilegelLongs.add(privilegePO.getId());
 					}
 				}
 				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
 				Set<Long> serNodeIds = new HashSet<Long>();
-				Long roleId = null;
-				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
-					roleId = rolePrivilegeMaps.get(0).getRoleId();
-					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+				Set<Long> roleids = new HashSet<Long>();
+				if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+					for (RolePrivilegeMap long1 : rolePrivilegeMaps) {
+						roleids.add(long1.getRoleId());
+					}
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleids);
 					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
 						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
 							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
@@ -1058,23 +1080,28 @@ public class HttpInterfaceController {
 				Map<String, Object> pass_by_content = new HashMap<String, Object>();
 				local.put("name", serNodePO.getNodeName());
 				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-				for (int i = 0; i < serNodePOs.size(); i++) {
-					foreign.add(new HashMap<String, Object>());
-					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-					foreign.get(i).put("devices", devices);
-					foreign.get(i).put("role", roleId);
+				if(serNodePOs != null && serNodePOs.size()>0){
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("devices", devices);
+					}
+					pass_by_content.put("cmd", "deviceStatusChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBO.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					
+					System.out.println("------**发送Passby**------" + passByBO) ;
 				}
-				pass_by_content.put("cmd", "deviceStatusChange");
-				pass_by_content.put("local", local);
-				pass_by_content.put("foreign", foreign);
-				passByBO.setPass_by_content(pass_by_content);
-				if (workNodePOs != null && !workNodePOs.isEmpty()) {
-					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
-				}
-				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				
 				
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());

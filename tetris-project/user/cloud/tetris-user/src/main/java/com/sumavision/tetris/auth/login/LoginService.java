@@ -125,7 +125,7 @@ public class LoginService {
 			user.setLoginIp(ip);
 		}
 		if(user.getLoginIp()!=null && user.getLoginIp().length()!=0){
-			if(!ip.equals(user.getLoginIp())) throw new UserIpNotAllowLoginException(ip);
+			if(!ip.startsWith(user.getLoginIp())) throw new UserIpNotAllowLoginException(ip);
 		}
 		
 		if(UserClassify.LDAP.equals(user.getClassify())){
