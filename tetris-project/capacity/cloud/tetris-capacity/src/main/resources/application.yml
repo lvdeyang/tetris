@@ -101,8 +101,8 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://10.10.40.126:8081/eureka/
-#      defaultZone: http://192.165.56.182:8081/eureka/
+      defaultZone: http://10.10.40.184:8081/eureka/
+#      defaultZone: http://192.165.58.123:8081/eureka/
 #      defaultZone: http://192.165.56.16:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
@@ -144,5 +144,8 @@ constant:
     video:
       encode: m2v
       resolution: 720x576
+      fps: -1
     audio:
       encode: mp2
+#      打开音柱
+      column: 1

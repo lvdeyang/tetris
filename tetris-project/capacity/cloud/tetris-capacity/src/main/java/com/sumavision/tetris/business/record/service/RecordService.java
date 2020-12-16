@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import org.hibernate.exception.ConstraintViolationException;
@@ -157,7 +158,7 @@ public class RecordService {
 				
 				TaskOutputPO output = new TaskOutputPO();
 				output.setInputId(input.getId());
-				output.setOutput(JSON.toJSONString(outputBO));
+				output.setOutput(JSON.toJSONString(new ArrayList<OutputBO>().add(outputBO)));
 				output.setTask(JSON.toJSONString(taskBOs));
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);

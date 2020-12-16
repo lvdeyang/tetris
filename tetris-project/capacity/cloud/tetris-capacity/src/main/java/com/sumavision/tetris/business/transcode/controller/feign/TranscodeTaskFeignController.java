@@ -305,7 +305,7 @@ public class TranscodeTaskFeignController {
 			String syncObj,
 			HttpServletRequest request) throws Exception{
 		SyncVO syncVO = JSONObject.parseObject(syncObj, SyncVO.class);
-		String result = syncService.syncBusiness(syncVO,BusinessType.TRANSCODE);
+		String result = syncService.syncBusiness(syncVO);
 		return result;
 	}
 

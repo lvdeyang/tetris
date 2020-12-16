@@ -303,16 +303,19 @@ public class SyncService {
 	 * @Author: Poemafar
 	 * @Date: 2020/12/2 9:30
 	 **/
-	public synchronized String syncBusiness(SyncVO syncVO, BusinessType businessType) throws Exception {
+	public synchronized String syncBusiness(SyncVO syncVO) throws Exception {
 		SyncResponseVO syncResponseVO = new SyncResponseVO();
 		String deviceIp = syncVO.getDeviceIp();
 		if (deviceIp==null || deviceIp.isEmpty()){
 			throw new BaseException(StatusCode.ERROR,"fail to sync, not found deviceIp");
 		}
+		BusinessType businessType = BusinessType.valueOf(syncVO.getBusinessType().toUpperCase(Locale.ENGLISH));
+
 		syncTransform(deviceIp);//先保证能力服务和转换的同步
 		List<String> jobIds = syncVO.getJobIds();
 		List<String> lessJobIds = new ArrayList<>();
 		List<String> moreJobIds = new ArrayList<>();
+
 
 		//计算能力服务缺失的任务
 		for (int i = 0; i < jobIds.size(); i++) {
