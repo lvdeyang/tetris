@@ -1233,6 +1233,7 @@ public class MeetingEntity {
 		base_param.put("mode", aRecordSet.getString("mode"));
 		base_param.put("multi_video_addr", aRecordSet.getString("multi_video_addr"));
 		base_param.put("multi_audio_addr", aRecordSet.getString("multi_audio_addr"));
+		base_param.put("src_multi_ip", aRecordSet.getString("src_multi_ip"));
 		base_param.put("store_mode", aRecordSet.getString("store_mode"));
 		base_param.put("datetime", aRecordSet.getJSONObject("datetime"));
 		base_param.put("time_segment", aRecordSet.getJSONObject("time_segment"));
