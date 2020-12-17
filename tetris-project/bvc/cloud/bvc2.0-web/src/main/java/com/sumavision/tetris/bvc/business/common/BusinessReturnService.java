@@ -9,9 +9,13 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.tetris.bvc.business.bo.BusinessReturnBO;
 import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -22,6 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class BusinessReturnService {
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -102,6 +109,8 @@ public class BusinessReturnService {
 		BusinessReturnBO businessReturnBO=getAndRemove();
 		executeBusiness.execute(businessReturnBO.getLogic(), "最终下发命令执行");
 		
+		saveOrRemoveLianwangPassbyToResource(businessReturnBO.getLogic());
+		
 		List<Long> consumeIds = new ArrayList<Long>();
 		Map<MessageSendCacheBO, String> caches=businessReturnBO.getWebsocketCaches();
 		
@@ -111,6 +120,37 @@ public class BusinessReturnService {
 			consumeIds.add(ws.getId());
 		}
 		websocketMessageService.consumeAll(consumeIds);
+	}
+	
+	/** 把联网的passby存储或从资源层删除 */
+	public void saveOrRemoveLianwangPassbyToResource(LogicBO logic){
+		List<PassByBO> passbys = logic.getPass_by();
+		if(passbys == null) return;
+		for(PassByBO passby : passbys){
+			String type = passby.getType();
+			if(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER.equals(type)){
+				try{
+					String uuid = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getUuid();
+					String operate = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getOperate();
+					if(XtBusinessPassByContentBO.OPERATE_START.equals(operate)){
+						resourceServiceClient.coverLianwangPassby(
+								uuid, 
+								passby.getLayer_id(), 
+								type, 
+								JSON.toJSONString(passby));
+					}else if(XtBusinessPassByContentBO.OPERATE_STOP.equals(operate)){
+						resourceServiceClient.removeLianwangPassby(uuid);
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 }
