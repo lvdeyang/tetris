@@ -464,7 +464,7 @@ public class ApiThirdpartBvcCascadeController {
 		String status = params.getString("ststus");
 		BundlePO bundle = bundleDao.findByBundleId(bundleid);
 		
-		if("start".equals(status)){
+		if("open".equals(status)){
 			//开始点播设备
 			List<ChannelSchemeDTO> videoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundle.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
 			ChannelSchemeDTO videoChannel = videoChannels.get(0);
@@ -484,7 +484,7 @@ public class ApiThirdpartBvcCascadeController {
 						-1L, "");
 			}
 			
-		}else if("stop".equals(status)){
+		}else if("close".equals(status)){
 			//停止点播设备
 			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findByVideoBundleIdAndType(bundleid, LiveType.XT_LOCAL);
 			monitorLiveDeviceService.stopXtSeeLocal(liveList, true);

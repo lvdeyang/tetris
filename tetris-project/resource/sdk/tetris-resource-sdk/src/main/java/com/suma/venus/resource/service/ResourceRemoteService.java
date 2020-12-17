@@ -102,7 +102,7 @@ public class ResourceRemoteService {
 		
 		WorkNodePO workNode = workNodeDao.findTopByType(NodeType.ACCESS_QTLIANGWANG);
 		if(workNode == null || workNode.getNodeUid() == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "联网接入未注册！");
+			throw new BaseException(StatusCode.ERROR, "联网接入未注册！");
 		}
 		
 		return workNode.getNodeUid();
@@ -486,7 +486,7 @@ public class ResourceRemoteService {
 			}
 			
 		}else{
-			throw new BaseException(StatusCode.FORBIDDEN, "本服务节点不存在");
+			throw new BaseException(StatusCode.ERROR, "本服务节点不存在");
 		}
 		
 		return nodeInfo;
@@ -576,7 +576,7 @@ public class ResourceRemoteService {
 		}
 		
 		if(nodeUuid == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "设备所属节点不存在！");
+			throw new BaseException(StatusCode.ERROR, "设备所属节点不存在！");
 		}
 		
 		end = queryByUuid(allNodes, nodeUuid);
@@ -687,7 +687,7 @@ public class ResourceRemoteService {
 				break;
 			}
 		}
-		if(self == null) throw new BaseException(StatusCode.FORBIDDEN, "当前系统未创建服务节点！");
+		if(self == null) throw new BaseException(StatusCode.ERROR, "当前系统未创建服务节点！");
 		
 		return self;
 	}
