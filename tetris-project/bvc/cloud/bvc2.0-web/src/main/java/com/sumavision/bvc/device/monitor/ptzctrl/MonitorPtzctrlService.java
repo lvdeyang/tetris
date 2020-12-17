@@ -18,6 +18,7 @@ import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.PtzctrlPassByContent;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -49,6 +50,9 @@ public class MonitorPtzctrlService {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	/**
 	 * 透传云镜控制协议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -133,6 +137,8 @@ public class MonitorPtzctrlService {
 			   .append("</tiltservo>");
 		String xml = generateProtocal("start", control.toString());
 		
+		UserBO user = userUtils.queryUserById(userId);
+		
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
 			if(queryUtil.isLdapBundle(bundlePo)){
@@ -151,6 +157,7 @@ public class MonitorPtzctrlService {
 				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 				logic.getPass_by().add(ptzctrl);
 				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "竖直方向移动镜头", user.getName()+"对" +bundlePo.getBundleName()+ "向"+ direction.getName()+"移动镜头：");
 			}
 		}
 	}
@@ -180,6 +187,8 @@ public class MonitorPtzctrlService {
 			   .append("</panservo>");
 		String xml = generateProtocal("start", control.toString());
 		
+		UserBO user = userUtils.queryUserById(userId);
+		
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
 			if(queryUtil.isLdapBundle(bundlePo)){
@@ -198,6 +207,7 @@ public class MonitorPtzctrlService {
 				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 				logic.getPass_by().add(ptzctrl);
 				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "水平方向移动镜头", user.getName()+"对" +bundlePo.getBundleName()+ "向"+ direction.getName()+"移动镜头：");
 			}
 		}
 	}
@@ -227,6 +237,8 @@ public class MonitorPtzctrlService {
 			   .append("</zoom>");
 		String xml = generateProtocal("start", control.toString());
 		
+		UserBO user = userUtils.queryUserById(userId);
+		
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
 			if(queryUtil.isLdapBundle(bundlePo)){
@@ -245,6 +257,7 @@ public class MonitorPtzctrlService {
 				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 				logic.getPass_by().add(ptzctrl);
 				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "镜头变倍控制", user.getName()+"对" +bundlePo.getBundleName()+ direction.getName()+"镜头");
 			}
 		}
 	}
@@ -273,6 +286,8 @@ public class MonitorPtzctrlService {
 			   .append("</focus>");
 		String xml = generateProtocal("start", control.toString());
 		
+		UserBO user = userUtils.queryUserById(userId);
+		
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
 			if(queryUtil.isLdapBundle(bundlePo)){
@@ -291,6 +306,7 @@ public class MonitorPtzctrlService {
 				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 				logic.getPass_by().add(ptzctrl);
 				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "焦距控制", user.getName()+"对" +bundlePo.getBundleName()+"拉"+direction.getName()+"焦距");
 			}
 		}
 	}
@@ -320,7 +336,7 @@ public class MonitorPtzctrlService {
 			   .append("</aperture>");
 		String xml = generateProtocal("start", control.toString());
 		
-		
+		UserBO user = userUtils.queryUserById(userId);
 		
 		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
 		if(bundlePo != null){
@@ -340,6 +356,7 @@ public class MonitorPtzctrlService {
 				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
 				logic.getPass_by().add(ptzctrl);
 				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "光圈控制", user.getName()+"对" +bundlePo.getBundleName()+direction.getName()+"光圈");
 			}
 		}
 	}

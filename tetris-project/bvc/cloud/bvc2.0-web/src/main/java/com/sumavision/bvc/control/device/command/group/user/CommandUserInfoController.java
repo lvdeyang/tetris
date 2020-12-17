@@ -71,6 +71,9 @@ import net.sf.json.JSONObject;
 @RequestMapping(value = "/command/user/info")
 public class CommandUserInfoController {
 	
+	/** 发起业务时，synchronized锁的前缀 */
+	private static final String lockUserPrefix = "controller-userId-";
+	
 	@Autowired
 	private ServerProps serverProps;
 	
@@ -144,7 +147,9 @@ public class CommandUserInfoController {
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		if(null == userInfo){
 			//如果没有则建立默认
-			userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+			synchronized (new StringBuffer().append(lockUserPrefix).append(user.getId()).toString().intern()) {
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+			}
 		}else{
 			//如果有，则更新播放器信息
 			commandUserServiceImpl.updateUserInfoPlayers(userInfo, true);

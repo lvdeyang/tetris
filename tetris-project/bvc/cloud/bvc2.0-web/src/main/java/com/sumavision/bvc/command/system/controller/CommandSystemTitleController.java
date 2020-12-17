@@ -20,6 +20,7 @@ import com.sumavision.bvc.command.system.po.CommandSystemTitlePO;
 import com.sumavision.bvc.command.system.vo.CommandSystemTitleVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -33,6 +34,9 @@ public class CommandSystemTitleController {
 	
 	@Autowired
 	private CommandSystemTitleDAO commandSystemTitleDao;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/**
 	 * 添加任务标题<br/>
@@ -71,6 +75,8 @@ public class CommandSystemTitleController {
 		title.setTitleName(titleName);
 		commandSystemTitleDao.save(title);
 		
+		operationLogService.send(user.getName(), "添加任务标题", user.getName()+"添加任务标题，任务名称："+ titleName);
+		
 		return null;
 	}
 	
@@ -79,19 +85,35 @@ public class CommandSystemTitleController {
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年9月24日 下午3:42:13
-	 * @param id 任务标题
-	 * @return
+	 * @param id 任务标题id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value="/delete")
-	public Object delete(Long id){
+	public Object delete(Long id,
+			HttpServletRequest request) throws Exception{
 		
-		commandSystemTitleDao.delete(id);
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		CommandSystemTitlePO systemTitle = commandSystemTitleDao.findOne(id);
+		
+		commandSystemTitleDao.delete(systemTitle);
+		
+		operationLogService.send(user.getName(), "删除任务标题", user.getName()+"删除任务标题，任务名称："+ systemTitle.getTitleName());
 		
 		return null;
 	}
 	
+	/**
+	 * 修改任务标题<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月16日 下午6:52:05
+	 * @param id 任务标题id
+	 * @param beginTime 开始时间
+	 * @param titleName 标题名称
+	 * @param isCurrentTask 是否为当前任务
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value="/edit")
@@ -99,8 +121,11 @@ public class CommandSystemTitleController {
 			Long id,
 			String beginTime,
 			String titleName,
-			Boolean isCurrentTask) throws ParseException{
+			Boolean isCurrentTask,
+			HttpServletRequest request) throws Exception{
 
+		UserVO user = userUtils.getUserFromSession(request);
+		
 		if(Boolean.TRUE.equals(isCurrentTask)){
 			CommandSystemTitlePO title = commandSystemTitleDao.findByCurrentTaskEquals(true);
 			if(title!=null){
@@ -109,12 +134,14 @@ public class CommandSystemTitleController {
 			}
 		}
 		
-		
 		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
+		String tempTitle = title.getTitleName();
 		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
 		title.setTitleName(titleName);
 		title.setCurrentTask(isCurrentTask);
 		commandSystemTitleDao.save(title);
+		
+		operationLogService.send(user.getName(), "修改任务标题", user.getName()+"修改任务标题 "+tempTitle+" 为"+ title.getTitleName()+"或者设置为： "+title.getCurrentTask());
 		
 		return null;
 	}
