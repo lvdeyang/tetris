@@ -20,6 +20,8 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 @Component
@@ -127,13 +129,20 @@ public class MonitorLiveCommons {
 	 * @return String 联网的接入层id
 	 */
 	public String queryNetworkLayerId() throws Exception{
-		//List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_NETWORK);
+		/*//List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_NETWORK);
 		List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_LIANWANG);
 		if(layers==null||layers.size()<=0){
 			return null;
 		}else{
 			return layers.get(0).getNodeUid();
+		}*/
+		
+		WorkNodePO workNode = workNodeDao.findTopByType(NodeType.ACCESS_QTLIANGWANG);
+		if(workNode == null || workNode.getNodeUid() == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "联网接入未注册！");
 		}
+		
+		return workNode.getNodeUid();
 	}
 	
 	/**
