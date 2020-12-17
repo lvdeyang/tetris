@@ -644,7 +644,7 @@ public class MonitorLiveDeviceService {
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
 			
-			operationLogService.send(userVO.getNickname(), "停止转发", live.getVideoBundleName() + " 停止转发给 " + live.getDstVideoBundleName());
+			operationLogService.send(userVO.getUsername(), "停止且删除转发", userVO.getUsername() + "停止且删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else if(Boolean.TRUE.equals(stopAndDelete)){
 			
 			if(LiveType.XT_LOCAL.equals(live.getType())){
@@ -656,9 +656,14 @@ public class MonitorLiveDeviceService {
 			}else if(LiveType.XT_XT.equals(live.getType())){
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
+			
+			operationLogService.send(userVO.getUsername(), "停止但不删除转发", userVO.getUsername() + "停止但不删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else{
 			monitorLiveDeviceDao.delete(live);
+			operationLogService.send(userVO.getUsername(), "删除转发", userVO.getUsername() + "删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}
+		
+		
 		
 	}
 
@@ -1261,7 +1266,7 @@ public class MonitorLiveDeviceService {
 														   .setCodec_param(encodeCodec);
 			//发组播视频
 			if(Boolean.TRUE.equals(videoBundle.getMulticastEncode())){
-				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 2);
+				String videoAddr = multicastService.addrAddPort(videoBundle.getMulticastEncodeAddr(), 0);
 				connectVideoChannel.setMode(TransmissionMode.MULTICAST.getCode())
 									.setMulti_addr(videoAddr)
 									.setSrc_multi_ip(videoBundle.getMulticastSourceIp());
@@ -1537,6 +1542,8 @@ public class MonitorLiveDeviceService {
 	public void stopToRestart(List<Long> idList, Long userId) throws Exception{
 		
 		List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findAll(idList);
+		
+		String userName = userQuery.current().getUsername();
 		for(MonitorLiveDevicePO live:liveList){
 			try {
 				if(live == null) continue;
@@ -1577,6 +1584,8 @@ public class MonitorLiveDeviceService {
 				LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, false, live.getUdpUrl());
 				
 				executeBusiness.execute(logic, "点播系统：重新开始点播设备");
+				
+				operationLogService.send(userName, "开始转发转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 			} catch (Exception e) {
 				System.out.println("停止转发重新开始报错:");
 				e.printStackTrace();

@@ -462,7 +462,7 @@ public class ApiThirdpartBvcCascadeController {
 //		String video_channel = params.getString("video_channel");
 //		String audio_channel = params.getString(" audio_channel");
 		String status = params.getString("ststus");
-		BundlePO bundle = bundleDao.findByUsername(bundleid);
+		BundlePO bundle = bundleDao.findByBundleId(bundleid);
 		
 		if("start".equals(status)){
 			//开始点播设备

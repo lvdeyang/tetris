@@ -1015,6 +1015,8 @@ public class MonitorRecordService {
 		} else if (MonitorRecordType.XT_USER.equals(task.getType())) {
 			stopXtUser(task);
 		}
+		
+		operationLogService.send(user.getUsername(), "停止录制任务", user.getUsername()+"停止录制任务：" +task.getFileName());
 	}
 	
 	/**

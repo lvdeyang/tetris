@@ -47,6 +47,7 @@ import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.feign.ResourceServiceClient;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -135,6 +136,9 @@ public class CommandVodService {
 	
 	@Autowired
 	private BusinessReturnService businessReturnService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/**
 	 * 点播文件资源<br/>
@@ -839,6 +843,8 @@ public class CommandVodService {
 			businessReturnService.execute();
 		}
 		
+		operationLogService.send(user.getName(), "回放录像", user.getName()+"回放录像：" +task.getBusinessName());
+		
 		return new CommandGroupUserPlayerPO();
 		
 //		//占用播放器
@@ -874,6 +880,8 @@ public class CommandVodService {
 		if(businessReturnService.getSegmentedExecute()){
 			businessReturnService.execute();
 		}
+		
+		operationLogService.send(user.getName(), "关闭回放", user.getName()+"关闭回放录像：" +removeTask.getBusinessName());
 		
 		return new CommandGroupUserPlayerPO();
 		
