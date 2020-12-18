@@ -88,7 +88,7 @@
         <div style="width:337px; float:right; margin-top:130px;">
             <div style="box-shadow:0 0 6px rgba(0,0,0,.08); background-color:#fff; position:relative;">
                 <div style="padding:10px; position:absolute; right:0; top:0;">
-                    <div style="position:relative;">
+                    <!-- <div style="position:relative;">
                         <img src="images/wxLogin01.png"/>
                         <div style="position:absolute; top:0; right:70px;">
                             <div style="position:relative; border:1px solid #dddfe3; border-radius:2px; padding-left:10px; padding-right:10px;">
@@ -100,12 +100,12 @@
                                 <div style="position:absolute; right:-7px; top:4px; width:0; height:0; border-width:4px; border-style:solid dashed dashed; border-color:transparent transparent #fff transparent; transform: rotate(90deg);"></div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div style="padding:42px 32px 23px 32px;">
                     <div style="height:45px; border-bottom:1px solid #eef1f4;">
                         <div @click="tabClick('password')" :style="passwordModeTabStyle()">密码登录</div>
-                        <div @click="tabClick('phone')" :style="phoneModeTabStyle()">短信码登录</div>
+                        <!-- <div @click="tabClick('phone')" :style="phoneModeTabStyle()">短信码登录</div> -->
                     </div>
                     <form @submit.navite="doPasswordLogin" v-if="mode==='password'" style="margin-top:20px;" action="/do/password/login" method="POST">
                         <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号">
@@ -116,7 +116,7 @@
                         </el-input>
                         <input name="password" type="hidden" v-model="passwordEncode"></input>
                         <div style="margin-top:20px;">
-                            <el-button type="text" style="padding:0; float:right;">忘记密码？</el-button>
+                            <!-- <el-button type="text" style="padding:0; float:right;">忘记密码？</el-button> -->
                             <hr style="border:0; clear:both; padding:0; margin:0;"/>
                         </div>
                         <!--<el-button type="primary" style="margin-top:20px; width:100%; border-radius:2px;">登录</el-button>-->
@@ -135,15 +135,15 @@
                     </form>
                 </div>
                 <div style="height:61px; background-color:#fafbfc; border-top:solid 1px #f4f6f7; padding:10px 32px;">
-                    <el-button type="text">
+                    <!-- <el-button type="text">
                         <span>其他账号登录</span>
 	                        <span style="position:relative;">
 	                            <span style="position:absolute; left:10px; top:-2px; display:inline-block; width:20px; height:20px; line-height:20px; border-radius:100%; background:#409EFF;">
 	                                <span class="brands-icon-tencentqq icon-color-white"></span>
 	                            </span>
 	                        </span>
-                    </el-button>
-                    <el-button type="text" style="float:right;">立即注册</el-button>
+                    </el-button> -->
+                    <!-- <el-button type="text" style="float:right;">立即注册</el-button> -->
                 </div>
             </div>
             <div style="margin-top:20px; font-size:12px; text-align:center;">Copyright © 2019-2030 北京市数码视讯科技股份有限公司</div>
