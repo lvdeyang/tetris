@@ -59,6 +59,9 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 	
 	/** 记录序号，用于拼接存储地址*/
 	private Integer indexNumber;
+	
+	/** 记录的是此规则下正在执行的MonitorRecordManyTimesPO的id*/
+	private Long manyTimeId;
 
 	@Column(name="BUSINESSID")
 	public Long getBusinessId() {
@@ -181,6 +184,16 @@ public class MonitorRecordManyTimesRelationPO extends AbstractBasePO{
 
 	public MonitorRecordManyTimesRelationPO setIndexNumber(Integer indexNumber) {
 		this.indexNumber = indexNumber;
+		return this;
+	}
+
+	@Column(name="MANY_TIME_ID")
+	public Long getManyTimeId() {
+		return manyTimeId;
+	}
+
+	public MonitorRecordManyTimesRelationPO setManyTimeId(Long manyTimeId) {
+		this.manyTimeId = manyTimeId;
 		return this;
 	}
 	
