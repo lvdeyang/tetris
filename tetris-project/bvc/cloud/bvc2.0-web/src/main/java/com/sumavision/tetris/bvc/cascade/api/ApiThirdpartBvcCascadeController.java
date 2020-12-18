@@ -461,7 +461,7 @@ public class ApiThirdpartBvcCascadeController {
 		String bundleid = params.getString("bundleid");
 //		String video_channel = params.getString("video_channel");
 //		String audio_channel = params.getString(" audio_channel");
-		String status = params.getString("ststus");
+		String status = params.getString("status");
 		BundlePO bundle = bundleDao.findByBundleId(bundleid);
 		
 		if("open".equals(status)){
@@ -483,7 +483,6 @@ public class ApiThirdpartBvcCascadeController {
 						null, null, null, null, null, null, 
 						-1L, "");
 			}
-			
 		}else if("close".equals(status)){
 			//停止点播设备
 			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findByVideoBundleIdAndType(bundleid, LiveType.XT_LOCAL);

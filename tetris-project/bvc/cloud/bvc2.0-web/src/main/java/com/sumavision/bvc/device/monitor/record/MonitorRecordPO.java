@@ -20,7 +20,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Table(name = "BVC_MONITOR_RECORD")
 public class MonitorRecordPO extends AbstractBasePO{
 	
-	/** 排期录制执行时间间隔 */
+	/** 录制执行时间间隔 */
 	public static final int SCHEDULING_INTERVAL = 60000;
 
 	private static final long serialVersionUID = 1L;

@@ -816,15 +816,6 @@ public class MonitorLiveDeviceService {
 	}
 	
 	/**
-	 * 停止xt点播本地设备任务<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月19日 下午3:09:28
-	 * @param MonitorLiveDevicePO live xt点播本地设备任务
-	 * @param Long userId 发起用户id
-	 * @param String userno 发起用户号码
-	 */
-	/**
 	 * BQ项目给按bundleId停止外域看本地<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -870,7 +861,7 @@ public class MonitorLiveDeviceService {
 				monitorLiveDeviceDao.delete(live);
 			}if(Boolean.TRUE.equals(stopAndDelete)){
 				live.setStatus(MonitorRecordStatus.STOP);
-				monitorLiveDeviceDao.save(live);
+				monitorLiveDeviceDao.delete(live);
 			}
 			
 			resourceServiceClient.removeLianwangPassby(live.getUuid());
