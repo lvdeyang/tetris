@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -1962,12 +1963,14 @@ public class MonitorRecordService {
 			//停止排期录制
 			//通过排期规则表找到在运行的排期，停止录制
 			List<Long> monitorRecordEndManyTimesIds = stopRelations.stream().map(MonitorRecordManyTimesRelationPO::getManyTimeId).filter(id -> id != null).collect(Collectors.toList());
- 			List<MonitorRecordManyTimesPO> monitorRecordEndManyTimes = monitorRecordManyTimesDao.findNeedStop(monitorRecordEndManyTimesIds);
-			if(monitorRecordEndManyTimes!=null&&monitorRecordEndManyTimes.size()>0){
-				for(MonitorRecordManyTimesPO monitorRecordManyTimesPo : monitorRecordEndManyTimes){
-					monitorRecordManyTimesPo.setStatus(MonitorRecordStatus.STOP);
+ 			if(monitorRecordEndManyTimesIds.size() != 0){
+ 				List<MonitorRecordManyTimesPO> monitorRecordEndManyTimes = monitorRecordManyTimesDao.findNeedStop(monitorRecordEndManyTimesIds);
+				if(monitorRecordEndManyTimes!=null&&monitorRecordEndManyTimes.size()>0){
+					for(MonitorRecordManyTimesPO monitorRecordManyTimesPo : monitorRecordEndManyTimes){
+						monitorRecordManyTimesPo.setStatus(MonitorRecordStatus.STOP);
+					}
 				}
-			}
+ 			}
 			//停止结束
 		}
 		
@@ -2014,10 +2017,10 @@ public class MonitorRecordService {
 		//找出需要录制但是错过时间没录制的：先将需要停止的做停止，再判断是否需要立即录制还是等待录制。
 		List<MonitorRecordManyTimesRelationPO> missedRelations = monitorRecordManyTimesRelationDao.findMissedRelations(now);
 		
-		if(missedRelations.size()>1){
+		if(missedRelations.size()>0){
 			
-			List<Long> missedRelationIds = missedRelations.stream().map(MonitorRecordManyTimesRelationPO::getManyTimeId).collect(Collectors.toList());
-			List<MonitorRecordManyTimesPO> missedNeedToStopRecords = monitorRecordManyTimesDao.findNeedStop(missedRelationIds);
+			List<Long> missedRecordIds = missedRelations.stream().map(MonitorRecordManyTimesRelationPO::getManyTimeId).filter(id -> id!=null).collect(Collectors.toList());
+			List<MonitorRecordManyTimesPO> missedNeedToStopRecords = monitorRecordManyTimesDao.findNeedStop(missedRecordIds);
 			if(missedNeedToStopRecords.size() > 0){
 				for(MonitorRecordManyTimesPO missedNeedToStopRecord : missedNeedToStopRecords){
 					missedNeedToStopRecord.setStatus(MonitorRecordStatus.STOP);
@@ -2073,7 +2076,7 @@ public class MonitorRecordService {
 	
 	public void setStartAndEndTime(
 			String storeMode,
-			Date todayDate,
+			Date now,
 			MonitorRecordManyTimesRelationPO relation,
 			MonitorRecordManyTimesPO monitorRecordManyTimes 
 			) throws Exception{
@@ -2091,6 +2094,8 @@ public class MonitorRecordService {
 		Date shouldStart=new Date();
 		Date shouldEnd=new Date();
 		
+		String todayDate=DateUtil.format(now,DateUtil.defaultDatePattern);
+		
 		if(MonitorRecordManyTimesMode.DAY.equals(MonitorRecordManyTimesMode.forName(storeMode))){
 			
 			//算出开始录制时间以及结束时间
@@ -2102,6 +2107,7 @@ public class MonitorRecordService {
 			
 			//
 			if(new Date().after(shouldStart) && new Date().before(shouldEnd)){
+				//TODO
 				shouldRecord=true;
 				nextStartTime=DateUtil.addDay(shouldStart, 1);
 				nextEndTime=DateUtil.addDay(shouldEnd, 1);
