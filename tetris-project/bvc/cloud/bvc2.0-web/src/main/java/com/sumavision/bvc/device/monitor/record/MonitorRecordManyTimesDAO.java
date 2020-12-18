@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 @RepositoryDefinition(domainClass=MonitorRecordManyTimesPO.class, idClass=Long.class)
 public interface MonitorRecordManyTimesDAO extends MetBaseDAO<MonitorRecordManyTimesPO> {
 
-	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO record where record.status='RUN' and record.relationId in ?1")
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO record where record.status='RUN' and record.id in ?1")
 	public List<MonitorRecordManyTimesPO> findNeedStop(Collection<Long> relationIds);
 	
 	public List<MonitorRecordManyTimesPO> findByRelationId(Long relationId);
