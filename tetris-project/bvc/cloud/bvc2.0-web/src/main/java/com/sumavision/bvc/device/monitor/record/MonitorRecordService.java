@@ -1806,13 +1806,14 @@ public class MonitorRecordService {
 			List<AvtplGearsPO> gears = avtplGearsDao.findAll(gearIds);
 			for (MonitorRecordPO record : needStartRecords) {
 
-				// logic的添加
-				LogicBO targetLogic = logics.get(record.getUserId());
+				// logic的添加。注：开始录制设备的命令在创建任务时就已经下发，所以这里不下发；开始录制用户的命令目前还需要下发
+				LogicBO targetLogic = logics.get(record.getUserId().toString());
 				if (targetLogic == null) {
 					targetLogic = new LogicBO().setUserId(record.getUserId().toString())
 							.setConnectBundle(new ArrayList<ConnectBundleBO>())
 							.setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
-							.setRecordSet(new ArrayList<RecordSetBO>()).setRecordDel(new ArrayList<RecordSetBO>());
+							.setRecordSet(new ArrayList<RecordSetBO>())
+							.setRecordDel(new ArrayList<RecordSetBO>());
 					logics.put(record.getUserId().toString(), targetLogic);
 				}
 
@@ -1836,12 +1837,12 @@ public class MonitorRecordService {
 				// 参数模板结束
 
 				if (MonitorRecordType.LOCAL_DEVICE.equals(record.getType())) {
-					targetLogic.merge(openBundle(record, codec));
-					targetLogic.merge(startRecord(record, codec));
+					/*targetLogic.merge(openBundle(record, codec));
+					targetLogic.merge(startRecord(record, codec));*/
 				} else if (MonitorRecordType.XT_DEVICE.equals(record.getType())) {
-					BundlePO bundle = bundleDao.findByBundleId(record.getVideoBundleId());
+					/*BundlePO bundle = bundleDao.findByBundleId(record.getVideoBundleId());
 					targetLogic.merge(startDevicePassby(record, codec, bundle));
-					targetLogic.merge(startRecord(record, codec));
+					targetLogic.merge(startRecord(record, codec));*/
 				} else if (MonitorRecordType.LOCAL_USER.equals(record.getType())) {
 					targetLogic.merge(openBundle(record, codec));
 					targetLogic.merge(startRecord(record, codec));
@@ -1863,12 +1864,13 @@ public class MonitorRecordService {
 			for (MonitorRecordPO record : needStopRecords) {
 
 				// logic协议
-				LogicBO targetLogic = logics.get(record.getUserId());
+				LogicBO targetLogic = logics.get(record.getUserId().toString());
 				if (targetLogic == null) {
 					targetLogic = new LogicBO().setUserId(record.getUserId().toString())
 							.setConnectBundle(new ArrayList<ConnectBundleBO>())
 							.setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
-							.setRecordSet(new ArrayList<RecordSetBO>()).setRecordDel(new ArrayList<RecordSetBO>());
+							.setRecordSet(new ArrayList<RecordSetBO>())
+							.setRecordDel(new ArrayList<RecordSetBO>());
 					logics.put(record.getUserId().toString(), targetLogic);
 				}
 
