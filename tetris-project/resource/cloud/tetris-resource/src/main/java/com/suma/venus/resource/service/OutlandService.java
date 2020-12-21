@@ -519,10 +519,32 @@ public class OutlandService extends ControllerBase{
 	 * @param id 外域id
 	 */
 	public Object outlandDelete(Long id)throws Exception{
+		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		if (serNodePO != null) {
 			outlandOff(id);
 			serNodeDao.delete(serNodePO);
+			try {
+				//发送消息
+				PassByBO passByBO = new PassByBO();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				Map<String, Object> local = new HashMap<String, Object>();
+				local.put("name", localSerNodePOs.get(0).getNodeName());
+				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+				foreign.add(new HashMap<String, Object>());
+				foreign.get(0).put("name", serNodePO.getNodeName());
+				pass_by_content.put("cmd", "foreignDelete");
+				pass_by_content.put("local", local);
+				pass_by_content.put("foreign", foreign);
+				passByBO.setPass_by_content(pass_by_content);
+				if (workNodePOs != null && !workNodePOs.isEmpty()) {
+					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+				}
+				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
