@@ -131,6 +131,7 @@ define([
             self.dialog.addStation.form.stationName = "";
             self.dialog.addStation.form.totalWidth = "";
             self.dialog.addStation.form.singleWidth = "";
+            self.dialog.addStation.form.identity = ""
             self.load();
           }
         })

@@ -1,6 +1,6 @@
 .forword-outer-control .bvc2-auto-layout-wrapper{
   position: static;
-    width: 60%;
+    width: 64%;
     height: 95%;
     float: left;
     margin-left: 1%;
@@ -15,10 +15,23 @@
   /* position: absolute; */
   padding-top: 0;
   margin-left: 2%;
-  height: calc(100% - 80px);
+  height: calc(100% - 90px);
   margin-bottom: 15px;
 }
 .forword-outer-control .col{
   width: 30%;
-  min-height: calc(100% - 40px);
+  height: 96%;
+}
+.col {
+  flex: 1;
+  padding: 10px;
+  border: solid 1px #eee;
+  border-radius: 5px;
+  float: left;
+  min-height: 500px;
+  overflow: auto;
+  background-color: #fff;
+}
+.el-tree {
+  position: relative !important;
 }
