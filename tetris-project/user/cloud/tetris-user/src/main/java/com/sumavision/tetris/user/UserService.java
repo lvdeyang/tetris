@@ -131,6 +131,9 @@ public class UserService{
 	@Autowired
 	private OperationLogService operationLogService;
 	
+	@Autowired
+	private UserCapacityDAO userCapacityDAO;
+	
 	/**
 	 * 锁定用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -1323,6 +1326,26 @@ public class UserService{
 		userSystemRolePermissionDao.save(rolePermissions);
 		
 		return userPOs;
+	}
+
+	/**
+	 * 设置修改用户在线人数上限<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月18日 上午11:33:22
+	 * @param userCapatity 人数上限数量
+	 */
+	public void setUserCapacity(Long userCapatity) {
+		List<UserCapacityPO> userCapacityPOs = userCapacityDAO.findAll();
+		if(userCapacityPOs == null || userCapacityPOs.size() == 0 || userCapacityPOs.isEmpty()){
+			UserCapacityPO userCapacityPO = new UserCapacityPO();
+			userCapacityPO.setUserCapacityLong(200L);
+			userCapacityDAO.save(userCapacityPO);
+			userCapacityPOs.add(userCapacityPO);
+		}
+		UserCapacityPO userCapacityPO = userCapacityPOs.get(0);
+		userCapacityPO.setUserCapacityLong(userCapatity);
+		userCapacityDAO.save(userCapacityPO);
 	}
 	
 }

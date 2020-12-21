@@ -10,7 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.user.UserDAO;
+import com.sumavision.tetris.user.UserPO;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
+import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -19,6 +24,14 @@ public class TokenService {
 	@Autowired
 	private TokenDAO tokenDao;
 	
+	@Autowired
+	private UserDAO userDAO;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	/**
 	 * 作废token<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -31,6 +44,16 @@ public class TokenService {
 		TokenPO token = tokenDao.findOne(id);
 		token.setToken(null);
 		token.setLastModifyTime(null);
+		UserPO user = userDAO.findOne(token.getUserId());
+		if(TerminalType.QT_ZK.equals(token.getType())){
+			UserVO userVO =  userQuery.current();
+			//指控终端强制下线校验
+			TokenPO tokenqt = tokenDao.findByUserIdAndType(user.getId(), token.getType());
+			if(tokenqt!=null && UserStatus.ONLINE.equals(token.getStatus())){
+				//强制客户端下线
+				websocketMessageService.push(user.getId().toString(), "kickOffLine", null, userVO.getId().toString(), userVO.getNickname());
+			}
+		}
 		token.setStatus(UserStatus.OFFLINE);
 		tokenDao.save(token);
 		return token;

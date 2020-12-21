@@ -78,4 +78,7 @@ public class UserService {
 		userFeign.addTagHotcount(userId, tagNames);
 	}
 	
+	public void setUserCapacity(Long userCapacity)throws Exception{
+		userFeign.setUserCapacity(userCapacity);
+	}
 }

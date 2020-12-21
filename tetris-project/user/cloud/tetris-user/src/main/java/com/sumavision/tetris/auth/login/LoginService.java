@@ -2,6 +2,7 @@ package com.sumavision.tetris.auth.login;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,6 +31,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
+import com.sumavision.tetris.user.UserCapacityDAO;
+import com.sumavision.tetris.user.UserCapacityPO;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
@@ -39,6 +42,7 @@ import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 import com.sumavision.tetris.user.exception.UserIpNotAllowLoginException;
+import com.sumavision.tetris.user.exception.UserOnlineExceedLImitException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -75,6 +79,9 @@ public class LoginService {
 	
 	@Autowired
 	private AlarmFeign alarmFeign;
+	
+	@Autowired
+	private UserCapacityDAO userCapacityDAO;
 	
 	/**
 	 * 强制用户id登录<br/>
@@ -130,6 +137,16 @@ public class LoginService {
 		
 		if(UserClassify.LDAP.equals(user.getClassify())){
 			throw new DonotSupportRoamLoginException();
+		}
+		
+		//登录人数限制
+		List<UserCapacityPO> userCapacityPOs = userCapacityDAO.findAll();
+		if (null != userCapacityPOs && userCapacityPOs.size() > 0) {
+			List<UserVO> userVOs = userQuery.queryUserOnline();
+			Integer userOnline = userVOs.size();
+			if (userOnline.longValue() > userCapacityPOs.get(0).getUserCapacityLong()) {
+				throw new UserOnlineExceedLImitException(userCapacityPOs.get(0).getUserCapacityLong().toString());
+			};
 		}
 		
 		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
