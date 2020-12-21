@@ -5,7 +5,8 @@ define([
   'text!' + window.APPPATH + 'liangwu-user/page-liangwu-user.html',
   window.APPPATH + 'liangwu-user/page-liangwu-user.i18n',
   'config',
-  'restfull',
+  // 'restfull', //sequencePost
+  'sequencePost', //包含时序请求
   'jquery',
   'context',
   'commons',
@@ -40,6 +41,7 @@ define([
         user: context.getProp('user'),
         groups: context.getProp('groups'),
         i18n: i18n,
+        createLoading: false,
         roleOption: [],
         activeId: window.BASEPATH + 'index#/page-liangwu-user',
         dialogBindRole: {
@@ -61,12 +63,14 @@ define([
           total: 0,
           condition: {
             nickname: '',
-            userno: ''
+            userno: '',
+            userType: 'personal'
           }
         },
         dialog: {
           createUser: {
             visible: false,
+            userType: 'personal',
             nickname: '',
             username: '',
             userno: '',
@@ -86,7 +90,9 @@ define([
             lastlogintime: '',
             bindrole: '',
             bindRoles: '',
-            isLoginIp: true
+            isLoginIp: true,
+            loginIpBegin: '',
+            loginIpEnd: ''
           },
           editUser: {
             visible: false,
@@ -99,13 +105,14 @@ define([
             oldPassword: '',
             newPassword: '',
             repeat: '',
-            loading: false,
             remark: '',
             loginIp: '',
+            editUser: '',
             bindrole: '',
             bindRoles: '',
             bindAccessNodeUidName: '',
-            bindAccessNodeUid: ''
+            bindAccessNodeUid: '',
+            loading: false
           },
           import: {
             requireType: ['csv'],
@@ -115,6 +122,9 @@ define([
             visible: false,
             currentUser: '',
             rows: []
+          },
+          shareUser: {
+            visible: false
           }
         },
 
@@ -123,7 +133,21 @@ define([
         bindAccessNodeUid: '',
         bindAccessNodeUidName: '',
         bindAccessNodeUidRow: undefined,
-        isLoginIpDisabled: true
+        isLoginIpDisabled: true,
+        shareUserName: "",
+        userList: [],
+        shearUser: [], //共享用户主账号，需在列表显示的数据
+        personalUser: [], //个人用户
+        shearUserObj: {}, //共享用户真实数据
+        shareUserData: [],
+        loading: false,
+
+      },
+      computed: {
+        // 前端分页计算
+        tableData: function () {
+          return this.userList.slice((this.table.currentPage - 1) * this.table.pageSize, this.table.currentPage * this.table.pageSize);
+        },
       },
       methods: {
         rowKey: function (row) {
@@ -137,14 +161,16 @@ define([
           self.dialogBindRole.bindRoleDialogTableVisible = true;
           // self.$refs.roleTable.clearSelection()
           self.$nextTick(function () {
-            var role = JSON.parse(self.dialog.editUser.bindRoles)
-            self.roleOption.forEach(item => {
-              if (role.includes(item.id)) {
-                self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, true)
-              } else {
-                self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, false)
-              }
-            })
+            if (self.dialog.editUser.bindRoles) {
+              var role = JSON.parse(self.dialog.editUser.bindRoles)
+              self.roleOption.forEach(item => {
+                if (role.includes(item.id)) {
+                  self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, true)
+                } else {
+                  self.$refs.roleTable && self.$refs.roleTable.toggleRowSelection(item, false)
+                }
+              })
+            }
           })
 
 
@@ -165,7 +191,6 @@ define([
               for (var i = 0; i < rows.length; i++) {
                 self.accessNodeTable.push(rows[i]);
               }
-              console.log(self.accessNodeTable)
             }
           });
 
@@ -193,8 +218,13 @@ define([
               bindRoleIdArr.push(item.id)
             }
           })
-          this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
-          this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
+          if (bindRoleIdArr.length == 0) {
+            this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = '';
+            this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = '';
+          } else {
+            this.dialog.createUser.bindrole = this.dialog.editUser.bindrole = bindRoleNameArr.join(',');
+            this.dialog.createUser.bindRoles = this.dialog.editUser.bindRoles = JSON.stringify(bindRoleIdArr);
+          }
           // this.dialogBindRole.bindRoleSelection = [];
           this.$refs.roleTable.clearSelection()
         },
@@ -203,21 +233,51 @@ define([
           var row = scope.row;
           window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
         },
+        // 用户列表查询
         load: function (currentPage) {
           var self = this;
           var param = {
-            currentPage: currentPage,
-            pageSize: self.table.pageSize
+            currentPage: 1,
+            pageSize: 999999
           };
           if (self.table.condition.nickname) param.nickname = self.table.condition.nickname;
-          if (self.table.condition.userno) param.userno = self.table.condition.userno;
           self.table.rows.splice(0, self.table.rows.length);
           ajax.post('/user/find/by/company/id/and/condition', param, function (data) {
-            var total = data.total;
-            var rows = data.rows;
-            self.table.rows = data.rows;
-            self.table.total = total;
-            self.table.currentPage = currentPage;
+            var allUserList = data.rows;
+            var personalUser = [];
+            var shearUser = []
+            var shearUserObj = {};
+            allUserList.forEach(function (item) {
+              if (item.username.match(/((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)/)) {  //判断是否为共享用户
+                var shearUserKey = item.username.split('_')[0]
+                if (!shearUserObj[shearUserKey]) {
+                  shearUserObj[shearUserKey] = []
+                  shearUserObj[shearUserKey].push(item)
+                  // 共享用户只显示主账号，用户名需要去掉拼接ip
+                  var showShearUser = JSON.parse(JSON.stringify(item))
+                  showShearUser.username = shearUserKey
+                  shearUser.push(showShearUser)
+                } else {
+                  shearUserObj[shearUserKey].push(item)
+                }
+              } else {
+                personalUser.push(item)
+              }
+            })
+
+            self.personalUser = personalUser;
+            self.shearUser = shearUser;
+            self.shearUserObj = shearUserObj;
+
+            // 根据当前用户类型判断赋值
+            if (self.table.condition.userType == 'share') {
+              self.userList = self.shearUser
+            } else {
+              self.userList = self.personalUser
+            }
+
+            self.table.total = self.userList.length;
+            self.table.currentPage = 1;
           });
         },
         // 获取角色信息
@@ -336,6 +396,7 @@ define([
             }
           }
           self.dialog.editUser.id = row.id;
+          self.dialog.editUser.username = row.username;
           self.dialog.editUser.nickname = row.nickname;
           self.dialog.editUser.mobile = row.mobile;
           self.dialog.editUser.mail = row.mail;
@@ -343,6 +404,7 @@ define([
           self.dialog.editUser.visible = true;
           self.dialog.editUser.remark = row.remark;
           self.dialog.editUser.loginIp = row.loginIp;
+          self.dialog.editUser.isLoginIp = row.isLoginIp;
           self.dialog.editUser.bindrole = rolesName.join(',');
           self.dialog.editUser.bindRoles = JSON.stringify(rolesId);
         },
@@ -363,15 +425,9 @@ define([
           self.dialog.editUser.bindrole = '';
           self.dialog.editUser.bindRoles = ''
         },
+        // 修改用户
         handleEditUserSubmit: function () {
           var self = this;
-          if (!self.dialog.editUser.bindAccessNodeUid) {
-            self.$message({
-              'type': 'waring',
-              'message': "服务节点不能为空"
-            })
-            return
-          }
           if (!self.dialog.editUser.bindrole) {
             self.$message({
               'type': 'waring',
@@ -381,18 +437,34 @@ define([
           }
           self.dialog.editUser.loading = true;
           self.dialog.editUser.resetPermissions = true;
-          ajax.post('/user/edit/' + self.dialog.editUser.id, self.dialog.editUser, function (data, status) {
-            self.dialog.editUser.loading = false;
-            if (status !== 200) return;
-            for (var i = 0; i < self.table.rows.length; i++) {
-              if (self.table.rows[i].id === self.dialog.editUser.id) {
-                self.table.rows.splice(i, 1, data);
-                break;
+          if (self.table.condition.userType == "share") { //共享用户修改需走循环
+            self.shearUserObj[self.dialog.editUser.username].forEach(function (item, index) {
+              self.dialog.editUser.id = item.id
+              ajax.sequencePost('/user/edit/' + self.dialog.editUser.id, self.dialog.editUser, function (data, status) {
+                if (status !== 200) return;
+                if (index == self.shearUserObj[self.dialog.editUser.username].length - 1) {
+                  self.handleEditUserClose();
+                  self.dialog.editUser.loading = false;
+                  self.load(1)
+                }
+              }, null, ajax.NO_ERROR_CATCH_CODE);
+            })
+
+          } else {
+            ajax.post('/user/edit/' + self.dialog.editUser.id, self.dialog.editUser, function (data, status) {
+              self.dialog.editUser.loading = false;
+              if (status !== 200) return;
+              for (var i = 0; i < self.table.rows.length; i++) {
+                if (self.table.rows[i].id === self.dialog.editUser.id) {
+                  self.table.rows.splice(i, 1, data);
+                  break;
+                }
               }
-            }
-            self.handleEditUserClose();
-          }, null, ajax.NO_ERROR_CATCH_CODE);
+              self.handleEditUserClose();
+            }, null, ajax.NO_ERROR_CATCH_CODE);
+          }
         },
+        // 删除用户
         handleRowDelete: function (scope) {
           var self = this;
           var row = scope.row;
@@ -416,17 +488,30 @@ define([
             beforeClose: function (action, instance, done) {
               instance.confirmButtonLoading = true;
               if (action === 'confirm') {
-                ajax.post('/user/delete/' + row.id, null, function (data, status) {
-                  instance.confirmButtonLoading = false;
-                  if (status !== 200) return;
-                  for (var i = 0; i < self.table.rows.length; i++) {
-                    if (self.table.rows[i].id === row.id) {
-                      self.table.rows.splice(i, 1);
-                      break;
-                    }
-                  }
-                  done();
-                }, null, ajax.NO_ERROR_CATCH_CODE);
+                self.loading = true
+                if (self.table.condition.userType == 'personal') {  //个人用户走原来的删除逻辑
+                  ajax.post('/user/delete/' + row.id, null, function (data, status) {
+                    instance.confirmButtonLoading = false;
+                    if (status !== 200) return;
+                    self.loading = false
+                    self.load(1)
+                    done();
+                  }, null, ajax.NO_ERROR_CATCH_CODE);
+                } else {
+                  var shearUserKey = row.username;
+                  self.shearUserObj[shearUserKey].forEach(function (item, index) {
+                    ajax.sequencePost('/user/delete/' + item.id, null, function (data, status) {
+                      instance.confirmButtonLoading = false;
+                      if (status !== 200) return;
+                      if (index == self.shearUserObj[shearUserKey].length - 1) { //最后一个带ip的账号删除以后再重新请求用户列表
+                        self.loading = false
+                        self.load(1)
+                      }
+                      done();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                  })
+                }
+
               } else {
                 instance.confirmButtonLoading = false;
                 done();
@@ -436,20 +521,20 @@ define([
         },
         handleCreateUserClose: function () {
           var self = this;
-          self.dialog.createUser.nickname = '';
-          self.dialog.createUser.username = '';
-          self.dialog.createUser.userno = '';
-          self.dialog.createUser.password = '';
-          self.dialog.createUser.repeat = '';
-          self.dialog.createUser.mobile = '';
-          self.dialog.createUser.mail = '';
-          self.dialog.createUser.level = 1;
-          self.dialog.createUser.classify = '企业用户';
-          self.dialog.createUser.visible = false;
-          self.dialog.createUser.remark = "";
-          self.dialog.createUser.loginIp = "";
-          self.dialog.createUser.bindrole = [];
-          self.dialog.createUser.bindRoles = []
+          // self.dialog.createUser.nickname = '';
+          // self.dialog.createUser.username = '';
+          // self.dialog.createUser.userno = '';
+          // self.dialog.createUser.password = '';
+          // self.dialog.createUser.repeat = '';
+          // self.dialog.createUser.mobile = '';
+          // self.dialog.createUser.mail = '';
+          // self.dialog.createUser.level = 1;
+          // self.dialog.createUser.classify = '企业用户';
+          // self.dialog.createUser.visible = false;
+          // self.dialog.createUser.remark = "";
+          // self.dialog.createUser.loginIp = "";
+          // self.dialog.createUser.bindrole = '';
+          // self.dialog.createUser.bindRoles = ''
         },
         handleCreateUserSubmit: function () {
           var self = this;
@@ -467,11 +552,22 @@ define([
             })
             return
           }
+
+          if (self.dialog.createUser.userType == 'personal') {
+            self.handlePersonalSubmit(null, true)
+          } else {
+            self.handleShareSubmit()
+          }
+        },
+        // 新建提交
+        handlePersonalSubmit: function (shareUserName, islast) {
+          var self = this;
+
           var rundemNum = self.randomString(11);
-          self.dialog.createUser.loading = true;
+          // self.dialog.createUser.loading = true;
           var params = {
             nickname: self.dialog.createUser.nickname,
-            username: self.dialog.createUser.username,
+            username: shareUserName || self.dialog.createUser.username,
             userno: rundemNum,
             password: self.dialog.createUser.password,
             repeat: self.dialog.createUser.repeat,
@@ -488,21 +584,58 @@ define([
             isLoginIp: self.dialog.createUser.isLoginIp,
           };
 
-          ajax.post('/user/add', params, function (data, status) {
-            self.dialog.createUser.loading = false;
+          self.createLoading = true
+          ajax.sequencePost('/user/add', params, function (data, status) {
+            // self.dialog.createUser.loading = false;
             if (status !== 200) return;
             self.table.rows.push(data);
-            self.handleCreateUserClose();
+            if (islast) {
+              self.dialog.createUser.visible = false;
+              self.createLoading = false
+              self.load(1)
+            }
+            // self.handleCreateUserClose();
           }, null, ajax.NO_ERROR_CATCH_CODE);
+        },
+        handleShareSubmit: function () {
+          var self = this;
+          // 校验ip
+          if (!self.isValidIp(self.dialog.createUser.loginIpBegin)) {
+            self.$message({
+              'type': 'waring',
+              'message': "开始ip不合法"
+            })
+            return
+          } else if (!self.isValidIp(self.dialog.createUser.loginIpEnd)) {
+            self.$message({
+              'type': 'waring',
+              'message': "结束ip不合法"
+            })
+            return
+          }
+          var beginIP = self.dialog.createUser.loginIpBegin.split(".")
+          var begin = beginIP[3]
+          var endIP = self.dialog.createUser.loginIpEnd.split(".")
+          var end = endIP[3]
+          var subtraction = end - begin
+          var islast = false
+          for (var i = 0; i <= subtraction; i++) {
+            self.shareUserName = self.dialog.createUser.username + '_' + beginIP.join(".")
+            beginIP[3] = Number(beginIP[3]) + 1
+            if (subtraction == i) islast = true
+            self.handlePersonalSubmit(self.shareUserName, islast)
+          }
+        },
+        isValidIp: function (e) {
+          return /^((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$/.test(e)
         },
         handleSizeChange: function (size) {
           var self = this;
           self.table.pageSize = size;
-          self.load(self.table.currentPage);
         },
         handleCurrentChange: function (currentPage) {
           var self = this;
-          self.load(currentPage);
+          self.table.currentPage = currentPage
         },
         importStatus: function () {
           var self = this;
@@ -570,6 +703,26 @@ define([
           var self = this;
           var row = scope.row;
           self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
+          if (self.table.condition.userType == 'share') {
+            self.shareUserData = self.shearUserObj[row.username]
+            self.dialog.shareUser.visible = true
+          } else {
+            ajax.post('/token/load', { userId: row.id }, function (data) {
+              self.dialog.tokens.visible = true;
+              self.dialog.tokens.currentUser = row;
+              if (data && data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                  self.dialog.tokens.rows.push(data[i]);
+                }
+              }
+            });
+          }
+
+        },
+        handleShareTokens: function (scope) {
+
+          var self = this;
+          var row = scope.row;
           ajax.post('/token/load', { userId: row.id }, function (data) {
             self.dialog.tokens.visible = true;
             self.dialog.tokens.currentUser = row;
@@ -608,6 +761,22 @@ define([
         rowKey: function (row) {
           return 'user-' + row.uuid;
         },
+        // 用户类型变化
+        userTypeChange: function (val) {
+          console.log(val)
+        },
+        // 切换用户类型
+        conditionUserTypeChange: function (val) {
+          var self = this
+          if (val == 'share') {
+            self.userList = self.shearUser
+          } else {
+            self.userList = self.personalUser
+          }
+
+          self.table.total = self.userList.length;
+          self.table.currentPage = 1;
+        }
       },
       created: function () {
         var self = this;

@@ -66,6 +66,7 @@ require.config({
     'page-liangwu-role': window.APPPATH + 'liangwu-role/page-liangwu-role',
 
     'page-liangwu-user-batch': window.APPPATH + 'liangwu-user-batch/page-liangwu-user-batch',
+    'sequencePost': window.APPPATH + 'common/restfull/restfull.api',
 
   },
   shim: {
