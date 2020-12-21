@@ -76,6 +76,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class CommandVodService {
+	
+	private String lockRecordVodStart = "reocord-vod-start";
 
 	@Autowired
 	private QueryUtil queryUtil;
@@ -828,25 +830,27 @@ public class CommandVodService {
 	
 	public CommandGroupUserPlayerPO recordVodStart(UserBO user, String businessType, String businessInfo, String url, int locationIndex, Boolean allowNewPage) throws Exception{
 		
-		String originId = user.getId().toString();
-		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
-		PageTaskPO task = new PageTaskPO();
-		task.setBusinessInfoType(BusinessInfoType.PLAY_RECORD);
-		task.setBusinessName(businessInfo);
-		task.setBusinessId("-2");
-		task.setPlayUrl(url);
-//		pageTaskService.allowNewPageByAddAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null, allowNewPage);
-		pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
-		
-		if(businessReturnService.getSegmentedExecute()){
-			businessReturnService.execute();
+		//需要加锁，判断是否还有回放空闲路数
+		synchronized (lockRecordVodStart.intern()) {
+			String originId = user.getId().toString();
+			TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
+			PageTaskPO task = new PageTaskPO();
+			task.setBusinessInfoType(BusinessInfoType.PLAY_RECORD);
+			task.setBusinessName(businessInfo);
+			task.setBusinessId("-2");
+			task.setPlayUrl(url);
+//			pageTaskService.allowNewPageByAddAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null, allowNewPage);
+			pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
+			operationLogService.send(user.getName(), "回放录像", user.getName()+"回放录像：" +task.getBusinessName());
+			
+			return new CommandGroupUserPlayerPO();
 		}
-		
-		operationLogService.send(user.getName(), "回放录像", user.getName()+"回放录像：" +task.getBusinessName());
-		
-		return new CommandGroupUserPlayerPO();
-		
 //		//占用播放器
 //		CommandGroupUserPlayerPO player = null;
 //		if(locationIndex == -1){
