@@ -54,6 +54,7 @@ import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
+import com.suma.venus.resource.dao.VedioCapacityDAO;
 import com.suma.venus.resource.externalinterface.InterfaceFromResource;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundleLoginBlackListPO;
@@ -67,6 +68,7 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
+import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
@@ -177,6 +179,9 @@ public class BundleManageController extends ControllerBase {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private VedioCapacityDAO vedioCapacityDAO;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -238,6 +243,35 @@ public class BundleManageController extends ControllerBase {
 //				}
 			}
 
+			//限制210数量
+			List<BundlePO> bundlePOs = bundleDao.findAll();
+			List<BundlePO> bundleCountList = new ArrayList<BundlePO>();
+			for (BundlePO bundlePO1 : bundlePOs) {
+				if(bundlePO1.getDeviceModel().equalsIgnoreCase("jv210")){
+					bundleCountList.add(bundlePO1);
+				}
+			}
+			Integer bundle210 = bundleCountList.size();
+			List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
+			if(null != vedioCapacityPOs && vedioCapacityPOs.size() > 0){
+				if(bundle210.longValue() > vedioCapacityPOs.get(0).getVedioCapacity()){
+					data.put(ERRMSG, "图像设备数量已超过上限！");
+					return data;
+				}
+			}else {
+				if(bundle210.longValue() > 1024L){
+					data.put(ERRMSG, "图像设备数量已超过上限！");
+					return data;
+				}
+			}
+				
+				
+			if (null != bundlePO.getUsername() && !bundlePO.getUsername().isEmpty()) {
+				if (null != bundleService.findByUsername(bundlePO.getUsername())) {
+					data.put(ERRMSG, "设备账号已存在");
+					return data;
+				}
+			}
 			bundleService.save(bundlePO);
 			if (null != extraInfos) {
 				for (ExtraInfoPO extraInfo : extraInfos) {
