@@ -1974,53 +1974,16 @@ public class MonitorRecordService {
 			//停止结束
 		}
 		
-		//找出需要录制的规则表 早录一会
-		List<MonitorRecordManyTimesRelationPO> startRelations = monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
-		List<Long> monitorRecordStartIds=new ArrayList<Long>();
-		
-		for(MonitorRecordManyTimesRelationPO relation:startRelations){
-			monitorRecordStartIds.add(relation.getBusinessId());
-		}
-		List<MonitorRecordPO> needStartRecords = monitorRecordDao.findByIdIn(monitorRecordStartIds);
-		if (needStartRecords != null && needStartRecords.size() > 0) {
-			Set<Long> avtplIds = new HashSet<Long>();
-			Set<Long> gearIds = new HashSet<Long>();
-			for (MonitorRecordPO record : needStartRecords) {
-				avtplIds.add(record.getAvTplId());
-				gearIds.add(record.getGearId());
-			}
-			List<AvtplPO> avtpls = avtplDao.findAll(avtplIds);
-			List<AvtplGearsPO> gears = avtplGearsDao.findAll(gearIds);
-			for (MonitorRecordPO record : needStartRecords) {
-				
-				// 修改任务状态
-				record.setStatus(MonitorRecordStatus.RUN);
-			}
-			
-			//更新录制规则表中的下次开始停止时间,MonitorRecordManyTimesPO中添加一些数据
-			List<MonitorRecordManyTimesPO> monitorRecordStartManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
-			
-			for(MonitorRecordManyTimesRelationPO relation:startRelations){
-				MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
-				monitorRecordManyTimesPO.setStartTime(relation.getNextStartTime())
-										.setEndTime(relation.getNextEndTime())
-										.setIndexNumber(relation.getIndexNumber())
-										.setStatus(MonitorRecordStatus.RUN);
-				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
-				monitorRecordManyTimesRelationService.updateNextTime(relation);
-			}
-			
-			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
-			//更新添加结束
-		}
-		
 		//找出需要录制但是错过时间没录制的：先将需要停止的做停止，再判断是否需要立即录制还是等待录制。
 		List<MonitorRecordManyTimesRelationPO> missedRelations = monitorRecordManyTimesRelationDao.findMissedRelations(now);
 		
 		if(missedRelations.size()>0){
 			
 			List<Long> missedRecordIds = missedRelations.stream().map(MonitorRecordManyTimesRelationPO::getManyTimeId).filter(id -> id!=null).collect(Collectors.toList());
-			List<MonitorRecordManyTimesPO> missedNeedToStopRecords = monitorRecordManyTimesDao.findNeedStop(missedRecordIds);
+			List<MonitorRecordManyTimesPO> missedNeedToStopRecords = new ArrayList<MonitorRecordManyTimesPO>();
+			if(missedRecordIds.size() > 0){
+				missedNeedToStopRecords = monitorRecordManyTimesDao.findNeedStop(missedRecordIds);
+			}
 			if(missedNeedToStopRecords.size() > 0){
 				for(MonitorRecordManyTimesPO missedNeedToStopRecord : missedNeedToStopRecords){
 					missedNeedToStopRecord.setStatus(MonitorRecordStatus.STOP);
@@ -2042,6 +2005,36 @@ public class MonitorRecordService {
 			}
 		}
 		
+		//找出需要录制的规则表 早录一会
+		List<MonitorRecordManyTimesRelationPO> startRelations = monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
+		List<Long> monitorRecordStartIds=new ArrayList<Long>();
+		
+		for(MonitorRecordManyTimesRelationPO relation:startRelations){
+			monitorRecordStartIds.add(relation.getBusinessId());
+		}
+		List<MonitorRecordPO> needStartRecords = monitorRecordDao.findByIdIn(monitorRecordStartIds);
+		if (needStartRecords != null && needStartRecords.size() > 0) {
+			for (MonitorRecordPO record : needStartRecords) {
+				record.setStatus(MonitorRecordStatus.RUN);
+			}
+			
+			//更新录制规则表中的下次开始停止时间,MonitorRecordManyTimesPO中添加一些数据
+			List<MonitorRecordManyTimesPO> monitorRecordStartManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
+			
+			for(MonitorRecordManyTimesRelationPO relation:startRelations){
+				MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
+				monitorRecordManyTimesPO.setStartTime(relation.getNextStartTime())
+										.setEndTime(relation.getNextEndTime())
+										.setIndexNumber(relation.getIndexNumber())
+										.setStatus(MonitorRecordStatus.RUN);
+				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
+				monitorRecordManyTimesRelationService.updateNextTime(relation);
+			}
+			
+			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
+			//更新添加结束
+		}
+		
 		if (needStartRecords != null && needStartRecords.size() > 0) {
 			monitorRecordDao.save(needStartRecords);
 		}
@@ -2050,28 +2043,6 @@ public class MonitorRecordService {
 			monitorRecordDao.save(needStopRecords);
 		}
 
-//		if (logics.size() > 0) {
-//			List<ResultDstBO> responses = new ArrayList<ExecuteBusinessReturnBO.ResultDstBO>();
-//			Collection<LogicBO> protocols = logics.values();
-//			for (LogicBO protocol : protocols) {
-//				ExecuteBusinessReturnBO response = executeBusiness.execute(protocol, "点播系统，排期任务线程：");
-//				if (response.getOutConnMediaMuxSet() != null && response.getOutConnMediaMuxSet().size() > 0) {
-//					responses.addAll(response.getOutConnMediaMuxSet());
-//				}
-//			}
-//			// 回写录制文件接入层信息
-//			if (needStartRecords != null && needStartRecords.size() > 0) {
-//				for (MonitorRecordPO record : needStartRecords) {
-//					for (ResultDstBO response : responses) {
-//						if (response.getUuid().equals(record.getUuid())) {
-//							record.setStoreLayerId(response.getLayerId());
-//							break;
-//						}
-//					}
-//				}
-//				monitorRecordDao.save(needStartRecords);
-//			}
-//		}
 	}
 	
 	public void setStartAndEndTime(
@@ -2107,7 +2078,6 @@ public class MonitorRecordService {
 			
 			//
 			if(new Date().after(shouldStart) && new Date().before(shouldEnd)){
-				//TODO
 				shouldRecord=true;
 				nextStartTime=DateUtil.addDay(shouldStart, 1);
 				nextEndTime=DateUtil.addDay(shouldEnd, 1);
