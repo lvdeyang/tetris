@@ -15,8 +15,10 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
+import com.suma.venus.resource.service.VedioCapacityService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
@@ -25,6 +27,7 @@ import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
+import com.sumavision.bvc.command.system.service.CommandSystemQueryService;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -78,6 +81,8 @@ import lombok.extern.slf4j.Slf4j;
 public class CommandVodService {
 	
 	private String lockRecordVodStart = "reocord-vod-start";
+	
+	private boolean isLock = true;
 
 	@Autowired
 	private QueryUtil queryUtil;
@@ -141,6 +146,12 @@ public class CommandVodService {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+	
+	@Autowired
+	private VedioCapacityService vedioCapacityService;
+	
+	@Autowired
+	private CommandSystemQueryService commandSystemQueryService;
 	
 	/**
 	 * 点播文件资源<br/>
@@ -831,7 +842,40 @@ public class CommandVodService {
 	public CommandGroupUserPlayerPO recordVodStart(UserBO user, String businessType, String businessInfo, String url, int locationIndex, Boolean allowNewPage) throws Exception{
 		
 		//需要加锁，判断是否还有回放空闲路数
-		synchronized (lockRecordVodStart.intern()) {
+		if(isLock){
+			synchronized (lockRecordVodStart.intern()) {
+				
+				List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
+				if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getReplayCapacity() == null){
+					throw new BaseException(StatusCode.FORBIDDEN, "没有查到回放容量");
+				}
+				
+				Long replayCapacity = videoCapacityList.get(0).getReplayCapacity();
+				Long reviewCount = commandSystemQueryService.queryCountOfReview();
+				if(replayCapacity <= reviewCount){
+					throw new BaseException(StatusCode.FORBIDDEN, "回放路数已经达到上限");
+				}
+				
+				String originId = user.getId().toString();
+				TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
+				PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
+				PageTaskPO task = new PageTaskPO();
+				task.setBusinessInfoType(BusinessInfoType.PLAY_RECORD);
+				task.setBusinessName(businessInfo);
+				task.setBusinessId("-2");
+				task.setPlayUrl(url);
+//				pageTaskService.allowNewPageByAddAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null, allowNewPage);
+				pageTaskService.addAndRemoveTasks(pageInfo, new ArrayListWrapper<PageTaskPO>().add(task).getList(), null);
+				
+				if(businessReturnService.getSegmentedExecute()){
+					businessReturnService.execute();
+				}
+				
+				operationLogService.send(user.getName(), "回放录像", user.getName()+"回放录像：" +task.getBusinessName());
+				
+				return new CommandGroupUserPlayerPO();
+			}
+		}else {
 			String originId = user.getId().toString();
 			TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(originId, terminal.getId(), GroupMemberType.MEMBER_USER);
@@ -851,6 +895,7 @@ public class CommandVodService {
 			
 			return new CommandGroupUserPlayerPO();
 		}
+		
 //		//占用播放器
 //		CommandGroupUserPlayerPO player = null;
 //		if(locationIndex == -1){
