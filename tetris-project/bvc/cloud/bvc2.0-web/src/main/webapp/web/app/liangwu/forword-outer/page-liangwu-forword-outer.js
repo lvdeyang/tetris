@@ -1,5 +1,5 @@
 define([
-  'text!' + window.APPPATH + 'liangwu/forword/page-liangwu-forword.html',
+  'text!' + window.APPPATH + 'liangwu/forword-outer/page-liangwu-forword-outer.html',
   'restfull',
   'config',
   'commons',
@@ -8,11 +8,10 @@ define([
   'bvc2-header',
   'bvc2-system-nav-side',
   'extral',
-  'bvc2-monitor-forword-list',
-  'bvc2-liangwu-forword-list'
+  'forword-outer-control'
 ], function (tpl, ajax, config, commons, Vue) {
 
-  var pageId = 'page-liangwu-forword';
+  var pageId = 'page-liangwu-forword-outer';
 
   var init = function (p) {
 
@@ -27,7 +26,7 @@ define([
       data: {
         menurouter: false,
         shortCutsRoutes: commons.data,
-        active: "/page-liangwu-forword",
+        active: "/page-liangwu-forword-outer",
         header: commons.getHeader(0)
       },
       methods: {

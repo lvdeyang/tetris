@@ -32,6 +32,7 @@ define([
         tableCurrgenData: [],
         multipleSelection: [],
         region: '',
+        localRegion: '',
         regionOption: [],
         singleWidth: '',
         totalWidth: '',
@@ -49,7 +50,9 @@ define([
     props: [],
     computed: {
       tableData: function () {
-        return this.tableCurrgenData.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+        if (this.tableCurrgenData && this.tableCurrgenData.length != 0) {
+          return this.tableCurrgenData.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+        }
       },
       currentWidth: function () {
         return this.forwordTotal * this.singleWidth
@@ -67,7 +70,11 @@ define([
       initTree: function (keepExpand) {
         this.treeLoading = true;
         var self = this;
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
+        var params = {
+          privilegesStr: "['DIANBO']",
+          satisfyAll: false
+        };
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', params, function (data) {
           self.encodetree = data;
           this.treeLoading = false;
         });
@@ -75,6 +82,7 @@ define([
       },
       initTableData: function () {
         var self = this;
+        self.loading = true;
         var params = {
           privilegesStr: "['DIANBO']",
           returnBundleList: true,
@@ -120,7 +128,7 @@ define([
                 }
                 for (var j = 0; j < self.regionOption.length; j++) {
                   var item = self.regionOption[j];
-                  if (item.identity == parseExtend) {
+                  if (item && item.identity == parseExtend) {
                     self.tableList[item.identity].push(rows[i])
                     if (rows[i].forwordid && rows[i].status == '运行中') { //计算转发路数
                       self.totalNum[item.identity] += 1
@@ -130,13 +138,13 @@ define([
               }
             }
 
-            var region = self.region ? self.region : self.regionOption[0].identity;
+            var region = self.region ? self.region : (self.regionOption[0] ? self.regionOption[0].identity : "");
             self.tableCurrgenData = self.tableList[region];
             self.currentPage = 1;
-            self.total = self.tableList[region].length
-            self.forwordTotal = self.totalNum[region];
-            self.singleWidth = self.regionOption[0].singleWidth
-            self.totalWidth = self.regionOption[0].totalWidth
+            self.total = region ? self.tableList[region].length : 0
+            self.forwordTotal = region ? self.totalNum[region] : 0;
+            self.singleWidth = self.regionOption[0] ? self.regionOption[0].singleWidth : 0
+            self.totalWidth = self.regionOption[0] ? self.regionOption[0].totalWidth : 0
             self.loading = false;
           })
         });
@@ -145,7 +153,6 @@ define([
 
       loadStation: function () {
         var self = this;
-        self.loading = true;
         ajax.post('/command/station/bandwidth/query', null, function (data, status) {
           if (status == 200) {
             self.regionOption = data.rows;
@@ -158,7 +165,11 @@ define([
               self.totalNum[item.identity] = 0
             }
             // 设置tab栏初始选中值,和带宽初始值
-            self.region = self.region ? self.region : self.regionOption[0].identity;
+            if (self.localRegion) {
+              self.region = self.localRegion
+            } else {
+              self.region = self.regionOption[0] ? self.regionOption[0].identity : "";
+            }
             self.initTableData()
           }
         })
@@ -175,6 +186,7 @@ define([
       },
       handleRegionChange (val) {
         var self = this;
+        self.localRegion = val
         self.tableCurrgenData = self.tableList[val];
         self.currentPage = 1
         self.total = self.tableList[val].length;
@@ -401,17 +413,10 @@ define([
         console.log(e.dataTransfer.getData('data'))
         var srcBundleId = JSON.parse(e.dataTransfer.getData('data')).id;
         var dstBundleId = '';
-
-        for (index in e.path) {
-          if (e.path[index].attributes && e.path[index].attributes.class && e.path[index].attributes.class.nodeValue.indexOf('el-table__row') != -1) {
-            console.log(e.path[index])
-            dstBundleId = e.path[index].attributes.class.nodeValue.split(' ')[1]
-            break
-          } else {
-            continue
-          }
+        // 获取解码器id
+        if ($(e.target).closest("tr").length != 0) {
+          dstBundleId = $(e.target).closest("tr").attr('class').split(' ')[1]
         }
-
         var param = {
           srcType: 'BUNDLE',
           srcBundleId: srcBundleId,
@@ -419,13 +424,18 @@ define([
           dstBundleId: dstBundleId,
           type: 'DEVICE',
         }
-        ajax.post('/monitor/live/vod/device', param, function (data) {
-          self.$message({
-            type: 'success',
-            message: '操作成功！'
-          })
-          self.loadStation()
-        });
+        if (dstBundleId) {
+          ajax.post('/monitor/live/vod/device', param, function (data) {
+            self.$message({
+              type: 'success',
+              message: '操作成功！'
+            })
+            self.loadStation()
+          });
+        } else {
+          self.$message.error("请把编码器拖动到对应解码器列表上！")
+        }
+
       },
       dragover: function (e) {
         e.preventDefault()
