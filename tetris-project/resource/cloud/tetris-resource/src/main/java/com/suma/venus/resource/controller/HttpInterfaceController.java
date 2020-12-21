@@ -113,6 +113,7 @@ import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.LianwangPassbyService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
@@ -230,6 +231,9 @@ public class HttpInterfaceController {
 	
 	@Autowired
 	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -885,24 +889,16 @@ public class HttpInterfaceController {
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_online_response(respBody);
 		try {
-			OprlogParamBO log = new OprlogParamBO();
-			log.setSourceService("tetris-resource");
-			log.setUserName("");
-			log.setOprName("设备上线");
-			log.setSourceServiceIP("");
-			log.setOprlogType(EOprlogType.DEVICE_ONLINE);
-//			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 			
 			if (null == po) {
 				respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 				return resp;
 			}
-			String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
-			log.setOprDetail(bundlename);
 
 			if(!po.getDeviceModel().equalsIgnoreCase("player")){
-				alarmFeign.sendOprlog(log);
+				String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+				operationLogService.send(" ", "设备上线", bundlename , EOprlogType.DEVICE_ONLINE);
 			}
 			boolean status_change = (ONLINE_STATUS.ONLINE != po.getOnlineStatus()) ? true : false;
 
@@ -1008,18 +1004,11 @@ public class HttpInterfaceController {
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_offline_response(respBody);
 		try {
-			OprlogParamBO log = new OprlogParamBO();
-			log.setSourceService("tetris-resource");
-			log.setUserName("");
-			log.setOprName("设备下线");
-			log.setSourceServiceIP("");
-			log.setOprlogType(EOprlogType.DEVICE_OFFLINE);
 			BundlePO po = bundleService.findByBundleId(bundleId);
 			
-			String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
-			log.setOprDetail(bundlename);
 			if(null != po && !po.getDeviceModel().equalsIgnoreCase("player")){
-				alarmFeign.sendOprlog(log);
+				String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+				operationLogService.send(" ", "设备下线", bundlename , EOprlogType.DEVICE_OFFLINE);
 			}
 
 			if (null != po && po.getOnlineStatus() != ONLINE_STATUS.OFFLINE) {
@@ -1110,6 +1099,7 @@ public class HttpInterfaceController {
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 		}
 		
