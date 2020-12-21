@@ -45,6 +45,7 @@ define([
         passwordInput: '12345',
         roleOption: [],
         createNumber: 1,
+        loading: false,
         activeId: window.BASEPATH + 'index#/page-liangwu-user',
         dialogBindRole: {
           bindRoleDialogTableVisible: false,
@@ -134,7 +135,9 @@ define([
         bindAccessNodeUid: '',
         bindAccessNodeUidName: '',
         bindAccessNodeUidRow: undefined,
-        isLoginIpDisabled: true
+        isLoginIpDisabled: true,
+        webSocketMap: undefined,
+        selection: []
       },
       watch: {
         // passwordInput: function () {
@@ -529,32 +532,72 @@ define([
           }
 
         },
-        loginSubmit: function () {
+        loginSubmit: function (type) {
           var self = this;
+          self.loading = true;
           self.passwordEncode = self.encodePassword(self.dialog.batchLogin.password);
           var begin = self.dialog.batchLogin.beginNumber;
           var end = self.dialog.batchLogin.endNumber;
           var number = 0;
-
+          var postUrl = '';
+          var localeHost = location.host
+          var wssMap = new Map();
+          if (type == 'ms') {
+            postUrl = "/do/password/login/test"
+          } else {
+            postUrl = "/api/zk/auth/do/username/password/login"
+          }
           var timeIndex = setInterval(function () {
             if (begin <= end) {
               var username = self.dialog.batchLogin.userName + '-' + begin
-              // ajax.post('/do/password/login/test', { username: username, password: self.passwordEncode }, function (data) {  //管理平台登录
-              ajax.post('/api/zk/auth/do/username/password/login', { username: username, password: self.passwordEncode }, function (data) { //QT客户端登录
-
+              ajax.post(postUrl, { username: username, password: self.passwordEncode }, function (data) {
                 if (data) {
                   self.$message({
                     type: "success",
                     message: "账号" + username + "已成功登录！"
                   })
+                  if (type == 'qt') { //建立ws
+                    var webSocket = new WebSocket('wss://' + localeHost + '/server/websocket/' + data);
+                    webSocket.onmessage = function (e) {
+                      var message = e.data;
+                      console.log(message)
+                    };
+                    wssMap.set(username, webSocket)
+                  }
                 }
               });
+              self.webSocketMap = wssMap
+              console.log(wssMap)
               begin++
             } else {
-              clearInterval(timeIndex)
 
+              clearInterval(timeIndex)
+              self.loading = false;
+              self.dialog.batchLogin.visible = true;
+              // self.load(self.table.currentPage);
+              setTimeout(self.load, 2000, self.table.currentPage)
             }
           }, 300)
+        },
+        handleSelectionChange: function (val) {
+          this.selection = val;
+        },
+        batchLogaOutQt () {
+          var self = this;
+          if (self.selection.length == 0) {
+            self.$message.error('请先选择需要下线的账号！')
+          } else {
+            console.log(self.selection)
+            for (var i = 0; i < self.selection.length; i++) {
+              var element = self.selection[i];
+              if (self.webSocketMap && self.webSocketMap.get(element.username)) {
+                self.webSocketMap.get(element.username).close();
+              }
+            }
+
+            setTimeout(self.load, 2000, self.table.currentPage)
+            console.log(self.webSocketMap)
+          }
         },
         handleTokens: function (scope) {
           var self = this;
@@ -671,6 +714,8 @@ define([
               type: 'success',
               message: '操作成功'
             });
+
+            self.load(self.table.currentPage)
           });
         },
 
@@ -690,13 +735,7 @@ define([
       },
       mounted: function () {
         this.$nextTick(function () {
-          console.log($("#form"))
-          $("#form").load(function () {
-            var text = $(this).contents().find("body").text();      //获取到的是json的字符串
-            var j = $.parseJSON(text);                                         //json字符串转换成json对象
-            console.log(j)
 
-          })
         })
       }
     });
