@@ -2,6 +2,8 @@ package com.suma.venus.resource.vo;
 
 import java.util.List;
 
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+
 /**
  * 分组树VO
  * 
@@ -46,6 +48,16 @@ public class FolderTreeVO {
 	private Integer folderIndex;
 
 	private String nodeType;
+	
+	private ONLINE_STATUS onlineStatus;
+	
+	public ONLINE_STATUS getOnlineStatus() {
+		return onlineStatus;
+	}
+
+	public void setOnlineStatus(ONLINE_STATUS onlineStatus) {
+		this.onlineStatus = onlineStatus;
+	}
 
 	public Long getId() {
 		return id;

@@ -66,7 +66,7 @@ public class VedioCapacityController {
 		VedioCapacityVO vedioCapacityVO = new VedioCapacityVO();
 		vedioCapacityVO.setUserCapacity(vedioCapacityPO.getUserCapacity());
 		vedioCapacityVO.setVedioCapacity(vedioCapacityPO.getVedioCapacity());
-		vedioCapacityVO.setTurnCapacity(vedioCapacityPO.getUserCapacity());
+		vedioCapacityVO.setTurnCapacity(vedioCapacityPO.getTurnCapacity());
 		vedioCapacityVO.setReplayCapacity(vedioCapacityPO.getReplayCapacity()); 
 		List<UserVO> userVOs = userQuery.queryUserOnline();
 		Integer user = userVOs.size();

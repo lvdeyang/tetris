@@ -36,6 +36,7 @@ import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
@@ -542,6 +543,7 @@ public class OutlandService extends ControllerBase{
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 				}
 				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				System.out.println("_______________删除外域———————————————"+ passByBO );
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -801,19 +803,29 @@ public class OutlandService extends ControllerBase{
 			// 添加子分组节点(递归)
 			// TODO
 			List<FolderPO> childrenPO = folderService.findByParentId(parentId);
-			for (FolderPO childFolder : childrenPO) {
-				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
-				folderNodeVO.setChildren(createChildrenTreeNodes(childFolder.getId()));
-				children.add(folderNodeVO);
-			}
-
-			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
-
+			
 			// 添加子bundle节点
 			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
 			for (BundlePO bundle : bundles) {
 				children.add(createBundleNode(parentId, bundle));
 			}
+			
+			for (FolderPO childFolder : childrenPO) {
+				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
+				folderNodeVO.setChildren(createChildrenTreeNodes(childFolder.getId()));
+				if(folderNodeVO.getChildren() != null && folderNodeVO.getChildren().size() > 0){
+					children.add(folderNodeVO);
+				}
+				//children.add(folderNodeVO);
+			}
+
+			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+
+			// 添加子bundle节点
+//			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
+//			for (BundlePO bundle : bundles) {
+//				children.add(createBundleNode(parentId, bundle));
+//			}
 
 		} catch (Exception e) {
 			LOGGER.error("Fail to creat folder tree children", e);
@@ -832,6 +844,7 @@ public class OutlandService extends ControllerBase{
 		bundleNodeVO.setFolderIndex(bundle.getFolderIndex());
 		bundleNodeVO.setNodeType("BUNDLE");
 		bundleNodeVO.setSystemSourceType(bundle.getSourceType().equals(SOURCE_TYPE.SYSTEM) ? true : false);
+		bundleNodeVO.setOnlineStatus(bundle.getOnlineStatus()==null ? ONLINE_STATUS.OFFLINE:bundle.getOnlineStatus());
 		return bundleNodeVO;
 	}
 	
