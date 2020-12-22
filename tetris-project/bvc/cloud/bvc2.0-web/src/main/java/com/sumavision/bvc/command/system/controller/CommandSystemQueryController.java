@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.bvc.command.system.service.CommandSystemQueryService;
+import com.sumavision.bvc.command.system.service.CommandSystemQueryImp;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceQuery;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
@@ -25,7 +25,7 @@ public class CommandSystemQueryController {
 	private PageTaskDAO pageTaskDao;
 	
 	@Autowired
-	private CommandSystemQueryService commandSystemQueryService;
+	private CommandSystemQueryImp commandSystemQueryImp;
 	
 	/**
 	 * 查询已经占用的转发路数<br/>
@@ -38,7 +38,7 @@ public class CommandSystemQueryController {
 	@ResponseBody
 	@RequestMapping(value="/count/of/transmit")
 	public Object queryCountOfTransmit(){
-		return commandSystemQueryService.queryCountOfTransmit();
+		return commandSystemQueryImp.queryCountOfTransmit();
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class CommandSystemQueryController {
 	@ResponseBody
 	@RequestMapping(value="/count/of/review")
 	public Object queryCountOfReview(){
-		return commandSystemQueryService.queryCountOfReview();
+		return commandSystemQueryImp.queryCountOfReview();
 	}
 	
 }

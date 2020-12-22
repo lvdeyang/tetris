@@ -27,7 +27,7 @@ import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
-import com.sumavision.bvc.command.system.service.CommandSystemQueryService;
+import com.sumavision.bvc.command.system.service.CommandSystemQueryImp;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -151,7 +151,7 @@ public class CommandVodService {
 	private VedioCapacityService vedioCapacityService;
 	
 	@Autowired
-	private CommandSystemQueryService commandSystemQueryService;
+	private CommandSystemQueryImp commandSystemQueryImp;
 	
 	/**
 	 * 点播文件资源<br/>
@@ -851,7 +851,7 @@ public class CommandVodService {
 				}
 				
 				Long replayCapacity = videoCapacityList.get(0).getReplayCapacity();
-				Long reviewCount = commandSystemQueryService.queryCountOfReview();
+				Long reviewCount = commandSystemQueryImp.queryCountOfReview();
 				if(replayCapacity <= reviewCount){
 					throw new BaseException(StatusCode.FORBIDDEN, "回放路数已经达到上限");
 				}
