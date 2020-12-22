@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -134,29 +135,31 @@ public class CommandUserInfoController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		//重构的分页信息
-		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-		if(null == pageInfo){
-			pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-			pageInfo.setPageSize(16);
-			pageInfoDao.save(pageInfo);
-		}
-		
-		//查找该用户配置信息
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		if(null == userInfo){
-			//如果没有则建立默认
-			synchronized (new StringBuffer().append(lockUserPrefix).append(user.getId()).toString().intern()) {
-				userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+		synchronized (new StringBuffer().append(lockUserPrefix).append(user.getId()).toString().intern()) {
+			
+			//重构的分页信息
+			TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
+			if(null == pageInfo){
+				pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
+				pageInfo.setPageSize(16);
+				pageInfoDao.save(pageInfo);
 			}
-		}else{
-			//如果有，则更新播放器信息
-			commandUserServiceImpl.updateUserInfoPlayers(userInfo, true);
+			
+			//查找该用户配置信息
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+			if(null == userInfo){
+				//如果没有则建立默认
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+			}else{
+				//如果有，则更新播放器信息
+				commandUserServiceImpl.updateUserInfoPlayers(userInfo, true);
+			}
+			
+			CommandGroupUserLayoutShemeVO schemeVO = pageTaskService.generateSchemeVO(userInfo, pageInfo);
+			log.info(user.getName() + " 用户 /get/current: " + JSON.toJSONString(schemeVO, SerializerFeature.DisableCircularReferenceDetect));
+			return schemeVO;
 		}
-		
-		CommandGroupUserLayoutShemeVO schemeVO = pageTaskService.generateSchemeVO(userInfo, pageInfo);		
-		return schemeVO;
 	}
 	
 	/**
