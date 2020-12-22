@@ -23,7 +23,7 @@ import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.VedioCapacityService;
-import com.sumavision.bvc.command.system.service.CommandSystemQueryService;
+import com.sumavision.bvc.command.system.service.CommandSystemQueryImp;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -154,7 +154,7 @@ public class MonitorLiveDeviceService {
 	private VedioCapacityService vedioCapacityService;
 	
 	@Autowired
-	private CommandSystemQueryService commandSystemQueryService;
+	private CommandSystemQueryImp commandSystemQueryImp;
 	/**
 	 * xt看本地设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -204,7 +204,7 @@ public class MonitorLiveDeviceService {
 				}
 				
 				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryService.queryCountOfTransmit();
+				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
 				if(TurnCapacity <= forwardCount){
 					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
 				}
@@ -432,7 +432,7 @@ public class MonitorLiveDeviceService {
 				}
 				
 				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryService.queryCountOfTransmit();
+				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
 				if(TurnCapacity <= forwardCount){
 					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
 				}
@@ -657,7 +657,7 @@ public class MonitorLiveDeviceService {
 				}
 				
 				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryService.queryCountOfTransmit();
+				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
 				if(TurnCapacity <= forwardCount){
 					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
 				}
@@ -1822,7 +1822,7 @@ public class MonitorLiveDeviceService {
 				}
 				
 				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryService.queryCountOfTransmit();
+				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
 				Long idSize = (long) idList.size();
 				if(TurnCapacity <= (forwardCount + idSize)){
 					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");

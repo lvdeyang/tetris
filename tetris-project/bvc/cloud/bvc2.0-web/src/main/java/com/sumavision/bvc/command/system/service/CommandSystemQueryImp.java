@@ -11,7 +11,7 @@ import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 
 @Service
-public class CommandSystemQueryService {
+public class CommandSystemQueryImp {
 
 	@Autowired
 	private MonitorLiveDeviceQuery monitorLiveDeviceQuery;
