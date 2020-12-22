@@ -378,6 +378,6 @@ public interface UserFeign {
 	
 	@RequestMapping(value = "/user/feign/set/userCapacity")
 	public JSONObject setUserCapacity(
-			@RequestParam("userCapacity") Long setUserCapacity);
+			@RequestParam("userCapacity") Long userCapacity);
 
 }

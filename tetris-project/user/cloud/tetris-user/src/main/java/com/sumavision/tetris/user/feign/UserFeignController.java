@@ -689,8 +689,10 @@ public class UserFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set/userCapacity" )
-	public void setUserCapacity(Long userCapatity)throws Exception{
+	public Object setUserCapacity(Long userCapacity)throws Exception{
 		
-		userService.setUserCapacity(userCapatity);
+		userService.setUserCapacity(userCapacity);
+		
+		return null;
 	}
 }

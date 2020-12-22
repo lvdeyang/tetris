@@ -1335,16 +1335,16 @@ public class UserService{
 	 * <b>日期：</b>2020年12月18日 上午11:33:22
 	 * @param userCapatity 人数上限数量
 	 */
-	public void setUserCapacity(Long userCapatity) {
+	public void setUserCapacity(Long userCapacity) {
 		List<UserCapacityPO> userCapacityPOs = userCapacityDAO.findAll();
-		if(userCapacityPOs == null || userCapacityPOs.size() == 0 || userCapacityPOs.isEmpty()){
+		if(null == userCapacityPOs || userCapacityPOs.size() == 0){
 			UserCapacityPO userCapacityPO = new UserCapacityPO();
 			userCapacityPO.setUserCapacityLong(200L);
 			userCapacityDAO.save(userCapacityPO);
 			userCapacityPOs.add(userCapacityPO);
 		}
 		UserCapacityPO userCapacityPO = userCapacityPOs.get(0);
-		userCapacityPO.setUserCapacityLong(userCapatity);
+		userCapacityPO.setUserCapacityLong(userCapacity);
 		userCapacityDAO.save(userCapacityPO);
 	}
 	
