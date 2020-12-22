@@ -592,7 +592,7 @@ public class MonitorRecordService {
 			if(shouldRecord){
 				monitorRecordManyTimes.setStatus(MonitorRecordStatus.RUN)
 									.setRelationId(relation.getId())
-									.setIndexNumber(relation.getIndexNumber());
+									.setIndexNumber(relation.getIndexNumber().intValue());
 				monitorRecordManyTimesDao.save(monitorRecordManyTimes);
 				
 				relation.setIndexNumber(relation.getIndexNumber()+1);
@@ -1999,7 +1999,7 @@ public class MonitorRecordService {
 
 				monitorRecordManyTimes.setStatus(MonitorRecordStatus.RUN)
 				  					  .setRelationId(missedRelation.getId())
-				  					  .setIndexNumber(missedRelation.getIndexNumber());
+				  					  .setIndexNumber(missedRelation.getIndexNumber().intValue());
 				monitorRecordManyTimesDao.save(monitorRecordManyTimes);
 
 				missedRelation.setManyTimeId(monitorRecordManyTimes.getId());
@@ -2027,7 +2027,7 @@ public class MonitorRecordService {
 				MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
 				monitorRecordManyTimesPO.setStartTime(relation.getNextStartTime())
 										.setEndTime(relation.getNextEndTime())
-										.setIndexNumber(relation.getIndexNumber())
+										.setIndexNumber(relation.getIndexNumber().intValue())
 										.setStatus(MonitorRecordStatus.RUN);
 				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
 				monitorRecordManyTimesRelationService.updateNextTime(relation);
