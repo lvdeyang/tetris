@@ -616,7 +616,7 @@ public class MonitorRecordService {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Calendar cal = Calendar.getInstance();
 		cal.setFirstDayOfWeek(Calendar.MONDAY);
-		dayWeek=dayWeek+1;
+		dayWeek=dayWeek-1;
 		cal.add(Calendar.DATE, dayWeek - cal.getFirstDayOfWeek());
 		Date mondayDate = cal.getTime();
 		String dayOfWeek = sdf.format(mondayDate);
@@ -1993,17 +1993,8 @@ public class MonitorRecordService {
 			}
 			
 			for(MonitorRecordManyTimesRelationPO missedRelation :missedRelations){
-				
 				MonitorRecordManyTimesPO monitorRecordManyTimes = new MonitorRecordManyTimesPO();
 				setStartAndEndTime(missedRelation.getMode().getName(), now, missedRelation, monitorRecordManyTimes);
-
-				monitorRecordManyTimes.setStatus(MonitorRecordStatus.RUN)
-				  					  .setRelationId(missedRelation.getId())
-				  					  .setIndexNumber(missedRelation.getIndexNumber().intValue());
-				monitorRecordManyTimesDao.save(monitorRecordManyTimes);
-
-				missedRelation.setManyTimeId(monitorRecordManyTimes.getId());
-				monitorRecordManyTimesRelationDao.save(missedRelation);
 			}
 		}
 		
@@ -2146,6 +2137,16 @@ public class MonitorRecordService {
 			
 			relation.setNextStartTime(nextStartTime);
 			relation.setNextEndTime(nextEndTime);
+		}
+		
+		if(shouldRecord){
+			monitorRecordManyTimes.setStatus(MonitorRecordStatus.RUN)
+			  .setRelationId(relation.getId())
+			  .setIndexNumber(relation.getIndexNumber().intValue());
+			monitorRecordManyTimesDao.save(monitorRecordManyTimes);
+
+			relation.setManyTimeId(monitorRecordManyTimes.getId());
+			monitorRecordManyTimesRelationDao.save(relation);
 		}
 	}
 
