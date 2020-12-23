@@ -307,7 +307,7 @@ public class MonitorRecordService {
 		// 处理定时录制   直接下命令
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
-			now = DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
+			now = DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET);
 			if (task.getStartTime().after(now)) {
 //				return task;
 			} else {
@@ -727,7 +727,7 @@ public class MonitorRecordService {
 		// 处理排期录制
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
-			DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
+			DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET);
 			if (task.getStartTime().after(now)) {
 				return task;
 			} else {
@@ -849,7 +849,7 @@ public class MonitorRecordService {
 		// 处理排期录制
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
-			DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
+			DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET);
 			if (task.getStartTime().after(now)) {
 				return task;
 			} else {
@@ -958,7 +958,7 @@ public class MonitorRecordService {
 		// 处理排期录制
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
-			DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
+			DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET);
 			if (task.getStartTime().after(now)) {
 				return task;
 			} else {
@@ -1675,7 +1675,7 @@ public class MonitorRecordService {
 		// 处理排期录制
 		if (MonitorRecordMode.SCHEDULING.equals(parsedMode)) {
 			Date now = new Date();
-			DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL);
+			DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET);
 			if (task.getStartTime().after(now)) {
 				return task;
 			} else {
@@ -1794,7 +1794,7 @@ public class MonitorRecordService {
 
 		// 早录一会
 		List<MonitorRecordPO> needStartRecords = monitorRecordDao
-				.findNeedStartSchedulingRecord(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
+				.findNeedStartSchedulingRecord(DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET));
 		if (needStartRecords != null && needStartRecords.size() > 0) {
 			Set<Long> avtplIds = new HashSet<Long>();
 			Set<Long> gearIds = new HashSet<Long>();
@@ -1859,7 +1859,7 @@ public class MonitorRecordService {
 
 		// 晚停一会
 		List<MonitorRecordPO> needStopRecords = monitorRecordDao
-				.findNeedStopSchedulingRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.SCHEDULING_INTERVAL));
+				.findNeedStopSchedulingRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
 		if (needStopRecords != null && needStopRecords.size() > 0) {
 			for (MonitorRecordPO record : needStopRecords) {
 
@@ -1948,7 +1948,7 @@ public class MonitorRecordService {
 //		Map<String, LogicBO> logics = new HashMap<String, LogicBO>();
 		
 		//找出需要停止录制的规则表   晚停一会。需要先停止否则会将结束时间更新。
-		List<MonitorRecordManyTimesRelationPO> stopRelations=monitorRecordManyTimesRelationDao.findNeedStopRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.SCHEDULING_INTERVAL));
+		List<MonitorRecordManyTimesRelationPO> stopRelations=monitorRecordManyTimesRelationDao.findNeedStopRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
 		List<Long> monitorRecordStopIds=new ArrayList<Long>();
 		
 		for(MonitorRecordManyTimesRelationPO relation:stopRelations){
@@ -1977,7 +1977,7 @@ public class MonitorRecordService {
 		}
 		
 		//找出需要录制但是错过时间没录制的：先将需要停止的做停止，再判断是否需要立即录制还是等待录制。
-		List<MonitorRecordManyTimesRelationPO> missedRelations = monitorRecordManyTimesRelationDao.findMissedRelations(now);
+		List<MonitorRecordManyTimesRelationPO> missedRelations = monitorRecordManyTimesRelationDao.findMissedRelations(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
 		
 		if(missedRelations.size()>0){
 			
@@ -1999,7 +1999,7 @@ public class MonitorRecordService {
 		}
 		
 		//找出需要录制的规则表 早录一会
-		List<MonitorRecordManyTimesRelationPO> startRelations = monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.SCHEDULING_INTERVAL));
+		List<MonitorRecordManyTimesRelationPO> startRelations = monitorRecordManyTimesRelationDao.findNeedUpdateTime(DateUtil.addMilliSecond(now, MonitorRecordPO.RECORD_OFFSET));
 		List<Long> monitorRecordStartIds=new ArrayList<Long>();
 		
 		for(MonitorRecordManyTimesRelationPO relation:startRelations){
@@ -2012,19 +2012,22 @@ public class MonitorRecordService {
 			}
 			
 			//更新录制规则表中的下次开始停止时间,MonitorRecordManyTimesPO中添加一些数据
-			List<MonitorRecordManyTimesPO> monitorRecordStartManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
+//			List<MonitorRecordManyTimesPO> monitorRecordStartManyTimes=new ArrayList<MonitorRecordManyTimesPO>();
 			
 			for(MonitorRecordManyTimesRelationPO relation:startRelations){
 				MonitorRecordManyTimesPO monitorRecordManyTimesPO=new MonitorRecordManyTimesPO();
 				monitorRecordManyTimesPO.setStartTime(relation.getNextStartTime())
 										.setEndTime(relation.getNextEndTime())
 										.setIndexNumber(relation.getIndexNumber().intValue())
-										.setStatus(MonitorRecordStatus.RUN);
-				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
+										.setStatus(MonitorRecordStatus.RUN)
+										.setRelationId(relation.getId());
+//				monitorRecordStartManyTimes.add(monitorRecordManyTimesPO);
+				monitorRecordManyTimesDao.save(monitorRecordManyTimesPO);
+				relation.setManyTimeId(monitorRecordManyTimesPO.getId());
 				monitorRecordManyTimesRelationService.updateNextTime(relation);
 			}
 			
-			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
+//			monitorRecordManyTimesDao.save(monitorRecordStartManyTimes);
 			//更新添加结束
 		}
 		
@@ -2145,7 +2148,7 @@ public class MonitorRecordService {
 			  .setIndexNumber(relation.getIndexNumber().intValue());
 			monitorRecordManyTimesDao.save(monitorRecordManyTimes);
 
-			relation.setManyTimeId(monitorRecordManyTimes.getId());
+			relation.setManyTimeId(monitorRecordManyTimes.getId()).setIndexNumber(relation.getIndexNumber()+1);
 			monitorRecordManyTimesRelationDao.save(relation);
 		}
 	}

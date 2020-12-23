@@ -20,14 +20,14 @@ public class MonitorRecordManyTimesRelationService {
 	 */
 	public void updateNextTime(MonitorRecordManyTimesRelationPO relation){
 		if(MonitorRecordManyTimesMode.DAY.equals(relation.getMode())){
-			DateUtil.addDay(relation.getNextStartTime(), 1);
-			DateUtil.addDay(relation.getNextEndTime(), 1);
+			relation.setNextStartTime(DateUtil.addDay(relation.getNextStartTime(), 1));
+			relation.setNextEndTime(DateUtil.addDay(relation.getNextEndTime(), 1));
 		}else if(MonitorRecordManyTimesMode.WEEK.equals(relation.getMode())){
-			DateUtil.addDay(relation.getNextStartTime(), 7);
-			DateUtil.addDay(relation.getNextEndTime(), 7);
+			relation.setNextStartTime(DateUtil.addDay(relation.getNextStartTime(), 7));
+			relation.setNextEndTime(DateUtil.addDay(relation.getNextEndTime(), 7));
 		}else if(MonitorRecordManyTimesMode.MONTH.equals(relation.getMode())){
-			DateUtil.addMonth(relation.getNextStartTime(), 1);
-			DateUtil.addMonth(relation.getNextEndTime(), 1);
+			relation.setNextStartTime(DateUtil.addMonth(relation.getNextStartTime(), 1));
+			relation.setNextEndTime(DateUtil.addMonth(relation.getNextEndTime(), 1));
 		}
 		relation.setIndexNumber(relation.getIndexNumber()+1);
 		monitorRecordManyTimesRelationDao.save(relation);
