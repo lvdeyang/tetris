@@ -1944,37 +1944,15 @@ public class MonitorRecordService {
 	public void scheduling() throws Exception{
 		
 		Date now = new Date();
-
-//		Map<String, LogicBO> logics = new HashMap<String, LogicBO>();
 		
 		//找出需要停止录制的规则表   晚停一会。需要先停止否则会将结束时间更新。
-		List<MonitorRecordManyTimesRelationPO> stopRelations=monitorRecordManyTimesRelationDao.findNeedStopRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
-		List<Long> monitorRecordStopIds=new ArrayList<Long>();
+		List<MonitorRecordManyTimesPO> stopRecords = monitorRecordManyTimesDao.findNeedStopRecord(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
 		
-		for(MonitorRecordManyTimesRelationPO relation:stopRelations){
-			if(relation.getBusinessId() != null){
-				monitorRecordStopIds.add(relation.getBusinessId());
-			}
+		for(MonitorRecordManyTimesPO record : stopRecords){
+			record.setStatus(MonitorRecordStatus.STOP);
 		}
 		
-		List<MonitorRecordPO> needStopRecords = monitorRecordDao.findByIdIn(monitorRecordStopIds);
-		
-		//排期这里不用下命令只用记录数据。
-		if (needStopRecords != null && needStopRecords.size() > 0) {
-			
-			//停止排期录制
-			//通过排期规则表找到在运行的排期，停止录制
-			List<Long> monitorRecordEndManyTimesIds = stopRelations.stream().map(MonitorRecordManyTimesRelationPO::getManyTimeId).filter(id -> id != null).collect(Collectors.toList());
- 			if(monitorRecordEndManyTimesIds.size() != 0){
- 				List<MonitorRecordManyTimesPO> monitorRecordEndManyTimes = monitorRecordManyTimesDao.findNeedStop(monitorRecordEndManyTimesIds);
-				if(monitorRecordEndManyTimes!=null&&monitorRecordEndManyTimes.size()>0){
-					for(MonitorRecordManyTimesPO monitorRecordManyTimesPo : monitorRecordEndManyTimes){
-						monitorRecordManyTimesPo.setStatus(MonitorRecordStatus.STOP);
-					}
-				}
- 			}
-			//停止结束
-		}
+		monitorRecordManyTimesDao.save(stopRecords);
 		
 		//找出需要录制但是错过时间没录制的：先将需要停止的做停止，再判断是否需要立即录制还是等待录制。
 		List<MonitorRecordManyTimesRelationPO> missedRelations = monitorRecordManyTimesRelationDao.findMissedRelations(DateUtil.addMilliSecond(now, -MonitorRecordPO.RECORD_OFFSET));
@@ -2033,10 +2011,6 @@ public class MonitorRecordService {
 		
 		if (needStartRecords != null && needStartRecords.size() > 0) {
 			monitorRecordDao.save(needStartRecords);
-		}
-
-		if (needStopRecords != null && needStopRecords.size() > 0) {
-			monitorRecordDao.save(needStopRecords);
 		}
 
 	}
