@@ -22,6 +22,9 @@ public class MonitorRecordPO extends AbstractBasePO{
 	
 	/** 录制执行时间间隔 */
 	public static final int SCHEDULING_INTERVAL = 60000;
+	
+	/** 录制偏移量*/
+	public static final int RECORD_OFFSET = 90000;
 
 	private static final long serialVersionUID = 1L;
 	
