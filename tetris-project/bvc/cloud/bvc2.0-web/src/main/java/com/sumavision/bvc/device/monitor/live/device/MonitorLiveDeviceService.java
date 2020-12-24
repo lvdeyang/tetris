@@ -1824,7 +1824,7 @@ public class MonitorLiveDeviceService {
 				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
 				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
 				Long idSize = (long) idList.size();
-				if(TurnCapacity <= (forwardCount + idSize)){
+				if(TurnCapacity < (forwardCount + idSize)){
 					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
 				}
 				List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findAll(idList);
