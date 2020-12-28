@@ -175,7 +175,7 @@ public class ResourceRemoteService {
 	 * @param requestJson
 	 */
 	public void notifyXml(String cmd, String xml) throws Exception{
-
+		System.out.println("notifyXml : ");
 		System.out.println(xml);
 		// 获取联网发来的notify消息
 		if ("syncinfo".equals(cmd)) {

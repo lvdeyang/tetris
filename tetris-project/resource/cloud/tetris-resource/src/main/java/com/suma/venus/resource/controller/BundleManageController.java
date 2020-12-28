@@ -606,6 +606,7 @@ public class BundleManageController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> logout(@RequestParam(value = "bundleId") String bundleId) {
 		Map<String, Object> data = makeAjaxData();
+		LOGGER.info("/logout : " + bundleId);
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
 			/** 通知接入层 */
