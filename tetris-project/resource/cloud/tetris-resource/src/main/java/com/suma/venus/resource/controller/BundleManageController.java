@@ -254,12 +254,12 @@ public class BundleManageController extends ControllerBase {
 			Integer bundle210 = bundleCountList.size();
 			List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
 			if(null != vedioCapacityPOs && vedioCapacityPOs.size() > 0){
-				if(bundle210.longValue() > vedioCapacityPOs.get(0).getVedioCapacity()){
+				if(bundle210.longValue() >= vedioCapacityPOs.get(0).getVedioCapacity()){
 					data.put(ERRMSG, "图像设备数量已超过上限！");
 					return data;
 				}
 			}else {
-				if(bundle210.longValue() > 1024L){
+				if(bundle210.longValue() >= 1024L){
 					data.put(ERRMSG, "图像设备数量已超过上限！");
 					return data;
 				}

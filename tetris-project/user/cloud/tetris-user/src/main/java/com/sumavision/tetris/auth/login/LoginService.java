@@ -144,7 +144,7 @@ public class LoginService {
 		if (null != userCapacityPOs && userCapacityPOs.size() > 0) {
 			List<UserVO> userVOs = userQuery.queryUserOnline();
 			Integer userOnline = userVOs.size();
-			if (userOnline.longValue() > userCapacityPOs.get(0).getUserCapacityLong()) {
+			if (userOnline.longValue() >= userCapacityPOs.get(0).getUserCapacityLong()) {
 				throw new UserOnlineExceedLImitException(userCapacityPOs.get(0).getUserCapacityLong().toString());
 			};
 		}

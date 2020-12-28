@@ -835,6 +835,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		if (bundlePOs != null && bundlePOs.size() > 0) {
 			for (BundlePO bundlePO : bundlePOs) {
 				bundlePO.setOnlineStatus(onlineStatus.get(bundlePO.getBundleId()));
+				System.out.println("bundle offline :" + bundlePO.getBundleId() + "----------*****外域影响***----------");
 			}
 		}
 		bundleDao.save(bundlePOs);
