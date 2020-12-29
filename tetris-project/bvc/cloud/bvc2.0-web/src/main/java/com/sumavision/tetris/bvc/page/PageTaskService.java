@@ -1157,9 +1157,9 @@ public class PageTaskService {
 					if(newTask.getTaskIndex()==fixedPageTasks.get(i).getTaskIndex()){
 						PageTaskPO oldTask=fixedPageTasks.get(i);
 						resolveConflict(oldTask,fixedPageTasks,i);
-						oldTask=newTask;
+						fixedPageTasks.set(i, newTask);
 						addFixed=false;
-						continue;
+						break;
 					}
 					if(newTask.getTaskIndex()<fixedPageTasks.get(i).getTaskIndex()){
 						fixedPageTasks.add(i, newTask);
