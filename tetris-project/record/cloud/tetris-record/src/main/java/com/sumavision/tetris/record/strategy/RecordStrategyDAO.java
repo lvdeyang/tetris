@@ -31,4 +31,5 @@ public interface RecordStrategyDAO extends BaseDAO<RecordStrategyPO> {
 	
 	List<RecordStrategyPO> findByDeviceId(Long deviceId);
 
+	List<RecordStrategyPO> findByDeviceIdAndStatus(Long deviceId, RecordStrategyPO.EStrategyStatus status);
 }

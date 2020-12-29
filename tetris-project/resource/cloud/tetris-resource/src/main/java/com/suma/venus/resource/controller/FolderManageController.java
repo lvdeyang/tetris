@@ -65,6 +65,7 @@ import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.FolderUserMap.FolderUserComparator;
@@ -275,13 +276,14 @@ public class FolderManageController extends ControllerBase {
 				
 				//------------------
 				Set<Long> allFolderIds = new HashSet<Long>();
-				if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
+				if(folderPO.getParentPath() != null && !folderPO.getParentPath().equals("")){
 					String[] allfolderIds = folderPO.getParentPath().split("/");
 					for (int i = 1; i < allfolderIds.length; i++) {
 						allFolderIds.add(Long.parseLong(allfolderIds[i]));
 					}
 				}
 				List<FolderPO> allFolderPOs = folderDao.findByIdIn(allFolderIds);
+				allFolderPOs.add(folderPO);
 				Map<Long, String> idUuidMap = new HashMap<Long, String>();
 				List<FolderVO> folderVOs = new ArrayList<FolderVO>();
 				if(allFolderPOs!=null && allFolderPOs.size()>0){
@@ -348,6 +350,7 @@ public class FolderManageController extends ControllerBase {
 						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
+					System.out.println("--------修改设备组织机构***——————————" + passByBOnew);
 				}
 				
 			} catch (Exception e) {
@@ -490,6 +493,83 @@ public class FolderManageController extends ControllerBase {
 			folder.setToLdap(toLdap);
 			folder.setSyncStatus(SYNC_STATUS.ASYNC);
 			folderService.save(folder);
+			
+			//设备修改组织机构外域
+			try {
+				PassByBO passByBOnew = new PassByBO();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+				Map<String, Object> local = new HashMap<String, Object>();
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				local.put("name", serNodePO.getNodeName());
+				//处理组织机构
+				
+				//------------------
+				Set<Long> allFolderIds = new HashSet<Long>();
+				if(folder.getParentPath() != null && !folder.getParentPath().equals("")){
+					String[] allfolderIds = folder.getParentPath().split("/");
+					for (int i = 1; i < allfolderIds.length; i++) {
+						allFolderIds.add(Long.parseLong(allfolderIds[i]));
+					}
+				}
+				List<FolderPO> allFolderPOs = folderDao.findByIdIn(allFolderIds);
+				allFolderPOs.add(folder);
+				Map<Long, String> idUuidMap = new HashMap<Long, String>();
+				List<FolderVO> folderVOs = new ArrayList<FolderVO>();
+				if(allFolderPOs!=null && allFolderPOs.size()>0){
+					for(FolderPO folderPO1:allFolderPOs){
+						FolderVO folderVO = FolderVO.fromFolderPO(folderPO1);
+						folderVOs.add(folderVO);
+						idUuidMap.put(folderVO.getId(), folderVO.getUuid());
+					}
+					
+					for(FolderVO folderVO:folderVOs){
+//						folderVO.setParentId(idUuidMap.get(folderVO.getId()));
+						String parentPath = folderVO.getParentPath();
+						if(parentPath==null || "".equals(parentPath)) continue;
+						StringBufferWrapper newParentPath = new StringBufferWrapper();
+						String[] parentIds = parentPath.split("/");
+						for(int i=1; i<parentIds.length; i++){
+							newParentPath.append("/").append(idUuidMap.get(Long.valueOf(parentIds[i])));
+						}
+						folderVO.setParentPath(newParentPath.toString());
+					}
+				}
+				//----------------------
+				
+				List<SerNodePO> ExserNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
+				List<SerNodePO> serNodePOs = new ArrayList<SerNodePO>();
+				if(ExserNodePOs != null&& ExserNodePOs.size()>0){
+					for (SerNodePO serNodePO2 : ExserNodePOs) {
+						if (serNodePO2.getStatus().equals(ConnectionStatus.ON)) {
+							serNodePOs.add(serNodePO2);
+						}
+					}
+				}
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				
+				if (serNodePOs != null && !serNodePOs.isEmpty()) {
+					List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("institutions", folderVOs);
+						foreign.get(i).put("devices", devices);
+					}
+					pass_by_content.put("cmd", "deviceInstitutionChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBOnew.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
+					System.out.println("--------修改设备组织机构***gaiming——————————" + passByBOnew);
+				}
+				
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to modify folder : ", e);
 			data.put(ERRMSG, "内部错误");

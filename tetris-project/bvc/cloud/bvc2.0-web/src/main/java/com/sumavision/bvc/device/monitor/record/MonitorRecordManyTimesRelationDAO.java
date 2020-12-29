@@ -16,6 +16,9 @@ public interface MonitorRecordManyTimesRelationDAO extends MetBaseDAO<MonitorRec
 	
 	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesRelationPO relation where relation.status='WAITING' and relation.nextEndTime<=?1")
 	public List<MonitorRecordManyTimesRelationPO> findNeedStopRecord(Date time);
+	
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesRelationPO relation where relation.status='WAITING' and relation.nextStartTime<=?1")
+	public List<MonitorRecordManyTimesRelationPO> findMissedRelations(Date time);
 
 	public MonitorRecordManyTimesRelationPO findByBusinessId(Long businessId);
 }

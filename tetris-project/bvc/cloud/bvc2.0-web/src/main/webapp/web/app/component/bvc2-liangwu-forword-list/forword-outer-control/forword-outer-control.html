@@ -1,5 +1,5 @@
 <div class="forword-outer-control"
-  style="width:100%; height:95%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;"
+  style="width:100%; height:100%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;"
   v-loading="loading">
   <div class="col">
     <div class="title">编码器</div>
@@ -9,7 +9,7 @@
           <span slot="prefix" class="el-input__icon el-icon-search"></span>
         </el-input>
       </div>
-      <div>
+      <div style="height: 100%;">
         <el-tree ref="tree" :data="encodetree" node-key="id" highlight-current :expand-on-click-node="true"
           :props="defaultProps" :default-checked-keys="checked" :default-expand-all="defaultExpandAll"
           :filter-node-method="filterNode" :render-content="renderContent" @node-expand="nodeExpand"
@@ -36,7 +36,7 @@
       <el-tag type="danger" size="small" style="margin-left: 10px;">当前转发/最大转发：{{forwordTotal}}/{{currentWidthTotleNum}}
       </el-tag>
     </el-row>
-    <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 90%"
+    <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 98%;overflow: auto;"
       @selection-change="handleSelectionChange" :row-class-name="rowClassName">
       <el-table-column type="selection" width="55" :selectable="selectableFun">
       </el-table-column>

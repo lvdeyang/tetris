@@ -44,6 +44,9 @@ import net.sf.json.JSONObject;
 @RequestMapping(value = "/command/decoder")
 public class CommandUserDecoderController {
 	
+	/** 发起业务时，synchronized锁的前缀 */
+	private static final String lockUserPrefix = "controller-userId-";
+	
 	@Autowired
 	private UserUtils userUtils;
 	
@@ -82,29 +85,32 @@ public class CommandUserDecoderController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
-		
-		//查找该用户配置信息
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
-		if(null == userInfo){
-			//如果没有则建立默认
-			userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
-		}		
-		List<CommandGroupDecoderSchemePO> decoderSchemes = userInfo.getDecoderSchemes();
-		
-		List<DecoderSchemeVO> schemeVOs = new ArrayList<DecoderSchemeVO>();		
-		if(decoderSchemes != null){
-			for(CommandGroupDecoderSchemePO decoderScheme : decoderSchemes){
-				DecoderSchemeVO schemeVO = new DecoderSchemeVO().set(decoderScheme);
-				schemeVOs.add(schemeVO);
+
+		synchronized (new StringBuffer().append(lockUserPrefix).append(user.getId()).toString().intern()) {
+			
+			//查找该用户配置信息
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+			if(null == userInfo){
+				//如果没有则建立默认
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+			}		
+			List<CommandGroupDecoderSchemePO> decoderSchemes = userInfo.getDecoderSchemes();
+			
+			List<DecoderSchemeVO> schemeVOs = new ArrayList<DecoderSchemeVO>();		
+			if(decoderSchemes != null){
+				for(CommandGroupDecoderSchemePO decoderScheme : decoderSchemes){
+					DecoderSchemeVO schemeVO = new DecoderSchemeVO().set(decoderScheme);
+					schemeVOs.add(schemeVO);
+				}
 			}
+			
+			Map<String, Object> map = new HashMapWrapper<String, Object>()
+					.put("decoderSchemes", schemeVOs)
+					.getMap();
+	//		log.info("queryAllScheme: " + JSON.toJSON(map));
+			
+			return map;
 		}
-		
-		Map<String, Object> map = new HashMapWrapper<String, Object>()
-				.put("decoderSchemes", schemeVOs)
-				.getMap();
-//		log.info("queryAllScheme: " + JSON.toJSON(map));
-		
-		return map;
 	}
 	
 	/**

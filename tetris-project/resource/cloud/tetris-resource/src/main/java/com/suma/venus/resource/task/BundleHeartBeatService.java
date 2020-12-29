@@ -61,6 +61,7 @@ public class BundleHeartBeatService {
 			BundlePO bundlePO = bundlePOs.get(0);
 			bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 			bundleDao.save(bundlePO);
+			LOGGER.info("remove heartBeat， bundle_id=" + bundlePO.getBundleId());
 		} else {
 			LOGGER.warn("removeBundleStatus, cannot find budlePO, ip=" + bundle_ip);
 		}

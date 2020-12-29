@@ -375,5 +375,9 @@ public interface UserFeign {
 	@RequestMapping(value = "/user/feign/find/by/roleId/in")
 	public JSONObject findByRoleIdIn(
 			@RequestParam("roleIds") List<Long> roleIds);
+	
+	@RequestMapping(value = "/user/feign/set/userCapacity")
+	public JSONObject setUserCapacity(
+			@RequestParam("userCapacity") Long userCapacity);
 
 }

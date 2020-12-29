@@ -735,7 +735,7 @@ public class AgendaExecuteService {
 						forward.setSrcBaseType(video.getBaseType());
 						forward.setSrcChannelName(video.getChannelName());
 						if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-							String addr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
+							String addr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 0);
 							forward.setVideoTransmissionMode(TransmissionMode.MULTICAST);
 							forward.setVideoMultiAddr(addr);
 							forward.setVideoMultiSrcAddr(bundlePO.getMulticastSourceIp());
@@ -770,7 +770,7 @@ public class AgendaExecuteService {
 							forward.setSrcAudioBaseType(audio.getBaseType());
 							forward.setSrcAudioChannelName(audio.getChannelName());
 							if(Boolean.TRUE.equals(audioBundlePO.getMulticastEncode())){
-								String addr = multicastService.addrAddPort(audioBundlePO.getMulticastEncodeAddr(), 4);
+								String addr = multicastService.addrAddPort(audioBundlePO.getMulticastEncodeAddr(), 2);
 								forward.setAudioTransmissionMode(TransmissionMode.MULTICAST);
 								forward.setAudioMultiAddr(addr);
 								forward.setAudioMultiSrcAddr(audioBundlePO.getMulticastSourceIp());

@@ -14,7 +14,7 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 @RepositoryDefinition(domainClass=MonitorRecordManyTimesPO.class, idClass=Long.class)
 public interface MonitorRecordManyTimesDAO extends MetBaseDAO<MonitorRecordManyTimesPO> {
 
-	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO record where record.status='RUN' and record.relationId in ?1")
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO record where record.status='RUN' and record.id in ?1")
 	public List<MonitorRecordManyTimesPO> findNeedStop(Collection<Long> relationIds);
 	
 	public List<MonitorRecordManyTimesPO> findByRelationId(Long relationId);
@@ -25,4 +25,15 @@ public interface MonitorRecordManyTimesDAO extends MetBaseDAO<MonitorRecordManyT
 	public Page<MonitorRecordManyTimesPO> findByRelation(Long relationId, Pageable page);
 	
 	public MonitorRecordManyTimesPO findByRelationIdAndStatusNot(Long relationId,MonitorRecordStatus status);
+
+	/**
+	 * 根据结束时间查找要停止的录制<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月23日 下午2:55:15
+	 * @param addMilliSecond
+	 * @return
+	 */
+	@Query("from com.sumavision.bvc.device.monitor.record.MonitorRecordManyTimesPO record where record.status = 'RUN' and record.endTime <= ?1")
+	public List<MonitorRecordManyTimesPO> findNeedStopRecord(Date endTime);
 }

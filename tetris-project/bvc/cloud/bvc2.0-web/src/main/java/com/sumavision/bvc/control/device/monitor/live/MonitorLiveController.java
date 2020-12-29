@@ -52,6 +52,7 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
@@ -191,11 +192,11 @@ public class MonitorLiveController {
 			}
 		}else{
 			if(userId.longValue() == 1l || user.getIsGroupCreator()){
-				Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByType(currentPage, pageSize, type);
+				Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByTypeAndStatus(currentPage, pageSize, type, MonitorRecordStatus.RUN);
 				entities = pagedEntities.getContent();
 				total = pagedEntities.getTotalElements();
 			}else{
-				Page<MonitorLiveDevicePO> pagedEntities  = monitorLiveDeviceQuery.findByUserIdAndType(userId, currentPage, pageSize, type);
+				Page<MonitorLiveDevicePO> pagedEntities  = monitorLiveDeviceQuery.findByUserIdAndTypeAndStatus(userId, currentPage, pageSize, type, MonitorRecordStatus.RUN);
 				entities = pagedEntities.getContent();
 				total = pagedEntities.getTotalElements();
 			}

@@ -52,7 +52,32 @@ public class OprlogParamBO {
 		/**
 		 * 外域连接断开
 		 */
-		EXTERNAL_DISCONNECT("外域连接断开");
+		EXTERNAL_DISCONNECT("外域连接断开"),
+		
+		/**
+		 * 设备资源
+		 */
+		DEVICE_OPR("设备资源操作"),
+		
+		/**
+		 * 角色操作
+		 */
+		ROLE_OPR("角色操作"),
+		
+		/**
+		 * 权限变更
+		 */
+		PRIVILEGE_CHANGE("权限变更"),
+		
+		/**
+		 * 用户角色变更
+		 */
+		USER_ROLE_CHANGE("用户角色变更"),
+		
+		/**
+		 * 层节点操作
+		 */
+		ACCESSNODE_OPR("层节点操作");
 
 		private String name;
 

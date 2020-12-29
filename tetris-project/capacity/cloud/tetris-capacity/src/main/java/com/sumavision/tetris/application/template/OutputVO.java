@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class OutputVO {
 
+    private Integer index;
 
     private String url;
 
@@ -752,5 +753,13 @@ public class OutputVO {
 
     public void setPcr_clock(String pcr_clock) {
         this.pcr_clock = pcr_clock;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
     }
 }

@@ -36,16 +36,20 @@ import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -87,6 +91,13 @@ public class OutlandService extends ControllerBase{
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	
 	/**
 	 * 查询本域信息<br/>
@@ -370,6 +381,11 @@ public class OutlandService extends ControllerBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+		
 		return serNodeVO;
 	}
 	
@@ -443,6 +459,10 @@ public class OutlandService extends ControllerBase{
 			e.printStackTrace();
 		}
 		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+		
 		return serNodeVO;
 	}
 	
@@ -484,6 +504,11 @@ public class OutlandService extends ControllerBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//外域连接成功日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
+		
 		return serNodeVO;
 	}
 	
@@ -495,10 +520,33 @@ public class OutlandService extends ControllerBase{
 	 * @param id 外域id
 	 */
 	public Object outlandDelete(Long id)throws Exception{
+		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		if (serNodePO != null) {
 			outlandOff(id);
 			serNodeDao.delete(serNodePO);
+			try {
+				//发送消息
+				PassByBO passByBO = new PassByBO();
+				List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+				Map<String, Object> pass_by_content = new HashMap<String, Object>();
+				Map<String, Object> local = new HashMap<String, Object>();
+				local.put("name", localSerNodePOs.get(0).getNodeName());
+				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+				foreign.add(new HashMap<String, Object>());
+				foreign.get(0).put("name", serNodePO.getNodeName());
+				pass_by_content.put("cmd", "foreignDelete");
+				pass_by_content.put("local", local);
+				pass_by_content.put("foreign", foreign);
+				passByBO.setPass_by_content(pass_by_content);
+				if (workNodePOs != null && !workNodePOs.isEmpty()) {
+					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+				}
+				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				System.out.println("_______________删除外域———————————————"+ passByBO );
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -755,19 +803,29 @@ public class OutlandService extends ControllerBase{
 			// 添加子分组节点(递归)
 			// TODO
 			List<FolderPO> childrenPO = folderService.findByParentId(parentId);
-			for (FolderPO childFolder : childrenPO) {
-				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
-				folderNodeVO.setChildren(createChildrenTreeNodes(childFolder.getId()));
-				children.add(folderNodeVO);
-			}
-
-			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
-
+			
 			// 添加子bundle节点
 			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
 			for (BundlePO bundle : bundles) {
 				children.add(createBundleNode(parentId, bundle));
 			}
+			
+			for (FolderPO childFolder : childrenPO) {
+				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
+				folderNodeVO.setChildren(createChildrenTreeNodes(childFolder.getId()));
+				if(folderNodeVO.getChildren() != null && folderNodeVO.getChildren().size() > 0){
+					children.add(folderNodeVO);
+				}
+				//children.add(folderNodeVO);
+			}
+
+			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+
+			// 添加子bundle节点
+//			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
+//			for (BundlePO bundle : bundles) {
+//				children.add(createBundleNode(parentId, bundle));
+//			}
 
 		} catch (Exception e) {
 			LOGGER.error("Fail to creat folder tree children", e);
@@ -786,6 +844,7 @@ public class OutlandService extends ControllerBase{
 		bundleNodeVO.setFolderIndex(bundle.getFolderIndex());
 		bundleNodeVO.setNodeType("BUNDLE");
 		bundleNodeVO.setSystemSourceType(bundle.getSourceType().equals(SOURCE_TYPE.SYSTEM) ? true : false);
+		bundleNodeVO.setOnlineStatus(bundle.getOnlineStatus()==null ? ONLINE_STATUS.OFFLINE:bundle.getOnlineStatus());
 		return bundleNodeVO;
 	}
 	

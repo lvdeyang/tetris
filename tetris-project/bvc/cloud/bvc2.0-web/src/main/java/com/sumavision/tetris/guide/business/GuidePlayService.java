@@ -548,7 +548,7 @@ public class GuidePlayService {
 				      .setBase_type("VenusAudioIn")
 				      .setCodec_param(codec);
 			if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-				String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
+				String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
 				connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
 			}
 			connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);

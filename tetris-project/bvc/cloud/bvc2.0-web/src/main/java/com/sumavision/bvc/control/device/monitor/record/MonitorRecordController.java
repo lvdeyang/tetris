@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,10 +44,10 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordMode;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.system.dao.SystemConfigurationDAO;
-import com.sumavision.tetris.bvc.system.po.SystemConfigurationPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -96,6 +94,9 @@ public class MonitorRecordController {
 	@Autowired
 	private UserQueryService userQueryService;
 	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
 		
@@ -126,7 +127,7 @@ public class MonitorRecordController {
 		List<AccessNodeBO> layers =resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(file.getStoreLayerId()).getList());
 		if(layers==null || layers.size()<=0) return null;
 		AccessNodeBO targetLayer = layers.get(0);
-		
+		UserVO user = userUtils.getUserFromSession(request);
 		
 //		.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 		StringBufferWrapper downloadUrl = new StringBufferWrapper();
@@ -141,6 +142,8 @@ public class MonitorRecordController {
 		Date endTime = file.getEndTime()==null?new Date():file.getEndTime();
 		
 		long duration = (endTime.getTime()-startTime.getTime())/1000;
+		
+		operationLogService.send(user.getName(), "下载录制任务", user.getName()+"下载录制任务：" +file.getFileName());
 		
 		return new HashMapWrapper<String, Object>().put("downloadUrl", downloadUrl.toString())
 											       .put("duration", duration)

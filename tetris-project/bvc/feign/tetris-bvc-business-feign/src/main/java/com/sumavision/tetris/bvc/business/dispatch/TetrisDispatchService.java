@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.sumavision.tetris.bvc.business.dispatch.bo.DispatchBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.DispatchResponseBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
@@ -41,7 +42,7 @@ public class TetrisDispatchService {
 	 * @throws Exception
 	 */
 	public void dispatch(List<PassByBO> passbyBOs) throws Exception{
-		dispatchFeign.passby(JSON.toJSONString(passbyBOs));
+		dispatchFeign.passby(JSON.toJSONString(passbyBOs, SerializerFeature.DisableCircularReferenceDetect));
 	}
 	
 }

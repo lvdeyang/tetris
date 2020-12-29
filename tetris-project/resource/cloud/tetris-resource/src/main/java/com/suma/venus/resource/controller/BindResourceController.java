@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hibernate.annotations.SourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -37,7 +35,6 @@ import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
-import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
@@ -52,22 +49,21 @@ import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
 import com.suma.venus.resource.lianwang.auth.DevAuthXml;
 import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
-import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
-import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
-import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
+import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
@@ -77,10 +73,13 @@ import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.suma.venus.resource.vo.FolderVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -150,6 +149,13 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -985,6 +991,7 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 					
 					
@@ -1035,9 +1042,14 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 				}
 				
+				//修改授权日志
+				UserVO userVO = userQuery.current();
+				operationLogService.send(userVO.getUsername(), "修改权限", userVO.getUsername() + "修改了授权", EOprlogType.PRIVILEGE_CHANGE);
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
 				e.printStackTrace();

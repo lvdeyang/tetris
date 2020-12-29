@@ -527,12 +527,12 @@ define([
         ajax.post('/monitor/record/add', task, function (data, status) {
           self.dialog.addRecord.loading = false;
           if (status !== 200) return;
-          if (self.dialog.addRecord.mode === self.condition.mode) {
-            self.table.data.splice(0, 0, data);
-          } else {
-            // self.condition.mode = self.dialog.addRecord.mode;
-            self.table.prependRow = data;
-          }
+          // if (self.dialog.addRecord.mode === self.condition.mode) {
+          //   self.table.data.splice(0, 0, data);
+          // } else {
+          //   // self.condition.mode = self.dialog.addRecord.mode;
+          //   self.table.prependRow = data;
+          // }
 
           self.load(1);
           self.getTotle(1);
@@ -552,7 +552,8 @@ define([
         var self = this;
         self.dialog.selectDevice.visible = true;
         self.dialog.selectDevice.tree.data.splice(0, self.dialog.selectDevice.tree.data.length);
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
+        var params = { privilegesStr: "['RECORD','LR']", satisfyAll: false };
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', params, function (data) {
           if (data && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
               self.dialog.selectDevice.tree.data.push(data[i]);
@@ -634,14 +635,15 @@ define([
           pageSize: this.downloadTable.page.pageSize
         }
         ajax.post('/monitor/record/load/many/times/record', param, function (data) {
-          var total = data.total;
-          var rows = data.rows;
           if (!data) {
             self.downloadTable.data = []
+          } else {
+            var total = data.total;
+            var rows = data.rows;
+            self.downloadTable.page.total = total;
+            self.downloadTable.data = rows;
           }
           // self.downloadTable.page.currentPage = currentPage;
-          self.downloadTable.page.total = total;
-          self.downloadTable.data = rows;
         });
       },
       handleDownloadClose () {

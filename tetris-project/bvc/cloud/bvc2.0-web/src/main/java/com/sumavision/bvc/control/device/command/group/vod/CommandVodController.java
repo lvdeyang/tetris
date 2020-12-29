@@ -480,7 +480,6 @@ public class CommandVodController {
 			}else {
 				vodService.deviceStart(user, deviceId, null);
 			}
-			
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 
@@ -637,7 +636,7 @@ public class CommandVodController {
 				admin.setId(-1L);
 
 				businessReturnService.init(Boolean.TRUE);
-				vodService.deviceStop(businessId);
+				vodService.deviceStop(user, businessId);
 
 				return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
 						.getMap();

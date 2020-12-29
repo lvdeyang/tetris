@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserCapacityPO;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
@@ -39,6 +40,7 @@ public class UserFeignController {
 	
 	@Autowired
 	private UserService userService;
+	
 	
 	/**
 	 * 用户登录校验<br/>
@@ -675,5 +677,22 @@ public class UserFeignController {
 	@RequestMapping(value = "/find/by/roleId/in")
 	public Object findByRoleIdIn(List<Long> roleIds) throws Exception{
 		return userDAO.findByRoleIdIn(roleIds);
+	}
+	
+	/**
+	 * 设置修改用户在线人数上限<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月18日 上午11:33:22
+	 * @param userCapatity 人数上限数量
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/userCapacity" )
+	public Object setUserCapacity(Long userCapacity)throws Exception{
+		
+		userService.setUserCapacity(userCapacity);
+		
+		return null;
 	}
 }

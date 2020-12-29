@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import com.sumavision.bvc.device.monitor.ptzctrl.ApertureControl;
 import com.sumavision.bvc.device.monitor.ptzctrl.Direction;
 import com.sumavision.bvc.device.monitor.ptzctrl.FocusControl;
 import com.sumavision.bvc.device.monitor.ptzctrl.ZoomControl;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -43,6 +45,9 @@ public class CloudControlController {
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	/**
 	 * 竖直方向移动镜头<br/>
 	 * <b>作者:</b>zsy<br/>
@@ -61,9 +66,9 @@ public class CloudControlController {
 			String speed,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.vertical(serial, Direction.valueOf(direction), speed, userId);
+		cloudControlService.vertical(serial, Direction.valueOf(direction), speed, userVo.getId());
 		
 		return null;
 	}
@@ -86,9 +91,9 @@ public class CloudControlController {
 			String speed,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.horizontal(serial, Direction.valueOf(direction), speed, userId);
+		cloudControlService.horizontal(serial, Direction.valueOf(direction), speed, userVo.getId());
 		
 		return null;
 	}
@@ -111,9 +116,9 @@ public class CloudControlController {
 			String speed,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.zoom(serial, ZoomControl.valueOf(direction), speed, userId);
+		cloudControlService.zoom(serial, ZoomControl.valueOf(direction), speed, userVo.getId());
 		
 		return null;
 	}
@@ -136,9 +141,9 @@ public class CloudControlController {
 			String speed, 
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.focus(serial, FocusControl.valueOf(direction), speed, userId);
+		cloudControlService.focus(serial, FocusControl.valueOf(direction), speed, userVo.getId());
 		
 		return null;
 	}
@@ -161,9 +166,9 @@ public class CloudControlController {
 			String speed, 
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.aperture(serial, ApertureControl.valueOf(direction), speed, userId);
+		cloudControlService.aperture(serial, ApertureControl.valueOf(direction), speed, userVo.getId());
 		
 		return null;
 	}
@@ -182,9 +187,9 @@ public class CloudControlController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		cloudControlService.stop(serial, userId);
+		cloudControlService.stop(serial, userVo.getId());
 		
 		return null;
 	}
@@ -204,15 +209,15 @@ public class CloudControlController {
 			int serial,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, serial);
+		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userVo.getId(), serial);
 		List<MonitorPointPO> entities = monitorPointDao.findByBundleId(bundle.getBundleId());
 		
 		List<MonitorPointVO> points = new ArrayList<MonitorPointVO>();
 		if(entities!=null && entities.size()>0){
 			for(MonitorPointPO entity:entities){
-				points.add(new MonitorPointVO().set(entity, userId));
+				points.add(new MonitorPointVO().set(entity, userVo.getId()));
 			}
 		}
 		
@@ -236,11 +241,11 @@ public class CloudControlController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userUtils.getUserFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		MonitorPointPO entity = cloudControlService.add(serial, name, user.getId(), user.getName());
+		MonitorPointPO entity = cloudControlService.add(serial, name, userVo.getId(), userVo.getName());
 		
-		return new MonitorPointVO().set(entity, user.getId());
+		return new MonitorPointVO().set(entity, userVo.getId());
 	}
 	
 	/**
@@ -257,9 +262,9 @@ public class CloudControlController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		UserVO userVo = userUtils.getUserFromSession(request);
 		
-		monitorPointService.invoke(Long.parseLong(id), userId);
+		monitorPointService.invoke(Long.parseLong(id), userVo.getId());
 		
 		return null;
 	}
@@ -280,8 +285,8 @@ public class CloudControlController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
-		monitorPointService.remove(Long.parseLong(id), userId);
+		UserVO userVo = userUtils.getUserFromSession(request);
+		monitorPointService.remove(Long.parseLong(id), userVo.getId());
 		
 		return null;
 	}
@@ -300,6 +305,7 @@ public class CloudControlController {
 	public Object checkPrivilege(
 			int serial,
 			HttpServletRequest request) throws Exception{
+		
 		Long userId = userUtils.getUserIdFromSession(request);
 		cloudControlService.checkPrivilege(serial, userId, null);
 		return null;

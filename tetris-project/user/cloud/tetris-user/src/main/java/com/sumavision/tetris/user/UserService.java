@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
@@ -126,6 +127,12 @@ public class UserService{
 	
 	@Autowired
 	private UserTagsDAO userTagsDAO;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserCapacityDAO userCapacityDAO;
 	
 	/**
 	 * 锁定用户<br/>
@@ -431,6 +438,11 @@ public class UserService{
 			}
 		}
 		result.setBusinessRoles(JSON.toJSONString(roles));
+		
+		//添加用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "添加用戶", "用户  " + userVO.getUsername() + " 添加了用户  " + user.getUsername(), EOprlogType.USER_OPR);
+		
 		return result;
 	}
 	
@@ -664,6 +676,10 @@ public class UserService{
 																											   .getList());
 		applicationEventPublisher.publishEvent(event);
 		
+		//删除用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "删除用戶", "用户  " + userVO.getUsername() + " 删除了用户  " + user.getUsername(), EOprlogType.USER_OPR);
+		
 	}
 	
 	/**
@@ -769,6 +785,10 @@ public class UserService{
 			}
 		}
 		result.setBusinessRoles(JSON.toJSONString(roles));
+		
+		//修改用戶日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "修改用户", "用户 " + userVO.getUsername() + "修改了用户 " + user.getUsername() + " 的信息", EOprlogType.USER_OPR);
 		
 		return result;
 	}
@@ -1306,6 +1326,26 @@ public class UserService{
 		userSystemRolePermissionDao.save(rolePermissions);
 		
 		return userPOs;
+	}
+
+	/**
+	 * 设置修改用户在线人数上限<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月18日 上午11:33:22
+	 * @param userCapatity 人数上限数量
+	 */
+	public void setUserCapacity(Long userCapacity) {
+		List<UserCapacityPO> userCapacityPOs = userCapacityDAO.findAll();
+		if(null == userCapacityPOs || userCapacityPOs.size() == 0){
+			UserCapacityPO userCapacityPO = new UserCapacityPO();
+			userCapacityPO.setUserCapacityLong(200L);
+			userCapacityDAO.save(userCapacityPO);
+			userCapacityPOs.add(userCapacityPO);
+		}
+		UserCapacityPO userCapacityPO = userCapacityPOs.get(0);
+		userCapacityPO.setUserCapacityLong(userCapacity);
+		userCapacityDAO.save(userCapacityPO);
 	}
 	
 }

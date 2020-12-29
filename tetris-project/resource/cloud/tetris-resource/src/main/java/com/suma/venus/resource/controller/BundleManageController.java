@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,12 +53,8 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
-import com.suma.venus.resource.dao.PrivilegeDAO;
-import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
-import com.suma.venus.resource.dao.SerNodeDao;
-import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
-import com.suma.venus.resource.dao.WorkNodeDao;
+import com.suma.venus.resource.dao.VedioCapacityDAO;
 import com.suma.venus.resource.externalinterface.InterfaceFromResource;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundleLoginBlackListPO;
@@ -69,34 +64,30 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
-import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
-import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.FolderService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.capacity.server.CapacityService;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
-import antlr.collections.impl.LList;
 
 @Controller
 @RequestMapping("/bundle")
@@ -181,22 +172,16 @@ public class BundleManageController extends ControllerBase {
 	private ExtraInfoDao extraInfoDao;
 	
 	@Autowired
-	private WorkNodeDao workNodeDao;
-	
-	@Autowired
-	private SerNodeDao serNodeDao;
-	
-	@Autowired
-	private PrivilegeDAO privilegeDAO;
-	
-	@Autowired
-	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
-	
-	@Autowired
-	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
-	
-	@Autowired
 	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private VedioCapacityDAO vedioCapacityDAO;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -258,6 +243,35 @@ public class BundleManageController extends ControllerBase {
 //				}
 			}
 
+			//限制210数量
+			List<BundlePO> bundlePOs = bundleDao.findAll();
+			List<BundlePO> bundleCountList = new ArrayList<BundlePO>();
+			for (BundlePO bundlePO1 : bundlePOs) {
+				if(bundlePO1.getDeviceModel().equalsIgnoreCase("jv210")){
+					bundleCountList.add(bundlePO1);
+				}
+			}
+			Integer bundle210 = bundleCountList.size();
+			List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
+			if(null != vedioCapacityPOs && vedioCapacityPOs.size() > 0){
+				if(bundle210.longValue() >= vedioCapacityPOs.get(0).getVedioCapacity()){
+					data.put(ERRMSG, "图像设备数量已超过上限！");
+					return data;
+				}
+			}else {
+				if(bundle210.longValue() >= 1024L){
+					data.put(ERRMSG, "图像设备数量已超过上限！");
+					return data;
+				}
+			}
+				
+				
+			if (null != bundlePO.getUsername() && !bundlePO.getUsername().isEmpty()) {
+				if (null != bundleService.findByUsername(bundlePO.getUsername())) {
+					data.put(ERRMSG, "设备账号已存在");
+					return data;
+				}
+			}
 			bundleService.save(bundlePO);
 			if (null != extraInfos) {
 				for (ExtraInfoPO extraInfo : extraInfos) {
@@ -317,6 +331,10 @@ public class BundleManageController extends ControllerBase {
 			}
 			
 			data.put("bundleId", bundlePO.getBundleId());
+			
+			//添加设备日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "添加设备", userVO.getUsername() + "添加设备：" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			e.printStackTrace();
@@ -424,7 +442,7 @@ public class BundleManageController extends ControllerBase {
 					List<PassByBO> passByBOs = new ArrayList<PassByBO>();
 					PassByBO passByBO = new PassByBO();
 					BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
-					if(bundlePO.getAccessNodeUid() != null && !bundlePO.getAccessNodeUid().equals("")){
+					if(bundlePO.getAccessNodeUid() != null && !"".equals(bundlePO.getAccessNodeUid())){
 						passByBO.setLayer_id(bundlePO.getAccessNodeUid());
 						BundleVO bundleVO = new BundleVO();
 						bundleVO.setOperate("delete_bundle");
@@ -436,8 +454,13 @@ public class BundleManageController extends ControllerBase {
 					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
 					
 					deleteByBundleId(bundleId);
+					
+					//删除设备日志
+					UserVO userVO = userQuery.current();
+					operationLogService.send(userVO.getUsername(), "删除设备", userVO.getUsername() + "删除设备：" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
 				} catch (Exception e) {
 					LOGGER.warn("fail to delete bundle ; bundleId = " + bundleId, e);
+					data.put(ERRMSG, "内部错误");
 				}
 				
 			}
@@ -583,6 +606,7 @@ public class BundleManageController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> logout(@RequestParam(value = "bundleId") String bundleId) {
 		Map<String, Object> data = makeAjaxData();
+		LOGGER.info("/logout : " + bundleId);
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
 			/** 通知接入层 */
@@ -689,7 +713,8 @@ public class BundleManageController extends ControllerBase {
 			Long folderId,
 			String location,
 			String multicastSourceIp,
-			Boolean transcod) {
+			Boolean transcod,
+			Boolean ignoreBasicInfo) {
 		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
 				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
 
@@ -697,27 +722,29 @@ public class BundleManageController extends ControllerBase {
 		try {
 			BundlePO bundle = bundleService.findByBundleId(bundleId);
 			
-			if (!bundleName.equals(bundle.getBundleName())) {
-				bundle.setBundleName(bundleName);
-			}
+			if(ignoreBasicInfo == null || !ignoreBasicInfo.booleanValue()==true){
+				if (!bundleName.equals(bundle.getBundleName())) {
+					bundle.setBundleName(bundleName);
+				}
 
-			if (!deviceIp.equals(bundle.getDeviceIp())) {
-				bundle.setDeviceIp(deviceIp);
-			}
+				if (!deviceIp.equals(bundle.getDeviceIp())) {
+					bundle.setDeviceIp(deviceIp);
+				}
 
-			if (!devicePort.equals(bundle.getDevicePort())) {
-				bundle.setDevicePort(devicePort);
+				if (!devicePort.equals(bundle.getDevicePort())) {
+					bundle.setDevicePort(devicePort);
+				}
+				bundle.setMulticastEncode(multicastEncode);
+				bundle.setMulticastEncodeAddr(multicastEncodeAddr);
+				bundle.setMulticastDecode(multicastDecode);
+				bundle.setFolderId(folderId);
+				bundle.setLocation(location);
+				bundle.setMulticastSourceIp(multicastSourceIp);
+				bundle.setTranscod(transcod);
+				
+				bundle.setSyncStatus(SYNC_STATUS.ASYNC);
+				bundleService.save(bundle);
 			}
-			bundle.setMulticastEncode(multicastEncode);
-			bundle.setMulticastEncodeAddr(multicastEncodeAddr);
-			bundle.setMulticastDecode(multicastDecode);
-			bundle.setFolderId(folderId);
-			bundle.setLocation(location);
-			bundle.setMulticastSourceIp(multicastSourceIp);
-			bundle.setTranscod(transcod);
-			
-			bundle.setSyncStatus(SYNC_STATUS.ASYNC);
-			bundleService.save(bundle);
 
 			// 删除旧数据
 			extraInfoService.deleteByBundleId(bundleId);
@@ -755,8 +782,13 @@ public class BundleManageController extends ControllerBase {
 				tetrisDispatchService.dispatch(passByBOs);
 			}
 			
+			//修改设备日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "修改设备", userVO.getUsername() + "修改设备:" + bundlePO.getBundleName() + ":" + bundlePO.getBundleId(), EOprlogType.DEVICE_OPR);
+			
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			data.put(ERRMSG, "内部错误");
 		}
 		

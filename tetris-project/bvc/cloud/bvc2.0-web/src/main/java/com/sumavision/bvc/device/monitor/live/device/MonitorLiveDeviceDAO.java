@@ -26,7 +26,7 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	public Page<MonitorLiveDevicePO> findByUserId(Long userId, Pageable page);
 	
 	/**
-	 * 获取用户以及转发类型点播设备任务<br/>
+	 * 根据用户以及转发类型，执行状态查询点播设备任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月24日 上午11:51:10
@@ -35,7 +35,7 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @param Pageable page 分页信息
 	 * @return Page<MonitorLiveDevicePO> 点播设备任务列表
 	 */
-	public Page<MonitorLiveDevicePO> findByUserIdAndType(Long userId, LiveType type,Pageable page);
+	public Page<MonitorLiveDevicePO> findByUserIdAndTypeAndStatus(Long userId, LiveType type, MonitorRecordStatus status,Pageable page);
 	
 	/**
 	 * 获取用户的点播设备任务<br/>
@@ -151,6 +151,6 @@ public interface MonitorLiveDeviceDAO extends MetBaseDAO<MonitorLiveDevicePO>{
 	 * @param LiveType type
 	 * @return
 	 */
-	public Page<MonitorLiveDevicePO> findByType(LiveType type, Pageable pageAble);
+	public Page<MonitorLiveDevicePO> findByTypeAndStatus(LiveType type, MonitorRecordStatus status, Pageable pageAble);
 	
 }

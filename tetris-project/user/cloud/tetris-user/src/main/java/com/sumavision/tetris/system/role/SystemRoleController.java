@@ -7,10 +7,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.system.role.exception.SystemRoleGroupNotExistException;
 import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
+import com.sumavision.tetris.user.OperationLogService;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -32,6 +35,9 @@ public class SystemRoleController {
 	
 	@Autowired
 	private SystemRoleService systemRoleService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/**
 	 * 分页查询系统角色<br/>
@@ -94,6 +100,10 @@ public class SystemRoleController {
 		role.setType(SystemRoleType.SYSTEM);
 		systemRoleDao.save(role);
 		
+		//添加角色日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "添加角色", "用户  " + userVO.getUsername() + " 添加了  " + role.getName(), EOprlogType.ROLE_OPR);
+		
 		return new SystemRoleVO().set(role);
 	}
 	
@@ -123,9 +133,14 @@ public class SystemRoleController {
 		if(role == null){
 			throw new SystemRoleNotExistException(id);
 		}
+		String oldname = role.getName();
 		
 		role.setName(name);
 		systemRoleDao.save(role);
+		
+		//修改角色日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "修改角色", "用户  " + userVO.getUsername() + " 修改  " + oldname + " 为 " + name, EOprlogType.ROLE_OPR);
 		
 		return new SystemRoleVO().set(role);
 	}
@@ -152,6 +167,10 @@ public class SystemRoleController {
 		
 		if(role != null){
 			systemRoleService.delete(new ArrayListWrapper<SystemRolePO>().add(role).getList());
+			
+			//删除角色日志
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "修改角色", "用户  " + userVO.getUsername() + " 删除了  " + role.getName() + " 角色", EOprlogType.ROLE_OPR);
 		}
 		
 		return null;
