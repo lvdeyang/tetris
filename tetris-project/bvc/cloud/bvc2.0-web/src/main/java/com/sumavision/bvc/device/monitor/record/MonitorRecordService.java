@@ -2284,13 +2284,13 @@ public class MonitorRecordService {
 							List<Long> ids=new ArrayList<Long>();
 							
 							for(MonitorRecordManyTimesPO record:records.get()){
-								files.add(fileName+"/"+record.getIndexNumber());
+//								files.add(fileName+"/"+record.getIndexNumber());
 								ids.add(record.getId());
 							}
 							
 							monitorRecordManyTimesDao.deleteByIdIn(ids);
 						}
-						
+						files.add(fileName);//删除整个排期的文件，对整个目录添加一次即可
 					}else{
 						files.add(fileName);
 					}
