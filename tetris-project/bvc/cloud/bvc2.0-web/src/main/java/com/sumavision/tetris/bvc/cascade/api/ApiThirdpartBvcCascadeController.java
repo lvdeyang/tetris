@@ -1,10 +1,15 @@
 package com.sumavision.tetris.bvc.cascade.api;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -12,17 +17,27 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceRemoteService;
+import com.sumavision.bvc.control.device.monitor.live.MonitorLiveDeviceVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceQuery;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.bvc.cascade.ProtocolParser;
@@ -33,6 +48,7 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.util.HttpServletRequestParser;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserClassify;
+import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/api/thirdpart/bvc/cascade")
@@ -70,6 +86,25 @@ public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
 	private MonitorLiveDeviceDAO monitorLiveDeviceDao;
+	
+	@Autowired
+	private MonitorLiveDeviceQuery monitorLiveDeviceQuery;
+	
+	@Autowired
+	private QueryUtil queryUtil;
+	
+	
+	@Autowired
+	private MonitorOsdDAO monitorOsdDao;
+	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private ExtraInfoService extraInfoService;
 	
 	/**
 	 * 查询服务节点<br/>
@@ -426,10 +461,10 @@ public class ApiThirdpartBvcCascadeController {
 		String bundleid = params.getString("bundleid");
 //		String video_channel = params.getString("video_channel");
 //		String audio_channel = params.getString(" audio_channel");
-		String status = params.getString("ststus");
-		BundlePO bundle = bundleDao.findByUsername(bundleid);
+		String status = params.getString("status");
+		BundlePO bundle = bundleDao.findByBundleId(bundleid);
 		
-		if("start".equals(status)){
+		if("open".equals(status)){
 			//开始点播设备
 			List<ChannelSchemeDTO> videoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundle.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
 			ChannelSchemeDTO videoChannel = videoChannels.get(0);
@@ -448,8 +483,7 @@ public class ApiThirdpartBvcCascadeController {
 						null, null, null, null, null, null, 
 						-1L, "");
 			}
-			
-		}else if("stop".equals(status)){
+		}else if("close".equals(status)){
 			//停止点播设备
 			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findByVideoBundleIdAndType(bundleid, LiveType.XT_LOCAL);
 			monitorLiveDeviceService.stopXtSeeLocal(liveList, true);
@@ -461,6 +495,99 @@ public class ApiThirdpartBvcCascadeController {
 		
 		return JSONobject;
 	}
-	
 
+	/**
+	 * 分页查询点播设备任务<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月15日 上午10:58:42
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @param String type 点播设备类型{@code LiveType 中的枚举值}
+	 * @return total int 总数据量
+	 * @return rows List<MonitorLiveDeviceVO> 任务列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/device/lives")
+	public Object loadDeviceLives(HttpServletRequest request) throws Exception{
+		
+		HttpServletRequestParser parser = new HttpServletRequestParser(request);
+		JSONObject params = parser.parseJSON();
+		
+		Integer currentPage = Integer.valueOf(params.getString("currentPage"));
+		Integer pageSize = Integer.valueOf(params.getString("pageSize"));
+		String type = params.getString("type");
+		
+		long total = 0;
+		
+		List<MonitorLiveDevicePO> entities = null;
+		
+		if(type == null || type.equals("")){
+			total = monitorLiveDeviceDao.count();
+			entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
+		}else{
+			Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByTypeAndStatus(currentPage, pageSize, type, MonitorRecordStatus.RUN);
+			entities = pagedEntities.getContent();
+			total = pagedEntities.getTotalElements();
+		}
+		
+		//外部点播本地的外部用户id集合
+		Set<Long> outerUserIds = new HashSet<Long>();		
+		List<String> bundleIds=new ArrayList<String>();
+		entities.stream().forEach(entity->{
+			if(entity.getVideoBundleId() != null) bundleIds.add(entity.getVideoBundleId());
+			if(entity.getDstVideoBundleId() != null) bundleIds.add(entity.getDstVideoBundleId());
+			if(LiveType.XT_LOCAL.equals(entity.getType())) outerUserIds.add(entity.getUserId());
+		});
+		List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+		List<FolderUserMap> outerUserMaps = folderUserMapDao.findByUserIdIn(outerUserIds);
+		
+		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
+			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getVideoBundleId());
+			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstVideoBundleId());
+			if(LiveType.XT_LOCAL.equals(entity.getType())){
+				//外部点播本地编码器，造一个ExtraInfoPO给dstExtraInfo设置值使用
+				FolderUserMap userMap = queryUtil.queryUserMapByUserId(outerUserMaps, entity.getUserId());
+				ExtraInfoPO extraInfo = new ExtraInfoPO();
+				extraInfo.setName("extend_param");
+				extraInfo.setValue("{\"region\":\"" + userMap.getUserNode() + "\"}");
+				dstExtraInfos = new ArrayList<ExtraInfoPO>();
+				dstExtraInfos.add(extraInfo);
+			}
+			try {
+				return new MonitorLiveDeviceVO().set(entity,extraInfos,dstExtraInfos);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}).collect(Collectors.toList());
+		
+		if(rows!=null && rows.size()>0){
+			Set<Long> osdIds = new HashSet<Long>();
+			
+			for(MonitorLiveDeviceVO row:rows){
+				osdIds.add(row.getOsdId()==null?0l:row.getOsdId());
+			}
+			
+			List<MonitorOsdPO> osdEntities = monitorOsdDao.findAll(osdIds);
+			
+			if(osdEntities!=null && osdEntities.size()>0){
+				for(MonitorLiveDeviceVO row:rows){
+					for(MonitorOsdPO osdEntity:osdEntities){
+						if(osdEntity.getId().equals(row.getOsdId())){
+							row.setOsdName(osdEntity.getName())
+							   .setOsdUsername(osdEntity.getUsername());
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
+	}
+	
 }

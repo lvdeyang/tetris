@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.alibaba.druid.wall.violation.ErrorCode;
 import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
@@ -95,6 +96,9 @@ public class ScheduleService {
 	private ResponseService responseService;
 
 	@Autowired
+	private TaskService taskService;
+
+	@Autowired
 	private TemplateService templateService;
 
 	@Value("${constant.default.video.encode:x264}")
@@ -130,6 +134,7 @@ public class ScheduleService {
 											   .toString());
 		input.setTaskUuid(uuid);
 		input.setInput(JSON.toJSONString(schedule));
+		input.setNodeId(schedule.getId());
 		input.setType(BusinessType.PUSH);
 		taskInputDao.save(input);
 		
@@ -237,6 +242,7 @@ public class ScheduleService {
 				input.setUpdateTime(new Date());
 				input.setUniq(uniq);
 				input.setTaskUuid(taskId);
+				input.setNodeId(inputBO.getId());
 				input.setInput(JSON.toJSONString(inputBO));
 				input.setType(BusinessType.PUSH);
 				taskInputDao.save(input);
@@ -247,9 +253,11 @@ public class ScheduleService {
 					inputBO = push2StreamInput(taskId, mediaType, pushInput);
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskId);
+					input.setNodeId(inputBO.getId());
 					input.setType(BusinessType.PUSH);
 				}else{
 					inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
+					input.setNodeId(input.getNodeId());
 					isExist = true;
 				}
 				input.setUpdateTime(new Date());
@@ -279,9 +287,11 @@ public class ScheduleService {
 			
 			input = new TaskInputPO();
 			input.setUpdateTime(new Date());
+			input.setNodeId(input.getNodeId());
 			input.setUniq(uniq);
 			input.setTaskUuid(taskId);
 			input.setInput(JSON.toJSONString(inputBO));
+			input.setNodeId(inputBO.getId());
 			input.setType(BusinessType.PUSH);
 			taskInputDao.save(input);
 			
@@ -628,7 +638,7 @@ public class ScheduleService {
 				case h264:
 					videoEncode.setH264(obj);
 					break;
-				case h265:
+				case hevc:
 					videoEncode.setHevc(obj);
 					break;
 				case mpeg2:
@@ -872,8 +882,10 @@ public class ScheduleService {
 			
 			request.setDelete_input(delete);
 		}
-		
-		request.setInput_array(new ArrayListWrapper<InputBO>().addAll(inputs).getList());
+
+		if (inputs!=null&& !inputs.isEmpty()) {
+			request.setInput_array(new ArrayListWrapper<InputBO>().addAll(inputs).getList());
+		}
 		ScheduleRequest scheduleRequest = new ScheduleRequest();
 		scheduleRequest.setSource_array(new ArrayListWrapper<ScheduleProgramBO>().addAll(schedules).getList());
 		request.setSchedule(scheduleRequest);
@@ -900,70 +912,7 @@ public class ScheduleService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void deletePushTask(String taskUuid) throws Exception {
-		
-		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
-		
-		if(output != null){
-			
-			try{
-			
-				List<Long> inputIds = new ArrayList<Long>();
-				if(output.getPrevId() != null){
-					inputIds.add(output.getPrevId());
-				}
-				if(output.getNextId() != null){
-					inputIds.add(output.getNextId());
-				}
-				if(output.getScheduleId() != null){
-					inputIds.add(output.getScheduleId());
-				}
-				
-				List<TaskInputPO> inputs = taskInputDao.findByIdIn(inputIds);
-				
-				AllRequest allRequest = new AllRequest();
-				allRequest.setInput_array(new ArrayList<InputBO>());
-				
-				for(TaskInputPO input: inputs){
-					if(input == null) {
-						continue;
-					}
-					input.setUpdateTime(new Date());
-					if(input.getCount() >= 1){
-						input.setCount(input.getCount() - 1);
-					}
-					taskInputDao.save(input);
-					if(input.getCount().equals(0) && input.getInput() != null){
-						InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-						allRequest.getInput_array().add(inputBO);
-					}
-				}
-				
-				List<OutputBO> outputBOs = JSONObject.parseArray(output.getOutput(), OutputBO.class);
-				List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
-				
-				if(tasks != null){
-					allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
-				}
-				if(outputBOs != null){
-					allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
-				}
-			
-				capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
-				
-				output.setOutput(null);
-				output.setTask(null);
-				
-				taskOutputDao.save(output);
-				
-			} catch (ObjectOptimisticLockingFailureException e) {
-				
-				// 版本不对，version校验
-				System.out.println("delete校验version版本不对");
-				Thread.sleep(300);
-				deletePushTask(taskUuid);
-			}
-		}
-		
+		TaskOutputPO output = taskService.delete(taskUuid,BusinessType.PUSH,true);
 		taskOutputDao.delete(output);
 	}
 

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.*;
+
 /**
  * 裁剪参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -73,5 +75,16 @@ public class CutBO {
 		this.y = y;
 		return this;
 	}
-	
+
+	public CutBO() {
+	}
+
+	public CutBO(ProcessVO processVO) {
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.width = processVO.getWidth();
+		this.height = processVO.getHeight();
+		this.x = processVO.getX();
+		this.y = processVO.getY();
+	}
 }

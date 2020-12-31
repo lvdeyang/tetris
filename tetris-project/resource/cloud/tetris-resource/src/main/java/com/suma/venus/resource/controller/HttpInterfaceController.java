@@ -101,7 +101,6 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
-import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -114,6 +113,7 @@ import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.LianwangPassbyService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
@@ -129,6 +129,7 @@ import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
@@ -228,7 +229,11 @@ public class HttpInterfaceController {
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
 	
+	@Autowired
 	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -884,22 +889,16 @@ public class HttpInterfaceController {
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_online_response(respBody);
 		try {
-			OprlogParamBO log = new OprlogParamBO();
-			log.setSourceService("tetris-resource");
-			log.setUserName("");
-			log.setOprName("设备上线");
-			log.setSourceServiceIP("");
-			log.setOprDetail(bundleId);
-			log.setOprlogType(EOprlogType.DEVICE_ONLINE);
-//			alarmFeign.sendOprlog(log);
 			BundlePO po = bundleService.findByBundleId(bundleId);
+			
 			if (null == po) {
 				respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 				return resp;
 			}
 
 			if(!po.getDeviceModel().equalsIgnoreCase("player")){
-				alarmFeign.sendOprlog(log);
+				String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+				operationLogService.send(" ", "设备上线", bundlename , EOprlogType.DEVICE_ONLINE);
 			}
 			boolean status_change = (ONLINE_STATUS.ONLINE != po.getOnlineStatus()) ? true : false;
 
@@ -925,23 +924,32 @@ public class HttpInterfaceController {
 			
 			//设备状态变动
 			try {
-				List<BundleVO> devices = new ArrayList<BundleVO>();
+				//List<BundleVO> devices = new ArrayList<BundleVO>();
 				BundleVO bundleVO = BundleVO.fromPO(po);
 				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-				devices.add(bundleVO);
-				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				//devices.add(bundleVO);
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				Map<String, Object> device = new HashMap<String, Object>();
+				device.put("bundleId", po.getBundleId());
+				device.put("operate", ONLINE_STATUS.ONLINE);
+				devices.add(device);
+				Set<String> bundles = new HashSet<String>();
+				bundles.add(bundleId);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundles);
 				Set<Long> privilegelLongs = new HashSet<Long>();
-				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
 					for (PrivilegePO privilegePO : privilegePOs) {
 						privilegelLongs.add(privilegePO.getId());
 					}
 				}
 				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
 				Set<Long> serNodeIds = new HashSet<Long>();
-				Long roleId = null;
-				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
-					roleId = rolePrivilegeMaps.get(0).getRoleId();
-					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+				Set<Long> roleids = new HashSet<Long>();
+				if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+					for (RolePrivilegeMap long1 : rolePrivilegeMaps) {
+						roleids.add(long1.getRoleId());
+					}
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleids);
 					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
 						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
 							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
@@ -956,23 +964,27 @@ public class HttpInterfaceController {
 				Map<String, Object> pass_by_content = new HashMap<String, Object>();
 				local.put("name", serNodePO.getNodeName());
 				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-				for (int i = 0; i < serNodePOs.size(); i++) {
-					foreign.add(new HashMap<String, Object>());
-					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-					foreign.get(i).put("devices", devices);
-					foreign.get(i).put("role", roleId);
+				if(serNodePOs != null && serNodePOs.size()>0){
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("devices", devices);
+					}
+					pass_by_content.put("cmd", "deviceStatusChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBO.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					
+					System.out.println("------**发送Passby**------" + passByBO) ;
 				}
-				pass_by_content.put("cmd", "deviceStatusChange");
-				pass_by_content.put("local", local);
-				pass_by_content.put("foreign", foreign);
-				passByBO.setPass_by_content(pass_by_content);
-				if (workNodePOs != null && !workNodePOs.isEmpty()) {
-					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
-				}
-				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 				
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -986,22 +998,18 @@ public class HttpInterfaceController {
 	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/bundleOffline", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public BundleOfflineResponse bundleOffline(@RequestBody BundleOfflineRequest request) {
+		LOGGER.info("Bundle offline request : " + JSONObject.toJSONString(request));
 		String bundleId = request.getBundle_offline_request().getBundle_id();
 		BundleOfflineResponse resp = new BundleOfflineResponse();
 		BundleOnlineRespParam respBody = new BundleOnlineRespParam();
 		respBody.setBundle_id(bundleId);
 		resp.setBundle_offline_response(respBody);
 		try {
-			OprlogParamBO log = new OprlogParamBO();
-			log.setSourceService("tetris-resource");
-			log.setUserName("");
-			log.setOprName("设备下线");
-			log.setSourceServiceIP("");
-			log.setOprDetail(bundleId);
-			log.setOprlogType(EOprlogType.DEVICE_OFFLINE);
 			BundlePO po = bundleService.findByBundleId(bundleId);
+			
 			if(null != po && !po.getDeviceModel().equalsIgnoreCase("player")){
-				alarmFeign.sendOprlog(log);
+				String bundlename = new StringBufferWrapper().append(po.getBundleName()).append(":").append(bundleId).toString();
+				operationLogService.send(" ", "设备下线", bundlename , EOprlogType.DEVICE_OFFLINE);
 			}
 
 			if (null != po && po.getOnlineStatus() != ONLINE_STATUS.OFFLINE) {
@@ -1027,23 +1035,32 @@ public class HttpInterfaceController {
 			
 			//设备状态变动
 			try {
-				List<BundleVO> devices = new ArrayList<BundleVO>();
+				//List<BundleVO> devices = new ArrayList<BundleVO>();
 				BundleVO bundleVO = BundleVO.fromPO(po);
 				bundleVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-				devices.add(bundleVO);
-				List<PrivilegePO> privilegePOs = privilegeDAO.findByResourceIndentityLike(bundleId);
+				//devices.add(bundleVO);
+				List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+				Map<String, Object> device = new HashMap<String, Object>();
+				device.put("bundleId", po.getBundleId());
+				device.put("operate", ONLINE_STATUS.OFFLINE);
+				devices.add(device);
+				Set<String> bundles = new HashSet<String>();
+				bundles.add(bundleId);
+				List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundles);
 				Set<Long> privilegelLongs = new HashSet<Long>();
-				if (privilegelLongs != null && !privilegelLongs.isEmpty()) {
+				if (privilegePOs != null && !privilegePOs.isEmpty()) {
 					for (PrivilegePO privilegePO : privilegePOs) {
 						privilegelLongs.add(privilegePO.getId());
 					}
 				}
 				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegelLongs);
 				Set<Long> serNodeIds = new HashSet<Long>();
-				Long roleId = null;
-				if (rolePrivilegeMaps != null && rolePrivilegeMaps.isEmpty()) {
-					roleId = rolePrivilegeMaps.get(0).getRoleId();
-					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleId(roleId);
+				Set<Long> roleids = new HashSet<Long>();
+				if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
+					for (RolePrivilegeMap long1 : rolePrivilegeMaps) {
+						roleids.add(long1.getRoleId());
+					}
+					List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleids);
 					if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
 						for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
 							serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
@@ -1058,26 +1075,32 @@ public class HttpInterfaceController {
 				Map<String, Object> pass_by_content = new HashMap<String, Object>();
 				local.put("name", serNodePO.getNodeName());
 				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
-				for (int i = 0; i < serNodePOs.size(); i++) {
-					foreign.add(new HashMap<String, Object>());
-					foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-					foreign.get(i).put("devices", devices);
-					foreign.get(i).put("role", roleId);
+				if(serNodePOs != null && serNodePOs.size()>0){
+					for (int i = 0; i < serNodePOs.size(); i++) {
+						foreign.add(new HashMap<String, Object>());
+						foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+						foreign.get(i).put("devices", devices);
+					}
+					pass_by_content.put("cmd", "deviceStatusChange");
+					pass_by_content.put("local", local);
+					pass_by_content.put("foreign", foreign);
+					passByBO.setPass_by_content(pass_by_content);
+					if (workNodePOs != null && !workNodePOs.isEmpty()) {
+						passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
+					}
+					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+					
+					System.out.println("------**发送Passby**------" + passByBO) ;
 				}
-				pass_by_content.put("cmd", "deviceStatusChange");
-				pass_by_content.put("local", local);
-				pass_by_content.put("foreign", foreign);
-				passByBO.setPass_by_content(pass_by_content);
-				if (workNodePOs != null && !workNodePOs.isEmpty()) {
-					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
-				}
-				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				
 				
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
+			e.printStackTrace();
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
 		}
 		
@@ -1398,8 +1421,8 @@ public class HttpInterfaceController {
 	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public LayerHeartBeatResponse layerHeartBeat(@RequestBody LayerHeartBeatRequest request) {
-		// LOGGER.info("Layer heartbeat Request : " +
-		// JSONObject.toJSONString(request));
+		 LOGGER.info("Layer heartbeat Request : " +
+		 JSONObject.toJSONString(request));
 
 		LayerHeartBeatResponse resp = new LayerHeartBeatResponse();
 		com.suma.venus.resource.base.bo.ResponseBody respBody = new com.suma.venus.resource.base.bo.ResponseBody();

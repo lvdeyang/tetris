@@ -70,7 +70,7 @@ define([
           satisfyAll: false
         };
         var self = this;
-        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', null, function (data) {
+        ajax.post('/command/query/find/institution/tree/bundle/2/false/0', params, function (data) {
           self.encodetree = data;
           this.treeLoading = false;
         });
@@ -370,6 +370,19 @@ define([
         });
 
       },
+      // 一键开始停止转发
+      changeStatusAll: function (status) {
+        var self = this;
+        ajax.post('/location/of/screen/wall/all/start/or/stop', { allStart: status, layoutId: self.templateId }, function (data, status) {
+          if (status == 200) {
+            self.$message({
+              type: "success",
+              message: "操作成功！"
+            })
+            self.handleTemplateChange(self.templateId)
+          }
+        })
+      }
     },
     mounted: function () {
       var self = this;

@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,5 +36,8 @@ public class ProgramOutputBO {
 		this.element_array = element_array;
 		return this;
 	}
-	
+
+	public ProgramOutputBO() {
+	}
+
 }

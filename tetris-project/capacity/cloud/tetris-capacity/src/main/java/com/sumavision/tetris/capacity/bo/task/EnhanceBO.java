@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.ProcessVO;
+
 /**
  * 图像增强参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -142,5 +144,23 @@ public class EnhanceBO {
 
 	public void setLocalenhance(String localenhance) {
 		this.localenhance = localenhance;
+	}
+
+	public EnhanceBO() {
+	}
+
+	public EnhanceBO(ProcessVO processVO) {
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		this.brightness = processVO.getBrightness();
+		this.chrome = processVO.getChrome();
+		this.contrast = processVO.getContrast();
+		this.saturation = processVO.getSaturation();
+		this.gamma = processVO.getGamma();
+		this.x = processVO.getX();
+		this.y = processVO.getY();
+		this.width = processVO.getWidth();
+		this.height = processVO.getHeight();
+		this.localenhance = processVO.getLocalenhance();
 	}
 }

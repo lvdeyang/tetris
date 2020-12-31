@@ -16,6 +16,7 @@ import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.vo.VedioCapacityVO;
 import com.sumavision.tetris.bvc.business.query.CommandSystemQueryService;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserService;
 import com.sumavision.tetris.user.UserVO;
 
 
@@ -34,6 +35,9 @@ public class VedioCapacityController {
 	
 	@Autowired
 	private CommandSystemQueryService commandSystemQueryService;
+	
+	@Autowired
+	private UserService userService;
  	
 	/**
 	 * 容量状态查询<br/>
@@ -54,6 +58,7 @@ public class VedioCapacityController {
 			vedioCapacityPO.setVedioCapacity(1024l);
 			vedioCapacityPO.setTurnCapacity(128l);
 			vedioCapacityPO.setReplayCapacity(20l);
+			userService.setUserCapacity(200l);
 			vedioCapacityDAO.save(vedioCapacityPO);
 			vedioCapacityPOs.add(vedioCapacityPO);
 		}
@@ -61,7 +66,7 @@ public class VedioCapacityController {
 		VedioCapacityVO vedioCapacityVO = new VedioCapacityVO();
 		vedioCapacityVO.setUserCapacity(vedioCapacityPO.getUserCapacity());
 		vedioCapacityVO.setVedioCapacity(vedioCapacityPO.getVedioCapacity());
-		vedioCapacityVO.setTurnCapacity(vedioCapacityPO.getUserCapacity());
+		vedioCapacityVO.setTurnCapacity(vedioCapacityPO.getTurnCapacity());
 		vedioCapacityVO.setReplayCapacity(vedioCapacityPO.getReplayCapacity()); 
 		List<UserVO> userVOs = userQuery.queryUserOnline();
 		Integer user = userVOs.size();
@@ -112,12 +117,13 @@ public class VedioCapacityController {
 			Long userCapacity,
 			Long vedioCapacity,
 			Long turnCapacity,
-			Long replayCapacity){
+			Long replayCapacity) throws Exception{
 		List<VedioCapacityPO> vedioCapacityPOs = vedioCapacityDAO.findAll();
 		VedioCapacityPO vedioCapacityPO = vedioCapacityPOs.get(0);
 		vedioCapacityPO.setUserCapacity(userCapacity);
 		vedioCapacityPO.setVedioCapacity(vedioCapacity);
 		vedioCapacityPO.setTurnCapacity(turnCapacity);
+		userService.setUserCapacity(userCapacity);
 		vedioCapacityPO.setReplayCapacity(replayCapacity);
 		vedioCapacityDAO.save(vedioCapacityPO);
 		VedioCapacityVO vedioCapacityVO = new VedioCapacityVO();

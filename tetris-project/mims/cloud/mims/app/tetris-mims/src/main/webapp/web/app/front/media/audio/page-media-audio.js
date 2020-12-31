@@ -45,6 +45,7 @@ define([
                 activeId:window.BASEPATH + 'index/media/audio/' + window.TOKEN,
                 current:'',
                 breadCrumb:[],
+                refreshloading:false,
                 table:{
                     tooltip:false,
                     rows:[],
@@ -212,6 +213,18 @@ define([
                         a.href = window.BASEPATH + uri;
                         a.dispatchEvent(event);
                         row.downloadCount += 1;
+                    });
+                },
+                handleRefresh:function(scope){
+                	var self=this;
+                	this.refreshloading=true;
+                	var row = scope.row;
+                    ajax.post('/media/audio/refresh/uri/' + row.id, null, function(data){
+                    	row.codec=data.codec;
+                    	row.channelNum=data.channelNum;
+                    	row.sample=data.sample;
+                    	row.bitrate=data.bitrate;//bps
+                    	this.refreshloading=false;
                     });
                 },
                 //预览文件

@@ -81,10 +81,10 @@ public class AlarmService {
 		try {
 			if("11070001".equals(alarmCode)){
 				LOG.info("transform online");
-				syncService.sync(capacityIp);
+				syncService.syncTransform(capacityIp);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("sync fail",e);
 		}
 		
 		JSONObject alarmObj = new JSONObject();

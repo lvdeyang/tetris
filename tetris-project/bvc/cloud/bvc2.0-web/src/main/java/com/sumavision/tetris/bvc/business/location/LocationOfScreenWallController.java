@@ -219,4 +219,26 @@ public class LocationOfScreenWallController {
 		return locationOfScreenWallService.exchangeLocationStatus(id, stopOrStart, user.getUserno(), user.getId());
 	}
 	
+	/**
+	 * 为了测试需要批量停止或者开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 * @param layoutId 屏幕墙布局模板id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/all/start/or/stop")
+	public Object allStartOrStop(
+			Boolean allStart,
+			Long layoutId,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		locationOfScreenWallService.allStartOrStop(allStart, layoutId, user.getId(), user.getUserno());
+		
+		return null;
+	}
 }

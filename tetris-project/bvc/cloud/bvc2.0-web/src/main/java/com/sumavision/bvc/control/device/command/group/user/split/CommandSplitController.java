@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
@@ -50,6 +51,11 @@ public class CommandSplitController {
 	
 	@Autowired
 	private BusinessReturnService businessReturnService;
+	
+
+	/** 发起业务时，synchronized锁的前缀 */
+	private static final String lockUserPrefix = "controller-userId-";
+	
 	/**
 	 * 切换分屏方案<br/>
 	 * <p>详细描述</p>
@@ -66,26 +72,30 @@ public class CommandSplitController {
 	@RequestMapping(value = "/change")
 	public Object change(
 			int split,
+			@RequestParam(defaultValue="true")Boolean allowNewPage,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		
-		//设置CommandGroupUserInfoPO、CommandGroupUserLayoutShemePO数据，后续使用新数据结构
-		commandSplitServiceImpl.changeLayoutScheme_re(userId, split);
-		
-		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-		PlayerSplitLayout newSplitLayout = PlayerSplitLayout.fromId(split);
-		int pageSize = newSplitLayout.getPlayerCount();
-		
-		businessReturnService.init(Boolean.TRUE);
-		pageTaskService.jumpToPageAndChangeSplit(pageInfo, 1, pageSize);
-		
-		if(businessReturnService.getSegmentedExecute()){
-			businessReturnService.execute();
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			
+			//设置CommandGroupUserInfoPO、CommandGroupUserLayoutShemePO数据，后续使用新数据结构
+			commandSplitServiceImpl.changeLayoutScheme_re(userId, split);
+			
+			TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
+			PlayerSplitLayout newSplitLayout = PlayerSplitLayout.fromId(split);
+			int pageSize = newSplitLayout.getPlayerCount();
+			
+			businessReturnService.init(Boolean.TRUE);
+//			pageTaskService.allowNewPageByJumpToPageAndChangeSplit(pageInfo, 1, pageSize, allowNewPage);
+			pageTaskService.jumpToPageAndChangeSplit(pageInfo, 1, pageSize);
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
+			return null;
 		}
-		
-		return null;
 	}
 	
 	@JsonBody
@@ -95,18 +105,19 @@ public class CommandSplitController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		
-		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-		
-		businessReturnService.init(Boolean.TRUE);
-		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()+1, pageInfo.getPageSize());
-		
-		if(businessReturnService.getSegmentedExecute()){
-			businessReturnService.execute();
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
+			
+			businessReturnService.init(Boolean.TRUE);
+			pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()+1, pageInfo.getPageSize());
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
+			return null;
 		}
-		
-		return null;
 	}
 	
 	@JsonBody
@@ -117,17 +128,19 @@ public class CommandSplitController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
-		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-		
-		businessReturnService.init(Boolean.TRUE);
-		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()-1, pageInfo.getPageSize());
-		
-		if(businessReturnService.getSegmentedExecute()){
-			businessReturnService.execute();
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(userId.toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
+			
+			businessReturnService.init(Boolean.TRUE);
+			pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()-1, pageInfo.getPageSize());
+			
+			if(businessReturnService.getSegmentedExecute()){
+				businessReturnService.execute();
+			}
+			
+			return null;
 		}
-		
-		return null;
 	}
 	
 	/**
@@ -153,10 +166,11 @@ public class CommandSplitController {
 //		throw new BaseException(StatusCode.FORBIDDEN, "不能移动窗口");
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		
-		commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
-		
-		return null;
+		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
+			
+			return null;
+		}
 	}
 	
 	/**

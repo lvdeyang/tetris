@@ -2,6 +2,8 @@ package com.sumavision.tetris.cs.channel.broad.ability;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -11,24 +13,28 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 
 	/**
-	 * 能力播发信息（channel频道--页面轮播推流补充信息�?
+	 * 能力播发信息（channel频道--页面轮播推流补充信息�?
 	 */
 	private static final long serialVersionUID = 1L;
 	
 	/** 频道id */
 	private Long channelId;
-	/** 预播发地�? */
+	/** 预播发地�? */
 	private String previewUrlIp;
 	/** 本地Ip */
 	private String localIp;
-	/** 预播发可用起始端�? */
+	/** 预播发可用起始端�? */
 	private String previewUrlPort;
-	/** 预播发可用终止端�? */
+	/** 预播发可用终止端�? */
 	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;
 	/** 预播发用户id */
 	private Long userId;
+	
+	private OutputType outputType;
+	
+	private String rtmpUrl;
 	
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -91,4 +97,22 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	public void setLocalIp(String localIp) {
 		this.localIp = localIp;
 	}
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "OUT_PUT_TYPE")
+	public OutputType getOutputType() {
+		return outputType;
+	}
+
+	public void setOutputType(OutputType outputType) {
+		this.outputType = outputType;
+	}
+	@Column(name = "RTMP_URL")
+	public String getRtmpUrl() {
+		return rtmpUrl;
+	}
+
+	public void setRtmpUrl(String rtmpUrl) {
+		this.rtmpUrl = rtmpUrl;
+	}
+	
 }

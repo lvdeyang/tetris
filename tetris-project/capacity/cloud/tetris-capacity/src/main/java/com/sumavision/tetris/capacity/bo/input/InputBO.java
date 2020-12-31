@@ -61,7 +61,7 @@ public class InputBO extends InputBaseBO<InputBO>{
             case SDI:
                 this.setSdi(new SdiBO(mediaSourceBO.getUrl()));
                 break;
-            case ZIXI:
+            case ZIXI_TS:
                 InputZiXiBO ziXiBO = new InputZiXiBO();
                 ziXiBO.setUrl(mediaSourceBO.getUrl());
                 ziXiBO.setMode(0);

@@ -12,6 +12,29 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @FeignClient(name = "tetris-capacity", configuration = FeignConfiguration.class)
 public interface CapacityFeign{
 
+
+	/**
+	 * @MethodName: addTaskByTemplate
+	 * @Description: 通过模板下发业务
+	 * @param taskInfo 添加任务信息
+	 * @Return: 任务创建完成后返回信息
+	 * @Author: Poemafar
+	 * @Date: 2020/12/10 16:27
+	 **/
+	@RequestMapping(value = "/template/task/feign/add")
+	public JSONObject addTaskByTemplate(@RequestParam("taskInfo") String taskInfo) throws Exception;
+
+
+	/**
+	 * @MethodName: getAllTemplate
+	 * @Description: 获取所有模板
+	 * @Return: com.alibaba.fastjson.JSONObject
+	 * @Author: Poemafar
+	 * @Date: 2020/12/11 8:30
+	 **/
+	@RequestMapping(value = "/template/task/feign/getAll")
+	public JSONObject getAllTemplate() throws Exception;
+
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -149,7 +172,7 @@ public interface CapacityFeign{
 	 * @param String deviceIp 转换模块ip
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/sync")
-	public JSONObject sync(@RequestParam("deviceIp") String deviceIp) throws Exception;
+	public JSONObject sync(@RequestParam("syncObj") String syncObj) throws Exception;
 	
 	/**
 	 * 设置告警地址<br/>
@@ -276,7 +299,21 @@ public interface CapacityFeign{
 	public JSONObject deleteTransformOutput(
 			@RequestParam("id") String id,
 			@RequestParam("outputParam") String outputParam) throws Exception;
-	
+
+	 /**
+	  * @MethodName: analysisInput
+	  * @Description: 媒资刷源接口，只刷文件源（应急广播业务需求）
+	  * @param ip 刷源设备
+	  * @param url 刷源地址
+	  * @Return: 返回刷表信息
+	  * @Author: Poemafar
+	  * @Date: 2020/11/29 9:44
+	  **/
+	@RequestMapping(value = "/capacity/transform/feign/analysis/input")
+	public JSONObject analysisInput(
+			@RequestParam("deviceIp") String ip,
+			@RequestParam("url") String url) throws Exception;
+
 	/**
 	 * 删除应急广播任务全部输出<br/>
 	 * <b>作者:</b>wjw<br/>

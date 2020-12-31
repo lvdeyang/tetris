@@ -29,7 +29,7 @@
       <!-- <el-button type="primary" size="mini" @click="handleTotalSizeMb">设置磁盘大小</el-button> -->
       <el-button size="mini" @click="handleAddRecord" type="success">添加录制</el-button>
       <!-- <el-tag type="success" size="mini" style="margin-left: 10px;">当前设置磁盘大小：{{totalSizeMb?totalSizeMb:'未设置'}}/GB</el-tag> -->
-      <el-tag type="danger" size="mini" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag>
+      <!-- <el-tag type="danger" size="mini" style="margin-left: 10px;">当前录制数：{{totleRecord}}/20</el-tag> -->
     </div>
     <div style="width:100%;height: calc(100% - 150px);  left:0; bottom:52px; background-color:#fff;overflow: auto;">
       <el-table height="100%" :data="table.data" stripe style="width: 100%; min-height: calc(100% - 150px);">
@@ -42,6 +42,9 @@
         <el-table-column prop="mode" label="录制模式" width="100">
         </el-table-column>
         <el-table-column prop="videoSource" label="录制设备">
+          <template slot-scope="scope">
+            {{scope.row.videoSource.replace('-VenusVideoIn_1','')}}
+          </template>
         </el-table-column>
         <el-table-column prop="startTime" label="开始时间" width="200">
         </el-table-column>

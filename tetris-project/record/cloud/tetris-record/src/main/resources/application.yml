@@ -6,12 +6,12 @@ spring:
     name: tetris-record
   cloud:
     client:
-      ipAddress: 10.10.40.27
+      ipAddress: 10.10.40.24
     inetutils:
-      preferred-networks: 10.10.40.27
+      preferred-networks: 10.10.40.24
 
   datasource:
-      url: jdbc:mysql://10.10.40.207:3306/record?characterEncoding=utf-8&useUnicode=true
+      url: jdbc:mysql://localhost:3306/record?characterEncoding=utf-8&useUnicode=true&&useSSL=false
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
@@ -39,11 +39,11 @@ eureka:
     lease-expiration-duration-in-seconds: 10
     lease-renewal-interval-in-seconds: 3
     preferIpAddress: true
-    ipAddress: 10.10.40.27
+    ipAddress: 10.10.40.24
     instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
   client:
     serviceUrl:
-      defaultZone:  http://10.10.40.207:8081/eureka/
+      defaultZone:  http://10.10.40.184:8081/eureka/
 ribbon:
   eager-load:
       enabled: true
@@ -71,5 +71,6 @@ httpBasePath: http://10.10.40.103:9081/record/
 storageSize: 80
 cleanSpaceThreshold: 60
 cleanTimeThreshold: 30
+taskTemplateName: RECORD_COMMON
 
 

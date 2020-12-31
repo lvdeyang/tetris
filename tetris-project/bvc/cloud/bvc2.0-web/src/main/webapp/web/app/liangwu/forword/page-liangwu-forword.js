@@ -27,7 +27,7 @@ define([
       data: {
         menurouter: false,
         shortCutsRoutes: commons.data,
-        active: "/page-monitor-forword",
+        active: "/page-liangwu-forword",
         header: commons.getHeader(0)
       },
       methods: {

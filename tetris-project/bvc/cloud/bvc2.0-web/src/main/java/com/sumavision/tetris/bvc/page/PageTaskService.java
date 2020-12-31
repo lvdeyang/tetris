@@ -3,8 +3,10 @@ package com.sumavision.tetris.bvc.page;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,6 +156,31 @@ public class PageTaskService {
 		return cache;
 	}
 	
+//	/**
+//	 * 判断添加任务是否支持创建新分页<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2020年11月26日 上午11:51:20
+//	 * @param pageInfo
+//	 * @param newTasks
+//	 * @param removeTasks
+//	 * @param allowNewPage
+//	 * @throws Exception
+//	 */
+//	public void allowNewPageByAddAndRemoveTasks(PageInfoPO pageInfo, List<PageTaskPO> newTasks, List<PageTaskPO> removeTasks, Boolean allowNewPage) throws Exception{
+//		
+//		PageTaskPO jumpTo= newAddTask(pageInfo, newTasks);
+//		
+//		if(jumpTo != null){
+//			if(getPageNumberByIndex(pageInfo, jumpTo.getTaskIndex()) != 1 && !allowNewPage){
+//				businessReturnService.getAndRemove();
+//				throw new BaseException(StatusCode.FORBIDDEN, "可用的播放器不足");
+//			}else{
+//				addAndRemoveTasks(pageInfo, newTasks, removeTasks);
+//			}
+//		}
+//	}
+	
 	public void addAndRemoveTasks(PageInfoPO pageInfo, List<PageTaskPO> newTasks, List<PageTaskPO> removeTasks) throws Exception{
 		
 		if(newTasks == null) newTasks = new ArrayList<PageTaskPO>();
@@ -162,20 +189,24 @@ public class PageTaskService {
 		
 		Integer currentPage = pageInfo.getCurrentPage();
 		
+		Boolean allowNewPage = true;
+		
 		//新添加的是同一个groupPO下的任务。
 		if(newTasks.size()>0){
 			String businessId=newTasks.get(0).getBusinessId();
-			if(businessId.matches("\\d+")){
+//			if(businessId.matches("\\d+")){
 				Long groupId=Long.parseLong(businessId);
 				GroupPO group=groupDao.findOne(groupId);
-				if(group!=null&&group.getLocationIndex()!=null){
+				if(group!=null&& group.getLocationIndex()!=null){
 					int taskIndex=(pageInfo.getCurrentPage()-1)*pageInfo.getPageSize()+group.getLocationIndex();
 					for(PageTaskPO newTask:newTasks){
 						newTask.setTaskIndex(taskIndex++);
 						newTask.setFixedAtPageAndLocation(true);
 					}
 				}
-			}
+				//获取group中分页标识字段
+				if(group != null && group.getAllowNewPage() != null) allowNewPage = group.getAllowNewPage();
+//			}
 		}
 		
 		//获取当前分页下的任务
@@ -204,6 +235,10 @@ public class PageTaskService {
 		int newCurrentPage = 1;
 		if(jumpTo != null){
 			newCurrentPage = getPageNumberByIndex(pageInfo, jumpTo.getTaskIndex());
+			if(newCurrentPage != 1 && !allowNewPage){
+				businessReturnService.getAndRemove();
+				throw new BaseException(StatusCode.FORBIDDEN, "可用的播放器不足");
+			}
 		}
 		else if(currentPage > newPageCount){
 			newCurrentPage = newPageCount;
@@ -234,6 +269,27 @@ public class PageTaskService {
 		}
 		
 	}
+	
+//	/**
+//	 * 切换分屏，跳转页数时是否创建新分页<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2020年11月26日 下午2:55:52
+//	 * @param pageInfo
+//	 * @param toPage
+//	 * @param pageSize
+//	 * @param allowNewPage
+//	 * @throws Exception
+//	 */
+//	public void allowNewPageByJumpToPageAndChangeSplit(PageInfoPO pageInfo, int toPage, int pageSize, Boolean allowNewPage)throws Exception{
+//		
+//		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, pageInfo.getCurrentPage(), true);
+//		if(oldTaskPOs.size() > pageSize){
+//			throw new BaseException(StatusCode.FORBIDDEN, "要切换的分屏的播放器数量不满足");
+//		}else{
+//			jumpToPageAndChangeSplit(pageInfo, toPage, pageSize);
+//		}
+//	}
 	
 	/**
 	 * 切换分屏，跳转页数<br/>
@@ -1101,9 +1157,9 @@ public class PageTaskService {
 					if(newTask.getTaskIndex()==fixedPageTasks.get(i).getTaskIndex()){
 						PageTaskPO oldTask=fixedPageTasks.get(i);
 						resolveConflict(oldTask,fixedPageTasks,i);
-						oldTask=newTask;
+						fixedPageTasks.set(i, newTask);
 						addFixed=false;
-						continue;
+						break;
 					}
 					if(newTask.getTaskIndex()<fixedPageTasks.get(i).getTaskIndex()){
 						fixedPageTasks.add(i, newTask);
@@ -1256,4 +1312,52 @@ public class PageTaskService {
 			pageTask.setFixedAtPageAndLocation(true);
 		}
 	}
+//	//-------------------去除空白页-----------------
+//	//解决:不移动视频在屏幕中位置去除空白页
+//	//先找所有固定,再找空白页页码集合,当前页,删除空白页后应该看哪一页,删除空白页后每页对应页码
+//	/**
+//	 * 去除空白页<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2020年11月26日 下午4:46:51
+//	 * @param allTasks 要除去空白页的任务集合
+//	 * @param pageSize 每页的大小
+//	 * @param currentPage 当前的页面
+//	 */
+//	public void removeBlankPage(
+//			List<PageTaskPO> allTasks, 
+//			Integer pageSize,
+//			Integer currentPage){
+//		//作为核心方法，应该操作简单，逻辑复杂，上层判空，反复调用。
+//		
+//		//每页中的集合,1是第一页
+//		Map<Integer, List<PageTaskPO>> pageIndexAndTask = allTasks.stream().collect(Collectors.groupingBy(task->{return (task.getTaskIndex()/pageSize)+1;}));
+//		//非空白页号码
+//		List<Integer> pageNumberList = pageIndexAndTask.keySet().stream().sorted().collect(Collectors.toList());
+////		//删除空白页需要改变标号的页面
+////		Map<Integer, List<Integer>> cascadeExchangeMap =  new HashMap<Integer, List<Integer>>();
+////		
+////		for(Integer pageNumber :pageNumberList){
+////			cascadeExchangeMap.put(pageNumber, new ArrayList<Integer>(pageNumberList));
+////			pageNumberList.remove(pageNumber);
+////		}
+//		
+//		Map<Integer, Integer> cascadeExchangeMap =  new HashMap<Integer, Integer>();
+//		Integer pageNumber = 1;
+//		for(Integer pageNumber: pageNumberList){
+//			cascadeExchangeMap.put(pageNumber, 0);
+//		}
+//		
+//		for(int i = 0 ; i<pageNumberList.size() ; i++){
+//			Integer distance = pageNumberList.get(i) - pageNumberList.get(i);
+//			if(distance > 1){
+//				for(){
+//					
+//				}
+//			}
+//		}
+//		
+//	}
+//	
+//	//-------------------去除空白页结束--------------
 }

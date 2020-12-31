@@ -100,7 +100,14 @@ public class ResourceRemoteService {
 	 */
 	public String queryLocalLayerId() throws Exception{
 		
-		WorkNodePO workNode = workNodeDao.findTopByType(NodeType.ACCESS_LIANWANG);
+		List<WorkNodePO> nodeList= workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+		
+		WorkNodePO workNode = null;
+		
+		if(nodeList != null && nodeList.size() > 0){
+			workNode = nodeList.get(0);
+		}
+		
 		if(workNode == null || workNode.getNodeUid() == null){
 			throw new BaseException(StatusCode.ERROR, "联网接入未注册！");
 		}
@@ -168,7 +175,7 @@ public class ResourceRemoteService {
 	 * @param requestJson
 	 */
 	public void notifyXml(String cmd, String xml) throws Exception{
-
+		System.out.println("notifyXml : ");
 		System.out.println(xml);
 		// 获取联网发来的notify消息
 		if ("syncinfo".equals(cmd)) {

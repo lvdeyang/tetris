@@ -317,4 +317,5 @@ public class InputBaseBO <V extends InputBaseBO>{
 		this.pid_map = pid_map;
 		return (V)this;
 	}
+
 }

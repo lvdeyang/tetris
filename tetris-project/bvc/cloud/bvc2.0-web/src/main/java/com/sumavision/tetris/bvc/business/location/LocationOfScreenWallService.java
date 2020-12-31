@@ -2,17 +2,14 @@ package com.sumavision.tetris.bvc.business.location;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.bvc.control.device.monitor.live.MonitorLiveUtil;
 import com.sumavision.bvc.control.welcome.UserVO;
-import com.sumavision.bvc.device.monitor.live.MonitorLiveDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceDAO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDevicePO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
@@ -88,10 +85,20 @@ public class LocationOfScreenWallService {
 		LocationOfScreenWallPO searchScreenWall = locationOfScreenWallDao.findByLocationTemplateLayoutIdAndDecoderBundleId(locationTemplateLayoutId, bundleId);
 		//查找屏幕现在绑定的解码器.
 		LocationOfScreenWallPO locationScreen = locationOfScreenWallDao.findByLocationTemplateLayoutIdAndLocationXAndLocationY(locationTemplateLayoutId, locationX, locationY);
+		//已经在其他屏幕墙模板绑定过就不能再绑定
+		LocationOfScreenWallPO wallOfOtherLayout = locationOfScreenWallDao.findByLocationTemplateLayoutIdNotAndDecoderBundleId(locationTemplateLayoutId, bundleId);
+		
+		if(wallOfOtherLayout != null){
+			throw new BaseException(StatusCode.FORBIDDEN, "绑定失败:解码器已经被其他屏幕墙模板占用");
+		}
 		
 		if((searchScreenWall != null && LocationExecuteStatus.RUN.equals(searchScreenWall.getStatus())) || 
 		   (locationScreen !=null && LocationExecuteStatus.RUN.equals(locationScreen.getStatus()))){
 			throw new BaseException(StatusCode.FORBIDDEN, "绑定失败:解码器正在播放或者屏幕正在被占用播放");
+		}
+		
+		if(locationScreen !=null && LocationExecuteStatus.STOP.equals(locationScreen.getStatus())){
+			locationOfScreenWallDao.delete(locationScreen);
 		}
 		
 		LocationOfScreenWallPO screenWall = new LocationOfScreenWallPO();
@@ -271,6 +278,8 @@ public class LocationOfScreenWallService {
 			});
 			
 			screenList.removeAll(errorScreenList);
+			List<Long> needToDeleteLiveIds = screenList.stream().map(LocationOfScreenWallPO::getMonitorLiveDeviceId).collect(Collectors.toList());
+			monitorLiveDeviceDao.deleteByIdIn(needToDeleteLiveIds);
 			
 			locationOfScreenWallDao.save(screenList);
 		}else{
@@ -337,6 +346,45 @@ public class LocationOfScreenWallService {
 		locationOfScreenWallDao.save(screenPO);
 		
 		return screenPO;
+	}
+	
+
+	/**
+	 * 为了测试需要批量停止或者开始已经配置转发关系<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 * @param layoutId 屏幕墙模板id
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void allStartOrStop(
+			Boolean allStart, 
+			Long layoutId,
+			Long userId, 
+			String userno) throws Exception{
+		
+		if(allStart != null && allStart){
+			
+			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatusAndLocationTemplateLayoutId(LocationExecuteStatus.STOP, layoutId);
+			locationOfScreenWalls.forEach(wall->{
+				wall.setStatus(LocationExecuteStatus.RUN);
+			});
+			locationOfScreenWallDao.save(locationOfScreenWalls);
+			
+			List<Long> liveIds = locationOfScreenWalls.stream().map(LocationOfScreenWallPO::getMonitorLiveDeviceId).collect(Collectors.toList());
+			monitorLiveDeviceService.stopToRestart(liveIds, userId);
+		}else if(allStart != null && !allStart){
+			
+			List<LocationOfScreenWallPO> locationOfScreenWalls = locationOfScreenWallDao.findByEncoderBundleIdNotNullAndStatusAndLocationTemplateLayoutId(LocationExecuteStatus.RUN, layoutId);
+			locationOfScreenWalls.forEach(wall->{
+				wall.setStatus(LocationExecuteStatus.STOP);
+			});
+			locationOfScreenWallDao.save(locationOfScreenWalls);
+			
+			List<Long> liveIds = locationOfScreenWalls.stream().map(LocationOfScreenWallPO::getMonitorLiveDeviceId).collect(Collectors.toList());
+			monitorLiveDeviceService.stop(liveIds, userId, userno, Boolean.TRUE);
+		}
 	}
 
 }

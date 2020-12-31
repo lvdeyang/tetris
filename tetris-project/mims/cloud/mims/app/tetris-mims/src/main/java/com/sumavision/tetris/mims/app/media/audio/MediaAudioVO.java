@@ -89,6 +89,11 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	/**是否置顶1是，0否*/
 	private Integer isTop=0;
 	
+	private String codec;
+	private Integer channelNum;
+	private Integer sample;
+	private Integer bitrate;//bps
+	
 	public String getName() {
 		return name;
 	}
@@ -407,6 +412,10 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
+			.setCodec(entity.getCodec())
+			.setChannelNum(entity.getChannelNum())
+			.setBitrate(entity.getBitrate())
+			.setSample(entity.getSample())
 			.setIsTop(entity.getIsTop())
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
@@ -462,4 +471,42 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			return 1;
 		}
 	}
+
+	public String getCodec() {
+		return codec;
+	}
+
+	public MediaAudioVO setCodec(String codec) {
+		this.codec = codec;
+		return this;
+	}
+
+	public Integer getChannelNum() {
+		return channelNum;
+	}
+
+	public MediaAudioVO setChannelNum(Integer channelNum) {
+		this.channelNum = channelNum;
+		return this;
+	}
+
+	public Integer getSample() {
+		return sample;
+	}
+
+	public MediaAudioVO setSample(Integer sample) {
+		this.sample = sample;
+		return this;
+	}
+
+	public Integer getBitrate() {
+		return bitrate;
+	}
+
+	public MediaAudioVO setBitrate(Integer bitrate) {
+		this.bitrate = bitrate;
+		return this;
+	}
+	
+	
 }

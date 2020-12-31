@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.sumavision.tetris.business.common.service.TaskService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -62,6 +63,9 @@ public class StreamPassbyService {
 	
 	@Autowired
 	private TaskInputDAO taskInputDao;
+
+	@Autowired
+	private TaskService taskService;
 	
 	@Autowired
 	private CapacityProps capacityProps;
@@ -162,6 +166,7 @@ public class StreamPassbyService {
 				input.setUniq(rtmpUrl);
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
+				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -223,6 +228,7 @@ public class StreamPassbyService {
 				outputBO = stream2OutputBO(outputId, videoTaskId, audioTaskId, encodeVideoId, encodeAudioId, name, storageUrl);
 				
 				if(input.getCount().equals(0)){
+					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
 					input.setTaskUuid(taskUuid);
 					input.setType(businessType);
@@ -302,58 +308,7 @@ public class StreamPassbyService {
 	 * @return TaskOutputPO 任务输出
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
-		
-		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.LIVE);
-		
-		if(output != null){
-			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
-			
-			if(input != null){
-				
-				try {
-
-					input.setUpdateTime(new Date());
-					if(input.getCount() >= 1){
-						input.setCount(input.getCount() - 1);
-					}
-					taskInputDao.save(input);
-					
-					AllRequest allRequest = new AllRequest();
-					
-					OutputBO outputBO = JSONObject.parseObject(output.getOutput(), OutputBO.class);
-					List<TaskBO> tasks = JSONObject.parseArray(output.getTask(), TaskBO.class);
-					InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
-					
-					if(input.getCount().equals(0) && input.getInput() != null){
-						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
-					}
-					if(tasks != null){
-						allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
-					}
-					if(outputBO != null){
-						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
-					}
-				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
-					
-					output.setOutput(null);
-					output.setTask(null);
-					
-					taskOutputDao.save(output);
-					
-				} catch (ObjectOptimisticLockingFailureException e) {
-					
-					// 版本不对，version校验
-					System.out.println("delete校验version版本不对");
-					Thread.sleep(300);
-					output = delete(taskUuid);
-				}
-			}
-			
-		}
-		
-		return output;
+		return  taskService.delete(taskUuid,BusinessType.LIVE,true);
 	}
 	
 	/**

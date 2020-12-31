@@ -160,4 +160,11 @@ public class EncodeBO {
 		return this;
 	}
 
+	public JSONObject getAvs2() {
+		return avs2;
+	}
+
+	public void setAvs2(JSONObject avs2) {
+		this.avs2 = avs2;
+	}
 }

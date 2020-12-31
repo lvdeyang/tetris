@@ -1,4 +1,4 @@
-<mi-frame ref="frame" id="page-media-audio-wrapper" :menus="menus" :user="user" :groups="groups" @task-show="exitTaskViewMinimizeState" :active-id="activeId">
+<mi-frame  ref="frame" id="page-media-audio-wrapper" :menus="menus" :user="user" :groups="groups" @task-show="exitTaskViewMinimizeState" :active-id="activeId">
 
     <template slot="title">{{user.groupName}}（音频库）</template>
 
@@ -8,7 +8,7 @@
     </template>
 
     <template>
-        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+        <el-card v-loading="refreshloading" class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
                 <el-button type="primary" size="small" @click="dialog.addAudio.visible = true" :disabled="!current.id"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
                 <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
@@ -52,6 +52,12 @@
                                 <el-button v-if="scope.row.type==='FOLDER'" type="text" style="padding:0; color:inherit;"><a class="folder-link" :href="'#/page-media-audio/'+scope.row.id">{{scope.row.name}}</a></el-button>
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
+                                    
+                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="刷源" placement="bottom">
+                                        <el-button size="small" type="text"  style="padding:0; position:absolute; top:1px; right:110px;" @click="handleRefresh(scope)">
+                                            <span class="el-icon-refresh" style="font-size:20px; position:relative; top:1px;"></span>
+                                        </el-button>
+                                    </el-tooltip>
                                     <el-tooltip  v-if="scope.row.type!=='FOLDER'&&!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" class="item" effect="dark" content="下载" placement="bottom">
                                         <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:87px;" @click="handleDownload(scope)">
                                             <span class="el-icon-download" style="font-size:20px; position:relative; top:1px;"></span>
@@ -87,13 +93,25 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="是否置顶" width="180">
+                        <el-table-column label="是否置顶" width="140">
                             <template slot-scope="scope">{{scope.row.isTop==1?'已置顶':'否'}}</template>
                         </el-table-column>
-                        <el-table-column label="大小" width="180">
+                        <el-table-column label="编码" width="80">
+                            <template slot-scope="scope">{{scope.row.codec}}</template>
+                        </el-table-column>
+                        <el-table-column label="声道数" width="100">
+                            <template slot-scope="scope">{{scope.row.channelNum}}</template>
+                        </el-table-column>
+                        <el-table-column label="采样率" width="100">
+                            <template slot-scope="scope">{{scope.row.sample}}</template>
+                        </el-table-column>
+                        <el-table-column label="码率" width="80">
+                            <template slot-scope="scope">{{scope.row.bitrate}}</template>
+                        </el-table-column>
+                        <el-table-column label="大小" width="80">
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                         </el-table-column>
-                        <el-table-column label="下载量" width="180">
+                        <el-table-column label="下载量" width="100">
                             <template slot-scope="scope">{{scope.row.downloadCount}}</template>
                         </el-table-column>
                         <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>

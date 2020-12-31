@@ -3,6 +3,10 @@ package com.sumavision.tetris.capacity.constant;/**
  */
 
 import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+
+import java.util.Locale;
 
 /**
  * @ClassName: EncodeConstant
@@ -14,7 +18,30 @@ import com.sumavision.tetris.business.common.exception.CommonException;
 public class EncodeConstant {
 
     public enum VideoType{
-        h264,h265,mpeg2,avs;
+        h264,hevc,mpeg2,avs,passby;
+
+        public static VideoType getVideoType(String codec) throws BaseException {
+            String type = codec.toLowerCase(Locale.ENGLISH);
+            if (type.contains("passby")){
+                return passby;
+            }
+            if (type.contains("264")){
+                return h264;
+            }
+            if (type.contains("265") || type.contains("hevc") || type.contains("svt") || type.contains("orion")){
+                return hevc;
+            }
+            if (type.contains("mpeg2") || type.contains("m2v")){
+                return mpeg2;
+            }
+            if (type.contains("avs")){
+                return avs;
+            }
+
+            throw new BaseException(StatusCode.ERROR,"not support codec: "+codec);
+        }
+
+
 
         public static VideoType getVideoType(TplVideoEncoder type) throws CommonException {
             switch (type) {
@@ -28,7 +55,7 @@ public class EncodeConstant {
                 case VENCODER_ORION:
                 case VENCODER_MSDK_H265:
                 case VENCODER_CUDA_H265:
-                    return h265;
+                    return hevc;
                 case VENCODER_CPU_MPEG2:
                 case VENCODER_MSDK_MPEG2:
                     return mpeg2;
@@ -56,51 +83,69 @@ public class EncodeConstant {
         VENCODER_CUDA_H264, //"cuda_h264"
         VENCODER_CUDA_H265;  //"cuda_h265"
 
-        public static TplVideoEncoder getTplVideoEncoder(String encodeType) throws CommonException {
+        public static TplVideoEncoder getDefaultCodeLibForVideoType(VideoType videoType) throws BaseException {
+            //默认视频类型对应的编码库
+            switch (videoType){
+                case h264:
+                    return VENCODER_X264;
+                case hevc:
+                    return VENCODER_X265;
+                case mpeg2:
+                    return VENCODER_CPU_MPEG2;
+                case avs:
+                    return VENCODER_AVS2;
+            }
+            throw new BaseException(StatusCode.ERROR,"unknown videotype:"+videoType);
+        }
+
+        public static TplVideoEncoder getTplVideoEncoder(String codelib) throws  CommonException {
+            String encodeType = codelib.toUpperCase(Locale.ENGLISH);
             switch (encodeType) {
-                case "x264":
+                case "H264": //h264默认库
                 case "X264":
                 case "VENCODER_X264":
                     return VENCODER_X264;
-                case "uux264":
+                case "UUX264":
                 case "VENCODER_UUX264":
                     return VENCODER_UUX264;
-                case "x265":
+                case "HEVC":  //h265默认库
+                case "H265":  //h265默认库
                 case "X265":
                 case "VENCODER_X265":
                     return VENCODER_X265;
-                case "svt":
+                case "SVT":
                 case "VENCODER_SVT":
                     return VENCODER_SVT;
-                case "ux265":
-                case "orion":
+                case "UX265":
                 case "ORION":
                 case "VENCODER_ORION":
                     return VENCODER_ORION;
-                case "m2v":
+                case "MPEG2": //mpeg2默认库
+                case "M2V":
                 case "VENCODER_CPU_MPEG2":
                     return VENCODER_CPU_MPEG2;
-                case "avs2":
+                case "AVS":    //avs库
+                case "AVS2":
                 case "VENCODER_AVS2":
                     return VENCODER_AVS2;
-                case "msdk_h264":
+                case "MSDK_H264":
                 case "VENCODER_MSDK_H264":
                     return VENCODER_MSDK_H264;
-                case "msdk_h265":
+                case "MSDK_H265":
                 case "VENCODER_MSDK_H265":
                     return VENCODER_MSDK_H265;
-                case "msdk_mpeg2":
+                case "MSDK_MPEG2":
                 case "VENCODER_MSDK_MPEG2":
                     return VENCODER_MSDK_MPEG2;
-                case "cuda_h264":
+                case "CUDA_H264":
                 case "VENCODER_CUDA_H264":
                     return VENCODER_CUDA_H264;
-                case "cuda_h265":
+                case "CUDA_H265":
                 case "VENCODER_CUDA_H265":
                     return VENCODER_CUDA_H265;
-
             }
-            throw new CommonException("unknown encodeType :" + encodeType);
+
+            throw new CommonException("unknown codelib :" + codelib);
         }
 
         public static String getProtoName(TplVideoEncoder type) throws CommonException {
@@ -169,8 +214,12 @@ public class EncodeConstant {
         AENCODER_MP2,        //"mpeg2_audio"
         AENCODER_MP3,        //"mp3"
         AENCODER_AC3,        //"ac3"
-        AENCODER_EAC3;        //"eac3"
+        AENCODER_EAC3,
+        PASSBY;        //"eac3"
         public static TplAudioEncoder getTplAudioEncoder(String encodeType) throws CommonException {
+            if (encodeType.contains("passby")){
+                return PASSBY;
+            }
             switch (encodeType) {
                 case "aac":
                 case "aaclc":
@@ -181,6 +230,7 @@ public class EncodeConstant {
                 case "mpeg4-he-aac-lc":
                 case "AENCODER_HEAAC":
                     return AENCODER_HEAAC;
+                case "heaacv2":
                 case "heaac_v2":
                 case "mpeg4-he-aac-v2-lc":
                 case "AENCODER_HEAAC_V2":

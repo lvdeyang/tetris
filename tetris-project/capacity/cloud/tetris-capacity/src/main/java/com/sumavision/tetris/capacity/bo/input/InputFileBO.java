@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.List;
 
 public class InputFileBO {
@@ -18,8 +21,13 @@ public class InputFileBO {
 	public InputFileBO() {
 	}
 
+
 	public InputFileBO(List<InputFileObjectBO> file_array) {
 		this.file_array = file_array;
 	}
-	
+
+	public InputFileBO(String file_array) {
+		this.file_array  = JSONObject.parseArray(file_array,InputFileObjectBO.class);
+	}
+
 }

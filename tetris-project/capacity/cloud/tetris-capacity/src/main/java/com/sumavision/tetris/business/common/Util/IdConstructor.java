@@ -36,7 +36,7 @@ public class IdConstructor {
 
 
     public IdConstructor() {
-        this.jobId = UUID.randomUUID().toString().substring(0,16);;
+        this.jobId = UUID.randomUUID().toString();
     }
 
     public IdConstructor(String jobId){

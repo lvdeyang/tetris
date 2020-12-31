@@ -1,5 +1,13 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.application.template.MediaVO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.capacity.bo.task.EncodeBO;
+import com.sumavision.tetris.capacity.bo.task.TaskBO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -98,5 +106,9 @@ public class OutputRtspBO {
 		this.media_array = media_array;
 		return this;
 	}
-	
+
+	public OutputRtspBO() {
+	}
+
+
 }

@@ -78,15 +78,7 @@ public class ServiceDeploymentQuery {
 		List<Long> deploymentIds = new ArrayList<Long>();
 		
  		for (ServiceDeploymentPO serviceDeploymentPO : entities) {
-			ServiceDeploymentVO row = new ServiceDeploymentVO(); 
-			row.setId(serviceDeploymentPO.getId())
-			.setServerId(serviceDeploymentPO.getServerId())
-			.setServiceTypeId(serviceDeploymentPO.getServiceTypeId())
-			.setInstallationPackageId(serviceDeploymentPO.getInstallationPackageId())
-			.setInstallFullPath(serviceDeploymentPO.getInstallFullPath())
-			.setCreator(serviceDeploymentPO.getCreator())
-			.setCreateTime(serviceDeploymentPO.getCreateTime().toString())//问题可能
-			.setStatus(serviceDeploymentPO.getStatus());
+			ServiceDeploymentVO row = new ServiceDeploymentVO().set(serviceDeploymentPO); 
 			rows.add(row);
 			
 			deploymentIds.add(serviceDeploymentPO.getId());

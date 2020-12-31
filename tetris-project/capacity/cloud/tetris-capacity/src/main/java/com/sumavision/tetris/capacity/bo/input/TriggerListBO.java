@@ -4,7 +4,7 @@ public class TriggerListBO {
 
 	private boolean cutoff;
 	
-	private boolean meida_lost;
+	private boolean media_lost;
 	
 	private boolean plp_high;
 
@@ -17,12 +17,12 @@ public class TriggerListBO {
 		return this;
 	}
 
-	public boolean isMeida_lost() {
-		return meida_lost;
+	public boolean isMedia_lost() {
+		return media_lost;
 	}
 
-	public TriggerListBO setMeida_lost(boolean meida_lost) {
-		this.meida_lost = meida_lost;
+	public TriggerListBO setMedia_lost(boolean media_lost) {
+		this.media_lost = media_lost;
 		return this;
 	}
 

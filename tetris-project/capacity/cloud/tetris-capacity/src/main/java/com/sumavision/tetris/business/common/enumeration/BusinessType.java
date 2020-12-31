@@ -1,7 +1,7 @@
 package com.sumavision.tetris.business.common.enumeration;
 
 public enum BusinessType {
-
+	DEFAULT,
 	YJGB,
 	LIVE,
 	RECORD,

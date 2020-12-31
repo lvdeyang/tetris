@@ -1,5 +1,12 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.application.template.ProgramVO;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * srt_ts输出参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -84,5 +91,9 @@ public class OutputSrtTsBO extends BaseTsOutputBO<OutputSrtTsBO>{
 		this.key_len = key_len;
 		return this;
 	}
-	
+
+	public OutputSrtTsBO() {
+	}
+
+
 }

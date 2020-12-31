@@ -11,6 +11,8 @@ import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @RepositoryDefinition(domainClass = TaskInputPO.class, idClass = Long.class)
 public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
@@ -31,7 +33,7 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public List<TaskInputPO> findByCount(Integer count);
 	
 	public List<TaskInputPO> findByIdIn(Collection<Long> ids);
-	
+
 	//乐观
 	@Modifying
 	@Query("update TaskInputPO input set input.version = ?2 + 1, input.count = ?3 where input.taskUuid = ?1 and input.version = ?2")
@@ -42,5 +44,18 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public List<TaskInputPO> findByType(BusinessType type);
 
 	public List<TaskInputPO> findByTypeAndCapacityIp(BusinessType type, String capacityIp);
+
+	@Modifying
+	@Query("update TaskInputPO input set input.syncStatus = ?2 where input.id = ?1")
+	public void updateSyncStatusById(Long id, Integer syncStatus);
+
+	@Modifying
+	@Query("update TaskInputPO input set input.analysis = ?2 where input.id = ?1")
+	public void updateAnalysisById(Long id, Integer syncStatus);
+
+	@Modifying
+	@Query("update TaskInputPO input set input.count= ?2, input.syncStatus = ?3 where input.id = ?1")
+	public void updateCountAndSyncStatusById(Long id, Integer count, Integer syncStatus);
+
 
 }

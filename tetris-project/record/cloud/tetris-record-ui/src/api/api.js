@@ -73,6 +73,7 @@ export const queryRecordDevice = params => { return axiosInstance.post(`${basePa
 export const queryDeviceFromFeignAPI = params => { return axiosInstance.post(`${basePath}/record/device/queryFromFeign`, qs.stringify(params)).then(res => res.data) }
 export const addDevice = params => { return axiosInstance.post(`${basePath}/record/device/add`, qs.stringify(params)).then(res => res.data) }
 export const delDevice = params => { return axiosInstance.post(`${basePath}/record/device/del`, qs.stringify(params)).then(res => res.data) }
+export const syncDevice = params => { return axiosInstance.post(`${basePath}/record/device/sync`, qs.stringify(params)).then(res => res.data) }
 
 // 录制文件
 export const queryRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/query`, qs.stringify(params)).then(res => res.data) }

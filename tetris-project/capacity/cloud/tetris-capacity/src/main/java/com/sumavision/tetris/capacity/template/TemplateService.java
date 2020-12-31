@@ -39,7 +39,7 @@ public class TemplateService {
     public String getVideoEncodeMap(TplVideoEncoder encType) throws CommonException {
         //获取模板库
         String tpl = TransformJniLib.getInstance().GetVideoEncParamTemplate(encType.ordinal(),"main","4",0);
-        LOG.info("transform template json : {} , param: {} ",tpl,encType.name());
+        LOG.debug("transform template json : {} , param: {} ",tpl,encType.name());
 
         JSONObject encObj = JSONObject.parseObject(tpl);
         VideoType videoType = VideoType.getVideoType(encType);//编码类型
@@ -55,12 +55,10 @@ public class TemplateService {
         List<String> libParams = getAllParamsByEncodeTpl(libObj);
         //获取编码参数及对应的默认值
         Map<String,Object> libMap = getParamMapByTpl(libObj,libParams);
-        encodeParamMap.put(libName,JSONObject.toJSONString(libMap));
+        encodeParamMap.put(libName,JSONObject.parseObject(JSON.toJSONString(libMap)));
 
         return JSON.toJSONString(encodeParamMap);
     }
-
-
 
     public String getAudioEncodeMap(String encodeType) throws CommonException {
         TplAudioEncoder audioEncoder = TplAudioEncoder.getTplAudioEncoder(encodeType);

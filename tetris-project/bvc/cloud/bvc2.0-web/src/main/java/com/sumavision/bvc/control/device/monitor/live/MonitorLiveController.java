@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,7 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
@@ -160,6 +162,7 @@ public class MonitorLiveController {
 	 * <b>日期：</b>2019年5月4日 下午4:23:50
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
+	 * @param String type 点播设备类型{@code LiveType 中的枚举值}
 	 * @return total int 总数据量
 	 * @return rows List<MonitorLiveDeviceVO> 任务列表
 	 */
@@ -169,6 +172,7 @@ public class MonitorLiveController {
 	public Object loadDeviceLives(
 			int currentPage,
 			int pageSize,
+			String type,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
@@ -178,15 +182,25 @@ public class MonitorLiveController {
 		
 		List<MonitorLiveDevicePO> entities = null;
 		
-		if(userId.longValue() == 1l || user.getIsGroupCreator()){
-			total = monitorLiveDeviceDao.count();
-			entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
+		if(type == null || type.equals("")){
+			if(userId.longValue() == 1l || user.getIsGroupCreator()){
+				total = monitorLiveDeviceDao.count();
+				entities = monitorLiveDeviceQuery.findAll(currentPage, pageSize);
+			}else{
+				total = monitorLiveDeviceDao.countByUserId(userId);
+				entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
+			}
 		}else{
-			total = monitorLiveDeviceDao.countByUserId(userId);
-			entities = monitorLiveDeviceQuery.findByUserId(userId, currentPage, pageSize);
+			if(userId.longValue() == 1l || user.getIsGroupCreator()){
+				Page<MonitorLiveDevicePO> pagedEntities = monitorLiveDeviceQuery.findByTypeAndStatus(currentPage, pageSize, type, MonitorRecordStatus.RUN);
+				entities = pagedEntities.getContent();
+				total = pagedEntities.getTotalElements();
+			}else{
+				Page<MonitorLiveDevicePO> pagedEntities  = monitorLiveDeviceQuery.findByUserIdAndTypeAndStatus(userId, currentPage, pageSize, type, MonitorRecordStatus.RUN);
+				entities = pagedEntities.getContent();
+				total = pagedEntities.getTotalElements();
+			}
 		}
-		
-		
 //		List<MonitorLiveDeviceVO> rows = MonitorLiveVO.getConverter(MonitorLiveDeviceVO.class).convert(entities, MonitorLiveDeviceVO.class);
 		
 		//外部点播本地的外部用户id集合
@@ -1138,6 +1152,27 @@ public class MonitorLiveController {
 		List<String> bundleIdList = JSONArray.parseArray(bundleIds, String.class);
 		
 		monitorLiveDeviceService.resetBundles(bundleIdList, userId);
+		
+		return null;
+	}
+	
+	/**
+	 * 为了测试需要批量停止或者开始<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月12日 下午7:23:10
+	 * @param allStart true将所有的转发开始，stop将所有转发停止
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/all/start/or/stop")
+	public Object allStartOrStop(
+			Boolean allStart,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		monitorLiveDeviceService.allStartOrStop(allStart, user.getId(), user.getUserno());
 		
 		return null;
 	}

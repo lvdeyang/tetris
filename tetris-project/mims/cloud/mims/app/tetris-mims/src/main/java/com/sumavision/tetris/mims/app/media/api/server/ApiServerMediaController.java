@@ -304,7 +304,13 @@ public class ApiServerMediaController {
 		String type = request.getString("type");
 		long beginOffset = request.getLongValue("beginOffset");
 		long endOffset = request.getLongValue("endOffset");
-		
+		Boolean refresh=null;
+		try {
+			refresh=request.getBoolean("refresh");
+		}catch (Exception e){
+
+		}
+
 		//参数错误
 		if((beginOffset + endOffset) != blockSize){
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
@@ -407,6 +413,16 @@ public class ApiServerMediaController {
 				task.setUploadStatus(UploadStatus.COMPLETE);
 				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 				task.setDuration(multimediaInfo.getDuration());
+				//这里刷表
+				if(refresh!=null&&refresh){
+					try {
+						mediaAudioService.refresh(task.getId());
+					} catch (Exception e) {
+						// TODO: handle exception
+						System.out.println("刷表失败："+task.getName());
+					}
+					
+				}
 				mediaAudioDao.save(task);
 				mediaAudioService.checkMediaEdit(task);
 			}

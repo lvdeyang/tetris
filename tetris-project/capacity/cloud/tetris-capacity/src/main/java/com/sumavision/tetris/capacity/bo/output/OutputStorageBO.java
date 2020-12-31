@@ -12,7 +12,7 @@ public class OutputStorageBO {
 	
 	private String dir_name;
 	
-	private String can_del;
+	private Boolean can_del;
 
 	public String getUrl() {
 		return url;
@@ -32,13 +32,12 @@ public class OutputStorageBO {
 		return this;
 	}
 
-	public String getCan_del() {
+	public Boolean getCan_del() {
 		return can_del;
 	}
 
-	public OutputStorageBO setCan_del(String can_del) {
+	public OutputStorageBO setCan_del(Boolean can_del) {
 		this.can_del = can_del;
 		return this;
 	}
-	
 }

@@ -172,7 +172,7 @@ public class GuidePlayService {
 	 	if(outputGroups!=null&&outputGroups.get(0).getGuideId()!=null){
 	 		List<OutputSettingPO> outputSources=outputSettingDao.findByGroupId(outputGroups.get(0).getId());
 			if(outputSources==null){
-				throw new BaseException(StatusCode.ERROR,"备份源为空"); 
+				throw new BaseException(StatusCode.FORBIDDEN,"备份源为空"); 
 			}
 			
 			PassByBO passBy=getOutputSettingPassBy(outputGroups.get(0),OutType.SWITCH);
@@ -548,7 +548,7 @@ public class GuidePlayService {
 				      .setBase_type("VenusAudioIn")
 				      .setCodec_param(codec);
 			if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-				String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
+				String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
 				connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
 			}
 			connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);

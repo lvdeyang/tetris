@@ -8,7 +8,7 @@
   </template>
 
   <template>
-    <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+    <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading">
 
       <el-button type="primary" size="small" @click="handleCreate"><span
           class="icon-plus sp_title"></span>&nbsp;{{i18n.handleCreate}}</el-button>
@@ -30,6 +30,7 @@
           size="small"></el-input>
       </div>
       <el-button type="primary" size="small" @click="batchLogin">&nbsp;批量登录</el-button>
+      <el-button type="primary" size="small" @click="batchLogaOutQt">&nbsp;批量下线客户端</el-button>
       <!-- <div class="condition-item">
         <el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable
           size="small"></el-input>
@@ -38,11 +39,9 @@
 
       <div class="div_user_list">
         <el-scrollbar style="height:100%;">
-          <el-table :data="table.rows" :row-key="rowKey" style="width:100%">
-            <!-- <el-table-column
-                                type="selection"
-                                width="55">
-                        </el-table-column> -->
+          <el-table :data="table.rows" :row-key="rowKey" style="width:100%" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55">
+            </el-table-column>
             <el-table-column :label="i18n.tableColumnNickname" prop="nickname">
             </el-table-column>
             <el-table-column :label="i18n.tableColumnUsername" prop="username">
@@ -150,8 +149,10 @@
         <input name="password" type="hidden" v-model="passwordEncode"></input>
         <button type="submit" style="display:none" class="login-submit-button"></button>
         </div> -->
-        <el-button class="el-button el-button--primary" style="margin-top: 20px; width: 100%; border-radius: 2px;"
-          @click="loginSubmit">登录</el-button>
+        <el-button class="el-button el-button--primary" style="margin-top: 20px; width: 48%; border-radius: 2px;"
+          @click="loginSubmit('ms')">平台登录</el-button>
+        <el-button class="el-button el-button--primary" style="margin-top: 20px; width: 48%; border-radius: 2px;"
+          @click="loginSubmit('qt')">客户端登录</el-button>
         <!--  -->
       </form>
       <!-- <iframe name="form" id="form"></iframe> -->

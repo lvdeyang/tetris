@@ -27,6 +27,8 @@
         </el-option>
       </el-select>
       <el-button type="danger" size="mini" @click="deleteAllEncode">解绑所有编码器</el-button>
+      <el-button type="success" size="mini" @click="changeStatusAll(true)">一键开始</el-button>
+      <el-button type="danger" size="mini" @click="changeStatusAll(false)">一键停止</el-button>
     </el-row>
 
     <div class="bvc2-auto-layout-container"></div>

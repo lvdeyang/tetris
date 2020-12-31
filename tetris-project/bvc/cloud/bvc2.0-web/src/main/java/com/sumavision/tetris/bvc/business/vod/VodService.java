@@ -49,6 +49,7 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.feign.ResourceServiceClient;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -211,6 +212,9 @@ public class VodService {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	/** 重构点播文件 */
 	@Transactional(rollbackFor = Exception.class)
@@ -604,7 +608,8 @@ public class VodService {
 		group.setCreatetime(new Date());
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
-		if(serial!=null)group.setLocationIndex(serial);
+		if(serial!=null && serial != -1) group.setLocationIndex(serial);
+		if(serial == -1 ) group.setAllowNewPage(false);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
@@ -673,6 +678,8 @@ public class VodService {
 		if(businessReturnService.getSegmentedExecute()){
 			businessReturnService.execute();
 		}
+		
+		operationLogService.send(user.getName(), "点播设备", user.getName()+"点播设备："+ encoderBundleEntity.getBundleName());
 	}
 	
 	/**
@@ -686,7 +693,7 @@ public class VodService {
 //	 * @param changeSource 慎用！一般都用false；换源业务时使用true，不改播放器，不挂播放器
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void deviceStop(Long groupId) throws Exception{
+	public void deviceStop(UserBO user, Long groupId) throws Exception{
 		
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
 			
@@ -731,6 +738,8 @@ public class VodService {
 			if(businessReturnService.getSegmentedExecute()){
 				businessReturnService.execute();
 			}
+			
+			operationLogService.send(user.getName(), "关闭点播", user.getName()+"停止点播："+ vod.getDstBundleName());
 			
 			//删除这些PO
 			groupDao.delete(group);

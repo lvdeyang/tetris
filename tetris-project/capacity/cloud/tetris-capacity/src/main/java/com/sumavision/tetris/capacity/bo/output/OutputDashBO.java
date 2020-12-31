@@ -1,5 +1,10 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.application.template.OutputVO;
+import com.sumavision.tetris.capacity.bo.task.TaskBO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,5 +80,9 @@ public class OutputDashBO {
 		this.storage = storage;
 		return this;
 	}
-	
+
+	public OutputDashBO() {
+	}
+
+
 }

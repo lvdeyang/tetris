@@ -69,7 +69,8 @@ define([
                         interval:'',
                         currentDeployment:'',
                         properties:[],
-                        loading:false
+                        loading:false,
+                        ipAndPortSelect:[]
                     },
                     updateStep:{
                         visible:false,
@@ -78,6 +79,7 @@ define([
                         currentDeployment:'',
                         properties:[],
                         loading:false,
+                        ipAndPortSelect:[],
                         updatePackageId:0
                     },
                     editProperties:{
@@ -118,7 +120,7 @@ define([
                         databaseIP:"",
                         databasePort:"",
                         ipAndPort:""
-                    }
+                    },
                 }
 
             },
@@ -220,8 +222,15 @@ define([
                                             if(data && data.length>0){
                                                 for(var i=0; i<data.length; i++){
                                                     data[i].value = data[i].propertyDefaultValue;
-                                                    if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
-                                                    self.dialog.step.properties.push(data[i]);
+                                                    if(data[i].valueType === 'DBPORT'){
+                                                        self.dialog.step.ipAndPortSelect.push(data[i]);
+                                                    }else{
+                                                        if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
+                                                        self.dialog.step.properties.push(data[i]);
+                                                    }
+                                                }
+                                                if(self.dialog.step.ipAndPortSelect.length > 0){
+                                                    self.dialog.database.ipAndPort = self.dialog.step.ipAndPortSelect[0].propertyDefaultValue;
                                                 }
                                             }
                                         });
@@ -277,9 +286,11 @@ define([
                     if(self.dialog.step.interval){
                         clearInterval(self.dialog.step.interval);
                     }
+                    self.dialog.database.ipAndPort = '';
                     self.dialog.step.interval = '';
                     self.dialog.step.currentDeployment = '';
                     self.dialog.step.properties.splice(0, self.dialog.step.properties.length);
+                    self.dialog.step.ipAndPortSelect = [],
                     self.dialog.step.loading = false;
                     self.dialog.step.visible = false;
                 },
@@ -302,6 +313,8 @@ define([
                         for(var i=0; i<self.dialog.step.properties.length; i++){
                             config[self.dialog.step.properties[i].propertyKey] = self.dialog.step.properties[i].value;
                         }
+                        self.dialog.database.databaseIP = self.dialog.database.ipAndPort.split(":")[0];
+                        self.dialog.database.databasePort = self.dialog.database.ipAndPort.split(":")[1];
                         config["databaseAddr"] = self.dialog.database.databaseIP;
                         config["databaseport"] = self.dialog.database.databasePort;
                     }
@@ -327,6 +340,7 @@ define([
                         self.dialog.database.ipAndPort = "";
                         self.dialog.database.databaseIP = "";
                         self.dialog.database.databasePort = "";
+                        self.dialog.step.ipAndPortSelect = [];
                         self.load(self.table.currentPage);
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
@@ -509,8 +523,15 @@ define([
                                         if(data && data.length>0){
                                             for(var i=0; i<data.length; i++){
                                                 //data[i].value = data[i].propertyDefaultValue;
-                                                if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
-                                                self.dialog.updateStep.properties.push(data[i]);
+                                                if(data[i].valueType === 'DBPORT'){
+                                                    self.dialog.updateStep.ipAndPortSelect.push(data[i]);
+                                                }else{
+                                                    if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
+                                                    self.dialog.updateStep.properties.push(data[i]);
+                                                }
+                                            }
+                                            if(self.dialog.updateStep.ipAndPortSelect.length > 0){
+                                            self.dialog.database.ipAndPort = self.dialog.updateStep.ipAndPortSelect[0].propertyDefaultValue;
                                             }
                                         }
                                     });
@@ -526,6 +547,8 @@ define([
                         for(var i=0; i<self.dialog.updateStep.properties.length; i++){
                             config[self.dialog.updateStep.properties[i].propertyKey] = self.dialog.updateStep.properties[i].propertyValue;
                         }
+                        self.dialog.database.databaseIP = self.dialog.database.ipAndPort.split(":")[0];
+                        self.dialog.database.databasePort = self.dialog.database.ipAndPort.split(":")[1];
                         config["databaseAddr"] = self.dialog.database.databaseIP;
                         config["databaseport"] = self.dialog.database.databasePort;
                     }
@@ -557,6 +580,7 @@ define([
                         self.dialog.database.ipAndPort = "";
                         self.dialog.database.databaseIP = "";
                         self.dialog.database.databasePort = "";
+                        self.dialog.step.ipAndPortSelect = [];
                         self.load(self.table.currentPage);
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },

@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.application.template.SourceVO;
+
 /**
  * rtp_es参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -66,4 +69,16 @@ public class RtpEsBO {
 		this.local_ip = local_ip;
 		return this;
 	}
+
+	public RtpEsBO() {
+	}
+
+	public RtpEsBO(SourceVO sourceVO) {
+		this.source_ip = IpV4Util.getIpFromUrl(sourceVO.getUrl());
+		this.local_port = IpV4Util.getPortFromUrl(sourceVO.getUrl());
+		this.local_ip = sourceVO.getLocal_ip();
+		this.type = sourceVO.getMediaType();
+		this.codec = "auto"; //假设都符合rfc3550标准
+	}
 }
+

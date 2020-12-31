@@ -2775,7 +2775,7 @@ public class GroupService {
 						      .setBase_type(video.getBaseType())
 						      .setCodec_param(codec);
 				if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-					String videoAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
+					String videoAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 0);
 					connectEncoderVideoChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(videoAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
 				}
 				connectEncoderBundle.getChannels().add(connectEncoderVideoChannel);
@@ -2786,7 +2786,7 @@ public class GroupService {
 						      .setBase_type(audio.getBaseType())
 						      .setCodec_param(codec);
 					if(Boolean.TRUE.equals(bundlePO.getMulticastEncode())){
-						String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 4);
+						String audioAddr = multicastService.addrAddPort(bundlePO.getMulticastEncodeAddr(), 2);
 						connectEncoderAudioChannel.setMode(TransmissionMode.MULTICAST.getCode()).setMulti_addr(audioAddr).setSrc_multi_ip(bundlePO.getMulticastSourceIp());
 					}
 					connectEncoderBundle.getChannels().add(connectEncoderAudioChannel);

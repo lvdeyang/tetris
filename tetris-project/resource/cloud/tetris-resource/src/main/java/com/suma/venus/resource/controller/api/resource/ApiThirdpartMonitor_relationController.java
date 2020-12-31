@@ -1,5 +1,8 @@
 package com.suma.venus.resource.controller.api.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +33,11 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/server/node/info")
-	public Object queryServerNodeInfo()throws Exception{
+	public Object queryServerNodeInfo(HttpServletRequest request)throws Exception{
 		
-		return apiThirdpartMonitor_relationService.queryServerNodeInfo();
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartMonitor_relationService.queryServerNodeInfo(wrapper);
 	}
 	
 	/**
@@ -119,7 +124,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/device/permission/change")
+	@RequestMapping(value = "/device/institution/change")
 	public Object devicePermissionChange(HttpServletRequest request)throws Exception{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
@@ -174,11 +179,29 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "foreign/server/information")
+	@RequestMapping(value = "/foreign/server/information")
 	public Object foreignServerInformation(HttpServletRequest request)throws Exception{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
-		return apiThirdpartMonitor_relationService.foreignServerInformation(wrapper);
+ 		String foreignName = wrapper.getString("foreign");
+		return apiThirdpartMonitor_relationService.foreignServerInformation(foreignName);
+	}
+	
+	/**
+	 * 查询passby消息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月27日 上午10:58:48
+	 * @param layerId 接入id
+	 * @return List<LianwangPassbyVO> passby消息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/passby/message")
+	public Object queryPassbyMessage(HttpServletRequest request)throws Exception{
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		String layerId = wrapper.getString("layerId");
+		return apiThirdpartMonitor_relationService.queryPassbyMessage(layerId);
 	}
 }

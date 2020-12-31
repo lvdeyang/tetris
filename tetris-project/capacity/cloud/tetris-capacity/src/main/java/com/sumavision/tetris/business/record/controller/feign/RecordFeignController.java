@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.record.controller.feign;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,10 +28,11 @@ public class RecordFeignController {
 	 * @param String recordInfo 收录信息
 	 * @return String 收录标识
 	 */
+	@OprLog(name = "record")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(
+	public Object addTask(
 			String recordInfo,
 			HttpServletRequest request) throws Exception{
 		
@@ -46,10 +48,11 @@ public class RecordFeignController {
 	 * <b>日期：</b>2019年12月3日 上午10:35:32
 	 * @param String id 收录标识
 	 */
+	@OprLog(name = "record")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete")
-	public Object delete(
+	public Object deleteTask(
 			String id,
 			HttpServletRequest request) throws Exception{
 		

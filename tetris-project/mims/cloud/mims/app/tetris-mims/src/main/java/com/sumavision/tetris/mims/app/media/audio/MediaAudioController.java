@@ -754,6 +754,34 @@ public class MediaAudioController {
 		return result;
 	}
 	
+	
+	/**
+	 * 文件刷表
+	 * 文件刷表，返回编码格式，码率，采样率等等信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr.h<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月27日 下午5:56:09
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/refresh/uri/{id}")
+	public Object refreshUri(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		MediaAudioPO media = mediaAudioQuery.loadById(id);
+		
+		return mediaAudioService.refresh(id);
+	}
+	
+	
 	/**
 	 * 增加下载数<br/>
 	 * <b>作者:</b>lzp<br/>

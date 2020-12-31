@@ -5,6 +5,7 @@ import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.hibernate.AssertionFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +43,14 @@ public class PushTaskFeignController {
 	 * @param String task push任务信息
 	 * @return String 任务标识
 	 */
+	@OprLog(name = "push")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
 	public Object addTask(
-			String task,
-			HttpServletRequest request) throws Exception{
-
-		LOG.info("[push]<add-schedule>(req) hash:{} \n task: {}",task.hashCode(),task);
+			String task) throws Exception{
 		ScheduleTaskVO pushTask = JSONObject.parseObject(task, ScheduleTaskVO.class);
 		String result = addPushTaskTrascation(pushTask);
-		LOG.info("[push]<add-schedule>(resp) hash:{}",task.hashCode());
 		return result;
 	}
 	
@@ -63,26 +61,23 @@ public class PushTaskFeignController {
 	 * <b>日期：</b>2020年4月25日 下午5:17:56
 	 * @param String taskId push任务id
 	 */
+	@OprLog(name = "push")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(
-			String taskId,
-			HttpServletRequest request) throws Exception{
-		
+			String taskId) throws Exception{
 		scheduleService.deletePushTask(taskId);
 		return null;
 	}
 
+	@OprLog(name = "push")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/clear/task")
 	public Object clearTask(
-			String taskId,
-			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<clear-schedule>(req) hash:{} \n taskId: {}",taskId.hashCode(),taskId);
+			String taskId) throws Exception{
 		scheduleService.clearPushTask(taskId);
-		LOG.info("[push]<clear-schedule>(resp) hash:{} \n taskId: {}",taskId.hashCode());
 		return null;
 	}
 	
@@ -93,18 +88,14 @@ public class PushTaskFeignController {
 	 * <b>日期：</b>2020年4月25日 下午5:28:41
 	 * @param String changeSchedule 节目单信息
 	 */
+	@OprLog(name = "push")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/change/schedule")
 	public Object changeSchedule(
-			String changeSchedule,
-			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<change-schedule>(req) hash:{} \n changeSchedule: {}",changeSchedule.hashCode(),changeSchedule);
+			String changeSchedule) throws Exception{
 		SwitchScheduleVO schedule = JSONObject.parseObject(changeSchedule, SwitchScheduleVO.class);
-		
-		System.out.println(JSON.toJSONString(schedule));
 		changeScheduleTrascation(schedule);
-		LOG.info("[push]<change-schedule>(resp) hash:{}",changeSchedule.hashCode());
 		return null;
 	}
 	
@@ -115,15 +106,14 @@ public class PushTaskFeignController {
 	 * <b>日期：</b>2020年4月27日 上午11:17:04
 	 * @param String taskIds 任务ids
 	 */
+	@OprLog(name = "push")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/batch/delete/task")
 	public Object batchDeleteTask(
 			String taskIds,
 			HttpServletRequest request) throws Exception{
-		LOG.info("[push]<delete-schedule>(req) hash:{} \n delete: {}",taskIds.hashCode(),taskIds);
 		List<String> taskUuids = JSONArray.parseArray(taskIds, String.class);
-		LOG.info("[push]<delete-schedule>(resp) hash:{} \n delete: {}",taskIds.hashCode());
 		scheduleService.batchDeletePushTask(taskUuids);
 		return null;
 	}

@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hibernate.annotations.SourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,6 @@ import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
-import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
@@ -51,34 +49,37 @@ import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
 import com.suma.venus.resource.lianwang.auth.DevAuthXml;
 import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
-import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
-import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
-import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
+import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.OperationLogService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.suma.venus.resource.vo.FolderVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -148,6 +149,13 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -898,41 +906,57 @@ public class BindResourceController extends ControllerBase {
 					if (toBindBundleIds != null && !toBindBundleIds.isEmpty()) {
 						Set<Long> folderIds = new HashSet<Long>();
 	 					List<BundlePO> toBindBundlePOs = bundleDao.findByBundleIdIn(toBindBundleIds);
-						List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+	 					List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
+	 					Set<Long> allFolderIds = new HashSet<Long>();
 						if (toBindBundlePOs != null && !toBindBundlePOs.isEmpty()) {
 							for (BundlePO bundlePO : toBindBundlePOs) {
 								folderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
 								bundlePO.setEquipFactInfo(serNodePO.getNodeName());
 								BundleVO bundleVO = BundleVO.fromPO(bundlePO);
 								bundleVOs.add(bundleVO);
+								allFolderIds.add(bundlePO.getFolderId()==null? 0l:bundlePO.getFolderId());
 							}
 						}
 						
-						List<FolderPO> institutions = new ArrayList<FolderPO>();
-						List<FolderPO> allFolderPOs = folderDao.findAll();
-						if(folderIds != null && !folderIds.isEmpty()){
-							List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-							if(folderPOs !=null && !folderPOs.isEmpty()){
-								for (FolderPO folderPO : folderPOs) {
-									StringBufferWrapper parentpath = new StringBufferWrapper();
-									if(folderPO.getParentPath() != null && folderPO.getParentPath().equals("")){
-										String[] parentPathStrings = folderPO.getParentPath().split("/"); 
-										for (int i = 1; i < parentPathStrings.length; i++) {
-											if (allFolderPOs != null && !allFolderPOs.isEmpty()) {
-												for (FolderPO allFolderPO : allFolderPOs) {
-													if(parentPathStrings[i].equals(allFolderPO.getId().toString())){
-														parentpath.append("/").append(allFolderPO.getUuid());
-													}
-												}
-											}
-										}
+						List<FolderPO> bundleFolderPOs = folderDao.findByIdIn(folderIds);
+						if(bundleFolderPOs != null && !bundleFolderPOs.isEmpty()){
+							for (FolderPO folderPO : bundleFolderPOs) {
+								if (null != folderPO.getParentPath() && !"".equals(folderPO.getParentPath())) {
+									String[] allfolderIds = folderPO.getParentPath().split("/");
+									for (int i = 1; i < allfolderIds.length; i++) {
+										allFolderIds.add(Long.parseLong(allfolderIds[i]));
 									}
-									folderPO.setParentPath(parentpath.toString());
 								}
 							}
-							institutions.addAll(folderPOs);
 						}
-						
+						List<FolderPO> allFolderPOs = folderDao.findByIdIn(allFolderIds);
+						Map<Long, String> idUuidMap = new HashMap<Long, String>();
+						List<FolderVO> folderVOs = new ArrayList<FolderVO>();
+						if(allFolderPOs!=null && allFolderPOs.size()>0){
+							for(FolderPO folderPO:allFolderPOs){
+								FolderVO folderVO = FolderVO.fromFolderPO(folderPO);
+								folderVOs.add(folderVO);
+								idUuidMap.put(folderVO.getId(), folderVO.getUuid());
+							}
+							
+							for(FolderVO folderVO:folderVOs){
+//								folderVO.setParentId(idUuidMap.get(folderVO.getId()));
+								String parentPath = folderVO.getParentPath();
+								if(parentPath==null || "".equals(parentPath)) continue;
+								StringBufferWrapper newParentPath = new StringBufferWrapper();
+								String[] parentIds = parentPath.split("/");
+								for(int i=1; i<parentIds.length; i++){
+									newParentPath.append("/").append(idUuidMap.get(Long.valueOf(parentIds[i])));
+								}
+								folderVO.setParentPath(newParentPath.toString());
+							}
+							
+							if (bundleVOs != null && !bundleVOs.isEmpty()) {
+								for (BundleVO bundleVO : bundleVOs) {
+									bundleVO.setInstitution(idUuidMap.get(bundleVO.getFolderId()));
+								}
+							}
+						}
 						List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(toBindBundleIds);
 						if (bundleVOs != null && !bundleVOs.isEmpty()) {
 							for (BundleVO bundleVO : bundleVOs) {
@@ -955,8 +979,8 @@ public class BindResourceController extends ControllerBase {
 						for (int i = 0; i < serNodePOs.size(); i++) {
 							foreign.add(new HashMap<String, Object>());
 							foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
-							foreign.get(i).put("institutions", institutions);
-							foreign.get(i).put("devices", toBindBundlePOs);
+							foreign.get(i).put("institutions", folderVOs);
+							foreign.get(i).put("devices", bundleVOs);
 							foreign.get(i).put("bindChecks", toBindChecks);
 						}
 						pass_by_content.put("cmd", "devicePermissionAdd");
@@ -967,6 +991,7 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 					
 					
@@ -1017,11 +1042,17 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+						
+						System.out.println("------**发送Passby**------" + passByBO) ;
 					}
 				}
 				
+				//修改授权日志
+				UserVO userVO = userQuery.current();
+				operationLogService.send(userVO.getUsername(), "修改权限", userVO.getUsername() + "修改了授权", EOprlogType.PRIVILEGE_CHANGE);
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
+				e.printStackTrace();
 			}
 			
 

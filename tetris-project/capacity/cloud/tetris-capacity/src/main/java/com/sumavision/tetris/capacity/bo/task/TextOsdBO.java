@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.sumavision.tetris.application.template.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,5 +44,17 @@ public class TextOsdBO {
 		this.text_osds = text_osds;
 		return this;
 	}
-	
+
+	public TextOsdBO() {
+	}
+
+	public TextOsdBO(ProcessVO processVO) {
+		this.text_osds = new ArrayList<>();
+		this.plat = processVO.getPlat().name().toLowerCase();
+		this.nv_card_idx = processVO.getNv_card_idx();
+		for (int i = 0; i < processVO.getPic_osds().size(); i++) {
+			TextOsdVO textOsdVO = processVO.getText_osds().get(i);
+			this.text_osds.add(new OsdBO(textOsdVO));
+		}
+	}
 }

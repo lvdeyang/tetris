@@ -37,6 +37,10 @@ define([
                         [{serialNum:3, data:''}, {serialNum:4, data:''}, {serialNum:5, data:'', data:''}],
                         [{serialNum:6, data:''}, {serialNum:7, data:''}, {serialNum:8, data:'', data:''}]
                     ],
+                    '12':[
+                          [{serialNum:0, data:''}, {serialNum:1, data:''}, {serialNum:2, data:''}, {serialNum:3, data:''}],
+                          [{serialNum:4, data:''}, {serialNum:5, data:''}, {serialNum:6, data:''}, {serialNum:7, data:''}],
+                          [{serialNum:8, data:''}, {serialNum:9, data:''}, {serialNum:10, data:''}, {serialNum:11, data:''}]],
                     '16':[
                         [{serialNum:0, data:''}, {serialNum:1, data:''}, {serialNum:2, data:''}, {serialNum:3, data:''}],
                         [{serialNum:4, data:''}, {serialNum:5, data:''}, {serialNum:6, data:''}, {serialNum:7, data:''}],

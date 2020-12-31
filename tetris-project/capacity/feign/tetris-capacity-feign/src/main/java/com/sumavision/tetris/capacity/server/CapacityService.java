@@ -12,7 +12,7 @@ public class CapacityService {
 
 	@Autowired
 	private CapacityFeign capacityFeign;
-	
+
 	/**
 	 * 添加收录<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -139,7 +139,7 @@ public class CapacityService {
 	}
 	
 	/**
-	 * 刷源<br/>
+	 * 转码刷源<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 下午5:11:50
@@ -148,6 +148,18 @@ public class CapacityService {
 	 */
 	public String analysisInput(String analysisInput) throws Exception{
 		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(analysisInput), String.class);
+	}
+
+	/**
+	 * 媒资刷源，接口从媒资服务调的（应急广播业务需求）<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月29日 上午9:11:50
+	 * @param String analysisInput
+	 * @return String
+	 */
+	public String analysisInput(String deviceIp,String url) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(deviceIp,url), String.class);
 	}
 	
 	/**
@@ -215,8 +227,8 @@ public class CapacityService {
 	 * <b>日期：</b>2020年5月8日 下午5:31:15
 	 * @param String deviceIp 转换模块ip
 	 */
-	public void sync(String deviceIp) throws Exception{
-		JsonBodyResponseParser.parseObject(capacityFeign.sync(deviceIp), null);
+	public String sync(String syncObj) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.sync(syncObj), String.class);
 	}
 	
 	/**
@@ -258,5 +270,27 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.getEncodeTemplate(encodeType), String.class);
 	}
 
+	/**
+	 * @MethodName: addTask
+	 * @Description: 通过模板下发任务
+	 * @param taskInfo 任务参数
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/10 16:27
+	 **/
+	public String addTaskByTemplate(String taskInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addTaskByTemplate(taskInfo), String.class);
+	}
+
+	/**
+	 * @MethodName: getAllTemplate
+	 * @Description: 获取所有模板
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/11 13:18
+	 **/
+	public String getAllTemplate() throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.getAllTemplate(), String.class);
+	}
 
 }

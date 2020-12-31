@@ -6,18 +6,21 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInfoVO, BroadAbilityBroadInfoPO>{
 	/** 频道id */
 	private Long channelId;
-	/** 预播发地�? */
+	/** 预播发地�? */
 	private String previewUrlIp;
 	/** 本地Ip */
 	private String localIp;
-	/** 预播发可用起始端�? */
+	/** 预播发可用起始端�? */
 	private String previewUrlPort;
-	/** 预播发可用终止端�? */
+	/** 预播发可用终止端�? */
 	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;
 	/** 预播发用户id */
 	private Long userId;
+	private String outputType;
+	private String rtmpUrl;
+
 	
 	public Long getChannelId() {
 		return channelId;
@@ -72,6 +75,28 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		this.userId = userId;
 		return this;
 	}
+	
+	
+
+	public String getOutputType() {
+		return outputType;
+	}
+
+	public BroadAbilityBroadInfoVO setOutputType(String outputType) {
+		this.outputType = outputType;
+		return this;
+	}
+	
+	
+
+	public String getRtmpUrl() {
+		return rtmpUrl;
+	}
+
+	public BroadAbilityBroadInfoVO setRtmpUrl(String rtmpUrl) {
+		this.rtmpUrl = rtmpUrl;
+		return this;
+	}
 
 	@Override
 	public BroadAbilityBroadInfoVO set(BroadAbilityBroadInfoPO entity) throws Exception {
@@ -79,11 +104,13 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		.setUuid(entity.getUuid())
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setChannelId(entity.getChannelId())
-		.setMediaId(entity.getMediaId())
+		.setMediaId(entity.getMediaId()==null?0:entity.getMediaId())
 		.setPreviewUrlIp(entity.getPreviewUrlIp())
 		.setPreviewUrlPort(entity.getPreviewUrlPort())
 		.setPreviewUrlEndPort(entity.getPreviewUrlEndPort())
 		.setLocalIp(entity.getLocalIp())
+		.setOutputType(entity.getOutputType()==null?"":entity.getOutputType().getName())
+		.setRtmpUrl(entity.getRtmpUrl())
 		.setUserId(entity.getUserId());
 		return this;
 	}
@@ -97,8 +124,12 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 				&& this.getLocalIp() != null
 				&& this.getLocalIp().equals(infoVO.getLocalIp())
 				&& this.getPreviewUrlPort() != null
+				&& this.getOutputType()!=null
+				&& this.getOutputType().equals(infoVO.getOutputType())
 				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
 				&& this.getPreviewUrlEndPort() != null
+				&& this.getRtmpUrl()!=null
+				&& this.getRtmpUrl().equals(infoVO.getRtmpUrl())
 				&& this.getPreviewUrlEndPort().equals(infoVO.getPreviewUrlEndPort());
 	}
 

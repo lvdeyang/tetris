@@ -1,5 +1,8 @@
 package com.suma.venus.resource.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.dao.LianwangPassbyDAO;
 import com.suma.venus.resource.pojo.LianwangPassbyPO;
+import com.suma.venus.resource.vo.LianwangPassbyVO;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
@@ -80,4 +84,23 @@ public class LianwangPassbyService {
 		}
 	}
 	
+	/**
+	 * 根据节点id查询passby<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年11月27日 上午10:41:03
+	 * @param layerId 联网接入id
+	 * @return List<LianwangPassbyVO> passby消息
+	 */
+	public List<LianwangPassbyVO> queryPassby(String layerId)throws Exception{
+		List<LianwangPassbyPO> passbyPOs = lianwangPassbyDao.findByLayerId(layerId);
+		List<LianwangPassbyVO> passbyVOs = new ArrayList<LianwangPassbyVO>();
+		if (passbyPOs != null && !passbyPOs.isEmpty()) {
+			for (LianwangPassbyPO lianwangPassbyPO : passbyPOs) {
+				LianwangPassbyVO lianwangPassbyVO = new LianwangPassbyVO().set(lianwangPassbyPO);
+				passbyVOs.add(lianwangPassbyVO);
+			}
+		}
+		return passbyVOs;
+	}
 }
