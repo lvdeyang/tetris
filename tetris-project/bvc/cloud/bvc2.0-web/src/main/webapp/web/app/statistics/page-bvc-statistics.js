@@ -242,11 +242,11 @@ define([
     };
 
     var destroy = function(){
-        vueInstance.perNumber.echarts.dispose();
-        vueInstance.perDuration.echarts.dispose();
-        vueInstance.totalNumber.echarts.dispose();
-        vueInstance.totalTimes.echarts.dispose();
-        vueInstance.totalDuration.echarts.dispose();
+        if(vueInstance.perNumber.echarts) vueInstance.perNumber.echarts.dispose();
+        if(vueInstance.perDuration.echarts) vueInstance.perDuration.echarts.dispose();
+        if(vueInstance.totalNumber.echarts) vueInstance.totalNumber.echarts.dispose();
+        if(vueInstance.totalTimes.echarts) vueInstance.totalTimes.echarts.dispose();
+        if(vueInstance.totalDuration.echarts) vueInstance.totalDuration.echarts.dispose();
     };
 
     var page = {
