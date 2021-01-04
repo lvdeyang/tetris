@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
+import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationDAO;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationPO;
 import com.sumavision.tetris.omms.software.service.installation.BackupInformationVO;
@@ -38,6 +41,9 @@ public class ServiceDeploymentQuery {
 	
 	@Autowired
 	public BackupInformationDAO backupInformationDAO;
+	
+	@Autowired
+	public DatabaseDAO databaseDAO;
 	
 	/**
 	 * 查询状态<br/>
@@ -141,6 +147,28 @@ public class ServiceDeploymentQuery {
 	public List<BackupInformationVO> findBackup(Long deploymentId) throws Exception{
 		List<BackupInformationPO> list = backupInformationDAO.findByDeploymentId(deploymentId);
 		return BackupInformationVO.getConverter(BackupInformationVO.class).convert(list, BackupInformationVO.class);
+	}
+
+	/**
+	 * 查询创建的Sql服务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月30日 下午4:48:24
+	 * @return List<String> ipAndPort ip和端口的组合
+	 */
+	public List<String> databaseIpAndPort() {
+		List<DatabasePO> databasePOs = databaseDAO.findAll();
+		List<String> ipAndPort = new ArrayList<String>();
+		if(null!= databasePOs && !databasePOs.isEmpty()){
+			for (DatabasePO databasePO : databasePOs) {
+				ipAndPort.add(new StringBufferWrapper()
+						.append(databasePO.getDatabaseIP())
+						.append(":")
+						.append(databasePO.getDatabasePort()).toString());
+			}
+		}
+		return ipAndPort;
 	}
 
 }

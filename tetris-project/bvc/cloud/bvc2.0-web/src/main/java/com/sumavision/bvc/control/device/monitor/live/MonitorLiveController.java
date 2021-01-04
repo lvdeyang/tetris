@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -1091,7 +1092,7 @@ public class MonitorLiveController {
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/device/by/delete")
 	public Object stopLiveDeviceByDeleteDevice(
-			String ids,
+			@RequestBody String ids,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -1114,7 +1115,7 @@ public class MonitorLiveController {
 	@ResponseBody
 	@RequestMapping(value = "/stop/live/by/lose/privilege")
 	public Object stopLiveByLosePrivilege(
-			@RequestParam String userBundleBoList,
+			@RequestBody String userBundleBoList,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userUtils.getUserFromSession(request);
@@ -1140,7 +1141,7 @@ public class MonitorLiveController {
 	@ResponseBody
 	@RequestMapping(value = "/reset/bundles")
 	public Object resetBundles(
-			String bundleIds,
+			@RequestBody String bundleIds,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
