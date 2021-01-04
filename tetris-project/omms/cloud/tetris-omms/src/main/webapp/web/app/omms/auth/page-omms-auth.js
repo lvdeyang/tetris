@@ -58,23 +58,31 @@ define([
                         loading:false,
                         id:0,
                         deviceId:'',
-                        bvc:{
-                        	surpport:false
+                        bvc_business:{
+                            support:false
                         },
-                        transSystem:{
-                        	surpport:false
+                        tetrissts:{
+                            support:false
                         },
                         mediaTransform:{
-                        	surpport:false,
+                            support:false,
                         	serverNum:0,
                         	v4k:0,
                         	v1080:0,
                         	v720:0
                         },
-                        jv210Joiner:{
-                        	surpport:false,
-                        	serverNum:0
-                        }
+                        JV210Joiner:{
+                            support:false,
+                        	serverNum:0,
+                        },
+                        CDNJoiner:{
+                            support:false,
+                            cdnNum:0,
+                        },
+                        MixerJoiner:{
+                            support:false,
+                            screenNum:0
+                        },
                     }
                 }
             },
@@ -85,6 +93,9 @@ define([
 
             },
             methods:{
+                handleChange(value) {
+                    console.log(value);
+                },
                 load:function(currentPage){
                     var self = this;
                     self.table.data.splice(0, self.table.data.length);

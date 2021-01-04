@@ -2,10 +2,13 @@ package com.sumavision.tetris.omms.auth;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.fileupload.FileItem;
@@ -41,6 +44,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.omms.auth.exception.HttpGadgetEncryptionException;
 import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
@@ -193,5 +197,75 @@ public class AuthService {
 		return null;
 	}
 	
+	/**
+	 * 授权信息加密<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月16日 下午7:12:10
+	 * @param entity 授权内容
+	 * @return encryption 加密文件内容及长度
+	 */
+	public Map<String, String> encryption(AuthPO entity) throws Exception{
+		Map<String, String> encryption = new HashMap<String, String>();
+		CloseableHttpClient client = null;
+
+		try {
+			
+			String serverip = "192.165.56.70" ;
+//			String serverip = "127.0.0.1" ;
+			Integer port = 8910 ;
+			String user = "Admin";
+			String password = "sumavisionrd";
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(serverip, port, "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(user, password));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+	        
+	        String url = new StringBufferWrapper().append("http://").append(serverip).append(":").append(port).append("/action/encrypt_authcode").toString();
+	        
+	        System.out.println(url);
+	        HttpPost httpPost = new HttpPost(url);
+	        List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+	        formparams.add(new BasicNameValuePair("type", "run"));
+	        formparams.add(new BasicNameValuePair("sn", entity.getDeviceId()));
+	        formparams.add(new BasicNameValuePair("data", entity.getContent()));
+	        
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+	        
+	        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+	        httpPost.setConfig(requestConfig);
+	        
+			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			String authcode = jsonObject.getString("authcode");
+			String authcode_len = jsonObject.getString("authcode_len");
+			if(!"0".equals(result)){
+				throw new HttpGadgetEncryptionException(serverip, port.toString(), errormsg);
+			}
+			
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetEncryptionException(serverip, port.toString(), String.valueOf(code));
+			}
+			encryption.put("authcode", authcode);
+			encryption.put("authcode_len", authcode_len);
+			return encryption;
+			
+		} finally {
+			if(client != null) client.close();
+		}
+	}
 	
 }

@@ -26,6 +26,19 @@ public class DatabaseVO extends AbstractBaseVO<DatabaseVO, DatabasePO>{
 	
 	/** 服务器id */
 	private Long serverId;
+	
+	/** 路径 */
+	private String path;
+	
+
+	public String getPath() {
+		return path;
+	}
+
+	public DatabaseVO setPath(String path) {
+		this.path = path;
+		return this;
+	}
 
 	public Long getId() {
 		return id;
@@ -98,7 +111,8 @@ public class DatabaseVO extends AbstractBaseVO<DatabaseVO, DatabasePO>{
 			.setDatabaseName(entity.getDatabaseName())
 			.setUsername(entity.getUsername())
 			.setPassword(entity.getPassword())
-			.setServerId(entity.getServerId());
+			.setServerId(entity.getServerId())
+			.setPath(entity.getPath());
 		return this;
 	}
 }

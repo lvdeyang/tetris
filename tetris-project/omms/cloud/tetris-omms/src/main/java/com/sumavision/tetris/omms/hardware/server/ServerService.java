@@ -1,15 +1,24 @@
 package com.sumavision.tetris.omms.hardware.server;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -39,9 +48,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.omms.auth.AuthPO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseService;
 import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
@@ -51,11 +60,17 @@ import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataD
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
+import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.FtpCreateFolderFailException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetEncyptAuthcodeException;
+import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetEquipmentIdentificationCodeException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetModifyIniException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ServerService {
+	
+	public static final String RELATIVE_FOLDER = "auth";
 
 	@Autowired
 	private ServerDAO serverDao;
@@ -74,6 +89,9 @@ public class ServerService {
 	
 	@Autowired
 	private DatabaseDAO databaseDAO;
+	
+	@Autowired
+	private DatabaseService databaseService;
 	
 	/**
 	 * 添加一个服务器<br/>
@@ -504,14 +522,146 @@ public class ServerService {
 	}
 	
 	
-	public ServerVO importAuth(long id,FileItem authFile) throws IOException{
+	/**
+	 * 上传并解密授权信息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月17日 下午1:11:48
+	 * @param id 服务id
+	 * @param authFile 授权文件
+	 * @return
+	 */
+	public ServerVO importAuth(long id,FileItem authFile) throws Exception{
 
+		CloseableHttpClient client = null;
+		String name = authFile.getName();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(authFile.getInputStream()));
-		reader.readLine();
+		//reader.readLine();
 		//对接小工具下发授权并修改设备授权状态
-		return new ServerVO();
+		ServerPO server = serverDao.findOne(id);
+		
+		databaseService.enableFtp(id);
+		
+		Boolean upload = ftpupload(
+				server.getIp(), 
+				Integer.parseInt(server.getFtpPort()), 
+				server.getFtpUsername(), 
+				server.getFtpPassword(),
+				new StringBufferWrapper().append("/").append(RELATIVE_FOLDER).append("/").toString(), 
+				name, 
+				reader);
+		if (upload) {
+			StringBufferWrapper runprocess = new StringBufferWrapper();
+			try{
+				
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+		        client = HttpClients.custom()
+				        		    .setDefaultCredentialsProvider(credsProvider)
+				        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+				        		    .build();
+				String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/decrypt_authcode").toString();
+				System.out.println(url);
+				HttpPost httpPost = new HttpPost(url);
+				
+				List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+				formparams.add(new BasicNameValuePair("type", "run"));  
+				httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+				
+				RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+	            httpPost.setConfig(requestConfig);
+				
+				CloseableHttpResponse response = client.execute(httpPost);
+				
+				// 解析小工具HTTP返回结果并提示异常信息
+				HttpEntity httpEntity = response.getEntity();
+				InputStream content = httpEntity.getContent();
+				byte[] byteArr = new byte[content.available()];
+				content.read(byteArr);
+				String str = new String(byteArr);
+				JSONObject jsonObject = JSON.parseObject(str);
+				String result = jsonObject.getString("result");
+				String errormsg = jsonObject.getString("errormsg");
+				
+				if(!"0".equals(result)){
+					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), errormsg);
+				}
+				
+				int code = response.getStatusLine().getStatusCode();
+				if(code != 200){
+					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				}
+//				JSONObject auth = jsonObject.getJSONObject("auth");
+//				JSONObject bvcbusiness = auth.getJSONObject("bvc");
+//				JSONObject transSystem = auth.getJSONObject("transSystem");
+//				JSONObject mediaTransform = auth.getJSONObject("mediaTransform");
+//				JSONObject jv210Joiner = auth.getJSONObject("jv210Joiner");
+//				String bvcsup = bvcbusiness.getString("support");
+//				String transSystemsup = transSystem.getString("support");
+//				String jv210Joinersup = jv210Joiner.getString("support");
+//				if (bvcsup.equals("true")) {
+//					runprocess.append(" ").append("bvc进程名");
+//				}
+//				if (transSystemsup.equals("true")) {
+//					runprocess.append(" ").append("转码进程名");
+//				}
+//				//资源保存接入设备限制
+//				if (jv210Joinersup.equals("true")) {
+//					String serverNum = jv210Joiner.getString("serverNum");
+//					String cdnNum = jv210Joiner.getString("cdnNum");
+//					String screenNum = jv210Joiner.getString("screenNum");
+//					vedioCapacityService.setBundleCapacity(Long.valueOf(serverNum), Long.valueOf(cdnNum), Long.valueOf(screenNum));
+//				}
+			}finally{
+				if(client != null) client.close();
+			}
+//			CloseableHttpClient reclient = null;
+//			try{
+//				
+//				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+//				AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+//		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+//		        reclient = HttpClients.custom()
+//				        		    .setDefaultCredentialsProvider(credsProvider)
+//				        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+//				        		    .build();
+//				String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/decrypt_authcode").toString();
+//				System.out.println(url);
+//				HttpPost httpPost = new HttpPost(url);
+//				
+//				List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+//				formparams.add(new BasicNameValuePair("run", runprocess.toString()));  
+//				httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+//				
+//				RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+//	            httpPost.setConfig(requestConfig);
+//				
+//				CloseableHttpResponse response = reclient.execute(httpPost);
+//				
+//				// 解析小工具HTTP返回结果并提示异常信息
+//				HttpEntity httpEntity = response.getEntity();
+//				InputStream content = httpEntity.getContent();
+//				byte[] byteArr = new byte[content.available()];
+//				content.read(byteArr);
+//				String str = new String(byteArr);
+//				JSONObject jsonObject = JSON.parseObject(str);
+//				String result = jsonObject.getString("result");
+//				String errormsg = jsonObject.getString("errormsg");
+//				if(!"0".equals(result)){
+//					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), errormsg);
+//				}
+//				
+//				int code = response.getStatusLine().getStatusCode();
+//				if(code != 200){
+//					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+//				}
+//			}finally{
+//				if(reclient != null) reclient.close();
+//			}
+		}
+		return new ServerVO().set(server);
 	}
-	
 	
 	/**
 	 * 
@@ -526,7 +676,7 @@ public class ServerService {
 	 * @param password 密码
 	 * @throws Exception 
 	 */
-	public DatabaseVO addDatabase(Long serverId, String databasePort, String databaseName, String username, String password) throws Exception{
+	public DatabaseVO addDatabase(Long serverId, String databaseIp, String databasePort, String databaseName, String username, String password) throws Exception{
 		ServerPO server = serverDao.findOne(serverId);
 		DatabasePO database = new DatabasePO();
 		database.setServerId(serverId);
@@ -537,5 +687,208 @@ public class ServerService {
 		database.setPassword(password);
 		databaseDAO.save(database);
 		return new DatabaseVO().set(database);
+	}
+
+	/**
+	 * 获取设备唯一标识<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月16日 上午10:34:58
+	 * @param id 服务器id
+	 * @return String 设备标识
+	 */
+	public String exportDeviceid(Long id) throws Exception{
+		CloseableHttpClient client = null;
+		try{
+			ServerPO server = serverDao.findOne(id);
+			
+			JSONArray params = new JSONArray();
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/get_device_id").toString();
+			System.out.println(url);
+			HttpPost httpPost = new HttpPost(url);
+			
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+			formparams.add(new BasicNameValuePair("params", params.toJSONString()));  
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+            httpPost.setConfig(requestConfig);
+			
+			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String sn = jsonObject.getString("sn");
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetEquipmentIdentificationCodeException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetEquipmentIdentificationCodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}
+			return sn;
+		}finally{
+			if(client != null) client.close();
+		}
+	}
+	
+	@Transactional
+	public boolean uploadFile(String url,int port,String username, String password, String path, String filename, String inputPath) throws Exception{
+		boolean success = false;
+		FTPClient ftp = new FTPClient();
+		FileInputStream fin = null;
+		BufferedInputStream in = null;
+		OutputStream out = null;
+		
+		try {
+			int reply;
+			ftp.connect(url, port);//连接FTP服务器
+			ftp.login(username, password);//登录
+			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+			ftp.enterLocalPassiveMode();
+			ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+			ftp.setControlEncoding("utf-8");
+			ftp.setBufferSize(1024*1024*10);
+			reply = ftp.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				ftp.disconnect();
+				return success;
+			}
+			File file = new File(inputPath);
+			long total = file.length();
+			int lastBuffSize = 0;
+			long buffLoopTimes = 0;
+			int buffSize = ftp.getBufferSize();
+			if(buffSize >= total){
+				lastBuffSize = (int)total;
+			}else{
+				buffLoopTimes = (long)(total/buffSize);
+				lastBuffSize = (int)(total - buffSize * buffLoopTimes);
+			}
+			byte[] buff = new byte[buffSize];
+			byte[] lastBuff = new byte[lastBuffSize];
+			
+			fin = new FileInputStream(file);
+			in = new BufferedInputStream(fin);
+			String str = path + filename;
+			out = ftp.storeFileStream(new String(str.getBytes("utf-8"), "iso-8859-1"));
+			for(int i = 0; i < buffLoopTimes; i++){
+				in.read(buff);
+				out.write(buff);
+			}
+			if(lastBuffSize > 0){
+				in.read(lastBuff);
+				out.write(lastBuff);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {out.close();} catch (IOException e) {e.printStackTrace();}
+			try {in.close();} catch (IOException e) {e.printStackTrace();}
+			try {fin.close();} catch (IOException e) {e.printStackTrace();}
+			if (ftp.isConnected()) {
+				try {ftp.logout();ftp.disconnect();} catch (IOException ioe) {}
+			}
+		}
+		return success;
+	}
+	
+	/**
+	 * 上传授权信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月21日 上午8:06:47
+	 * @param url
+	 * @param port
+	 * @param username
+	 * @param password
+	 * @param path
+	 * @param filename
+	 * @param reader
+	 * @return
+	 * @throws Exception
+	 */
+	public Boolean ftpupload(String url,int port,String username, String password, String path, String filename, BufferedReader reader)throws Exception{
+		
+		boolean success = false;
+		FTPClient ftp = new FTPClient();
+		BufferedReader br = reader;
+		BufferedReader in = null;
+		OutputStream out = null;
+		BufferedWriter bw = null;
+		
+		try {
+			int reply;
+			ftp.connect(url, port);//连接FTP服务器
+			ftp.login(username, password);//登录
+			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+			ftp.enterLocalPassiveMode();
+			ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+			ftp.setControlEncoding("utf-8");
+			ftp.setBufferSize(1024*1024*10);
+			boolean changeResult = ftp.changeWorkingDirectory(encodeFtpText(RELATIVE_FOLDER));
+			if(!changeResult){
+				boolean mdResult = ftp.makeDirectory(encodeFtpText(RELATIVE_FOLDER));
+				if(!mdResult){
+					throw new FtpCreateFolderFailException(url, String.valueOf(port), RELATIVE_FOLDER);
+				}
+				changeResult = ftp.changeWorkingDirectory(encodeFtpText(RELATIVE_FOLDER));
+				if(!changeResult){
+					throw new FtpChangeFolderFailException(url, String.valueOf(port), RELATIVE_FOLDER);
+				}
+			}
+			reply = ftp.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				ftp.disconnect();
+				return success;
+			}
+			String str = path + filename;
+			out = ftp.storeFileStream(new String(str.getBytes("utf-8"), "iso-8859-1"));
+			
+			int ch = 0;
+			while ((ch = br.read()) != -1) {
+				out.write(ch);
+			 }
+			
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				bw.write(line);
+				bw.newLine();
+				bw.flush();
+			}
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {out.close();} catch (IOException e) {e.printStackTrace();}
+			try {br.close();} catch (IOException e) {e.printStackTrace();}
+			if (ftp.isConnected()) {
+				try {ftp.logout();ftp.disconnect();} catch (IOException ioe) {}
+			}
+		}
+		return success;
+	}
+	
+	private String encodeFtpText(String text) throws Exception{
+		return new String(text.getBytes("utf-8"), "iso-8859-1");
 	}
 }

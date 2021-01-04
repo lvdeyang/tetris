@@ -18,12 +18,16 @@
                             :row-key="rowKey"
                             style="width:100%">
                         <el-table-column
-                                label="数据库端口"
-                                prop="databasePort">
-                        </el-table-column>
-                        <el-table-column
                                 label="数据库名称"
                                 prop="databaseName">
+                        </el-table-column>
+                        <el-table-column
+                                label="数据库ip"
+                                prop="databaseIP">
+                        </el-table-column>
+                        <el-table-column
+                                label="数据库端口"
+                                prop="databasePort">
                         </el-table-column>
                         <el-table-column
                                 label="用户名"
@@ -40,6 +44,12 @@
                                 <el-tooltip class="item" effect="dark" content="删除数据库" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:3px;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="备份数据库" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-document" style="font-size:20px; padding:0; margin-left:3px;" @click="handleRowBackup(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="数据库备份管理" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-printer" style="font-size:20px; padding:0; margin-left:3px;" @click="gotoDatabasesBackup(scope)"></el-button>
+                                </el-tooltip>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -55,11 +65,14 @@
                 width="450px"
                 :before-close="handleAddDatabaseClose">
             <el-form label-width="80px">
-                <el-form-item label="端口">
-                    <el-input v-model="dialog.database.databasePort"></el-input>
-                </el-form-item>
                 <el-form-item label="名称">
                     <el-input v-model="dialog.database.databaseName"></el-input>
+                </el-form-item>
+                <!--<el-form-item label="数据库ip">-->
+                    <!--<el-input v-model="dialog.database.databaseIp"></el-input>-->
+                <!--</el-form-item>-->
+                <el-form-item label="端口">
+                    <el-input v-model="dialog.database.databasePort"></el-input>
                 </el-form-item>
                 <el-form-item label="用户名">
                     <el-input v-model="dialog.database.username"></el-input>
@@ -72,6 +85,48 @@
                 <el-button size="medium" @click="handleAddDatabaseClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleAddDatabaseSubmit">确定</el-button>
             </span>
+        </el-dialog>
+
+        <el-dialog
+                title="请选择需要备份的数据库"
+                :visible.sync="dialog.backup.visible"
+                width="450px"
+                high="500px"
+                :before-close="backupDatabaseClose">
+
+            <el-checkbox-group  v-model="zz" format="changeStyle">
+                <div>
+                    <el-checkbox
+                            v-for="item in hardwareListData"
+                            :key="item.id"
+                            :label="item.id"
+                            @change=" handleChange($event,item.id)">{{item.realName}}</el-checkbox>
+                </div>
+            </el-checkbox-group>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="backupDatabaseClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleBackupDatabaseSubmit">备份</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="编写备份数据库信息"
+                :visible.sync="dialog.backupMessage.visible"
+                width="450px"
+                :before-close="handleBackupMessageClose">
+                <el-form label-width="80px">
+                    <el-form-item label="备份名称">
+                        <el-input v-model="dialog.backupMessage.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备份说明" type="txt">
+                        <el-input v-model="dialog.backupMessage.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button size="medium" @click="handleBackupMessageClose">取消</el-button>
+                        <el-button size="medium" type="primary" @click="handleBackupMessageSubmit">确定</el-button>
+                    </span>
         </el-dialog>
     </template>
 

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.controller.ControllerBase;
@@ -819,7 +820,9 @@ public class OutlandService extends ControllerBase{
 				//children.add(folderNodeVO);
 			}
 
-			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+			if(null != children && !children.isEmpty()){
+				Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+			}
 
 			// 添加子bundle节点
 //			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
@@ -869,6 +872,7 @@ public class OutlandService extends ControllerBase{
 		bundlePrivilege.setName(po.getBundleName());
 		bundlePrivilege.setUsername(po.getUsername());
 		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
+		bundlePrivilege.setOnlineStatus(po.getOnlineStatus()==null ? ONLINE_STATUS.OFFLINE:po.getOnlineStatus());
 		return bundlePrivilege;
 	}
 	

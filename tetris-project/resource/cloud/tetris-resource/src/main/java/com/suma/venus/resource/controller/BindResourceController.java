@@ -16,6 +16,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.format.PointFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +50,7 @@ import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
 import com.suma.venus.resource.lianwang.auth.DevAuthXml;
 import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -98,9 +100,6 @@ public class BindResourceController extends ControllerBase {
 
 	@Autowired
 	private VirtualResourceService virtualResourceService;
-
-	@Autowired
-	private UserQueryFeign userFeign;
 
 	@Autowired
 	private AuthXmlUtil authXmlUtil;
@@ -351,6 +350,16 @@ public class BindResourceController extends ControllerBase {
 		Set<String> bundleIds = bundleService.queryBundleSetByMultiParams(deviceModel, null, keyword, folderId);
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
+		}else{
+			//过滤外域的设备
+			Set<String> externalBundle = new HashSet<String>();
+			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
+			for(BundlePO bundlePO:bundlePOs){
+				if(bundlePO.getSourceType().equals(SOURCE_TYPE.EXTERNAL)){
+					externalBundle.add(bundlePO.getBundleId());
+				}
+			}
+			bundleIds.removeAll(externalBundle);
 		}
 
 //		ResourceIdListBO bindResourceIdBO = userFeign.queryResourceByRoleId(roleId);
@@ -1498,6 +1507,7 @@ public class BindResourceController extends ControllerBase {
 		bundlePrivilege.setName(po.getBundleName());
 		bundlePrivilege.setUsername(po.getUsername());
 		bundlePrivilege.setCodec(po.getCoderType()==null?null:po.getCoderType().toString());
+		bundlePrivilege.setOnlineStatus(po.getOnlineStatus()==null ? ONLINE_STATUS.OFFLINE:po.getOnlineStatus());
 		return bundlePrivilege;
 	}
 
