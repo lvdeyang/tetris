@@ -3,6 +3,7 @@ package com.sumavision.bvc.device.monitor.live.device;
 import java.util.List;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +23,7 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/stop/live/device/by/delete", method = RequestMethod.POST)
 	public JSONObject stopLiveDevice(
-			@RequestParam(value="ids") String ids) throws Exception;
+			@RequestBody String ids) throws Exception;
 	
 	/**
 	 * 失去权限后停止转发<br/>
@@ -33,7 +34,7 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/stop/live/by/lose/privilege", method = RequestMethod.POST)
 	public JSONObject stopLiveByLosePrivilege(
-			@RequestParam(value="userBundleBoList") String userBundleBoList) throws Exception;
+			@RequestBody String userBundleBoList) throws Exception;
 	
 	/**
 	 * 重置设备<br/>
@@ -44,5 +45,5 @@ public interface MonitorLiveDeviceFeign {
 	 */
 	@RequestMapping(value="/monitor/live/reset/bundles", method = RequestMethod.POST)
 	public JSONObject resetBundles(
-			@RequestParam(value="bundleIds")String bundleIds) throws Exception;
+			@RequestBody String bundleIds) throws Exception;
 }
