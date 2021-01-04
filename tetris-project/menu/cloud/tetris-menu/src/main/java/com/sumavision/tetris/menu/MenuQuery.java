@@ -70,7 +70,15 @@ public class MenuQuery {
 			String xmlString = memoryQuery.findAll();
 			for (MenuPO menuPO : menus) {
 				if(menuPO.getLink() == null) continue;
-				String appName = menuPO.getLink().split("//")[1].split("/")[0];
+				String[] applink = menuPO.getLink().split("//");
+				if (applink.length < 2) {
+					continue;
+				}
+				String[] applinkString = applink[1].split("/");
+				if (applinkString.length<1) {
+					continue;
+				}
+				String appName = applinkString[0];
 				
 				XMLReader reader = new XMLReader(xmlString);
 				List<Node> nodes = reader.readNodeList("applications.application");

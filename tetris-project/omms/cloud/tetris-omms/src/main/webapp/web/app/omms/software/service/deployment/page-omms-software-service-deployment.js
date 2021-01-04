@@ -119,7 +119,7 @@ define([
                         visible:false,
                         databaseIP:"",
                         databasePort:"",
-                        ipAndPort:""
+                        ipAndPort:''
                     },
                 }
 
@@ -187,6 +187,7 @@ define([
                 },
                 handleSelectInstallationPackageSubmit:function(){
                     var self = this;
+                    var handleQuery = false;
                     if(self.dialog.selectInstallationPackage.tree.current &&
                         self.dialog.selectInstallationPackage.list.current){
                         self.dialog.step.visible = true;
@@ -210,7 +211,8 @@ define([
                                     self.dialog.step.currentDeployment = data;
                                     if(self.dialog.step.currentDeployment.error){
                                         clearInterval(self.dialog.step.interval);
-                                    }else if(self.dialog.step.currentDeployment.step == 'CONFIG'){
+                                    }else if(self.dialog.step.currentDeployment.step == 'CONFIG' && !handleQuery){
+                                        handleQuery = true;
                                         clearInterval(self.dialog.step.interval);
                                         self.dialog.step.properties.splice(0, self.dialog.step.properties.length);
                                         ajax.post('/properties/find/by/installation/package/id', {
@@ -223,14 +225,19 @@ define([
                                                 for(var i=0; i<data.length; i++){
                                                     data[i].value = data[i].propertyDefaultValue;
                                                     if(data[i].valueType === 'DBPORT'){
-                                                        self.dialog.step.ipAndPortSelect.push(data[i]);
+                                                        ajax.post('/service/deployment/database/IpAndPort',null,function(dataq){
+                                                            self.dialog.step.ipAndPortSelect.splice(0, self.dialog.step.ipAndPortSelect.length);
+                                                            for(var j = 0;j<dataq.length;j++){
+                                                                self.dialog.step.ipAndPortSelect.push(dataq[j]);
+                                                            }
+                                                            if(self.dialog.step.ipAndPortSelect.length > 0){
+                                                                self.dialog.database.ipAndPort = self.dialog.step.ipAndPortSelect[0];
+                                                            }
+                                                        })
                                                     }else{
                                                         if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                                         self.dialog.step.properties.push(data[i]);
                                                     }
-                                                }
-                                                if(self.dialog.step.ipAndPortSelect.length > 0){
-                                                    self.dialog.database.ipAndPort = self.dialog.step.ipAndPortSelect[0].propertyDefaultValue;
                                                 }
                                             }
                                         });
@@ -457,7 +464,22 @@ define([
                 handleSelectBackupClick:function(scope){
                     var self = this;
                     var row = scope.row;
-                    ajax.post('/service/deployment/restore',{ backupId:row.id }, function(data, status, message){
+                    ajax.post('/service/deployment/restore',
+                        {
+                            backupId:row.id,
+                            database:false
+                        }, function(data, status, message){
+                        self.dialog.backups.visible = false;
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                handleSelectBackupClickWithDatabase:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/service/deployment/restore',
+                        {
+                            backupId:row.id,
+                            database:true
+                        }, function(data, status, message){
                         self.dialog.backups.visible = false;
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
@@ -524,14 +546,21 @@ define([
                                             for(var i=0; i<data.length; i++){
                                                 //data[i].value = data[i].propertyDefaultValue;
                                                 if(data[i].valueType === 'DBPORT'){
+                                                    self.dialog.step.ipAndPortSelect.splice(0, self.dialog.step.ipAndPortSelect.length);
                                                     self.dialog.updateStep.ipAndPortSelect.push(data[i]);
+                                                    self.dialog.database.ipAndPort = self.dialog.updateStep.ipAndPortSelect[0];
+                                                    ajax.post('/service/deployment/database/IpAndPort',null,function(dataq){
+                                                        for(var j = 0;j<dataq.length;j++){
+                                                            self.dialog.updateStep.ipAndPortSelect.push(dataq[j]);
+                                                        }
+                                                        //if(self.dialog.updateStep.ipAndPortSelect.length > 0){
+                                                        //    self.dialog.database.ipAndPort = self.dialog.updateStep.ipAndPortSelect[0];
+                                                        //}
+                                                    })
                                                 }else{
                                                     if(data[i].valueSelect) data[i].valueSelect = $.parseJSON(data[i].valueSelect);
                                                     self.dialog.updateStep.properties.push(data[i]);
                                                 }
-                                            }
-                                            if(self.dialog.updateStep.ipAndPortSelect.length > 0){
-                                            self.dialog.database.ipAndPort = self.dialog.updateStep.ipAndPortSelect[0].propertyDefaultValue;
                                             }
                                         }
                                     });
@@ -682,6 +711,12 @@ define([
                 },
                 databaseRestore:function(p){
                     var self = this;
+                },
+                selectDatabase:function(){
+                    var self = this;
+                    ajax.post('/service/deployment/database/IpAndPort',null,function(data){
+                        self.dialog.database.ipAndPort.push(data)
+                    })
                 }
             },
             mounted:function(){

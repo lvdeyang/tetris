@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -61,6 +62,18 @@ public class BackupInformationPO extends AbstractBasePO{
 	
 	/** 配置信息 */
 	private String config;
+	
+	/** 备份的数据库id */
+	private Long databaseBackupId;
+
+	@Column(name = "DATABASE_BACKUP_ID")
+	public Long getDatabaseBackupId() {
+		return databaseBackupId;
+	}
+
+	public void setDatabaseBackupId(Long databaseBackupId) {
+		this.databaseBackupId = databaseBackupId;
+	}
 
 	@Column(name = "SERVER_ID")
 	public Long getServerId() {

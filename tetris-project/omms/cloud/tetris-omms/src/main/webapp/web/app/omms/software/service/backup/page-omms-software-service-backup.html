@@ -60,9 +60,16 @@
         <el-dialog
                 title="添加备份"
                 :visible.sync="dialog.addBackupVisible"
-                width="500px"
+                width="600px"
                 :before-close="handleAddBackupClose">
             <el-form label-width="80px">
+                <el-form-item>
+                    <el-switch
+                            v-model="dialog.value"
+                            active-text="备份数据库"
+                            inactive-text="不备份数据库">
+                    </el-switch>
+                </el-form-item>
                 <el-form-item label="添加备注">
                     <el-input
                             type="textarea"

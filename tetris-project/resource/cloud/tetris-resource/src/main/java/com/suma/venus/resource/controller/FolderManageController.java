@@ -28,6 +28,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.bouncycastle.crypto.signers.DSADigestSigner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -670,7 +671,7 @@ public class FolderManageController extends ControllerBase {
 	
 	@RequestMapping(value = "/initTreeWithOutMember", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> initAllTreeWithOutMember() {
+	public Map<String, Object> initAllTreeWithOutMember(String sourceType) {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<FolderPO> rootFolders = folderService.findByParentPath(null);
@@ -678,7 +679,21 @@ public class FolderManageController extends ControllerBase {
 				data.put(ERRMSG, "数据库错误：不存在根节点");
 				return data;
 			}
+			List<FolderPO> anotherFolderPOs = new ArrayList<FolderPO>();
+			if(null != sourceType && !"".equals(sourceType)){
+				SOURCE_TYPE souType = BundlePO.SOURCE_TYPE.fromName(sourceType);
+				for (FolderPO folderPO : rootFolders) {
+					if(!folderPO.getSourceType().equals(souType)){
+						anotherFolderPOs.add(folderPO);
+					}
+				}
+			}
 //			FolderPO rootFolderPO = rootFolders.get(0);
+			rootFolders.removeAll(anotherFolderPOs);
+			if (rootFolders.isEmpty()) {
+				data.put(ERRMSG, "数据库错误：不存在根节点");
+				return data;
+			}
 			List<FolderTreeVO> tree = new LinkedList<FolderTreeVO>();
 			for (FolderPO rootFolderPO : rootFolders) {
 				FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);

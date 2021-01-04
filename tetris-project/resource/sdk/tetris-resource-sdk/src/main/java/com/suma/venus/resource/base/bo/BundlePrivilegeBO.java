@@ -1,5 +1,8 @@
 package com.suma.venus.resource.base.bo;
 
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+
 public class BundlePrivilegeBO {
 	
 	private Long id;
@@ -34,6 +37,16 @@ public class BundlePrivilegeBO {
 	
 	private boolean canLocalReadPrivilege = false;
 	
+	private ONLINE_STATUS onlineStatus;
+	
+	public ONLINE_STATUS getOnlineStatus() {
+		return onlineStatus;
+	}
+
+	public void setOnlineStatus(ONLINE_STATUS onlineStatus) {
+		this.onlineStatus = onlineStatus;
+	}
+
 	public boolean isCanReadPrivilege() {
 		return canReadPrivilege;
 	}

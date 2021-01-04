@@ -237,13 +237,14 @@ public class ServerController {
 	@RequestMapping(value = "/addDatabase")
 	public Object addDatabase(
 			Long serverId,  
+			String databaseIp,
 			String databasePort, 
 			String databaseName,
 			String username, 
 			String password,
 			HttpServletRequest request) throws Exception{
 		
-		return serverService.addDatabase(serverId, databasePort, databaseName, username, password);
+		return serverService.addDatabase(serverId, databaseIp, databasePort, databaseName, username, password);
 		
 	}
 	
@@ -275,10 +276,20 @@ public class ServerController {
 		return serverService.importAuth(id, authFile);
 	}
 	
+	/**
+	 * 获取设备唯一标识<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月16日 上午10:50:18
+	 * @param id 服务器id
+	 * @param request 
+	 * @return deviceId.ini 设备标识文件
+	 */
 	@RequestMapping(value = "/export/{id}")
 	public ResponseEntity<byte[]> handleExport(@PathVariable Long id,HttpServletRequest request) throws Exception{
-		String deviceId="xydkk09033kkkdadcccxsd0993d";
+		//String deviceId="xydkk09033kkkdadcccxsd0993d";
 		//对接小工具获取设备唯一标识
+		String deviceId = serverService.exportDeviceid(id);
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-type", new MediaType(MediaType.TEXT_PLAIN, Charset.forName("utf-8")).toString());
         headers.add("Content-Disposition", "attchement;filename=auth("+deviceId+").csv");

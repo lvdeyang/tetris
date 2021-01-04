@@ -88,8 +88,8 @@
                                     <el-button v-if="scope.row.status === '已安装'" type="text" icon="feather-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="deleteDeploymentData(scope)" disabled></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="卸载部署" placement="bottom-end">
-                                    <el-button v-if="scope.row.status === '已安装'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)"></el-button>
-                                    <el-button v-if="scope.row.status === '已卸载'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)" disabled></el-button>
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)"></el-button>
+                                    <!--<el-button v-if="scope.row.status === '已卸载'" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDelete(scope)" disabled></el-button>-->
                                 </el-tooltip>
                             </template>
                         </el-table-column>
@@ -196,7 +196,7 @@
                                 <el-form label-position="top" label-width="300px">
                                     <el-form-item v-if="dialog.step.ipAndPortSelect.length !== 0" label="数据库IP和端口" style="margin-right: 20px">
                                         <el-select v-model="dialog.database.ipAndPort" style="width:100%;">
-                                            <el-option v-for="item in dialog.step.ipAndPortSelect" :label="item.propertyDefaultValue" :value="item.propertyDefaultValue" :key="item.propertyDefaultValue"></el-option>
+                                            <el-option v-for="(item,i) in dialog.step.ipAndPortSelect" :label="item" :value="item" :key="i"></el-option>
                                         </el-select>
                                         <!--<el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>-->
                                     </el-form-item>
@@ -242,15 +242,16 @@
         <el-dialog
                 title="选择备份"
                 :visible.sync="dialog.backups.visible"
-                width="600px"
+                width="650px"
                 :before-close="handleSelectBackupClose">
 
             <el-table :data="dialog.backups.backupData" border style="width: 100%">
                 <el-table-column fixed prop = "backupTime" label="备份时间" width="200px"></el-table-column>
                 <el-table-column fixed prop = "notes" label="备注信息" width="200px"></el-table-column>
-                <el-table-column fixed="right" label="操作" width="100px">
+                <el-table-column fixed="right" label="操作" width="150px">
                     <template slot-scope="scope">
                         <el-button @click="handleSelectBackupClick(scope)" type="text" size="small">恢复</el-button>
+                        <el-button @click="handleSelectBackupClickWithDatabase(scope)" type="text" size="small">同时恢复数据库</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -312,9 +313,8 @@
                                 <el-form label-position="top" label-width="300px">
                                     <el-form-item v-if="dialog.updateStep.ipAndPortSelect.length !== 0" label="数据库IP和端口" style="margin-right: 20px">
                                         <el-select v-model="dialog.database.ipAndPort" style="width:100%;">
-                                            <el-option v-for="item in dialog.updateStep.ipAndPortSelect" :label="item.propertyDefaultValue" :value="item.propertyDefaultValue" :key="item.propertyDefaultValue"></el-option>
+                                            <el-option v-for="(item,i) in dialog.updateStep.ipAndPortSelect" :label="item" :value="item" :key="i"></el-option>
                                         </el-select>
-                                        <!--<el-input v-model="dialog.database.ipAndPort" placeholder="请选择" @focus="selectDatabase"></el-input>-->
                                     </el-form-item>
                                 </el-form>
                             </el-col>
