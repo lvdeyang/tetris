@@ -50,6 +50,7 @@ public class BundleHeartBeatService {
 	}
 
 	public void removeBundleStatus(String bundle_ip) {
+		if(bundle_ip==null || "".equals(bundle_ip)) return;
 		LOGGER.info("remove heartBeat， bundle_ip=" + bundle_ip);
 
 		bunldeStatusMap.remove(bundle_ip);
@@ -74,7 +75,7 @@ public class BundleHeartBeatService {
 	}
 
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
-
+		if(bundle_ip==null || "".equals(bundle_ip)) return;
 		boolean threadFlag = false;
 
 		if (bunldeStatusMap.size() == 0) {
