@@ -157,10 +157,18 @@ public class InitApplication implements ApplicationRunner {
 
     }
 
+    /**
+     * @MethodName: initSqlData
+     * @Description: TODO 初始化数据库数据
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/1/5 10:08
+     **/
     public void initSqlData(){
         initBackupCondition();
         initNetGroup();
         initDeviceGroup();
+        initDevices();
     }
 
     /**
@@ -199,16 +207,23 @@ public class InitApplication implements ApplicationRunner {
         }
     }
 
-
     public void initDeviceGroup(){
-        List<DeviceGroupPO> all = deviceGroupDao.findAll();
-        if (all==null || all.isEmpty()){
-            DeviceGroupPO deviceGroupPO = new DeviceGroupPO();
+        DeviceGroupPO deviceGroupPO = deviceGroupDao.findByBeDefault(true);
+        if (deviceGroupPO==null){
+            deviceGroupPO = new DeviceGroupPO();
             deviceGroupPO.setName("默认分组");
             deviceGroupPO.setUpdateTime(new Date());
             deviceGroupPO.setBackupStrategy(BackupStrategy.NPLUSM);
             deviceGroupPO.setAutoBackupFlag(true);
+            deviceGroupPO.setBeDefault(true);
             deviceGroupDao.save(deviceGroupPO);
+        }
+    }
+
+    public void initDevices(){
+        List<DevicePO> all = deviceDao.findAll();
+        if (all==null || all.isEmpty()){
+            DeviceGroupPO defaultGroup = deviceGroupDao.findByBeDefault(true);
             try {
                 List<BundleFeignVO> bundles = bundleFeignService.queryTranscodeDevice();
                 if (bundles==null || bundles.isEmpty()){
@@ -225,7 +240,7 @@ public class InitApplication implements ApplicationRunner {
                 for (String key: deviceMap.keySet()) {
                     BundleFeignVO bundle = deviceMap.get(key);
                     DevicePO devicePO = new DevicePO();
-                    devicePO.setDeviceGroupId(deviceGroupPO.getId());
+                    devicePO.setDeviceGroupId(defaultGroup.getId());
                     devicePO.setDeviceIp(bundle.getDeviceIp());
                     devicePO.setDevicePort(bundle.getDevicePort());
                     devicePO.setName(bundle.getBundle_name());
@@ -234,9 +249,15 @@ public class InitApplication implements ApplicationRunner {
                     devicePO.setFunUnitStatus(bundle.getBundle_status().equals("ONLINE")? FunUnitStatus.NORMAL:FunUnitStatus.OFF_LINE);
                     deviceDao.save(devicePO);
                     try {
+                        //尝试设置告警地址
+                        alarmService.setAlarmUrl(devicePO.getDeviceIp());
+                    } catch (Exception e) {
+                        LOGGER.error("告警地址设置失败",e);
+                    }
+                    try {
                         deviceService.setNetCardsForDevice(devicePO);//有可能获取网卡信息失败
                     } catch (BaseException e) {
-                        e.printStackTrace();
+                        LOGGER.warn("网卡信息获取失败",e);
                     }
                 }
             } catch (Exception e) {
@@ -244,27 +265,20 @@ public class InitApplication implements ApplicationRunner {
             }
         }else{
             //同步设备信息
-            for (int i = 0; i < all.size(); i++) {
-                DeviceGroupPO deviceGroupPO = all.get(i);
-                List<DevicePO> devices = deviceDao.findByDeviceGroupId(deviceGroupPO.getId());
-                if (devices!=null && !devices.isEmpty()){
+            for (int j = 0; j < all.size(); j++) {
+                DevicePO devicePO = all.get(j);
+                if (devicePO.getBundleId()==null){
                     continue;
                 }
-                for (int j = 0; j < devices.size(); j++) {
-                    DevicePO devicePO = devices.get(j);
-                    if (devicePO.getBundleId()==null){
-                        continue;
+                try {
+                    BundleFeignVO bundle = bundleFeignService.queryDeviceByBundleId(devicePO.getBundleId());
+                    if ("OFF_LINE".equals(bundle.getBundle_status())) {
+                        deviceDao.updateFunUnitStatusById(FunUnitStatus.OFF_LINE,devicePO.getId());
+                    } else if ("ONLINE".equals(bundle.getBundle_status())&& !FunUnitStatus.NORMAL.equals(devicePO.getFunUnitStatus())) {
+                        syncService.syncTransform(devicePO.getDeviceIp());
                     }
-                    try {
-                        BundleFeignVO bundle = bundleFeignService.queryDeviceByBundleId(devicePO.getBundleId());
-                        if ("OFF_LINE".equals(bundle.getBundle_status())) {
-                            deviceDao.updateFunUnitStatusById(FunUnitStatus.OFF_LINE,devicePO.getId());
-                        } else if ("ONLINE".equals(bundle.getBundle_status())&& !FunUnitStatus.NORMAL.equals(devicePO.getFunUnitStatus())) {
-                            syncService.syncTransform(devicePO.getDeviceIp());
-                        }
-                    } catch (Exception e) {
-                        LOGGER.info("device cannot find from resource service, "+devicePO.getId(),e);
-                    }
+                } catch (Exception e) {
+                    LOGGER.info("device cannot find from resource service, "+devicePO.getId(),e);
                 }
             }
         }

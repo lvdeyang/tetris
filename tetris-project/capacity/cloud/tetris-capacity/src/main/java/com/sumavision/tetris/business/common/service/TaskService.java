@@ -571,12 +571,18 @@ public class TaskService {
         return false;
     }
 
-    public InputBO getTransformInput(String transformIp, InputBO inputBO){
-
+    /**
+     * @MethodName: getTransformInput
+     * @Description: TODO 判断能力要建的输入是否在转换上存在
+     * @param inputs 1 转换上的输入
+     * @param inputBO 2 准备建的输入
+     * @Return: com.sumavision.tetris.capacity.bo.input.InputBO
+     * @Author: Poemafar
+     * @Date: 2021/1/5 10:03
+     **/
+    public InputBO getTransformInput(GetInputsResponse inputs,  InputBO inputBO){
         InputBO targetInputBO = null;
-
         try {
-            GetInputsResponse inputs = capacityService.getInputs(transformIp);
             if (inputBO.getUdp_ts() != null) {
                 targetInputBO = inputs.getInput_array().stream().filter(i-> i.getUdp_ts()!=null
                         && i.getUdp_ts().getSource_ip().equals(inputBO.getUdp_ts().getSource_ip())

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.application.alarm.AlarmCode;
+import com.sumavision.tetris.application.alarm.service.AlarmService;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BackType;
@@ -80,6 +81,9 @@ public class DeviceService {
     @Autowired
     BundleFeignService bundleFeignService;
 
+    @Autowired
+    AlarmService alarmService;
+
 //    @Autowired
 //    private ConstantUtil constantUtil;
 
@@ -105,12 +109,12 @@ public class DeviceService {
 
     public void deleteDevice(DevicePO devicePO)  {
 //        alarmReportToCmpUtil.reportOptLogToCmp(AlarmConstants.OPT_DEVICE_DELETE, "delete device,id:" + deviceId);
-        //删任务
-        try {
-            taskService.removeAll(devicePO.getDeviceIp());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //todo 删设备暂不删任务
+//        try {
+//            taskService.removeAll(devicePO.getDeviceIp());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         /**删除设备数据*/
         deviceDao.delete(devicePO);
@@ -167,11 +171,29 @@ public class DeviceService {
         }
         deviceDao.save(devicePO);
         try {
+            alarmService.setAlarmUrl(deviceIp);//离线的时候就会设置失败
+        } catch (Exception e) {
+            LOGGER.error("设置告警地址失败",e);
+        }
+        try {
             setNetCardsForDevice(devicePO);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("获取设备网卡信息失败",e);
             deviceDao.delete(devicePO);
             throw new BaseException(StatusCode.ERROR,"获取设备网卡信息失败");
+        }
+    }
+
+    public void saveDevice(String deviceIp){
+        DeviceGroupPO deviceGroupPO = deviceGroupDao.findByBeDefault(true);
+        if (deviceGroupPO == null) {
+            LOGGER.warn("未找到默认分组");
+            return;
+        }
+        try {
+            saveDevice(deviceGroupPO.getId(),BackType.MAIN,deviceIp,deviceIp,5656);
+        } catch (BaseException e) {
+            e.printStackTrace();
         }
     }
 

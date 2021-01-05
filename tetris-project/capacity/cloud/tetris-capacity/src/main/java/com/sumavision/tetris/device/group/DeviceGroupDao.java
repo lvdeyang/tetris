@@ -30,4 +30,5 @@ public interface DeviceGroupDao extends BaseDAO<DeviceGroupPO> {
     @Query(value = "update DeviceGroupPO d set d.autoBackupFlag = ?2 where d.id = ?1")
     public Integer updateAutoBackupFlagById(Long id,Boolean checked);
 
+    public DeviceGroupPO findByBeDefault(Boolean beDefault);
 }

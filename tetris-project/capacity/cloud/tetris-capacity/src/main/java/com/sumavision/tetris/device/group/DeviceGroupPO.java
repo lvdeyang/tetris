@@ -32,6 +32,7 @@ public class DeviceGroupPO extends AbstractBasePO {
 
 	private String dataNetIds;
 
+	private Boolean beDefault = false;
 
 	@Column
 	public String getName() {
@@ -68,5 +69,15 @@ public class DeviceGroupPO extends AbstractBasePO {
 
 	public void setDataNetIds(String dataNetIds) {
 		this.dataNetIds = dataNetIds;
+	}
+
+	@Column
+	@Type(type = "yes_no")
+	public Boolean getBeDefault() {
+		return beDefault;
+	}
+
+	public void setBeDefault(Boolean beDefault) {
+		this.beDefault = beDefault;
 	}
 }
