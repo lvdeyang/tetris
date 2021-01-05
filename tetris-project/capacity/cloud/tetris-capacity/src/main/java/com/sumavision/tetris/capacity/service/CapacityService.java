@@ -71,7 +71,7 @@ public class CapacityService {
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-inputs] response, result: {}", res);
 
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		if(res == null) throw new HttpTimeoutException(transformIp);
 		GetInputsResponse response = JSONObject.parseObject(res.toJSONString(), GetInputsResponse.class);
 		
 		return response;
@@ -1566,8 +1566,9 @@ public class CapacityService {
 											  .append("?msg_id=")
 											  .append(msg_id)
 											  .toString();
-		
-		return HttpUtil.httpGet(url);
+		JSONObject res = HttpUtil.httpGet(url);
+		if(res == null) throw new HttpTimeoutException(ip);
+		return res;
 	}
 
 
@@ -1631,7 +1632,7 @@ public class CapacityService {
 	 * @Author: Poemafar
 	 * @Date: 2020/12/30 14:09
 	 **/
-	public String getAlarmUrl(String ip,Long port){
+	public String getAlarmUrl(String ip,Long port) throws Exception {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
 				.append(ip)
@@ -1644,6 +1645,7 @@ public class CapacityService {
 		LOG.info("[get-alarm-url] request, url: {}",url);
 		JSONObject res = HttpUtil.httpGet(url);
 		LOG.info("[get-alarm-url] response, result: {}",res);
+		if(res == null) throw new HttpTimeoutException(ip);
 		String alarm_url = res.getString("alarm_url");
 		return alarm_url;
 	}

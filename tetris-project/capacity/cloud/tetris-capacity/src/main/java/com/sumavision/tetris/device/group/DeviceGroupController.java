@@ -53,8 +53,9 @@ public class DeviceGroupController {
 
     @JsonBody
     @RequestMapping(value = "/delete" , method = RequestMethod.POST)
-    public void deleteDeviceGroup(@RequestParam String name, HttpServletRequest request) {
+    public Object deleteDeviceGroup(@RequestParam String name, HttpServletRequest request)throws Exception {
         deviceGroupService.delete(name);
+        return null;
     }
 
     @JsonBody

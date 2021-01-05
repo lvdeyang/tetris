@@ -27,6 +27,9 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.device.DeviceDao;
+import com.sumavision.tetris.device.DevicePO;
+import com.sumavision.tetris.device.DeviceService;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Strings;
 import org.hibernate.exception.ConstraintViolationException;
@@ -81,6 +84,12 @@ public class TranscodeTaskService {
 
 	@Autowired
 	private SyncService syncService;
+
+	@Autowired
+	private DeviceDao deviceDao;
+
+	@Autowired
+	private DeviceService deviceService;
 
 	@Value("${constant.default.audio.column:0}")
 	private Integer audioColumn;
@@ -575,6 +584,12 @@ public class TranscodeTaskService {
 			BusinessType businessType) throws Exception{
 		AllRequest allRequest = new AllRequest();
 
+		DevicePO device = deviceDao.findByDeviceIp(capacityIp);
+		if (device == null) {
+			deviceService.saveDevice(capacityIp);
+		}
+
+		GetInputsResponse transInputs = capacityService.getInputs(capacityIp);
 		try {
 			Boolean beBackInput = beBackupInput(inputBOs);
 			List<InputBO> needSendInputArray = new ArrayList<>();
@@ -583,7 +598,7 @@ public class TranscodeTaskService {
 				InputBO inputBO = inputBOs.get(i);
 				String uniq = taskService.generateUniq(inputBO);//这判重合理不，是不是还不如直接看转换
 				TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-				InputBO realInput = taskService.getTransformInput(capacityIp, inputBO);
+				InputBO realInput = taskService.getTransformInput(transInputs, inputBO);
 				if (inputPO == null) {
 					inputPO = new TaskInputPO();
 					inputPO.setCreateTime(new Date());

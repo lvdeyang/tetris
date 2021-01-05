@@ -103,6 +103,9 @@ public class AlarmService {
 		}
 	}
 
+	public String getAlarmUrl(String ip) throws Exception {
+		return capacityService.getAlarmUrl(ip,5656L);
+	}
 
 	
 	/**

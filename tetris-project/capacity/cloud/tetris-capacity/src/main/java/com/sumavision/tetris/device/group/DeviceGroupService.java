@@ -99,10 +99,13 @@ public class DeviceGroupService {
         return deviceGroupVOS;
     }
 
-    public void delete(String name) {
+    public void delete(String name) throws Exception {
         DeviceGroupPO deviceGroupPO = deviceGroupDao.findTopByName(name);
         if (deviceGroupPO==null){
             return;
+        }
+        if (Boolean.TRUE.equals(deviceGroupPO.getBeDefault())){
+            throw new BaseException(StatusCode.FORBIDDEN,"不能删除默认分组");
         }
         delete(deviceGroupPO);
     }
