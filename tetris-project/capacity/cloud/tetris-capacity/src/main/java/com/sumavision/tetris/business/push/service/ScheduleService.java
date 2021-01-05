@@ -1,13 +1,7 @@
 package com.sumavision.tetris.business.push.service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import com.alibaba.druid.wall.violation.ErrorCode;
 import com.sumavision.tetris.business.common.exception.CommonException;
@@ -398,11 +392,17 @@ public class ScheduleService {
 		}
 		
 		if("file".equals(program.getType())){
-			ProgramFileBO file = new ProgramFileBO().setStart_ms(program.getFile().getSeek().intValue())
-											        .setDuration(program.getFile().getDuration().intValue())
-											        .setStart_time(program.getFile().getStartTime());
-			
-			scheduleProgram.setFile(file);
+			if (program.getFile_array()!=null && !program.getFile_array().isEmpty()) {
+				ProgramFileBO file = new ProgramFileBO().setStart_ms(program.getFile_array().get(0).getSeek().intValue())
+						.setDuration(program.getFile_array().get(0).getDuration().intValue())
+						.setStart_time(program.getFile_array().get(0).getStartTime());
+				scheduleProgram.setFile(file);
+			}else{
+				ProgramFileBO file = new ProgramFileBO().setStart_ms(program.getFile().getSeek().intValue())
+						.setDuration(program.getFile().getDuration().intValue())
+						.setStart_time(program.getFile().getStartTime());
+				scheduleProgram.setFile(file);
+			}
 		}else if("stream".equals(program.getType())){
 			ProgramStreamBO stream = new ProgramStreamBO().setStart_time(program.getStream().getStartTime())
 														  .setEnd_time(program.getStream().getEndTime());
@@ -440,7 +440,7 @@ public class ScheduleService {
 		       .setMedia_type_once_map(new JSONObject())
 		       .setProgram_array(new ArrayList<ProgramBO>());
 		
-		PushFileVO fileVO = pushInput.getFile();
+		PushFileVO fileVO = pushInput.getFile_array().get(0);
 		InputFileBO file = new InputFileBO().setFile_array(new ArrayList<InputFileObjectBO>());
 
 		InputFileObjectBO fileObject = new InputFileObjectBO().setUrl(fileVO.getUrl())
@@ -1085,7 +1085,6 @@ public class ScheduleService {
 		//不要想着循环调用单个任务删除！
 		Map<Long, Integer> map = new HashMap<Long, Integer>();
 		for(TaskOutputPO output: outputs){
-			
 			Long prevId = output.getPrevId();
 			Long nextId = output.getNextId();
 			Long scheduleId = output.getScheduleId();
@@ -1113,6 +1112,18 @@ public class ScheduleService {
 					map.put(scheduleId, count + 1);
 				}
 			}
+			List<Long> inputList = JSONArray.parseArray(output.getInputList(), Long.class);
+			if (inputList!=null){
+				for (int i = 0; i < inputList.size(); i++) {
+					Long curInput = inputList.get(i);
+					if(map.get(curInput) == null){
+						map.put(curInput, 1);
+					}else{
+						int count = map.get(curInput);
+						map.put(curInput, count + 1);
+					}
+				}
+			}
 		}
 		
 		List<InputMapBO> needDeleteInputs = new ArrayList<InputMapBO>();
@@ -1126,7 +1137,11 @@ public class ScheduleService {
 				
 				input.setUpdateTime(new Date());
 				if(input.getCount() >= 1){
-					input.setCount(input.getCount() - i);
+					if (input.getCount()<=i){
+						input.setCount(0);
+					}else{
+						input.setCount(input.getCount() - i);
+					}
 				}
 				
 				InputBO inputBO = JSONObject.parseObject(input.getInput(), InputBO.class);
@@ -1156,11 +1171,12 @@ public class ScheduleService {
 				bos.add(bo);
 			}
 			
-			List<Long> outputInputIds = new ArrayList<Long>();
+			Set<Long> outputInputIds = new HashSet<>();
 			Long prevId = output.getPrevId();
 			Long nextId = output.getNextId();
 			Long scheduleId = output.getScheduleId();
 			Long inputId = output.getInputId();
+			List<Long> inputList = JSONArray.parseArray(output.getInputList(), Long.class);
 			if(prevId != null){
 				outputInputIds.add(prevId);
 			}
@@ -1172,6 +1188,9 @@ public class ScheduleService {
 			}
 			if(inputId != null){
 				outputInputIds.add(inputId);
+			}
+		 	if (inputList!=null){
+		 		outputInputIds.addAll(inputList);
 			}
 			
 			for(InputMapBO delete: needDeleteInputs){

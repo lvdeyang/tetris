@@ -36,7 +36,11 @@ public class OutputBO {
 	private OutputHttpTsPassbyBO http_ts_passby;
 	
 	private OutputSrtTsPassbyBO srt_ts_passby;
-	
+
+	/**
+	 * rtmp协议
+	 * rtmp只支持  视频格式h264,h265；音频格式mp3,aac,heaac
+	 */
 	private OutputRtmpBO rtmp;
 	
 	private OutputRtmpBO http_flv;
