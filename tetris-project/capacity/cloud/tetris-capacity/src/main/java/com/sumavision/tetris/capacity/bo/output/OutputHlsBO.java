@@ -26,8 +26,13 @@ public class OutputHlsBO {
 	private boolean i_frames_only; 
 	
 	private List<OutputMediaGroupBO> media_group_array;
-	
+
+	/**
+	 * 废弃参数，新打包后删掉
+	 */
 	private OutputStorageBO storage;
+
+	private List<OutputStorageBO> storage_array;
 	
 	private OutputEncryptBO encrypt;
 
@@ -100,6 +105,15 @@ public class OutputHlsBO {
 
 	public OutputHlsBO setI_frames_only(boolean i_frames_only) {
 		this.i_frames_only = i_frames_only;
+		return this;
+	}
+
+	public List<OutputStorageBO> getStorage_array() {
+		return storage_array;
+	}
+
+	public OutputHlsBO setStorage_array(List<OutputStorageBO> storage_array) {
+		this.storage_array = storage_array;
 		return this;
 	}
 

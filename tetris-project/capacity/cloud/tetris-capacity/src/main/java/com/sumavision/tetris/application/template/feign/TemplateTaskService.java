@@ -15,6 +15,7 @@ import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.MediaType;
 import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.push.service.ScheduleService;
@@ -106,22 +107,67 @@ public class TemplateTaskService {
         }
         generateOutputBOS(missionBO,combineJobBO);
 
-        transcodeTaskService.save(missionBO.getIdCtor().getJobId(), taskBO.getTask_ip(), missionBO.getInputMap().values().stream().collect(Collectors.toList()) , missionBO.getTask_array(), missionBO.getOutput_array(), tmpPO.getBusinessType());
         try {
-            //如果有排期还需要再发个修改排期的任务
-            decideAndPutSchedule(missionBO,combineJobBO,tmpPO.getBusinessType());
+            createTaskByTemplate(missionBO,combineJobBO,tmpPO.getBusinessType());//下发命令
         } catch (Exception e) {
             TaskOutputPO output = taskService.delete(missionBO.getIdCtor().getJobId(), tmpPO.getBusinessType(), true);
             if(output != null){
                 taskOutputDAO.delete(output);
             }
-            e.printStackTrace();
+            LOGGER.error("任务创建失败",e);
+            throw e;//异常要抛出，让业务知道
         }
+
 
         ResponseVO responseVO = new ResponseVO();
         responseVO.setTaskId(missionBO.getIdCtor().getJobId());
         return JSON.toJSONString(responseVO);
     }
+
+    public void createTaskByTemplate(MissionBO missionBO,TemplateTaskVO jobBO,BusinessType businessType) throws Exception {
+        JSONObject schedule = (JSONObject)jobBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
+        if (schedule!=null){ //排期任务的输入只能有个排期
+            List<InputBO> taskInputBOS = new ArrayList<>();
+            List<InputBO> scheInputBOS = new ArrayList<>();
+            taskInputBOS.add(missionBO.getInputMap().get(schedule.getInteger("index")));
+            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(), taskInputBOS, missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
+            List<ScheduleProgramBO> schedules = new ArrayList();
+            TaskOutputPO taskOutput = taskOutputDAO.findByTaskUuidAndType(missionBO.getIdCtor().getJobId(), businessType);
+            for (int i = 0; i < jobBO.getMap_sources().size(); i++) {
+                JSONObject sourceObj = jobBO.getMap_sources().getJSONObject(i);
+                if (schedule.containsKey("prev") && sourceObj.getInteger("index").equals(schedule.getInteger("prev"))){
+                    InputBO preInputBO = missionBO.getInputMap().get(schedule.getInteger("prev"));
+                    schedules.add(getScheduleProgram(preInputBO,sourceObj));
+                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(missionBO.getDevice_ip(),preInputBO,businessType);
+                    taskOutput.setPrevId(inputWrapperBO.getTaskInputPO().getId());
+                    if (inputWrapperBO.getBeCreate()){
+                        scheInputBOS.add(preInputBO);
+                    }
+                }
+                if (schedule.containsKey("next")  && sourceObj.getInteger("index").equals(schedule.getInteger("next") )){
+                    InputBO nextInputBO = missionBO.getInputMap().get(schedule.getInteger("next"));
+                    schedules.add(getScheduleProgram(nextInputBO,sourceObj));
+                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(missionBO.getDevice_ip(),nextInputBO,businessType);
+                    taskOutput.setNextId(inputWrapperBO.getTaskInputPO().getId());
+                    if (inputWrapperBO.getBeCreate()){
+                        scheInputBOS.add(nextInputBO);
+                    }
+                }
+            }
+
+            if (!schedules.isEmpty()) {
+                InputBO scheduleBO = missionBO.getInputMap().get(schedule.getInteger("index"));
+                scheduleService.sendSchedule(missionBO.getDevice_ip(), scheduleBO.getId(), null, scheInputBOS, schedules);
+                taskOutput.setScheduleId(taskInputDAO.findByUniq(taskService.generateUniq(scheduleBO)).getId());
+                taskOutput.setUpdateTime(new Date());
+                taskOutputDAO.save(taskOutput);
+            }
+        }else {
+            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(), missionBO.getInputMap().values().stream().collect(Collectors.toList()), missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
+        }
+
+    }
+
 
     /**
      * @MethodName: combine
@@ -174,8 +220,6 @@ public class TemplateTaskService {
         }else{
             combineJobBO.setMap_sources(taskVO.getMap_sources());
         }
-
-
         //task合并
         JSONArray combineTasks = new JSONArray();
         if (taskVO.getMap_tasks()!=null && !taskVO.getMap_tasks().isEmpty()) {
@@ -249,32 +293,7 @@ public class TemplateTaskService {
         return combineJobBO;
     }
 
-    public void decideAndPutSchedule(MissionBO missionBO, TemplateTaskVO tmplBO, BusinessType businessType) throws Exception {
-        JSONObject schedule = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
-        if (schedule!=null){
-            List<ScheduleProgramBO> schedules = new ArrayList();
-            TaskOutputPO taskOutput = taskOutputDAO.findByTaskUuidAndType(missionBO.getIdCtor().getJobId(), businessType);
-            for (int i = 0; i < tmplBO.getMap_sources().size(); i++) {
-                JSONObject sourceObj = tmplBO.getMap_sources().getJSONObject(i);
-                if (schedule.containsKey("prev") && sourceObj.getInteger("index").equals(schedule.getInteger("prev"))){
-                    InputBO preInputBO = missionBO.getInputMap().get(schedule.getInteger("prev"));
-                    schedules.add(getScheduleProgram(preInputBO,sourceObj));
-                    taskOutput.setPrevId(schedule.getLong("prev"));
-                }
-                if (schedule.containsKey("next")  && sourceObj.getInteger("index").equals(schedule.getInteger("next") )){
-                    InputBO nextInputBO = missionBO.getInputMap().get(schedule.getInteger("next"));
-                    schedules.add(getScheduleProgram(nextInputBO,sourceObj));
-                    taskOutput.setNextId(schedule.getLong("next"));
-                }
-            }
-            if (!schedules.isEmpty()) {
-                scheduleService.sendSchedule(missionBO.getDevice_ip(), missionBO.getInputMap().get(schedule.getInteger("index")).getId(), null, null, schedules);
-                taskOutput.setUpdateTime(new Date());
-                taskOutputDAO.save(taskOutput);
-            }
-        }
 
-    }
 
     /**
      * @MethodName: getScheduleProgram
@@ -285,7 +304,7 @@ public class TemplateTaskService {
      * @Author: Poemafar
      * @Date: 2020/12/9 15:32
      **/
-    public ScheduleProgramBO getScheduleProgram(InputBO inputBO,JSONObject curSource){
+    public ScheduleProgramBO getScheduleProgram(InputBO inputBO,JSONObject curSource) throws BaseException {
         ScheduleProgramBO scheduleProgram = new ScheduleProgramBO();
         scheduleProgram.setInput_id(inputBO.getId())
                 .setProgram_number(inputBO.getProgram_array().get(0).getProgram_number())
@@ -301,8 +320,10 @@ public class TemplateTaskService {
             scheduleProgram.getElement_array().add(ele);
         }
         if (curSource.getString("type").toLowerCase().equals("file")) {
-            List<ProgramFileBO> fileBOS = JSONArray.parseArray(curSource.getString("file_array"), ProgramFileBO.class) ;
-            scheduleProgram.setFile(fileBOS.get(0));
+            JSONArray file_array = curSource.getJSONArray("file_array");
+            JSONObject fileJSON = file_array.getJSONObject(0);
+            ProgramFileBO programFileBO = new ProgramFileBO(fileJSON);
+            scheduleProgram.setFile(programFileBO);
         }else{
             ProgramStreamBO stream = JSONObject.parseObject(curSource.toJSONString(), ProgramStreamBO.class);
             scheduleProgram.setLive(stream);
@@ -460,7 +481,7 @@ public class TemplateTaskService {
                     }
 
                     JSONObject videoEncObj = combineVideoEncode(tmplTaskObj,templateService.getVideoEncodeMap(codelib));
-                    encodeBO.setProcess_array(handleProcessList(tmplTaskObj,videoEncObj));
+                    encodeBO.setProcess_array(handleVideoProcessList(tmplTaskObj,videoEncObj));
 
                     switch (videoType){
                         case h264:
@@ -486,7 +507,7 @@ public class TemplateTaskService {
                     }
                     EncodeConstant.TplAudioEncoder audioType = EncodeConstant.TplAudioEncoder.getTplAudioEncoder(codec);
                     JSONObject audioEncObj = combineAudioEncode(tmplTaskObj, templateService.getAudioEncodeMap(audioType.name()));
-                    encodeBO.setProcess_array(handleProcessList(tmplTaskObj,audioEncObj));
+                    encodeBO.setProcess_array(handleAudioProcessList(tmplTaskObj,audioEncObj));
                     switch (audioType){
                         case AENCODER_AACLC:
                             encodeBO.setAac(audioEncObj);
@@ -580,25 +601,49 @@ public class TemplateTaskService {
         return combineObj;
     }
 
-    public List handleProcessList(JSONObject tmplTaskObj,JSONObject combineEncodeObj){
+    public List handleAudioProcessList(JSONObject tmplTaskObj,JSONObject combineEncodeObj){
+        List<PreProcessingBO> processingBOS = new ArrayList<>();
+        Integer smpRate = Float.valueOf(combineEncodeObj.getFloat("sample_rate")*1000).intValue();
+        ResampleBO resample = new ResampleBO().setSample_rate(smpRate)
+                .setChannel_layout(tmplTaskObj.containsKey("channel_layout")? tmplTaskObj.getString("channel_layout"): combineEncodeObj.getString("channel_layout"))
+                .setFormat(tmplTaskObj.containsKey("sample_fmt")?tmplTaskObj.getString("sample_fmt"):combineEncodeObj.getString("sample_fmt"));
+        processingBOS.add(new PreProcessingBO().setResample(resample));
+
+        //预处理
+        combineEncodeObj.remove("pretreatments");
+        if (tmplTaskObj.containsKey("pretreatments")) {
+            JSONArray pretreatments = tmplTaskObj.getJSONArray("pretreatments");
+            for (int i = 0; i < pretreatments.size(); i++) {
+                ProcessVO processVO = JSONObject.parseObject(pretreatments.getString(i), ProcessVO.class);
+                switch (processVO.getTreat_type()){
+                    case RESAMPLE:
+                        processingBOS.add(new PreProcessingBO().setResample(new ResampleBO(processVO)));
+                        break;
+                    case AUDGAIN:
+                        processingBOS.add(new PreProcessingBO().setAud_gain(new AudioGainBO(processVO)));
+                        break;
+                }
+            }
+        }
+        return processingBOS;
+    }
+    public List handleVideoProcessList(JSONObject tmplTaskObj,JSONObject combineEncodeObj){
         List<PreProcessingBO> processingBOS = new ArrayList<>();
 
+        String resolv = "";
         if (tmplTaskObj.containsKey("resolution")) {
-            String resolv = tmplTaskObj.getString("resolution");
-            StringTokenizer resolution = new StringTokenizer(resolv,"*xX");
-            int width = Integer.parseInt(resolution.nextToken());
-            int height = Integer.parseInt(resolution.nextToken()) ;
-            ScaleBO scale = new ScaleBO().setWidth(width)
-                    .setHeight(height);
-            processingBOS.add(new PreProcessingBO().setScale(scale));
+            resolv = tmplTaskObj.getString("resolution");
+        }else if(combineEncodeObj.containsKey("resolution")){
+            resolv = combineEncodeObj.getString("resolution");
+        }else{
+            resolv = "720*576";
         }
-        if (tmplTaskObj.containsKey("sample_rate")) {
-            Integer smpRate = tmplTaskObj.getInteger("sample_rate");
-            ResampleBO resample = new ResampleBO().setSample_rate(smpRate)
-                    .setChannel_layout(tmplTaskObj.containsKey("channel_layout")? tmplTaskObj.getString("channel_layout"): combineEncodeObj.getString("channel_layout"))
-                    .setFormat(tmplTaskObj.containsKey("sample_fmt")?tmplTaskObj.getString("sample_fmt"):combineEncodeObj.getString("sample_fmt"));
-            processingBOS.add(new PreProcessingBO().setResample(resample));
-        }
+        StringTokenizer resolution = new StringTokenizer(resolv,"*xX");
+        int width = Integer.parseInt(resolution.nextToken());
+        int height = Integer.parseInt(resolution.nextToken()) ;
+        ScaleBO scale = new ScaleBO().setWidth(width)
+                .setHeight(height);
+        processingBOS.add(new PreProcessingBO().setScale(scale));
 
         //预处理
         combineEncodeObj.remove("pretreatments");
@@ -637,12 +682,6 @@ public class TemplateTaskService {
                         break;
                     case IMAGEFILTER:
                         processingBOS.add(new PreProcessingBO().setImageFilter(new ImageFilterBO(processVO)));
-                        break;
-                    case RESAMPLE:
-                        processingBOS.add(new PreProcessingBO().setResample(new ResampleBO(processVO)));
-                        break;
-                    case AUDGAIN:
-                        processingBOS.add(new PreProcessingBO().setAud_gain(new AudioGainBO(processVO)));
                         break;
                 }
             }
