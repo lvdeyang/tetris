@@ -342,7 +342,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/remove/all")
 	public Object removeAll(
 			String ip) throws Exception{
-		transcodeTaskService.removeAll(ip);
+		taskService.removeAll(ip);
 		return null;
 	}
 

@@ -1,14 +1,11 @@
 package com.sumavision.tetris.business.transcode.service;
 
-import ch.qos.logback.core.status.Status;
-import com.alibaba.druid.support.spring.stat.annotation.Stat;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
-import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.SyncService;
@@ -402,6 +399,9 @@ public class TranscodeTaskService {
 
 		//输出udp
 		OutputStorageBO outputStorageBO = new OutputStorageBO().setUrl("file").setDir_name(pubName).setCan_del(true);
+		List<OutputStorageBO> outputStorageBOS = new ArrayList<>();
+		outputStorageBOS.add(outputStorageBO);
+
 		List<OutputMediaGroupBO> outputMediaGroupBOS = new ArrayList<>();
 		OutputMediaGroupBO media = new OutputMediaGroupBO();
 		media.setAudio_array(new ArrayList<>());
@@ -431,7 +431,7 @@ public class TranscodeTaskService {
 				.setPlaylist_name(playName)
 				.setPlaylist_seg_count(3)
 				.setMax_seg_duration(5)
-				.setStorage(outputStorageBO);
+				.setStorage_array(outputStorageBOS);
 
 		output.setHls(hlsBO);
 
@@ -1383,56 +1383,6 @@ public class TranscodeTaskService {
 		capacityService.putAlarmList(ip, capacityProps.getPort(), alarmlist);
 	}
 
-	/**
-	 * 清空转换模块上所有任务<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月5日 下午2:41:38
-	 * @param String ip 转换模块ip
-	 */
-	public void removeAll(String ip) throws Exception{
-
-		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
-
-		if(outputs != null && outputs.size() > 0){
-			Set<Long> inputIds = new HashSet<Long>();
-			for(TaskOutputPO outputPO: outputs){
-				if(!Objects.isNull(outputPO.getInputId())){
-					//单源
-					inputIds.add(outputPO.getInputId());
-				}else if(!StringUtils.isEmpty(outputPO.getInputList())){
-					//备份源
-					inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
-				}else if(!Objects.isNull(outputPO.getCoverId())){
-					//盖播
-					inputIds.add(outputPO.getCoverId());
-				}else if(!Objects.isNull(outputPO.getScheduleId())){
-					//排期
-					inputIds.add(outputPO.getScheduleId());
-				}else if(!Objects.isNull(outputPO.getPrevId())){
-					//追加排期prev
-					inputIds.add(outputPO.getPrevId());
-				}else if(!Objects.isNull(outputPO.getNextId())){
-					//追加排期next
-					inputIds.add(outputPO.getNextId());
-				}
-			}
-
-			List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
-			if(inputPOs != null && inputPOs.size() > 0){
-				for(TaskInputPO inputPO: inputPOs){
-					inputPO.setCount(0);
-				}
-			}
-
-			taskInputDao.save(inputPOs);
-			taskOutputDao.deleteInBatch(outputs);
-
-		}
-
-		//清空转换模块上面所有任务
-		capacityService.removeAll(ip);
-	}
 
 	public TaskInputPO addInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
 		String uniq = taskService.generateUniq(inputBO);
@@ -1585,7 +1535,7 @@ public class TranscodeTaskService {
 		modifyBackupMode(taskSetVO,taskInputPOS,capacityIp);
 
 		//创建任务
-		if (Objects.nonNull(taskSetVO.getAdd_task())){
+		if (Objects.nonNull(taskSetVO.getAdd_task()) && !taskSetVO.getAdd_task().getTask_array().isEmpty()){
 			CreateTaskRequest createTaskRequest = taskSetVO.getAdd_task();
 			capacityService.createTasksWithMsgId(createTaskRequest,capacityIp);
 			List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
@@ -1597,7 +1547,7 @@ public class TranscodeTaskService {
 
 
 		//删除任务
-		if (Objects.nonNull(taskSetVO.getDelete_task())){
+		if (Objects.nonNull(taskSetVO.getDelete_task()) && !taskSetVO.getDelete_task().getTask_array().isEmpty()){
 			DeleteTasksRequest deleteTasksRequest = taskSetVO.getDelete_task();
 			capacityService.deleteTasksWithMsgId(deleteTasksRequest,capacityIp);
 			List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
@@ -1724,7 +1674,7 @@ public class TranscodeTaskService {
 		}
 
 		//增加输出
-		if (Objects.nonNull(taskSetVO.getAdd_output())) {
+		if (Objects.nonNull(taskSetVO.getAdd_output()) && !taskSetVO.getAdd_output().getOutput_array().isEmpty()) {
 			CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(taskSetVO.getAdd_output(),capacityIp);
 			List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, capacityIp);
 
