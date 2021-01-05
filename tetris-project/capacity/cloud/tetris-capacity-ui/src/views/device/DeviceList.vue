@@ -65,7 +65,7 @@
                 <a-popconfirm slot="extra" placement="rightBottom" ok-text="Yes" cancel-text="No" @confirm="deleteDevice(item.id)">
                   <template slot="title">
                     <p>{{item.name}}</p>
-                    <p>即将删除设备及其上的所有任务</p>
+                    <p>即将删除设备，是否继续</p>
                   </template>
                   <span style="margin-left:10px;"><a-icon type="delete"/></span>
                 </a-popconfirm>

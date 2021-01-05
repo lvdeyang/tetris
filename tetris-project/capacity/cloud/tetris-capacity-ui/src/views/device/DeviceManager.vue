@@ -79,7 +79,11 @@
           deleteDeviceGroup(name){
             let self =this;
             deleteDeviceGroup( {name: name}).then(res => {
-              self.fetchDeviceGroups()
+              if (res.status!=200){
+                this.$message.error(res.message);
+              }else {
+                self.fetchDeviceGroups()
+              }
             })
           },
           fetchDeviceGroups(){
