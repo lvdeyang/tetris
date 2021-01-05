@@ -86,7 +86,7 @@
           <a-divider dashed ></a-divider>
           <a-row type="flex" justify="center" :gutter="20">
             <a-col>
-              <a-button type="primary" size="small" @click="visibleEditGroupModal=true;editDeviceGroupObj.name=curDeviceGroup.name;editDeviceGroupObj.backupStrategy=curDeviceGroup.backupStrategy">修改分组</a-button>
+              <a-button type="primary" size="small" @click="openEditDeviceGroupModal()">修改分组</a-button>
             </a-col>
             <a-col>
               <a-button type="danger" size="small" @click="deleteDeviceGroup(curDeviceGroup.name)">删除分组</a-button>
@@ -100,7 +100,7 @@
       </a-col>
     </a-row>
     <!--修改分组对话框-->
-    <a-modal v-model="visibleEditGroupModal" title="修改分组" @ok="editDeviceGroup()">
+    <a-modal v-model="visibleEditGroupModal" title="修改分组" @ok="editDeviceGroup()" @cancel="closeEditGroupModal">
       <a-form :label-col="{span:8}" :wrapper-col="{span:8}">
         <a-form-item label="分组名称">
           <a-input v-model="editDeviceGroupObj.name"></a-input>
@@ -132,6 +132,7 @@
       data(){
         return{
           config:false,
+          visibleEditGroupModal:false,
           editDeviceGroupObj:{
             id:'',
             name:'',
@@ -166,10 +167,14 @@
             }
           })
         },
+        openEditDeviceGroupModal(){
+          this.visibleEditGroupModal=true;
+          this.editDeviceGroupObj.name=this.curDeviceGroup.name;
+          this.editDeviceGroupObj.backupStrategy=this.curDeviceGroup.backupStrategy
+          this.editDeviceGroupObj.id=this.curDeviceGroup.id
+        },
         editDeviceGroup(){
-          let body = this.editDeviceGroupObj;
-          body.id=this.curDeviceGroup.id;
-          editDeviceGroup(body).then(res=>{
+          editDeviceGroup( this.editDeviceGroupObj).then(res=>{
             if (res.status!=200){
               this.$message.error(res.message);
             }else {
@@ -179,6 +184,10 @@
               this.visibleEditGroupModal=false;
             }
           })
+        },
+        closeEditGroupModal(){
+          this.editDeviceGroupObj={}
+          this.visibleEditGroupModal=false
         },
         deleteDeviceGroup(name){
           let self = this;
