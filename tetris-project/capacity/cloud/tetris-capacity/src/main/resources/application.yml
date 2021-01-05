@@ -140,6 +140,8 @@ log:
   maxHistory: 10
   totalSizeCap: 1GB
 constant:
+  init:
+    alarm: false
   default:
     video:
       encode: m2v

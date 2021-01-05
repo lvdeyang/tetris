@@ -82,7 +82,15 @@
 			<artifactId>tetris-user-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
+		<!-- menu-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-menu-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+
 		<!-- tetris-ui -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
@@ -95,6 +103,13 @@
 			<groupId>com.sumavision.tetris</groupId>
 		    <artifactId>tetris-alarm-feign</artifactId>
 		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!--资源-->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-resource-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- eureka依赖 -->

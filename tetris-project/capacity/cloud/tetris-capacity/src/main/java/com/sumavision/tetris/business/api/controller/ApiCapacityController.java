@@ -1,7 +1,6 @@
 package com.sumavision.tetris.business.api.controller;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.business.alarm.service.AlarmService;
+import com.sumavision.tetris.application.alarm.service.AlarmService;
 import com.sumavision.tetris.business.api.vo.AlarmVO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;

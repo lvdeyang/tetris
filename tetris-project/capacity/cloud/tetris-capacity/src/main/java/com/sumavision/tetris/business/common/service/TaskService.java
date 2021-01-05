@@ -20,6 +20,7 @@ import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.input.InputBaseBO;
+import com.sumavision.tetris.capacity.bo.input.InputWrapperBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
@@ -32,6 +33,7 @@ import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -479,8 +481,52 @@ public class TaskService {
     }
 
 
+    /**
+     * @MethodName: addInputInDatabase 查重并创建输入记录数据库，不发命令
+     * @Description: TODO 添加输入
+     * @param deviceIp 1 设备IP
+     * @param inputBO 2 输入BO
+     * @param busType 3 业务类型
+     * @Return: com.sumavision.tetris.capacity.bo.input.InputWrapperBO
+     * @Author: Poemafar
+     * @Date: 2021/1/4 17:59
+     **/
+    public InputWrapperBO addInputInDatabase(String deviceIp, InputBO inputBO, BusinessType busType) throws Exception {
+        Boolean beCreate = null;
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
+        if (inputPO == null) {
+            inputPO = new TaskInputPO();
+            inputPO.setCreateTime(new Date());
+            inputPO.setUpdateTime(inputPO.getCreateTime());
+            inputPO.setUniq(uniq);
+            inputPO.setType(busType);
+            inputPO.setInput(JSON.toJSONString(inputBO));
+            inputPO.setNodeId(inputBO.getId());
+            inputPO.setCapacityIp(deviceIp);
+            beCreate=Boolean.TRUE;
+            taskInputDao.save(inputPO);
+        } else if (inputPO.getCount().equals(0)) {
+            inputPO.setInput(JSON.toJSONString(inputBO));
+            inputPO.setNodeId(inputBO.getId());
+            inputPO.setType(busType);
+            inputPO.setCreateTime(new Date());
+            inputPO.setUpdateTime(inputPO.getCreateTime());
+            inputPO.setCount(inputPO.getCount() + 1);
+            inputPO.setCapacityIp(deviceIp);
+            beCreate=Boolean.TRUE;
+            taskInputDao.save(inputPO);
+        } else {
+            inputPO.setUpdateTime(new Date());
+            inputPO.setCount(inputPO.getCount()+1);
+            beCreate=Boolean.FALSE;
+            taskInputDao.save(inputPO);
+        }
+        InputWrapperBO inputWrapperBO = new InputWrapperBO().setTaskInputPO(inputPO).setBeCreate(beCreate);
+        return inputWrapperBO;
+    }
 
-/**
+    /**
  * @MethodName: deleteStreamInputsAfterCheckRepeat
  * @Description: 删码流分析输入
  * @param deviceIp 1
@@ -596,6 +642,58 @@ public class TaskService {
         }
 
         return targetInputBO;
+    }
+
+
+    /**
+     * 清空转换模块上所有任务<br/>
+     * <b>作者:</b>wjw<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2020年6月5日 下午2:41:38
+     * @param String ip 转换模块ip
+     */
+    public void removeAll(String ip) throws Exception{
+
+        List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
+
+        if(outputs != null && outputs.size() > 0){
+            Set<Long> inputIds = new HashSet<Long>();
+            for(TaskOutputPO outputPO: outputs){
+                if(!Objects.isNull(outputPO.getInputId())){
+                    //单源
+                    inputIds.add(outputPO.getInputId());
+                }else if(!StringUtils.isEmpty(outputPO.getInputList())){
+                    //备份源
+                    inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
+                }else if(!Objects.isNull(outputPO.getCoverId())){
+                    //盖播
+                    inputIds.add(outputPO.getCoverId());
+                }else if(!Objects.isNull(outputPO.getScheduleId())){
+                    //排期
+                    inputIds.add(outputPO.getScheduleId());
+                }else if(!Objects.isNull(outputPO.getPrevId())){
+                    //追加排期prev
+                    inputIds.add(outputPO.getPrevId());
+                }else if(!Objects.isNull(outputPO.getNextId())){
+                    //追加排期next
+                    inputIds.add(outputPO.getNextId());
+                }
+            }
+
+            List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
+            if(inputPOs != null && inputPOs.size() > 0){
+                for(TaskInputPO inputPO: inputPOs){
+                    inputPO.setCount(0);
+                }
+            }
+
+            taskInputDao.save(inputPOs);
+            taskOutputDao.deleteInBatch(outputs);
+
+        }
+
+        //清空转换模块上面所有任务
+        capacityService.removeAll(ip);
     }
 
 }

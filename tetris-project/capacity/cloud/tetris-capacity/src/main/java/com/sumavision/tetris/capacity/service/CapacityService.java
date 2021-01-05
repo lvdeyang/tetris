@@ -1621,7 +1621,33 @@ public class CapacityService {
 		}
 		return response;
 	}
-	
+
+	/**
+	 * @MethodName: getAlarmUrl
+	 * @Description: TODO 获取告警地址
+	 * @param ip 1 转换模块IP
+ 	 * @param port 2 转换模块Port
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2020/12/30 14:09
+	 **/
+	public String getAlarmUrl(String ip,Long port){
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(port)
+				.append(UrlConstant.URL_ALARM)
+				.append("?msg_id=")
+				.append(msg_id)
+				.toString();
+		LOG.info("[get-alarm-url] request, url: {}",url);
+		JSONObject res = HttpUtil.httpGet(url);
+		LOG.info("[get-alarm-url] response, result: {}",res);
+		String alarm_url = res.getString("alarm_url");
+		return alarm_url;
+	}
+
 	/**
 	 * 设置告警地址请求<br/>
 	 * <b>作者:</b>wjw<br/>
