@@ -220,6 +220,14 @@ public class DeviceService {
         if (!resOptVO.getBeSuccess()){
             return resOptVO;
         }
+        //设置告警地址
+        try {
+            alarmService.setAlarmUrl(devicePO.getDeviceIp());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException(StatusCode.ERROR,"告警地址设置失败");
+        }
+
         //判断是否配置控制口输出
         if (checkCtrlPortAndOutput(nets)){
             resOptVO.setTooltip("控制口配置输出分组会导致，本地发布任务主备切换失败；");
@@ -229,7 +237,6 @@ public class DeviceService {
         //网卡分组 配置成功
         deviceDao.updateNetConfigById(devicePO.getId(),true);
         updateDataNetIds(devicePO.getDeviceGroupId());
-
         return resOptVO;
     }
 

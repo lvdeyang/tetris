@@ -12,6 +12,9 @@ import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
+import com.sumavision.tetris.device.DeviceDao;
+import com.sumavision.tetris.device.DevicePO;
+import com.sumavision.tetris.device.DeviceService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +116,12 @@ public class TransformService {
 
 	@Autowired
 	private TemplateService templateService;
+
+	@Autowired
+	private DeviceDao deviceDao;
+
+	@Autowired
+	private DeviceService deviceService;
 
 	@Autowired
 	private TranscodeTaskService transcodeTaskService;
@@ -234,7 +243,13 @@ public class TransformService {
 			String recordAddress,
 			String recordCallBackUrl,
 			StreamTranscodingVO streamVO) throws Exception{
-		
+
+		//加任务的时候判断下，如果设备不在就加下设备，为了设置告警地址设备就能上线同步了。
+		DevicePO device = deviceDao.findByDeviceIp(capacityIp);
+		if (device == null) {
+			deviceService.saveDevice(capacityIp);
+		}
+
 		TaskInputPO input = taskInputDao.findByUniq(uniq);
 		
 		if(input == null){
