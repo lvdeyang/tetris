@@ -217,6 +217,7 @@ public class EncodeConstant {
         AENCODER_EAC3,
         PASSBY;        //"eac3"
         public static TplAudioEncoder getTplAudioEncoder(String encodeType) throws CommonException {
+            encodeType = encodeType.toLowerCase(Locale.ENGLISH);
             if (encodeType.contains("passby")){
                 return PASSBY;
             }
@@ -224,29 +225,29 @@ public class EncodeConstant {
                 case "aac":
                 case "aaclc":
                 case "mpeg4-aac-lc":
-                case "AENCODER_AACLC":
+                case "aencoder_aaclc":
                     return AENCODER_AACLC;
                 case "heaac":
                 case "mpeg4-he-aac-lc":
-                case "AENCODER_HEAAC":
+                case "aencoder_heaac":
                     return AENCODER_HEAAC;
                 case "heaacv2":
                 case "heaac_v2":
                 case "mpeg4-he-aac-v2-lc":
-                case "AENCODER_HEAAC_V2":
+                case "aencoder_heaac_v2":
                     return AENCODER_HEAAC_V2;
                 case "mp2":
                 case "mpeg2_audio":
-                case "AENCODER_MP2":
+                case "aencoder_mp2":
                     return AENCODER_MP2;
                 case "mp3":
-                case "AENCODER_MP3":
+                case "aencoder_mp3":
                     return AENCODER_MP3;
                 case "ac3":
-                case "AENCODER_AC3":
+                case "aencoder_ac3":
                     return AENCODER_AC3;
                 case "eac3":
-                case "AENCODER_EAC3":
+                case "aencoder_eac3":
                     return AENCODER_EAC3;
             }
             throw new CommonException("unknown tpl audio encoder :"+encodeType);
