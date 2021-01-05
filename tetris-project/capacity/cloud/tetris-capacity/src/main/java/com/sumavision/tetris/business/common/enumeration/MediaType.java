@@ -8,7 +8,7 @@ import com.sumavision.tetris.commons.exception.code.StatusCode;
 
 /**
  * @ClassName: MediaType
- * @Description TODO
+ * @Description TODO 媒体类型： 视频，音频，字幕
  * @Author: Poemafar
  * @Version：1.0
  * @Date 2020/11/5 17:27
