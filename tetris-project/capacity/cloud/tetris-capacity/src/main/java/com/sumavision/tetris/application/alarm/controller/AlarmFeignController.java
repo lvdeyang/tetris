@@ -1,4 +1,4 @@
-package com.sumavision.tetris.business.alarm.controller;
+package com.sumavision.tetris.application.alarm.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -7,9 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.business.alarm.service.AlarmService;
+import com.sumavision.tetris.application.alarm.service.AlarmService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
+/**
+ * 转换模块发来的告警
+ */
 @Controller
 @RequestMapping(value = "/capacity/alarm/feign")
 public class AlarmFeignController {
