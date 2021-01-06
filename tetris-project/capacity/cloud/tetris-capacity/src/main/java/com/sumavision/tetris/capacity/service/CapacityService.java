@@ -143,6 +143,10 @@ public class CapacityService {
         JSONObject res = HttpUtil.httpPost(url, request);
         LOG.info("[command-queue] response, result: {}", res);
         if (res == null) throw new HttpTimeoutException(ip);
+
+        if (!CommonUtil.findAllEqualByKey(res,"result_code","0") || !CommonUtil.findAllEqualByKey(res,"http_code","200")) {
+            throw new BaseException(StatusCode.ERROR,"存在指令操作失败");
+        }
         return res;
     }
 
