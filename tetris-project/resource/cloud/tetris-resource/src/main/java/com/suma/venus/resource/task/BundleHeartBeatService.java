@@ -50,6 +50,7 @@ public class BundleHeartBeatService {
 	}
 
 	public void removeBundleStatus(String bundle_ip) {
+		if(bundle_ip==null || "".equals(bundle_ip)) return;
 		LOGGER.info("remove heartBeat， bundle_ip=" + bundle_ip);
 
 		bunldeStatusMap.remove(bundle_ip);
@@ -66,16 +67,20 @@ public class BundleHeartBeatService {
 			LOGGER.warn("removeBundleStatus, cannot find budlePO, ip=" + bundle_ip);
 		}
 
-		// if (bunldeStatusMap.size() == 0 && t != null) {
-		//
-		// t.cancel(true);
-		// }
+		if (bunldeStatusMap.size() == 0 && t != null) {
+			// TODO
+			t.cancel(true);
+		}
 
 	}
 
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
+		if(bundle_ip==null || "".equals(bundle_ip)) return;
+		boolean threadFlag = false;
 
-		// boolean threadFlag = false;
+		if (bunldeStatusMap.size() == 0) {
+			threadFlag = true;
+		}
 
 		if (bunldeStatusMap.get(bundle_ip) == null) {
 			// TODO 设备从离线变为上线，更新数据库status
@@ -103,35 +108,16 @@ public class BundleHeartBeatService {
 		}
 
 		bunldeStatusMap.put(bundle_ip, currentTime);
-		startBundleHeartBeatMonitor();
 
 		// TODO 判断是否需要启动线程
-		// if (threadFlag) {
-		// startBundleHeartBeatMonitor();
-		// }
-	}
-
-	public void initBundleStatus(BundlePO po) {
-
-		// startBundleHeartBeatMonitor();
-
-		if (bunldeStatusMap.get(po.getDeviceIp()) == null) {
-			if (po.getOnlineStatus().equals(ONLINE_STATUS.ONLINE)) {
-				bunldeStatusMap.put(po.getDeviceIp(), Calendar.getInstance().getTimeInMillis());
-			}
-
-		}
-
-	}
-
-	public synchronized void startBundleHeartBeatMonitor() {
-
-		if (t == null || t.isCancelled()) {
-			LOGGER.info("new thread for bundle monitor");
-			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService,
-					timeout);
-			t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
+		if (threadFlag) {
+			startBundleHeartBeatMonitor();
 		}
 	}
 
+	public void startBundleHeartBeatMonitor() {
+		LOGGER.info("new thread for bundle monitor");
+		BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService, timeout);
+		t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
+	}
 }

@@ -214,7 +214,9 @@ public class OutputFactory {
             url = "file";
         }
         outputStorageBO.setUrl(url);
-        outputBO.setStorage(outputStorageBO);
+        List<OutputStorageBO> outputStorageBOS = new ArrayList<>();
+        outputStorageBOS.add(outputStorageBO);
+        outputBO.setStorage_array(outputStorageBOS);
 
         List<OutputMediaGroupBO> medias = new ArrayList<>();
         if (taskOutput.containsKey("medias")){
@@ -442,12 +444,15 @@ public class OutputFactory {
         return outputBO;
     }
 
-    public OutputRtmpBO getOutputRtmpBO(MissionBO missionBO, JSONObject taskOutput) {
+    public OutputRtmpBO getOutputRtmpBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
         OutputRtmpBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputRtmpBO.class);
         if (outputBO.getServer_url()==null){
             outputBO.setServer_url(taskOutput.getString("url"));
         }
-
+        //校验rtmp url头
+        if (!outputBO.getServer_url().startsWith("rtmp")){
+            throw new BaseException(StatusCode.FORBIDDEN,"rtmp url format error");
+        }
         List<BaseMediaBO> mediaBOS = new ArrayList<>();
         if (!taskOutput.containsKey("medias")){
             missionBO.getTask_array().stream().forEach(t->{

@@ -92,7 +92,11 @@ public class RecordStrategyPO extends AbstractBasePO {
 	@Column(name = "delStatus")
 	private Integer delStatus = 0;
 
+	@Enumerated(EnumType.STRING)
 	private EAutoInject autoInjectSel;
+	
+	@Enumerated(EnumType.STRING)
+	private EAutoFFMpegTranscode autoFFMpegTranscode = EAutoFFMpegTranscode.MANUAL;
 
 	public enum EStrategyStatus {
 		NEW("新建"), RUNNING("执行中"), STOP("停止"), ERROR("流异常"), SUCCESS("已完成");// 添加异常状态，异常是运行态，但未录制，yzx add on 20190402
@@ -180,6 +184,20 @@ public class RecordStrategyPO extends AbstractBasePO {
 		private String name;
 
 		private EAutoInject(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+	}
+	
+	public enum EAutoFFMpegTranscode {
+		MANUAL("手动ff转码"), AUTO_FFMPEG_TRANSCODE("自动ff转码");
+
+		private String name;
+
+		private EAutoFFMpegTranscode(String name) {
 			this.name = name;
 		}
 
@@ -334,6 +352,14 @@ public class RecordStrategyPO extends AbstractBasePO {
 
 	public void setAutoInjectSel(EAutoInject autoInjectSel) {
 		this.autoInjectSel = autoInjectSel;
+	}
+
+	public EAutoFFMpegTranscode getAutoFFMpegTranscode() {
+		return autoFFMpegTranscode;
+	}
+
+	public void setAutoFFMpegTranscode(EAutoFFMpegTranscode autoFFMpegTranscode) {
+		this.autoFFMpegTranscode = autoFFMpegTranscode;
 	}
 
 }

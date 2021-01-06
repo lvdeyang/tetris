@@ -182,7 +182,7 @@ public class RecordStrategyController {
 
 	@RequestMapping("/addRecordStrategy")
 	@ResponseBody
-	public Object addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
+	public Map<String, Object> addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
 			@RequestParam(value = "name") String name,
 			@RequestParam(value = "status", required = false) String statusStr,
 			@RequestParam(value = "type") String typeStr,

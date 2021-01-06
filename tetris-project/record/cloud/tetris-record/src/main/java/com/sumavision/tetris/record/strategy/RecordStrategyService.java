@@ -14,6 +14,7 @@ import com.sumavision.tetris.record.file.RecordFilePO;
 import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
 import com.sumavision.tetris.record.file.RecordFileService;
 import com.sumavision.tetris.record.storage.StorageDAO;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO.EAutoFFMpegTranscode;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EAutoInject;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyStatus;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyType;
@@ -245,6 +246,16 @@ public class RecordStrategyService {
 			}
 		}
 
+		if (recordStrategyPO.getAutoFFMpegTranscode() != null
+				&& recordStrategyPO.getAutoFFMpegTranscode().equals(EAutoFFMpegTranscode.AUTO_FFMPEG_TRANSCODE)) {
+			LOGGER.info("auto ffmpeg transcode");
+			try {
+				recordFileService.startffMpegTrans(recordFilePO, recordStrategyPO);
+			} catch (Exception e) {
+				// TODO: handle exception
+				LOGGER.info("uto ffmpeg transcode exception=" + e.getStackTrace());
+			}
+		}
 	}
 
 	public void delAllStgy(List<RecordStrategyPO> recordStrategyPOs) {

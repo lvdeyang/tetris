@@ -1,13 +1,20 @@
 package com.sumavision.tetris.record.storage;
 
+import java.io.File;
+import java.text.DecimalFormat;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import com.sumavision.tetris.record.file.RecordFileDAO;
+import com.sumavision.tetris.record.file.RecordFilePO;
+import com.sumavision.tetris.record.file.RecordFileService;
 
 @Service
 public class StorageService {
@@ -17,7 +24,12 @@ public class StorageService {
 	@Autowired
 	private StorageDAO storageDAO;
 
-	// 检测设备心跳动作的频率
+	@Autowired
+	private RecordFileDAO recordFileDAO;
+
+	@Autowired
+	private RecordFileService recordFileService;
+
 	@Value("${localRecordBasePath}")
 	private String localRecordBasePath;
 
@@ -27,14 +39,17 @@ public class StorageService {
 	@Value("${httpBasePath}")
 	private String httpBasePath;
 
-	@Value("${storageSize}")
-	private Integer size;
+	@Value("${clean_timeThreshold}")
+	private Integer clean_timeThreshold;
 
-	@Value("${cleanSpaceThreshold}")
-	private Integer cleanSpaceThreshold;
+	@Value("${clean_diskUsedPercentThreshold}")
+	private Integer clean_diskUsedPercentThreshold;
 
-	@Value("${cleanTimeThreshold}")
-	private Integer cleanTimeThreshold;
+	@Value("${clean_recordMaxSpaceThreshold}")
+	private Integer clean_recordMaxSpaceThreshold;
+
+	@Value("${localFFMpegOutputPath}")
+	private String localFFMpegOutputPath;
 
 	public void init() {
 
@@ -48,29 +63,101 @@ public class StorageService {
 		StoragePO storagePO = new StoragePO();
 		storagePO.setName("默认仓库");
 		storagePO.setLocalRecordPath(localRecordBasePath);
+		storagePO.setLocalFFMpegOutputPath(localFFMpegOutputPath);
 		storagePO.setFtpBasePath(ftpBasePath);
 		storagePO.setHttpBasePath(httpBasePath);
 
-		if (size == null || size == 0) {
-			size = 80;
+		if (clean_timeThreshold == null || clean_timeThreshold == 0) {
+			clean_timeThreshold = 80;
 		}
 
-		storagePO.setSize(size);
+		storagePO.setIsCheckTimeThreshold(true);
+		storagePO.setClean_timeThreshold(clean_timeThreshold);
 
-		if (cleanSpaceThreshold == null || cleanSpaceThreshold == 0) {
-			cleanSpaceThreshold = 60;
+		if (clean_diskUsedPercentThreshold == null || clean_diskUsedPercentThreshold == 0) {
+			clean_diskUsedPercentThreshold = 85;
 		}
 
-		storagePO.setCleanSpaceThreshold(cleanSpaceThreshold);
+		storagePO.setIsCheckDiskUsedSpacePctThreshold(true);
+		storagePO.setClean_diskUsedSpaceThreshold(clean_diskUsedPercentThreshold);
 
-		if (cleanTimeThreshold == null || cleanTimeThreshold == 0) {
-			cleanTimeThreshold = 30;
+		if (clean_recordMaxSpaceThreshold == null || clean_recordMaxSpaceThreshold == 0) {
+			clean_recordMaxSpaceThreshold = 60;
 		}
 
-		storagePO.setCleanTimeThreshold(cleanTimeThreshold);
+		storagePO.setIsCheckRecordMaxSpaceThreshold(true);
+		storagePO.setClean_recordMaxSpaceThreshold(clean_recordMaxSpaceThreshold);
+
+		storagePO.setIsMounted(true);
 
 		storageDAO.save(storagePO);
 
+	}
+
+	public Integer updateRecordSpace(StoragePO storagePO) {
+
+		String localRecordPath = storagePO.getLocalRecordPath();
+
+		File recordDir = new File(localRecordPath);
+
+		long usedSpaceInBytes = FileUtils.sizeOfDirectory(recordDir);
+
+		Integer usedSpaceInMB = (int) (usedSpaceInBytes / 1024 / 1024);
+
+		return usedSpaceInMB;
+	}
+
+	public Integer updateDiskUsedPct(StoragePO storagePO) {
+
+		String localRecordPath = storagePO.getLocalRecordPath();
+		File recordDir = new File(localRecordPath);
+		float diskFreePctFloat = (float) recordDir.getUsableSpace() / recordDir.getTotalSpace();
+		Integer diskUsedPct = 100 - Math.round(diskFreePctFloat * 100);
+		return diskUsedPct;
+
+	}
+
+	public void cleanStorageForDiskUsedPct(StoragePO storagePO) {
+
+		LOGGER.info("cleanStorageForDiskUsedPct start");
+
+		// TODO
+		List<RecordFilePO> recordFilePOs = recordFileDAO.findByStorageIdOrderByStopTimeDesc(storagePO.getId());
+
+		if (!CollectionUtils.isEmpty(recordFilePOs)) {
+			int size = recordFilePOs.size();
+			int i = 0;
+			while (i < size) {
+				LOGGER.info("cleanStorageForDiskUsedPct, del recordFile()", i);
+				recordFileService.delRecordFile(recordFilePOs.get(i));
+				if (updateDiskUsedPct(storagePO) < storagePO.getClean_diskUsedSpaceThreshold()) {
+					break;
+				}
+			}
+		}
+
+	}
+
+	public void cleanStorageForReordMaxSpoace(StoragePO storagePO) {
+
+		LOGGER.info("cleanStorageForReordMaxSpoace start");
+
+		// TODO
+		List<RecordFilePO> recordFilePOs = recordFileDAO.findByStorageIdOrderByStopTimeDesc(storagePO.getId());
+
+		if (!CollectionUtils.isEmpty(recordFilePOs)) {
+			int size = recordFilePOs.size();
+			int i = 0;
+			while (i < size) {
+				LOGGER.info("cleanStorageForReordMaxSpoace, del recordFile()", i);
+
+				recordFileService.delRecordFile(recordFilePOs.get(i));
+
+				if (updateRecordSpace(storagePO) < storagePO.getClean_recordMaxSpaceThreshold()) {
+					break;
+				}
+			}
+		}
 	}
 
 }

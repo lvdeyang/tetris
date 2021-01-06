@@ -10,6 +10,8 @@ import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 
@@ -26,6 +28,7 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 	public List<TaskOutputPO> findByInputId(Long id);
 	
 	public List<TaskOutputPO> findByCapacityIp(String capacityIp);
+	public Integer countDistinctByCapacityIpAndOutputNotNullAndTaskNotNull(String capacityIp);
 	public List<TaskOutputPO> findByCapacityIpAndSyncStatus(String capacityIp, Integer syncStatus);
 
 	public List<TaskOutputPO> findByTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(String taskId);
@@ -33,10 +36,15 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 
 	public Integer countDistinctByInputIdAndTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(Long inputId,String taskId);
 
-	@Modifying
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
 	@Query("update TaskOutputPO output set output.syncStatus = ?2 where output.id = ?1")
 	public void updateSyncStatusById(Long id, Integer syncStatus);
 
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
+	@Query("update TaskOutputPO output set output.capacityIp = ?2 where output.capacityIp = ?1")
+	public void updateCapacityIpByIp(String srcIp, String tgtIp);
 
 
 }

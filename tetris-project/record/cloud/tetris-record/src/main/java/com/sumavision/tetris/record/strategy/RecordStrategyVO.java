@@ -47,7 +47,7 @@ public class RecordStrategyVO {
 		vo.setId(po.getId());
 		vo.setName(po.getName());
 		vo.setSourceId(po.getSourceId());
-		vo.setSourceInfo(po.getSourceType() + " : " + po.getSourceUrl());
+		vo.setSourceInfo("(" + po.getSourceType() + ")" + po.getSourceUrl());
 		vo.setStatus(po.getStatus().getName());
 		vo.setType(po.getType().getName());
 		vo.setDelStatus(po.getDelStatus());

@@ -4,11 +4,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
 import com.sumavision.tetris.business.common.vo.SyncResponseVO;
 import com.sumavision.tetris.business.common.vo.SyncVO;
 import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.device.DeviceDao;
+import com.sumavision.tetris.device.DeviceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +54,9 @@ public class SyncService {
 
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private DeviceDao deviceDao;
 	
 	/**
 	 * 转换模块同步<br/>
@@ -249,6 +255,7 @@ public class SyncService {
 			}
 			capacityService.deleteAllAddMsgId(delete, deviceIp, capacityProps.getPort());
 		}
+		deviceDao.updateFunUnitStatusByIp(FunUnitStatus.NORMAL,deviceIp);
 		LOG.info("[transform-sync] complete, deviceIp :{}",deviceIp);
 	}
 

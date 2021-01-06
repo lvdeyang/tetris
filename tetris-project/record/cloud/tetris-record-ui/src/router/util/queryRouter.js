@@ -114,6 +114,8 @@ if (!getRouter) {
 
       router.addRoutes(assembleVueRouter(routerData))
 
+      // console.log('router=' + JSON.stringify(router))
+
       // 获取活动页
       var activeMenu = getActiveMenu(getRouter)
 
@@ -178,7 +180,9 @@ function assembleVueRouter (routerData) {
     return true
   })
 
+  console.log("accessedRouters=" + JSON.stringify(accessedRouters))
   return accessedRouters
+  
 }
 
 // 从path中解析pageId

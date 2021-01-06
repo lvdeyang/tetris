@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sumavision.tetris.record.external.ffmpeg.FFMpegTransThread;
 import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
 import com.sumavision.tetris.record.storage.StorageDAO;
 import com.sumavision.tetris.record.storage.StoragePO;
@@ -125,6 +127,18 @@ public class RecordFileService {
 
 	}
 
+	public void startffMpegTrans(RecordFilePO recordFilePO, RecordStrategyPO recordStrategyPO) {
+
+		// TODO
+		StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+
+		FFMpegTransThread ffMpegTransThread = new FFMpegTransThread(recordFilePO, storagePO, recordStrategyPO, this,
+				recordFileDAO);
+
+		ffMpegTransThread.run();
+
+	}
+
 	public Map<String, String> getFileUrl(RecordFilePO recordFilePO, StoragePO storagePO) {
 
 		Map<String, String> urlMap = new HashMap<String, String>(4);
@@ -178,6 +192,20 @@ public class RecordFileService {
 		urlMap.put("ftpUrl", ftpUrl);
 
 		return urlMap;
+	}
+
+	public void delRecordFile(RecordFilePO recordFilePO) {
+
+	}
+	
+	
+	
+	public void delRecordFile(List<RecordFilePO> recordFilePOList) {
+
+		for (RecordFilePO recordFilePO : recordFilePOList) {
+			delRecordFile(recordFilePO);
+		}
+
 	}
 
 	public String getWithOutParams(String url) {

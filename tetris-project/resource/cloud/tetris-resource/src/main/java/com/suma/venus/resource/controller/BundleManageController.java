@@ -497,7 +497,7 @@ public class BundleManageController extends ControllerBase {
 //			}
 //		}
 
-		if (bundle.getDeviceIp() != null) {
+		if (bundle.getDeviceIp()!=null && "".equals(bundle.getDeviceIp())) {
 			bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
 		}
 

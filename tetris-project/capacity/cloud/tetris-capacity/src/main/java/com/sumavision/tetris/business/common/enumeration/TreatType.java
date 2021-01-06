@@ -4,7 +4,7 @@ package com.sumavision.tetris.business.common.enumeration;/**
 
 /**
  * @ClassName: TreatType
- * @Description TODO
+ * @Description TODO 预处理类型
  * @Author: Poemafar
  * @Version：1.0
  * @Date 2020/11/5 16:35

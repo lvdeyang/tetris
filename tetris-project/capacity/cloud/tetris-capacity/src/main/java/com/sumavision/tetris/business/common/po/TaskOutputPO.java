@@ -1,17 +1,12 @@
 package com.sumavision.tetris.business.common.po;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
-@Table(name = "TETRIS_CAPACITY_TASK_OUTPUT")
+@Table(name = "TETRIS_CAPACITY_TASK_OUTPUT",uniqueConstraints = {@UniqueConstraint(columnNames={"taskUuid"})})
 public class TaskOutputPO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;

@@ -926,7 +926,7 @@ public class MonitorLiveDeviceService {
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
 			
-			operationLogService.send(userVO.getUsername(), "停止且删除转发", userVO.getUsername() + "停止且删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+			operationLogService.send(userVO.getUsername(), "停止并删除转发", userVO.getUsername() + "停止并删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else if(Boolean.TRUE.equals(stopAndDelete)){
 			
 			if(LiveType.XT_LOCAL.equals(live.getType())){
@@ -939,7 +939,7 @@ public class MonitorLiveDeviceService {
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
 			
-			operationLogService.send(userVO.getUsername(), "停止但不删除转发", userVO.getUsername() + "停止但不删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+			operationLogService.send(userVO.getUsername(), "停止转发", userVO.getUsername() + "停止转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else{
 			monitorLiveDeviceDao.delete(live);
 			operationLogService.send(userVO.getUsername(), "删除转发", userVO.getUsername() + "删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
@@ -1871,7 +1871,7 @@ public class MonitorLiveDeviceService {
 						
 						executeBusiness.execute(logic, "点播系统：重新开始点播设备");
 						
-						operationLogService.send(userName, "开始转发转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+						operationLogService.send(userName, "开始转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 					} catch (Exception e) {
 						System.out.println("停止转发重新开始报错:");
 						e.printStackTrace();
@@ -1923,7 +1923,7 @@ public class MonitorLiveDeviceService {
 					
 					executeBusiness.execute(logic, "点播系统：重新开始点播设备");
 					
-					operationLogService.send(userName, "开始转发转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+					operationLogService.send(userName, "开始转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 				} catch (Exception e) {
 					System.out.println("停止转发重新开始报错:");
 					e.printStackTrace();
