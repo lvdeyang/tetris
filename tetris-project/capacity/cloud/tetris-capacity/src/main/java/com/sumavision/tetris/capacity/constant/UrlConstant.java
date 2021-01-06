@@ -7,67 +7,74 @@ package com.sumavision.tetris.capacity.constant;
  * <b>日期：</b>2019年10月28日 下午2:35:41
  */
 public class UrlConstant {
-	
+
+	public static final String URL_VERSION = "/v0.0";
+
 	/** 前缀 */
 	public static final String URL_PREFIX = "http://";
 	
 	/** 组合 */
-	public static final String URL_COMBINE = "/v0.0/combination";
+	public static final String URL_COMBINE = "combination";
+
+	/**
+	 * 指令队列
+	 */
+	public static final String URL_QUEUE = "queue";
 
 	/** 输入 */
-	public static final String URL_INPUT = "/v0.0/inputs";
+	public static final String URL_INPUT = "inputs";
 	
 	/** 修改指定输入 */
-	public static final String URL_INPUT_PARAM = "/param";
+	public static final String URL_INPUT_PARAM = "param";
 	
 	/** 节目 */
-	public static final String URL_INPUT_PROGRAM = "/programs";
+	public static final String URL_INPUT_PROGRAM = "programs";
 	
 	/** 排期 */
-	public static final String URL_INPUT_SCHEDULE = "/schedule";
+	public static final String URL_INPUT_SCHEDULE = "schedule";
 	
-	public static final String URL_INPUT_PROGRAM_ElEMENTS = "/elements";
+	public static final String URL_INPUT_PROGRAM_ElEMENTS = "elements";
 	
 	/** 修改指定节目解码配置 */
-	public static final String URL_INPUT_PROGRAM_DECODE = "/decode_mode";
+	public static final String URL_INPUT_PROGRAM_DECODE = "decode_mode";
 	
 	/** 获取输入源 */
-	public static final String URL_INPUT_ANALYSIS = "/analysis";
+	public static final String URL_INPUT_ANALYSIS = "analysis";
 	
 	/** 获取所有任务 */
-	public static final String URL_TASK = "/v0.0/tasks";
+	public static final String URL_TASK = "tasks";
 	
 	/** 任务编码 */
-	public static final String URL_TASK_ENCODE = "/encoders";
+	public static final String URL_TASK_ENCODE = "encoders";
 	
 	/** 任务解码后处理 */
-	public static final String URL_TASK_DECODE_PROCESS = "/decode_process";
+	public static final String URL_TASK_DECODE_PROCESS = "decode_process";
 	
 	/** 任务源 */
-	public static final String URL_TASK_SOURCE = "/source";
+	public static final String URL_TASK_SOURCE = "source";
 	
 	/** 任务节目切换 */
-	public static final String URL_TASK_SOURCE_INDEX = "/select_index";
+	public static final String URL_TASK_SOURCE_INDEX = "select_index";
 	
 	/** 输出 */
-	public static final String URL_OUTPUT = "/v0.0/outputs";
+	public static final String URL_OUTPUT = "outputs";
 	
 	/** 全部 */
-	public static final String URL_ENTIRETY = "/v0.0/entireties";
+	public static final String URL_ENTIRETY = "entireties";
 	
 	/** 授权 */
-	public static final String URL_AUTHORIZATION = "/v0.0/authorization";
+	public static final String URL_AUTHORIZATION = "authorization";
 	
 	/** 告警 */
-	public static final String URL_ALARM = "/v0.0/alarmurl";
+	public static final String URL_ALARM = "alarmurl";
 	
 	/** 心跳 */
-	public static final String URL_HEARTBEAT = "/v0.0/heartbeaturl";
+	public static final String URL_HEARTBEAT = "heartbeaturl";
 	
 	/** 告警列表 */
-	public static final String URL_ALARMLIST = "/v0.0/alarmlist";
+	public static final String URL_ALARMLIST = "alarmlist";
 
 	/** 硬件平台 */
-	public static final String GET_PLATFORM = "/v0.0/platform";
+	public static final String GET_PLATFORM = "platform";
 
 }

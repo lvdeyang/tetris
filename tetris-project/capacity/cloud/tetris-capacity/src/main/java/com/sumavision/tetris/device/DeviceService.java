@@ -192,7 +192,7 @@ public class DeviceService {
         }
         try {
             saveDevice(deviceGroupPO.getId(),BackType.MAIN,deviceIp,deviceIp,5656);
-        } catch (BaseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -206,7 +206,7 @@ public class DeviceService {
             }
             netCardInfoDao.save(netCardInfoPO);
         }
-        netCardService.setCallBack(devicePO);
+
     }
 
     /*
@@ -227,7 +227,13 @@ public class DeviceService {
             e.printStackTrace();
             throw new BaseException(StatusCode.ERROR,"告警地址设置失败");
         }
-
+        //设置小工具回调地址
+        try {
+            netCardService.setCallBack(devicePO);
+        } catch (BaseException e) {
+            e.printStackTrace();
+            throw new BaseException(StatusCode.ERROR,"小工具回调地址设置失败");
+        }
         //判断是否配置控制口输出
         if (checkCtrlPortAndOutput(nets)){
             resOptVO.setTooltip("控制口配置输出分组会导致，本地发布任务主备切换失败；");
