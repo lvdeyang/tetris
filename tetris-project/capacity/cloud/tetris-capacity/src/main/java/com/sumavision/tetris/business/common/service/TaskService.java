@@ -702,6 +702,30 @@ public class TaskService {
         capacityService.removeAll(ip);
     }
 
+    public TaskInputPO addInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = new TaskInputPO();
+        inputPO.setCreateTime(new Date());
+        inputPO.setUpdateTime(inputPO.getCreateTime());
+        inputPO.setUniq(uniq);
+        inputPO.setType(busType);
+        inputPO.setInput(JSON.toJSONString(inputBO));
+        inputPO.setNodeId(inputBO.getId());
+        taskInputDao.save(inputPO);
+        return inputPO;
+    }
+
+    public void updateInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
+        inputPO.setUpdateTime(new Date());
+        inputPO.setUniq(uniq);
+
+        inputPO.setType(busType);
+        inputPO.setInput(JSON.toJSONString(inputBO));
+        inputPO.setNodeId(inputBO.getId());
+        taskInputDao.save(inputPO);
+    }
 }
 
 

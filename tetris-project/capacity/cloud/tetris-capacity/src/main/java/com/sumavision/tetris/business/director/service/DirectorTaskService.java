@@ -1314,7 +1314,7 @@ public class DirectorTaskService {
 		if (backBO.getBack_up_passby()!=null){
 			backBO.getBack_up_passby().setSelect_index(selectIndex.toString());
 		}
-		transcodeTaskService.updateInputToDB(backBO,BusinessType.DIRECTOR);
+		taskService.updateInputToDB(backBO,BusinessType.DIRECTOR);
 	}
 
 

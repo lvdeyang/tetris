@@ -95,9 +95,6 @@ public class CommonUtil {
                     for (int i=srcLen;i<tarLen;i++){
                         source.getJSONArray(tk).add(target.getJSONArray(tk).getJSONObject(i));
                     }
-
-
-
                 }else{
                     source.put(tk,target.get(tk));
                 }
