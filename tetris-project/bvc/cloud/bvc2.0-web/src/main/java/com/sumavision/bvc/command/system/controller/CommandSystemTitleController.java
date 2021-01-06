@@ -23,6 +23,7 @@ import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -75,7 +76,7 @@ public class CommandSystemTitleController {
 		title.setTitleName(titleName);
 		commandSystemTitleDao.save(title);
 		
-		operationLogService.send(user.getName(), "添加任务标题", user.getName()+"添加任务标题，任务名称："+ titleName);
+		operationLogService.send(user.getName(), "添加任务", user.getName()+"添加任务，任务名称："+ titleName);
 		
 		return null;
 	}
@@ -99,7 +100,7 @@ public class CommandSystemTitleController {
 		
 		commandSystemTitleDao.delete(systemTitle);
 		
-		operationLogService.send(user.getName(), "删除任务标题", user.getName()+"删除任务标题，任务名称："+ systemTitle.getTitleName());
+		operationLogService.send(user.getName(), "删除任务", user.getName()+"删除任务，任务名称："+ systemTitle.getTitleName());
 		
 		return null;
 	}
@@ -134,14 +135,41 @@ public class CommandSystemTitleController {
 			}
 		}
 		
-		CommandSystemTitlePO title=commandSystemTitleDao.findOne(id);
-		String tempTitle = title.getTitleName();
-		title.setBeginTime(DateUtil.parse(beginTime, DateUtil.dateTimePattern));
-		title.setTitleName(titleName);
-		title.setCurrentTask(isCurrentTask);
-		commandSystemTitleDao.save(title);
+		CommandSystemTitlePO title = commandSystemTitleDao.findOne(id);
+		String titleName0 = title.getTitleName();
 		
-		operationLogService.send(user.getName(), "修改任务标题", user.getName()+"修改任务标题 "+tempTitle+" 为"+ title.getTitleName()+"或者设置为： "+title.getCurrentTask());
+		boolean changed = false;
+		StringBuffer log = new StringBuffer().append(user.getName() + "修改任务“" + titleName0 + "”");
+		
+		if(!titleName0.equals(titleName)){	
+			title.setTitleName(titleName);		
+			changed = true;
+			log.append("为“" + titleName + "” ");
+		}
+		
+		Date beginTime0 = title.getBeginTime();
+		Date beginTime1 = DateUtil.parse(beginTime, DateUtil.dateTimePattern);
+		if(beginTime0.getTime() != beginTime1.getTime()){
+			title.setBeginTime(beginTime1);
+			changed = true;
+			log.append("开始时间为“" + beginTime + "” ");
+		}
+		
+		Boolean isCurrentTask0 = title.getCurrentTask();
+		if(!isCurrentTask0.equals(isCurrentTask)){
+			title.setCurrentTask(isCurrentTask);
+			changed = true;
+			if(isCurrentTask0){
+				log.append("设置为当前任务");
+			}else{
+				log.append("设置为非当前任务");
+			}
+		}
+		
+		if(changed){
+			commandSystemTitleDao.save(title);
+			operationLogService.send(user.getName(), "修改任务", log.toString());
+		}		
 		
 		return null;
 	}

@@ -739,7 +739,7 @@ public class VodService {
 				businessReturnService.execute();
 			}
 			
-			operationLogService.send(user.getName(), "关闭点播", user.getName()+"停止点播："+ vod.getDstBundleName());
+			operationLogService.send(user.getName(), "关闭点播", user.getName()+"停止点播："+ vod.getSrcName());
 			
 			//删除这些PO
 			groupDao.delete(group);
