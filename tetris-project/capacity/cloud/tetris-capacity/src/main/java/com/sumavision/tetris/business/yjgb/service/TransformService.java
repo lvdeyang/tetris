@@ -244,12 +244,6 @@ public class TransformService {
 			String recordCallBackUrl,
 			StreamTranscodingVO streamVO) throws Exception{
 
-		//加任务的时候判断下，如果设备不在就加下设备，为了设置告警地址设备就能上线同步了。
-		DevicePO device = deviceDao.findByDeviceIp(capacityIp);
-		if (device == null) {
-			deviceService.saveDevice(capacityIp);
-		}
-
 		TaskInputPO input = taskInputDao.findByUniq(uniq);
 		
 		if(input == null){
