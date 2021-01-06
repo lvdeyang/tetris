@@ -1500,7 +1500,7 @@ public class TranscodeTaskService {
 		}
 
 		//删除输入
-		if (Objects.nonNull(taskSetVO.getDelete_input())){
+		if (Objects.nonNull(taskSetVO.getDelete_input()) && !taskSetVO.getDelete_input().getInput_array().isEmpty()){
 			capacityService.deleteInputs(capacityIp, taskSetVO.getDelete_input());
 			List<String> delInputList = taskSetVO.getDelete_input().getInput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
 			taskInputPOS.stream().forEach(i->{
