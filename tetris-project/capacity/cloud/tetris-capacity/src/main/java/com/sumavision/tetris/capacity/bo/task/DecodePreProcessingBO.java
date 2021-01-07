@@ -20,7 +20,7 @@ public class DecodePreProcessingBO {
 
 	private EnhanceBO enhance;
 
-	private ImageFilterBO imageFilterBO;
+	private ImageFilterBO imageFilter;
 
 	@JSONField(name = "SDRHDRConvert")
 	private HdrBO SDRHDRConvert;
@@ -89,12 +89,13 @@ public class DecodePreProcessingBO {
 		this.enhance = enhance;
 	}
 
-	public ImageFilterBO getImageFilterBO() {
-		return imageFilterBO;
+	public ImageFilterBO getImageFilter() {
+		return imageFilter;
 	}
 
-	public void setImageFilterBO(ImageFilterBO imageFilterBO) {
-		this.imageFilterBO = imageFilterBO;
+	public DecodePreProcessingBO setImageFilter(ImageFilterBO imageFilter) {
+		this.imageFilter = imageFilter;
+		return this;
 	}
 
 	public HdrBO getSDRHDRConvert() {
