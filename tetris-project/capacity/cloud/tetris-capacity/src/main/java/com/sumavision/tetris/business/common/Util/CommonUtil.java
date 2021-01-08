@@ -50,6 +50,11 @@ public class CommonUtil {
         types.add("enum");
     }
 
+    /**
+     * 是否组播，true 是；false 否
+     * @param ip
+     * @return
+     */
     public static boolean isMulticast(String ip){
         //补全ip格式  224.1.1.1 -> 224.001.001.001
         String[] ipSplit = ip.split("\\.");

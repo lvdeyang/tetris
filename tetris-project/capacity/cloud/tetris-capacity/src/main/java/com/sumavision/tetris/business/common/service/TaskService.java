@@ -604,22 +604,22 @@ public class TaskService {
                         && i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port())).findAny().orElse(null);
             }
             if(inputBO.getHls() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null &&  i.getHls().getUrl().equals(inputBO.getHls().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getDash() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl().equals(inputBO.getDash().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getMss() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl().equals(inputBO.getMss().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtmp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl().equals(inputBO.getRtmp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtsp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl().equals(inputBO.getRtsp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getHttp_flv() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl().equals(inputBO.getHttp_flv().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getSdi() != null){
                 targetInputBO = inputs.getInput_array().stream().filter(i->i.getSdi()!=null
