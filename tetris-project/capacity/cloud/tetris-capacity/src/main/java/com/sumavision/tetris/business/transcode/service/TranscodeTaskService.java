@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.alarm.service.AlarmService;
+import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
@@ -213,10 +214,29 @@ public class TranscodeTaskService {
 
 	}
 
+	public void transferStream(InputBO inputBO){
+		//是否转发
+		if (inputBO.getUdp_ts() != null) {
+			if (CommonUtil.isMulticast(inputBO.getUdp_ts().getSource_ip())) {
+
+			}
+		}else if (inputBO.getRtp_ts()!=null){
+
+		}else if (inputBO.getHttp_ts()!=null){
+
+		}else if (inputBO.getSrt_ts()!=null){
+
+		}
+
+		//转发
+
+	}
 
 	public void previewInput(CreateInputPreviewVO createInputPreviewVO) throws Exception {
 
 		InputBO inputBO = createInputPreviewVO.getInput_array().get(0);
+
+//		transferStream(inputBO);
 
 		if (createInputPreviewVO.getProgram_number() == null){
 			throw new BaseException(StatusCode.ERROR,"param[program number] not exist");
