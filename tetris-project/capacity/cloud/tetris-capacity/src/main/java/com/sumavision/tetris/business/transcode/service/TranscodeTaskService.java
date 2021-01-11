@@ -4,10 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.alarm.service.AlarmService;
+import com.sumavision.tetris.application.preview.PreviewDAO;
+import com.sumavision.tetris.application.preview.PreviewPO;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
+import com.sumavision.tetris.business.common.Util.NodeUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.SyncService;
@@ -93,6 +97,12 @@ public class TranscodeTaskService {
 
 	@Autowired
 	private AlarmService alarmService;
+
+	@Autowired
+	private PreviewDAO previewDao;
+
+	@Autowired
+	private NodeUtil nodeUtil;
 
 	@Value("${constant.default.audio.column:0}")
 	private Integer audioColumn;
@@ -214,51 +224,89 @@ public class TranscodeTaskService {
 
 	}
 
-	public void transferStream(InputBO inputBO){
-		//是否转发
-		if (inputBO.getUdp_ts() != null) {
-			if (CommonUtil.isMulticast(inputBO.getUdp_ts().getSource_ip())) {
-
+	/**
+	 * 判断是否需要转发流
+	 * @param previewDevice
+	 * @param receiveDevice
+	 * @param inputBO
+	 * @return
+	 */
+	public boolean beTransferStream(String previewDevice,String receiveDevice,InputBO inputBO){
+		if (receiveDevice==null || previewDevice.equals(receiveDevice)){
+			return false;
+		}else {
+			if (inputBO.getUdp_ts() != null && !CommonUtil.isMulticast(inputBO.getUdp_ts().getSource_ip())) { //udp单播 转发
+				return true;
 			}
-		}else if (inputBO.getRtp_ts()!=null){
-
-		}else if (inputBO.getHttp_ts()!=null){
-
-		}else if (inputBO.getSrt_ts()!=null){
-
+			if (inputBO.getRtp_ts() != null && !CommonUtil.isMulticast(inputBO.getRtp_ts().getSource_ip())) { //rtp单播 转发
+				return true;
+			}
 		}
-
-		//转发
-
+		return false;
 	}
 
-	public void previewInput(CreateInputPreviewVO createInputPreviewVO) throws Exception {
+	public String transferStream(InputBO inputBO,String previewDevice,String receiveDevice) throws Exception {
+		//转发
+		String transJobId = UUID.randomUUID().toString();
+		ProtocolType inType = ProtocolType.getProtocolType(inputBO);
+		String inUrl = nodeUtil.getUrl(inputBO);
+		String outUrl = "";
+		Integer outPort = nodeUtil.getPortByDevice(previewDevice);
+		if (outPort==null){
+			throw new BaseException(StatusCode.FORBIDDEN,"no port for transfer stream");
+		}
+		if (inputBO.getUdp_ts()!=null){
+			outUrl = "udp://"+previewDevice+":"+outPort;
+			inputBO.getUdp_ts().setSource_ip(previewDevice);
+			inputBO.getUdp_ts().setSource_port(outPort);
+			inputBO.getUdp_ts().setLocal_ip(previewDevice);
+		}
+		if (inputBO.getRtp_ts()!=null){
+			outUrl = "rtp://"+previewDevice+":"+outPort;
+			inputBO.getRtp_ts().setSource_ip(previewDevice);
+			inputBO.getRtp_ts().setSource_port(outPort);
+			inputBO.getRtp_ts().setLocal_ip(previewDevice);
+		}
+		taskService.transferStream(receiveDevice,transJobId, inType, inUrl,null, inType, outUrl,BusinessType.TRANSCODE);
 
-		InputBO inputBO = createInputPreviewVO.getInput_array().get(0);
+		return transJobId;
+	}
 
-//		transferStream(inputBO);
 
-		if (createInputPreviewVO.getProgram_number() == null){
+
+
+	public void createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+
+		PreviewPO previewPO = new PreviewPO();
+		InputBO inputBO = inputPreviewVO.getInput_array().get(0);
+
+		if (beTransferStream(inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device(),inputBO)) {
+			String transferJobId = transferStream(inputBO, inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device());
+			previewPO.setTransferTaskId(transferJobId);
+		}
+
+		if (inputPreviewVO.getProgram_number() == null){
 			throw new BaseException(StatusCode.ERROR,"param[program number] not exist");
 		}
 
 		String pubName = inputBO.getId();
 		String playName = inputBO.getId();
-		String taskId = inputBO.getId();
+		previewPO.setInputId(inputBO.getId());
+		String taskId = UUID.randomUUID().toString();
 
 		String uniq = taskService.generateUniq(inputBO);
 		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
 		if (inputPO!=null && inputPO.getCount()>0){ //输入存在的话就将现有输入进行替换下，以免input_id不一致
 			inputBO = JSONObject.parseObject(inputPO.getInput(),InputBO.class);
-			createInputPreviewVO.getInput_array().remove(0);
-			createInputPreviewVO.getInput_array().add(inputBO);
+			inputPreviewVO.getInput_array().remove(0);
+			inputPreviewVO.getInput_array().add(inputBO);
 		}
 		ProgramBO taskProgramBO = inputBO.getProgram_array().stream()
-				.filter(p->createInputPreviewVO.getProgram_number().equals(p.getProgram_number()))
+				.filter(p-> inputPreviewVO.getProgram_number().equals(p.getProgram_number()))
 				.findFirst()
 				.get();
 		if (taskProgramBO == null) {
-			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+createInputPreviewVO.getProgram_number());
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+ inputPreviewVO.getProgram_number());
 		}
 
 		fps=StringUtils.deleteWhitespace(fps);
@@ -270,11 +318,11 @@ public class TranscodeTaskService {
 			taskProgramBO.getAudio_array().get(0).setAudio_column("on");
 		}
 
-		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, createInputPreviewVO.getProgram_number());
+		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, inputPreviewVO.getProgram_number());
 
 //		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
 		String outputUrl = new StringBuilder().append("rtmp://")
-				.append(createInputPreviewVO.getDevice_ip())
+				.append(inputPreviewVO.getDevice_ip())
 				.append(":1935")
 				.append("/")
 				.append("live")
@@ -283,8 +331,11 @@ public class TranscodeTaskService {
 				.toString();
 		List<OutputBO> outputBOs = trans2RTMPOutputBO(taskId, taskBOs, outputUrl);
 
-		save(taskId, createInputPreviewVO.getDevice_ip(), createInputPreviewVO.getInput_array()  , taskBOs, outputBOs, BusinessType.TRANSCODE);
+		save(taskId, inputPreviewVO.getDevice_ip(), inputPreviewVO.getInput_array(), taskBOs, outputBOs, BusinessType.TRANSCODE);
 
+		previewPO.setPreviewTaskId(taskId);
+		previewPO.setUpdateTime(new Date());
+		previewDao.save(previewPO);
 
 	}
 
@@ -624,6 +675,7 @@ public class TranscodeTaskService {
 					inputPO.setType(businessType);
 					inputPO.setInput(JSON.toJSONString(inputBO));
 					inputPO.setNodeId(inputBO.getId());
+					inputPO.setUrl(nodeUtil.getUrl(inputBO));
 					inputPO.setCapacityIp(capacityIp);
 					taskInputDao.save(inputPO);
 					if (realInput==null) {
@@ -643,6 +695,7 @@ public class TranscodeTaskService {
 					inputPO.setType(businessType);
 					inputPO.setCreateTime(new Date());
 					inputPO.setUpdateTime(inputPO.getCreateTime());
+					inputPO.setUrl(nodeUtil.getUrl(inputBO));
 					inputPO.setCount(inputPO.getCount() + 1);
 					inputPO.setCapacityIp(capacityIp);
 					taskInputDao.save(inputPO);

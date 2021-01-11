@@ -2,8 +2,6 @@ package com.sumavision.tetris.business.transcode.vo;/**
  * Created by Poemafar on 2020/9/1 13:51
  */
 
-import com.sumavision.tetris.business.bvc.vo.BvcAudioParamVO;
-import com.sumavision.tetris.business.bvc.vo.BvcVideoParamVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 
 import java.util.List;
@@ -15,11 +13,29 @@ import java.util.List;
  * @Version：1.0
  * @Date 2020/9/1 13:51
  */
-public class CreateInputPreviewVO {
+public class InputPreviewVO {
+    /**
+     * 操作类型：create添加预览  delete 删除预览
+     */
+    private String operate;
+
+    /**
+     * 删除预览任务的ID
+     */
+    private String delInputId;
+
 
     private String msg_id;
 
+    /**
+     * 预览任务的设备
+     */
     private String device_ip;
+
+    /**
+     * 收流的设备,如果是null说明是任意设备都能收到流
+     */
+    private String receive_stream_device;
 
     private Integer program_number;
     /**
@@ -57,5 +73,32 @@ public class CreateInputPreviewVO {
 
     public void setProgram_number(Integer program_number) {
         this.program_number = program_number;
+    }
+
+    public String getReceive_stream_device() {
+        return receive_stream_device;
+    }
+
+    public InputPreviewVO setReceive_stream_device(String receive_stream_device) {
+        this.receive_stream_device = receive_stream_device;
+        return this;
+    }
+
+    public String getOperate() {
+        return operate;
+    }
+
+    public InputPreviewVO setOperate(String operate) {
+        this.operate = operate;
+        return this;
+    }
+
+    public String getDelInputId() {
+        return delInputId;
+    }
+
+    public InputPreviewVO setDelInputId(String delInputId) {
+        this.delInputId = delInputId;
+        return this;
     }
 }
