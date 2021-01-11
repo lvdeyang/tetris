@@ -5,6 +5,8 @@ package com.sumavision.tetris.business.common.service;/**
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.preview.PreviewDAO;
+import com.sumavision.tetris.application.preview.PreviewPO;
 import com.sumavision.tetris.business.common.ResultBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.NodeUtil;
@@ -16,6 +18,7 @@ import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
+import com.sumavision.tetris.business.transcode.vo.InputPreviewVO;
 import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
@@ -39,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,6 +73,9 @@ public class TaskService {
 
     @Autowired
     CapacityService capacityService;
+
+    @Autowired
+    PreviewDAO previewDao;
 
     @Autowired
     TranscodeTaskService transcodeTaskService;
@@ -725,6 +732,32 @@ public class TaskService {
         inputPO.setInput(JSON.toJSONString(inputBO));
         inputPO.setNodeId(inputBO.getId());
         taskInputDao.save(inputPO);
+    }
+
+    public void previewInput(InputPreviewVO inputPreviewVO) throws Exception {
+        if(inputPreviewVO.getOperate()==null || "CREATE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            transcodeTaskService.createPreviewForInput(inputPreviewVO);
+        }else if ("DELETE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            deletePreviewForInput(inputPreviewVO);
+        }else{
+            throw new BaseException(StatusCode.FORBIDDEN,"unknown operate type",inputPreviewVO.getOperate());
+        }
+    }
+
+    public void deletePreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+        PreviewPO previewPO = previewDao.findByInputId(inputPreviewVO.getDelInputId());
+        if (previewPO == null) {
+            return;
+        }
+        if (previewPO.getTransferTaskId() != null && !previewPO.getTransferTaskId().isEmpty()) {
+            deleteTranscodeTask(previewPO.getTransferTaskId());
+            previewDao.updateTransferTaskIdById(previewPO.getId(),"");
+        }
+        if (previewPO.getPreviewTaskId()!=null && !previewPO.getPreviewTaskId().isEmpty()){
+            deleteTranscodeTask(previewPO.getPreviewTaskId());
+            previewDao.updatePreviewTaskIdById(previewPO.getId(),"");
+        }
+        previewDao.delete(previewPO.getId());
     }
 }
 

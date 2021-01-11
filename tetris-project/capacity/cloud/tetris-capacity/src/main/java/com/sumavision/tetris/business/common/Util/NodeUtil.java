@@ -4,18 +4,20 @@ package com.sumavision.tetris.business.common.Util;/**
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.bo.MediaSourceBO;
+import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
+import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
 import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @ClassName: NodeUtil
@@ -27,6 +29,45 @@ import java.util.UUID;
 @Component
 public class NodeUtil {
 
+    @Autowired
+    TaskInputDAO taskInputDao;
+
+    public String getUrl(InputBO inputBO){
+        if (inputBO.getUdp_ts() != null) {
+            return "udp://"+inputBO.getUdp_ts().getSource_ip()+":"+inputBO.getUdp_ts().getSource_port();
+        }
+        if (inputBO.getRtp_ts() != null) {
+            return "rtp://"+inputBO.getRtp_ts().getSource_ip()+":"+inputBO.getRtp_ts().getSource_port();
+        }
+        if (inputBO.getHttp_ts() != null) {
+            return inputBO.getHttp_ts().getUrl();
+        }
+        if (inputBO.getSrt_ts() != null) {
+            return "srt://"+inputBO.getSrt_ts().getSource_ip()+":"+inputBO.getSrt_ts().getSource_port();
+        }
+        if (inputBO.getHls() != null) {
+            return inputBO.getHls().getUrl();
+        }
+        if (inputBO.getDash() != null) {
+            return inputBO.getDash().getUrl();
+        }
+        if (inputBO.getRtsp() != null) {
+            return inputBO.getRtsp().getUrl();
+        }
+        if (inputBO.getRtmp() != null) {
+            return inputBO.getRtmp().getUrl();
+        }
+        if (inputBO.getHttp_flv() != null) {
+            return inputBO.getHttp_flv().getUrl();
+        }
+        if (inputBO.getZixi() != null) {
+            return inputBO.getZixi().getUrl();
+        }
+        if (inputBO.getMss() != null) {
+            return inputBO.getMss().getUrl();
+        }
+        return null;
+    }
 
     public InputBO getPassbyInputInCommand(IdConstructor idCtor,ProtocolType type, String url,String srtMode, String localIp){
         InputBO inputBO = new InputBO();
@@ -64,7 +105,6 @@ public class NodeUtil {
     }
 
 
-
     public OutputBO getPassbyOutputInCommond(IdConstructor idCtor,ProtocolType type, String url, String localIp){
 
         OutputBO outputBO = new OutputBO();
@@ -100,4 +140,21 @@ public class NodeUtil {
         return outputBO;
     }
 
+
+    public Integer getPortByDevice(String deviceIp){
+        Set<Integer> usedPorts = new HashSet<>();
+        List<TaskInputPO> all = taskInputDao.findByUrlNotNull();
+        for (int i = 0; i < all.size(); i++) {
+            TaskInputPO inputPO = all.get(i);
+            if (inputPO.getCount()>0 && inputPO.getUrl().contains(deviceIp)) {
+                usedPorts.add(IpV4Util.getPortFromUrl(inputPO.getUrl()));
+            }
+        }
+        for (int port = 1000;port < 65535;port++){
+            if (!usedPorts.contains(port)){
+                return port;
+            }
+        }
+        return null;
+    }
 }
