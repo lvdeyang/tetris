@@ -989,7 +989,7 @@ public class OutlandService extends ControllerBase{
 		if (bundlePOs != null && bundlePOs.size() > 0) {
 			for (BundlePO bundlePO : bundlePOs) {
 				if (!bundlePO.getDeviceModel().equals("cdn")) {
-					if (null != bundlePO.getCoderType() && !"".equals(bundlePO.getCoderType()) && bundlePO.getCoderType().equals(CoderType.DECODER)) {
+					if (null != bundlePO.getCoderType() && !"".equals(bundlePO.getCoderType()) && !bundlePO.getCoderType().equals(CoderType.DECODER)) {
 						bundleIdsFilter.add(bundlePO.getBundleId());
 					}
 				}
