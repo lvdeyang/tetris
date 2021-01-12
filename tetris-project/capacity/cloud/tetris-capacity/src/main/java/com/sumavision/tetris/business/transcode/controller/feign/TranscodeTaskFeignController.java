@@ -83,8 +83,8 @@ public class TranscodeTaskFeignController {
 	public Object previewInput(
 			String inputInfo) throws Exception{
 		InputPreviewVO inputVO = JSON.parseObject(inputInfo, InputPreviewVO.class);
-		taskService.previewInput(inputVO);
-		return null;
+		String result = taskService.previewInput(inputVO);
+		return result;
 	}
 
 	/**

@@ -275,8 +275,15 @@ public class TranscodeTaskService {
 
 
 
-
-	public void createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+/**
+ * @MethodName: createPreviewForInput
+ * @Description: TODO 输入预览
+ * @param inputPreviewVO 1
+ * @Return: void
+ * @Author: Poemafar
+ * @Date: 2021/1/12 9:55
+ **/
+	public String createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
 
 		PreviewPO previewPO = new PreviewPO();
 		InputBO inputBO = inputPreviewVO.getInput_array().get(0);
@@ -322,6 +329,12 @@ public class TranscodeTaskService {
 
 		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, inputPreviewVO.getProgram_number());
 
+//		String outputUrl = new StringBuilder()
+//				.append("http://")
+//				.append(inputPreviewVO.getDevice_ip())
+//				.append(":8888").append("/")
+//				.append(inputBO.getId()).append("/")
+//				.append(inputBO.getId()).append(".m3u8").toString();
 //		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
 		String outputUrl = new StringBuilder().append("rtmp://")
 				.append(inputPreviewVO.getDevice_ip())
@@ -346,6 +359,9 @@ public class TranscodeTaskService {
 		previewPO.setUpdateTime(new Date());
 		previewDao.save(previewPO);
 
+		JSONObject result = new JSONObject();
+		result.put("outputUrl",outputUrl);
+		return result.toJSONString();
 	}
 
 	public List<TaskBO> trans2TaskBO(

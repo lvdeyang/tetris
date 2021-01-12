@@ -1,15 +1,14 @@
-package com.sumavision.tetris.application.alarm;/**
- * Created by Poemafar on 2020/12/28 8:42
- */
+package com.sumavision.tetris.application.alarm;
 
 /**
  * @ClassName: AlarmCode
- * @Description TODO
+ * @Description TODO 告警码
+ * final类 不能被继承
  * @Author: Poemafar
  * @Version：1.0
  * @Date 2020/12/28 8:42
  */
-public class AlarmCode {
+public final class AlarmCode {
 
     /**
      * 授权失败
@@ -31,4 +30,7 @@ public class AlarmCode {
      */
     public static final String DEVICE_SWITCH = "11011002";
 
+    private AlarmCode(){
+
+    }
 }

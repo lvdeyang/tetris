@@ -734,14 +734,16 @@ public class TaskService {
         taskInputDao.save(inputPO);
     }
 
-    public void previewInput(InputPreviewVO inputPreviewVO) throws Exception {
+    public String previewInput(InputPreviewVO inputPreviewVO) throws Exception {
+        String result = "";
         if(inputPreviewVO.getOperate()==null || "CREATE".equals(inputPreviewVO.getOperate().toUpperCase())){
-            transcodeTaskService.createPreviewForInput(inputPreviewVO);
+            result = transcodeTaskService.createPreviewForInput(inputPreviewVO);
         }else if ("DELETE".equals(inputPreviewVO.getOperate().toUpperCase())){
             deletePreviewForInput(inputPreviewVO);
         }else{
             throw new BaseException(StatusCode.FORBIDDEN,"unknown operate type",inputPreviewVO.getOperate());
         }
+        return result;
     }
 
     public void deletePreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
