@@ -159,7 +159,12 @@
 		            <encoding>utf-8</encoding>
 		        </configuration>
 	        </plugin>
-
+<!--代码质量审查-->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.2</version>
+			</plugin>
 			<!--源码-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

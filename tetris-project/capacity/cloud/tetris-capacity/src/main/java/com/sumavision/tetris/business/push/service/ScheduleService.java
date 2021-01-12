@@ -635,13 +635,13 @@ public class ScheduleService {
 			
 			EncodeConstant.VideoType type = EncodeConstant.VideoType.getVideoType(videoEncoder);
 			switch (type) {
-				case h264:
+				case H264:
 					videoEncode.setH264(obj);
 					break;
-				case hevc:
+				case HEVC:
 					videoEncode.setHevc(obj);
 					break;
-				case mpeg2:
+				case MPEG2:
 					videoEncode.setMpeg2(obj);
 					break;
 				default:

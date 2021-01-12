@@ -1,36 +1,29 @@
 package com.sumavision.tetris.business.transcode.controller.feign;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.application.annotation.OprLog;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.business.common.service.TaskModifyService;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.common.vo.SyncVO;
+import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
+import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
+import com.sumavision.tetris.capacity.bo.output.OutputBO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.business.common.service.SyncService;
-import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
-import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
-import com.sumavision.tetris.capacity.bo.input.InputBO;
-import com.sumavision.tetris.capacity.bo.output.OutputBO;
-import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/capacity/transcode/feign")
 public class TranscodeTaskFeignController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(TranscodeTaskFeignController.class);
 
 	@Autowired
 	private TranscodeTaskService transcodeTaskService;
@@ -60,11 +53,13 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/add")
 	public Object addTask(
 			String transcodeInfo) throws Exception{
-		TranscodeTaskVO transcode = JSONObject.parseObject(transcodeInfo, TranscodeTaskVO.class);
+		TranscodeTaskVO transcode = JSON.parseObject(transcodeInfo, TranscodeTaskVO.class);
 		if(transcode.getSystem_type() == null || transcode.getSystem_type().equals(0)){
 			transcodeTaskService.addTranscodeTask(transcode);
 		}else if(transcode.getSystem_type().equals(1)){
 			return externalTaskService.addExternalTask(transcode);
+		}else {
+			throw new IllegalArgumentException("system type:"+transcode.getSystem_type());
 		}
 		return null;
 	}
@@ -76,7 +71,7 @@ public class TranscodeTaskFeignController {
 	public Object addInput(
 			String inputInfo,
 			HttpServletRequest request) throws Exception{
-		CreateInputsVO inputsVO = JSONObject.parseObject(inputInfo, CreateInputsVO.class);
+		CreateInputsVO inputsVO = JSON.parseObject(inputInfo, CreateInputsVO.class);
 		String result = transcodeTaskService.addInputs(inputsVO);
 		return result;
 	}
@@ -87,7 +82,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/preview/input")
 	public Object previewInput(
 			String inputInfo) throws Exception{
-		InputPreviewVO inputVO = JSONObject.parseObject(inputInfo, InputPreviewVO.class);
+		InputPreviewVO inputVO = JSON.parseObject(inputInfo, InputPreviewVO.class);
 		taskService.previewInput(inputVO);
 		return null;
 	}
@@ -106,11 +101,13 @@ public class TranscodeTaskFeignController {
 	public Object deleteTask(
 			String task) throws Exception{
 
-		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		TaskVO taskVO = JSON.parseObject(task, TaskVO.class);
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
 			taskService.deleteTranscodeTask(taskVO);
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.deleteExternalTask(taskVO);
+		}else {
+			throw new IllegalArgumentException("system type:"+taskVO.getSystem_type());
 		}
 		return null;
 	}
@@ -129,7 +126,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/analysis/input")
 	public Object analysisInput(
 			String analysisInput) throws Exception{
-		AnalysisInputVO analysisInputVO = JSONObject.parseObject(analysisInput, AnalysisInputVO.class);
+		AnalysisInputVO analysisInputVO = JSON.parseObject(analysisInput, AnalysisInputVO.class);
 		String response = transcodeTaskService.analysisInput(analysisInputVO);
 		return response;
 	}
@@ -175,7 +172,7 @@ public class TranscodeTaskFeignController {
 			String taskId,
 			String input,
 			HttpServletRequest request) throws Exception{
-		InputBO inputBO = JSONObject.parseObject(input, InputBO.class);
+		InputBO inputBO = JSON.parseObject(input, InputBO.class);
 		transcodeTaskService.addCover(taskId, inputBO);
 		return null;
 	}
@@ -212,12 +209,14 @@ public class TranscodeTaskFeignController {
 	public Object restartTask(
 			String task,
 			HttpServletRequest request) throws Exception{
-		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		TaskVO taskVO = JSON.parseObject(task, TaskVO.class);
 
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
 
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.rebootExternalTask(taskVO);
+		}else {
+			throw new IllegalArgumentException("system type:"+taskVO.getSystem_type());
 		}
 		return null;
 	}
@@ -236,12 +235,14 @@ public class TranscodeTaskFeignController {
 	public Object stopTask(
 			String task,
 			HttpServletRequest request) throws Exception{
-		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		TaskVO taskVO = JSON.parseObject(task, TaskVO.class);
 
 		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
 
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.stopExternalTask(taskVO);
+		}else {
+			throw new IllegalArgumentException("system type:"+taskVO.getSystem_type());
 		}
 		return null;
 	}
@@ -265,7 +266,7 @@ public class TranscodeTaskFeignController {
 			String output,
 			HttpServletRequest request) throws Exception{
 		if(systemType == 0){
-			List<OutputBO> outputs = JSONArray.parseArray(output, OutputBO.class);
+			List<OutputBO> outputs = JSON.parseArray(output, OutputBO.class);
 			transcodeTaskService.addOutput(taskId, outputs);
 		}else{
 			//TODO
@@ -307,7 +308,7 @@ public class TranscodeTaskFeignController {
 	public Object syncBusiness(
 			String syncObj,
 			HttpServletRequest request) throws Exception{
-		SyncVO syncVO = JSONObject.parseObject(syncObj, SyncVO.class);
+		SyncVO syncVO = JSON.parseObject(syncObj, SyncVO.class);
 		String result = syncService.syncBusiness(syncVO);
 		return result;
 	}
@@ -362,7 +363,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/modify")
 	public Object modifyTask(
 			String taskInfo) throws Exception{
-		TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
+		TaskSetVO taskSetVO = JSON.parseObject(taskInfo, TaskSetVO.class);
 		taskModifyService.modifyTask(taskSetVO,BusinessType.TRANSCODE);
 		return null;
 	}
@@ -373,7 +374,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/put/input")
 	public Object modifyInput(
 			String inputInfo) throws Exception{
-		InputSetVO inputSetVO = JSONObject.parseObject(inputInfo, InputSetVO.class);
+		InputSetVO inputSetVO = JSON.parseObject(inputInfo, InputSetVO.class);
 		transcodeTaskService.modifyTranscodeInput(inputSetVO);
 		return null;
 	}
@@ -403,7 +404,7 @@ public class TranscodeTaskFeignController {
 	public Object streamAnalysis(
 			String analysis,
 			HttpServletRequest request) throws Exception{
-		AnalysisStreamVO analysisStreamVO = JSONObject.parseObject(analysis, AnalysisStreamVO.class);
+		AnalysisStreamVO analysisStreamVO = JSON.parseObject(analysis, AnalysisStreamVO.class);
 		String response = transcodeTaskService.analysisStream(analysisStreamVO,BusinessType.TRANSCODE);
 		return response;
 	}
