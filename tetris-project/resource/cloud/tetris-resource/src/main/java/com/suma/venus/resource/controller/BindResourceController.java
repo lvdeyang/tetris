@@ -36,6 +36,7 @@ import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
@@ -53,6 +54,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
@@ -66,12 +68,14 @@ import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.OperationLogService;
+import com.suma.venus.resource.service.OutlandService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.suma.venus.resource.vo.ExtraInfoVO;
 import com.suma.venus.resource.vo.FolderVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
@@ -155,6 +159,11 @@ public class BindResourceController extends ControllerBase {
 	@Autowired
 	private OperationLogService operationLogService;
 	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
+	
+	@Autowired
+	private OutlandService outlandService;
 	
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -912,9 +921,20 @@ public class BindResourceController extends ControllerBase {
 					toBindBundleIds.addAll(toBindCloudCheckList);
 					toBindBundleIds.addAll(toBindLocalReadCheckList);
 					toBindBundleIds.addAll(toBindDownloadCheckList);
+					//过滤cdn及解码器
+					toBindBundleIds = outlandService.bundleFilter(toBindBundleIds);
 					if (toBindBundleIds != null && !toBindBundleIds.isEmpty()) {
 						Set<Long> folderIds = new HashSet<Long>();
 	 					List<BundlePO> toBindBundlePOs = bundleDao.findByBundleIdIn(toBindBundleIds);
+	 					
+	 					//设备扩展
+	 					List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(toBindBundleIds);
+	 					List<ExtraInfoVO> extraInfoVOs = new ArrayList<ExtraInfoVO>();
+	 					for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+	 						ExtraInfoVO extraInfoVO = ExtraInfoVO.fromPO(extraInfoPO);
+	 						extraInfoVOs.add(extraInfoVO);
+	 					}
+	 					
 	 					List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
 	 					Set<Long> allFolderIds = new HashSet<Long>();
 						if (toBindBundlePOs != null && !toBindBundlePOs.isEmpty()) {
@@ -991,6 +1011,7 @@ public class BindResourceController extends ControllerBase {
 							foreign.get(i).put("institutions", folderVOs);
 							foreign.get(i).put("devices", bundleVOs);
 							foreign.get(i).put("bindChecks", toBindChecks);
+							foreign.get(i).put("extraInfo", extraInfoVOs);
 						}
 						pass_by_content.put("cmd", "devicePermissionAdd");
 						pass_by_content.put("local", local);

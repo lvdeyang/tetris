@@ -155,13 +155,13 @@
                         <el-switch v-model="dialog.setAuth.cdnJoiner.support"></el-switch>
                     </el-form-item>
                     <el-form-item label="接入CDN个数" v-if="dialog.setAuth.cdnJoiner.support==true">
-                        <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.cdnNum" @change="handleChange" :min="0" :step="1" step-strictly="true" ></el-input-number>
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.cdnJoiner.cdnNum" @change="handleChange" :min="0" :step="1" step-strictly="true" ></el-input-number>
                     </el-form-item>
                     <el-form-item label="合屏接入">
                         <el-switch v-model="dialog.setAuth.mixerJoiner.support"></el-switch>
                     </el-form-item>
                     <el-form-item label="接入合屏个数" v-if="dialog.setAuth.mixerJoiner.support==true">
-                        <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.mixerJoiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                     </el-form-item>
                      <!--<el-form-item label="接入能力个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
                          <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum"></el-input>-->

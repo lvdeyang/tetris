@@ -204,4 +204,20 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		String layerId = wrapper.getString("layerId");
 		return apiThirdpartMonitor_relationService.queryPassbyMessage(layerId);
 	}
+	
+	/**
+	 * 修改设备信息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月11日 下午3:16:20
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value ="/device/information/change")
+	public Object deviceInformationChange(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		return apiThirdpartMonitor_relationService.deviceInformationChange(wrapper);
+	}
 }

@@ -540,6 +540,51 @@ public class ServerService {
 		//对接小工具下发授权并修改设备授权状态
 		ServerPO server = serverDao.findOne(id);
 		
+		
+		CloseableHttpClient faclient = null;
+		try{
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        faclient = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+			String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/execute_cmd").toString();
+			System.out.println(url);
+			HttpPost httpPost = new HttpPost(url);
+			
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+			formparams.add(new BasicNameValuePair("cmd", "service xstreamdogd stop"));  
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+			
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+            httpPost.setConfig(requestConfig);
+			
+			CloseableHttpResponse response = faclient.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			}
+		}finally{
+			if(faclient != null) faclient.close();
+		}
+		
 		databaseService.enableFtp(id);
 		
 		Boolean upload = ftpupload(
@@ -551,7 +596,6 @@ public class ServerService {
 				name, 
 				reader);
 		if (upload) {
-			StringBufferWrapper runprocess = new StringBufferWrapper();
 			try{
 				
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -592,73 +636,52 @@ public class ServerService {
 				if(code != 200){
 					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
 				}
-//				JSONObject auth = jsonObject.getJSONObject("auth");
-//				JSONObject bvcbusiness = auth.getJSONObject("bvc");
-//				JSONObject transSystem = auth.getJSONObject("transSystem");
-//				JSONObject mediaTransform = auth.getJSONObject("mediaTransform");
-//				JSONObject jv210Joiner = auth.getJSONObject("jv210Joiner");
-//				String bvcsup = bvcbusiness.getString("support");
-//				String transSystemsup = transSystem.getString("support");
-//				String jv210Joinersup = jv210Joiner.getString("support");
-//				if (bvcsup.equals("true")) {
-//					runprocess.append(" ").append("bvc进程名");
-//				}
-//				if (transSystemsup.equals("true")) {
-//					runprocess.append(" ").append("转码进程名");
-//				}
-//				//资源保存接入设备限制
-//				if (jv210Joinersup.equals("true")) {
-//					String serverNum = jv210Joiner.getString("serverNum");
-//					String cdnNum = jv210Joiner.getString("cdnNum");
-//					String screenNum = jv210Joiner.getString("screenNum");
-//					vedioCapacityService.setBundleCapacity(Long.valueOf(serverNum), Long.valueOf(cdnNum), Long.valueOf(screenNum));
-//				}
 			}finally{
 				if(client != null) client.close();
 			}
-//			CloseableHttpClient reclient = null;
-//			try{
-//				
-//				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-//				AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
-//		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
-//		        reclient = HttpClients.custom()
-//				        		    .setDefaultCredentialsProvider(credsProvider)
-//				        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
-//				        		    .build();
-//				String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/decrypt_authcode").toString();
-//				System.out.println(url);
-//				HttpPost httpPost = new HttpPost(url);
-//				
-//				List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
-//				formparams.add(new BasicNameValuePair("run", runprocess.toString()));  
-//				httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
-//				
-//				RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-//	            httpPost.setConfig(requestConfig);
-//				
-//				CloseableHttpResponse response = reclient.execute(httpPost);
-//				
-//				// 解析小工具HTTP返回结果并提示异常信息
-//				HttpEntity httpEntity = response.getEntity();
-//				InputStream content = httpEntity.getContent();
-//				byte[] byteArr = new byte[content.available()];
-//				content.read(byteArr);
-//				String str = new String(byteArr);
-//				JSONObject jsonObject = JSON.parseObject(str);
-//				String result = jsonObject.getString("result");
-//				String errormsg = jsonObject.getString("errormsg");
-//				if(!"0".equals(result)){
-//					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), errormsg);
-//				}
-//				
-//				int code = response.getStatusLine().getStatusCode();
-//				if(code != 200){
-//					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
-//				}
-//			}finally{
-//				if(reclient != null) reclient.close();
-//			}
+			CloseableHttpClient reclient = null;
+			try{
+				
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+		        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+		        reclient = HttpClients.custom()
+				        		    .setDefaultCredentialsProvider(credsProvider)
+				        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+				        		    .build();
+				String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/execute_cmd").toString();
+				System.out.println(url);
+				HttpPost httpPost = new HttpPost(url);
+				
+				List<NameValuePair> formparams = new ArrayList<NameValuePair>();  
+				formparams.add(new BasicNameValuePair("cmd", "service xstreamdogd start"));  
+				httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+				
+				RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+	            httpPost.setConfig(requestConfig);
+				
+				CloseableHttpResponse response = reclient.execute(httpPost);
+				
+				// 解析小工具HTTP返回结果并提示异常信息
+				HttpEntity httpEntity = response.getEntity();
+				InputStream content = httpEntity.getContent();
+				byte[] byteArr = new byte[content.available()];
+				content.read(byteArr);
+				String str = new String(byteArr);
+				JSONObject jsonObject = JSON.parseObject(str);
+				String result = jsonObject.getString("result");
+				String errormsg = jsonObject.getString("errormsg");
+				if(!"0".equals(result)){
+					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), errormsg);
+				}
+				
+				int code = response.getStatusLine().getStatusCode();
+				if(code != 200){
+					throw new HttpGadgetEncyptAuthcodeException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+				}
+			}finally{
+				if(reclient != null) reclient.close();
+			}
 		}
 		return new ServerVO().set(server);
 	}

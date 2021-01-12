@@ -59,32 +59,37 @@ define([
                         id:0,
                         deviceId:'',
                         bvc_business:{
-                            support:false
+                            support:false,
+                            time:""
                         },
                         sts:{
-                            support:false
+                            support:false,
+                            serverNum:0,
                         },
                         capacity:{
                             support:false,
-                        	serverNum:0,
+                            time:"",
                         	v4k:0,
                         	v1080:0,
                         	v720:0
                         },
                         JV210Joiner:{
                             support:false,
+                            time:"",
                         	serverNum:0,
                         },
                         CDNJoiner:{
                             support:false,
+                            time:"",
                             cdnNum:0,
                         },
                         MixerJoiner:{
                             support:false,
-                            screenNum:0
+                            time:"",
+                            mixerNum:0
                         },
-                    }
-                }
+                    },
+                },
             },
             computed:{
 
@@ -256,6 +261,28 @@ define([
                    
                     ajax.post('/auth/set',params, function(data){
                     	self.dialog.setAuth.loading = false;
+                        self.load(self.table.page.currentPage);
+                        self.handleSetAuthClose();
+                    });
+                },
+                handleSetAuthSubmit1:function(){
+                    var self = this;
+                    self.dialog.importDevice.loading = true;
+                    var contentJson={};
+                    contentJson.deviceId=self.dialog.setAuth.deviceId;
+                    contentJson.bvc_business=self.dialog.setAuth.bvc_business;
+                    contentJson.sts=self.dialog.setAuth.sts;
+                    contentJson.capacity=self.dialog.setAuth.capacity;
+                    contentJson.JV210Joiner=self.dialog.setAuth.JV210Joiner;
+                    contentJson.CDNJoiner=self.dialog.setAuth.CDNJoiner;
+                    contentJson.MixerJoiner=self.dialog.setAuth.MixerJoiner;
+
+                    var params = {};
+                    params.id=self.dialog.setAuth.id;
+                    params.content=JSON.stringify(contentJson);
+
+                    ajax.post('/auth/set',params, function(data){
+                        self.dialog.setAuth.loading = false;
                         self.load(self.table.page.currentPage);
                         self.handleSetAuthClose();
                     });

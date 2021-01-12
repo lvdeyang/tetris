@@ -40,6 +40,7 @@ public class OperationLogService {
 		try{
 			alarmFeign.sendOprlog(log);
 		}catch(Exception e){
+			e.printStackTrace();
 			System.out.println("日志存储失败！");
 			System.out.println(JSON.toJSONString(log));
 		}

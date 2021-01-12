@@ -63,4 +63,15 @@ public class ResourceService {
 		return JsonBodyResponseParser.parseArray(resourceFeign.load(), WorkNodeVO.class);
 	}
 	
+	/**
+	 * 获取接入设备的限制数量<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月7日 下午3:42:45
+	 * @return AccessCapacityBO 设备限制数量
+	 */
+	public AccessCapacityBO queryAccessCapacity()throws Exception{
+		return JsonBodyResponseParser.parseObject(resourceFeign.queryAccessCapacity(), AccessCapacityBO.class);
+	}
 }

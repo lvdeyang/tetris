@@ -206,4 +206,6 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findOnlineDevicesByDeviceModel(String deviceModel);
 	
 	public List<BundlePO> findByEquipFactInfo(String equipFactInfo);
+	
+	public List<BundlePO> findByEquipFactInfoIn(Collection<String> equipFactInfos);
 }
