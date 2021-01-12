@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
@@ -308,15 +309,16 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
  		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(bundStrings);
 		List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
-		for(int i = 0;i<extraInfoArray.size();i++){
-			JSONObject jsonObject = extraInfoArray.getJSONObject(i);
-			ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
-			ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
-			extraInfoPOs.add(extraInfoPO);
+		if(extraInfoArray!=null && extraInfoArray.size()>0){
+			for(int i = 0;i<extraInfoArray.size();i++){
+				JSONObject jsonObject = extraInfoArray.getJSONObject(i);
+				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+				extraInfoPOs.add(extraInfoPO);
+			}
+			extraInfoDao.delete(exExtraInfoPOs);
+			extraInfoDao.save(extraInfoPOs);
 		}
-		extraInfoDao.delete(exExtraInfoPOs);
-		extraInfoDao.save(extraInfoPOs);
-		
 		
 		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
 		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findAll();
