@@ -216,9 +216,13 @@ public class MonitorLiveController {
 		List<FolderUserMap> outerUserMaps = folderUserMapDao.findByUserIdIn(outerUserIds);
 		
 		List<MonitorLiveDeviceVO> rows =entities.stream().map(entity->{
+			if(LiveType.XT_LOCAL.equals(entity.getType())){
+				return null;
+			}
 			List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getVideoBundleId());
 			List<ExtraInfoPO> dstExtraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, entity.getDstVideoBundleId());
 			if(LiveType.XT_LOCAL.equals(entity.getType())){
+				//TODO: 这里不用了，后续给XT_LOCAL添加“发起方的域”信息
 				//外部点播本地编码器，造一个ExtraInfoPO给dstExtraInfo设置值使用
 				FolderUserMap userMap = queryUtil.queryUserMapByUserId(outerUserMaps, entity.getUserId());
 				ExtraInfoPO extraInfo = new ExtraInfoPO();
@@ -234,6 +238,8 @@ public class MonitorLiveController {
 			}
 			return null;
 		}).collect(Collectors.toList());
+		
+		rows.remove(null);
 		
 		if(rows!=null && rows.size()>0){
 			Set<Long> osdIds = new HashSet<Long>();
