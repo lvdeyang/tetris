@@ -717,13 +717,14 @@ public class CommandQueryController {
 				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
 					serName = "本域";
 				}
-				if(ConnectionStatus.ON.equals(targetSerNode.getStatus())){
+				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
+						ConnectionStatus.ON.equals(targetSerNode.getStatus())){
 					_root.setName(new StringBufferWrapper().append(_root.getName())
 												   .append("(")
 												   .append(serName)
 												   .append(")")
 												   .toString());
-					existSerNodeName.add(serName);
+					existSerNodeName.add(targetSerNode.getNodeName());
 				}else{
 					i.remove();
 				}

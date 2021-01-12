@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.errorprone.annotations.Var;
 import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -297,8 +298,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		Set<BundlePO> bundlePOs = new HashSet<BundlePO>();
 		Set<BundlePO> removeBundlePOs = new HashSet<BundlePO>();
 		Set<String> oldBundleIds = new HashSet<String>();
-//		List<BundlePO> existedBundlePOs =  bundleDao.findByEquipFactInfo(name);
-		List<BundlePO> existedBundlePOs =  bundleDao.findAll();
+		List<BundlePO> existedBundlePOs =  bundleDao.findByEquipFactInfo(name);
 		
 		//设备扩展参数
 		Set<String> bundStrings = new HashSet<String>();
@@ -321,9 +321,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
 		
 		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findAll();
-		Set<ChannelSchemePO> newchannelSchemePOs = new HashSet<ChannelSchemePO>();
-		Set<ChannelSchemePO> removeChannelSchemePOs = new HashSet<ChannelSchemePO>();
+		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundStrings);
+		List<ChannelSchemePO> newchannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		List<ChannelSchemePO> removeChannelSchemePOs = new ArrayList<ChannelSchemePO>();
 		
 		Set<String> needBundleIdSet = new HashSet<String>();
 		for (int i = 0; i < devicesaArray.size(); i++) {
@@ -349,17 +349,22 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				SchemePOs.add(channelSchemePO);
 			}
 			if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
-				for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-					if (newchannelSchemePOs != null && !newchannelSchemePOs.isEmpty()) {
-						for (ChannelSchemePO schemePO : SchemePOs) {
+				for (ChannelSchemePO schemePO : SchemePOs) {
+					boolean finded = false;
+					if (SchemePOs != null && !SchemePOs.isEmpty()) {
+						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
 							if (schemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
 									&& schemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
 								channelSchemePO.setChannelTemplateID(schemePO.getChannelTemplateID());
 								removeChannelSchemePOs.add(channelSchemePO);
+								finded = true;
 							}
 						}
 					}
+					if(!finded) newchannelSchemePOs.add(schemePO);
 				}
+			}else{
+				newchannelSchemePOs.addAll(SchemePOs);
 			}
 			String institution = jsonObject.getString("institution");
 			if (newFolders != null && !newFolders.isEmpty()) {
@@ -409,6 +414,22 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			for (BundlePO bundlePO : needBundlePOs) {
 				delbundle.add(bundlePO.getBundleId());
 			}
+			List<ChannelSchemePO> channel = channelSchemeDao.findByBundleIdIn(delbundle);
+			if(channel!=null && channel.size()>0 && channelSchemePOs!=null && channelSchemePOs.size()>0){
+				List<ChannelSchemePO> deletedChannels = new ArrayList<ChannelSchemePO>();
+				for(ChannelSchemePO c1:channel){
+					for(ChannelSchemePO c2:channelSchemePOs){
+						if(c1.getId().equals(c2.getId())){
+							deletedChannels.add(c2);
+							break;
+						}
+					}
+				}
+				channelSchemePOs.removeAll(deletedChannels);
+				channelSchemeDao.delete(channel);
+				
+			}
+			
 			bundleDao.delete(existedBundlePOs);
 			List<ExtraInfoPO> extraInfoPOs2 = extraInfoDao.findByBundleIdIn(delbundle);
 			extraInfoDao.delete(extraInfoPOs2);
@@ -417,9 +438,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			bundleDao.save(bundlePOs);
 		}
 		
-		newchannelSchemePOs.remove(removeChannelSchemePOs);
+//		newchannelSchemePOs.remove(removeChannelSchemePOs);
 		channelSchemeDao.save(newchannelSchemePOs);
-		channelSchemeDao.save(channelSchemePOs);
+		channelSchemeDao.save(removeChannelSchemePOs);
 		
 		//外域下授权信息
 		oldBundleIds.add("-1");
@@ -452,7 +473,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			olPrivilegesPos.removeAll(existPos);
 			
 			if (olPrivilegesPos.size() > 0) {
-				for (PrivilegePO privilegePO : newprivilegePos) {
+				for (PrivilegePO privilegePO : olPrivilegesPos) {
 					mapId.add(privilegePO.getId());
 				}
 				privilegeDAO.delete(olPrivilegesPos);
@@ -489,6 +510,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
 		JSONArray extraInfoArray = new JSONArray();
+		String name = new String();
 		Set<String> serverNodeName = new HashSet<String>();
 		List<String> toBindChecks = new ArrayList<String>();
 		for (int i = 0; i < foreign.size(); i++) {
@@ -496,7 +518,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			institutionsArray = foreign.getJSONObject(i).getJSONArray("institutions");
 			devicesaArray = foreign.getJSONObject(i).getJSONArray("devices");
 			extraInfoArray = foreign.getJSONObject(i).getJSONArray("extraInfo");
-			String name = jsonObject.getString("name");
+			name = jsonObject.getString("name");
 			toBindChecks = JSONObject.parseArray(jsonObject.getJSONArray("bindChecks").toJSONString(), String.class);
 			serverNodeName.add(name);
 		}
@@ -594,7 +616,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		
 		List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 		List<BundlePO> removeBundlePOs = new ArrayList<BundlePO>();
-		List<BundlePO> existedBundlePOs =  bundleDao.findAll(); 
+		List<BundlePO> existedBundlePOs =  bundleDao.findByEquipFactInfo(name); 
 		
 		//设备扩展参数
 		Set<String> bundStrings = new HashSet<String>();
@@ -605,19 +627,21 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
  		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(bundStrings);
 		List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
-		for(int i = 0;i<extraInfoArray.size();i++){
-			JSONObject jsonObject = extraInfoArray.getJSONObject(i);
-			ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
-			ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
-			extraInfoPOs.add(extraInfoPO);
+		if(extraInfoArray!=null && extraInfoArray.size()>0){
+			for(int i = 0;i<extraInfoArray.size();i++){
+				JSONObject jsonObject = extraInfoArray.getJSONObject(i);
+				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+				extraInfoPOs.add(extraInfoPO);
+			}
+			extraInfoDao.delete(exExtraInfoPOs);
+			extraInfoDao.save(extraInfoPOs);
 		}
-		extraInfoDao.delete(exExtraInfoPOs);
-		extraInfoDao.save(extraInfoPOs);
 		
 		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findAll();
-		Set<ChannelSchemePO> newchannelSchemePOs = new HashSet<ChannelSchemePO>();
-		Set<ChannelSchemePO> removeChannelSchemePOs = new HashSet<ChannelSchemePO>();
+		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundStrings);
+		List<ChannelSchemePO> newchannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		List<ChannelSchemePO> removeChannelSchemePOs = new ArrayList<ChannelSchemePO>();
 		
 		for (int i = 0; i < devicesaArray.size(); i++) {
 			JSONObject jsonObject = devicesaArray.getJSONObject(i); 
@@ -630,6 +654,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 						if (channelSchemeVO.getDeviceModel().equals(channelTemplatePO.getDeviceModel()) 
 								&& channelSchemeVO.getChannelName().equals(channelTemplatePO.getChannelName())) {
 							channelSchemeVO.setChannelTemplateID(channelTemplatePO.getId());
+							break;
 						}
 					}
 				}
@@ -642,17 +667,22 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				SchemePOs.add(channelSchemePO);
 			}
 			if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
-				for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-					if (newchannelSchemePOs != null && !newchannelSchemePOs.isEmpty()) {
-						for (ChannelSchemePO schemePO : SchemePOs) {
+				for (ChannelSchemePO schemePO : SchemePOs) {
+					boolean finded = false;
+					if (SchemePOs != null && !SchemePOs.isEmpty()) {
+						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
 							if (schemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
 									&& schemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
 								channelSchemePO.setChannelTemplateID(schemePO.getChannelTemplateID());
 								removeChannelSchemePOs.add(channelSchemePO);
+								finded = true;
 							}
 						}
 					}
+					if(!finded) newchannelSchemePOs.add(schemePO);
 				}
+			}else{
+				newchannelSchemePOs.addAll(SchemePOs);
 			}
 			String institution = jsonObject.getString("institution");
 			if (newFolders != null && !newFolders.isEmpty()) {
@@ -681,9 +711,10 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		bundlePOs.removeAll(removeBundlePOs);
 		bundleDao.save(bundlePOs);
 		
-		newchannelSchemePOs.remove(removeChannelSchemePOs);
+		//newchannelSchemePOs.remove(removeChannelSchemePOs);
+		channelSchemeDao.save(removeChannelSchemePOs);
 		channelSchemeDao.save(newchannelSchemePOs);
-		channelSchemeDao.save(channelSchemePOs);
+		//channelSchemeDao.save(channelSchemePOs);
 		
 		return null;
 	}
@@ -758,6 +789,10 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		deleteBundleIds.removeAll(bindBundleIds);
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(deleteBundleIds);
 		bundleDao.delete(bundlePOs);
+		List<ChannelSchemePO> channels = channelSchemeDao.findByBundleIdIn(deleteBundleIds);
+		if (channels != null&&channels.size()>0) {
+			channelSchemeDao.delete(channels);
+		}
 		//删除扩展参数
 		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(deleteBundleIds);
 		extraInfoDao.delete(exExtraInfoPOs);
