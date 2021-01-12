@@ -67,6 +67,9 @@ public class BundleBO {
 	
 	private String layerWebUrl;
 	
+	/** 外域名称*/
+	private String equipFactInfo;
+	
 	public static enum BundleRealType{
 		XT("系统设备"),
 		BVC("bvc设备");
@@ -76,6 +79,16 @@ public class BundleBO {
 		}
 	}
 	
+	
+	public String getEquipFactInfo() {
+		return equipFactInfo;
+	}
+
+	public BundleBO setEquipFactInfo(String equipFactInfo) {
+		this.equipFactInfo = equipFactInfo;
+		return this;
+	}
+
 	public Long getMemberId() {
 		return memberId;
 	}

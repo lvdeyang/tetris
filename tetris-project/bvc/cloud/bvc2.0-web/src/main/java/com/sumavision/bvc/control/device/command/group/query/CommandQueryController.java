@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
@@ -42,6 +44,8 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
@@ -67,6 +71,7 @@ import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.time.CommandFightTimeServiceImpl;
+import com.sumavision.bvc.device.group.bo.AapAlarmBO;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
@@ -100,6 +105,7 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
@@ -185,6 +191,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private SystemRoleQuery systemRoleQuery;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -581,6 +590,7 @@ public class CommandQueryController {
 							.setOnlineStatus(bundleBody.getOnlineStatus().toString())
 							.setLockStatus(bundleBody.getLockStatus())
 							.setType(bundleBody.getBundleType())
+							.setEquipFactInfo(bundleBody.getEquipFactInfo())
 							.setRealType(SOURCE_TYPE.EXTERNAL.equals(bundleBody.getSourceType())?BundleBO.BundleRealType.XT.toString():BundleBO.BundleRealType.BVC.toString());
 	
 					bundles.add(bundle);
@@ -685,8 +695,74 @@ public class CommandQueryController {
 		//将同一个文件夹下的设备按照名称排序
 		orderBundleByName(_roots);
 		
+		//筛选 //
+		List<SerNodePO> serNodeEntities = serNodeDao.findAll();
+		List<String> existSerNodeName = new ArrayList<String>();
+		if(serNodeEntities!=null && serNodeEntities.size()>0){
+			Iterator<TreeNodeVO> i = _roots.iterator();
+			while(i.hasNext()){
+				TreeNodeVO _root = i.next();
+				TreeNodeVO nodeVO = findFirstDeviceNode(_root);
+				String serName = JSON.parseObject(nodeVO.getParam()).getString("equipFactInfo"); 
+				SerNodePO targetSerNode = null;
+				for(SerNodePO serNode:serNodeEntities){
+					if(serName == null && SOURCE_TYPE.SYSTEM.equals(serNode.getSourceType())){
+						targetSerNode = serNode;
+						break;
+					}else if(serNode.getNodeName().equals(serName)){
+						targetSerNode = serNode;
+						break;
+					}
+				}
+				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
+					serName = "本域";
+				}
+				if(ConnectionStatus.ON.equals(targetSerNode.getStatus())){
+					_root.setName(new StringBufferWrapper().append(_root.getName())
+												   .append("(")
+												   .append(serName)
+												   .append(")")
+												   .toString());
+					existSerNodeName.add(serName);
+				}else{
+					i.remove();
+				}
+			}
+			for(SerNodePO serNodeEntity:serNodeEntities){
+				boolean finded = false;
+				for(String name:existSerNodeName){
+					if(name.equals(serNodeEntity.getNodeName())){
+						finded = true;
+						break;
+					}
+				}
+				if(finded) continue;
+				String name = null;
+				if(ConnectionStatus.ON.equals(serNodeEntity.getStatus())){
+					name = serNodeEntity.getNodeName();
+				}else{
+					name = new StringBufferWrapper().append(serNodeEntity.getNodeName()).append("(").append("离线").append(")").toString();
+				}
+				_roots.add(new TreeNodeVO().setId(new StringBufferWrapper().append("offline-sernode-").append(serNodeEntity.getId()).toString())
+										   .setName(name)
+										   .setType(TreeNodeType.FOLDER)
+										   .setIcon(TreeNodeIcon.FOLDER.getName())
+										   .setKey(serNodeEntity.getId().toString()));
+			}
+		}
 		return _roots;
 		
+	}
+	
+	private TreeNodeVO findFirstDeviceNode(TreeNodeVO node) throws Exception{
+		if(node.getType().equals(TreeNodeType.BUNDLE)) return node;
+		if(node.getChildren()!=null && node.getChildren().size()>0){
+			for (TreeNodeVO nodeVo:node.getChildren()) {
+				TreeNodeVO dNodeVO = findFirstDeviceNode(nodeVo);
+				if(dNodeVO != null) return dNodeVO;
+			}
+		}
+		return null;
 	}
 	
 	/**
