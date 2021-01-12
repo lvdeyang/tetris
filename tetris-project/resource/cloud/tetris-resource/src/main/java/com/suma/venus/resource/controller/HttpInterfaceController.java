@@ -1421,8 +1421,8 @@ public class HttpInterfaceController {
 	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public LayerHeartBeatResponse layerHeartBeat(@RequestBody LayerHeartBeatRequest request) {
-		 LOGGER.info("Layer heartbeat Request : " +
-		 JSONObject.toJSONString(request));
+//		 LOGGER.info("Layer heartbeat Request : " +
+//		 JSONObject.toJSONString(request));
 
 		LayerHeartBeatResponse resp = new LayerHeartBeatResponse();
 		com.suma.venus.resource.base.bo.ResponseBody respBody = new com.suma.venus.resource.base.bo.ResponseBody();
