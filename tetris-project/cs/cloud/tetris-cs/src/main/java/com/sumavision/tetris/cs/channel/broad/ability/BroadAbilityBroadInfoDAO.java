@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @Transactional
@@ -29,5 +30,6 @@ public interface BroadAbilityBroadInfoDAO extends BaseDAO<BroadAbilityBroadInfoP
 	
 	@Query(value = "SELECT preview_url_port FROM TETRIS_CS_ABILITY_BROAD_INFO WHERE preview_url_ip = ?1", nativeQuery = true)
 	public List<String> findByPreviewUrlIp(String ip);
-
+	
+	public BroadAbilityBroadInfoPO findByUserId(Long userId);
 }

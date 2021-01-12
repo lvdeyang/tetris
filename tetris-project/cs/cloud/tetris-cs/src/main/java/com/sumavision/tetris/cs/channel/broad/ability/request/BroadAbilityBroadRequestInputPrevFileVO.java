@@ -1,11 +1,6 @@
 package com.sumavision.tetris.cs.channel.broad.ability.request;
 
 public class BroadAbilityBroadRequestInputPrevFileVO {
-	/** 源地址 */
-	private String url;
-	
-	/** seek */
-	private Long seek;
 	
 	/** 循环次数 */
 	private Integer count;
@@ -13,8 +8,15 @@ public class BroadAbilityBroadRequestInputPrevFileVO {
 	/** 文件播放时长 */
 	private Long duration;
 	
+	/** seek */
+	private Long seek;
+	
+	/** 源地址 */
+	private String url;
+		
 	/** 播发开始的绝对时间 */
 	private String startTime;
+	
 
 	public String getUrl() {
 		return url;
@@ -60,4 +62,6 @@ public class BroadAbilityBroadRequestInputPrevFileVO {
 		this.startTime = startTime;
 		return this;
 	}
+
+
 }

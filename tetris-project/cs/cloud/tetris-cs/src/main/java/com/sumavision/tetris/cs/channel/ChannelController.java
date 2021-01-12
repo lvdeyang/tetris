@@ -143,10 +143,14 @@ public class ChannelController {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
-			Boolean rotation,
+			String videoCodec,
+			String audioCodec,
 			String backfileUrl,
 			String backfileDuration,
 			String backfileName,
+			String backfileType,
+			String codeRate,
+			String resolution,
 			HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
@@ -185,10 +189,14 @@ public class ChannelController {
 				taskTemple,
 				rateCtrl,
 				rate,
+				videoCodec,
+				audioCodec,
 				backfileUrl,
 				backfileDuration,
 				backfileName,
-				rotation);
+				backfileType,
+				codeRate,
+				resolution);
 		
 		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
 
@@ -204,7 +212,10 @@ public class ChannelController {
 				.setTaskTemple(taskTemple)
 				.setRate(rate)
 				.setRateCtrl(rateCtrl)
-				.setRotation(rotation);
+				.setCodeRate(codeRate)
+				.setResolution(resolution)
+				.setAudioCodec(audioCodec)
+				.setVideoCodec(videoCodec);
 	}
 
 	/**
@@ -242,10 +253,14 @@ public class ChannelController {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
-			Boolean rotation,
+			String codeRate,
+			String resolution,
+			String videoCodec,
+			String audioCodec,
 			String backfileUrl,
 			String backfileDuration,
 			String backfileName,
+			String backfileType,
 			HttpServletRequest request) throws Exception {
 		
 		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = JSONArray.parseArray(output, BroadAbilityBroadInfoVO.class);
@@ -283,10 +298,14 @@ public class ChannelController {
 				taskTemple,
 				rateCtrl,
 				rate,
+				codeRate,
+				resolution,
 				backfileUrl,
 				backfileDuration,
 				backfileName,
-				rotation);
+				backfileType,
+				videoCodec,
+				audioCodec);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {
 			channelService.autoAddSchedulesAndBroad(channel.getId());
@@ -304,7 +323,8 @@ public class ChannelController {
 				.setTaskTemple(taskTemple)
 				.setRate(rate)
 				.setRateCtrl(rateCtrl)
-				.setRotation(rotation);
+				.setCodeRate(codeRate)
+				.setResolution(resolution);
 	}
 
 	/**
@@ -513,4 +533,6 @@ public class ChannelController {
 	public Object getTime(HttpServletRequest request) throws Exception {
 		return DateUtil.now();
 	}
+	
+
 }

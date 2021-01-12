@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = ChannelPO.class, idClass = Long.class)
@@ -66,4 +67,6 @@ public interface ChannelDAO extends BaseDAO<ChannelPO>{
 	public List<ChannelPO> findByBroadWayAndBroadcastStatus(String broadWay, String broadStatus);
 	
 	public ChannelPO findByChannelUuid(String channelUuid);
+	
+
 }

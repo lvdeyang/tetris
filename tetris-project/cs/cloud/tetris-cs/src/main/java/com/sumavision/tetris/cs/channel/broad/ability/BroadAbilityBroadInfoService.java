@@ -119,6 +119,8 @@ public class BroadAbilityBroadInfoService {
 				infoPO.setUserId(broadAbilityBroadInfoVO.getUserId());
                 infoPO.setRtmpUrl(broadAbilityBroadInfoVO.getRtmpUrl()); 
                 infoPO.setLocalIp(broadAbilityBroadInfoVO.getLocalIp());
+                infoPO.setRate(broadAbilityBroadInfoVO.getRate());
+                infoPO.setRateCtrl(broadAbilityBroadInfoVO.getRateCtrl());
 			}else{
 				infoPO.setChannelId(channelId);
 				infoPO.setUserId(broadAbilityBroadInfoVO.getUserId());
