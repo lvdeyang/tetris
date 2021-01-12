@@ -107,6 +107,7 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	private String equipNode;
 
+	/** 外域名称*/
 	private String equipFactInfo;
 
 	/**
