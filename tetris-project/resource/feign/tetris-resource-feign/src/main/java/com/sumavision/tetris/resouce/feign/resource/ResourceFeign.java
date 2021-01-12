@@ -57,4 +57,15 @@ public interface ResourceFeign {
 	@RequestMapping(value = "/layernode/load")
 	public JSONObject load() throws Exception;
 
+	/**
+	 * 获取接入设备的限制数量<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月7日 下午3:42:45
+	 * @return AccessCapacityBO 设备限制数量
+	 */
+	@RequestMapping(value = "/feign/resource/query/access/capacity")
+	public JSONObject queryAccessCapacity()throws Exception;
+
 }

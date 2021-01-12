@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.auth;
+package com.suma.venus.resource.service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,20 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class Configure {
-
-	/**
-	 * 读取"gadgetConfig.json"文件<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>lqxuhv<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年12月31日 下午1:45:08
-	 * @return String 文件内容
-	 */
+public class Additional {
+	
 	public String readGadgetConfig()throws Exception{
 		return readFile("gadgetConfig.json");
 	}
-
 	
 	/**
 	 * 读取配置文件信息<br/>
@@ -49,4 +40,5 @@ public class Configure {
 		}
 		return json;
 	}
+
 }

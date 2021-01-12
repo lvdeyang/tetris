@@ -58,10 +58,10 @@ define([
                         loading:false,
                         id:0,
                         deviceId:'',
-                        bvc_business:{
+                        bvc:{
                             support:false
                         },
-                        tetrissts:{
+                        transSystem:{
                             support:false
                         },
                         mediaTransform:{
@@ -71,15 +71,15 @@ define([
                         	v1080:0,
                         	v720:0
                         },
-                        JV210Joiner:{
+                        jv210Joiner:{
                             support:false,
                         	serverNum:0,
                         },
-                        CDNJoiner:{
+                        cdnJoiner:{
                             support:false,
                             cdnNum:0,
                         },
-                        MixerJoiner:{
+                        mixerJoiner:{
                             support:false,
                             screenNum:0
                         },

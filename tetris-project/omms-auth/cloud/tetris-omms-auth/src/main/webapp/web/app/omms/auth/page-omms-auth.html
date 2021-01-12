@@ -124,56 +124,127 @@
                 <el-scrollbar style="height: 500px;">
                 <el-form label-width="120px">
                      <el-form-item label="视频融合平台">
-		                <el-switch v-model="dialog.setAuth.bvc.support"></el-switch>
+		                <el-switch v-model="dialog.setAuth.bvc_business.support"></el-switch>
+                         <el-date-picker
+                                 v-if="dialog.setAuth.bvc_business.support==true"
+                                 v-model="dialog.setAuth.bvc_business.time"
+                                 type="daterange"
+                                 range-separator="至"
+                                 start-placeholder="开始日期"
+                                 end-placeholder="结束日期"
+                                 format="yyyy 年 MM 月 dd 日"
+                                 value-format="timestamp"
+                                 unlink-panels=true
+                                 size="mini">
+                         </el-date-picker>
 		             </el-form-item>
 		             <el-form-item label="转码云平台">
-		                <el-switch v-model="dialog.setAuth.transSystem.support"></el-switch>
+		                <el-switch v-model="dialog.setAuth.sts.support"></el-switch>
+                         <el-date-picker
+                                 v-if="dialog.setAuth.sts.support==true"
+                                 v-model="dialog.setAuth.sts.time"
+                                 type="daterange"
+                                 range-separator="至"
+                                 start-placeholder="开始日期"
+                                 end-placeholder="结束日期"
+                                 format="yyyy 年 MM 月 dd 日"
+                                 value-format="timestamp"
+                                 unlink-panels=true
+                                 size="mini">
+                         </el-date-picker>
 		             </el-form-item>
-		             <el-form-item label="转码能力个数" v-if="dialog.setAuth.transSystem.support==true">
-                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+		             <el-form-item label="转码能力个数" v-if="dialog.setAuth.sts.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.capacity.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
 		             <el-form-item label="转码能力">
-                         <!--<el-switch v-model="dialog.setAuth.mediaTransform.support" active-value="1" inactive-value="0"></el-switch>-->
-		                <el-switch v-model="dialog.setAuth.mediaTransform.support"></el-switch>
+                         <!--<el-switch v-model="dialog.setAuth.capacity.support" active-value="1" inactive-value="0"></el-switch>-->
+		                <el-switch v-model="dialog.setAuth.capacity.support"></el-switch>
+                         <el-date-picker
+                                 v-if="dialog.setAuth.capacity.support==true"
+                                 v-model="dialog.setAuth.capacity.time"
+                                 type="daterange"
+                                 range-separator="至"
+                                 start-placeholder="开始日期"
+                                 end-placeholder="结束日期"
+                                 format="yyyy 年 MM 月 dd 日"
+                                 value-format="timestamp"
+                                 unlink-panels=true
+                                 size="mini">
+                         </el-date-picker>
 		             </el-form-item>
-		             <el-form-item label="转码路数(4K)" v-if="dialog.setAuth.mediaTransform.support==true">
-                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v4k" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+		             <el-form-item label="转码路数(4K)" v-if="dialog.setAuth.capacity.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.capacity.v4k" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
-                     <el-form-item label="转码路数(高清)" v-if="dialog.setAuth.mediaTransform.support==true">
-                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v1080" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                     <el-form-item label="转码路数(高清)" v-if="dialog.setAuth.capacity.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.capacity.v1080" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
-                      <el-form-item label="转码路数(标清)" v-if="dialog.setAuth.mediaTransform.support==true">
-                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v720" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                      <el-form-item label="转码路数(标清)" v-if="dialog.setAuth.capacity.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.capacity.v720" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
 		             <el-form-item label="设备接入">
-		                <el-switch v-model="dialog.setAuth.jv210Joiner.support"></el-switch>
+		                <el-switch v-model="dialog.setAuth.JV210Joiner.support"></el-switch>
+                         <el-date-picker
+                                 v-if="dialog.setAuth.JV210Joiner.support==true"
+                                 v-model="dialog.setAuth.JV210Joiner.time"
+                                 type="daterange"
+                                 range-separator="至"
+                                 start-placeholder="开始日期"
+                                 end-placeholder="结束日期"
+                                 format="yyyy 年 MM 月 dd 日"
+                                 value-format="timestamp"
+                                 unlink-panels=true
+                                 size="mini">
+                         </el-date-picker>
 		             </el-form-item>
-                     <el-form-item label="接入能力个数" v-if="dialog.setAuth.jv210Joiner.support==true">
-                         <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                     <el-form-item label="接入能力个数" v-if="dialog.setAuth.JV210Joiner.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.JV210Joiner.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
                     <el-form-item label="CDN接入">
-                        <el-switch v-model="dialog.setAuth.cdnJoiner.support"></el-switch>
+                        <el-switch v-model="dialog.setAuth.CDNJoiner.support"></el-switch>
+                        <el-date-picker
+                                v-if="dialog.setAuth.CDNJoiner.support==true"
+                                v-model="dialog.setAuth.CDNJoiner.time"
+                                type="daterange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期"
+                                format="yyyy 年 MM 月 dd 日"
+                                value-format="timestamp"
+                                unlink-panels=true
+                                size="mini">
+                        </el-date-picker>
                     </el-form-item>
-                    <el-form-item label="接入CDN个数" v-if="dialog.setAuth.cdnJoiner.support==true">
-                        <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.cdnNum" @change="handleChange" :min="0" :step="1" step-strictly="true" ></el-input-number>
+                    <el-form-item label="接入CDN个数" v-if="dialog.setAuth.CDNJoiner.support==true">
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.CDNJoiner.cdnNum" @change="handleChange" :min="0" :step="1" step-strictly="true" ></el-input-number>
                     </el-form-item>
                     <el-form-item label="合屏接入">
-                        <el-switch v-model="dialog.setAuth.mixerJoiner.support"></el-switch>
+                        <el-switch v-model="dialog.setAuth.MixerJoiner.support"></el-switch>
+                        <el-date-picker
+                                v-if="dialog.setAuth.MixerJoiner.support==true"
+                                v-model="dialog.setAuth.MixerJoiner.time"
+                                type="daterange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期"
+                                format="yyyy 年 MM 月 dd 日"
+                                value-format="timestamp"
+                                unlink-panels=true
+                                size="mini">
+                        </el-date-picker>
                     </el-form-item>
-                    <el-form-item label="接入合屏个数" v-if="dialog.setAuth.mixerJoiner.support==true">
-                        <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                    <el-form-item label="接入合屏个数" v-if="dialog.setAuth.MixerJoiner.support==true">
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.MixerJoiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                     </el-form-item>
-                     <!--<el-form-item label="接入能力个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
-                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum"></el-input>-->
+                     <!--<el-form-item label="接入能力个数" v-if="dialog.setAuth.JV210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.JV210Joiner.serverNum"></el-input>-->
                      <!--</el-form-item>-->
-                     <!--<el-form-item label="接入CDN个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
-                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.cdnNum"></el-input>-->
+                     <!--<el-form-item label="接入CDN个数" v-if="dialog.setAuth.JV210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.JV210Joiner.cdnNum"></el-input>-->
                      <!--</el-form-item>-->
-                     <!--<el-form-item label="接入合屏个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
-                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.screenNum"></el-input>-->
+                     <!--<el-form-item label="接入合屏个数" v-if="dialog.setAuth.JV210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.JV210Joiner.screenNum"></el-input>-->
                      <!--</el-form-item>-->
 
-		            
                 </el-form>
                 </el-scrollbar>
             </div>

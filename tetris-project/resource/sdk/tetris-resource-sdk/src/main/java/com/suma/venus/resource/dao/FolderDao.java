@@ -71,4 +71,6 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	public List<FolderPO> findByParentIdAndFolderTypeNotIn(Long parentId);
 	
 	public List<FolderPO> findByIdIn(Collection<Long> ids);
+	
+	public FolderPO findByUuid(String uuid);
 }

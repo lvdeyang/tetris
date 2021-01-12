@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.omms.auth.exception.HttpGadgetEncryptionException;
@@ -192,6 +193,32 @@ public class AuthService {
 		Map<String, String> encryption = new HashMap<String, String>();
 		CloseableHttpClient client = null;
 
+		Map<String, Object> thelast = new HashMap<String, Object>();
+		JSONArray jArray = new JSONArray();
+		JSONObject contentJson = JSONObject.parseObject(entity.getContent());
+		//bvc
+		Map<String, Object> bvc_business = contentJson.getJSONObject("bvc_business");
+		bvc_business.put("name", "bvc_business");
+		Map<String, Object> sts = contentJson.getJSONObject("sts");
+		sts.put("name", "sts");
+		Map<String, Object> capacity = contentJson.getJSONObject("capacity");
+		capacity.put("name", "capacity");
+		Map<String, Object> JV210Joiner = contentJson.getJSONObject("JV210Joiner");
+		JV210Joiner.put("name", "JV210Joiner");
+		Map<String, Object> CDNJoiner = contentJson.getJSONObject("CDNJoiner");
+		CDNJoiner.put("name", "CDNJoiner");
+		Map<String, Object> MixerJoiner = contentJson.getJSONObject("MixerJoiner");
+		MixerJoiner.put("name", "MixerJoiner");
+		
+		jArray.add(bvc_business);
+		jArray.add(sts);
+		jArray.add(capacity);
+		jArray.add(JV210Joiner);
+		jArray.add(CDNJoiner);
+		jArray.add(MixerJoiner);
+		thelast.put("deviceId", entity.getDeviceId());
+		thelast.put("process", jArray);
+		JSONObject json = new JSONObject(thelast);
 		try {
 			
 			String profile = configure.readGadgetConfig();
@@ -220,7 +247,7 @@ public class AuthService {
 	        List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 	        formparams.add(new BasicNameValuePair("type", "run"));
 	        formparams.add(new BasicNameValuePair("sn", entity.getDeviceId()));
-	        formparams.add(new BasicNameValuePair("data", entity.getContent()));
+	        formparams.add(new BasicNameValuePair("data", json.toString()));
 	        
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
 	        

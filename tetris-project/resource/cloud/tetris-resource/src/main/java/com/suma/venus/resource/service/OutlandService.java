@@ -1,6 +1,7 @@
 package com.suma.venus.resource.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,12 +19,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.controller.FolderManageController;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
@@ -37,20 +41,27 @@ import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.BundlePO.CoderType;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+import com.sumavision.tetris.websocket.message.WebsocketMessageType;
+import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -99,6 +110,17 @@ public class OutlandService extends ControllerBase{
 	@Autowired
 	private OperationLogService operationLogService;
 	
+	@Autowired
+	private ChannelSchemeDao channelSchemeDao;
+	
+	@Autowired
+	private MonitorLiveDeviceFeign monitorLiveDeviceFeign;
+	
+	@Autowired
+	private UserQueryService userQueryService;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	/**
 	 * 查询本域信息<br/>
@@ -525,7 +547,48 @@ public class OutlandService extends ControllerBase{
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		if (serNodePO != null) {
 			outlandOff(id);
-			serNodeDao.delete(serNodePO);
+			Set<String> bundleIds = new HashSet<String>();
+			Set<Long> folderIds = new HashSet<Long>();  
+ 			String name  = serNodePO.getNodeName();
+ 			//删除设备停业务
+ 			StringBufferWrapper bundleId = new StringBufferWrapper();
+			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(name);
+			if(bundlePOs != null && bundlePOs.size()>0){
+				for(BundlePO bundlepo:bundlePOs){
+					bundleIds.add(bundlepo.getBundleId());
+					folderIds.add(bundlepo.getFolderId());
+					bundleId.append(bundlepo.getBundleId()).append(",");
+				}
+				String str = bundleId.toString();
+				String bundleidsStr = str.substring(0,str.length()-1);
+				monitorLiveDeviceFeign.stopLiveDevice(bundleidsStr);
+				bundleDao.delete(bundlePOs);
+			}
+			//删除授权
+			List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIds);
+			if (privilegePOs != null && privilegePOs.size() > 0) {
+				Set<Long> privilegeId = new HashSet<Long>(); 
+				for (PrivilegePO privilegePO : privilegePOs) {
+					privilegeId.add(privilegePO.getId());
+				}
+				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegeId);
+				if (rolePrivilegeMaps != null && rolePrivilegeMaps.size() > 0) {
+					rolePrivilegeMapDAO.delete(rolePrivilegeMaps);
+				}
+				privilegeDAO.delete(privilegePOs);
+			}
+			//删除通道
+			List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundleIds);
+			if (channelSchemePOs != null && channelSchemePOs.size() > 0 ) {
+				channelSchemeDao.delete(channelSchemePOs);
+			}
+			//删除目录
+			List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+			if (folderPOs != null && folderPOs.size() > 0) {
+				folderDao.delete(folderPOs);
+			}
+			
+ 			serNodeDao.delete(serNodePO);
 			try {
 				//发送消息
 				PassByBO passByBO = new PassByBO();
@@ -749,6 +812,19 @@ public class OutlandService extends ControllerBase{
 					rolePrivilegeMapDAO.save(newbindPermission);
 				}
 			}
+			
+			List<UserBO> userBOs = userQueryService.queryUsersByRole(roleId);
+			if(null != userBOs && userBOs.size() > 0){
+				List<Long> consumeIds = new ArrayList<Long>();
+				for (UserBO userBO : userBOs) {
+					JSONObject message = new JSONObject();
+					message.put("businessType", "AuthUpdate");
+					WebsocketMessageVO ws = websocketMessageService.send(userBO.getId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
+				System.out.println("------------------f发送客户端权限变更通知****--------------");
+			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
 			data.put(ERRMSG, "权限修改失败");
@@ -898,8 +974,34 @@ public class OutlandService extends ControllerBase{
 		}
 	}
 
-	
-	public static void  main(String[] args){
+	/**
+	 * 过滤cdn以及解码器设备<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月11日 下午6:53:23
+	 * @param bundleIds
+	 * @return
+	 */
+	public Set<String> bundleFilter(Collection<String> bundleIds)throws Exception{
+		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
+		Set<String>  bundleIdsFilter = new HashSet<String>();
+		if (bundlePOs != null && bundlePOs.size() > 0) {
+			for (BundlePO bundlePO : bundlePOs) {
+				if (!bundlePO.getDeviceModel().equals("cdn")) {
+					if (null != bundlePO.getCoderType() && !"".equals(bundlePO.getCoderType()) && bundlePO.getCoderType().equals(CoderType.DECODER)) {
+						bundleIdsFilter.add(bundlePO.getBundleId());
+					}
+				}
+			}
+			
+		}
 		
+		return bundleIdsFilter;
+	}
+	public static void  main(String[] args){
+		String string = "123456789,";
+		String str = string.substring(0, string.length()-2);
+		System.out.println(str);
  	}
 }
