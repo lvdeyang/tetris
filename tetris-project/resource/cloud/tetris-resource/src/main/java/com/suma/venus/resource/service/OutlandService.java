@@ -28,6 +28,7 @@ import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.controller.FolderManageController;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
@@ -45,6 +46,7 @@ import com.suma.venus.resource.pojo.BundlePO.CoderType;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.FolderTreeVO;
@@ -121,6 +123,9 @@ public class OutlandService extends ControllerBase{
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
 	
 	/**
 	 * 查询本域信息<br/>
@@ -587,7 +592,11 @@ public class OutlandService extends ControllerBase{
 			if (folderPOs != null && folderPOs.size() > 0) {
 				folderDao.delete(folderPOs);
 			}
-			
+			//扩展参数
+			List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(bundleIds);
+			if(extraInfoPOs != null&& extraInfoPOs.size()>0){
+				extraInfoDao.delete(extraInfoPOs);
+			}
  			serNodeDao.delete(serNodePO);
 			try {
 				//发送消息
