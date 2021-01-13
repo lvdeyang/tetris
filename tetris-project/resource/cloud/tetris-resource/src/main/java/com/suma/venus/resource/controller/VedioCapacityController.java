@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.VedioCapacityDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.vo.VedioCapacityVO;
 import com.sumavision.tetris.bvc.business.query.CommandSystemQueryService;
@@ -75,7 +76,7 @@ public class VedioCapacityController {
 		List<BundlePO> bundlePOs = bundleDao.findAll();
 		List<BundlePO> bundleCountList = new ArrayList<BundlePO>();
 		for (BundlePO bundlePO : bundlePOs) {
-			if(bundlePO.getDeviceModel().equalsIgnoreCase("jv210")){
+			if(bundlePO.getDeviceModel().equalsIgnoreCase("jv210") && bundlePO.getSourceType().equals(SOURCE_TYPE.SYSTEM)){
 				bundleCountList.add(bundlePO);
 			}
 		}

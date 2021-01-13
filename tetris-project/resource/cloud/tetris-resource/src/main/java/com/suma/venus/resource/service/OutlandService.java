@@ -166,10 +166,10 @@ public class OutlandService extends ControllerBase{
 		if (serNodePOs != null && !serNodePOs.isEmpty()) {
 			for (SerNodePO forserNodePO : serNodePOs) {
 				forserNodePO.setStatus(ConnectionStatus.OFF);
-				forserNodePO.setOperate(ConnectionStatus.OFF);
+//				forserNodePO.setOperate(ConnectionStatus.OFF);
 			}
+			serNodeDao.save(serNodePOs);
 		}
-		
 		//发送消息
 		try {
 			PassByBO passByBO = new PassByBO();
@@ -430,7 +430,7 @@ public class OutlandService extends ControllerBase{
 		serNodePO.setNodeName(name);
 		serNodePO.setIp(ip);
 		serNodePO.setPort(port);
-		serNodePO.setOperate(ConnectionStatus.OFF);
+//		serNodePO.setOperate(ConnectionStatus.OFF);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		serNodeDao.save(serNodePO);
 		
@@ -454,15 +454,6 @@ public class OutlandService extends ControllerBase{
 		}
 		serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
 		
-		if (!oldname.equals(name)) {
-			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(oldname);
-			if (bundlePOs != null && bundlePOs.size() >0) {
-				for (BundlePO bundlePO : bundlePOs) {
-					bundlePO.setEquipFactInfo(name);
-				}
-			}
-			bundleDao.save(bundlePOs);
-		}
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -475,7 +466,7 @@ public class OutlandService extends ControllerBase{
 			foreign.get(0).put("oldName", oldname);
 			foreign.get(0).put("newName", name);
 			foreign.get(0).put("password", password);
-			foreign.get(0).put("operate", ConnectionStatus.OFF);
+//			foreign.get(0).put("operate", ConnectionStatus.OFF);
 			
 			foreign.get(0).put("ip", ip);
 			foreign.get(0).put("port", port);
@@ -834,6 +825,8 @@ public class OutlandService extends ControllerBase{
 				websocketMessageService.consumeAll(consumeIds);
 				System.out.println("------------------f发送客户端权限变更通知****--------------");
 			}
+			UserVO userVO = userQuery.current();
+			operationLogService.send(userVO.getUsername(), "修改权限", userVO.getUsername() + "修改了授权", EOprlogType.PRIVILEGE_CHANGE);
 		} catch (Exception e) {
 			LOGGER.error("", e);
 			data.put(ERRMSG, "权限修改失败");
