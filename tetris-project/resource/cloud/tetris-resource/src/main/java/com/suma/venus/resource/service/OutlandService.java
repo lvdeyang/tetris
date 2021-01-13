@@ -459,6 +459,15 @@ public class OutlandService extends ControllerBase{
 		}
 		serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
 		
+		if(!oldname.equals(name)){
+			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(oldname);
+			if(bundlePOs != null && bundlePOs.size()>0){
+				for (BundlePO bundlePO : bundlePOs) {
+					bundlePO.setEquipFactInfo(name);
+				}
+			}
+		}
+		
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
