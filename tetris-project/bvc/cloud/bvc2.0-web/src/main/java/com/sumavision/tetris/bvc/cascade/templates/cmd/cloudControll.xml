@@ -1,0 +1,9 @@
+<notify>
+	<commandname>cloudControll</commandname>
+	<operation>controll</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<op>${op}</op>
+	<mid>${mid}</mid>
+	<content>${subject}</content>
+</notify>
