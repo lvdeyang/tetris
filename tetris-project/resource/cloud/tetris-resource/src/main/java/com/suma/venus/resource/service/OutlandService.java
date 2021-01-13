@@ -561,8 +561,8 @@ public class OutlandService extends ControllerBase{
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		if (serNodePO != null) {
 			outlandOff(id);
-			Set<String> bundleIds = new HashSet<String>();
-			Set<Long> folderIds = new HashSet<Long>();  
+			List<String> bundleIds = new ArrayList<String>();
+			List<Long> folderIds = new ArrayList<Long>();  
  			String name  = serNodePO.getNodeName();
  			//删除设备停业务
  			StringBufferWrapper bundleId = new StringBufferWrapper();
@@ -598,10 +598,13 @@ public class OutlandService extends ControllerBase{
 				channelSchemeDao.delete(channelSchemePOs);
 			}
 			//删除目录
-			List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-			if (folderPOs != null && folderPOs.size() > 0) {
-				folderDao.delete(folderPOs);
+			if(folderIds !=null&&folderIds.size()>0){
+				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+				if (folderPOs != null && folderPOs.size() > 0) {
+					folderDao.delete(folderPOs);
+				}
 			}
+			
 			//扩展参数
 			List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(bundleIds);
 			if(extraInfoPOs != null&& extraInfoPOs.size()>0){

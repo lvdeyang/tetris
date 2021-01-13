@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.JSpinner.ListEditor;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import com.suma.venus.resource.pojo.BundlePO.CoderType;
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
@@ -54,8 +55,11 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.VedioCapacityDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceFromResource;
@@ -72,8 +76,11 @@ import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.service.BundleService;
@@ -201,6 +208,15 @@ public class BundleManageController extends ControllerBase {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDAO;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDAO;
+	
+	@Autowired
+	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -456,6 +472,65 @@ public class BundleManageController extends ControllerBase {
 			String[] bundleIdArr = bundleIds.split(",");
 			for (String bundleId : bundleIdArr) {
 				try {
+					List<String> bundleIdString = new ArrayList<String>();
+					bundleIdString.add(bundleId);
+					List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("bundleId", bundleId);
+					List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIdString);
+					List<String> toUnbindChecks = new ArrayList<String>();
+					if (privilegePOs != null&&privilegePOs.size()>0) {
+						List<Long> privilegeIds = new ArrayList<Long>();
+						for (PrivilegePO privilegePO : privilegePOs) {
+							privilegeIds.add(privilegePO.getId());
+							toUnbindChecks.add(privilegePO.getResourceIndentity());
+						}
+						List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegeIds);
+						List<Long> roleIds = new ArrayList<Long>();
+						if(rolePrivilegeMaps != null&&rolePrivilegeMaps.size()>0){
+							for (RolePrivilegeMap rolePrivilegeMap : rolePrivilegeMaps) {
+								roleIds.add(rolePrivilegeMap.getId());
+							}
+							List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleIds);
+							Set<Long> serNodeIds = new HashSet<Long>();
+							if (serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()) {
+								for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
+									serNodeIds.add(serNodeRolePermissionPO.getSerNodeId());
+								}
+								SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+								List<SerNodePO> serNodePOs = serNodeDao.findByIdIn(serNodeIds);
+								Map<String, Object> local = new HashMap<String, Object>();
+								local.put("name", serNodePO.getNodeName());
+								List<WorkNodePO> workNodePOs = workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+								PassByBO passByBOforeign = new PassByBO();
+								Map<String, Object> pass_by_content = new HashMap<String, Object>();
+								List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
+								for (int i = 0; i < serNodePOs.size(); i++) {
+									foreign.add(new HashMap<String, Object>());
+									foreign.get(i).put("name", serNodePOs.get(i).getNodeName());
+									foreign.get(i).put("devices", devices);
+									foreign.get(i).put("unBindChecks", toUnbindChecks);
+									//取消转发的设备
+									foreign.get(i).put("toUnbindWriteCheList", bundleIdString);
+								}
+								pass_by_content.put("cmd", "devicePermissionRemove");
+								pass_by_content.put("local", local);
+								pass_by_content.put("foreign", foreign);
+								passByBOforeign.setPass_by_content(pass_by_content);
+								if (workNodePOs != null && !workNodePOs.isEmpty()) {
+									passByBOforeign.setLayer_id(workNodePOs.get(0).getNodeUid());
+								}
+								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOforeign).getList());
+								
+								System.out.println("------**删除设备发送passby**------" + JSON.toJSONString(passByBOforeign)) ;
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.out.println("------删除设备发送passby失败-------");
+				}
+				try {
 					//透传	
 					List<PassByBO> passByBOs = new ArrayList<PassByBO>();
 					PassByBO passByBO = new PassByBO();
@@ -470,6 +545,7 @@ public class BundleManageController extends ControllerBase {
 						tetrisDispatchService.dispatch(passByBOs);
 					}
 					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
+					
 					deleteByBundleId(bundleId);
 					//删除设备日志
 					UserVO userVO = userQuery.current();
