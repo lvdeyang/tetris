@@ -917,9 +917,10 @@ public class OutlandService extends ControllerBase{
 			}
 
 			if(null != children && !children.isEmpty()){
-				Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+				Collections.sort(children, new FolderTreeVO.FolderIndecComparator());
 			}
 
+			
 			// 添加子bundle节点
 //			List<BundlePO> bundles = bundleService.findByFolderId(parentId);
 //			for (BundlePO bundle : bundles) {
