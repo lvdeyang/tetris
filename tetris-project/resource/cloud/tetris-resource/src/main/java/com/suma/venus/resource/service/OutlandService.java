@@ -579,6 +579,7 @@ public class OutlandService extends ControllerBase{
 				bundleDao.delete(bundlePOs);
 			}
 			//删除授权
+			bundleIds.add("1-1");
 			List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIds);
 			if (privilegePOs != null && privilegePOs.size() > 0) {
 				Set<Long> privilegeId = new HashSet<Long>(); 
