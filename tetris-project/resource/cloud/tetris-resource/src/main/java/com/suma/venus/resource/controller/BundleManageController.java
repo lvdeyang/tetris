@@ -955,7 +955,7 @@ public class BundleManageController extends ControllerBase {
 						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
-					System.out.println("--------设备信息修改***deviceInformationChange---------" + passByBOnew);
+					System.out.println("--------设备信息修改***deviceInformationChange---------" + JSON.toJSONString(passByBOnew));
 				}
 			} catch (Exception e) {
 

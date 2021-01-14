@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.errorprone.annotations.Var;
@@ -141,6 +142,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
 		data.put("local", local);
 		data.put("foreign", foreign);
+		System.out.println(JSON.toJSONString(data));
 		return data;
 	}
 	
@@ -153,6 +155,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return null
 	 */
 	public Object foreignServerNodeOff(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreignNames = wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
 		for (int i = 0; i < foreignNames.size(); i++) {
@@ -189,6 +192,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @throws Exception
 	 */
 	public Object foreignServerNodeOn(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreignNames =  wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
 		for (int i = 0; i < foreignNames.size(); i++) {
@@ -216,6 +220,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @param request
 	 */
 	public Object foreignServerNodeMessage(JSONHttpServletRequestWrapper wrapper) throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -506,6 +511,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object devicePermissionAdd(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -729,6 +735,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object devicePermissionRemove(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> deleteBundleIds = new HashSet<String>();
 		JSONArray devicesArray = new JSONArray();
@@ -809,6 +816,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @throws Exception
 	 */
 	public Object devicePermissionChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray institutions = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
@@ -933,6 +941,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object deviceStatusChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> bundleIds = new HashSet<String>(); 
 		Map<String, ONLINE_STATUS> onlineStatus = new HashMap<String, ONLINE_STATUS>();
@@ -1101,6 +1110,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			foreign.get(0).put("privileges", privileges);
 			foreign.get(0).put("extraInfo", extraInfoVOs);
 		data.put("foreign", foreign);
+		System.out.println(JSON.toJSONString(data));
 		return data;
 	}
 	
@@ -1114,6 +1124,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 */
 	public List<LianwangPassbyVO> queryPassbyMessage(String layerId)throws Exception{
 		List<LianwangPassbyVO> passbyVOs = lianwangPassbyService.queryPassby(layerId);
+		System.out.println(JSON.toJSONString(passbyVOs));
 		return passbyVOs;
 	}
 	
@@ -1149,6 +1160,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * <b>日期：</b>2021年1月11日 下午3:16:20
 	 */
 	public Object deviceInformationChange(JSONHttpServletRequestWrapper wrapper) throws Exception{
+		System.out.println(JSON.toJSONString(wrapper));
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray extraInfo = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
