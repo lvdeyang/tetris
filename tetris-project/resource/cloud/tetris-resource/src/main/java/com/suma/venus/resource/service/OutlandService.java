@@ -480,7 +480,7 @@ public class OutlandService extends ControllerBase{
 			foreign.get(0).put("oldName", oldname);
 			foreign.get(0).put("newName", name);
 			foreign.get(0).put("password", password);
-//			foreign.get(0).put("operate", ConnectionStatus.OFF);
+			foreign.get(0).put("operate", serNodePO.getOperate());
 			
 			foreign.get(0).put("ip", ip);
 			foreign.get(0).put("port", port);
