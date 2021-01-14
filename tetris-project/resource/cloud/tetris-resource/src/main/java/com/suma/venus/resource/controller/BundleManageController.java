@@ -415,7 +415,12 @@ public class BundleManageController extends ControllerBase {
 				BundleVO vo = BundleVO.fromPO(bundlePO);
 				if(bundlePO.getFolderId()!= null){
 					FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
-					vo.setBundleFolderName(folderPO.getName());
+					if (null != folderPO) {
+						vo.setBundleFolderName(folderPO.getName());
+					}else {
+						bundlePO.setFolderId(null);
+					}
+					
 				}
 				if (!"VenusTerminal".equals(bundlePO.getBundleType()) && !"VenusProxy".equals(bundlePO.getBundleType())
 						&& !lockChannelParamDao.findByBundleId(bundlePO.getBundleId()).isEmpty()) {
@@ -425,6 +430,7 @@ public class BundleManageController extends ControllerBase {
 				bundles.add(vo);
 			}
 			
+			bundleDao.save(bundlePOs);
 			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleIdIn(bundleIds);
 			if(extraInfos!=null && extraInfos.size()>0){
 				for(BundleVO bundle:bundles){
@@ -477,6 +483,7 @@ public class BundleManageController extends ControllerBase {
 					List<Map<String, Object>> devices = new ArrayList<Map<String,Object>>();
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("bundleId", bundleId);
+					devices.add(map);
 					List<PrivilegePO> privilegePOs = privilegeDAO.findByIndentify(bundleIdString);
 					List<String> toUnbindChecks = new ArrayList<String>();
 					if (privilegePOs != null&&privilegePOs.size()>0) {
@@ -489,7 +496,7 @@ public class BundleManageController extends ControllerBase {
 						List<Long> roleIds = new ArrayList<Long>();
 						if(rolePrivilegeMaps != null&&rolePrivilegeMaps.size()>0){
 							for (RolePrivilegeMap rolePrivilegeMap : rolePrivilegeMaps) {
-								roleIds.add(rolePrivilegeMap.getId());
+								roleIds.add(rolePrivilegeMap.getRoleId());
 							}
 							List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findByRoleIdIn(roleIds);
 							Set<Long> serNodeIds = new HashSet<Long>();
@@ -881,6 +888,7 @@ public class BundleManageController extends ControllerBase {
 				Map<String, Object> local = new HashMap<String, Object>();
 				Map<String, Object> pass_by_content = new HashMap<String, Object>();
 				BundleVO bundleVO = BundleVO.fromPO(bundlePO);
+				bundleVO.setEquipFactInfo(serNodePO.getNodeName());
 				local.put("name", serNodePO.getNodeName());
 				
 				FolderPO folderPO = folderDao.findOne(folderId);
