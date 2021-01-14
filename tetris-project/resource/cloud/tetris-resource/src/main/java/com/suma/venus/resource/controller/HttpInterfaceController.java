@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.AccessToken;
 import com.suma.venus.resource.base.bo.BatchLockBundleParam;
@@ -979,7 +980,7 @@ public class HttpInterfaceController {
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 					
-					System.out.println("------**发送Passby**------" + passByBO) ;
+					System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 				}
 				
 			} catch (Exception e) {
@@ -1090,7 +1091,7 @@ public class HttpInterfaceController {
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 					
-					System.out.println("------**发送Passby**------" + passByBO) ;
+					System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 				}
 				
 				

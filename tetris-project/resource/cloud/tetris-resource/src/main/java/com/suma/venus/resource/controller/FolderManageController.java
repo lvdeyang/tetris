@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.department.dao.LdapDepartmentDao;
 import com.suma.application.ldap.department.po.LdapDepartmentPo;
@@ -351,7 +352,7 @@ public class FolderManageController extends ControllerBase {
 						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
-					System.out.println("--------修改设备组织机构***——————————" + passByBOnew);
+					System.out.println("--------修改设备组织机构***——————————" + JSON.toJSONString(passByBOnew));
 				}
 				
 			} catch (Exception e) {
@@ -565,7 +566,7 @@ public class FolderManageController extends ControllerBase {
 						passByBOnew.setLayer_id(workNodePOs.get(0).getNodeUid());
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOnew).getList());
-					System.out.println("--------修改设备组织机构***gaiming——————————" + passByBOnew);
+					System.out.println("--------修改设备组织机构***gaiming——————————" + JSON.toJSONString(passByBOnew));
 				}
 				
 			} catch (Exception e) {

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
@@ -1021,7 +1022,7 @@ public class BindResourceController extends ControllerBase {
 							passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
-						System.out.println("------**发送Passby**------" + passByBO) ;
+						System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 					}
 					
 					
@@ -1073,7 +1074,7 @@ public class BindResourceController extends ControllerBase {
 						}
 						tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 						
-						System.out.println("------**发送Passby**------" + passByBO) ;
+						System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 					}
 				}
 				

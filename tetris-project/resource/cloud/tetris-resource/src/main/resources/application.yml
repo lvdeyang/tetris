@@ -4,18 +4,18 @@ server:
 
 spring:
     application:
-        name: tetris-resource-ldy
+        name: tetris-resource
     cloud:
         client:
-            ipAddress : 192.165.56.85
+            ipAddress : 192.165.56.111
         inetutils:
-            preferred-networks: 192.165.56.85
+            preferred-networks: 192.165.56.111
 
     #datasource        
     datasource:
         #resource datasource
         resource:
-            url: jdbc:mysql://192.165.56.71:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+            url: jdbc:mysql://192.165.56.111:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
             username : root
             password : sumavisionrd
             driver-class-name : com.mysql.jdbc.Driver
@@ -46,10 +46,10 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.58.123:8081/eureka/
+      defaultZone: http://192.165.56.111:8081/eureka/
   instance:
     prefer-ip-address: true
-    ip-address: 192.165.56.85
+    ip-address: 192.165.56.111
     lease-renewal-interval-in-seconds : 3
     lease-expiration-duration-in-seconds : 10
     

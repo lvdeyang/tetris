@@ -188,6 +188,7 @@ public class OutlandService extends ControllerBase{
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 			}
 			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			System.out.println(JSON.toJSONString(passByBO));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -304,6 +305,7 @@ public class OutlandService extends ControllerBase{
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 				}
 				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+				System.out.println(JSON.toJSONString(passByBO));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -406,6 +408,7 @@ public class OutlandService extends ControllerBase{
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 			}
 			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			System.out.println(JSON.toJSONString(passByBO));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -480,7 +483,7 @@ public class OutlandService extends ControllerBase{
 			foreign.get(0).put("oldName", oldname);
 			foreign.get(0).put("newName", name);
 			foreign.get(0).put("password", password);
-//			foreign.get(0).put("operate", ConnectionStatus.OFF);
+			foreign.get(0).put("operate", serNodePO.getOperate());
 			
 			foreign.get(0).put("ip", ip);
 			foreign.get(0).put("port", port);
@@ -492,6 +495,7 @@ public class OutlandService extends ControllerBase{
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 			}
 			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			System.out.println(JSON.toJSONString(passByBO));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -538,6 +542,7 @@ public class OutlandService extends ControllerBase{
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 			}
 			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+			System.out.println(JSON.toJSONString(passByBO));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -640,7 +645,7 @@ public class OutlandService extends ControllerBase{
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 				}
 				tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
-				System.out.println("_______________删除外域———————————————"+ passByBO );
+				System.out.println(JSON.toJSONString(passByBO));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
