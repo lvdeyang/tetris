@@ -570,7 +570,7 @@ public class OutlandService extends ControllerBase{
 			if(bundlePOs != null && bundlePOs.size()>0){
 				for(BundlePO bundlepo:bundlePOs){
 					bundleIds.add(bundlepo.getBundleId());
-					folderIds.add(bundlepo.getFolderId());
+					folderIds.add(bundlepo.getFolderId()==null ? 0:bundlepo.getFolderId());
 					bundleId.append(bundlepo.getBundleId()).append(",");
 				}
 				String str = bundleId.toString();
@@ -601,7 +601,18 @@ public class OutlandService extends ControllerBase{
 			if(folderIds !=null&&folderIds.size()>0){
 				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
 				if (folderPOs != null && folderPOs.size() > 0) {
-					folderDao.delete(folderPOs);
+					for (FolderPO folderPO : folderPOs) {
+						if (folderPO.getParentPath() != null && "".equals(folderPO.getParentPath())) {
+							String[] pathId = folderPO.getParentPath().split("/");
+							if (pathId.length > 1) {
+								for (int i = 1; i < pathId.length; i++) {
+									folderIds.add(Long.valueOf(pathId[i]));
+								}
+							}
+						}
+					}
+					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
+					folderDao.delete(folder2all);
 				}
 			}
 			
@@ -1027,6 +1038,17 @@ public class OutlandService extends ControllerBase{
 	public static void  main(String[] args){
 		String string = "123456789,";
 		String str = string.substring(0, string.length()-2);
-		System.out.println(str);
+		String testString = "/2";
+		List<Long> folderIds = new ArrayList<Long>();
+		String[] pathId = testString.split("/");
+		if (pathId.length > 1) {
+			for (int i = 1; i < pathId.length; i++) {
+				folderIds.add(Long.valueOf(pathId[i]));
+			}
+		}
+		for (Long string2 : folderIds) {
+			System.out.println(string2);
+		}
+//		System.out.println(str);
  	}
 }
