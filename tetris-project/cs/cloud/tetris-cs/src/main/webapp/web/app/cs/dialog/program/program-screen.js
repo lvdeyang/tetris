@@ -427,14 +427,14 @@ define([
                     row.rotation = null;
                 }
             },
-            handleStartTimeChange(row, value){
+            handleStartTimeChange: function(row, value){
             	if (value) {
                     row.startTime = value;
                 } else {
                     row.startTime = null;
                 }
             },
-            handleEndTimeChange(row, value){
+            handleEndTimeChange: function(row, value){
             	if (value) {
                     row.endTime = value;
                 } else {

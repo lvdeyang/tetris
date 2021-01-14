@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.validation.constraints.Size;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -405,10 +406,12 @@ public class BroadAbilityService {
 				List<ScreenVO> screenVOs = templateVO.getData();
 				if (screenVOs==null||screenVOs.isEmpty()) continue;
 				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
-				//先判断有没有垫播
+				//判断有没有垫播
 				if(channel.getBackfileDuration()!=null&&channel.getBackfileName()!=null&&!channel.getBackfileDuration().isEmpty()&&!channel.getBackfileName().isEmpty()){
 					//这里重新根据开始，结束时间计算duration
 					templateVO.setData(resetScreenDuration(broadDate,screenVOs,channel));
+				}else{
+					templateVO.setData(resetDurationWithoutBackfile(broadDate, screenVOs, channel));
 				}
 				long tempScheduleTime=querySchedulePlayTimeByScreens(screenVOs);
 				
@@ -449,21 +452,7 @@ public class BroadAbilityService {
 								inputPrevFileVO.setCount(1);
 							}
 							
-							//无垫播情况下根据页面设置的时间来修改播放时间
-							if(channel.getBackfileDuration().isEmpty()&&channel.getBackfileName().isEmpty()){
-								if(screenVO.getStartTime()!=null&&!screenVO.getStartTime().isEmpty()&&screenVO.getEndTime()!=null&&!screenVO.getEndTime().isEmpty()){
-									Date startTime=DateUtil.parse(screenVO.getStartTime(),"yyyy-MM-dd HH:mm:ss");
-								    Date endTime=DateUtil.parse(screenVO.getEndTime(), "yyyy-MM-dd HH:mm:ss");
-								    //文件自身时长
-								    long fileduration=Long.parseLong(screenVO.getDuration());
-								    //页面设置的时长
-								    long expectedDuration=endTime.getTime()-startTime.getTime();
-								    //如果文件时长大于设置的时长，将duration改为页面设置的时长
-								    if(fileduration>expectedDuration){
-								    	screenVO.setDuration(expectedDuration+"");
-								    }
-								}
-							}
+							
 							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
 							.setDuration(Long.parseLong(screenVO.getDuration()))
 							.setSeek(0l);
@@ -736,6 +725,70 @@ public class BroadAbilityService {
 		}
 	}
 	
+	
+	/**
+	 * 无垫播设置节目排期<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月12日 下午4:47:17
+	 * @param broadTime
+	 * @param screens
+	 * @param channel
+	 * @return
+	 * @throws ParseException
+	 */
+	private List<ScreenVO> resetDurationWithoutBackfile(Date broadTime,List<ScreenVO> screens,ChannelPO channel) throws ParseException{
+		List<ScreenVO> resetList=new ArrayList<ScreenVO>();
+		//无垫播情况下根据页面设置的时间来修改播放时间
+		for(int i=0;i<screens.size();i++){
+			//循环次数默认为1
+			if(screens.get(i).getRotation()==null||screens.get(i).getRotation().isEmpty()||("0").equals(screens.get(i).getRotation())){
+				screens.get(i).setRotation("1");
+			}
+			//获取循环次数
+		    int rotationTimes = Integer.parseInt(screens.get(i).getRotation());
+			if(screens.get(i).getStartTime()!=null&&!screens.get(i).getStartTime().isEmpty()
+					&&screens.get(i).getEndTime()!=null&&!screens.get(i).getEndTime().isEmpty()){
+				Date startTime=DateUtil.parse(screens.get(i).getStartTime(),"yyyy-MM-dd HH:mm:ss");
+			    Date endTime=DateUtil.parse(screens.get(i).getEndTime(), "yyyy-MM-dd HH:mm:ss");
+			    //文件时长
+			    long fileduration=Long.parseLong(screens.get(i).getDuration());
+			    //页面设置的时长
+			    long expectedDuration=endTime.getTime()-startTime.getTime();  
+			    //获取循环节目的播放总时长
+			    long totalDuration = rotationTimes*fileduration;
+			    if(expectedDuration>totalDuration){
+			    	//设置时长大于播放总时长，循环加入节目单
+			    	for(int j=0;j<rotationTimes;j++){
+			    		resetList.add(screens.get(i));
+			    	}
+			    }else{
+			    	//设置时长不够情况下先计算能完整放多少次
+			    	int count = (int)(expectedDuration/fileduration);
+			    	for(int j=0;j<count;j++){
+			    		resetList.add(screens.get(i));
+			    	}
+			    	//剩余时间作为最后一次的播放时间
+			    	long newDuration = (expectedDuration-count*fileduration)>fileduration?fileduration:(expectedDuration-count*fileduration);
+			    	//最后一次播放时间应该大于10秒
+			    	if(newDuration>10000){
+			    		resetList.add(new ScreenVO().setPreviewUrl(screens.get(i).getPreviewUrl())
+				    			 .setType(screens.get(i).getType())
+				    			 .setDuration(Long.toString(newDuration)));
+			    	}
+			    }
+			}else{
+				//未在页面设置时间，直接加入节目单
+				for(int j=0;j<rotationTimes;j++){
+					//screens.get(i).setCount(j+1);
+		    		resetList.add(screens.get(i));
+		    	}
+			}
+		}
+		return resetList;
+	}
+	
+	
 	/**
 	 * 
 	 * 重置duration<br/>
@@ -749,8 +802,15 @@ public class BroadAbilityService {
 	 */
 	private List<ScreenVO> resetScreenDuration(Date broadTime,List<ScreenVO> screens,ChannelPO channel) throws ParseException{
 		List<ScreenVO> resetList=new ArrayList<ScreenVO>();
+		
 		long current=broadTime.getTime();
 		for(int i=0;i<screens.size();i++){
+			
+			if(screens.get(i).getRotation()==null||screens.get(i).getRotation().isEmpty()||("0").equals(screens.get(i).getRotation())){
+				screens.get(i).setRotation("1");
+			}
+		    int rotationTimes = Integer.parseInt(screens.get(i).getRotation());
+		    
 			if(screens.get(i).getStartTime()!=null&&!screens.get(i).getStartTime().isEmpty()
 					&&screens.get(i).getEndTime()!=null&&!screens.get(i).getEndTime().isEmpty()){
 				Date startTime=DateUtil.parse(screens.get(i).getStartTime(),"yyyy-MM-dd HH:mm:ss");
@@ -764,8 +824,6 @@ public class BroadAbilityService {
 						ScreenVO screenVO=new ScreenVO();
 						screenVO.setPreviewUrl(channel.getBackfileUrl());
 						screenVO.setDuration(channel.getBackfileDuration());
-						//screenVO.setCount(1);
-						//必须在此设置类型，不然后边无法生成协议
 						screenVO.setType(channel.getBackfileType());
 						resetList.add(screenVO);
 					}
@@ -774,25 +832,68 @@ public class BroadAbilityService {
 						ScreenVO screenVO=new ScreenVO();
 						screenVO.setPreviewUrl(channel.getBackfileUrl());
 						screenVO.setDuration(left+"");
-						//screenVO.setCount(1);
 						screenVO.setType(channel.getBackfileType());
 						resetList.add(screenVO);
 					}
 			    	current+=tempDuration;
-			    }
+			    } 
 			    //放入当前节目
-				resetList.add(screens.get(i));
+				//resetList.add(screens.get(i));
+				
+			    //页面设置的播放时长
+				long expectedDuration=endTime.getTime()-startTime.getTime();
+				//获取循环节目的播放总时长
+			    long totalDuration = rotationTimes*fileduration;
+			    if(expectedDuration>totalDuration){
+			    	//设置时长大于播放总时长，循环加入节目单
+			    	for(int j=0;j<rotationTimes;j++){
+			    		resetList.add(screens.get(i));
+			    	}
+			    	//播放完循环节目后如果剩余时间大于10秒加入垫播
+			    	long extraTime = expectedDuration-totalDuration;
+			    	
+			    	//计算垫播能完整播多少次
+			    	int count = (int)(extraTime/Long.parseLong(channel.getBackfileDuration()));
+				    for(int j=0;j<count;j++){
+				    	resetList.add(new ScreenVO().setPreviewUrl(channel.getBackfileUrl())
+				    			.setDuration(channel.getBackfileDuration())
+				    			.setType(channel.getBackfileType()));
+				    }
+				    //垫播播完后剩余时间
+				    long left = extraTime-count*Long.parseLong(channel.getBackfileDuration());
+				    if(left>10000){
+				    	resetList.add(new ScreenVO().setPreviewUrl(channel.getBackfileUrl())
+				    			.setDuration(Long.toString(left))
+				    			.setType(channel.getBackfileType()));
+				    }
+			    	
+			    }else{
+			    	//设置时长不够情况下先计算能完整放多少次
+			    	int count = (int)(expectedDuration/fileduration);
+			    	for(int j=0;j<count;j++){
+			    		resetList.add(screens.get(i));
+			    	}
+			    	//剩余时间作为最后一次的播放时间
+			    	long newDuration = (expectedDuration-count*fileduration)>fileduration?fileduration:(expectedDuration-count*fileduration);
+			    	//最后一次播放时间应该大于10秒
+			    	if(newDuration>10000){
+			    		resetList.add(new ScreenVO().setPreviewUrl(screens.get(i).getPreviewUrl())
+				    			 .setType(screens.get(i).getType())
+				    			 .setDuration(Long.toString(newDuration)));
+			    	}
+			    }
+			    //current+=endTime.getTime()-startTime.getTime();
+			    current+=expectedDuration;
+			    
 				//后边剩下的加入垫播
-				long progDuration=endTime.getTime()-startTime.getTime();
 				//如果文件时长小于开始结束时间间隔，则将文件的duration设置为开始结束时间间隔
-				if(fileduration<progDuration){
+			/*	if(fileduration<progDuration){
 					long tempDuration=progDuration-fileduration;
 					int count=(int) Math.ceil(tempDuration/Long.parseLong(channel.getBackfileDuration()));
 					for(int j=0;j<count;j++){
 						ScreenVO screenVO=new ScreenVO();
 						screenVO.setPreviewUrl(channel.getBackfileUrl());
 						screenVO.setDuration(channel.getBackfileDuration());
-						//screenVO.setCount(1);
 						screenVO.setType(channel.getBackfileType());
 						resetList.add(screenVO);
 					}
@@ -802,19 +903,21 @@ public class BroadAbilityService {
 						ScreenVO screenVO=new ScreenVO();
 						screenVO.setPreviewUrl(channel.getBackfileUrl());
 						screenVO.setDuration(left+"");
-						//screenVO.setCount(1);
 						screenVO.setType(channel.getBackfileType());
 						resetList.add(screenVO);
 					}
 				}else{
 					//如果文件时长大于开始结束时间间隔，则将设置的开始结束时间作为播发开始结束时间
 					screens.get(i).setDuration(progDuration+"");
-				}
+				}*/
 
-				current+=endTime.getTime()-startTime.getTime();
+				
 			}else{
-				current+=Long.parseLong(screens.get(i).getDuration());
-				resetList.add(screens.get(i));
+				//没设置排期直接加入新节目单
+				for(int j=0;j<rotationTimes;j++){
+					current+=Long.parseLong(screens.get(i).getDuration());
+					resetList.add(screens.get(i));
+				}
 			}
 
 		}
