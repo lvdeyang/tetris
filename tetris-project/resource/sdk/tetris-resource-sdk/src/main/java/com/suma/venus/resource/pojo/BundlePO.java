@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 
 /**
  * 能力资源表
@@ -105,6 +107,7 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	private String equipNode;
 
+	/** 外域名称*/
 	private String equipFactInfo;
 
 	/**
@@ -285,6 +288,13 @@ public class BundlePO extends CommonPO<BundlePO> {
 	}
 
 	public void setOnlineStatus(ONLINE_STATUS onlineStatus) {
+		if(onlineStatus.equals(ONLINE_STATUS.OFFLINE) && "9c85c713a8d7461bbc04f2fe37575437".equals(this.getBundleId())){
+			try{
+				throw new BaseException(StatusCode.FORBIDDEN, "大华摄像头9c85c713a8d7461bbc04f2fe37575437离线了 dahua offline");
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
 		this.onlineStatus = onlineStatus;
 	}
 

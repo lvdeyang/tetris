@@ -14,12 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.errorprone.annotations.Var;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
+import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
@@ -29,6 +32,7 @@ import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
@@ -42,6 +46,7 @@ import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.suma.venus.resource.vo.ExtraInfoVO;
 import com.suma.venus.resource.vo.FolderVO;
 import com.suma.venus.resource.vo.LianwangPassbyVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
@@ -88,6 +93,15 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	
 	@Autowired
 	private SerNodeRolePermissionDAO serNodeRolePermissionDAO;
+	
+	@Autowired
+	private ExtraInfoDao extraInfoDao;
+	
+	@Autowired
+	private ExtraInfoService extraInfoService;
+	
+	@Autowired
+	private OutlandService outlandService;
 	
 	/**
 	 * 查本域以及外域信息<br/>
@@ -151,6 +165,14 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			for (SerNodePO serNodePO : serNodePOs) {
 				serNodePO.setStatus(ConnectionStatus.OFF);
 			}
+			//断开时外域的设备设为离线状态
+			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfoIn(serverNodeName);
+			if(bundlePOs != null && bundlePOs.size() > 0){
+				for (BundlePO bundlePO : bundlePOs) {
+					bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+				}
+				bundleDao.save(bundlePOs);
+			}
 		}
 		serNodeDao.save(serNodePOs);
 		return null;
@@ -197,6 +219,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
+		JSONArray extraInfoArray = new JSONArray();
 		String name = new String();
 		List<String> privileges = new ArrayList<String>();
 		Set<String> serverNodeName = new HashSet<String>();
@@ -204,6 +227,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			JSONObject jsonObject = foreign.getJSONObject(i);
 			institutionsArray = foreign.getJSONObject(i).getJSONArray("institutions");
 			devicesaArray = foreign.getJSONObject(i).getJSONArray("devices");
+			extraInfoArray = foreign.getJSONObject(i).getJSONArray("extraInfo");
 			privileges = JSONObject.parseArray(jsonObject.getJSONArray("privileges").toJSONString(), String.class);
 			name = jsonObject.getString("name");
 			serverNodeName.add(name);
@@ -275,12 +299,73 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		Set<BundlePO> removeBundlePOs = new HashSet<BundlePO>();
 		Set<String> oldBundleIds = new HashSet<String>();
 		List<BundlePO> existedBundlePOs =  bundleDao.findByEquipFactInfo(name);
+		
+		//设备扩展参数
+		Set<String> bundStrings = new HashSet<String>();
+ 		if (existedBundlePOs != null && existedBundlePOs.size() > 0) {
+			for (BundlePO bundlePO : existedBundlePOs) {
+				bundStrings.add(bundlePO.getBundleId());
+			}
+		}
+ 		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(bundStrings);
+		List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
+		if(extraInfoArray!=null && extraInfoArray.size()>0){
+			for(int i = 0;i<extraInfoArray.size();i++){
+				JSONObject jsonObject = extraInfoArray.getJSONObject(i);
+				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+				extraInfoPOs.add(extraInfoPO);
+			}
+			extraInfoDao.delete(exExtraInfoPOs);
+			extraInfoDao.save(extraInfoPOs);
+		}
+		
+		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
+		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundStrings);
+		List<ChannelSchemePO> newchannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		List<ChannelSchemePO> removeChannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		
 		Set<String> needBundleIdSet = new HashSet<String>();
-		JSONArray channels = new JSONArray();
 		for (int i = 0; i < devicesaArray.size(); i++) {
 			JSONObject jsonObject = devicesaArray.getJSONObject(i); 
-			channels = jsonObject.getJSONArray("channels");
-			BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);			
+			BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
+			List<ChannelSchemeVO> SchemeVOs = bundleVO.getChannels();
+			List<ChannelSchemePO> SchemePOs = new ArrayList<ChannelSchemePO>();
+			for (ChannelSchemeVO channelSchemeVO : SchemeVOs) {
+				if (templatePOs != null && !templatePOs.isEmpty()) {
+					for (ChannelTemplatePO channelTemplatePO : templatePOs) {
+						if (channelSchemeVO.getDeviceModel().equals(channelTemplatePO.getDeviceModel()) 
+								&& channelSchemeVO.getChannelName().equals(channelTemplatePO.getChannelName())) {
+							channelSchemeVO.setChannelTemplateID(channelTemplatePO.getId());
+						}
+					}
+				}
+				ChannelSchemePO channelSchemePO = new ChannelSchemePO();
+				channelSchemePO.setBundleId(channelSchemeVO.getBundleId());
+				channelSchemePO.setChannelId(channelSchemeVO.getChannelId());
+				channelSchemePO.setChannelName(channelSchemeVO.getChannelName());
+				channelSchemePO.setChannelTemplateID(channelSchemeVO.getChannelTemplateID());
+				channelSchemePO.setChannelStatus(LockStatus.IDLE);
+				SchemePOs.add(channelSchemePO);
+			}
+			if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
+				for (ChannelSchemePO schemePO : SchemePOs) {
+					boolean finded = false;
+					if (SchemePOs != null && !SchemePOs.isEmpty()) {
+						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
+							if (schemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
+									&& schemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
+								channelSchemePO.setChannelTemplateID(schemePO.getChannelTemplateID());
+								removeChannelSchemePOs.add(channelSchemePO);
+								finded = true;
+							}
+						}
+					}
+					if(!finded) newchannelSchemePOs.add(schemePO);
+				}
+			}else{
+				newchannelSchemePOs.addAll(SchemePOs);
+			}
 			String institution = jsonObject.getString("institution");
 			if (newFolders != null && !newFolders.isEmpty()) {
 				for (FolderPO newfolderPO : newFolders) {
@@ -297,6 +382,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 					for (BundlePO bundlePO2 : bundlePOs) {
 						needBundleIdSet.add(bundlePO2.getBundleId());
 						if (bundlePO1.getBundleId().equals(bundlePO2.getBundleId())) {
+							bundlePO1 = bundlePOtoBundlePO(bundlePO1, bundlePO2);
+							bundlePO1.setOnlineStatus(bundlePO2.getOnlineStatus());
 							removeBundlePOs.add(bundlePO2);
 							break;
 						}
@@ -305,6 +392,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 			}
 		}
+
 		bundlePOs.removeAll(removeBundlePOs);
 		Set<BundlePO> needBundlePOs = new HashSet<BundlePO>();
 		if(existedBundlePOs != null && existedBundlePOs.size()>0){
@@ -318,13 +406,42 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 			}
 		}
+//		保存更新状态的设备		
+		bundleDao.save(needBundlePOs);
 		existedBundlePOs.removeAll(needBundlePOs);
 		if (existedBundlePOs != null && !existedBundlePOs.isEmpty()) {
+			List<String> delbundle = new ArrayList<String>();
+			for (BundlePO bundlePO : needBundlePOs) {
+				delbundle.add(bundlePO.getBundleId());
+			}
+			List<ChannelSchemePO> channel = channelSchemeDao.findByBundleIdIn(delbundle);
+			if(channel!=null && channel.size()>0 && channelSchemePOs!=null && channelSchemePOs.size()>0){
+				List<ChannelSchemePO> deletedChannels = new ArrayList<ChannelSchemePO>();
+				for(ChannelSchemePO c1:channel){
+					for(ChannelSchemePO c2:channelSchemePOs){
+						if(c1.getId().equals(c2.getId())){
+							deletedChannels.add(c2);
+							break;
+						}
+					}
+				}
+				channelSchemePOs.removeAll(deletedChannels);
+				channelSchemeDao.delete(channel);
+				
+			}
+			
 			bundleDao.delete(existedBundlePOs);
+			List<ExtraInfoPO> extraInfoPOs2 = extraInfoDao.findByBundleIdIn(delbundle);
+			extraInfoDao.delete(extraInfoPOs2);
 		}
 		if (bundlePOs.size()>0) {
 			bundleDao.save(bundlePOs);
 		}
+		
+//		newchannelSchemePOs.remove(removeChannelSchemePOs);
+		channelSchemeDao.save(newchannelSchemePOs);
+		channelSchemeDao.save(removeChannelSchemePOs);
+		
 		//外域下授权信息
 		oldBundleIds.add("-1");
 		List<PrivilegePO> olPrivilegesPos = privilegeDAO.findByIndentify(oldBundleIds);
@@ -356,7 +473,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			olPrivilegesPos.removeAll(existPos);
 			
 			if (olPrivilegesPos.size() > 0) {
-				for (PrivilegePO privilegePO : newprivilegePos) {
+				for (PrivilegePO privilegePO : olPrivilegesPos) {
 					mapId.add(privilegePO.getId());
 				}
 				privilegeDAO.delete(olPrivilegesPos);
@@ -369,47 +486,14 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		if (newprivilegePos.size() > 0) {
 			privilegeDAO.save(newprivilegePos);
 		}
+		List<BundlePO> allbundlePOs = bundleDao.findAll();
+		Map<String, String> bundleModel = new HashMap<String, String>();
+		if(allbundlePOs != null && allbundlePOs .size() >0){
+			for (BundlePO bundlePO : allbundlePOs) {
+				bundleModel.put(bundlePO.getBundleId(), bundlePO.getDeviceModel());
+			}
+		}
 		
-		//外域下的通道信息
-		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findAll();
-		Set<ChannelSchemePO> newchannelSchemePOs = new HashSet<ChannelSchemePO>();
-		for (int i = 0; i < channels.size(); i++) {
-			JSONObject jsonObject = channels.getJSONObject(i);
-			ChannelSchemeVO channelSchemeVO = JSONObject.toJavaObject(jsonObject, ChannelSchemeVO.class);
-			if (templatePOs != null && !templatePOs.isEmpty()) {
-				for (ChannelTemplatePO channelTemplatePO : templatePOs) {
-					if (channelSchemeVO.getDeviceModel().equals(channelTemplatePO.getDeviceModel()) 
-							&& channelSchemeVO.getChannelName().equals(channelTemplatePO.getChannelName())) {
-						channelSchemeVO.setChannelTemplateID(channelTemplatePO.getId());
-					}
-				}
-			}
-			ChannelSchemePO channelSchemePO = new ChannelSchemePO();
-			channelSchemePO.setBundleId(channelSchemeVO.getBundleId());
-			channelSchemePO.setChannelId(channelSchemeVO.getChannelId());
-			channelSchemePO.setChannelName(channelSchemeVO.getChannelName());
-			channelSchemePO.setChannelTemplateID(channelSchemeVO.getChannelTemplateID());
-			channelSchemePO.setChannelStatus(LockStatus.IDLE);
-			newchannelSchemePOs.add(channelSchemePO);
-		}
-		Set<ChannelSchemePO> removeChannelSchemePOs = new HashSet<ChannelSchemePO>();
-		if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
-			for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-				if (newchannelSchemePOs != null && !newchannelSchemePOs.isEmpty()) {
-					for (ChannelSchemePO newchannelSchemePO : newchannelSchemePOs) {
-						if (newchannelSchemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
-								&& newchannelSchemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
-							channelSchemePO.setChannelTemplateID(newchannelSchemePO.getChannelTemplateID());
-							removeChannelSchemePOs.add(newchannelSchemePO);
-						}
-					}
-				}
-			}
-		}
-		newchannelSchemePOs.remove(removeChannelSchemePOs);
-		channelSchemeDao.save(newchannelSchemePOs);
-		channelSchemeDao.save(channelSchemePOs);
 		return null;
 	}
 
@@ -425,13 +509,16 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
+		JSONArray extraInfoArray = new JSONArray();
+		String name = new String();
 		Set<String> serverNodeName = new HashSet<String>();
 		List<String> toBindChecks = new ArrayList<String>();
 		for (int i = 0; i < foreign.size(); i++) {
 			JSONObject jsonObject = foreign.getJSONObject(i);
 			institutionsArray = foreign.getJSONObject(i).getJSONArray("institutions");
 			devicesaArray = foreign.getJSONObject(i).getJSONArray("devices");
-			String name = jsonObject.getString("name");
+			extraInfoArray = foreign.getJSONObject(i).getJSONArray("extraInfo");
+			name = jsonObject.getString("name");
 			toBindChecks = JSONObject.parseArray(jsonObject.getJSONArray("bindChecks").toJSONString(), String.class);
 			serverNodeName.add(name);
 		}
@@ -529,12 +616,74 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		
 		List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 		List<BundlePO> removeBundlePOs = new ArrayList<BundlePO>();
-		List<BundlePO> existedBundlePOs =  bundleDao.findAll(); 
-		JSONArray channels = new JSONArray();
+		List<BundlePO> existedBundlePOs =  bundleDao.findByEquipFactInfo(name); 
+		
+		//设备扩展参数
+		Set<String> bundStrings = new HashSet<String>();
+ 		if (existedBundlePOs != null && existedBundlePOs.size() > 0) {
+			for (BundlePO bundlePO : existedBundlePOs) {
+				bundStrings.add(bundlePO.getBundleId());
+			}
+		}
+ 		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(bundStrings);
+		List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
+		if(extraInfoArray!=null && extraInfoArray.size()>0){
+			for(int i = 0;i<extraInfoArray.size();i++){
+				JSONObject jsonObject = extraInfoArray.getJSONObject(i);
+				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+				extraInfoPOs.add(extraInfoPO);
+			}
+			extraInfoDao.delete(exExtraInfoPOs);
+			extraInfoDao.save(extraInfoPOs);
+		}
+		
+		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
+		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundStrings);
+		List<ChannelSchemePO> newchannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		List<ChannelSchemePO> removeChannelSchemePOs = new ArrayList<ChannelSchemePO>();
+		
 		for (int i = 0; i < devicesaArray.size(); i++) {
 			JSONObject jsonObject = devicesaArray.getJSONObject(i); 
-			channels = jsonObject.getJSONArray("channels");
-			BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);			
+			BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
+			List<ChannelSchemeVO> SchemeVOs = bundleVO.getChannels();
+			List<ChannelSchemePO> SchemePOs = new ArrayList<ChannelSchemePO>();
+			for (ChannelSchemeVO channelSchemeVO : SchemeVOs) {
+				if (templatePOs != null && !templatePOs.isEmpty()) {
+					for (ChannelTemplatePO channelTemplatePO : templatePOs) {
+						if (channelSchemeVO.getDeviceModel().equals(channelTemplatePO.getDeviceModel()) 
+								&& channelSchemeVO.getChannelName().equals(channelTemplatePO.getChannelName())) {
+							channelSchemeVO.setChannelTemplateID(channelTemplatePO.getId());
+							break;
+						}
+					}
+				}
+				ChannelSchemePO channelSchemePO = new ChannelSchemePO();
+				channelSchemePO.setBundleId(channelSchemeVO.getBundleId());
+				channelSchemePO.setChannelId(channelSchemeVO.getChannelId());
+				channelSchemePO.setChannelName(channelSchemeVO.getChannelName());
+				channelSchemePO.setChannelTemplateID(channelSchemeVO.getChannelTemplateID());
+				channelSchemePO.setChannelStatus(LockStatus.IDLE);
+				SchemePOs.add(channelSchemePO);
+			}
+			if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
+				for (ChannelSchemePO schemePO : SchemePOs) {
+					boolean finded = false;
+					if (SchemePOs != null && !SchemePOs.isEmpty()) {
+						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
+							if (schemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
+									&& schemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
+								channelSchemePO.setChannelTemplateID(schemePO.getChannelTemplateID());
+								removeChannelSchemePOs.add(channelSchemePO);
+								finded = true;
+							}
+						}
+					}
+					if(!finded) newchannelSchemePOs.add(schemePO);
+				}
+			}else{
+				newchannelSchemePOs.addAll(SchemePOs);
+			}
 			String institution = jsonObject.getString("institution");
 			if (newFolders != null && !newFolders.isEmpty()) {
 				for (FolderPO newfolderPO : newFolders) {
@@ -561,46 +710,11 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
 		bundlePOs.removeAll(removeBundlePOs);
 		bundleDao.save(bundlePOs);
-		//外域下的通道信息
-		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findAll();
-		List<ChannelSchemePO> newchannelSchemePOs = new ArrayList<ChannelSchemePO>();
-		for (int i = 0; i < channels.size(); i++) {
-			JSONObject jsonObject = channels.getJSONObject(i);
-			ChannelSchemeVO channelSchemeVO = JSONObject.toJavaObject(jsonObject, ChannelSchemeVO.class);
-			if (templatePOs != null && !templatePOs.isEmpty()) {
-				for (ChannelTemplatePO channelTemplatePO : templatePOs) {
-					if (channelSchemeVO.getDeviceModel().equals(channelTemplatePO.getDeviceModel()) 
-							&& channelSchemeVO.getChannelName().equals(channelTemplatePO.getChannelName())) {
-						channelSchemeVO.setChannelTemplateID(channelTemplatePO.getId());
-					}
-				}
-			}
-			ChannelSchemePO channelSchemePO = new ChannelSchemePO();
-			channelSchemePO.setBundleId(channelSchemeVO.getBundleId());
-			channelSchemePO.setChannelId(channelSchemeVO.getChannelId());
-			channelSchemePO.setChannelName(channelSchemeVO.getChannelName());
-			channelSchemePO.setChannelTemplateID(channelSchemeVO.getChannelTemplateID());
-			channelSchemePO.setChannelStatus(LockStatus.IDLE);
-			newchannelSchemePOs.add(channelSchemePO);
-		}
-		List<ChannelSchemePO> removeChannelSchemePOs = new ArrayList<ChannelSchemePO>();
-		if(channelSchemePOs != null && !channelSchemePOs.isEmpty()){
-			for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-				if (newchannelSchemePOs != null && !newchannelSchemePOs.isEmpty()) {
-					for (ChannelSchemePO newchannelSchemePO : newchannelSchemePOs) {
-						if (newchannelSchemePO.getBundleId().equals(channelSchemePO.getBundleId()) 
-								&& newchannelSchemePO.getChannelName().equals(channelSchemePO.getChannelName())) {
-							channelSchemePO.setChannelTemplateID(newchannelSchemePO.getChannelTemplateID());
-							removeChannelSchemePOs.add(newchannelSchemePO);
-						}
-					}
-				}
-			}
-		}
-		newchannelSchemePOs.remove(removeChannelSchemePOs);
+		
+		//newchannelSchemePOs.remove(removeChannelSchemePOs);
+		channelSchemeDao.save(removeChannelSchemePOs);
 		channelSchemeDao.save(newchannelSchemePOs);
-		channelSchemeDao.save(channelSchemePOs);
+		//channelSchemeDao.save(channelSchemePOs);
 		
 		return null;
 	}
@@ -675,6 +789,13 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		deleteBundleIds.removeAll(bindBundleIds);
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(deleteBundleIds);
 		bundleDao.delete(bundlePOs);
+		List<ChannelSchemePO> channels = channelSchemeDao.findByBundleIdIn(deleteBundleIds);
+		if (channels != null&&channels.size()>0) {
+			channelSchemeDao.delete(channels);
+		}
+		//删除扩展参数
+		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(deleteBundleIds);
+		extraInfoDao.delete(exExtraInfoPOs);
 		return null;
 	}
 	
@@ -824,11 +945,6 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				ONLINE_STATUS on = devicesArray.getJSONObject(j).getObject("operate", ONLINE_STATUS.class);
 				bundleIds.add(bundleId);
 				onlineStatus.put(bundleId, on);
-//				BundleVO bundleVO = JSONObject.toJavaObject(jsonObject,BundleVO.class);
-//				BundlePO bundlePO = bundleVO.toPO();
-//				bundlePO.setEquipFactInfo(name);
-//				changeBundlePOs.add(bundlePO);
-//				bundleIds.add(bundlePO.getBundleId());
 			}
 		}
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
@@ -891,7 +1007,17 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			
 		}
 //		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(foreignName);
+		//过滤cdn及解码器
+		bundleidSet = outlandService.bundleFilter(bundleidSet);
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleidSet);
+		// 移除外域设备
+		List<BundlePO> outBundlePOs = new ArrayList<BundlePO>();
+		for (BundlePO bundlePO : bundlePOs) {
+			if (bundlePO.getSourceType().equals(SOURCE_TYPE.EXTERNAL)) {
+				outBundlePOs.add(bundlePO);
+			}
+		}
+		bundlePOs.removeAll(outBundlePOs);
 		List<BundleVO> bundleVOs = new ArrayList<BundleVO>();
 		Set<String> bundleIds = new HashSet<String>();
 		Set<Long> folderIds = new HashSet<Long>();
@@ -961,12 +1087,19 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				bundleVO.setChannels(inBundleVo);
 			}
 		}
+		List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(bundleIds);
+		List<ExtraInfoVO> extraInfoVOs = new ArrayList<ExtraInfoVO>();
+		for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+			ExtraInfoVO extraInfoVO = ExtraInfoVO.fromPO(extraInfoPO);
+			extraInfoVOs.add(extraInfoVO);
+		}
 		List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
 			foreign.add(new HashMap<String, Object>());
 			foreign.get(0).put("name", serNodePO.getNodeName());
 			foreign.get(0).put("institutions", folderVOs);
 			foreign.get(0).put("devices", bundleVOs);
 			foreign.get(0).put("privileges", privileges);
+			foreign.get(0).put("extraInfo", extraInfoVOs);
 		data.put("foreign", foreign);
 		return data;
 	}
@@ -983,4 +1116,82 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		List<LianwangPassbyVO> passbyVOs = lianwangPassbyService.queryPassby(layerId);
 		return passbyVOs;
 	}
+	
+	/**
+	 * 更新设备的信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月11日 下午3:17:59
+	 * @param oldPo 旧的设备信息
+	 * @param newPO 新的设备信息
+	 * @return BundlePO 更新后的旧的设备信息
+	 */
+	public BundlePO bundlePOtoBundlePO(BundlePO oldPO , BundlePO newPO) throws Exception{
+		oldPO.setBundleName(newPO.getBundleName());
+		oldPO.setOnlineStatus(newPO.getOnlineStatus());
+		oldPO.setDeviceIp(newPO.getDeviceIp() == null ? null:newPO.getDeviceIp());
+		oldPO.setDevicePort(newPO.getDevicePort() == null ? null:newPO.getDevicePort());
+		oldPO.setMulticastEncode(newPO.getMulticastEncode()==null?false:newPO.getMulticastEncode());
+		oldPO.setMulticastEncodeAddr(newPO.getMulticastEncodeAddr() == null ? null:newPO.getMulticastEncodeAddr());
+		oldPO.setMulticastDecode(newPO.getMulticastDecode()==null?false:newPO.getMulticastDecode());
+		oldPO.setLocation(newPO.getLocation()==null?null:newPO.getLocation());
+		oldPO.setMulticastSourceIp(newPO.getMulticastSourceIp()==null?null:newPO.getMulticastSourceIp());
+		oldPO.setTranscod(newPO.getTranscod()==null?null:newPO.getTranscod());
+		oldPO.setEquipFactInfo(newPO.getEquipFactInfo());
+		return oldPO;
+	}
+
+	/**
+	 * 修改设备信息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月11日 下午3:16:20
+	 */
+	public Object deviceInformationChange(JSONHttpServletRequestWrapper wrapper) throws Exception{
+		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
+		JSONArray extraInfo = new JSONArray();
+		JSONArray devicesJsonArray = new JSONArray();
+		JSONArray institutionsArray = new JSONArray();
+		for (int i = 0; i < foreign.size(); i++) {
+			JSONObject jsonObject = foreign.getJSONObject(i);
+			String sername = jsonObject.getString("name");
+			institutionsArray = foreign.getJSONObject(i).getJSONArray("institutions");
+			devicesJsonArray = jsonObject.getJSONArray("devices");
+			extraInfo = jsonObject.getJSONArray("extraInfo");
+		}
+		BundlePO newbundlePO = new BundlePO();
+		String folderuuid = null;
+		for (int i = 0; i < devicesJsonArray.size(); i++) {
+			JSONObject jsonObject = devicesJsonArray.getJSONObject(i); 
+			BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
+			folderuuid = bundleVO.getInstitution();
+			newbundlePO = bundleVO.toPO();
+		}
+		BundlePO bundlePO = bundleDao.findByBundleId(newbundlePO.getBundleId());
+		if (null != bundlePO) {
+			
+			//附带组织机构
+			folderUpdate(institutionsArray);
+			
+			List<ExtraInfoPO> newextraInfoPOs = new ArrayList<ExtraInfoPO>();
+			for (int i = 0; i < extraInfo.size(); i++) {
+				JSONObject jsonObject = devicesJsonArray.getJSONObject(i); 
+//				BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
+				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+				newextraInfoPOs.add(extraInfoPO);
+			}
+			//除旧迎新
+			extraInfoService.deleteByBundleId(bundlePO.getBundleId());
+			extraInfoDao.save(newextraInfoPOs);
+			
+			FolderPO bundleFolder = folderDao.findByUuid(folderuuid);
+			bundlePO = bundlePOtoBundlePO(bundlePO,newbundlePO);
+			bundlePO.setFolderId(bundleFolder.getId());
+			bundleDao.save(bundlePO);
+		}
+		return null;
+	}
+	
 }

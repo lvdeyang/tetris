@@ -39,6 +39,7 @@ define([
                 rows:[],
                 dialog:{
                     addBackupVisible: false,
+                    value:false,
                     notes: ''
                 }
             },
@@ -76,12 +77,14 @@ define([
                     var param = {
                         deploymentId: self.deploymentId,
                         deploymentName: self.deploymentName,
-                        notes: self.dialog.notes
+                        notes: self.dialog.notes,
+                        databaseBackup:self.dialog.value,
                     };
                     ajax.post('/service/deployment/backup', param, function(data){
                         self.rows.push(data);
                         self.dialog.addBackupVisible = false;
                         self.dialog.notes = '';
+                        self.dialog.value = false;
                     });
                 },
                 handleRowDelete:function(scope){

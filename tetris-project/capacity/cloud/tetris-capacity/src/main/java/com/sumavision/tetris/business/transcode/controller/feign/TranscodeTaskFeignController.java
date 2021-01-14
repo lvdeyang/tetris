@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.sumavision.tetris.application.annotation.OprLog;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.business.common.service.TaskModifyService;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.common.vo.SyncVO;
 import com.sumavision.tetris.business.transcode.vo.*;
@@ -39,6 +40,9 @@ public class TranscodeTaskFeignController {
 
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private TaskModifyService taskModifyService;
 
 	@Autowired
 	private SyncService syncService;
@@ -83,11 +87,10 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/preview/input")
 	public Object previewInput(
 			String inputInfo) throws Exception{
-		CreateInputPreviewVO inputVO = JSONObject.parseObject(inputInfo, CreateInputPreviewVO.class);
-		transcodeTaskService.previewInput(inputVO);
+		InputPreviewVO inputVO = JSONObject.parseObject(inputInfo, InputPreviewVO.class);
+		taskService.previewInput(inputVO);
 		return null;
 	}
-
 
 	/**
 	 * 删除流转码任务<br/>
@@ -342,7 +345,7 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/remove/all")
 	public Object removeAll(
 			String ip) throws Exception{
-		transcodeTaskService.removeAll(ip);
+		taskService.removeAll(ip);
 		return null;
 	}
 
@@ -360,7 +363,7 @@ public class TranscodeTaskFeignController {
 	public Object modifyTask(
 			String taskInfo) throws Exception{
 		TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
-		transcodeTaskService.modifyTranscodeTask(taskSetVO);
+		taskModifyService.modifyTask(taskSetVO,BusinessType.TRANSCODE);
 		return null;
 	}
 

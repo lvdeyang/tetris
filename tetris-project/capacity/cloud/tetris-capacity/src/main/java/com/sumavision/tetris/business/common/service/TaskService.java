@@ -5,6 +5,8 @@ package com.sumavision.tetris.business.common.service;/**
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.preview.PreviewDAO;
+import com.sumavision.tetris.application.preview.PreviewPO;
 import com.sumavision.tetris.business.common.ResultBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.NodeUtil;
@@ -16,10 +18,12 @@ import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
+import com.sumavision.tetris.business.transcode.vo.InputPreviewVO;
 import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.input.InputBaseBO;
+import com.sumavision.tetris.capacity.bo.input.InputWrapperBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
@@ -32,11 +36,13 @@ import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,6 +73,9 @@ public class TaskService {
 
     @Autowired
     CapacityService capacityService;
+
+    @Autowired
+    PreviewDAO previewDao;
 
     @Autowired
     TranscodeTaskService transcodeTaskService;
@@ -479,8 +488,52 @@ public class TaskService {
     }
 
 
+    /**
+     * @MethodName: addInputInDatabase 查重并创建输入记录数据库，不发命令
+     * @Description: TODO 添加输入
+     * @param deviceIp 1 设备IP
+     * @param inputBO 2 输入BO
+     * @param busType 3 业务类型
+     * @Return: com.sumavision.tetris.capacity.bo.input.InputWrapperBO
+     * @Author: Poemafar
+     * @Date: 2021/1/4 17:59
+     **/
+    public InputWrapperBO addInputInDatabase(String deviceIp, InputBO inputBO, BusinessType busType) throws Exception {
+        Boolean beCreate = null;
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
+        if (inputPO == null) {
+            inputPO = new TaskInputPO();
+            inputPO.setCreateTime(new Date());
+            inputPO.setUpdateTime(inputPO.getCreateTime());
+            inputPO.setUniq(uniq);
+            inputPO.setType(busType);
+            inputPO.setInput(JSON.toJSONString(inputBO));
+            inputPO.setNodeId(inputBO.getId());
+            inputPO.setCapacityIp(deviceIp);
+            beCreate=Boolean.TRUE;
+            taskInputDao.save(inputPO);
+        } else if (inputPO.getCount().equals(0)) {
+            inputPO.setInput(JSON.toJSONString(inputBO));
+            inputPO.setNodeId(inputBO.getId());
+            inputPO.setType(busType);
+            inputPO.setCreateTime(new Date());
+            inputPO.setUpdateTime(inputPO.getCreateTime());
+            inputPO.setCount(inputPO.getCount() + 1);
+            inputPO.setCapacityIp(deviceIp);
+            beCreate=Boolean.TRUE;
+            taskInputDao.save(inputPO);
+        } else {
+            inputPO.setUpdateTime(new Date());
+            inputPO.setCount(inputPO.getCount()+1);
+            beCreate=Boolean.FALSE;
+            taskInputDao.save(inputPO);
+        }
+        InputWrapperBO inputWrapperBO = new InputWrapperBO().setTaskInputPO(inputPO).setBeCreate(beCreate);
+        return inputWrapperBO;
+    }
 
-/**
+    /**
  * @MethodName: deleteStreamInputsAfterCheckRepeat
  * @Description: 删码流分析输入
  * @param deviceIp 1
@@ -525,12 +578,18 @@ public class TaskService {
         return false;
     }
 
-    public InputBO getTransformInput(String transformIp, InputBO inputBO){
-
+    /**
+     * @MethodName: getTransformInput
+     * @Description: TODO 判断能力要建的输入是否在转换上存在
+     * @param inputs 1 转换上的输入
+     * @param inputBO 2 准备建的输入
+     * @Return: com.sumavision.tetris.capacity.bo.input.InputBO
+     * @Author: Poemafar
+     * @Date: 2021/1/5 10:03
+     **/
+    public InputBO getTransformInput(GetInputsResponse inputs,  InputBO inputBO){
         InputBO targetInputBO = null;
-
         try {
-            GetInputsResponse inputs = capacityService.getInputs(transformIp);
             if (inputBO.getUdp_ts() != null) {
                 targetInputBO = inputs.getInput_array().stream().filter(i-> i.getUdp_ts()!=null
                         && i.getUdp_ts().getSource_ip().equals(inputBO.getUdp_ts().getSource_ip())
@@ -552,22 +611,22 @@ public class TaskService {
                         && i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port())).findAny().orElse(null);
             }
             if(inputBO.getHls() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null &&  i.getHls().getUrl().equals(inputBO.getHls().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getDash() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl().equals(inputBO.getDash().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getMss() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl().equals(inputBO.getMss().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtmp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl().equals(inputBO.getRtmp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtsp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl().equals(inputBO.getRtsp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getHttp_flv() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl().equals(inputBO.getHttp_flv().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getSdi() != null){
                 targetInputBO = inputs.getInput_array().stream().filter(i->i.getSdi()!=null
@@ -598,6 +657,108 @@ public class TaskService {
         return targetInputBO;
     }
 
+
+    /**
+     * 清空转换模块上所有任务<br/>
+     * <b>作者:</b>wjw<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2020年6月5日 下午2:41:38
+     * @param String ip 转换模块ip
+     */
+    public void removeAll(String ip) throws Exception{
+
+        List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
+
+        if(outputs != null && outputs.size() > 0){
+            Set<Long> inputIds = new HashSet<Long>();
+            for(TaskOutputPO outputPO: outputs){
+                if(!Objects.isNull(outputPO.getInputId())){
+                    //单源
+                    inputIds.add(outputPO.getInputId());
+                }else if(!StringUtils.isEmpty(outputPO.getInputList())){
+                    //备份源
+                    inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
+                }else if(!Objects.isNull(outputPO.getCoverId())){
+                    //盖播
+                    inputIds.add(outputPO.getCoverId());
+                }else if(!Objects.isNull(outputPO.getScheduleId())){
+                    //排期
+                    inputIds.add(outputPO.getScheduleId());
+                }else if(!Objects.isNull(outputPO.getPrevId())){
+                    //追加排期prev
+                    inputIds.add(outputPO.getPrevId());
+                }else if(!Objects.isNull(outputPO.getNextId())){
+                    //追加排期next
+                    inputIds.add(outputPO.getNextId());
+                }
+            }
+
+            List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
+            if(inputPOs != null && inputPOs.size() > 0){
+                for(TaskInputPO inputPO: inputPOs){
+                    inputPO.setCount(0);
+                }
+            }
+
+            taskInputDao.save(inputPOs);
+            taskOutputDao.deleteInBatch(outputs);
+
+        }
+
+        //清空转换模块上面所有任务
+        capacityService.removeAll(ip);
+    }
+
+    public TaskInputPO addInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = new TaskInputPO();
+        inputPO.setCreateTime(new Date());
+        inputPO.setUpdateTime(inputPO.getCreateTime());
+        inputPO.setUniq(uniq);
+        inputPO.setType(busType);
+        inputPO.setInput(JSON.toJSONString(inputBO));
+        inputPO.setNodeId(inputBO.getId());
+        taskInputDao.save(inputPO);
+        return inputPO;
+    }
+
+    public void updateInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
+        String uniq = generateUniq(inputBO);
+        TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
+        inputPO.setUpdateTime(new Date());
+        inputPO.setUniq(uniq);
+
+        inputPO.setType(busType);
+        inputPO.setInput(JSON.toJSONString(inputBO));
+        inputPO.setNodeId(inputBO.getId());
+        taskInputDao.save(inputPO);
+    }
+
+    public void previewInput(InputPreviewVO inputPreviewVO) throws Exception {
+        if(inputPreviewVO.getOperate()==null || "CREATE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            transcodeTaskService.createPreviewForInput(inputPreviewVO);
+        }else if ("DELETE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            deletePreviewForInput(inputPreviewVO);
+        }else{
+            throw new BaseException(StatusCode.FORBIDDEN,"unknown operate type",inputPreviewVO.getOperate());
+        }
+    }
+
+    public void deletePreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+        PreviewPO previewPO = previewDao.findByInputId(inputPreviewVO.getDelInputId());
+        if (previewPO == null) {
+            return;
+        }
+        if (previewPO.getTransferTaskId() != null && !previewPO.getTransferTaskId().isEmpty()) {
+            deleteTranscodeTask(previewPO.getTransferTaskId());
+            previewDao.updateTransferTaskIdById(previewPO.getId(),"");
+        }
+        if (previewPO.getPreviewTaskId()!=null && !previewPO.getPreviewTaskId().isEmpty()){
+            deleteTranscodeTask(previewPO.getPreviewTaskId());
+            previewDao.updatePreviewTaskIdById(previewPO.getId(),"");
+        }
+        previewDao.delete(previewPO.getId());
+    }
 }
 
 

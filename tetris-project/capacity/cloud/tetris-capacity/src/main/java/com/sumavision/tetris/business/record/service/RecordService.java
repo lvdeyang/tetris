@@ -71,7 +71,7 @@ public class RecordService {
 	
 	@Autowired
 	private CapacityProps capacityProps;
-	
+
 	/**
 	 * 创建收录<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -130,7 +130,7 @@ public class RecordService {
 			String uniq,
 			RecordVO record,
 			BusinessType businessType) throws Exception{
-		
+
 		TaskInputPO input = taskInputDao.findByUniq(uniq);
 		
 		if(input == null){

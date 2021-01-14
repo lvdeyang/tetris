@@ -121,36 +121,61 @@
                 :before-close="handleSetAuthClose">
 
             <div style="height:500px;">
-               <el-form label-width="120px">
+                <el-scrollbar style="height: 500px;">
+                <el-form label-width="120px">
                      <el-form-item label="视频融合平台">
-		                <el-switch v-model="dialog.setAuth.bvc.surpport" active-value="1" inactive-value="0"></el-switch>
+		                <el-switch v-model="dialog.setAuth.bvc.support"></el-switch>
 		             </el-form-item>
-		             <el-form-item label="接入能力个数">
-                         <el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum"></el-input>
-                     </el-form-item>
 		             <el-form-item label="转码云平台">
-		                <el-switch v-model="dialog.setAuth.transSystem.surpport" active-value="1" inactive-value="0"></el-switch>
+		                <el-switch v-model="dialog.setAuth.transSystem.support"></el-switch>
 		             </el-form-item>
-		             <el-form-item label="转码能力个数">
-                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.serverNum"></el-input>
+		             <el-form-item label="转码能力个数" v-if="dialog.setAuth.transSystem.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
 		             <el-form-item label="转码能力">
-		                <el-switch v-model="dialog.setAuth.mediaTransform.surpport" active-value="1" inactive-value="0"></el-switch>
+                         <!--<el-switch v-model="dialog.setAuth.mediaTransform.support" active-value="1" inactive-value="0"></el-switch>-->
+		                <el-switch v-model="dialog.setAuth.mediaTransform.support"></el-switch>
 		             </el-form-item>
-		             <el-form-item label="转码路数(4K)">
-                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v4k"></el-input>
+		             <el-form-item label="转码路数(4K)" v-if="dialog.setAuth.mediaTransform.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v4k" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
-                     <el-form-item label="转码路数(高清)">
-                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v1080"></el-input>
+                     <el-form-item label="转码路数(高清)" v-if="dialog.setAuth.mediaTransform.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v1080" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
-                      <el-form-item label="转码路数(标清)">
-                         <el-input style="width:300px" v-model="dialog.setAuth.mediaTransform.v720"></el-input>
+                      <el-form-item label="转码路数(标清)" v-if="dialog.setAuth.mediaTransform.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.mediaTransform.v720" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                      </el-form-item>
 		             <el-form-item label="设备接入">
-		                <el-switch v-model="dialog.setAuth.jv210Joiner.surpport" active-value="1" inactive-value="0"></el-switch>
+		                <el-switch v-model="dialog.setAuth.jv210Joiner.support"></el-switch>
 		             </el-form-item>
+                     <el-form-item label="接入能力个数" v-if="dialog.setAuth.jv210Joiner.support==true">
+                         <el-input-number style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                     </el-form-item>
+                    <el-form-item label="CDN接入">
+                        <el-switch v-model="dialog.setAuth.cdnJoiner.support"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="接入CDN个数" v-if="dialog.setAuth.cdnJoiner.support==true">
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.cdnJoiner.cdnNum" @change="handleChange" :min="0" :step="1" step-strictly="true" ></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="合屏接入">
+                        <el-switch v-model="dialog.setAuth.mixerJoiner.support"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="接入合屏个数" v-if="dialog.setAuth.mixerJoiner.support==true">
+                        <el-input-number style="width:300px" v-model="dialog.setAuth.mixerJoiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
+                    </el-form-item>
+                     <!--<el-form-item label="接入能力个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.serverNum"></el-input>-->
+                     <!--</el-form-item>-->
+                     <!--<el-form-item label="接入CDN个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.cdnNum"></el-input>-->
+                     <!--</el-form-item>-->
+                     <!--<el-form-item label="接入合屏个数" v-if="dialog.setAuth.jv210Joiner.support==true">-->
+                         <!--<el-input style="width:300px" v-model="dialog.setAuth.jv210Joiner.screenNum"></el-input>-->
+                     <!--</el-form-item>-->
+
 		            
-               </el-form>
+                </el-form>
+                </el-scrollbar>
             </div>
            
             <span slot="footer" class="dialog-footer">

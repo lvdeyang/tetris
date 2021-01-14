@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.common.enumeration;/**
  * Created by Poemafar on 2020/9/18 15:52
  */
 
+import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 
@@ -86,5 +87,57 @@ public enum ProtocolType {
                 return SCHEDULE;
         }
         throw new BaseException(StatusCode.FORBIDDEN,"unknown protocol type:"+type);
+    }
+
+    public static ProtocolType getProtocolType(InputBO inputBO) throws BaseException {
+        if (inputBO.getUdp_ts() != null) {
+            return UDP_TS;
+        }
+        if (inputBO.getRtp_ts()!=null){
+            return RTP_TS;
+        }
+        if (inputBO.getHttp_ts() != null) {
+            return HTTP_TS;
+        }
+        if (inputBO.getSrt_ts() != null) {
+            return SRT_TS;
+        }
+        if (inputBO.getHls() != null) {
+            return HLS;
+        }
+        if (inputBO.getDash() != null) {
+            return DASH;
+        }
+        if (inputBO.getRtsp() != null) {
+            return RTSP;
+        }
+        if (inputBO.getRtp_es() != null) {
+            return RTP_ES;
+        }
+        if (inputBO.getRtmp() != null) {
+            return RTMP;
+        }
+        if (inputBO.getHttp_flv() != null) {
+            return HTTP_FLV;
+        }
+        if (inputBO.getZixi() != null) {
+            return ZIXI_TS;
+        }
+        if (inputBO.getUdp_pcm() != null) {
+            return UDP_PCM;
+        }
+        if (inputBO.getMss() != null) {
+            return MSS;
+        }
+        if (inputBO.getSdi() != null) {
+            return SDI;
+        }
+        if (inputBO.getFile() != null) {
+            return FILE;
+        }
+        if (inputBO.getSchedule() != null) {
+            return SCHEDULE;
+        }
+        throw new BaseException(StatusCode.FORBIDDEN,"unknown protocol type, inputId:"+inputBO.getId());
     }
 }

@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-wangkai
+    name: tetris-bvc-business-zsy
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.115
+      ipAddress: 192.165.56.77
   profiles:
     active: pro
   datasource:

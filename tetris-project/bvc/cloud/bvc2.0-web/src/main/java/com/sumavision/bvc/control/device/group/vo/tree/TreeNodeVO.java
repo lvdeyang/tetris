@@ -588,6 +588,7 @@ public class TreeNodeVO {
 																			.put("memberId",bundle.getMemberId())
 																			.put("venusBundleType", bundle.getType())
 																			.put("realType", bundle.getRealType())
+																			.put("equipFactInfo", bundle.getEquipFactInfo())
 																		    .getMap()))
 			.setExtraInfo(extraInfo.toJSONString())
 			.setType(TreeNodeType.BUNDLE)

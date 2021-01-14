@@ -34,6 +34,8 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	
 	public List<TaskInputPO> findByIdIn(Collection<Long> ids);
 
+	public List<TaskInputPO> findByUrlNotNull();
+
 	//乐观
 	@Modifying
 	@Query("update TaskInputPO input set input.version = ?2 + 1, input.count = ?3 where input.taskUuid = ?1 and input.version = ?2")
@@ -53,9 +55,14 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	@Query("update TaskInputPO input set input.analysis = ?2 where input.id = ?1")
 	public void updateAnalysisById(Long id, Integer syncStatus);
 
-	@Modifying
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
 	@Query("update TaskInputPO input set input.count= ?2, input.syncStatus = ?3 where input.id = ?1")
 	public void updateCountAndSyncStatusById(Long id, Integer count, Integer syncStatus);
 
 
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
+	@Query("update TaskInputPO input set input.capacityIp = ?2 where input.capacityIp = ?1")
+	public void updateCapacityIpByIp(String srcIp, String tgtIp);
 }

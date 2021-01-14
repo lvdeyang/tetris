@@ -1,0 +1,113 @@
+<mi-frame id="page-omms-hardware-database-backup-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">数据库备份管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <!--<el-breadcrumb-item><a href="#/page-omms-hardware-server">{{serverName}}</a></el-breadcrumb-item>-->
+        <el-breadcrumb-item>数据库备份管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <!--<el-button @click="handleCreate" type="primary" size="small"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加MySQL服务</el-button>-->
+            <div style="position:absolute; top:0px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="备份名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="备份的数据库名"
+                                prop="backupname">
+                        </el-table-column>
+                        <el-table-column
+                                label="备份时间"
+                                prop="date">
+                        </el-table-column>
+                        <el-table-column
+                                label="备份数据库路径"
+                                prop="username">
+                        </el-table-column>
+                        <el-table-column
+                                label="说明"
+                                prop="remark">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="220">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="下载备份" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-download" style="font-size:20px; padding:0; margin-left:3px;" @click="handleRowDownload(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="恢复数据库" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-document" style="font-size:20px; padding:0; margin-left:3px;" @click="handleRowBackup(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除备份" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:3px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+        </el-card>
+    </template>
+
+    <template>
+        <dialog
+                title="xuanzecunchuweizhi"
+                :visible.sync="dialog.selectIndex.visible"
+                width="500px"
+                :before-close="handleAddServerClose">
+            <el-form ref="form" :model="form" label-width="120px" style="width: 50%">
+                <el-form-item label="保存至文件夹">
+                    <input type="file" id="file" hidden @change="fileChange" webkitdirectory mozdirectory>
+                    <el-input placeholder="请输入内容" v-model="form.imgSavePath" class="input-with-select">
+                        <el-button slot="append" icon="el-icon-folder" type="success" @click="btnChange"></el-button>
+                    </el-input>
+                </el-form-item>
+            </el-form>
+        </dialog>
+
+        <!--<dialog-->
+                <!--title="选择需要恢复的服务器"-->
+                <!--:visible.sync="dialog.restore.visible"-->
+                <!-->-->
+
+        <!--</dialog>-->
+        <dialog
+                title="选择要恢复的数据库"
+                :visible.sync="dialog.restore.visible"
+                width="500px"
+                :before-close="handleRecoverClose">
+
+            <!--<el-checkbox-group  v-model="zz" format="changeStyle">-->
+                <!--<div>-->
+                    <!--<el-checkbox-->
+                            <!--v-for="item in hardwareListData"-->
+                            <!--:key="item"-->
+                            <!--:label="item"-->
+                            <!--@change=" handleChange($event,item)">{{item}}</el-checkbox>-->
+                <!--</div>-->
+            <!--</el-checkbox-group>-->
+            <el-form ref="form" :model="form" label-width="120px" style="width: 50%">
+                <el-form-item label="保存至文件夹">
+                    <input type="file" id="file1" hidden @change="fileChange" webkitdirectory mozdirectory>
+                    <el-input placeholder="请输入内容" v-model="form.imgSavePath" class="input-with-select">
+                        <el-button slot="append" icon="el-icon-folder" type="success" @click="btnChange"></el-button>
+                    </el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleRecoverClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleRecoverSubmit">确定</el-button>
+            </span>
+        </dialog>
+    </template>
+</mi-frame>

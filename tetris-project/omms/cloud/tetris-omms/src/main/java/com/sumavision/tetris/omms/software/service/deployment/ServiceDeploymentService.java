@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,12 +44,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.mysql.fabric.xmlrpc.base.Array;
+import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
+import com.sumavision.tetris.omms.hardware.database.DatabaseService;
+import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupDAO;
+import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupPO;
+import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupVO;
+import com.sumavision.tetris.omms.hardware.database.databases.DatabasesPO;
 import com.sumavision.tetris.omms.hardware.server.ServerDAO;
 import com.sumavision.tetris.omms.hardware.server.ServerPO;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
@@ -77,6 +86,10 @@ public class ServiceDeploymentService {
 
 	public static final String RELATIVE_FOLDER = "install";
 	
+	public static final String DATABASEBACKUP_FOLDER = "databasebackup";
+	
+	public static final String RECOVER_FOLDER = "recoverbackup";
+	
 	@Autowired
 	private ServerDAO serverDao;
 	
@@ -101,6 +114,12 @@ public class ServiceDeploymentService {
 	@Autowired
 	private DatabaseDAO databaseDAO;
 	
+	@Autowired 
+	private DatabaseBackupDAO databaseBackupDAO;
+	
+	@Autowired
+	private DatabaseService databaseservice;
+	
 	/**
 	 * 上传安装包到服务器<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -121,7 +140,7 @@ public class ServiceDeploymentService {
 		
 		ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findByServerIdAndServiceTypeId(serverId, installationPackageEntity.getServiceTypeId());
 		
-		ServiceDeploymentPO serviceDeploymentEntity = new ServiceDeploymentPO();
+		ServiceDeploymentPO serviceDeploymentEntity = null;
 		
 		if(serviceDeploymentPO != null && !serviceDeploymentPO.equals(" ")){
 			serviceDeploymentEntity = serviceDeploymentPO;
@@ -129,6 +148,7 @@ public class ServiceDeploymentService {
 			serviceDeploymentEntity.setProgress(0);
 			
 		}else{
+			serviceDeploymentEntity = new ServiceDeploymentPO();
 			Date now = new Date();
 			serviceDeploymentEntity.setUpdateTime(now);
 			serviceDeploymentEntity.setServiceTypeId(installationPackageEntity.getServiceTypeId());
@@ -409,12 +429,6 @@ public class ServiceDeploymentService {
 			formparams.add(new BasicNameValuePair("path",deployment.getInstallFullPath()));  
 			formparams.add(new BasicNameValuePair("config", configBuffer.toString()));
 		
-			/*JSONObject params = new JSONObject();
-			params.put("path", deployment.getInstallFullPath());
-			params.put("config", configBuffer.toString());
-			
-			StringEntity entity = new StringEntity(params.toJSONString());
-			httpPost.setEntity(entity);*/
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
 			
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60*60*1000).setConnectTimeout(60*60*1000).build();
@@ -464,7 +478,7 @@ public class ServiceDeploymentService {
 		InstallationPackagePO updateInstallationPackagePO = installationPackageDao.findOne(updatePackageId);
 		
 		if(isBackup){
-			backup(deploymentId, deploymentName, notes);
+			backup(deploymentId, deploymentName, notes ,true);
 		}
 				
 		CloseableHttpClient client = null;
@@ -657,7 +671,7 @@ public class ServiceDeploymentService {
 			
 			
 			if("uninstall".equals(type)){
-				backup(deploymentId, deploymentName, notes);
+				backup(deploymentId, deploymentName, notes, true);
 				deployment.setStatus(ServiceDeploymentStatus.UNINSTALLED);
 				serviceDeploymentDao.save(deployment);
 			}
@@ -749,7 +763,7 @@ public class ServiceDeploymentService {
 	 * @param deploymentId 部署id
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public BackupInformationVO backup(Long deploymentId, String deploymentName, String notes) throws Exception{
+	public BackupInformationVO backup(Long deploymentId, String deploymentName, String notes, Boolean databaseBackup) throws Exception{
 		CloseableHttpClient client = null;
 		try {
 			// 调小工具接口生成backfile.zip
@@ -828,7 +842,24 @@ public class ServiceDeploymentService {
 				"backfile.zip", 
 				downloadPath);
 			
-			disableFtp(deploymentId);// 关闭ftp端口
+			disableFtp(server.getId());// 关闭ftp端口
+			
+			
+			//备份数据库
+			DatabaseBackupVO databaseBackupVO = new DatabaseBackupVO();
+			if(databaseBackup){
+				StringBufferWrapper databaseName = new StringBufferWrapper();
+				List<ProcessDeploymentPO> processDeploymentPOs = processDeploymentDAO.findByServiceDeploymentId(deploymentId);
+				if(processDeploymentPOs != null && processDeploymentPOs.size() > 0){
+					for (ProcessDeploymentPO processDeploymentPO : processDeploymentPOs) {
+						if(null != processDeploymentPO.getDb() && !"".equals(processDeploymentPO.getDb())){
+							databaseName.append(" ").append(processDeploymentPO.getDb().split("/")[1]);
+						}
+					}
+				}
+				databaseBackupVO = backupDatabase(deploymentId,server.getId(),databaseName.toString(),deploymentName,databaseName.toString());
+			}
+			
 			
 			// 将备份的相关信息存入到数据库中
 			if(bool){
@@ -845,6 +876,7 @@ public class ServiceDeploymentService {
 				backupInformation.setNotes(notes);
 				backupInformation.setBackupFullPath(backupFullPath);
 				backupInformation.setConfig(deployment.getConfig());
+				backupInformation.setDatabaseBackupId(databaseBackupVO.getId()==null ? null:databaseBackupVO.getId());
 				backupInformationDAO.save(backupInformation);
 				return new BackupInformationVO().set(backupInformation);
 			}
@@ -870,7 +902,7 @@ public class ServiceDeploymentService {
 	 * @return
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public boolean downFile(String url, int port,String username, String password, String remotePath,String fileName,String localPath) {
+	public boolean downFile(String url, int port,String username, String password, String remotePath,String fileName,String localPath) throws Exception{
 		boolean success = false;
 		FTPClient ftp = new FTPClient();
 		try {
@@ -883,7 +915,19 @@ public class ServiceDeploymentService {
 				ftp.disconnect();
 				return success;
 			}
-			ftp.changeWorkingDirectory(remotePath);//转移到FTP服务器目录
+			//ftp.changeWorkingDirectory(remotePath);
+			//转移到FTP服务器目录
+			boolean changeResult = ftp.changeWorkingDirectory(encodeFtpText(remotePath));
+			if(!changeResult){
+				boolean mdResult = ftp.makeDirectory(encodeFtpText(remotePath));
+				if(!mdResult){
+					throw new FtpCreateFolderFailException(url, String.valueOf(port), remotePath);
+				}
+				changeResult = ftp.changeWorkingDirectory(encodeFtpText(remotePath));
+				if(!changeResult){
+					throw new FtpChangeFolderFailException(url, String.valueOf(port), remotePath);
+				}
+			}
 			ftp.setFileType(FTP.BINARY_FILE_TYPE);
 			FTPFile[] fs = ftp.listFiles();
 			for(FTPFile ff:fs){
@@ -909,6 +953,10 @@ public class ServiceDeploymentService {
 			}
 		}
 		return success;
+	}
+	
+	private String encodeFtpText(String text) throws Exception{
+		return new String(text.getBytes("utf-8"), "iso-8859-1");
 	}
 	
 	/**
@@ -965,7 +1013,7 @@ public class ServiceDeploymentService {
 	 * @param backupId 备份id
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void restore(Long backupId) throws Exception{
+	public void restore(Long backupId ,Boolean database) throws Exception{
 		
 		BackupInformationPO backupInformation = backupInformationDAO.findOne(backupId);
 		InstallationPackagePO installationPackage = installationPackageDao.findOne(backupInformation.getInstallPackageId());
@@ -990,7 +1038,7 @@ public class ServiceDeploymentService {
 				new StringBufferWrapper().append(path.webappPath()).append("packages").append(File.separator).append(backupInformation.getDeploymentName()).append(File.separator).append(fileName).toString()
 		);
 		
-		disableFtp(deployment.getId());// 关闭ftp端口
+		disableFtp(server.getId());// 关闭ftp端口
 		
 		// 解压安装包
 		CloseableHttpClient decompressionClient = null;
@@ -1050,7 +1098,7 @@ public class ServiceDeploymentService {
 				"backfile.zip", 
 				backupInformation.getBackupFullPath());
 		
-		disableFtp(deployment.getId());// 关闭ftp端口
+		disableFtp(server.getId());// 关闭ftp端口
 		
 		// 执行恢复脚本restore.sh
 		CloseableHttpClient client = null;
@@ -1097,6 +1145,19 @@ public class ServiceDeploymentService {
 		}finally{
 			if(client != null) client.close();
 		}
+		
+		//执行恢复数据库命令
+		if(database){
+			List<ProcessDeploymentPO> processDeploymentPOs = processDeploymentDAO.findByServiceDeploymentId(deployment.getId());
+			StringBufferWrapper databaseName = new StringBufferWrapper();
+			if(processDeploymentPOs != null && processDeploymentPOs.size() > 0){
+				for (ProcessDeploymentPO processDeploymentPO : processDeploymentPOs) {
+					databaseName.append(" ").append(processDeploymentPO.getDb().split("/")[1]);
+				}
+			}
+			databaseservice.recoverDatabase(backupInformation.getDatabaseBackupId(),databaseName.toString());
+		}
+		
 	}
 	/**
 	 * 向FTP服务器上传文件<br/>
@@ -1239,11 +1300,10 @@ public class ServiceDeploymentService {
 	 * @param deploymentId 部署id
 	 * @throws Exception
 	 */
-	public void disableFtp(Long deploymentId) throws Exception{
+	public void disableFtp(Long serverId) throws Exception{
 		CloseableHttpClient client = null;
 		try {
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
+			ServerPO server = serverDao.findOne(serverId);
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -1462,6 +1522,145 @@ public class ServiceDeploymentService {
 			}
 		}
 		
+		
 	}
-
+	
+	/**
+	 * 备份程序时备份数据库<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月24日 上午9:27:00
+	 * @param serviceDeploymentId 程序id
+	 * @param serverId 服務器id
+	 * @param databaseNames 備份的數據庫名
+	 * @param name 備份后文件的名稱
+	 * @param remark 備注
+	 * @return DatabaseBackupVO 備份數據庫文件的信息
+	 */
+	public DatabaseBackupVO backupDatabase(Long serviceDeploymentId ,Long serverId , String databaseNames , String name, String remark)throws Exception{
+		CloseableHttpClient client = null;
+		
+		
+		try {
+			
+			ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findOne(serviceDeploymentId);
+			String config = serviceDeploymentPO.getConfig();
+			JSONObject jsonObjectconfig = JSON.parseObject(config);
+			String databaseIP = jsonObjectconfig.getString("databaseAddr");// 数据库IP
+			String databasePort = jsonObjectconfig.getString("databaseport");// 数据库端口
+			DatabasePO databasePO = databaseDAO.findByDatabaseIPAndDatabasePort(databaseIP, databasePort);
+			
+			ServerPO server = serverDao.findOne(serverId);
+			
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
+	        credsProvider.setCredentials(authScope, new UsernamePasswordCredentials(server.getGadgetUsername(), server.getGadgetPassword()));
+	        client = HttpClients.custom()
+			        		    .setDefaultCredentialsProvider(credsProvider)
+			        		    .setRetryHandler(new DefaultHttpRequestRetryHandler(1, true))
+			        		    .build();
+	        
+	        String url = new StringBufferWrapper().append("http://").append(server.getIp()).append(":").append(server.getGadgetPort()).append("/action/execute_cmd").toString();
+	        
+	        System.out.println(url);
+	        
+	        String shell = new StringBufferWrapper().append("mysqldump")
+	        		.append(" -u")
+	        		.append(databasePO.getUsername())
+	        		.append(" -p")
+	        		.append(databasePO.getPassword())
+	        		.append(" --databases")
+	        		.append(databaseNames)
+	        		.append(" > ").toString();
+	        Date date = new Date();
+	        String namesql = new StringBufferWrapper().append(name).append(date.getTime()).append(".sql").toString();
+	        String indexpath = new StringBufferWrapper().append(DATABASEBACKUP_FOLDER).append("/").toString();
+	        System.out.println(namesql);
+	        HttpPost httpPost = new HttpPost(url);
+	        List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+	        formparams.add(new BasicNameValuePair("cmd", shell));
+	        formparams.add(new BasicNameValuePair("name", namesql));
+	        formparams.add(new BasicNameValuePair("path", indexpath));
+	        
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
+	        
+	        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+	        httpPost.setConfig(requestConfig);
+	        
+			CloseableHttpResponse response = client.execute(httpPost);
+			
+			// 解析小工具HTTP返回结果并提示异常信息
+			HttpEntity httpEntity = response.getEntity();
+			InputStream content = httpEntity.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			JSONObject jsonObject = JSON.parseObject(str);
+			String result = jsonObject.getString("result");
+			String errormsg = jsonObject.getString("errormsg");
+			if(!"0".equals(result)){
+				throw new HttpGadgetRestartProcessException(server.getIp(), server.getGadgetPort(), errormsg);
+			}
+			
+			int code = response.getStatusLine().getStatusCode();
+			if(code != 200){
+				throw new HttpGadgetRestartProcessException(server.getIp(), server.getGadgetPort(), String.valueOf(code));
+			} 
+			
+			// 将backup文件夹中的文件下载到运维服务器上
+			
+			Path path = SpringContext.getBean(Path.class);
+			String downloadPath = new StringBufferWrapper().append(path.webappPath())
+															.append(indexpath)
+															.append(server.getName())
+															.append("/")
+															.append(date.getTime()+"/")
+															.toString();
+			String downuri = new StringBufferWrapper().append(indexpath)
+													.append(server.getName())
+													.append("/")
+													.append(date.getTime()+"/")
+													.append(namesql)
+													.toString();
+			String backupFullPath = new StringBufferWrapper().append(path.webappPath()).append(downuri).toString();
+			File file = new File(downloadPath);
+			if(!file.exists()){
+				file.mkdirs();
+			}
+			
+			enableFtp(serviceDeploymentId);// 打开ftp端口
+			
+			Boolean bool = databaseservice.downFile(
+				server.getIp(), 
+				Integer.parseInt(server.getFtpPort()), 
+				server.getFtpUsername(), 
+				server.getFtpPassword(), 
+				indexpath, 
+				namesql, 
+				downloadPath);
+			
+			disableFtp(server.getId());// 关闭ftp端口
+			
+			if (bool) {
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				DatabaseBackupPO databaseBackupPO  = new DatabaseBackupPO();
+				databaseBackupPO.setName(name);
+				databaseBackupPO.setFilename(namesql);
+				databaseBackupPO.setDate(df.format(new Date()));
+				databaseBackupPO.setPath(backupFullPath);
+				databaseBackupPO.setRemark(remark);
+				databaseBackupPO.setDatabaseId(databasePO.getId());
+				databaseBackupPO.setDownuri(downuri);
+				databaseBackupPO.setBackupname(databaseNames.toString());
+				databaseBackupDAO.save(databaseBackupPO);
+				return new DatabaseBackupVO().set(databaseBackupPO);
+			}
+			
+		} finally {
+			if(client != null) client.close();
+		}
+			
+		return null;
+	}
 }

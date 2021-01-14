@@ -45,6 +45,11 @@ public class TaskInputPO extends AbstractBasePO{
 
 	private Date createTime;
 
+	/**
+	 * 输入源的url;
+	 */
+	private String url;
+
 	@Version
 	public Long getVersion() {
 		return version;
@@ -137,5 +142,14 @@ public class TaskInputPO extends AbstractBasePO{
 
 	public void setAnalysis(Integer analysis) {
 		this.analysis = analysis;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public TaskInputPO setUrl(String url) {
+		this.url = url;
+		return this;
 	}
 }

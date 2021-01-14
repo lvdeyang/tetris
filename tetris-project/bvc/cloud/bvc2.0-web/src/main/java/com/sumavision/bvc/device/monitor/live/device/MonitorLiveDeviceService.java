@@ -88,6 +88,7 @@ public class MonitorLiveDeviceService {
 	
 	private String lockMonitorLiveDevice = "monitor-live-device";
 	
+	/** 需要限制转发数量上限 */
 	private boolean isLock = true;
 	
 	@Autowired
@@ -178,7 +179,7 @@ public class MonitorLiveDeviceService {
 	 * @param String userno 发起业务用户号码
 	 * @return MonitorLiveDevicePO 点播任务
 	 */
-	public MonitorLiveDevicePO startXtSeeLocal(
+	public synchronized MonitorLiveDevicePO startXtSeeLocal(
 			Long osdId,
 			String uuid,
 			String videoBundleId,
@@ -197,160 +198,87 @@ public class MonitorLiveDeviceService {
 			String userno) throws Exception{
 		
 		if(isLock){
-			synchronized (lockMonitorLiveDevice.intern()) {
-				List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
-				if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
-					throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
-				}
-				
-				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
-				if(TurnCapacity <= forwardCount){
-					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
-				}
-				
-				//参数校验
-				isVideoBundleNotNull(videoBundleId, "internal");
-				regularizedAudioParams(audioBundleId, audioChannelId, "internal", "internal");
-//				authorize(videoBundleId, audioBundleId, userId);//TODO: 暂时注释
-				
-				//本地编码器
-				BundlePO localEncoder = bundleDao.findByBundleId(videoBundleId);
-				
-				//参数模板
-				Map<String, Object> result = commons.queryDefaultAvCodec();
-				AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-				AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-				CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-				codec = audioChannelId == null?codec.setAudio_param(null):codec;
-				
-				//获取联网id
-				String networkLayerId = commons.queryNetworkLayerId();
-				
-				//字幕
-				MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-				
-				MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-						null, null, null, null, null, null,
-						null, null, null, null, null, null,
-						userId,
-						targetAvtpl.getId(),
-						targetGear.getId(),
-						null,
-						LiveType.XT_LOCAL,
-						(osd==null?null:osd.getId()),
-						(osd==null?null:osd.getUsername()));
-				
-				if(uuid != null) live.setUuid(uuid);
-				
-				monitorLiveDeviceDao.save(live);
-				
-				LogicBO logic = openBundle(live, codec, osd, localEncoder, null, userId);
-				
-				logic.setPass_by(new ArrayList<PassByBO>());
-				
-				XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
-																						 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
-																						 .setUuid(live.getUuid())
-																						 .setSrc_user(userno)
-																						 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", videoLayerId)
-																								 											   .put("bundleid", videoBundleId)	
-																								 											   .put("video_channelid", videoChannelId)
-																								 											   .put("audio_channelid", audioChannelId)
-																								 											   .getMap())
-																						 .setDst_number(localEncoder.getUsername())
-																						 .setVparam(codec);
-				
-				PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
-												.setType(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
-												.setPass_by_content(passByContent);
-				
-				logic.getPass_by().add(passby);
-				
-				resourceServiceClient.coverLianwangPassby(
-						live.getUuid(), 
-						networkLayerId, 
-						XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
-						JSON.toJSONString(passby));
-				
-				executeBusiness.execute(logic, "点播系统：xt点播本地设备 " + videoBundleName);
-				
-				return live;
+			List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
+			if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
 			}
-		}else{
-			//参数校验
-			isVideoBundleNotNull(videoBundleId, "internal");
-			regularizedAudioParams(audioBundleId, audioChannelId, "internal", "internal");
-//			authorize(videoBundleId, audioBundleId, userId);//TODO: 暂时注释
 			
-			//本地编码器
-			BundlePO localEncoder = bundleDao.findByBundleId(videoBundleId);
-			
-			//参数模板
-			Map<String, Object> result = commons.queryDefaultAvCodec();
-			AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-			AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-			codec = audioChannelId == null?codec.setAudio_param(null):codec;
-			
-			//获取联网id
-			String networkLayerId = commons.queryNetworkLayerId();
-			
-			//字幕
-			MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-			
-			MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-					null, null, null, null, null, null,
-					null, null, null, null, null, null,
-					userId,
-					targetAvtpl.getId(),
-					targetGear.getId(),
-					null,
-					LiveType.XT_LOCAL,
-					(osd==null?null:osd.getId()),
-					(osd==null?null:osd.getUsername()));
-			
-			if(uuid != null) live.setUuid(uuid);
-			
-			monitorLiveDeviceDao.save(live);
-			
-			LogicBO logic = openBundle(live, codec, osd, localEncoder, null, userId);
-			
-			logic.setPass_by(new ArrayList<PassByBO>());
-			
-			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
-																					 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
-																					 .setUuid(live.getUuid())
-																					 .setSrc_user(userno)
-																					 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", videoLayerId)
-																							 											   .put("bundleid", videoBundleId)	
-																							 											   .put("video_channelid", videoChannelId)
-																							 											   .put("audio_channelid", audioChannelId)
-																							 											   .getMap())
-																					 .setDst_number(localEncoder.getUsername())
-																					 .setVparam(codec);
-			
-			PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
-											.setType(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
-											.setPass_by_content(passByContent);
-			
-			logic.getPass_by().add(passby);
-			
-			resourceServiceClient.coverLianwangPassby(
-					live.getUuid(), 
-					networkLayerId, 
-					XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
-					JSON.toJSONString(passby));
-			
-			executeBusiness.execute(logic, "点播系统：xt点播本地设备 " + videoBundleName);
-			
-			return live;
+			Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
+			Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
+			if(TurnCapacity <= forwardCount){
+				throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
+			}
 		}
 		
+		//参数校验
+		isVideoBundleNotNull(videoBundleId, "internal");
+		regularizedAudioParams(audioBundleId, audioChannelId, "internal", "internal");
+//				authorize(videoBundleId, audioBundleId, userId);//TODO: 暂时注释
+		
+		//本地编码器
+		BundlePO localEncoder = bundleDao.findByBundleId(videoBundleId);
+		
+		//参数模板
+		Map<String, Object> result = commons.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		codec = audioChannelId == null?codec.setAudio_param(null):codec;
+		
+		//获取联网id
+		String networkLayerId = commons.queryNetworkLayerId();
+		
+		//字幕
+		MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
+		
+		MonitorLiveDevicePO live = new MonitorLiveDevicePO(
+				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
+				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
+				null, null, null, null, null, null,
+				null, null, null, null, null, null,
+				userId,
+				targetAvtpl.getId(),
+				targetGear.getId(),
+				null,
+				LiveType.XT_LOCAL,
+				(osd==null?null:osd.getId()),
+				(osd==null?null:osd.getUsername()));
+		
+		if(uuid != null) live.setUuid(uuid);
+		
+		monitorLiveDeviceDao.save(live);
+		
+		LogicBO logic = openBundle(live, codec, osd, localEncoder, null, userId);
+		
+		logic.setPass_by(new ArrayList<PassByBO>());
+		
+		XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
+																				 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+																				 .setUuid(live.getUuid())
+																				 .setSrc_user(userno)
+																				 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", videoLayerId)
+																						 											   .put("bundleid", videoBundleId)	
+																						 											   .put("video_channelid", videoChannelId)
+																						 											   .put("audio_channelid", audioChannelId)
+																						 											   .getMap())
+																				 .setDst_number(localEncoder.getUsername())
+																				 .setVparam(codec);
+		
+		PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
+										.setType(XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER)
+										.setPass_by_content(passByContent);
+		
+		logic.getPass_by().add(passby);
+		
+		resourceServiceClient.coverLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
+				JSON.toJSONString(passby));
+		
+		executeBusiness.execute(logic, "点播系统：xt点播本地设备 " + videoBundleName);
+		
+		return live;		
 		
 	}
 	
@@ -392,7 +320,7 @@ public class MonitorLiveDeviceService {
 	 * @return MonitorLiveDevicePO 点播任务
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public MonitorLiveDevicePO startLocalSeeLocal(
+	public synchronized MonitorLiveDevicePO startLocalSeeLocal(
 			Long osdId,
 			String videoBundleId,
 			String videoBundleName,
@@ -425,163 +353,89 @@ public class MonitorLiveDeviceService {
 			String udpUrl) throws Exception{
 		
 		if(isLock){
-			synchronized (lockMonitorLiveDevice.intern()) {
-				List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
-				if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
-					throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
-				}
-				
-				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
-				if(TurnCapacity <= forwardCount){
-					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
-				}
-		
-				//参数校验
-				isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
-				regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
-				isSrcAndDstBeTheSame(videoBundleId, dstVideoBundleId, audioBundleId, dstAudioBundleId);
-				authorize(videoBundleId, audioBundleId, userId);
-				
-				//参数模板
-				Map<String, Object> result = commons.queryDefaultAvCodec();
-				AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-				AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-				CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-				
-				//用于播放器的参数模板
-				CodecParamBO playerCodec;
-				if(transcord){
-					Map<String, Object> resultForPlayer = commons.queryDefaultPlayerAvCodec();
-					AvtplPO targetPlayerAvtpl = (AvtplPO)resultForPlayer.get("avtpl");
-					AvtplGearsPO targetPlayerGear = (AvtplGearsPO)resultForPlayer.get("gear");
-					playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetPlayerAvtpl), new DeviceGroupAvtplGearsPO().set(targetPlayerGear));			
-				}else{
-					playerCodec = codec;
-				}
-						
-				//字幕
-				MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-				
-				//处理业务覆盖
-				coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
-				
-				//视频源和目的
-				BundlePO videoBundle = bundleDao.findByBundleId(videoBundleId);
-				BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
-				
-			//		//先做停止操作转发并删除操作(处理逻辑放在coverBusiness()方法中)
-			//		MonitorLiveDevicePO oldLIve = monitorLiveDeviceDao.findByDstVideoBundleId(dstVideoBundleId);
-			//		if(oldLIve != null){
-			//			if(MonitorRecordStatus.RUN.equals(oldLIve.getStatus())){
-			//				stop(oldLIve.getId(), userId, userno, null);
-			//			}else{
-			//				stop(oldLIve.getId(), userId, userno, Boolean.FALSE);
-			//			}
-			//		}
-				
-				MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-						dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
-						dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
-						userId,
-						targetAvtpl.getId(),
-						targetGear.getId(),
-						DstDeviceType.valueOf(dstDeviceType),
-						LiveType.LOCAL_LOCAL,
-						(osd==null?null:osd.getId()),
-						(osd==null?null:osd.getUsername()));
-				
-				//新加的参数，就不改MonitorLiveDevicePO(xxx)方法了
-				live.setUdpUrl(udpUrl);
-				live.setVideoDeviceModel(videoBundle.getDeviceModel());
-				live.setAudioDeviceModel(videoBundle.getDeviceModel());
-				live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
-				live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
-				
-				monitorLiveDeviceDao.save(live);
-				
-				
-			//		LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, transcord, udpUrl);
-				
-			//		executeBusiness.execute(logic, "点播系统：本地设备点播本地设备");
-				
-				return live;
+			List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
+			if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
 			}
-		}else{
-			//参数校验
-			isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
-			regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
-			isSrcAndDstBeTheSame(videoBundleId, dstVideoBundleId, audioBundleId, dstAudioBundleId);
-			authorize(videoBundleId, audioBundleId, userId);
 			
-			//参数模板
-			Map<String, Object> result = commons.queryDefaultAvCodec();
-			AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-			AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-			
-			//用于播放器的参数模板
-			CodecParamBO playerCodec;
-			if(transcord){
-				Map<String, Object> resultForPlayer = commons.queryDefaultPlayerAvCodec();
-				AvtplPO targetPlayerAvtpl = (AvtplPO)resultForPlayer.get("avtpl");
-				AvtplGearsPO targetPlayerGear = (AvtplGearsPO)resultForPlayer.get("gear");
-				playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetPlayerAvtpl), new DeviceGroupAvtplGearsPO().set(targetPlayerGear));			
-			}else{
-				playerCodec = codec;
+			Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
+			Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
+			if(TurnCapacity <= forwardCount){
+				throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
 			}
-					
-			//字幕
-			MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-			
-			//处理业务覆盖
-			coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
-			
-			//视频源和目的
-			BundlePO videoBundle = bundleDao.findByBundleId(videoBundleId);
-			BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
-			
-		//		//先做停止操作转发并删除操作(处理逻辑放在coverBusiness()方法中)
-		//		MonitorLiveDevicePO oldLIve = monitorLiveDeviceDao.findByDstVideoBundleId(dstVideoBundleId);
-		//		if(oldLIve != null){
-		//			if(MonitorRecordStatus.RUN.equals(oldLIve.getStatus())){
-		//				stop(oldLIve.getId(), userId, userno, null);
-		//			}else{
-		//				stop(oldLIve.getId(), userId, userno, Boolean.FALSE);
-		//			}
-		//		}
-			
-			MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
-					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
-					userId,
-					targetAvtpl.getId(),
-					targetGear.getId(),
-					DstDeviceType.valueOf(dstDeviceType),
-					LiveType.LOCAL_LOCAL,
-					(osd==null?null:osd.getId()),
-					(osd==null?null:osd.getUsername()));
-			
-			//新加的参数，就不改MonitorLiveDevicePO(xxx)方法了
-			live.setUdpUrl(udpUrl);
-			live.setVideoDeviceModel(videoBundle.getDeviceModel());
-			live.setAudioDeviceModel(videoBundle.getDeviceModel());
-			live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
-			live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
-			
-			monitorLiveDeviceDao.save(live);
-			
-			
-		//		LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, transcord, udpUrl);
-			
-		//		executeBusiness.execute(logic, "点播系统：本地设备点播本地设备");
-			
-			return live;
 		}
+		
+		//参数校验
+		isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
+		regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
+		isSrcAndDstBeTheSame(videoBundleId, dstVideoBundleId, audioBundleId, dstAudioBundleId);
+		authorize(videoBundleId, audioBundleId, userId);
+		
+		//参数模板
+		Map<String, Object> result = commons.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		
+		//用于播放器的参数模板
+		CodecParamBO playerCodec;
+		if(transcord){
+			Map<String, Object> resultForPlayer = commons.queryDefaultPlayerAvCodec();
+			AvtplPO targetPlayerAvtpl = (AvtplPO)resultForPlayer.get("avtpl");
+			AvtplGearsPO targetPlayerGear = (AvtplGearsPO)resultForPlayer.get("gear");
+			playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetPlayerAvtpl), new DeviceGroupAvtplGearsPO().set(targetPlayerGear));			
+		}else{
+			playerCodec = codec;
+		}
+				
+		//字幕
+		MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
+		
+		//处理业务覆盖
+		coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
+		
+		//视频源和目的
+		BundlePO videoBundle = bundleDao.findByBundleId(videoBundleId);
+		BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
+		
+	//		//先做停止操作转发并删除操作(处理逻辑放在coverBusiness()方法中)
+	//		MonitorLiveDevicePO oldLIve = monitorLiveDeviceDao.findByDstVideoBundleId(dstVideoBundleId);
+	//		if(oldLIve != null){
+	//			if(MonitorRecordStatus.RUN.equals(oldLIve.getStatus())){
+	//				stop(oldLIve.getId(), userId, userno, null);
+	//			}else{
+	//				stop(oldLIve.getId(), userId, userno, Boolean.FALSE);
+	//			}
+	//		}
+		
+		MonitorLiveDevicePO live = new MonitorLiveDevicePO(
+				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
+				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
+				dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
+				dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
+				userId,
+				targetAvtpl.getId(),
+				targetGear.getId(),
+				DstDeviceType.valueOf(dstDeviceType),
+				LiveType.LOCAL_LOCAL,
+				(osd==null?null:osd.getId()),
+				(osd==null?null:osd.getUsername()));
+		
+		//新加的参数，就不改MonitorLiveDevicePO(xxx)方法了
+		live.setUdpUrl(udpUrl);
+		live.setVideoDeviceModel(videoBundle.getDeviceModel());
+		live.setAudioDeviceModel(videoBundle.getDeviceModel());
+		live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
+		live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
+		
+		monitorLiveDeviceDao.save(live);
+		
+		//BQ项目都是新建之后不用立刻开始。其它项目需要使用的时候再扩展
+//		LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, transcord, udpUrl);
+	
+//		executeBusiness.execute(logic, "点播系统：本地设备点播本地设备");
+		
+		return live;
 	}
 	
 	/**
@@ -619,7 +473,7 @@ public class MonitorLiveDeviceService {
 	 * @param String userno 发起业务用户号码
 	 * @return MonitorLiveDevicePO 点播任务
 	 */
-	public MonitorLiveDevicePO startLocalSeeXt(
+	public synchronized MonitorLiveDevicePO startLocalSeeXt(
 			Long osdId,
 			String videoBundleId,
 			String videoBundleName,
@@ -647,184 +501,101 @@ public class MonitorLiveDeviceService {
 			String dstAudioBaseType,
 			String dstDeviceType,
 			Long userId,
-			String userno) throws Exception{
+			String userno) throws Exception{		
 		
 		if(isLock){
-			synchronized (lockMonitorLiveDevice.intern()) {
-				List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
-				if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
-					throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
-				}
-				
-				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
-				if(TurnCapacity <= forwardCount){
-					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
-				}
-				
-				//参数校验
-				isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
-				regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
-				authorize(videoBundleId, audioBundleId, userId);
-				
-				//xt编码器
-				BundlePO xtEncoder = bundleDao.findByBundleId(videoBundleId);
-				
-				//虚拟xt编码器--这个不取原来的号了
-				videoBundleId = UUID.randomUUID().toString().replace("-", "");
-				videoBundleId = new StringBufferWrapper().append(xtEncoder.getBundleId()).append("_").append(videoBundleId).toString();
-				audioBundleId = videoBundleId;
-				
-				//参数模板
-				Map<String, Object> result = commons.queryDefaultAvCodec();
-				AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-				AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-				CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-				
-				//获取联网id
-				String networkLayerId = commons.queryNetworkLayerId();
-				videoLayerId = audioLayerId = networkLayerId;
-				
-				//字幕
-				MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-				
-				//处理业务覆盖
-				coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
-				
-				//视频目的
-				BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
-				
-				MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-						dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
-						dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
-						userId,
-						targetAvtpl.getId(),
-						targetGear.getId(),
-						DstDeviceType.valueOf(dstDeviceType),
-						LiveType.LOCAL_XT,
-						(osd==null?null:osd.getId()),
-						(osd==null?null:osd.getUsername()));
-				
-				live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
-				live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
-				
-				monitorLiveDeviceDao.save(live);
-				LogicBO logic = openBundle(live, codec, osd, xtEncoder, dstVideoBundle, userId);
-				
-				logic.setPass_by(new ArrayList<PassByBO>());
-				
-				XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-																						 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
-																						 .setUuid(live.getUuid())
-																						 .setSrc_user(userno)
-																						 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", networkLayerId)
-																								 											.put("bundleid", videoBundleId)
-																								 											.put("video_channelid", videoChannelId)
-																								 											.put("audio_channelid", audioChannelId)
-																								 											.getMap())
-																						 .setDst_number(xtEncoder.getUsername())
-																						 .setVparam(codec);
-				
-				PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
-												.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-												.setPass_by_content(passByContent);
-				
-				logic.getPass_by().add(passby);
-				
-				resourceServiceClient.coverLianwangPassby(
-						live.getUuid(), 
-						networkLayerId, 
-						XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
-						JSON.toJSONString(passby));
-				
-				executeBusiness.execute(logic, "点播系统：本地点播xt设备");
-				
-				return live;
+			List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
+			if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
 			}
-		}else{
-			//参数校验
-			isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
-			regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
-			authorize(videoBundleId, audioBundleId, userId);
 			
-			//xt编码器
-			BundlePO xtEncoder = bundleDao.findByBundleId(videoBundleId);
-			
-			//虚拟xt编码器--这个不取原来的号了
-			videoBundleId = UUID.randomUUID().toString().replace("-", "");
-			videoBundleId = new StringBufferWrapper().append(xtEncoder.getBundleId()).append("_").append(videoBundleId).toString();
-			audioBundleId = videoBundleId;
-			
-			//参数模板
-			Map<String, Object> result = commons.queryDefaultAvCodec();
-			AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-			AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-			
-			//获取联网id
-			String networkLayerId = commons.queryNetworkLayerId();
-			videoLayerId = audioLayerId = networkLayerId;
-			
-			//字幕
-			MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
-			
-			//处理业务覆盖
-			coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
-			
-			//视频目的
-			BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
-			
-			MonitorLiveDevicePO live = new MonitorLiveDevicePO(
-					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
-					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
-					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
-					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
-					userId,
-					targetAvtpl.getId(),
-					targetGear.getId(),
-					DstDeviceType.valueOf(dstDeviceType),
-					LiveType.LOCAL_XT,
-					(osd==null?null:osd.getId()),
-					(osd==null?null:osd.getUsername()));
-			
-			live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
-			live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
-			
-			monitorLiveDeviceDao.save(live);
-			LogicBO logic = openBundle(live, codec, osd, xtEncoder, dstVideoBundle, userId);
-			
-			logic.setPass_by(new ArrayList<PassByBO>());
-			
-			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-																					 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
-																					 .setUuid(live.getUuid())
-																					 .setSrc_user(userno)
-																					 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", networkLayerId)
-																							 											.put("bundleid", videoBundleId)
-																							 											.put("video_channelid", videoChannelId)
-																							 											.put("audio_channelid", audioChannelId)
-																							 											.getMap())
-																					 .setDst_number(xtEncoder.getUsername())
-																					 .setVparam(codec);
-			
-			PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
-											.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-											.setPass_by_content(passByContent);
-			
-			logic.getPass_by().add(passby);
-			
-			resourceServiceClient.coverLianwangPassby(
-					live.getUuid(), 
-					networkLayerId, 
-					XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
-					JSON.toJSONString(passby));
-			
-			executeBusiness.execute(logic, "点播系统：本地点播xt设备");
-			
-			return live;
+			Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
+			Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
+			if(TurnCapacity <= forwardCount){
+				throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
+			}
 		}
+		
+		//参数校验
+		isVideoBundleNotNull(videoBundleId, dstVideoBundleId);
+		regularizedAudioParams(audioBundleId, audioChannelId, dstAudioBundleId, dstAudioChannelId);
+		authorize(videoBundleId, audioBundleId, userId);
+		
+		//xt编码器
+		BundlePO xtEncoder = bundleDao.findByBundleId(videoBundleId);
+		
+		//虚拟xt编码器--这个不取原来的号了（BQ项目把这里去掉，还是用原来的bundleId）
+//				videoBundleId = UUID.randomUUID().toString().replace("-", "");
+//				videoBundleId = new StringBufferWrapper().append(xtEncoder.getBundleId()).append("_").append(videoBundleId).toString();
+		audioBundleId = videoBundleId;
+		
+		//参数模板
+		Map<String, Object> result = commons.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		
+		//获取联网id
+		String networkLayerId = commons.queryNetworkLayerId();
+		videoLayerId = audioLayerId = networkLayerId;
+		
+		//字幕
+		MonitorOsdPO osd = monitorOsdDao.findOne(osdId==null?0:osdId);
+		
+		//处理业务覆盖
+		coverBusiness(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId, userId, userno);
+		
+		//视频目的
+		BundlePO dstVideoBundle = bundleDao.findByBundleId(dstVideoBundleId);
+		
+		MonitorLiveDevicePO live = new MonitorLiveDevicePO(
+				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType,
+				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType,
+				dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType,
+				dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType,
+				userId,
+				targetAvtpl.getId(),
+				targetGear.getId(),
+				DstDeviceType.valueOf(dstDeviceType),
+				LiveType.LOCAL_XT,
+				(osd==null?null:osd.getId()),
+				(osd==null?null:osd.getUsername()));
+		
+		live.setDstVideoDeviceModel(dstVideoBundle.getDeviceModel());
+		live.setDstAudioDeviceModel(dstVideoBundle.getDeviceModel());
+		
+		monitorLiveDeviceDao.save(live);
+		LogicBO logic = openBundle(live, codec, osd, xtEncoder, dstVideoBundle, userId);
+		
+		logic.setPass_by(new ArrayList<PassByBO>());
+		
+		XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+																				 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+																				 .setUuid(live.getUuid())
+																				 .setSrc_user(userno)
+																				 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", networkLayerId)
+																						 											.put("bundleid", videoBundleId)
+																						 											.put("video_channelid", videoChannelId)
+																						 											.put("audio_channelid", audioChannelId)
+																						 											.getMap())
+																				 .setDst_number(xtEncoder.getUsername())
+																				 .setVparam(codec);
+		
+		PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
+										.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										.setPass_by_content(passByContent);
+		
+		logic.getPass_by().add(passby);
+		
+		resourceServiceClient.coverLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
+				JSON.toJSONString(passby));
+		
+		executeBusiness.execute(logic, "点播系统：本地点播xt设备");
+		
+		return live;
 	}
 	
 	/**
@@ -926,7 +697,7 @@ public class MonitorLiveDeviceService {
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
 			
-			operationLogService.send(userVO.getUsername(), "停止且删除转发", userVO.getUsername() + "停止且删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+			operationLogService.send(userVO.getUsername(), "停止并删除转发", userVO.getUsername() + "停止并删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else if(Boolean.TRUE.equals(stopAndDelete)){
 			
 			if(LiveType.XT_LOCAL.equals(live.getType())){
@@ -939,7 +710,7 @@ public class MonitorLiveDeviceService {
 				stopXtSeeXt(live, userId, userno, stopAndDelete);
 			}
 			
-			operationLogService.send(userVO.getUsername(), "停止但不删除转发", userVO.getUsername() + "停止但不删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+			operationLogService.send(userVO.getUsername(), "停止转发", userVO.getUsername() + "停止转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
 		}else{
 			monitorLiveDeviceDao.delete(live);
 			operationLogService.send(userVO.getUsername(), "删除转发", userVO.getUsername() + "删除转发：" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
@@ -1812,122 +1583,103 @@ public class MonitorLiveDeviceService {
 	 * @param userId 业务用户
 	 * @throws Exception 
 	 */
-	public void stopToRestart(List<Long> idList, Long userId) throws Exception{
+	public synchronized void stopToRestart(List<Long> idList, Long userId) throws Exception{
 		
 		if(isLock){
-			synchronized (lockMonitorLiveDevice.intern()) {
-				List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
-				if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
-					throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
-				}
-				
-				Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
-				Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
-				Long idSize = (long) idList.size();
-				if(TurnCapacity < (forwardCount + idSize)){
-					throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
-				}
-				List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findAll(idList);
-				
-				String userName = userQuery.current().getUsername();
-				for(MonitorLiveDevicePO live:liveList){
-					try {
-						if(live == null) continue;
-						
-						if(LiveType.LOCAL_XT.equals(live.getType())){
-							authorize(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")), 
-									  live.getAudioBundleId().substring(0, live.getAudioBundleId().lastIndexOf("_")), 
-									  userId);
-						}else{
-							authorize(live.getVideoBundleId(), live.getAudioBundleId(), userId);
-						}
-						
-						//参数模板
-						Map<String, Object> result = commons.queryDefaultAvCodec();
-						AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-						AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-						CodecParamBO playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-						CodecParamBO codec = playerCodec;
-						
-						//字幕
-						MonitorOsdPO osd = monitorOsdDao.findOne(live.getOsdId()==null?0:live.getOsdId());
-						
-						//处理业务覆盖
-//						coverBusiness(live.getDstVideoBundleId(), live.getDstVideoChannelId(), live.getDstAudioBundleId(), live.getDstAudioChannelId(), user.getId(), user.getUserno());
-						
-						//视频源和目的
-						BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId());
-						BundlePO dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
-						if(LiveType.LOCAL_XT.equals(live.getType())){
-							videoBundle = bundleDao.findByBundleId(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")));
-							dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
-						}
-						
-						live.setStatus(MonitorRecordStatus.RUN);
-						
-						monitorLiveDeviceDao.save(live);
-						
-						LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, false, live.getUdpUrl());
-						
-						executeBusiness.execute(logic, "点播系统：重新开始点播设备");
-						
-						operationLogService.send(userName, "开始转发转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
-					} catch (Exception e) {
-						System.out.println("停止转发重新开始报错:");
-						e.printStackTrace();
-					}
-				}
+			List<VedioCapacityPO> videoCapacityList = vedioCapacityService.findAll();
+			if(videoCapacityList == null || videoCapacityList.size()==0 || videoCapacityList.get(0).getTurnCapacity() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "没有查到转发容量");
 			}
-		}else{
-			List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findAll(idList);
 			
-			String userName = userQuery.current().getUsername();
-			for(MonitorLiveDevicePO live:liveList){
-				try {
-					if(live == null) continue;
-					
-					if(LiveType.LOCAL_XT.equals(live.getType())){
-						authorize(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")), 
-								  live.getAudioBundleId().substring(0, live.getAudioBundleId().lastIndexOf("_")), 
-								  userId);
-					}else{
-						authorize(live.getVideoBundleId(), live.getAudioBundleId(), userId);
-					}
-					
-					//参数模板
-					Map<String, Object> result = commons.queryDefaultAvCodec();
-					AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-					AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-					CodecParamBO playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-					CodecParamBO codec = playerCodec;
-					
-					//字幕
-					MonitorOsdPO osd = monitorOsdDao.findOne(live.getOsdId()==null?0:live.getOsdId());
-					
-					//处理业务覆盖
-//					coverBusiness(live.getDstVideoBundleId(), live.getDstVideoChannelId(), live.getDstAudioBundleId(), live.getDstAudioChannelId(), user.getId(), user.getUserno());
-					
-					//视频源和目的
-					BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId());
-					BundlePO dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
-					if(LiveType.LOCAL_XT.equals(live.getType())){
-						videoBundle = bundleDao.findByBundleId(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")));
-						dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
-					}
-					
-					live.setStatus(MonitorRecordStatus.RUN);
-					
-					monitorLiveDeviceDao.save(live);
-					
-					LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, false, live.getUdpUrl());
-					
-					executeBusiness.execute(logic, "点播系统：重新开始点播设备");
-					
-					operationLogService.send(userName, "开始转发转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
-				} catch (Exception e) {
-					System.out.println("停止转发重新开始报错:");
-					e.printStackTrace();
+			Long TurnCapacity = videoCapacityList.get(0).getTurnCapacity();
+			Long forwardCount = commandSystemQueryImp.queryCountOfTransmit();
+			Long idSize = (long) idList.size();
+			if(TurnCapacity < (forwardCount + idSize)){
+				throw new BaseException(StatusCode.FORBIDDEN, "转发路数已经达到上限");
+			}
+		}
+		
+		List<MonitorLiveDevicePO> liveList = monitorLiveDeviceDao.findAll(idList);
+		
+		String userName = userQuery.current().getUsername();
+		for(MonitorLiveDevicePO live:liveList){
+			try {
+				if(live == null) continue;
+				
+				if(LiveType.LOCAL_XT.equals(live.getType())){
+					authorize(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")), 
+							  live.getAudioBundleId().substring(0, live.getAudioBundleId().lastIndexOf("_")), 
+							  userId);
+				}else{
+					authorize(live.getVideoBundleId(), live.getAudioBundleId(), userId);
 				}
+				
+				//参数模板
+				Map<String, Object> result = commons.queryDefaultAvCodec();
+				AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+				AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+				CodecParamBO playerCodec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+				CodecParamBO codec = playerCodec;
+				
+				//字幕
+				MonitorOsdPO osd = monitorOsdDao.findOne(live.getOsdId()==null?0:live.getOsdId());
+				
+				//处理业务覆盖
+//						coverBusiness(live.getDstVideoBundleId(), live.getDstVideoChannelId(), live.getDstAudioBundleId(), live.getDstAudioChannelId(), user.getId(), user.getUserno());
+				
+				//视频源和目的
+				BundlePO videoBundle = bundleDao.findByBundleId(live.getVideoBundleId());
+				BundlePO dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
+				if(LiveType.LOCAL_XT.equals(live.getType())){
+					videoBundle = bundleDao.findByBundleId(live.getVideoBundleId().substring(0, live.getVideoBundleId().lastIndexOf("_")));
+					dstVideoBundle = bundleDao.findByBundleId(live.getDstVideoBundleId());
+				}
+				
+				live.setStatus(MonitorRecordStatus.RUN);
+				
+				monitorLiveDeviceDao.save(live);
+				
+				LogicBO logic = openBundle(live, codec, playerCodec, osd, videoBundle, dstVideoBundle, userId, false, live.getUdpUrl());
+				
+				if(LiveType.LOCAL_XT.equals(live.getType())){
+					
+					//获取联网id
+					String networkLayerId = commons.queryNetworkLayerId();
+//							videoLayerId = audioLayerId = networkLayerId;
+					
+					logic.setPass_by(new ArrayList<PassByBO>());
+					
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+																							 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+																							 .setUuid(live.getUuid())
+																							 .setSrc_user(videoBundle.getUsername())
+																							 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", networkLayerId)
+																									 											.put("bundleid", live.getVideoBundleId())
+																									 											.put("video_channelid", live.getVideoChannelId())
+																									 											.put("audio_channelid", live.getAudioChannelId())
+																									 											.getMap())
+																							 .setDst_number(dstVideoBundle.getUsername())
+																							 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(networkLayerId)
+													.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+													.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+					
+					resourceServiceClient.coverLianwangPassby(
+							live.getUuid(), 
+							networkLayerId, 
+							XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
+							JSON.toJSONString(passby));
+				}
+				
+				executeBusiness.execute(logic, "点播系统：重新开始点播设备");
+				
+				operationLogService.send(userName, "开始转发", userName + "开始转发。" + live.getVideoBundleName() + " 转发给 " + live.getDstVideoBundleName());
+			} catch (Exception e) {
+				System.out.println("停止转发重新开始报错:");
+				e.printStackTrace();
 			}
 		}
 	}

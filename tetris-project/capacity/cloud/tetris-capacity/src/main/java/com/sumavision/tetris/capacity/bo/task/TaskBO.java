@@ -140,6 +140,9 @@ public class TaskBO {
 					new TaskSourceBO(taskInput.getId(), taskProg.getProgram_number(), taskAudio.getPid()));
 		}else if ("video".equals(this.getType())){
 			ProgramBO taskProg = taskInput.getProgram_array().get(taskProgNO);
+			if (taskProg.getVideo_array()==null || taskProg.getVideo_array().isEmpty()){
+				throw new BaseException(StatusCode.FORBIDDEN,"video track not found: source no video");
+			}
 			ProgramVideoBO taskVideo = taskProg.getVideo_array().get(taskVideoNO);
 			this.setRaw_source(
 					new TaskSourceBO(taskInput.getId(), taskProg.getProgram_number(), taskVideo.getPid()));

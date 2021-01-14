@@ -36,6 +36,18 @@ public class DatabasePO extends AbstractBasePO{
 	
 	/** 服务器id */
 	private Long serverId;
+	
+	/** 路径 */
+	private String path;
+	
+	@Column(name = "PATH")
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
 
 	@Column(name = "DATABASE_IP")
 	public String getDatabaseIP() {

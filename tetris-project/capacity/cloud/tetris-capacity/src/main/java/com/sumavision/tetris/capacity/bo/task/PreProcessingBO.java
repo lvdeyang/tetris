@@ -51,17 +51,21 @@ public class PreProcessingBO {
 	@JSONField(ordinal = 10)
 	private ImageFilterBO imageFilter;
 
-	/** 音频增益 */
+	/**
+	 * 截图
+	 */
 	@JSONField(ordinal = 11)
+	private ScreenCapBO screen_cap;
+
+	/** 音频增益 */
 	private AudioGainBO aud_gain;
 
 	/** 重采样 */
-	@JSONField(ordinal = 12)
 	private ResampleBO resample;
-	
+
+	private AudioProcessBO audioProcess;
 
 	/** 音柱 */
-	@JSONField(ordinal = 13)
 	private AudioColumnBO audiocolumn;
 
 	public ScaleBO getScale() {
@@ -178,6 +182,24 @@ public class PreProcessingBO {
 
 	public PreProcessingBO setAudiocolumn(AudioColumnBO audiocolumn) {
 		this.audiocolumn = audiocolumn;
+		return this;
+	}
+
+	public AudioProcessBO getAudioProcess() {
+		return audioProcess;
+	}
+
+	public PreProcessingBO setAudioProcess(AudioProcessBO audioProcess) {
+		this.audioProcess = audioProcess;
+		return this;
+	}
+
+	public ScreenCapBO getScreen_cap() {
+		return screen_cap;
+	}
+
+	public PreProcessingBO setScreen_cap(ScreenCapBO screen_cap) {
+		this.screen_cap = screen_cap;
 		return this;
 	}
 }

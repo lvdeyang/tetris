@@ -1,14 +1,17 @@
 package com.sumavision.tetris.business.transcode.service;
 
-import ch.qos.logback.core.status.Status;
-import com.alibaba.druid.support.spring.stat.annotation.Stat;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.alarm.service.AlarmService;
+import com.sumavision.tetris.application.preview.PreviewDAO;
+import com.sumavision.tetris.application.preview.PreviewPO;
+import com.sumavision.tetris.business.common.Util.CommonUtil;
+import com.sumavision.tetris.business.common.Util.NodeUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
-import com.sumavision.tetris.business.common.exception.CommonException;
+import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.SyncService;
@@ -30,6 +33,8 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.device.DeviceDao;
+import com.sumavision.tetris.device.DeviceService;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Strings;
 import org.hibernate.exception.ConstraintViolationException;
@@ -43,7 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 流转码<br/>
@@ -84,6 +88,21 @@ public class TranscodeTaskService {
 
 	@Autowired
 	private SyncService syncService;
+
+	@Autowired
+	private DeviceDao deviceDao;
+
+	@Autowired
+	private DeviceService deviceService;
+
+	@Autowired
+	private AlarmService alarmService;
+
+	@Autowired
+	private PreviewDAO previewDao;
+
+	@Autowired
+	private NodeUtil nodeUtil;
 
 	@Value("${constant.default.audio.column:0}")
 	private Integer audioColumn;
@@ -205,32 +224,89 @@ public class TranscodeTaskService {
 
 	}
 
+	/**
+	 * 判断是否需要转发流
+	 * @param previewDevice
+	 * @param receiveDevice
+	 * @param inputBO
+	 * @return
+	 */
+	public boolean beTransferStream(String previewDevice,String receiveDevice,InputBO inputBO){
+		if (receiveDevice==null || previewDevice.equals(receiveDevice)){
+			return false;
+		}else {
+			if (inputBO.getUdp_ts() != null && !CommonUtil.isMulticast(inputBO.getUdp_ts().getSource_ip())) { //udp单播 转发
+				return true;
+			}
+			if (inputBO.getRtp_ts() != null && !CommonUtil.isMulticast(inputBO.getRtp_ts().getSource_ip())) { //rtp单播 转发
+				return true;
+			}
+		}
+		return false;
+	}
 
-	public void previewInput(CreateInputPreviewVO createInputPreviewVO) throws Exception {
+	public String transferStream(InputBO inputBO,String previewDevice,String receiveDevice) throws Exception {
+		//转发
+		String transJobId = UUID.randomUUID().toString();
+		ProtocolType inType = ProtocolType.getProtocolType(inputBO);
+		String inUrl = nodeUtil.getUrl(inputBO);
+		String outUrl = "";
+		Integer outPort = nodeUtil.getPortByDevice(previewDevice);
+		if (outPort==null){
+			throw new BaseException(StatusCode.FORBIDDEN,"no port for transfer stream");
+		}
+		if (inputBO.getUdp_ts()!=null){
+			outUrl = "udp://"+previewDevice+":"+outPort;
+			inputBO.getUdp_ts().setSource_ip(previewDevice);
+			inputBO.getUdp_ts().setSource_port(outPort);
+			inputBO.getUdp_ts().setLocal_ip(previewDevice);
+		}
+		if (inputBO.getRtp_ts()!=null){
+			outUrl = "rtp://"+previewDevice+":"+outPort;
+			inputBO.getRtp_ts().setSource_ip(previewDevice);
+			inputBO.getRtp_ts().setSource_port(outPort);
+			inputBO.getRtp_ts().setLocal_ip(previewDevice);
+		}
+		taskService.transferStream(receiveDevice,transJobId, inType, inUrl,null, inType, outUrl,BusinessType.TRANSCODE);
 
-		InputBO inputBO = createInputPreviewVO.getInput_array().get(0);
+		return transJobId;
+	}
 
-		if (createInputPreviewVO.getProgram_number() == null){
+
+
+
+	public void createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+
+		PreviewPO previewPO = new PreviewPO();
+		InputBO inputBO = inputPreviewVO.getInput_array().get(0);
+
+		if (beTransferStream(inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device(),inputBO)) {
+			String transferJobId = transferStream(inputBO, inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device());
+			previewPO.setTransferTaskId(transferJobId);
+		}
+
+		if (inputPreviewVO.getProgram_number() == null){
 			throw new BaseException(StatusCode.ERROR,"param[program number] not exist");
 		}
 
 		String pubName = inputBO.getId();
 		String playName = inputBO.getId();
-		String taskId = inputBO.getId();
+		previewPO.setInputId(inputBO.getId());
+		String taskId = UUID.randomUUID().toString();
 
 		String uniq = taskService.generateUniq(inputBO);
 		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
 		if (inputPO!=null && inputPO.getCount()>0){ //输入存在的话就将现有输入进行替换下，以免input_id不一致
 			inputBO = JSONObject.parseObject(inputPO.getInput(),InputBO.class);
-			createInputPreviewVO.getInput_array().remove(0);
-			createInputPreviewVO.getInput_array().add(inputBO);
+			inputPreviewVO.getInput_array().remove(0);
+			inputPreviewVO.getInput_array().add(inputBO);
 		}
 		ProgramBO taskProgramBO = inputBO.getProgram_array().stream()
-				.filter(p->createInputPreviewVO.getProgram_number().equals(p.getProgram_number()))
+				.filter(p-> inputPreviewVO.getProgram_number().equals(p.getProgram_number()))
 				.findFirst()
 				.get();
 		if (taskProgramBO == null) {
-			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+createInputPreviewVO.getProgram_number());
+			throw new BaseException(StatusCode.ERROR,"cannot find program, program number: "+ inputPreviewVO.getProgram_number());
 		}
 
 		fps=StringUtils.deleteWhitespace(fps);
@@ -242,11 +318,11 @@ public class TranscodeTaskService {
 			taskProgramBO.getAudio_array().get(0).setAudio_column("on");
 		}
 
-		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, createInputPreviewVO.getProgram_number());
+		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, inputPreviewVO.getProgram_number());
 
 //		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
 		String outputUrl = new StringBuilder().append("rtmp://")
-				.append(createInputPreviewVO.getDevice_ip())
+				.append(inputPreviewVO.getDevice_ip())
 				.append(":1935")
 				.append("/")
 				.append("live")
@@ -255,8 +331,11 @@ public class TranscodeTaskService {
 				.toString();
 		List<OutputBO> outputBOs = trans2RTMPOutputBO(taskId, taskBOs, outputUrl);
 
-		save(taskId, createInputPreviewVO.getDevice_ip(), createInputPreviewVO.getInput_array()  , taskBOs, outputBOs, BusinessType.TRANSCODE);
+		save(taskId, inputPreviewVO.getDevice_ip(), inputPreviewVO.getInput_array(), taskBOs, outputBOs, BusinessType.TRANSCODE);
 
+		previewPO.setPreviewTaskId(taskId);
+		previewPO.setUpdateTime(new Date());
+		previewDao.save(previewPO);
 
 	}
 
@@ -402,6 +481,9 @@ public class TranscodeTaskService {
 
 		//输出udp
 		OutputStorageBO outputStorageBO = new OutputStorageBO().setUrl("file").setDir_name(pubName).setCan_del(true);
+		List<OutputStorageBO> outputStorageBOS = new ArrayList<>();
+		outputStorageBOS.add(outputStorageBO);
+
 		List<OutputMediaGroupBO> outputMediaGroupBOS = new ArrayList<>();
 		OutputMediaGroupBO media = new OutputMediaGroupBO();
 		media.setAudio_array(new ArrayList<>());
@@ -431,7 +513,7 @@ public class TranscodeTaskService {
 				.setPlaylist_name(playName)
 				.setPlaylist_seg_count(3)
 				.setMax_seg_duration(5)
-				.setStorage(outputStorageBO);
+				.setStorage_array(outputStorageBOS);
 
 		output.setHls(hlsBO);
 
@@ -575,6 +657,7 @@ public class TranscodeTaskService {
 			BusinessType businessType) throws Exception{
 		AllRequest allRequest = new AllRequest();
 
+		GetInputsResponse transInputs = capacityService.getInputs(capacityIp);
 		try {
 			Boolean beBackInput = beBackupInput(inputBOs);
 			List<InputBO> needSendInputArray = new ArrayList<>();
@@ -583,7 +666,7 @@ public class TranscodeTaskService {
 				InputBO inputBO = inputBOs.get(i);
 				String uniq = taskService.generateUniq(inputBO);//这判重合理不，是不是还不如直接看转换
 				TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-				InputBO realInput = taskService.getTransformInput(capacityIp, inputBO);
+				InputBO realInput = taskService.getTransformInput(transInputs, inputBO);
 				if (inputPO == null) {
 					inputPO = new TaskInputPO();
 					inputPO.setCreateTime(new Date());
@@ -592,6 +675,7 @@ public class TranscodeTaskService {
 					inputPO.setType(businessType);
 					inputPO.setInput(JSON.toJSONString(inputBO));
 					inputPO.setNodeId(inputBO.getId());
+					inputPO.setUrl(nodeUtil.getUrl(inputBO));
 					inputPO.setCapacityIp(capacityIp);
 					taskInputDao.save(inputPO);
 					if (realInput==null) {
@@ -611,6 +695,7 @@ public class TranscodeTaskService {
 					inputPO.setType(businessType);
 					inputPO.setCreateTime(new Date());
 					inputPO.setUpdateTime(inputPO.getCreateTime());
+					inputPO.setUrl(nodeUtil.getUrl(inputBO));
 					inputPO.setCount(inputPO.getCount() + 1);
 					inputPO.setCapacityIp(capacityIp);
 					taskInputDao.save(inputPO);
@@ -1383,387 +1468,6 @@ public class TranscodeTaskService {
 		capacityService.putAlarmList(ip, capacityProps.getPort(), alarmlist);
 	}
 
-	/**
-	 * 清空转换模块上所有任务<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月5日 下午2:41:38
-	 * @param String ip 转换模块ip
-	 */
-	public void removeAll(String ip) throws Exception{
-
-		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
-
-		if(outputs != null && outputs.size() > 0){
-			Set<Long> inputIds = new HashSet<Long>();
-			for(TaskOutputPO outputPO: outputs){
-				if(!Objects.isNull(outputPO.getInputId())){
-					//单源
-					inputIds.add(outputPO.getInputId());
-				}else if(!StringUtils.isEmpty(outputPO.getInputList())){
-					//备份源
-					inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
-				}else if(!Objects.isNull(outputPO.getCoverId())){
-					//盖播
-					inputIds.add(outputPO.getCoverId());
-				}else if(!Objects.isNull(outputPO.getScheduleId())){
-					//排期
-					inputIds.add(outputPO.getScheduleId());
-				}else if(!Objects.isNull(outputPO.getPrevId())){
-					//追加排期prev
-					inputIds.add(outputPO.getPrevId());
-				}else if(!Objects.isNull(outputPO.getNextId())){
-					//追加排期next
-					inputIds.add(outputPO.getNextId());
-				}
-			}
-
-			List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
-			if(inputPOs != null && inputPOs.size() > 0){
-				for(TaskInputPO inputPO: inputPOs){
-					inputPO.setCount(0);
-				}
-			}
-
-			taskInputDao.save(inputPOs);
-			taskOutputDao.deleteInBatch(outputs);
-
-		}
-
-		//清空转换模块上面所有任务
-		capacityService.removeAll(ip);
-	}
-
-	public TaskInputPO addInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
-		String uniq = taskService.generateUniq(inputBO);
-		TaskInputPO inputPO = new TaskInputPO();
-		inputPO.setCreateTime(new Date());
-		inputPO.setUpdateTime(inputPO.getCreateTime());
-		inputPO.setUniq(uniq);
-		inputPO.setType(busType);
-		inputPO.setInput(JSON.toJSONString(inputBO));
-		inputPO.setNodeId(inputBO.getId());
-		taskInputDao.save(inputPO);
-		return inputPO;
-	}
-
-	public void updateInputToDB(InputBO inputBO,BusinessType busType) throws Exception {
-		String uniq = taskService.generateUniq(inputBO);
-		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-		inputPO.setUpdateTime(new Date());
-		inputPO.setUniq(uniq);
-
-		inputPO.setType(busType);
-		inputPO.setInput(JSON.toJSONString(inputBO));
-		inputPO.setNodeId(inputBO.getId());
-		taskInputDao.save(inputPO);
-	}
-
-	/**
-	 * 处理某个设备上关于某个任务的所有任务命令<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月5日 下午2:41:38
-	 * @param String ip 转换模块ip
-	 */
-	public void modifyTranscodeTask(TaskSetVO taskSetVO) throws Exception {
-//先发命令
-		String taskUuid = taskSetVO.getTask_link_id().toString();
-		String capacityIp = taskSetVO.getDevice_ip();
-		//修改任务前，先判断下任务同步着没
-//		syncService.checkAndSyncTask(taskUuid,BusinessType.TRANSCODE);
-		TaskOutputPO taskOutputPO = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.TRANSCODE);
-		if (null == taskOutputPO){
-			LOG.warn("task not exist, id: {}", taskUuid);
-			return;
-		}
-
-		List<Long> inputIds = JSONArray.parseArray(taskOutputPO.getInputList(), Long.class);
-		List<TaskInputPO> taskInputPOS = taskInputDao.findByIdIn(inputIds);
-
-		//增加输入
-		if (Objects.nonNull(taskSetVO.getCreate_input())&&Objects.nonNull(taskSetVO.getCreate_input().getInput_array())){
-			List<InputBO> inputBOS = new ArrayList<>();//需要新下发创建输入的
-			for (int i = 0; i < taskSetVO.getCreate_input().getInput_array().size(); i++) {
-				InputBO curInputBO = taskSetVO.getCreate_input().getInput_array().get(i);
-				TaskInputPO dbInput = taskInputDao.findByUniq( taskService.generateUniq(curInputBO));
-				if (dbInput==null){
-					TaskInputPO inputPO = addInputToDB(curInputBO,BusinessType.TRANSCODE);
-					inputIds.add(inputPO.getId());
-					inputBOS.add(curInputBO);
-				}else{
-					if (dbInput.getCount()==0) {
-						dbInput.setCount(1);
-						dbInput.setUpdateTime(new Date());
-						dbInput.setInput(JSON.toJSONString(curInputBO));
-						dbInput.setNodeId(curInputBO.getId());
-						taskInputDao.save(dbInput);
-						if (!inputIds.contains(dbInput.getId())) {
-							inputIds.add(dbInput.getId());
-						}
-						inputBOS.add(curInputBO);
-					}else{
-						if (!inputIds.contains(dbInput.getId())) {
-							dbInput.setCount(dbInput.getCount()+1);
-							dbInput.setUpdateTime(new Date());
-							taskInputDao.save(dbInput);
-							inputIds.add(dbInput.getId());
-						}
-					}
-				}
-			}
-			if (!inputBOS.isEmpty()){
-				CreateInputsRequest createInputsRequest = new CreateInputsRequest().setInput_array(inputBOS).setMsg_id(taskSetVO.getCreate_input().getMsg_id());
-				capacityService.createInputs(capacityIp, createInputsRequest);
-			}
-
-		}
-
-		//修改输入参数
-		if (Objects.nonNull(taskSetVO.getModify_input_params())&&!taskSetVO.getModify_input_params().isEmpty()){
-			for (int i=0;i<taskSetVO.getModify_input_params().size();i++) {
-				PutInputsRequest putInputsRequest = taskSetVO.getModify_input_params().get(i);
-				InputBO inputBO = putInputsRequest.getInput();
-				TaskInputPO inputPO = taskInputDao.findByUniq(taskService.generateUniq(inputBO));
-				if (inputPO==null){
-					throw new BaseException(StatusCode.ERROR,"input not exist");
-				}
-				putInputsRequest.setInput(JSONObject.parseObject(inputPO.getInput(),InputBO.class));
-				capacityService.modifyInputs(capacityIp, putInputsRequest);
-				updateInputToDB(putInputsRequest.getInput(),BusinessType.TRANSCODE);
-			}
-		}
-
-		//删除输入
-		if (Objects.nonNull(taskSetVO.getDelete_input())){
-			capacityService.deleteInputs(capacityIp, taskSetVO.getDelete_input());
-			List<String> delInputList = taskSetVO.getDelete_input().getInput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
-			taskInputPOS.stream().forEach(i->{
-				InputBO inputBO = JSONObject.parseObject(i.getInput(),InputBO.class);
-				if (delInputList.contains(inputBO.getId())){
-					taskInputDao.delete(i);
-					inputIds.remove(i.getId());
-				}
-			});
-			taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));
-		}
-
-		//增加节目
-		if (Objects.nonNull(taskSetVO.getCreate_program())){
-			CreateProgramsRequest createProgramsRequest = taskSetVO.getCreate_program();
-			capacityService.createProgram(capacityIp, createProgramsRequest);
-			taskInputPOS.stream().forEach(i-> {
-				InputBO inputBO = JSONObject.parseObject(i.getInput(), InputBO.class);
-				if (inputBO.getId().equals(createProgramsRequest.getInput_id())){
-					inputBO.getProgram_array().addAll(createProgramsRequest.getProgram_array());
-					i.setInput(JSONObject.toJSONString(inputBO));
-					i.setNodeId(inputBO.getId());
-					taskInputDao.save(i);
-				}
-			});
-		}
-
-		//删除节目
-		if (Objects.nonNull(taskSetVO.getDelete_program())){
-			DeleteProgramRequest deleteProgramRequest = taskSetVO.getDelete_program();
-			capacityService.deleteProgram(capacityIp,deleteProgramRequest );
-
-			taskInputPOS.stream().forEach(i-> {
-				InputBO inputBO = JSONObject.parseObject(i.getInput(), InputBO.class);
-				if (inputBO.getId().equals(deleteProgramRequest.getInput_id())){
-					inputBO.getProgram_array().removeIf(p->{
-						return deleteProgramRequest.getProgram_array().stream().anyMatch(d->d.getProgram_number().equals(p.getProgram_number()));
-					});
-					i.setInput(JSONObject.toJSONString(inputBO));
-					i.setNodeId(inputBO.getId());
-					taskInputDao.save(i);
-				}
-			});
-		}
-
-		//修改节目备份
-		modifyBackupMode(taskSetVO,taskInputPOS,capacityIp);
-
-		//创建任务
-		if (Objects.nonNull(taskSetVO.getAdd_task())){
-			CreateTaskRequest createTaskRequest = taskSetVO.getAdd_task();
-			capacityService.createTasksWithMsgId(createTaskRequest,capacityIp);
-			List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-			createTaskRequest.getTask_array().stream().forEach(t->{
-				oriTaskBOS.add(t);
-			});
-			taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-		}
-
-
-		//删除任务
-		if (Objects.nonNull(taskSetVO.getDelete_task())){
-			DeleteTasksRequest deleteTasksRequest = taskSetVO.getDelete_task();
-			capacityService.deleteTasksWithMsgId(deleteTasksRequest,capacityIp);
-			List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-			deleteTasksRequest.getTask_array().forEach(t->{
-				oriTaskBOS.removeIf(o->o.getId().equals(t.getId()));
-			});
-			taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-		}
-
-
-		//修改编码预处理
-		if (Objects.nonNull(taskSetVO.getModify_decode_process())&&!taskSetVO.getModify_decode_process().isEmpty()){
-			for (int i=0;i<taskSetVO.getModify_decode_process().size();i++) {
-				PutTaskDecodeProcessRequest putTaskDecodeProcessRequest = taskSetVO.getModify_decode_process().get(i);
-				capacityService.modifyTaskDecodeProcess(capacityIp, putTaskDecodeProcessRequest);
-				List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-				oriTaskBOS.stream().filter(t->putTaskDecodeProcessRequest.getTask_id().equals(t.getId())).forEach(t->{
-					t.getDecode_process_array().clear();
-					t.setDecode_process_array(putTaskDecodeProcessRequest.getProcess_array());
-				});
-				taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-			}
-		}
-
-		//增加编码
-		if (Objects.nonNull(taskSetVO.getAdd_encoders())&& !taskSetVO.getAdd_encoders().isEmpty()){
-			for (int i=0;i<taskSetVO.getAdd_encoders().size();i++) {
-				AddTaskEncodeRequest addTaskEncodeRequest = taskSetVO.getAdd_encoders().get(i);
-				List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-				for (int j=0;j<oriTaskBOS.size();j++){
-					TaskBO oriTask = oriTaskBOS.get(j);
-					if (oriTask.getId().equals(addTaskEncodeRequest.getTask_id())){
-						capacityService.addTaskEncode(capacityIp, addTaskEncodeRequest);
-						oriTask.getEncode_array().addAll(addTaskEncodeRequest.getEncode_array());
-					}
-				}
-				taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-			}
-		}
-
-		//修改编码
-		if (Objects.nonNull(taskSetVO.getModify_encoders())&& !taskSetVO.getModify_encoders().isEmpty()){
-			for (int i=0;i<taskSetVO.getModify_encoders().size();i++) {
-				PutTaskEncodeRequest putTaskEncodeRequest = taskSetVO.getModify_encoders().get(i);
-				List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-				for (int j=0;j<oriTaskBOS.size();j++){
-					TaskBO oriTask = oriTaskBOS.get(j);
-					if (oriTask.getId().equals(putTaskEncodeRequest.getTask_id())){
-						capacityService.modifyTaskEncode(capacityIp, putTaskEncodeRequest);
-						oriTask.getEncode_array().removeIf(e->e.getEncode_id().equals(putTaskEncodeRequest.getEncode_param().getEncode_id()));
-						oriTask.getEncode_array().add(putTaskEncodeRequest.getEncode_param());
-					}
-				}
-				taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-			}
-		}
-
-		//修改编码模式
-		if (Objects.nonNull(taskSetVO.getModify_decode_mode()) && !taskSetVO.getModify_decode_mode().isEmpty()){
-			for (int i = 0; i < taskSetVO.getModify_decode_mode().size(); i++) {
-				PatchDecodeRequest patchDecodeRequest = taskSetVO.getModify_decode_mode().get(i);
-
-				Integer programNum = Integer.parseInt(patchDecodeRequest.getProgram_num());
-				Integer pid = Integer.parseInt(patchDecodeRequest.getPid());
-				String encodeMode = patchDecodeRequest.getDecode_mode();
-				capacityService.modifyProgramDecodeMode(capacityIp,patchDecodeRequest);
-				if (programNum == null || pid == null || encodeMode == null || encodeMode.isEmpty() ){
-					throw new Exception("modify encode param parse error");
-				}
-
-				taskInputPOS.stream().forEach(inputPO-> {
-					InputBO inputBO = JSONObject.parseObject(inputPO.getInput(), InputBO.class);
-					inputBO.getProgram_array().stream().filter(in->programNum.equals(in.getProgram_number())).forEach(p->{
-						if (p.getAudio_array()!=null &&!p.getAudio_array().isEmpty()) { p.getAudio_array().stream().filter(a -> pid.equals(a.getPid())).forEach(a -> a.setDecode_mode(encodeMode)); }
-						if (p.getVideo_array()!=null &&!p.getVideo_array().isEmpty()) {p.getVideo_array().stream().filter(a->pid.equals(a.getPid())).forEach(a->a.setDecode_mode(encodeMode));}
-						if (p.getSubtitle_array()!=null &&!p.getSubtitle_array().isEmpty()) {p.getSubtitle_array().stream().filter(a->pid.equals(a.getPid())).forEach(a->a.setDecode_mode(encodeMode));}
-					});
-					inputPO.setInput(JSONObject.toJSONString(inputBO));
-					inputPO.setNodeId(inputBO.getId());
-					taskInputDao.save(inputPO);
-				});
-			}
-
-		}
-
-		//删除编码,协议有问题
-		if (Objects.nonNull(taskSetVO.getDelete_encoders())&& !taskSetVO.getDelete_encoders().isEmpty()){
-			for (int i=0;i<taskSetVO.getDelete_encoders().size();i++) {
-				DeleteTaskEncodeResponse deleteTaskEncodeResponse = taskSetVO.getDelete_encoders().get(i);
-				List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-				for (int j=0;j<oriTaskBOS.size();j++){
-					TaskBO oriTask = oriTaskBOS.get(j);
-					if (oriTask.getId().equals(deleteTaskEncodeResponse.getTask_id())){
-						capacityService.deleteTaskEncode(capacityIp, deleteTaskEncodeResponse);
-						for (int k=0; k < oriTask.getEncode_array().size(); k++) {
-							EncodeBO encodeBO = oriTask.getEncode_array().get(k);
-							deleteTaskEncodeResponse.getEncode_array().stream()
-									.filter(e->e.getEncode_id().equals(encodeBO.getEncode_id()))
-									.forEach(e->{
-										oriTask.getEncode_array().remove(encodeBO);
-									});
-						}
-					}
-				}
-				taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-			}
-		}
-
-		//修改源
-		if (Objects.nonNull(taskSetVO.getModify_source())&&!taskSetVO.getModify_source().isEmpty()){
-			for (int i=0;i<taskSetVO.getModify_source().size();i++) {
-				PutTaskSourceRequest putTaskSourceRequest = taskSetVO.getModify_source().get(i);
-				capacityService.modifyTaskSource(capacityIp,putTaskSourceRequest);
-				List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
-				oriTaskBOS.stream().filter(t->putTaskSourceRequest.getTask_id().equals(t.getId())).forEach(t->{
-					if (putTaskSourceRequest.getRaw_source()!=null){ t.setRaw_source(putTaskSourceRequest.getRaw_source()); }
-					if (putTaskSourceRequest.getEs_source()!=null){ t.setEs_source(putTaskSourceRequest.getEs_source()); }
-					if (putTaskSourceRequest.getPassby_source()!=null){ t.setPassby_source(putTaskSourceRequest.getPassby_source()); }
-					if (putTaskSourceRequest.getVideo_mix_source()!=null){ t.setVideo_mix_source(putTaskSourceRequest.getVideo_mix_source()); }
-					if (putTaskSourceRequest.getAudio_mix_source()!=null){ t.setAudio_mix_source(putTaskSourceRequest.getAudio_mix_source()); }
-				});
-				taskOutputPO.setTask(JSON.toJSONString(oriTaskBOS));
-			}
-		}
-
-		//增加输出
-		if (Objects.nonNull(taskSetVO.getAdd_output())) {
-			CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(taskSetVO.getAdd_output(),capacityIp);
-			List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, capacityIp);
-
-			JSONArray oriOutputs = JSON.parseArray(taskOutputPO.getOutput());
-			oriOutputs.addAll(taskSetVO.getAdd_output().getOutput_array());
-			taskOutputPO.setOutput(JSON.toJSONString(oriOutputs));
-		}
-		//修改输出
-		if (Objects.nonNull(taskSetVO.getModify_output())&& !taskSetVO.getModify_output().isEmpty()){
-			for (int i=0;i<taskSetVO.getModify_output().size();i++) {
-				List<OutputBO> oriOutputs = JSONObject.parseArray(taskOutputPO.getOutput(), OutputBO.class);
-				List<String> needModifyOutIds = taskSetVO.getModify_output().stream().map(PutOutputRequest::getOutput).map(OutputBO::getId).collect(Collectors.toList());
-				List<OutputBO> needModifyOutputs = oriOutputs.stream().filter(o->needModifyOutIds.contains(o.getId())).collect(Collectors.toList());
-				if (!needModifyOutputs.isEmpty()) {
-					capacityService.modifyOutputById(capacityIp, taskSetVO.getModify_output().get(i));
-					oriOutputs.removeAll(needModifyOutputs);
-					oriOutputs.addAll(taskSetVO.getModify_output().stream().map(PutOutputRequest::getOutput).collect(Collectors.toList()));
-					taskOutputPO.setOutput(JSON.toJSONString(oriOutputs));
-				}else{
-					LOG.warn("modify output not exist");
-				}
-			}
-		}
-		//删除输出
-		if (Objects.nonNull(taskSetVO.getDelete_output()) && StringUtils.isNotBlank(taskOutputPO.getOutput())) {
-			List<OutputBO> oriOutputs = JSONObject.parseArray(taskOutputPO.getOutput(), OutputBO.class);
-			List<String> needDeleteOutIds = taskSetVO.getDelete_output().getOutput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
-			List<OutputBO> needDelOutputs = oriOutputs.stream().filter(o->needDeleteOutIds.contains(o.getId())).collect(Collectors.toList());
-			if (!needDeleteOutIds.isEmpty()) {
-				capacityService.deleteOutputsWithMsgId(taskSetVO.getDelete_output(), capacityIp);
-				oriOutputs.removeAll(needDelOutputs);
-				taskOutputPO.setOutput(JSON.toJSONString(oriOutputs));
-			}else{
-				LOG.warn("delete output not exist");
-			}
-		}
-		taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));
-		taskOutputDao.save(taskOutputPO);
-	}
 
 	/**
 	 * 获取设备支持的硬件平台<br/>
@@ -1782,10 +1486,13 @@ public class TranscodeTaskService {
 		return JSON.toJSONString(platforms);
 	}
 
-
-
-
-
+	/**
+	 * 码流分析
+	 * @param asVO
+	 * @param busType
+	 * @return
+	 * @throws Exception
+	 */
 	public String analysisStream(AnalysisStreamVO asVO,BusinessType busType) throws Exception {
 		if (asVO == null){
 			return "";
@@ -1825,45 +1532,10 @@ public class TranscodeTaskService {
 			return;
 		}
 
-
-
 		//修改视音频参数
 		modifyElements(inputSetVO,taskInputPOS,capacityIp);
 	}
-	/**
-	 * 修改输入备份关系
-	 * @param inputSetVO
-	 * @param taskInputPOS
-	 * @param capacityIp
-	 * @throws Exception
-	 */
-	public void modifyBackupMode(TaskSetVO inputSetVO,List<TaskInputPO> taskInputPOS,String capacityIp) throws Exception {
-		if (Objects.nonNull(inputSetVO.getModify_backup_mode())&& !inputSetVO.getModify_backup_mode().isEmpty()) {
-			for (int i = 0; i < inputSetVO.getModify_backup_mode().size(); i++) {
-				PutBackupModeRequest putBackupModeRequest = inputSetVO.getModify_backup_mode().get(i);
-				for (int i1 = 0; i1 < taskInputPOS.size(); i1++) {
-					TaskInputPO inputPO = taskInputPOS.get(i1);
-					InputBO inputBO = JSONObject.parseObject(inputPO.getInput(),InputBO.class);
-					if (inputBO.getId().equals(putBackupModeRequest.getInputId())){
-						if (inputBO.getBack_up_passby() != null) {
-							inputBO.getBack_up_passby().setMode(putBackupModeRequest.getMode());
-							inputBO.getBack_up_passby().setSelect_index(putBackupModeRequest.getSelect_index());
-						}
-						if (inputBO.getBack_up_es() != null) {
-							inputBO.getBack_up_es().setMode(putBackupModeRequest.getMode());
-							inputBO.getBack_up_es().setSelect_index(putBackupModeRequest.getSelect_index());
-						}
-						if (inputBO.getBack_up_raw() != null) {
-							inputBO.getBack_up_raw().setMode(putBackupModeRequest.getMode());
-							inputBO.getBack_up_raw().setSelect_index(putBackupModeRequest.getSelect_index());
-						}
-						updateInputToDB(inputBO,BusinessType.TRANSCODE);
-						capacityService.changeBackup(capacityIp, putBackupModeRequest);
-					}
-				}
-			}
-		}
-	}
+
 
 	/**
 	 * 修改指定节目媒体参数
@@ -1911,7 +1583,7 @@ public class TranscodeTaskService {
 							if (!Strings.isNullOrEmpty(modifyElementBO.getPattern_path())) {
 								programVideoBO.setPattern_path(modifyElementBO.getPattern_path());
 							}
-							updateInputToDB(oriInput,BusinessType.TRANSCODE);
+							taskService.updateInputToDB(oriInput,BusinessType.TRANSCODE);
 							capacityService.modifyProgramParamToTransform(capacityIp,putElementsRequest);
 							break;
 						}
@@ -1923,7 +1595,7 @@ public class TranscodeTaskService {
 							if (!Strings.isNullOrEmpty(modifyElementBO.getDecode_mode())){
 								programAudioBO.setDecode_mode(modifyElementBO.getDecode_mode());
 							}
-							updateInputToDB(oriInput,BusinessType.TRANSCODE);
+							taskService.updateInputToDB(oriInput,BusinessType.TRANSCODE);
 							capacityService.modifyProgramParamToTransform(capacityIp,putElementsRequest);
 							break;
 						}

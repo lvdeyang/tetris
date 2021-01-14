@@ -131,7 +131,9 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param Pageable page 分页信息
 	 * @return Page<UserPO> 用户列表
 	 */
-	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 \n#pageable\n", nativeQuery = true)
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 \n#pageable\n", 
+			countQuery = "select count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1",
+			nativeQuery = true)
 	public Page<UserPO> findByCompanyId(Long companyId, Pageable page);
 	
 	/**
@@ -330,7 +332,8 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param UserClassify classify 用户类型
 	 * @return List<UserPO> 用户列表
 	 */
-	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.classify=?2 \n#pageable\n", nativeQuery = true)
+	//@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.classify=?2 \n#pageable\n", nativeQuery = true)
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.classify=?2", nativeQuery = true)
 	public List<UserPO> findByCompanyIdAndClassfy(Long companyId, String classify);
 	
 	/**

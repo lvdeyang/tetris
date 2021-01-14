@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -52,6 +52,7 @@ import com.sumavision.bvc.device.monitor.exception.UserHashNoPermissionToStopMon
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.record.exception.ErrorRecordModeException;
 import com.sumavision.bvc.device.monitor.record.exception.MonitorRecordSourceVideoCannotBeNullException;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO.ResultDstBO;
@@ -72,7 +73,6 @@ import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -147,6 +147,9 @@ public class MonitorRecordService {
 	private UserUtils userUtils;
 	
 	@Autowired
+	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
 	private CommandSystemTitleDAO commandSystemTitleDao;
 	
 	/**
@@ -214,8 +217,9 @@ public class MonitorRecordService {
 		BundlePO bundle = bundleDao.findByBundleId(videoBundleId);
 		boolean bLdap = queryUtil.isLdapBundle(bundle);
 		if(bLdap){
-			videoBundleId = new StringBufferWrapper().append(videoBundleId).append("_")
-					.append(UUID.randomUUID().toString().replace("-", "")).toString();
+			//使用原本的bundleId
+//			videoBundleId = new StringBufferWrapper().append(videoBundleId).append("_")
+//					.append(UUID.randomUUID().toString().replace("-", "")).toString();
 			videoBundleName = bundle.getBundleName();
 			videoBundleType = bundle.getBundleType();
 			videoLayerId = resourceRemoteService.queryLocalLayerId();
@@ -603,7 +607,8 @@ public class MonitorRecordService {
 		//录制规则表以及关联实例表结束
 		
 		//下命令
-		LogicBO logic = openBundle(task, codec);
+//		LogicBO logic = openBundle(task, codec);
+		LogicBO logic = bLdap ? startDevicePassby(task, codec, bundle) : openBundle(task, codec);
 		logic.merge(startManyTimesRecord(task,relation,codec));
 		sendProtocol(task, logic, bLdap?"点播系统：开始排期录制外部系统设备":"点播系统：开始排期录制本地设备");
 		
@@ -661,9 +666,10 @@ public class MonitorRecordService {
 
 		BundlePO bundle = bundleDao.findByBundleId(bundleId);
 
-		// 虚拟设备id
-		String videoBundleId = new StringBufferWrapper().append(bundleId).append("_")
-				.append(UUID.randomUUID().toString().replace("-", "")).toString();
+		// 虚拟设备id（使用原本的bundleId）
+//		String videoBundleId = new StringBufferWrapper().append(bundleId).append("_")
+//				.append(UUID.randomUUID().toString().replace("-", "")).toString();
+		String videoBundleId = bundleId;
 		String videoLayerId = commons.queryNetworkLayerId();
 		String audioBundleId = videoBundleId;
 		String audioLayerId = videoLayerId;
@@ -1072,6 +1078,7 @@ public class MonitorRecordService {
 		LogicBO logic = closeBundle(task);
 		logic.merge(stopRecord(task));
 		executeBusiness.execute(logic, "点播系统：停止录制本地设备");
+		saveOrRemoveLianwangPassbyToResource(logic);
 	}
 
 	/**
@@ -1095,6 +1102,7 @@ public class MonitorRecordService {
 		LogicBO logic = stopRecord(task);
 		logic.merge(stopDevicePassby(task, codec, bundle));
 		executeBusiness.execute(logic, "点播系统：停止录制xt设备");
+		saveOrRemoveLianwangPassbyToResource(logic);
 	}
 
 	/**
@@ -1110,6 +1118,7 @@ public class MonitorRecordService {
 		LogicBO logic = closeBundle(task);
 		logic.merge(stopRecord(task));
 		executeBusiness.execute(logic, "点播系统：停止录制本地用户");
+		saveOrRemoveLianwangPassbyToResource(logic);
 	}
 
 	/**
@@ -1131,6 +1140,7 @@ public class MonitorRecordService {
 		LogicBO logic = stopRecord(task);
 		logic.merge(stopUserPassby(task, codec));
 		executeBusiness.execute(logic, "点播系统：停止录制xt用户");
+		saveOrRemoveLianwangPassbyToResource(logic);
 	}
 
 	/**
@@ -1216,7 +1226,8 @@ public class MonitorRecordService {
 
 		XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO()
 				.setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-				.setOperate(XtBusinessPassByContentBO.OPERATE_START).setUuid(task.getUuid())
+				.setOperate(XtBusinessPassByContentBO.OPERATE_START)
+				.setUuid(task.getUuid())
 				.setSrc_user(task.getUserno())
 				.setXt_encoder(new HashMapWrapper<String, String>().put("layerid", task.getVideoLayerId())
 						.put("bundleid", task.getVideoBundleId()).put("video_channelid", task.getVideoChannelId())
@@ -1396,6 +1407,8 @@ public class MonitorRecordService {
 
 		task.setStoreLayerId(response.getOutConnMediaMuxSet().get(0).getLayerId());
 		monitorRecordDao.save(task);
+		
+		saveOrRemoveLianwangPassbyToResource(logic);
 	}
 
 	/**
@@ -1448,7 +1461,8 @@ public class MonitorRecordService {
 
 		XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO()
 				.setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
-				.setOperate(XtBusinessPassByContentBO.OPERATE_STOP).setUuid(task.getUuid())
+				.setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+				.setUuid(task.getUuid())
 				.setSrc_user(task.getUserno())
 				.setXt_encoder(new HashMapWrapper<String, String>().put("layerid", task.getVideoLayerId())
 						.put("bundleid", task.getVideoBundleId()).put("video_channelid", task.getVideoChannelId())
@@ -2284,13 +2298,13 @@ public class MonitorRecordService {
 							List<Long> ids=new ArrayList<Long>();
 							
 							for(MonitorRecordManyTimesPO record:records.get()){
-								files.add(fileName+"/"+record.getIndexNumber());
+//								files.add(fileName+"/"+record.getIndexNumber());
 								ids.add(record.getId());
 							}
 							
 							monitorRecordManyTimesDao.deleteByIdIn(ids);
 						}
-						
+						files.add(fileName);//删除整个排期的文件，对整个目录添加一次即可
 					}else{
 						files.add(fileName);
 					}
@@ -2353,6 +2367,37 @@ public class MonitorRecordService {
 		}
 		MonitorRecordManyTimesRelationVO relationVo = new MonitorRecordManyTimesRelationVO().set(relationPo);
 		return relationVo;
+	}
+	
+	/** 把联网的passby存储或从资源层删除 */
+	public void saveOrRemoveLianwangPassbyToResource(LogicBO logic){
+		List<PassByBO> passbys = logic.getPass_by();
+		if(passbys == null) return;
+		for(PassByBO passby : passbys){
+			String type = passby.getType();
+			if(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER.equals(type)){
+				try{
+					String uuid = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getUuid();
+					String operate = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getOperate();
+					if(XtBusinessPassByContentBO.OPERATE_START.equals(operate)){
+						resourceServiceClient.coverLianwangPassby(
+								uuid, 
+								passby.getLayer_id(), 
+								type, 
+								JSON.toJSONString(passby));
+					}else if(XtBusinessPassByContentBO.OPERATE_STOP.equals(operate)){
+						resourceServiceClient.removeLianwangPassby(uuid);
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

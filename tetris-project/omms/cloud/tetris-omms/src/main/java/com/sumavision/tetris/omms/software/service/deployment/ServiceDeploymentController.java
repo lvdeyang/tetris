@@ -170,9 +170,10 @@ public class ServiceDeploymentController {
 			Long deploymentId,
 			String deploymentName,
 			String notes,
+			Boolean databaseBackup,
 			HttpServletRequest request) throws Exception{
 		
-		return serviceDeploymentService.backup(deploymentId, deploymentName, notes);
+		return serviceDeploymentService.backup(deploymentId, deploymentName, notes, databaseBackup);
 	}
 	
 	/**
@@ -231,9 +232,10 @@ public class ServiceDeploymentController {
 	@RequestMapping(value = "/restore")
 	public Object restore(
 			Long backupId,
+			Boolean database,
 			HttpServletRequest request) throws Exception{
 		
-		serviceDeploymentService.restore(backupId);
+		serviceDeploymentService.restore(backupId ,database);
 		return null;
 	}
 	
@@ -284,4 +286,19 @@ public class ServiceDeploymentController {
 		return null;
 	}
 	
+	/**
+	 * 查询创建的Sql服务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年12月30日 下午4:48:24
+	 * @return List<String> ipAndPort ip和端口的组合
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/database/IpAndPort")
+	public Object databaseIpAndPort()throws Exception{
+		
+		return serviceDeploymentQuery.databaseIpAndPort();
+	}
 }
