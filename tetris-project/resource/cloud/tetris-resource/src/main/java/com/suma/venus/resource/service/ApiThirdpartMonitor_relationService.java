@@ -254,6 +254,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
 							folderPO.setName(newFolderVO.getName());
 							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
+							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
 							removeFolderVOs.add(newFolderVO);
 						}
 					}
@@ -573,6 +574,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
 							folderPO.setName(newFolderVO.getName());
 							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
+							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
 							removeFolderVOs.add(newFolderVO);
 						}
 					}
@@ -885,6 +887,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 					for (FolderVO newFolderVO : folderVOs) {
 						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
 							folderPO.setName(newFolderVO.getName());
+							folderPO.setParentPath(newFolderVO.getParentPath());
 							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
 							removeFolderVOs.add(newFolderVO);
 						}
