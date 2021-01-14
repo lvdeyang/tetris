@@ -121,10 +121,14 @@ define([
                         taskTemple:'',
                         rateCtrl:'',
                         rate:'',
-                        rotation:false,
+                        codeRate:'',
+                        videoCodec:'',
+                        audioCodec:'',
                         backfileUrl:'',
                         backfileDuration:'',
-                        backfileName:''
+                        backfileName:'',
+                        backfileType:'',
+                        resolution:''
                     },
                     editChannel: {
                         visible: false,
@@ -150,10 +154,14 @@ define([
                         taskTemple:'',
                         rateCtrl:'',
                         rate:'',
-                        rotation:false,
+                        codeRate:'',
+                        videoCodec:'',
+                        audioCodec:'',
                         backfileUrl:'',
                         backfileDuration:'',
-                        backfileName:''
+                        backfileName:'',
+                        backfileType:'',
+                        resolution:''
                     },
                     defaultSchedule: {
                         visible: false,
@@ -174,6 +182,11 @@ define([
                         autoBroadTemplateId:'',
                         autoBroadTemplateOptions:[]
                     },
+                    setEncryption:{
+                        visible:false,
+                        scrambleMode:"AES-128",
+                        scrambleKey:"0123456789abcdef"
+                    },
                     setOutput: {
                         visible: false,
                         loading: false,
@@ -189,9 +202,16 @@ define([
                         taskTemple:'',
                         rateCtrl:'',
                         rate:'',
+                        codeRate:'',
+                        videoCodec:'',
+                        audioCodec:'',
+                        videoCodecOptions:["MPEG2","H264","H265","AVS2","VIDEOPASSBY"],
+                        audioCodecOptions:["AAC","HEAAC","HEAACV2","MP2","MP3","AC3","EAC3","AUDIOPASSBY"],
+                        taskTempleOptions:["PUSH_COMMON"],
                         rateCtrlOptions:["VBR","CBR"],
-                        outTypeOptions:["RTMP","UDP_TS"],
-                        rotation: false
+                        outTypeOptions:["RTMP","UDP_TS","HTTP_TS","SRT_TS","HLS","DASH","RTSP","RTP_ES","HTTP_FLV","HLS_RECORD","ZIXI_TS"],
+                        resolution:'',
+                        resolutionOptions:["720*576"]
                     },
                     pcversion: {
                         visible: false,
@@ -511,11 +531,13 @@ define([
                     self.dialog.addProgram.hasFile = true;
                     var t = new Date();
                     self.dialog.addProgram.date = t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate() + " " + t.getHours() + ":" + t.getMinutes() + ":" + t.getSeconds();
-                    var output = {
+                        var output = {
                         previewUrlIp: '',
                         localIp:'',
                         previewUrlPort: '',
-                        previewUrlEndPort: ''
+                        previewUrlEndPort: '',
+                        rate:'',
+                        rateCtrl:''
                     };
                     self.dialog.addProgram.outputCount = 1;
                     self.dialog.addProgram.output.push(output);
@@ -546,10 +568,14 @@ define([
                     self.dialog.addProgram.taskTemple = "";
                     self.dialog.addProgram.rateCtrl = "";
                     self.dialog.addProgram.rate = "";
-                    self.dialog.addProgram.rotation = false;
+                    self.dialog.addProgram.codeRate = "";
+                    self.dialog.addProgram.videoCodec="";
+                    self.dialog.addProgram.audioCodec="";
                     self.dialog.addProgram.backfileUrl='';
                     self.dialog.addProgram.backfileDuration='';
                     self.dialog.addProgram.backfileName='';
+                    self.dialog.addProgram.backfileType='';
+                    self.dialog.addProgram.resolution='';
                 },
                 //更换优先级监听
                 handleAddProgramLevelOptionsChange: function (data) {
@@ -603,10 +629,14 @@ define([
                         taskTemple:self.dialog.addProgram.taskTemple,
                         rateCtrl:self.dialog.addProgram.rateCtrl,
                         rate:self.dialog.addProgram.rate,
-                        rotation:self.dialog.addProgram.rotation,
+                        codeRate:self.dialog.addProgram.codeRate,
+                        videoCodec:self.dialog.addProgram.videoCodec,
+                        audioCodec:self.dialog.addProgram.audioCodec,
                         backfileUrl:self.dialog.addProgram.backfileUrl,
                     	backfileDuration:self.dialog.addProgram.backfileDuration,
-                    	backfileName:self.dialog.addProgram.backfileName
+                    	backfileName:self.dialog.addProgram.backfileName,
+                        backfileType:self.dialog.addProgram.backfileType,
+                        resolution:self.dialog.addProgram.resolution
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
                         self.dialog.addProgram.loading = false;
@@ -663,11 +693,15 @@ define([
                     self.dialog.editChannel.taskTemple = row.taskTemple;
                     self.dialog.editChannel.rateCtrl = row.rateCtrl;
                     self.dialog.editChannel.rate = row.rate;
-                    self.dialog.editChannel.backfileUrl=row.backfileUrl,
+                    self.dialog.editChannel.codeRate = row.codeRate;
+                    self.dialog.editChannel.videoCodec = row.videoCodec;
+                    self.dialog.editChannel.audioCodec = row.audioCodec;
+                    self.dialog.editChannel.backfileUrl=row.backfileUrl;
                 	self.dialog.editChannel.backfileDuration=row.backfileDuration;
                 	self.dialog.editChannel.backfileName=row.backfileName;
-                    self.dialog.editChannel.rotation = (row.rotation != null) ? row.rotation : false;
+                    self.dialog.editChannel.backfileType=row.backfileType;
                     self.dialog.editChannel.visible = true;
+                    self.dialog.editChannel.resolution=row.resolution;
                 },
                 handleEditChannelClose: function () {
                     var self = this;
@@ -693,10 +727,14 @@ define([
                     self.dialog.editChannel.taskTemple = "";
                     self.dialog.editChannel.rate = "";
                     self.dialog.editChannel.rateCtrl = "";
-                    self.dialog.editChannel.backfileUrl="",
+                    self.dialog.editChannel.codeRate = "";
+                    self.dialog.editChannel.videoCodec="";
+                    self.dialog.editChannel.audioCodec="";
+                    self.dialog.editChannel.backfileUrl="";
                 	self.dialog.editChannel.backfileDuration="";
                 	self.dialog.editChannel.backfileName="";
-                    self.dialog.editChannel.rotation = false;
+                    self.dialog.editChannel.backfileType="";
+                    self.dialog.editChannel.resolution = "";
                 },
                 handleDefaultSchedule: function () {
                     var self = this;
@@ -797,11 +835,15 @@ define([
                     var taskTemple = self.dialog.editChannel.taskTemple;
                     var rate = self.dialog.editChannel.rate;
                     var rateCtrl = self.dialog.editChannel.rateCtrl;
-                    var rotation = self.dialog.editChannel.rotation;
+                    var codeRate = self.dialog.editChannel.codeRate;
+                    var videoCodec = self.dialog.editChannel.videoCodec;
+                    var audioCodec = self.dialog.editChannel.audioCodec;
                     var backfileUrl=self.dialog.editChannel.backfileUrl;
                 	var backfileDuration=self.dialog.editChannel.backfileDuration;
                 	var backfileName=self.dialog.editChannel.backfileName;
-                    
+                    var backfileType=self.dialog.editChannel.backfileType;
+                    var resolution = self.dialog.editChannel.resolution;
+
                     var questData = {
                         id: self.dialog.editChannel.data.id,
                         name: newName,
@@ -821,10 +863,14 @@ define([
                         taskTemple:taskTemple,
                         rate:rate,
                         rateCtrl:rateCtrl,
-                        rotation:rotation,
+                        codeRate:codeRate,
+                        videoCodec:videoCodec,
+                        audioCodec:audioCodec,
                         backfileUrl:backfileUrl,
                 	    backfileDuration:backfileDuration,
-                	    backfileName:backfileName
+                	    backfileName:backfileName,
+                        backfileType:backfileType,
+                        resolution:resolution
                     };
                     ajax.post('/cs/channel/edit', questData, function (data, status) {
                         self.dialog.editChannel.loading = false;
@@ -852,9 +898,14 @@ define([
                         self.dialog.editChannel.data.rateCtrl = rateCtrl;
                         self.dialog.editChannel.data.taskTemple = taskTemple;
                         self.dialog.editChannel.data.rate = rate;
-                        self.dialog.editChannel.data.rotation = rotation;
+                        self.dialog.editChannel.data.codeRate = codeRate;
+                        self.dialog.editChannel.data.videoCodec = videoCodec;
+                        self.dialog.editChannel.data.audioCodec = audioCodec;
+                        self.dialog.editChannel.data.resolution = resolution;
                         self.dialog.editChannel.data.broadcastStatus = data.broadcastStatus;
+
                         self.handleEditChannelClose();
+
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 handleEditChannelCommit: function () {
@@ -884,6 +935,10 @@ define([
                             return;
                         }
                     }
+                    for(var i=0;i<self.dialog.editChannel.output.length;i++){
+                        self.dialog.editChannel.output[i].rateCtrl = self.dialog.editChannel.data.rateCtrl;
+                        self.dialog.editChannel.output[i].rate = self.dialog.editChannel.data.rate;
+                    }
                     if (self.dialog.editChannel.autoBroad) {
                         if ((!self.dialog.editChannel.autoBroadStart || !self.dialog.editChannel.autoBroadStart.trim())) {
                             this.$message({
@@ -899,7 +954,9 @@ define([
                         self.handleEditChannelCommitSend(function () {
                         });
                     }
+
                 },
+
 
                 //set autoBroad dialog event
                 handleSetAutoBroad: function (data) {
@@ -949,7 +1006,10 @@ define([
                     self.dialog.setOutput.taskTemple = self.dialog.setOutput.data.taskTemple;
                     self.dialog.setOutput.rateCtrl = self.dialog.setOutput.data.rateCtrl;
                     self.dialog.setOutput.rate = self.dialog.setOutput.data.rate;
-                    self.dialog.setOutput.rotation = self.dialog.setOutput.data.rotation;
+                    self.dialog.setOutput.codeRate = self.dialog.setOutput.data.codeRate;
+                    self.dialog.setOutput.videoCodec = self.dialog.setOutput.data.videoCodec;
+                    self.dialog.setOutput.audioCodec = self.dialog.setOutput.data.audioCodec;
+                    self.dialog.setOutput.resolution = self.dialog.setOutput.data.resolution;
                     var i = 0;
                     if (self.dialog.setOutput.data.outputQtUsers) {
                         for (i = 0; i < self.dialog.setOutput.data.outputQtUsers.length; i++) {
@@ -984,7 +1044,10 @@ define([
                     self.dialog.setOutput.taskTemple = '';
                     self.dialog.setOutput.rateCtrl = "";
                     self.dialog.setOutput.rate = '';
-                    self.dialog.setOutput.rotation = false;
+                    self.dialog.setOutput.codeRate = '';
+                    self.dialog.setOutput.videoCodec = '';
+                    self.dialog.setOutput.audioCodec = '';
+                    self.dialog.setOutput.resolution='';
                 },
                 //添加流输出数的监听
                 handleOutputCountChange: function (currentValue) {
@@ -995,7 +1058,9 @@ define([
                                 previewUrlIp: '',
                                 localIp:'',
                                 previewUrlPort: '',
-                                previewUrlEndPort: ''
+                                previewUrlEndPort: '',
+                                rate:'',
+                                rateCtrl:''
                             };
                             self.dialog.setOutput.output.push(output);
                         }
@@ -1049,6 +1114,11 @@ define([
                         }
                     }
 
+                    for(var i=0; i<self.dialog.addProgram.output.length; i++){
+                        self.dialog.addProgram.output[i].rateCtrl = self.dialog.setOutput.rateCtrl;
+                        self.dialog.addProgram.output[i].rate = self.dialog.setOutput.rate;
+                    }
+
                     self.dialog.setOutput.data.outputUserPort = self.dialog.setOutput.outputUserPort;
                     self.dialog.setOutput.data.outputUserEndPort = self.dialog.setOutput.outputUserEndPort;
                     self.dialog.setOutput.data.outputCount = self.dialog.setOutput.outputCount;
@@ -1058,8 +1128,10 @@ define([
                     self.dialog.setOutput.data.taskTemple = self.dialog.setOutput.taskTemple;
                     self.dialog.setOutput.data.rateCtrl = self.dialog.setOutput.rateCtrl;
                     self.dialog.setOutput.data.rate = self.dialog.setOutput.rate;
-                    self.dialog.setOutput.data.rotation = self.dialog.setOutput.rotation;
-
+                    self.dialog.setOutput.data.codeRate = self.dialog.setOutput.codeRate;
+                    self.dialog.setOutput.data.videoCodec = self.dialog.setOutput.videoCodec;
+                    self.dialog.setOutput.data.audioCodec = self.dialog.setOutput.audioCodec;
+                    self.dialog.setOutput.data.resolution = self.dialog.setOutput.resolution;
 
                     self.handleSetOutputClose();
                 },
@@ -1388,10 +1460,12 @@ define([
                     	self.dialog.addProgram.backfileUrl=reslist[0].previewUrl;
                         self.dialog.addProgram.backfileDuration=reslist[0].duration;
                         self.dialog.addProgram.backfileName=reslist[0].name;
+                        self.dialog.addProgram.backfileType=reslist[0].type;
                     }else{
                     	self.dialog.editChannel.backfileUrl=reslist[0].previewUrl;
                         self.dialog.editChannel.backfileDuration=reslist[0].duration;
                         self.dialog.editChannel.backfileName=reslist[0].name;
+                        self.dialog.editChannel.backfileType=reslist[0].type;
                     }      
                     self.dialog.channel.dialog.chooseResource.visible = false;
                 },
@@ -2197,7 +2271,7 @@ define([
 
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
-                getServerTime: function () {
+                /*getServerTime: function () {
                     var self = this;
                     ajax.post('/cs/channel/time', null, function (data, status) {
                         self.time = data;
@@ -2221,6 +2295,32 @@ define([
                             self.time = year + '-' + month + '-' + day + ' ' + h + ':' + m + ':' + s;
                         }, 1000)
                     })
+                },*/
+                getServerTime: function () {
+                    var self = this;
+                    setInterval(function(){
+                        ajax.post('/cs/channel/time', null, function (data, status) {
+                        self.time = data;
+                        var date = new Date(self.time);
+                        var longDate = date.getTime() + 1000;
+                        var newDate = new Date(longDate);
+                        var year = newDate.getFullYear();
+                        var month = self.dateCheck(newDate.getMonth() + 1);
+                        var day = self.dateCheck(newDate.getDate());
+
+                        //获取时分秒
+                        var h = newDate.getHours();
+                        var m = newDate.getMinutes();
+                        var s = newDate.getSeconds();
+
+                        //检查是否小于10
+                        h = self.dateCheck(h);
+                        m = self.dateCheck(m);
+                        s = self.dateCheck(s);
+                        self.time = year + '-' + month + '-' + day + ' ' + h + ':' + m + ':' + s;
+
+                    })},1000)
+
                 },
                 dateCheck: function (data) {
                     return data < 10 ? '0' + data : data

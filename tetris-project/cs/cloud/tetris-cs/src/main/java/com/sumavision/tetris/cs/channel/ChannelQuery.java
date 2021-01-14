@@ -28,6 +28,12 @@ import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+/**
+ * 类型概述<br/>
+ * <b>作者:</b>jiajun<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2021年1月4日 下午5:26:11
+ */
 @Component
 public class ChannelQuery {
 	@Autowired
@@ -217,5 +223,22 @@ public class ChannelQuery {
 		}
 		if (terminalChannels == null || terminalChannels.isEmpty()) return;
 		broadTerminalQuery.refreshChannelBroadstatus(terminalChannels);
+	}
+	
+	/**
+	 * 根据用户id获取channelId<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月4日 下午7:07:56
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+	public Long queryChannelId(Long userId){
+		BroadAbilityBroadInfoPO broadAbilityBroadInfoPO = broadAbilityBroadInfoDAO.findByUserId(userId);
+		if(broadAbilityBroadInfoPO==null){
+			return null;
+		}
+		return broadAbilityBroadInfoPO.getChannelId();
 	}
 }

@@ -31,10 +31,16 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	private Long mediaId;
 	/** 预播发用户id */
 	private Long userId;
+	/** 码率控制*/
+	private String rateCtrl;
+	/** 输出码率*/
+	private String rate;
 	
 	private OutputType outputType;
 	
 	private String rtmpUrl;
+	
+	
 	
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -89,7 +95,23 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+	@Column(name = "RATE_CTRL")
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
 
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	@Column(name = "RATE")
+	public String getRate() {
+		return rate;
+	}
+
+	public void setRate(String rate) {
+		this.rate = rate;
+	}
 	public String getLocalIp() {
 		return localIp;
 	}

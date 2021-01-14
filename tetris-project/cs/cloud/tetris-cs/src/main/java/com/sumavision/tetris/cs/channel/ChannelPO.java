@@ -2,8 +2,9 @@ package com.sumavision.tetris.cs.channel;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
-
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -51,15 +52,6 @@ public class ChannelPO extends AbstractBasePO {
 	/**转码模板*/
 	private String taskTemple;
 	
-	/**码率控制*/
-	private String rateCtrl;
-	
-	/**码率*/
-	private String rate;
-	
-	/**是否轮播*/
-	private boolean rotation;
-	
 	/**垫播媒资地址*/
 	private String backfileUrl;
 	
@@ -69,18 +61,51 @@ public class ChannelPO extends AbstractBasePO {
 	/**垫播媒资名称*/
 	private String backfileName;
 	
-	public boolean isRotation() {
-		return rotation;
-	}
+	/**垫播媒资类型*/
+	private String backfileType;
+	
+	/** 音频编码类型*/
+	private String audioCodec;
+	
+	/** 视频编码类型*/
+	private String videoCodec;
+	
+	/** 编码码率*/
+	private String codeRate;
+	
+	/** 分辨率*/
+	private String resolution;
+	
+	/** 码率控制*/
+	private String rateCtrl;
+	
+	/** 输出码率*/
+	private String rate;
+	
 
-	public void setRotation(boolean rotation) {
-		this.rotation = rotation;
-	}
-
-	public enum RATE_CTRL {
+/*	public enum RATE_CTRL {
 		VBR, CBR
 	}
+	*/
+	@Column(name = "AUDIO_CODEC")
+	public String getAudioCodec() {
+		return audioCodec;
+	}
 
+	public void setAudioCodec(String audioCodec) {
+		this.audioCodec = audioCodec;
+	}
+	
+	@Column(name = "VIDEO_CODEC")
+	public String getVideoCodec() {
+		return videoCodec;
+	}
+
+	public void setVideoCodec(String videoCodec) {
+		this.videoCodec = videoCodec;
+	}
+	
+	
 	@Column(name = "TASK_TEMPLE")
 	public String getTaskTemple() {
 		return taskTemple;
@@ -88,24 +113,6 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setTaskTemple(String taskTemple) {
 		this.taskTemple = taskTemple;
-	}
-
-	@Column(name = "RATE_CTRL")
-	public String getRateCtrl() {
-		return rateCtrl;
-	}
-
-	public void setRateCtrl(String rateCtrl) {
-		this.rateCtrl = rateCtrl;
-	}
-
-	@Column(name = "RATE")
-	public String getRate() {
-		return rate;
-	}
-
-	public void setRate(String rate) {
-		this.rate = rate;
 	}
 
 	@Column(name = "NAME")
@@ -231,5 +238,48 @@ public class ChannelPO extends AbstractBasePO {
 		this.backfileDuration = backfileDuration;
 	}
 	
+	@Column(name = "CODE_RATE")
+	public String getCodeRate() {
+		return codeRate;
+	}
+
+	public void setCodeRate(String codeRate) {
+		this.codeRate = codeRate;
+	}
 	
+	@Column(name = "RESOLUTION")
+	public String getResolution() {
+		return resolution;
+	}
+
+	public void setResolution(String resolution) {
+		this.resolution = resolution;
+	}
+	
+	@Column(name = "RATE_CTRL")
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	@Column(name = "RATE")
+	public String getRate() {
+		return rate;
+	}
+
+	public void setRate(String rate) {
+		this.rate = rate;
+	}
+	
+	@Column(name = "BACKFILE_TYPE")
+	public String getBackfileType() {
+		return backfileType;
+	}
+
+	public void setBackfileType(String backfileType) {
+		this.backfileType = backfileType;
+	}
 }

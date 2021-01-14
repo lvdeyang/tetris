@@ -73,8 +73,14 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	/**码率控制*/
 	private String rateCtrl;
 	
-	/**码率*/
+	/**输出码率*/
 	private String rate;
+	
+	/**编码码率*/
+	private String codeRate;
+	
+	/** 分辨率*/
+	private String resolution;
 	
 	/**是否轮播*/
 	private boolean rotation;
@@ -87,7 +93,14 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	/**垫播媒资名称*/
 	private String backfileName;
-
+	
+	/**视频编码类型*/
+	private String audioCodec;
+	
+	/**音频编码类型*/
+	private String videoCodec;
+	
+	
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -107,14 +120,15 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setAutoBroad(entity.getAutoBroad())
 		.setChannelUuid(entity.getChannelUuid())
 		.setTaskTemple(entity.getTaskTemple())
-		.setRate(entity.getRate())
-		.setRateCtrl(entity.getRateCtrl())
 		.setBackfileDuration(entity.getBackfileDuration())
 		.setBackfileName(entity.getBackfileName())
 		.setBackfileUrl(entity.getBackfileUrl())
-		.setRotation(entity.isRotation());
-		
-
+		.setRate(entity.getRate())
+		.setRateCtrl(entity.getRateCtrl())
+		.setCodeRate(entity.getCodeRate())
+		.setResolution(entity.getResolution())
+		.setAudioCodec(entity.getAudioCodec())
+		.setVideoCodec(entity.getVideoCodec());
 		return this;
 	}
 	
@@ -454,6 +468,55 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setAutoBroadTemplateId(long autoBroadTemplateId) {
 		this.autoBroadTemplateId = autoBroadTemplateId;
+		return this;
+	}
+
+
+
+	public String getCodeRate() {
+		return codeRate;
+	}
+
+	public ChannelVO setCodeRate(String codeRate) {
+		this.codeRate = codeRate;
+		return this;
+	}
+
+
+
+	public String getResolution() {
+		return resolution;
+	}
+
+
+	public ChannelVO setResolution(String resolution) {
+		this.resolution = resolution;
+		return this;
+	}
+
+
+
+	public String getAudioCodec() {
+		return audioCodec;
+	}
+
+
+
+	public ChannelVO setAudioCodec(String audioCodec) {
+		this.audioCodec = audioCodec;
+		return this;
+	}
+
+
+
+	public String getVideoCodec() {
+		return videoCodec;
+	}
+
+
+
+	public ChannelVO setVideoCodec(String videoCodec) {
+		this.videoCodec = videoCodec;
 		return this;
 	}
 	

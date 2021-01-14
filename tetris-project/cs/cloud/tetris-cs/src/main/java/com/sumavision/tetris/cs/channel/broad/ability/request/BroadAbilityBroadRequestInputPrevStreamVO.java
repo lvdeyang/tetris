@@ -1,6 +1,7 @@
 package com.sumavision.tetris.cs.channel.broad.ability.request;
 
 public class BroadAbilityBroadRequestInputPrevStreamVO {
+
 	/** 源地址 */
 	private String url;
 	
@@ -15,7 +16,13 @@ public class BroadAbilityBroadRequestInputPrevStreamVO {
 	
 	/** 流结束绝对时间 */
 	private String endTime;
+	
+	/** 收流网口*/
+	private String localIp;
 
+	/** 直播流类型*/
+	private String type;
+	
 	public String getUrl() {
 		return url;
 	}
@@ -58,6 +65,24 @@ public class BroadAbilityBroadRequestInputPrevStreamVO {
 
 	public BroadAbilityBroadRequestInputPrevStreamVO setEndTime(String endTime) {
 		this.endTime = endTime;
+		return this;
+	}
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public BroadAbilityBroadRequestInputPrevStreamVO setLocalIp(String localIp) {
+		this.localIp = localIp;
+		return this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public BroadAbilityBroadRequestInputPrevStreamVO setType(String type) {
+		this.type = type;
 		return this;
 	}
 }

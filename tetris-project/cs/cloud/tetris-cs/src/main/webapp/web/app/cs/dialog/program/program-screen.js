@@ -420,14 +420,21 @@ define([
                     row.duration = null;
                 }
             },
-            handleStartTimeChange(row, value){
+            handleRotationChange: function(row, value){
+                if (value) {
+                    row.rotation = value;
+                } else {
+                    row.rotation = null;
+                }
+            },
+            handleStartTimeChange: function(row, value){
             	if (value) {
                     row.startTime = value;
                 } else {
                     row.startTime = null;
                 }
             },
-            handleEndTimeChange(row, value){
+            handleEndTimeChange: function(row, value){
             	if (value) {
                     row.endTime = value;
                 } else {
