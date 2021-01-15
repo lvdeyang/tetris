@@ -479,13 +479,13 @@ public class UserService{
             Boolean isLoginIp,
             String bindRoles) throws Exception{
 		
-		if(username == null) throw new UsernameCannotBeNullException();
+		if(username == null||"".equals(username)) throw new UsernameCannotBeNullException();
 		
-		if(userno == null) throw new UsernoCannotBeNullException(nickname);
+		if(userno == null ||"".equals(userno)) throw new UsernoCannotBeNullException(nickname);
 		
-		if(nickname == null) nickname = username;
+		if(nickname == null ||"".equals(nickname)) nickname = username;
 		
-		if(password == null) throw new PasswordCannotBeNullException();
+		if(password == null ||"".equals(password)) throw new PasswordCannotBeNullException();
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
 		
@@ -749,8 +749,9 @@ public class UserService{
 				throw new MailAlreadyExistException(mail);
 			}
 		}
-		
-		user.setNickname(nickname);
+		if(nickname!=null && "".equals(nickname)){
+			user.setNickname(nickname);
+		}
 		user.setMobile(mobile);
 		user.setMail(mail);
 		user.setLevel(level);
