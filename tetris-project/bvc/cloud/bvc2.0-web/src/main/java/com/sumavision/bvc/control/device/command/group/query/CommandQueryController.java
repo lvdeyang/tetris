@@ -715,16 +715,22 @@ public class CommandQueryController {
 					}
 				}
 				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
-					serName = "本域";
+					serName = _root.getName();
 				}
-				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
-						ConnectionStatus.ON.equals(targetSerNode.getStatus())){
-					_root.setName(new StringBufferWrapper().append(_root.getName())
-												   .append("(")
-												   .append(serName)
-												   .append(")")
-												   .toString());
-					existSerNodeName.add(targetSerNode.getNodeName());
+//				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
+				if(!ConnectionStatus.OFF.equals(targetSerNode.getStatus())){
+					if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
+						_root.setName(new StringBufferWrapper().append(serName)
+													   .toString());
+						existSerNodeName.add(targetSerNode.getNodeName());
+					}else{
+						_root.setName(new StringBufferWrapper().append(serName)
+								   .append("(")
+								   .append("在线")
+								   .append(")")
+								   .toString());
+						existSerNodeName.add(targetSerNode.getNodeName());
+					}
 				}else{
 					i.remove();
 				}
