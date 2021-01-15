@@ -54,6 +54,7 @@ import com.sumavision.tetris.user.exception.DuplicateUsernameImportedException;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileNotExistException;
+import com.sumavision.tetris.user.exception.NicknameAlreadyExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
@@ -479,19 +480,24 @@ public class UserService{
             Boolean isLoginIp,
             String bindRoles) throws Exception{
 		
-		if(username == null||"".equals(username)) throw new UsernameCannotBeNullException();
+		if(username == null || "".equals(username)) throw new UsernameCannotBeNullException();
 		
-		if(userno == null ||"".equals(userno)) throw new UsernoCannotBeNullException(nickname);
+		if(userno == null || "".equals(userno)) throw new UsernoCannotBeNullException(nickname);
 		
-		if(nickname == null ||"".equals(nickname)) nickname = username;
+		if(nickname == null || "".equals(nickname)) nickname = username;
 		
-		if(password == null ||"".equals(password)) throw new PasswordCannotBeNullException();
+		if(password == null || "".equals(password)) throw new PasswordCannotBeNullException();
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
 		
 		userQuery.checkUserno(userno);
 		
 		userQuery.checkPassword(password);
+		
+		List<UserPO> users = userDao.findByNickname(nickname);
+		if(users!=null && users.size()>0){
+			throw new NicknameAlreadyExistException(nickname);
+		}
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user != null){
@@ -749,7 +755,11 @@ public class UserService{
 				throw new MailAlreadyExistException(mail);
 			}
 		}
-		if(nickname!=null && "".equals(nickname)){
+		if(nickname!=null && !"".equals(nickname)){
+			List<UserPO> users = userDao.findByNicknameAndIdNot(nickname, id);
+			if(users!=null && users.size()>0){
+				throw new NicknameAlreadyExistException(nickname);
+			}
 			user.setNickname(nickname);
 		}
 		user.setMobile(mobile);
