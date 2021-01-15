@@ -715,7 +715,8 @@ public class CommandQueryController {
 					}
 				}
 				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
-					serName = _root.getName();
+					serName = targetSerNode.getNodeName();
+//							_root.getName();
 				}
 //				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
 				if(!ConnectionStatus.OFF.equals(targetSerNode.getStatus())){
@@ -745,8 +746,13 @@ public class CommandQueryController {
 				}
 				if(finded) continue;
 				String name = null;
-				if(ConnectionStatus.ON.equals(serNodeEntity.getStatus())){
-					name = serNodeEntity.getNodeName();
+				if(!ConnectionStatus.OFF.equals(serNodeEntity.getStatus())){
+					if(SOURCE_TYPE.SYSTEM.equals(serNodeEntity.getSourceType())){
+						name = serNodeEntity.getNodeName();
+					}else{
+						name = serNodeEntity.getNodeName()+"(离线)";
+					}
+					
 				}else{
 					name = new StringBufferWrapper().append(serNodeEntity.getNodeName()).append("(").append("离线").append(")").toString();
 				}
