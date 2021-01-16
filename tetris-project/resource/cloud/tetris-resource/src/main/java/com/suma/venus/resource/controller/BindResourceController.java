@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -814,8 +815,11 @@ public class BindResourceController extends ControllerBase {
 						connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					}catch(Exception e){e.printStackTrace();}
 					
+					SerInfoPO appInfo = new SerInfoPO();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
-					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					if (null != self ) {
+						appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					}
 
 					List<Long> consumeIds = new ArrayList<Long>();
 					for (UserBO userBO : userBOs) {
@@ -837,7 +841,7 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
 								// 发送消息
-								if (connectCenterLayerID != null) {
+								if (connectCenterLayerID != null && appInfo != null) {
 									JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
 									PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
 									
