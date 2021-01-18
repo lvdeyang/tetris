@@ -1025,6 +1025,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return BundlePO 更新后的旧的设备信息
 	 */
 	public BundlePO bundlePOtoBundlePO(BundlePO oldPO , BundlePO newPO) throws Exception{
+		oldPO.setFolderId(newPO.getFolderId());
 		oldPO.setBundleName(newPO.getBundleName());
 		oldPO.setOnlineStatus(newPO.getOnlineStatus());
 		oldPO.setDeviceIp(newPO.getDeviceIp() == null ? null:newPO.getDeviceIp());

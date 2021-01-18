@@ -262,7 +262,7 @@ public class ResourceBundleDAO{
 			resultList = (List<T>) query.getResultList();
 		}catch (Exception e){
 			e.printStackTrace();
-			log.warn("query.getResultList()抛错，重设resourceEntityManager");
+			log.warn("ResourceBundleDAO query.getResultList()抛错，重设resourceEntityManager");
 			resultList = regainResultList(qlString, resultClass, param1, param2, param3, param4);
 		}
 		return resultList;
@@ -290,7 +290,7 @@ public class ResourceBundleDAO{
 			resourceEntityManager.clear();
 		}catch (Exception e){
 			e.printStackTrace();
-			log.warn("resourceEntityManager.clear()抛错，重设resourceEntityManager");
+			log.warn("ResourceBundleDAO resourceEntityManager.clear()抛错，重设resourceEntityManager");
 			resourceEntityManager = emf.createEntityManager();
 		}
 	}

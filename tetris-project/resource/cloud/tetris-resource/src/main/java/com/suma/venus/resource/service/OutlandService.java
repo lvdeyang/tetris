@@ -607,7 +607,7 @@ public class OutlandService extends ControllerBase{
 				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
 				if (folderPOs != null && folderPOs.size() > 0) {
 					for (FolderPO folderPO : folderPOs) {
-						if (folderPO.getParentPath() != null && "".equals(folderPO.getParentPath())) {
+						if (folderPO.getParentPath() != null && !"".equals(folderPO.getParentPath())) {
 							String[] pathId = folderPO.getParentPath().split("/");
 							if (pathId.length > 1) {
 								for (int i = 1; i < pathId.length; i++) {

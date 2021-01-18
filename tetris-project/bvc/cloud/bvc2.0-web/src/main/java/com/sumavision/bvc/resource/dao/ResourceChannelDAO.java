@@ -15,11 +15,14 @@ import org.springframework.stereotype.Repository;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @ClassName: 资源层channel查询对象<br/> 
  * @author lvdeyang
  * @date 2018年8月25日 下午6:15:37 
  */
+@Slf4j
 @Repository
 public class ResourceChannelDAO {
 	
@@ -230,6 +233,7 @@ public class ResourceChannelDAO {
 		try{
 			resultList = (List<T>) query.getResultList();
 		}catch (Exception e){
+			log.warn("ResourceChannelDAO query.getResultList()抛错，重设resourceEntityManager");
 			resultList = regainResultList(qlString, resultClass, param1, param2, param3, param4);
 		}
 		return resultList;
