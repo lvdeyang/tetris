@@ -74,23 +74,23 @@ public class InitListener implements ApplicationRunner {
 
 		LOGGER.info("init transcode device done");
 		
-		Thread onlineStatus = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(true){
-					try {
-						BundlePO bundlePO = bundleDao.findByBundleId("9c85c713a8d7461bbc04f2fe37575437");
-						if (null != bundlePO) {
-							LOGGER.info("设备" + bundlePO.getBundleId() + " 状态 " + bundlePO.getOnlineStatus());
-						}
-						Thread.sleep(60 * 1000);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		onlineStatus.start();
+//		Thread onlineStatus = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				while(true){
+//					try {
+//						BundlePO bundlePO = bundleDao.findByBundleId("9c85c713a8d7461bbc04f2fe37575437");
+//						if (null != bundlePO) {
+//							LOGGER.info("设备" + bundlePO.getBundleId() + " 状态 " + bundlePO.getOnlineStatus());
+//						}
+//						Thread.sleep(60 * 1000);
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		});
+//		onlineStatus.start();
 		
 		//initVerification.initialCapacity();
 	}

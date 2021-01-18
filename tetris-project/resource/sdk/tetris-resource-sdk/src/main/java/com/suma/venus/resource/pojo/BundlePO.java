@@ -288,13 +288,6 @@ public class BundlePO extends CommonPO<BundlePO> {
 	}
 
 	public void setOnlineStatus(ONLINE_STATUS onlineStatus) {
-		if(onlineStatus.equals(ONLINE_STATUS.OFFLINE) && "9c85c713a8d7461bbc04f2fe37575437".equals(this.getBundleId())){
-			try{
-				throw new BaseException(StatusCode.FORBIDDEN, "大华摄像头9c85c713a8d7461bbc04f2fe37575437离线了 dahua offline");
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
 		this.onlineStatus = onlineStatus;
 	}
 
