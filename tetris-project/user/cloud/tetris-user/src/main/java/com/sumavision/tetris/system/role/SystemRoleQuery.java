@@ -48,6 +48,24 @@ public class SystemRoleQuery {
 	}
 	
 	/**
+	 * 查询全部系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月18日 上午9:38:30
+	 * @return List<SystemRoleVO> 系统角色列表
+	 */
+	public List<SystemRoleVO> listAll() throws Exception{
+		List<SystemRolePO> roleEntities = systemRoleDao.findByType(SystemRoleType.SYSTEM);
+		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
+		if(roleEntities!=null && roleEntities.size()>0){
+			for(SystemRolePO roleEntity:roleEntities){
+				roles.add(new SystemRoleVO().set(roleEntity));
+			}
+		}
+		return roles;
+	}
+	
+	/**
 	 * 分页查询系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

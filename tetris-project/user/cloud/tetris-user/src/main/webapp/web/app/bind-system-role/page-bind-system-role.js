@@ -101,6 +101,7 @@ define([
                         }, function(data, status){
                             endLoading();
                             if(status !== 200) return;
+                            self.table.rows.splice(0, self.table.rows.length);
                             if(data && data.length>0){
                                 for(var i=0; i<data.length; i++){
                                     self.table.rows.push(data[i]);
