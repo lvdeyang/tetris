@@ -15,7 +15,6 @@ import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.MediaType;
 import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.business.common.exception.CommonException;
-import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.push.service.ScheduleService;
@@ -33,9 +32,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 /**
@@ -81,7 +81,7 @@ public class TemplateTaskService {
      **/
     public String addTask(TemplateTaskVO taskBO) throws Exception {
         TemplatePO tmpPO = getTemplateByName(taskBO.getTemplate());
-        TemplateTaskVO templateTaskVO = JSONObject.parseObject(tmpPO.getBody(), TemplateTaskVO.class);
+        TemplateTaskVO templateTaskVO = JSON.parseObject(tmpPO.getBody(), TemplateTaskVO.class);
         //组合
 //        TemplateTaskVO tmpBO = CommonUtil.combineSydwCore(templateTaskVO,taskVO);
 //        JSONObject templateObj = JSONObject.parseObject(JSON.toJSONString(templateTaskVO));
@@ -90,7 +90,7 @@ public class TemplateTaskService {
 //        LOGGER.info("task and template combine params: {}",combineTaskObj.toJSONString());
 //        TemplateTaskVO tmpBO = JSONObject.parseObject(combineTaskObj.toJSONString(),TemplateTaskVO.class);
         TemplateTaskVO combineJobBO = combine(templateTaskVO,taskBO);             // 合并方法2
-        LOGGER.info("combine params :{}",JSONObject.toJSONString(combineJobBO));
+        LOGGER.info("combine params :{}",JSON.toJSONString(combineJobBO));
         //开始转换参数
         MissionBO missionBO = new MissionBO();
         missionBO.setIdCtor(new IdConstructor());
@@ -98,12 +98,14 @@ public class TemplateTaskService {
         missionBO.setDevice_ip(taskBO.getTask_ip());
 
         generateInputBOS(missionBO,combineJobBO);
-        if (TaskType.TRANS.equals(tmpPO.getTaskType())) {
+        if (TaskType.TRANS==tmpPO.getTaskType()) {
             generateTaskBOS(missionBO, combineJobBO);
-        }else if (TaskType.PACKAGE.equals(tmpPO.getTaskType())){
+        }else if (TaskType.PACKAGE==tmpPO.getTaskType()){
             generatePackageTaskBOS(missionBO);
-        }else if (TaskType.PASSBY.equals(tmpPO.getTaskType())){
+        }else if (TaskType.PASSBY==tmpPO.getTaskType()){
 //            generateTaskBOS();
+        }else {
+            throw new IllegalArgumentException("unknown taskType: "+tmpPO.getTaskType());
         }
         generateOutputBOS(missionBO,combineJobBO);
 
@@ -325,7 +327,7 @@ public class TemplateTaskService {
             ProgramFileBO programFileBO = new ProgramFileBO(fileJSON);
             scheduleProgram.setFile(programFileBO);
         }else{
-            ProgramStreamBO stream = JSONObject.parseObject(curSource.toJSONString(), ProgramStreamBO.class);
+            ProgramStreamBO stream = JSON.parseObject(curSource.toJSONString(), ProgramStreamBO.class);
             scheduleProgram.setLive(stream);
         }
         return scheduleProgram;
@@ -382,7 +384,7 @@ public class TemplateTaskService {
         InputFactory inputFactory = new InputFactory();
         for (int i = 0; i < tmplBO.getMap_sources().size(); i++) {
             JSONObject inputObj = tmplBO.getMap_sources().getJSONObject(i);
-            SourceVO sourceVO = JSONObject.parseObject(inputObj.toJSONString(),SourceVO.class);
+            SourceVO sourceVO = JSON.parseObject(inputObj.toJSONString(),SourceVO.class);
             InputBO inputBO = inputFactory.getInputByTemplateInput(missionBO, sourceVO);
             missionBO.getInputMap().put(sourceVO.getIndex(),inputBO);
         }
@@ -430,7 +432,7 @@ public class TemplateTaskService {
      * @throws BaseException
      * @throws CommonException
      */
-    public void generateTaskBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws BaseException, CommonException {
+    public void generateTaskBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws BaseException {
         List<TaskBO> taskBOS = new ArrayList();
         TaskBO videoTaskBO = new TaskBO();
         List<EncodeBO> vEncodeBOS = new ArrayList<>();
@@ -466,7 +468,7 @@ public class TemplateTaskService {
                 pEncodeBOS.add(encodeBO.setPassby(new JSONObject()));
                 passbyTaskBO.setTaskSource(missionBO,mediaType);
             }else {
-                if (MediaType.VIDEO.equals(mediaType)){
+                if (MediaType.VIDEO==mediaType){
                     if (videoTaskBO.getId()==null || videoTaskBO.getId().isEmpty()) {
                         videoTaskBO.setId(missionBO.getIdCtor().getId(mediaOrder++, IdConstructor.IdType.TASK));
                         videoTaskBO.setType("video");
@@ -484,23 +486,23 @@ public class TemplateTaskService {
                     encodeBO.setProcess_array(handleVideoProcessList(tmplTaskObj,videoEncObj));
 
                     switch (videoType){
-                        case h264:
+                        case H264:
                             encodeBO.setH264(videoEncObj);
                             break;
-                        case hevc:
+                        case HEVC:
                             encodeBO.setHevc(videoEncObj);
                             break;
-                        case mpeg2:
+                        case MPEG2:
                             encodeBO.setMpeg2(videoEncObj);
                             break;
-                        case avs:
+                        case AVS:
                             encodeBO.setAvs2(videoEncObj);
                             break;
                     }
                     vEncodeBOS.add(encodeBO);
                     videoTaskBO.setDecode_process_array(new ArrayList<>());//解码预处理
                     videoTaskBO.setTaskSource(missionBO,null);//有透传有不透传，该发哪个source
-                }else if(MediaType.AUDIO.equals(mediaType)){
+                }else if(MediaType.AUDIO==mediaType){
                     if (audioTaskBO.getId()==null || audioTaskBO.getId().isEmpty()) {
                         audioTaskBO.setId(missionBO.getIdCtor().getId(mediaOrder++, IdConstructor.IdType.TASK));
                         audioTaskBO.setType("audio");
@@ -533,7 +535,7 @@ public class TemplateTaskService {
                     }
                     aEncodeBOS.add(encodeBO);
                     audioTaskBO.setTaskSource(missionBO,null);
-                } else if (MediaType.SUBTITLE.equals(mediaType)){
+                } else if (MediaType.SUBTITLE==mediaType){
                     if (subTaskBO.getId()==null || subTaskBO.getId().isEmpty()) {
                         subTaskBO.setId(missionBO.getIdCtor().getId(mediaOrder++, IdConstructor.IdType.TASK));
                         subTaskBO.setType("subtitle");
@@ -568,7 +570,7 @@ public class TemplateTaskService {
 
     public JSONObject combineVideoEncode(JSONObject tmplTaskObj,String params){
         //合并前处理
-        JSONObject combineObj = CommonUtil.coverJSONObject( JSONObject.parseObject(params),tmplTaskObj);
+        JSONObject combineObj = CommonUtil.coverJSONObject(JSON.parseObject(params),tmplTaskObj);
         //合并后处理
         if (tmplTaskObj.containsKey("resolution")){
             combineObj.put("resolution",tmplTaskObj.getString("resolution").replaceAll("\\*|X","x"));
@@ -591,7 +593,7 @@ public class TemplateTaskService {
     }
 
     public JSONObject combineAudioEncode(JSONObject tmplTaskObj,String params){
-        JSONObject combineObj = CommonUtil.coverJSONObject(JSONObject.parseObject(params),tmplTaskObj);
+        JSONObject combineObj = CommonUtil.coverJSONObject(JSON.parseObject(params),tmplTaskObj);
         if (tmplTaskObj.containsKey("abitrate")){
             combineObj.put("bitrate",tmplTaskObj.getLong("abitrate"));
         }
@@ -614,7 +616,7 @@ public class TemplateTaskService {
         if (tmplTaskObj.containsKey("pretreatments")) {
             JSONArray pretreatments = tmplTaskObj.getJSONArray("pretreatments");
             for (int i = 0; i < pretreatments.size(); i++) {
-                ProcessVO processVO = JSONObject.parseObject(pretreatments.getString(i), ProcessVO.class);
+                ProcessVO processVO = JSON.parseObject(pretreatments.getString(i), ProcessVO.class);
                 switch (processVO.getTreat_type()){
                     case RESAMPLE:
                         processingBOS.add(new PreProcessingBO().setResample(new ResampleBO(processVO)));
@@ -650,11 +652,12 @@ public class TemplateTaskService {
         if (tmplTaskObj.containsKey("pretreatments")) {
             JSONArray pretreatments = tmplTaskObj.getJSONArray("pretreatments");
             for (int i = 0; i < pretreatments.size(); i++) {
-                ProcessVO processVO = JSONObject.parseObject(pretreatments.getString(i), ProcessVO.class);
+                ProcessVO processVO = JSON.parseObject(pretreatments.getString(i), ProcessVO.class);
                 switch (processVO.getTreat_type()){
                     case SCALE:
                         ScaleBO scaleBO = new ScaleBO(processVO);
                         processingBOS.add(new PreProcessingBO().setScale(scaleBO));
+                        break;
                     case CUT:
                         CutBO cutBO = new CutBO(processVO);
                         processingBOS.add(new PreProcessingBO().setCut(cutBO));

@@ -550,7 +550,7 @@ public class TaskModifyService {
                         .append(patchDecodeRequest.getInput_id()).append("/")
                         .append(UrlConstant.URL_INPUT_PROGRAM).append("/")
                         .append(programNum).append("/")
-                        .append(UrlConstant.URL_INPUT_PROGRAM_ElEMENTS).append("/")
+                        .append(UrlConstant.URL_INPUT_PROGRAM_ELEMENTS).append("/")
                         .append(pid).append("/")
                         .append(UrlConstant.URL_INPUT_PROGRAM_DECODE);
                 cmdQueue.add(getRequest(RequestMethod.PUT, sb.toString(),JSON.toJSONString(patchDecodeRequest)));

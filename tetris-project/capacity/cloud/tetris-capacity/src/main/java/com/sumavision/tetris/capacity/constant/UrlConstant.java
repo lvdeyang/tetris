@@ -6,7 +6,7 @@ package com.sumavision.tetris.capacity.constant;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年10月28日 下午2:35:41
  */
-public class UrlConstant {
+public final class UrlConstant {
 
 	public static final String URL_VERSION = "/v0.0";
 
@@ -33,7 +33,7 @@ public class UrlConstant {
 	/** 排期 */
 	public static final String URL_INPUT_SCHEDULE = "schedule";
 	
-	public static final String URL_INPUT_PROGRAM_ElEMENTS = "elements";
+	public static final String URL_INPUT_PROGRAM_ELEMENTS = "elements";
 	
 	/** 修改指定节目解码配置 */
 	public static final String URL_INPUT_PROGRAM_DECODE = "decode_mode";
@@ -77,4 +77,6 @@ public class UrlConstant {
 	/** 硬件平台 */
 	public static final String GET_PLATFORM = "platform";
 
+	private UrlConstant() {
+	}
 }

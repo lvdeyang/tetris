@@ -18,10 +18,10 @@ public class PutElementsRequest {
 	private String input_id;
 
 	@JSONField(serialize = false)
-	private String program_num;
+	private Integer program_num;
 
 	@JSONField(serialize = false)
-	private String pid;
+	private Integer pid;
 
 	private ModifyElementBO param;
 
@@ -50,19 +50,25 @@ public class PutElementsRequest {
 		this.input_id = input_id;
 	}
 
-	public String getProgram_num() {
+	public Integer getProgram_num() {
 		return program_num;
 	}
 
-	public void setProgram_num(String program_num) {
+	public PutElementsRequest setProgram_num(Integer program_num) {
 		this.program_num = program_num;
+		return this;
 	}
 
-	public String getPid() {
+	public Integer getPid() {
 		return pid;
 	}
 
-	public void setPid(String pid) {
+	public PutElementsRequest setPid(Integer pid) {
 		this.pid = pid;
+		return this;
+	}
+
+	public PutElementsRequest() {
+		// Do nothing because of X and Y.
 	}
 }

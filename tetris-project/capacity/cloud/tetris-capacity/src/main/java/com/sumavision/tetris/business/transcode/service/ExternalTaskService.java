@@ -26,7 +26,7 @@ public class ExternalTaskService {
 		String external_url = transcodeTask.getUrl();
 		Object external_task = transcodeTask.getExternal_task_detail();
 		
-		JSONObject response = HttpUtil.httpPost(external_url, JSONObject.parseObject(JSON.toJSONString(external_task)));
+		JSONObject response = HttpUtil.httpPost(external_url, JSON.parseObject(JSON.toJSONString(external_task)));
 		
 		return JSON.toJSONString(response);
 	}

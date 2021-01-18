@@ -1,17 +1,25 @@
 package com.sumavision.tetris.application.alarm.service;
 
-import java.util.*;
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.application.alarm.AlarmCode;
+import com.sumavision.tetris.business.api.vo.AlarmVO;
 import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
+import com.sumavision.tetris.business.common.service.SyncService;
+import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
+import com.sumavision.tetris.capacity.config.CapacityProps;
+import com.sumavision.tetris.capacity.config.ServerProps;
+import com.sumavision.tetris.capacity.service.CapacityService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.device.DeviceDao;
 import com.sumavision.tetris.device.DevicePO;
 import com.sumavision.tetris.device.DeviceService;
 import com.sumavision.tetris.device.backup.BackupService;
-import com.sumavision.tetris.device.backup.condition.BackupConditionDao;
-import com.sumavision.tetris.device.backup.condition.BackupConditionPO;
 import com.sumavision.tetris.device.backup.condition.BackupConditionService;
 import com.sumavision.tetris.device.group.DeviceGroupDao;
 import com.sumavision.tetris.device.group.DeviceGroupPO;
@@ -24,17 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
-import com.sumavision.tetris.business.api.vo.AlarmVO;
-import com.sumavision.tetris.business.common.service.SyncService;
-import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
-import com.sumavision.tetris.capacity.config.CapacityProps;
-import com.sumavision.tetris.capacity.config.ServerProps;
-import com.sumavision.tetris.capacity.service.CapacityService;
-import com.sumavision.tetris.commons.exception.BaseException;
-import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import java.util.*;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -98,7 +96,7 @@ public class AlarmService {
 												   .append(ip)
 												   .toString();
 		ResultCodeResponse response = capacityService.putAlarmUrl(ip, capacityProps.getPort(), alarmUrl);
-		if(response.getResult_code().equals("1")){
+		if(response.getResult_code().equals(1)){
 			throw new BaseException(StatusCode.ERROR, "url格式错误");
 		}
 	}
@@ -131,19 +129,19 @@ public class AlarmService {
 		
 		JSONObject alarmObj = new JSONObject();
 		if(alarm.getInput_trigger() != null){
-			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getInput_trigger()));
+			alarmObj = JSON.parseObject(JSON.toJSONString(alarm.getInput_trigger()));
 			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getTask_trigger() != null){
-			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getTask_trigger()));
+			alarmObj = JSON.parseObject(JSON.toJSONString(alarm.getTask_trigger()));
 			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getOutput_trigger() != null){
-			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getOutput_trigger()));
+			alarmObj = JSON.parseObject(JSON.toJSONString(alarm.getOutput_trigger()));
 			alarmObj.put("detail",alarm.getDetail());
 		}
 		if(alarm.getLicense_trigger() != null){
-			alarmObj = JSONObject.parseObject(JSONObject.toJSONString(alarm.getLicense_trigger()));
+			alarmObj = JSON.parseObject(JSON.toJSONString(alarm.getLicense_trigger()));
 			alarmObj.put("details",alarm.getDetail());
 		}
 		
@@ -158,7 +156,7 @@ public class AlarmService {
 				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj.toJSONString(), null, true, new Date());
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("上报告警失败",e);
 		}
 		
 	}
@@ -195,7 +193,8 @@ public class AlarmService {
 			try {
 				Thread.sleep(10 * 1000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOGGER.error("Interrupted",e);
+				Thread.currentThread().interrupt();
 			}
 		}
 		if (retryTime <= 0){
@@ -213,35 +212,36 @@ public class AlarmService {
 	 * @Date: 2020/12/28 10:30
 	 **/
 	public void receiveAlarm(String code, AlarmNotifyBO alarmNotifyBO) {
-		 if (AlarmCode.DEVICE_OFFLINE.equals(code)){
-			 DevicePO device = deviceDao.findByDeviceIp(alarmNotifyBO.getAlarmDevice());
-			 if (device == null){
-				return;
+		 if (!AlarmCode.DEVICE_OFFLINE.equals(code)) {
+		 	return;
+		 }
+		 DevicePO device = deviceDao.findByDeviceIp(alarmNotifyBO.getAlarmDevice());
+		 if (device == null){
+			return;
+		 }
+		 if ("AUTO_RECOVER".equals(alarmNotifyBO.getAlarmStatus())){
+			if (FunUnitStatus.OFF_LINE==device.getFunUnitStatus()) {//是不同步的话，状态就不能改了
+				deviceDao.updateFunUnitStatusById(FunUnitStatus.NORMAL, device.getId());
+			}
+		 }else if("UNTREATED".equals(alarmNotifyBO.getAlarmStatus())){
+			 //设备离线，触发主备切换
+			 deviceDao.updateFunUnitStatusById(FunUnitStatus.OFF_LINE,device.getId());
+			 //判断下是否控制口断链
+			 if (backupConditionService.checkAutoBackupByCtrlPort()) {
+				 backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
 			 }
-			 if ("AUTO_RECOVER".equals(alarmNotifyBO.getAlarmStatus())){
-			 	if (FunUnitStatus.OFF_LINE.equals(device.getFunUnitStatus())) {//是不同步的话，状态就不能改了
-					deviceDao.updateFunUnitStatusById(FunUnitStatus.NORMAL, device.getId());
-				}
-			 }else if("UNTREATED".equals(alarmNotifyBO.getAlarmStatus())){
-				 //设备离线，触发主备切换
-				 deviceDao.updateFunUnitStatusById(FunUnitStatus.OFF_LINE,device.getId());
-				 //判断下是否控制口断链
-				 try {
-				 	if (netCardHttpUnit.getNetCardInfo(device).isEmpty()){
-						if (backupConditionService.checkAutoBackupByCtrlPort()){
-							backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
-						}
-					}else{
-						backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
-					}
-				 } catch (BaseException e) {
-				 	LOGGER.info("netcard get fail, {}",e.getMessage());
-				 	if (backupConditionService.checkAutoBackupByCtrlPort()){
-						backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
-					}
+			 try {
+				 if (!netCardHttpUnit.getNetCardInfo(device).isEmpty()){
+					 backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
 				 }
-
+			 } catch (BaseException e) {
+				LOGGER.info("netcard get fail, {}",e.getMessage());
+				if (backupConditionService.checkAutoBackupByCtrlPort()){
+					backupService.triggerAutoBackup(alarmNotifyBO.getAlarmDevice());
+				}
 			 }
+		 }else {
+			throw new IllegalArgumentException("unknown alarm status:"+alarmNotifyBO.getAlarmStatus());
 		 }
 	}
 
@@ -259,7 +259,7 @@ public class AlarmService {
 		//解析，获取所有网卡状态，转为方便存取的map
 		Map<String, Boolean> statusMap = new HashMap();
 		try {
-			JSONObject statusJsonObject = JSONObject.parseObject(netStatus);
+			JSONObject statusJsonObject = JSON.parseObject(netStatus);
 			String type = statusJsonObject.getString("type");
 			if(type == null || !type.equals("netchange")){
 				return;
@@ -275,8 +275,7 @@ public class AlarmService {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("netcard link status");
+			LOGGER.error("netcard link status",e);
 		}
 
 		/**
