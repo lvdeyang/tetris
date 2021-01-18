@@ -926,7 +926,9 @@ public class ScheduleService {
 
 		if (inputs == null || inputs.isEmpty()){
 			//输入不存在
-			throw new BaseException(StatusCode.ERROR,"not find input for task");
+			if (output.getScheduleId() != null) {
+				scheduleInput = taskInputDao.findOne(output.getScheduleId());
+			}
 		}else{
 			for (int i = 0; i < inputs.size(); i++) {
 				TaskInputPO inputPO = inputs.get(i);
