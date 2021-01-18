@@ -58,7 +58,10 @@ public interface NetCardInfoDao extends BaseDAO<NetCardInfoPO> {
 
     List<NetCardInfoPO> findByInputNetGroupId(Long netGroupId);
 
+    @Query(value = "select count(*) from TETRIS_CAPACITY_DEVICE_NETCARD nc inner join TETRIS_CAPACITY_DEVICE d on d.id = nc.device_id where nc.input_net_group_id = ?1",nativeQuery = true)
     Integer countDistinctByInputNetGroupId(Long netGroupId);
+
+    @Query(value = "select count(*) from TETRIS_CAPACITY_DEVICE_NETCARD nc inner join TETRIS_CAPACITY_DEVICE d on d.id = nc.device_id where nc.output_net_group_id = ?1",nativeQuery = true)
     Integer countDistinctByOutputNetGroupId(Long netGroupId);
 
     List<NetCardInfoPO> findByOutputNetGroupId(Long netGroupId);

@@ -118,7 +118,8 @@ public class DeviceService {
 
         /**删除设备数据*/
         deviceDao.delete(devicePO);
-
+        List<NetCardInfoPO> netcards = netCardInfoDao.findByDeviceId(devicePO.getId());
+        netCardInfoDao.deleteInBatch(netcards);
     }
 
 
