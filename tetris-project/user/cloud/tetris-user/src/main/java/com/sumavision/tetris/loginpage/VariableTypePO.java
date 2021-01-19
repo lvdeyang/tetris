@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sumavision.tetris.user;
+package com.sumavision.tetris.loginpage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
