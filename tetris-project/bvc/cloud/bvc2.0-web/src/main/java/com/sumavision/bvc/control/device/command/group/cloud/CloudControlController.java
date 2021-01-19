@@ -99,6 +99,31 @@ public class CloudControlController {
 	}
 	
 	/**
+	 * 其它方向移动摄像头：左上、左下、右上、右下<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午7:06:49
+	 * @param int serial 播放器位置索引
+	 * @param String direction 方向描述
+	 * @param String speed 速度
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/other/direction")
+	public Object otherDirection(
+			int serial,
+			String direction,
+			String speed,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO userVo = userUtils.getUserFromSession(request);
+		
+		cloudControlService.otherDirection(serial, Direction.valueOf(direction), speed, userVo.getId());
+		
+		return null;
+	}
+
+	/**
 	 * 镜头变倍控制<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
