@@ -1,0 +1,21 @@
+package com.sumavision.tetris.capacity.constant;/**
+ * Created by Poemafar on 2021/1/11 16:25
+ */
+
+/**
+ * @ClassName: Constant
+ * @Description TODO
+ * @Author: Poemafar
+ * @Version：1.0
+ * @Date 2021/1/11 16:25
+ */
+public class Constant {
+
+    public static final Integer MAX_PORT = 65535;
+
+    public static final Integer MIN_PORT = 1000;
+
+    private Constant() {
+        throw new IllegalStateException("constant class");
+    }
+}

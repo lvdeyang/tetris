@@ -247,6 +247,7 @@ public class TranscodeTaskService {
 
 	public String transferStream(InputBO inputBO,String previewDevice,String receiveDevice) throws Exception {
 		//转发
+		LOG.info("start to transfer stream");
 		String transJobId = UUID.randomUUID().toString();
 		ProtocolType inType = ProtocolType.getProtocolType(inputBO);
 		String inUrl = nodeUtil.getUrl(inputBO);
@@ -268,20 +269,28 @@ public class TranscodeTaskService {
 			inputBO.getRtp_ts().setLocal_ip(previewDevice);
 		}
 		taskService.transferStream(receiveDevice,transJobId, inType, inUrl,null, inType, outUrl,BusinessType.TRANSCODE);
-
+		LOG.info("transfer stream completed");
 		return transJobId;
 	}
 
 
 
-
-	public void createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+/**
+ * @MethodName: createPreviewForInput
+ * @Description: TODO 输入预览
+ * @param inputPreviewVO 1
+ * @Return: void
+ * @Author: Poemafar
+ * @Date: 2021/1/12 9:55
+ **/
+	public String createPreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
 
 		PreviewPO previewPO = new PreviewPO();
 		InputBO inputBO = inputPreviewVO.getInput_array().get(0);
 
+		String transferJobId ="";
 		if (beTransferStream(inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device(),inputBO)) {
-			String transferJobId = transferStream(inputBO, inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device());
+			transferJobId = transferStream(inputBO, inputPreviewVO.getDevice_ip(), inputPreviewVO.getReceive_stream_device());
 			previewPO.setTransferTaskId(transferJobId);
 		}
 
@@ -320,6 +329,12 @@ public class TranscodeTaskService {
 
 		List<TaskBO> taskBOs = trans2TaskBO(taskId, inputBO, fps, inputPreviewVO.getProgram_number());
 
+//		String outputUrl = new StringBuilder()
+//				.append("http://")
+//				.append(inputPreviewVO.getDevice_ip())
+//				.append(":8888").append("/")
+//				.append(inputBO.getId()).append("/")
+//				.append(inputBO.getId()).append(".m3u8").toString();
 //		List<OutputBO> outputBOs = trans2HLSOutputBO(taskId, taskBOs, pubName, playName);
 		String outputUrl = new StringBuilder().append("rtmp://")
 				.append(inputPreviewVO.getDevice_ip())
@@ -331,12 +346,22 @@ public class TranscodeTaskService {
 				.toString();
 		List<OutputBO> outputBOs = trans2RTMPOutputBO(taskId, taskBOs, outputUrl);
 
-		save(taskId, inputPreviewVO.getDevice_ip(), inputPreviewVO.getInput_array(), taskBOs, outputBOs, BusinessType.TRANSCODE);
+		try {
+			save(taskId, inputPreviewVO.getDevice_ip(), inputPreviewVO.getInput_array(), taskBOs, outputBOs, BusinessType.TRANSCODE);
+		} catch (Exception e) {
+			if (transferJobId != null && !transferJobId.isEmpty()) {
+				taskService.deleteTranscodeTask(transferJobId);
+			}
+			throw e;
+		}
 
 		previewPO.setPreviewTaskId(taskId);
 		previewPO.setUpdateTime(new Date());
 		previewDao.save(previewPO);
 
+		JSONObject result = new JSONObject();
+		result.put("outputUrl",outputUrl);
+		return result.toJSONString();
 	}
 
 	public List<TaskBO> trans2TaskBO(
@@ -769,17 +794,17 @@ public class TranscodeTaskService {
 		}catch (ObjectOptimisticLockingFailureException e) {
 
 			// 版本不对，version校验
-			System.out.println("save校验version版本不对");
+			LOG.warn("save校验version版本不对");
 			Thread.sleep(300);
 			save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, businessType);
 
 		} catch (DataIntegrityViolationException e){
-			System.out.println("唯一性约束，校验输入已存在");
+			LOG.warn("唯一性约束，校验输入已存在");
 			Thread.sleep(300);
 			save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, businessType);
 		} catch (ConstraintViolationException e) {
 			//数据已存在（ip，port校验）
-			System.out.println("校验输入已存在");
+			LOG.warn("校验输入已存在");
 			Thread.sleep(300);
 			save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, businessType);
 		} catch (BaseException e){
@@ -881,7 +906,7 @@ public class TranscodeTaskService {
 			} catch (ConstraintViolationException e) {
 
 				//数据已存在（ip，port校验）
-				System.out.println("校验输入已存在");
+				LOG.warn("校验输入已存在");
 				Thread.sleep(300);
 				save(taskUuid, uniq, capacityIp, inputBO, taskBOs, outputBOs, businessType);
 
@@ -946,7 +971,7 @@ public class TranscodeTaskService {
 			} catch (ObjectOptimisticLockingFailureException e) {
 
 				// 版本不对，version校验
-				System.out.println("save校验version版本不对");
+				LOG.warn("save校验version版本不对");
 				Thread.sleep(300);
 				save(taskUuid, uniq, capacityIp, inputBO, taskBOs, outputBOs, businessType);
 
@@ -1039,14 +1064,11 @@ public class TranscodeTaskService {
 	 * @return InputCheckBO
 	 */
 	public CheckInputBO transferNormalInput(InputBO inputBO, String uniq, String taskUuid) throws Exception{
-
 		TaskInputPO input = taskInputDao.findByUniq(uniq);
 		CheckInputBO check = new CheckInputBO();
 		boolean isExist = false;
 		if(input == null){
-
 			try {
-
 				input = new TaskInputPO();
 				input.setUpdateTime(new Date());
 				input.setUniq(uniq);
@@ -1055,26 +1077,19 @@ public class TranscodeTaskService {
 				input.setNodeId(inputBO.getId());
 				input.setType(BusinessType.TRANSCODE);
 				taskInputDao.save(input);
-
 			} catch (ConstraintViolationException e) {
-
 				//数据已存在（ip，port校验）
-				System.out.println("校验输入已存在");
+				LOG.warn("校验输入已存在");
 				Thread.sleep(300);
 				transferNormalInput(inputBO, uniq, taskUuid);
-
 			} catch (Exception e) {
-
 				if(!(e instanceof ConstraintViolationException)){
 					throw e;
 				}
-
 			}
 
 		}else{
-
 			try {
-
 				if(input.getCount().equals(0)){
 					input.setNodeId(inputBO.getId());
 					input.setInput(JSON.toJSONString(inputBO));
@@ -1092,14 +1107,12 @@ public class TranscodeTaskService {
 				taskInputDao.save(input);
 
 			} catch (ObjectOptimisticLockingFailureException e) {
-
 				// 版本不对，version校验
-				System.out.println("save校验version版本不对");
+				LOG.warn("save校验version版本不对");
 				Thread.sleep(300);
 				transferNormalInput(inputBO, uniq, taskUuid);
 
 			}catch (Exception e) {
-
 				if(!(e instanceof ObjectOptimisticLockingFailureException)){
 					throw e;
 				}
@@ -1209,7 +1222,9 @@ public class TranscodeTaskService {
 
 			String capacityIp = output.getCapacityIp();
 
-			if(output.getCoverId() != null) throw new BaseException(StatusCode.FORBIDDEN, "该任务的盖播已存在");
+			if(output.getCoverId() != null){
+				throw new IllegalArgumentException("该任务的盖播已存在");
+			}
 
 			TaskInputPO taskInput = null;
 
@@ -1226,7 +1241,7 @@ public class TranscodeTaskService {
 				}else {
 					List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
 					for (TaskInputPO inputPO : inputPOs) {
-						JSONObject inputObj = JSONObject.parseObject(inputPO.getInput());
+						JSONObject inputObj = JSON.parseObject(inputPO.getInput());
 						if (inputObj.containsKey("back_up_es") || inputObj.containsKey("back_up_passby") || inputObj.containsKey("back_up_raw")) {
 							taskInput = inputPO;
 							break;
@@ -1242,7 +1257,7 @@ public class TranscodeTaskService {
 						.append(taskInput.getId())
 						.toString();
 
-				InputBO exsitInputBO = JSONObject.parseObject(taskInput.getInput(), InputBO.class);
+				InputBO exsitInputBO = JSON.parseObject(taskInput.getInput(), InputBO.class);
 
 				input.getCover().getProgram_array().iterator().next().setInput_id(exsitInputBO.getId());
 
@@ -1260,7 +1275,7 @@ public class TranscodeTaskService {
 				}
 
 				//切换task中input
-				List<TaskBO> tasks = JSONArray.parseArray(output.getTask(), TaskBO.class);
+				List<TaskBO> tasks = JSON.parseArray(output.getTask(), TaskBO.class);
 				for(TaskBO task: tasks){
 					PutTaskSourceRequest source = new PutTaskSourceRequest();
 					if(task.getEs_source() != null){
@@ -1310,18 +1325,20 @@ public class TranscodeTaskService {
 
 		if(output != null){
 
-			if(output.getCoverId() == null) throw new BaseException(StatusCode.FORBIDDEN, "盖播不存在！");
+			if(output.getCoverId() == null){
+				throw new IllegalArgumentException("盖播不存在！");
+			}
 
 			TaskInputPO cover = taskInputDao.findOne(output.getCoverId());
 
 			if(cover != null){
 
-				InputBO coverInputBO = JSONObject.parseObject(cover.getInput(), InputBO.class);
+				InputBO coverInputBO = JSON.parseObject(cover.getInput(), InputBO.class);
 
 				String replaceInputId = coverInputBO.getCover().getProgram_array().iterator().next().getInput_id();
 
 				//替换task中inputId
-				List<TaskBO> tasks = JSONArray.parseArray(output.getTask(), TaskBO.class);
+				List<TaskBO> tasks = JSON.parseArray(output.getTask(), TaskBO.class);
 				for(TaskBO task: tasks){
 					PutTaskSourceRequest source = new PutTaskSourceRequest();
 					if(task.getEs_source() != null){
@@ -1356,7 +1373,7 @@ public class TranscodeTaskService {
 					if (!taskService.beUseForInputWithoutTask(cover.getId(),taskId)) {
 						cover.setUpdateTime(new Date());
 						cover.setCount(0);
-						InputBO inputBO = JSONObject.parseObject(cover.getInput(), InputBO.class);
+						InputBO inputBO = JSON.parseObject(cover.getInput(), InputBO.class);
 						allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
 					}else{
 						cover.setCount(cover.getCount() - 1);
@@ -1368,9 +1385,9 @@ public class TranscodeTaskService {
 				} catch (ObjectOptimisticLockingFailureException e) {
 
 					// 版本不对，version校验
-					System.out.println("delete校验version版本不对");
+					LOG.warn("delete校验version版本不对",e);
 					Thread.sleep(300);
-					output = delete(taskId);
+					delete(taskId);
 				}
 			}
 
@@ -1391,7 +1408,7 @@ public class TranscodeTaskService {
 		TaskOutputPO task = taskOutputDao.findByTaskUuidAndType(taskId.toString(), BusinessType.TRANSCODE);
 
 		if(task == null){
-			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
+			throw new IllegalArgumentException("任务不存在在！");
 		}
 
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
@@ -1400,11 +1417,12 @@ public class TranscodeTaskService {
 		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, task.getCapacityIp());
 
 		//创建输出返回处理 -- 回滚
-		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, task.getCapacityIp());
+		responseService.outputResponseProcess(outputResponse, null, null, task.getCapacityIp());
 
-		outputs.addAll(outputs);
+		List<OutputBO> oriOutputs = JSON.parseArray(task.getOutput(),OutputBO.class);
+		oriOutputs.addAll(outputs);
 
-		task.setOutput(JSON.toJSONString(outputs));
+		task.setOutput(JSON.toJSONString(oriOutputs));
 
 		taskOutputDao.save(task);
 
@@ -1423,10 +1441,10 @@ public class TranscodeTaskService {
 		TaskOutputPO taskPO = taskOutputDao.findByTaskUuidAndType(taskId.toString(), BusinessType.TRANSCODE);
 
 		if(taskPO == null){
-			throw new BaseException(StatusCode.ERROR, "任务不存在！");
+			throw new IllegalArgumentException("任务不存在！");
 		}
 
-		List<OutputBO> outputs = JSONObject.parseArray(taskPO.getOutput(), OutputBO.class);
+		List<OutputBO> outputs = JSON.parseArray(taskPO.getOutput(), OutputBO.class);
 
 		List<OutputBO> needDeleteOutputs = new ArrayList<OutputBO>();
 		if(outputs != null && outputs.size() > 0){
@@ -1437,7 +1455,7 @@ public class TranscodeTaskService {
 			}
 		}
 
-		if(needDeleteOutputs.size() > 0){
+		if(outputs !=null && needDeleteOutputs.size() > 0){
 
 			outputs.removeAll(needDeleteOutputs);
 
@@ -1480,7 +1498,7 @@ public class TranscodeTaskService {
 		PlatformResponse platformResponse = capacityService.getPlatforms(ip);
 		List<String> platforms = new ArrayList<>();
 		platformResponse.getPlatform_array().stream().forEach(p->{
-			JSONObject jsonObject = JSONObject.parseObject(p);
+			JSONObject jsonObject = JSON.parseObject(p);
 			platforms.add(jsonObject.getString("platform"));
 		});
 		return JSON.toJSONString(platforms);
@@ -1517,7 +1535,7 @@ public class TranscodeTaskService {
 			TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
 			responseBody = capacityService.getAnalysisStreamToTransform(asVO.getDeviceIp(), inputPO.getNodeId());
 		}else{
-			throw new Exception("not support type: "+ asVO.getType());
+			throw new IllegalArgumentException("not support type: "+ asVO.getType());
 		}
 
 		return responseBody;
@@ -1551,7 +1569,7 @@ public class TranscodeTaskService {
 				ModifyElementBO modifyElementBO = putElementsRequest.getParam();
 				for (int j = 0; j < taskInputPOS.size(); j++) {
 					TaskInputPO inputPO = taskInputPOS.get(j);
-					InputBO oriInput = JSONObject.parseObject(inputPO.getInput(),InputBO.class );
+					InputBO oriInput = JSON.parseObject(inputPO.getInput(),InputBO.class );
 					if (!oriInput.getId().equals(putElementsRequest.getInput_id())){
 						continue;
 					}

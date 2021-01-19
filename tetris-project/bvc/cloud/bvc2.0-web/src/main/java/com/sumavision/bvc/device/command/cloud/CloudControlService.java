@@ -82,6 +82,26 @@ public class CloudControlService {
 	}
 	
 	/**
+	 * 其它方向移动摄像头：左上、左下、右上、右下<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午7:06:49
+	 * @param int locationIndex 播放器位置索引
+	 * @param Direction direction 方向描述
+	 * @param String speed 速度
+	 * @param Long userId 业务用户
+	 */
+	public void otherDirection(
+			int locationIndex,
+			Direction direction, 
+			String speed, 
+			Long userId) throws Exception{
+		
+		BundleBO bundle = commandCommonServiceImpl.queryBundleByPlayerIndexForCloudControl(userId, locationIndex);
+		monitorPtzctrlService.otherDirection(bundle.getBundleId(), bundle.getNodeUid(), direction, speed, userId);
+	}
+
+	/**
 	 * 镜头变倍控制<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

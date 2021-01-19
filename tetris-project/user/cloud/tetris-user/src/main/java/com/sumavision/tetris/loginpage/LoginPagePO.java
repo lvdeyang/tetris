@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sumavision.tetris.user;
+package com.sumavision.tetris.loginpage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +32,9 @@ public class LoginPagePO extends AbstractBasePO {
 	/** 是否使用*/
 	private boolean isCurrent;
 	
+	/** 页面备注*/
+	private String remark;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -51,13 +54,22 @@ public class LoginPagePO extends AbstractBasePO {
 		this.tpl = tpl;
 	}
 
-	@Column(name = "ISCUREENT")
-	public boolean isCurrent() {
+	@Column(name = "ISCURRENT")
+	public boolean getIsCurrent() {
 		return isCurrent;
 	}
 
-	public void setCurrent(boolean isCurrent) {
+	public void setIsCurrent(boolean isCurrent) {
 		this.isCurrent = isCurrent;
+	}
+
+	@Column(name = "REMARK")
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 }

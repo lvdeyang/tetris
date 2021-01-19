@@ -622,7 +622,7 @@ public class CapacityService {
                 .append(inputId).append("/")
                 .append(UrlConstant.URL_INPUT_PROGRAM).append("/")
                 .append(programId).append("/")
-                .append(UrlConstant.URL_INPUT_PROGRAM_ElEMENTS).append("/")
+                .append(UrlConstant.URL_INPUT_PROGRAM_ELEMENTS).append("/")
                 .append(pid).append("/")
                 .append(UrlConstant.URL_INPUT_PROGRAM_DECODE)
                 .toString();

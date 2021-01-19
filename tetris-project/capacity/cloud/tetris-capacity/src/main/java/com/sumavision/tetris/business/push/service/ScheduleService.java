@@ -635,13 +635,13 @@ public class ScheduleService {
 			
 			EncodeConstant.VideoType type = EncodeConstant.VideoType.getVideoType(videoEncoder);
 			switch (type) {
-				case h264:
+				case H264:
 					videoEncode.setH264(obj);
 					break;
-				case hevc:
+				case HEVC:
 					videoEncode.setHevc(obj);
 					break;
-				case mpeg2:
+				case MPEG2:
 					videoEncode.setMpeg2(obj);
 					break;
 				default:
@@ -926,7 +926,9 @@ public class ScheduleService {
 
 		if (inputs == null || inputs.isEmpty()){
 			//输入不存在
-			throw new BaseException(StatusCode.ERROR,"not find input for task");
+			if (output.getScheduleId() != null) {
+				scheduleInput = taskInputDao.findOne(output.getScheduleId());
+			}
 		}else{
 			for (int i = 0; i < inputs.size(); i++) {
 				TaskInputPO inputPO = inputs.get(i);
