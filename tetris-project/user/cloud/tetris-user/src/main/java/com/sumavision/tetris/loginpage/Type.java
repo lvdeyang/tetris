@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.sumavision.tetris.user;
+package com.sumavision.tetris.loginpage;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 /**
