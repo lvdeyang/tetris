@@ -213,6 +213,57 @@ public class MonitorPtzctrlService {
 	}
 	
 	/**
+	 * 其它方向移动摄像头：左上、左下、右上、右下<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 上午10:37:47
+	 *@param String bundleId 设备id
+	 * @param String layerId 接入层id
+	 * @param Direction direction 方向描述
+	 * @param String speed 速度
+	 * @param Long userId 业务用户
+	 * @throws Exception
+	 */
+	public void otherDirection(
+			String bundleId, 
+			String layerId, 
+			Direction direction, 
+			String speed, 
+			Long userId) throws Exception{
+		
+		StringBufferWrapper control = new StringBufferWrapper();
+		control.append("<other>")
+			   .append(new StringBufferWrapper().append("<direction>").append(direction.getProtocol()).append("</direction>").toString())
+			   .append(new StringBufferWrapper().append("<speed>").append(speed).append("</speed>").toString())
+			   .append("</other>");
+		String xml = generateProtocal("start", control.toString());
+		
+		UserBO user = userUtils.queryUserById(userId);
+		
+		BundlePO bundlePo = bundleDao.findByBundleId(bundleId);
+		if(bundlePo != null){
+			if(queryUtil.isLdapBundle(bundlePo)){
+				//给外部系统发送级联命令
+				UserBO userBO = userUtils.queryUserById(userId);
+				GroupBO groupBO = commandCascadeUtil.generateCloudControll(bundleId, xml, bundlePo.getUsername(), userBO.getName());
+				commandCascadeService.cloudControll(groupBO);
+			}else{
+				LogicBO logic = new LogicBO();
+				logic.setUserId(userId.toString());
+				logic.setPass_by(new ArrayList<PassByBO>());
+				PassByBO ptzctrl = new PassByBO();
+				ptzctrl.setBundle_id(bundleId);
+				ptzctrl.setLayer_id(layerId);
+				ptzctrl.setType(PASSBY_TYPE);
+				ptzctrl.setPass_by_content(new PtzctrlPassByContent().setXml(xml));
+				logic.getPass_by().add(ptzctrl);
+				executeBusiness.execute(logic, "点播系统：云台控制");
+				operationLogService.send(user.getName(), "斜方向移动镜头", user.getName()+"对" +bundlePo.getBundleName()+ "向"+ direction.getName()+"移动镜头：");
+			}
+		}
+	}
+
+	/**
 	 * 镜头变倍控制<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
