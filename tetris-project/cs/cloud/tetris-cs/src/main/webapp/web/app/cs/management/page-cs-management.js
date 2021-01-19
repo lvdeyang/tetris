@@ -209,9 +209,9 @@ define([
                         audioCodecOptions:["AAC","HEAAC","HEAACV2","MP2","MP3","AC3","EAC3","AUDIOPASSBY"],
                         taskTempleOptions:["PUSH_COMMON"],
                         rateCtrlOptions:["VBR","CBR"],
-                        outTypeOptions:["RTMP","UDP_TS","HTTP_TS","SRT_TS","HLS","DASH","RTSP","RTP_ES","HTTP_FLV","HLS_RECORD","ZIXI_TS"],
+                        outTypeOptions:["RTMP","UDP_TS"/*,"HTTP_TS","SRT_TS","HLS","DASH","RTSP","RTP_ES","HTTP_FLV","HLS_RECORD","ZIXI_TS"*/],
                         resolution:'',
-                        resolutionOptions:["720*576"]
+                        resolutionOptions:["720*576","1280*720","1920*1080"]
                     },
                     pcversion: {
                         visible: false,
@@ -2324,8 +2324,7 @@ define([
                 },
                 dateCheck: function (data) {
                     return data < 10 ? '0' + data : data
-                },
-                showTip: function (title, text, confirmListener) {
+                },showTip: function (title, text, confirmListener) {
                     var self = this;
                     var h = self.$createElement;
                     self.$msgbox({
@@ -2355,6 +2354,7 @@ define([
                     }).catch(function () {
                     });
                 }
+
             },
             created: function () {
                 var self = this;
