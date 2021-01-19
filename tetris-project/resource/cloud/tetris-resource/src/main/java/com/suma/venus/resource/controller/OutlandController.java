@@ -1,12 +1,18 @@
 package com.suma.venus.resource.controller;
 
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.service.OutlandService;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -15,6 +21,9 @@ public class OutlandController extends ControllerBase{
 	
 	@Autowired
 	private OutlandService outlandService;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
 	
 	/**
 	 * 查询本域<br/>
@@ -130,7 +139,12 @@ public class OutlandController extends ControllerBase{
 	@ResponseBody
 	@RequestMapping(value = "/outland/change")
 	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port)throws Exception{
-		return outlandService.outlandChange(serNodeId,name,password,roleIds,ip,port);
+		Map<String, Object> data =  outlandService.outlandChange(serNodeId,name,password,roleIds,ip,port);
+		
+		PassByBO passByBO = (PassByBO) data.get("passby");
+		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
+		System.out.println(JSON.toJSONString(passByBO));
+		return data.get("serNodeVO");
 	}
 
 	/**
