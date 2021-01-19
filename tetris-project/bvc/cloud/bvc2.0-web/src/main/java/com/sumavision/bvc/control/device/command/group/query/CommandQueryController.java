@@ -703,6 +703,7 @@ public class CommandQueryController {
 			while(i.hasNext()){
 				TreeNodeVO _root = i.next();
 				TreeNodeVO nodeVO = findFirstDeviceNode(_root);
+				if(nodeVO == null) continue;
 				String serName = JSON.parseObject(nodeVO.getParam()).getString("equipFactInfo"); 
 				SerNodePO targetSerNode = null;
 				for(SerNodePO serNode:serNodeEntities){
@@ -750,7 +751,7 @@ public class CommandQueryController {
 					if(SOURCE_TYPE.SYSTEM.equals(serNodeEntity.getSourceType())){
 						name = serNodeEntity.getNodeName();
 					}else{
-						name = serNodeEntity.getNodeName()+"(离线)";
+						name = serNodeEntity.getNodeName()+"(在线)";
 					}
 					
 				}else{
