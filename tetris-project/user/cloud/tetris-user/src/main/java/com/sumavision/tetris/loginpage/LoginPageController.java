@@ -27,6 +27,16 @@ public class LoginPageController {
 	@Autowired
 	private LoginPageQuery loginPageQuery;
 	
+	
+	/**
+	 * 获取登陆页面列表<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午1:58:08
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/list")
@@ -35,6 +45,18 @@ public class LoginPageController {
 		return loginPageQuery.listLoginPage();
 	}
 	
+	/**
+	 * 添加登陆页面<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午1:58:50
+	 * @param name
+	 * @param remark
+	 * @param isCurrent
+	 * @param tpl
+	 * @return
+	 * @throws Exception
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
@@ -43,6 +65,14 @@ public class LoginPageController {
 		return loginPageService.addLoginPage(name, remark, isCurrent, tpl);
 	}
 	
+	/**
+	 * 删除登陆页面<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午1:59:06
+	 * @param id
+	 * @return
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete")
@@ -51,6 +81,14 @@ public class LoginPageController {
 		return null;
 	}
 	
+	/**
+	 * 使用登陆页面<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午1:59:18
+	 * @param id
+	 * @return
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/use")
