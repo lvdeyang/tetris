@@ -720,7 +720,7 @@ public class CommandQueryController {
 //							_root.getName();
 				}
 //				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
-				if(!ConnectionStatus.OFF.equals(targetSerNode.getStatus())){
+				if(ConnectionStatus.ON.equals(targetSerNode.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
 						_root.setName(new StringBufferWrapper().append(serName)
 													   .toString());
@@ -747,7 +747,7 @@ public class CommandQueryController {
 				}
 				if(finded) continue;
 				String name = null;
-				if(!ConnectionStatus.OFF.equals(serNodeEntity.getStatus())){
+				if(ConnectionStatus.ON.equals(serNodeEntity.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(serNodeEntity.getSourceType())){
 						name = serNodeEntity.getNodeName();
 					}else{
