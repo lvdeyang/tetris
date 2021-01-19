@@ -390,6 +390,9 @@ public class OutlandService extends ControllerBase{
 		List<SerNodeVO> serNodeVOs = new ArrayList<SerNodeVO>();
 		serNodeVOs.add(serNodeVO);
 		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -413,10 +416,6 @@ public class OutlandService extends ControllerBase{
 			e.printStackTrace();
 		}
 		
-		//外域连接断开日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
-		
 		return serNodeVO;
 	}
 	
@@ -430,7 +429,8 @@ public class OutlandService extends ControllerBase{
 	 * @param password 外域口令
 	 * @return serNodeVO 外域信息
 	 */
-	public Object outlandChange(Long id,String name,String password,String roleIds, String ip, String port)throws Exception{
+	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port)throws Exception{
+		Map<String, Object> map = new HashMap<String, Object>();
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		String oldname  = serNodePO.getNodeName();
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
@@ -471,6 +471,10 @@ public class OutlandService extends ControllerBase{
 			}
 		}
 		
+		//外域连接断开日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+		
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -494,17 +498,14 @@ public class OutlandService extends ControllerBase{
 			if (workNodePOs != null && !workNodePOs.isEmpty()) {
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
 			}
-			tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
-			System.out.println(JSON.toJSONString(passByBO));
+			final List<PassByBO> pss = new ArrayListWrapper<PassByBO>().add(passByBO).getList();
+			map.put("passby", passByBO);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		//外域连接断开日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
-		
-		return serNodeVO;
+		map.put("serNodeVO", serNodeVO);
+		return map;
 	}
 	
 	
@@ -523,6 +524,10 @@ public class OutlandService extends ControllerBase{
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
+		//外域连接成功日志
+		UserVO userVO = userQuery.current();
+		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
+				
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -546,10 +551,6 @@ public class OutlandService extends ControllerBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		//外域连接成功日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
 		
 		return serNodeVO;
 	}
