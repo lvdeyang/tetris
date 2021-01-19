@@ -703,6 +703,7 @@ public class CommandQueryController {
 			while(i.hasNext()){
 				TreeNodeVO _root = i.next();
 				TreeNodeVO nodeVO = findFirstDeviceNode(_root);
+				if(nodeVO == null) continue;
 				String serName = JSON.parseObject(nodeVO.getParam()).getString("equipFactInfo"); 
 				SerNodePO targetSerNode = null;
 				for(SerNodePO serNode:serNodeEntities){
@@ -719,7 +720,7 @@ public class CommandQueryController {
 //							_root.getName();
 				}
 //				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
-				if(!ConnectionStatus.OFF.equals(targetSerNode.getStatus())){
+				if(ConnectionStatus.ON.equals(targetSerNode.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
 						_root.setName(new StringBufferWrapper().append(serName)
 													   .toString());
@@ -746,11 +747,11 @@ public class CommandQueryController {
 				}
 				if(finded) continue;
 				String name = null;
-				if(!ConnectionStatus.OFF.equals(serNodeEntity.getStatus())){
+				if(ConnectionStatus.ON.equals(serNodeEntity.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(serNodeEntity.getSourceType())){
 						name = serNodeEntity.getNodeName();
 					}else{
-						name = serNodeEntity.getNodeName()+"(离线)";
+						name = serNodeEntity.getNodeName()+"(在线)";
 					}
 					
 				}else{
