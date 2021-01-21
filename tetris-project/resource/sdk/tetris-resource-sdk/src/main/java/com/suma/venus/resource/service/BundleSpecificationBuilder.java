@@ -26,7 +26,7 @@ public class BundleSpecificationBuilder {
 	 * @param pageable
 	 * @return
 	 */
-	public static Specification<BundlePO> getBundleSpecification(String deviceModel, String sourceType, String keyword, Long folderId, String coderType, boolean withoutFolder) {
+	public static Specification<BundlePO> getBundleSpecification(String deviceModel, String sourceType, String keyword, Long folderId, boolean withoutFolder) {
 
 		return new Specification<BundlePO>() {
 
@@ -38,11 +38,6 @@ public class BundleSpecificationBuilder {
 				// deviceModel 类型
 				if (!StringUtils.isEmpty(deviceModel)) {
 					predicateList.add(cb.equal(root.get("deviceModel").as(String.class), deviceModel));
-				}
-				
-				//编解码类型
-				if (!StringUtils.isEmpty(deviceModel)) {
-					predicateList.add(cb.equal(root.get("coderType").as(String.class), coderType));
 				}
 
 				if (!StringUtils.isEmpty(sourceType)) {
