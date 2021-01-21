@@ -227,7 +227,7 @@ public class BundleService extends CommonService<BundlePO> {
 	/** 根据userId和folderId查询文件夹下具有权限的bundleId **/
 	public List<String> queryBundleIdsByUserIdAndFolderId(Long userId, Long folderId) {
 		try {
-			List<String> bundleIds = queryBundleIdListByMultiParams(null, null, null, folderId,null);
+			List<String> bundleIds = queryBundleIdListByMultiParams(null, null, null, folderId);
 			//ResourceIdListBO bo = userFeign.queryResourceByUserId(userId);
 			ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 			Set<String> userBundleIds = new HashSet<String>();
@@ -262,7 +262,7 @@ public class BundleService extends CommonService<BundlePO> {
 	@Deprecated
 	public List<BundlePO> findByDeviceModelAndKeywordAndNoFolder(String deviceModel, String keyword) {
 
-		return queryBundlesByMultiParams(deviceModel, null, keyword, null, null, true);
+		return queryBundlesByMultiParams(deviceModel, null, keyword, null, true);
 	}
 
 	@Deprecated
@@ -276,7 +276,7 @@ public class BundleService extends CommonService<BundlePO> {
 		// keyword);
 		// List<BundlePO> bundleList = bundleDao.findByBundleIdIn(bundleIds);
 
-		List<BundlePO> bundleList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, null, null, false));
+		List<BundlePO> bundleList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, null, false));
 
 		if (null != userId && userId > 0 && !bundleList.isEmpty()) {
 			List<BundlePO> userBundles = queryByUserId(userId);
@@ -311,7 +311,7 @@ public class BundleService extends CommonService<BundlePO> {
 //			}
 //		}
 
-		return queryBundleIdSetByMultiParams(deviceModel, sourceType, keyword, null , null);
+		return queryBundleIdSetByMultiParams(deviceModel, sourceType, keyword, null);
 
 	}
 
@@ -327,7 +327,7 @@ public class BundleService extends CommonService<BundlePO> {
 //			return bundleDao.queryBundleIdByDeviceModelAndNameLike(deviceModel, keyword);
 //		}
 //		
-		return queryBundleIdSetByMultiParams(deviceModel, null, keyword, null, null);
+		return queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
 
 	}
 
@@ -401,24 +401,24 @@ public class BundleService extends CommonService<BundlePO> {
 	}
 
 	public Set<String> queryBundleIdByDeviceModel(String deviceModel) {
-		return queryBundleIdSetByMultiParams(deviceModel, null, null, null, null);
+		return queryBundleIdSetByMultiParams(deviceModel, null, null, null);
 	}
 
 	public Set<String> queryBundleIdByAccessNodeUid(String accessNodeUid) {
 		return bundleDao.queryBundleIdByAccessNodeUid(accessNodeUid);
 	}
 
-	public List<BundlePO> queryBundlesByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId, String coderType, boolean withoutFolder) {
-		return bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, coderType, withoutFolder));
+	public List<BundlePO> queryBundlesByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId, boolean withoutFolder) {
+		return bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, withoutFolder));
 	}
 
-	public Set<String> queryBundleIdSetByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId, String coderType) {
-		List<BundlePO> bundlePOList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, coderType, false));
+	public Set<String> queryBundleIdSetByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId) {
+		List<BundlePO> bundlePOList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, false));
 		return bundlePOList.stream().map(b -> b.getBundleId()).collect(Collectors.toSet());
 	}
 
-	public List<String> queryBundleIdListByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId, String coderType) {
-		List<BundlePO> bundlePOList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, coderType, false));
+	public List<String> queryBundleIdListByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId) {
+		List<BundlePO> bundlePOList = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, false));
 		return bundlePOList.stream().map(b -> b.getBundleId()).collect(Collectors.toList());
 	}
 	
@@ -805,11 +805,11 @@ public class BundleService extends CommonService<BundlePO> {
 		
 	}
 	
-	public Set<String> queryBundleSetByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId, String coderType) {
+	public Set<String> queryBundleSetByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId) {
 		
 		List<BundlePO> bundlePOList = new ArrayList<BundlePO>();
 		
-		bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, coderType, false)));
+		bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, false)));
 		
 		List<FolderPO> parentFolders = folderDao.findByParentId(folderId);
 		List<FolderPO> folders = folderDao.findByParentPathLike(new StringBufferWrapper().append("%")
@@ -819,10 +819,10 @@ public class BundleService extends CommonService<BundlePO> {
 																					 .append("%")
 																					 .toString());
 		for(FolderPO folderPO: parentFolders){
-			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), coderType, false)));
+			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), false)));
 		}
 		for(FolderPO folderPO: folders){
-			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), coderType, false)));
+			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), false)));
 		}
 		
 		return bundlePOList.stream().map(b -> b.getBundleId()).collect(Collectors.toSet());
