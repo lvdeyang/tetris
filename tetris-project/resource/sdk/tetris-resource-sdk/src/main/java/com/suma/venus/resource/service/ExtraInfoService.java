@@ -84,4 +84,15 @@ public class ExtraInfoService extends CommonService<ExtraInfoPO>{
 		return infos;
 	}
 	
+	public List<ExtraInfoPO> findBySerNodeId(Long serNodeId){		
+		return extraInfoDao.findBySerNodeId(serNodeId);
+	}
+	
+	public List<ExtraInfoPO> findBySerNodeIdIn(List<Long> serNodeIds){		
+		return extraInfoDao.findBySerNodeIdIn(serNodeIds);
+	}
+	
+	public int deleteBySerNodeId(Long serNodeId){
+		return extraInfoDao.deleteBySerNodeId(serNodeId);
+	}
 }

@@ -26,6 +26,8 @@ public interface ExtraInfoDao extends CommonDao<ExtraInfoPO>{
 	
 	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds);
 	
+	public List<ExtraInfoPO> findBySerNodeId(Long serNodeId);
+	
 	/**
 	 * 根据设备id列表和扩展变量名查询变量<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -59,4 +61,11 @@ public interface ExtraInfoDao extends CommonDao<ExtraInfoPO>{
 	@Transactional
 	@Query("delete from ExtraInfoPO po where po.worknodeId = ?1")
 	public int deleteByWorknodeId(String worknodeId);
+
+	public List<ExtraInfoPO> findBySerNodeIdIn(Collection<Long> serNodeIds);
+
+	@Modifying
+	@Transactional
+	@Query("delete from ExtraInfoPO po where po.serNodeId = ?1")
+	public int deleteBySerNodeId(Long serNodeId);
 }

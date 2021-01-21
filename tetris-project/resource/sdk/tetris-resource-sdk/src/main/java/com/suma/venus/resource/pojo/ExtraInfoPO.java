@@ -22,6 +22,16 @@ public class ExtraInfoPO extends CommonPO<ExtraInfoPO>{
 	private String bundleId;
 	
 	private String worknodeId;
+	
+	private Long serNodeId;
+	
+	public Long getSerNodeId() {
+		return serNodeId;
+	}
+
+	public void setSerNodeId(Long serNodeId) {
+		this.serNodeId = serNodeId;
+	}
 
 	public String getWorknodeId() {
 		return worknodeId;

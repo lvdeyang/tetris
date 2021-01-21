@@ -80,14 +80,15 @@ public class OutlandController extends ControllerBase{
 	 * @param name 外域名称
 	 * @param password 外域口令
 	 * @param roleIds 外域绑定的角色id
+	 * @param extraInfoVOList 扩展参数
 	 * @return data(成功时返回外域名称，失败时返回错误信息)
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/outland")
-	public Object addOutland(String name,String password,String roleIds,String ip,String port)throws Exception{
+	public Object addOutland(String name, String password, String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
 		
-		return outlandService.addOutland(name, password, roleIds,ip,port);
+		return outlandService.addOutland(name, password, roleIds, ip, port, extraInfoVOList);
 	}
 
 	/**
@@ -138,8 +139,8 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/outland/change")
-	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port)throws Exception{
-		Map<String, Object> data =  outlandService.outlandChange(serNodeId,name,password,roleIds,ip,port);
+	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
+		Map<String, Object> data =  outlandService.outlandChange(serNodeId, name, password, roleIds, ip, port, extraInfoVOList);
 		
 		PassByBO passByBO = (PassByBO) data.get("passby");
 		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
@@ -200,11 +201,12 @@ public class OutlandController extends ControllerBase{
 			Long serNodeId, 
 			String deviceModel, 
 			String keyword, 
-			Long folderId, 
+			Long folderId,
+			String codec,
 			int pageNum, 
 			int countPerPage) throws Exception{
 		
-		return outlandService.queryOutlandBundlePrivilege(roleId, serNodeId, deviceModel, keyword, folderId, pageNum, countPerPage);
+		return outlandService.queryOutlandBundlePrivilege(roleId, serNodeId, deviceModel, keyword, folderId, codec, pageNum, countPerPage);
 	}
 	
 	/**

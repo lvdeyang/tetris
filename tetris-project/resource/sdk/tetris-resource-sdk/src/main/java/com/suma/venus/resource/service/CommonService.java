@@ -59,4 +59,13 @@ public abstract class CommonService<T> {
 	public List<T> findAll(){
 		return commonDao.findAll();
 	}
+	
+	public void saveAll(List<T> pos) {
+		try {
+			commonDao.save(pos);
+		} catch (Exception e) {
+			LOGGER.error("Save " + pos.getClass().getSimpleName() + " Error:", e);
+			throw e;
+		}
+	}
 }

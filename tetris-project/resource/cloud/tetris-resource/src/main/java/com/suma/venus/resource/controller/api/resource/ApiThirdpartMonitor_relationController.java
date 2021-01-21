@@ -1,7 +1,5 @@
 package com.suma.venus.resource.controller.api.resource;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
@@ -48,6 +49,7 @@ import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
+import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
@@ -126,6 +128,8 @@ public class OutlandService extends ControllerBase{
 	@Autowired
 	private ExtraInfoDao extraInfoDao;
 	
+	@Autowired
+	private ExtraInfoService extraInfoService;
 	/**
 	 * 查询本域信息<br/>
 	 * <b>作者:</b>lqxuhv<br/>
@@ -213,6 +217,7 @@ public class OutlandService extends ControllerBase{
 				serNodeIds.add(serNodePO.getId());
 			}
 			List<SerNodeRolePermissionPO> serNodeRolePermissionPOs = serNodeRolePermissionDAO.findBySerNodeIdIn(serNodeIds);
+			List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findBySerNodeIdIn(serNodeIds);
 			Set<Long> roleIds = new HashSet<Long>();
 			if(serNodeRolePermissionPOs != null && !serNodeRolePermissionPOs.isEmpty()){
 				for (SerNodeRolePermissionPO serNodeRolePermissionPO : serNodeRolePermissionPOs) {
@@ -232,6 +237,16 @@ public class OutlandService extends ControllerBase{
 						}
 					}
 					serNodeVO.setBusinessRoles(JSON.toJSONString(folderSystemRoleVOs));
+					//扩展参数
+					if (extraInfoPOs != null&& extraInfoPOs.size()>0) {
+						JSONObject params = new JSONObject();
+						for(ExtraInfoPO extraInfo:extraInfoPOs){
+							if (extraInfo.getSerNodeId().equals(serNodeVO.getId())) {
+								params.put(extraInfo.getName(), extraInfo.getValue());
+							}
+						}
+						serNodeVO.setParam(params);
+					}
 				}
 			}
  		}
@@ -249,7 +264,7 @@ public class OutlandService extends ControllerBase{
 	 * @param roleIds 外域绑定的角色id
 	 * @return data(成功时返回外域信息，失败时返回错误信息)
 	 */
-	public Map<String, Object> addOutland(String name,String password,String roleIds,String ip,String port)throws Exception{
+	public Map<String, Object> addOutland(String name,String password,String roleIds,String ip,String port, String extraInfoVOList)throws Exception{
 		Map<String, Object> data= new HashMap<String, Object>();
 		try {
 			SerNodePO serNodePO = new SerNodePO();
@@ -278,7 +293,25 @@ public class OutlandService extends ControllerBase{
 			}
 			serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
 			
+			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
+			if (null != extraInfos) {
+				for (ExtraInfoPO extraInfo : extraInfos) {
+					extraInfo.setSerNodeId(serNodePO.getId());
+				}
+				extraInfoService.saveAll(extraInfos);
+			}
+			
 			SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
+			
+			//扩展参数
+			List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
+			if(extraInfoPOs!=null && extraInfoPOs.size()>0){
+				JSONObject params = new JSONObject();
+				for(ExtraInfoPO extraInfo:extraInfoPOs){
+					params.put(extraInfo.getName(), extraInfo.getValue());
+				}
+				serNodeVO.setParam(params);
+			}
 			
 			List<SerNodePO> localSerNodePO = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 			SerNodeVO localSerNodeVO = new SerNodeVO();
@@ -428,7 +461,7 @@ public class OutlandService extends ControllerBase{
 	 * @param password 外域口令
 	 * @return serNodeVO 外域信息
 	 */
-	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port)throws Exception{
+	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
 		Map<String, Object> map = new HashMap<String, Object>();
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		String oldname  = serNodePO.getNodeName();
@@ -440,6 +473,28 @@ public class OutlandService extends ControllerBase{
 //		serNodePO.setOperate(ConnectionStatus.OFF);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		serNodeDao.save(serNodePO);
+		
+		// 删除旧数据
+		extraInfoService.deleteBySerNodeId(serNodePO.getId());
+
+		// 添加新数据
+		List<ExtraInfoPO> newData = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
+		if (null != newData) {
+			for (ExtraInfoPO extraInfo : newData) {
+				extraInfo.setSerNodeId(serNodePO.getId());
+			}
+			extraInfoService.saveAll(newData);
+		}		
+		
+		//扩展参数
+		List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
+		if(extraInfoPOs!=null && extraInfoPOs.size()>0){
+			JSONObject params = new JSONObject();
+			for(ExtraInfoPO extraInfo:extraInfoPOs){
+				params.put(extraInfo.getName(), extraInfo.getValue());
+			}
+			serNodeVO.setParam(params);
+		}
 		
 		List<SerNodeRolePermissionPO> oldserNodeRolePermissionPOs = serNodeRolePermissionDAO.findBySerNodeId(id);
 		serNodeRolePermissionDAO.delete(oldserNodeRolePermissionPOs);
@@ -626,6 +681,11 @@ public class OutlandService extends ControllerBase{
 			if(extraInfoPOs != null&& extraInfoPOs.size()>0){
 				extraInfoDao.delete(extraInfoPOs);
 			}
+			List<ExtraInfoPO> extraInfos = extraInfoDao.findBySerNodeId(serNodePO.getId());
+			if (extraInfos != null && extraInfos.size() >0) {
+				extraInfoService.deleteBySerNodeId(serNodePO.getId());
+			}
+			
  			serNodeDao.delete(serNodePO);
 			try {
 				//发送消息
@@ -673,14 +733,15 @@ public class OutlandService extends ControllerBase{
 			Long serNodeId, 
 			String deviceModel, 
 			String keyword, 
-			Long folderId, 
+			Long folderId,
+			String coderType,
 			int pageNum, 
 			int countPerPage) throws Exception{
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
 			SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
-			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId);
+			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId, coderType);
 			Set<String> bundleIds = new HashSet<String>();
 			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
 			//测试数据用
@@ -955,7 +1016,7 @@ public class OutlandService extends ControllerBase{
 	}
 	
 	private FolderTreeVO createBundleNode(Long parentId, BundlePO bundle) {
-		FolderTreeVO bundleNodeVO = new FolderTreeVO();
+		FolderTreeVO bundleNodeVO = FolderTreeVO.fromBundlePO(bundle);
 		bundleNodeVO.setId(BUNDLE_NODE_ID_BASE + bundle.getId());
 		bundleNodeVO.setParentId(parentId);
 		bundleNodeVO.setName(bundle.getBundleName());

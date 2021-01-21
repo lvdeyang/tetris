@@ -23,23 +23,12 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class VariablePO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;
-	/** value值类型*/
-	private Type type;
-	
+
 	/** 变量类型ID*/
 	private String variableTypeId;
 	
 	/** 取值，text或img（base64编码）*/
 	private String value;
-	
-	@Column(name = "TYPE")
-	@Enumerated(EnumType.STRING)
-	public Type getType() {
-		return type;
-	}
-	public void setType(Type type) {
-		this.type = type;
-	}
 	
 	@Lob
 	@Column(name = "VALUE",columnDefinition = "LONGTEXT")
