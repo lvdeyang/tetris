@@ -67,7 +67,9 @@ require.config({
 
     'page-liangwu-user-batch': window.APPPATH + 'liangwu-user-batch/page-liangwu-user-batch',
     'sequencePost': window.APPPATH + 'common/restfull/restfull.api',
-    'page-login-page':window.APPPATH + 'login-page/page-login-page'
+    'page-login-page':window.APPPATH + 'login-page/page-login-page',
+    'page-login-variable-type':window.APPPATH + 'login-variable-type/page-login-variable-type',
+    'page-login-variable':window.APPPATH + 'login-variable/page-login-variable',
   },
   shim: {
     'vue': {
