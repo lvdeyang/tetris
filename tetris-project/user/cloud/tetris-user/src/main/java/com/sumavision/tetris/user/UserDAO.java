@@ -222,6 +222,26 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	public UserPO findByUsername(String username);
 	
 	/**
+	 * 根据用户昵称查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月15日 下午2:54:32
+	 * @param String nickname 用户昵称
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByNickname(String nickname);
+	
+	/**
+	 * 根据用户昵称查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月15日 下午2:54:32
+	 * @param String nickname 用户昵称
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByNicknameAndIdNot(String nickname, Long id);
+	
+	/**
 	 * 根据用户名和自动生成类型查询用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

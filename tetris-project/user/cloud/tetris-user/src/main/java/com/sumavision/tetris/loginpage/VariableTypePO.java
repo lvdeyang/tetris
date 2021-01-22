@@ -1,10 +1,12 @@
 /**
  * 
  */
-package com.sumavision.tetris.user;
+package com.sumavision.tetris.loginpage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -27,6 +29,17 @@ public class VariableTypePO extends AbstractBasePO{
 	/** 变量key*/
 	private String variableKey;
 	
+	/**	类型*/
+	private Type type;
+	
+	@Column(name = "TYPE")
+	@Enumerated(EnumType.STRING)
+	public Type getType() {
+		return type;
+	}
+	public void setType(Type type) {
+		this.type = type;
+	}
 	@Column(name = "NAME")
 	public String getName() {
 		return name;

@@ -4,14 +4,14 @@
         "component": "Home",
         "children": [
             {
-                "path": "/Device",
+                "path": "/device",
                 "component": "device/DeviceManager",
                 "meta": {
                     "title":  "设备管理"
                 }
             },
           {
-            "path": "/PageConfig",
+            "path": "/config",
             "component": "config/ConfigManager"
           }
         ]

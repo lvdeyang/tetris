@@ -28,7 +28,7 @@
       </a-form>
     </a-modal>
     <!--修改网卡分组-->
-    <a-modal title="添加设备分组" v-model="visibleEditNetGroupModal" @cancel="closeEditNetGroupModal" @ok="modifyNetGroup">
+    <a-modal title="修改设备分组" v-model="visibleEditNetGroupModal" @cancel="closeEditNetGroupModal" @ok="modifyNetGroup">
       <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }">
         <a-form-item label="分组名称">
           <a-input v-model="editNetGroupObj.netName"></a-input>

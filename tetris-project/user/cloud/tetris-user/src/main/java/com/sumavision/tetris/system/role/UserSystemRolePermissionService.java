@@ -52,7 +52,8 @@ public class UserSystemRolePermissionService {
 		
 		List<UserSystemRolePermissionPO> checkPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(userId, SystemRoleType.SYSTEM);
 		if(checkPermissions!=null && checkPermissions.size()>0){
-			throw new UserBindMoreThanOnneSystemRoleException();
+			userSystemRolePermissionDao.deleteInBatch(checkPermissions);
+			//throw new UserBindMoreThanOnneSystemRoleException();
 		}
 		
 		List<SystemRolePO> roles = systemRoleDao.findAll(roleIds);

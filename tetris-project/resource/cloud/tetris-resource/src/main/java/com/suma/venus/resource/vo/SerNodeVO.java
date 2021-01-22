@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
@@ -51,6 +52,17 @@ public class SerNodeVO {
 	/**外域端口*/
 	private String port;
 	
+	/**扩展字段**/
+	private JSONObject param;
+	
+	public JSONObject getParam() {
+		return param;
+	}
+
+	public void setParam(JSONObject param) {
+		this.param = param;
+	}
+
 	public String getIp() {
 		return ip;
 	}

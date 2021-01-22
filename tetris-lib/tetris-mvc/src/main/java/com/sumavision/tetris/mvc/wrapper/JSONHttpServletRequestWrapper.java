@@ -108,5 +108,10 @@ public class JSONHttpServletRequestWrapper extends HttpServletRequestWrapper{
 	public JSONArray getJSONArray(String name){
 		return this.params.getJSONArray(name);
 	}
+
+	@Override
+	public String toString() {
+		return this.params.toJSONString();
+	}
 	
 }

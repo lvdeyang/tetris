@@ -984,7 +984,7 @@ public class DirectorTaskService {
 
 	}
 
-	public String getEncodeTemplateParamByEncodeType(String encodeType) throws CommonException {
+	public String getEncodeTemplateParamByEncodeType(String encodeType) {
 		 String tpl = "";
 		 List<String> audioEncodeTypes = new ArrayList<>(Arrays.asList(
 		 		"mp2",

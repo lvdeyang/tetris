@@ -12,6 +12,7 @@ import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +106,7 @@ public class NodeUtil {
     }
 
 
-    public OutputBO getPassbyOutputInCommond(IdConstructor idCtor,ProtocolType type, String url, String localIp){
+    public OutputBO getPassbyOutputInCommond(IdConstructor idCtor,ProtocolType type, String url, String localIp) throws BaseException {
 
         OutputBO outputBO = new OutputBO();
 
@@ -135,6 +136,8 @@ public class NodeUtil {
 //                srtBO.setMode(mode);
 //                srtBO.setMedia(mediaBO);
 //                outputBO.setSrt_ts_passby(srtBO);
+            default:
+                throw new BaseException(StatusCode.FORBIDDEN,"not support passby:"+type);
         }
 
         return outputBO;
@@ -150,7 +153,7 @@ public class NodeUtil {
                 usedPorts.add(IpV4Util.getPortFromUrl(inputPO.getUrl()));
             }
         }
-        for (int port = 1000;port < 65535;port++){
+        for (int port = Constant.MIN_PORT;port < Constant.MAX_PORT; port++){
             if (!usedPorts.contains(port)){
                 return port;
             }

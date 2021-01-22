@@ -13,7 +13,11 @@ public enum Direction {
 	UP("上", "u"),
 	DOWN("下", "d"),
 	LEFT("左", "l"),
-	RIGHT("右", "r");
+	RIGHT("右", "r"),
+	LEFT_UP("左上", "lu"),
+	LEFT_DOWN("左下", "ld"),
+	RIGHT_UP("右上", "ru"),
+	RIGHT_DOWN("右下", "rd");
 	
 	private String name;
 	

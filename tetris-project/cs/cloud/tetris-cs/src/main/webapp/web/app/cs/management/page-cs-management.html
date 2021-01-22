@@ -589,7 +589,8 @@
                             </el-form-item>
 
                             <el-form-item label="编码码率">
-                                <el-input v-model="dialog.setOutput.codeRate" placeholder="编码码率"></el-input>
+                                <el-input v-model="dialog.setOutput.codeRate" placeholder="编码码率"  oninput="value=value.replace(/[^\d]/g,'')"
+                                          maxLength='9'></el-input>
                             </el-form-item>
 
                             <el-form-item label="音频编码类型">
@@ -611,15 +612,15 @@
                             </el-form-item>
 
                             <el-form-item label="输出码率">
-                                <el-input v-model="dialog.setOutput.rate" placeholder="输出码率"></el-input>
+                                <el-input v-model="dialog.setOutput.rate" placeholder="输出码率" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
                             </el-form-item>
 
 
                             <el-form-item label="可用起始端口">
-                                <el-input v-model="dialog.setOutput.outputUserPort" placeholder="可用起始端口" v-if="dialog.setOutput.broadWay == broadWayStream"></el-input>
+                                <el-input v-model="dialog.setOutput.outputUserPort" placeholder="可用起始端口" v-if="dialog.setOutput.broadWay == broadWayStream" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
                             </el-form-item>
                             <el-form-item label="可用终止端口">
-                                <el-input v-model="dialog.setOutput.outputUserEndPort" placeholder="可用终止端口" v-if="dialog.setOutput.broadWay == broadWayStream"></el-input>
+                                <el-input v-model="dialog.setOutput.outputUserEndPort" placeholder="可用终止端口" v-if="dialog.setOutput.broadWay == broadWayStream" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
                             </el-form-item>
                             <el-form-item label="流输出数">
                                 <el-input-number
@@ -639,10 +640,10 @@
                             		</el-select>
                                 </el-form-item>
                                 <el-form-item :label="'流输出地址 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='RTMP'">
-                                    <el-input v-model="dialog.setOutput.output[i-1].rtmpUrl"></el-input>
+                                    <el-input v-model="dialog.setOutput.output[i-1].rtmpUrl" placeholder="请输入完整url 例：rtmp://127.0.0.1:1970/live"></el-input>
                                 </el-form-item>
                                 <el-form-item :label="'流输出地址 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
-                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp"></el-input>
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp" placeholder="请输入IP地址 例：127.0.0.1"></el-input>
                                 </el-form-item>
                                 <el-form-item :label="'本地IP ' + i">
                                     <el-select v-model="dialog.setOutput.output[i-1].localIp" placeholder="请选择本地IP">
@@ -653,10 +654,10 @@
                             		</el-select>
                                 </el-form-item>
                                 <el-form-item :label="'可用初始端口 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
-                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort"></el-input>
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
                                 </el-form-item>
                                 <el-form-item :label="'可用终止端口 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
-                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlEndPort"></el-input>
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlEndPort" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
                                 </el-form-item>
                                 
                                 

@@ -35,6 +35,9 @@ public class AudioGainBO {
 		return this;
 	}
 
+	public AudioGainBO() {
+	}
+
 	public AudioGainBO(ProcessVO processVO) {
 		this.volume = processVO.getVolume();
 		this.gain_mode = processVO.getGain_mode();

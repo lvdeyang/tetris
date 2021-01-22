@@ -6,16 +6,16 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.exception.CommonException;
-import com.sumavision.tetris.capacity.constant.EncodeConstant.*;
+import com.sumavision.tetris.capacity.constant.EncodeConstant.TplVideoEncoder;
+import com.sumavision.tetris.capacity.constant.EncodeConstant.TplAudioEncoder;
+import com.sumavision.tetris.capacity.constant.EncodeConstant.VideoType;
+import com.sumavision.tetris.capacity.constant.EncodeConstant.AudioType;
 import com.sumavision.tetris.sts.transformTemplate.jni.TransformJniLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName: TemplateService
@@ -36,7 +36,7 @@ public class TemplateService {
      * @return json串
      * @throws CommonException
      */
-    public String getVideoEncodeMap(TplVideoEncoder encType) throws CommonException {
+    public String getVideoEncodeMap(TplVideoEncoder encType){
         //获取模板库
         String tpl = TransformJniLib.getInstance().GetVideoEncParamTemplate(encType.ordinal(),"main","4",0);
         LOG.debug("transform template json : {} , param: {} ",tpl,encType.name());
@@ -45,7 +45,7 @@ public class TemplateService {
         VideoType videoType = VideoType.getVideoType(encType);//编码类型
         String libName = TplVideoEncoder.getProtoName(encType);//库类型
 
-        JSONObject encTpl = encObj.getJSONObject(videoType.name());
+        JSONObject encTpl = encObj.getJSONObject(videoType.name().toLowerCase(Locale.ENGLISH));
         List<String> params =  getAllParamsByEncodeTpl(encTpl);
         Map<String,Object> encodeParamMap = getParamMapByTpl(encTpl,params);
 
@@ -60,11 +60,11 @@ public class TemplateService {
         return JSON.toJSONString(encodeParamMap);
     }
 
-    public String getAudioEncodeMap(String encodeType) throws CommonException {
+    public String getAudioEncodeMap(String encodeType){
         TplAudioEncoder audioEncoder = TplAudioEncoder.getTplAudioEncoder(encodeType);
         String tpl = "";
         AudioType audioType;
-        if (audioEncoder.equals(TplAudioEncoder.AENCODER_MP3)) {
+        if (audioEncoder == TplAudioEncoder.AENCODER_MP3) {
             tpl = TransformJniLib.getInstance().GetMp3EncParamTemplate("44.1");
             audioType = AudioType.getAudioType(audioEncoder);
         }else{
@@ -86,6 +86,9 @@ public class TemplateService {
      */
     public List getAllParamsByEncodeTpl(JSONObject encodeTpl){
         List<String> params = new ArrayList<>();
+        if (encodeTpl == null) {
+            throw new IllegalArgumentException();
+        }
         JSONObject items = encodeTpl.getJSONObject("items");
         JSONObject constraint = items.getJSONObject("constraint");
         JSONArray values = constraint.getJSONArray("values");
@@ -125,11 +128,7 @@ public class TemplateService {
     public static void main(String[] args) {
         TemplateService templateService = new TemplateService();
         String mp2Map = null;
-        try {
-            mp2Map = templateService.getAudioEncodeMap("aac");
-        } catch (CommonException e) {
-            e.printStackTrace();
-        }
+        mp2Map = templateService.getAudioEncodeMap("aac");
         JSONObject mp2Obj = JSONObject.parseObject(mp2Map);
 //        mp2Obj.put("bitrate",String.valueOf(1200/1000));
 //        mp2Obj.put("sample_rate",String.valueOf(3400/1000));

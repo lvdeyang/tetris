@@ -635,13 +635,13 @@ public class ScheduleService {
 			
 			EncodeConstant.VideoType type = EncodeConstant.VideoType.getVideoType(videoEncoder);
 			switch (type) {
-				case h264:
+				case H264:
 					videoEncode.setH264(obj);
 					break;
-				case hevc:
+				case HEVC:
 					videoEncode.setHevc(obj);
 					break;
-				case mpeg2:
+				case MPEG2:
 					videoEncode.setMpeg2(obj);
 					break;
 				default:
@@ -921,13 +921,12 @@ public class ScheduleService {
 	public void clearPushTask(String taskUuid) throws Exception {
 
 		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
-		List<TaskInputPO> inputs = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
 		TaskInputPO scheduleInput = new TaskInputPO();
 
-		if (inputs == null || inputs.isEmpty()){
-			//输入不存在
-			throw new BaseException(StatusCode.ERROR,"not find input for task");
+		if (output.getScheduleId() != null) {
+			scheduleInput = taskInputDao.findOne(output.getScheduleId());
 		}else{
+			List<TaskInputPO> inputs = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
 			for (int i = 0; i < inputs.size(); i++) {
 				TaskInputPO inputPO = inputs.get(i);
 				if (inputPO.getUniq().contains("schedule")) {
@@ -935,6 +934,9 @@ public class ScheduleService {
 					break;
 				}
 			}
+		}
+		if (scheduleInput.getInput() == null || scheduleInput.getInput().isEmpty()) {
+			throw new BaseException(StatusCode.FORBIDDEN,"not found schedule input for task:"+taskUuid);
 		}
 		if (output == null){
 			//输出不存在

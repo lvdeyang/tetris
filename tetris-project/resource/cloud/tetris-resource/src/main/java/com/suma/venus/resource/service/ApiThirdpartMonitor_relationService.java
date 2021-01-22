@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.errorprone.annotations.Var;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.controller.ControllerBase;
@@ -155,7 +152,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return null
 	 */
 	public Object foreignServerNodeOff(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreignNames = wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
 		for (int i = 0; i < foreignNames.size(); i++) {
@@ -192,7 +189,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @throws Exception
 	 */
 	public Object foreignServerNodeOn(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreignNames =  wrapper.getJSONArray("foreign");
 		Set<String> serverNodeName = new HashSet<String>();
 		for (int i = 0; i < foreignNames.size(); i++) {
@@ -220,7 +217,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @param request
 	 */
 	public Object foreignServerNodeMessage(JSONHttpServletRequestWrapper wrapper) throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -238,69 +235,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			serverNodeName.add(name);
 		}
 
-		List<FolderVO> folderVOs = new ArrayList<FolderVO>();
-		List<FolderVO> removeFolderVOs = new ArrayList<FolderVO>();
-		for (int i = 0; i < institutionsArray.size(); i++) {
-			JSONObject jsonObject = institutionsArray.getJSONObject(i);
-			FolderVO folderVO = JSONObject.toJavaObject(jsonObject, FolderVO.class);
-			folderVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-			folderVOs.add(folderVO);
-		}
-		List<FolderPO> existedFolderPOs = folderDao.findAll();
-		if (existedFolderPOs != null && !existedFolderPOs.isEmpty()) {
-			for (FolderPO folderPO : existedFolderPOs) {
-				if (folderVOs != null && !folderVOs.isEmpty()) {
-					for (FolderVO newFolderVO : folderVOs) {
-						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
-							folderPO.setName(newFolderVO.getName());
-							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
-							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
-							removeFolderVOs.add(newFolderVO);
-						}
-					}
-				}
-			}
-		}
-		folderVOs.removeAll(removeFolderVOs);
-		folderDao.save(existedFolderPOs);
-		Set<FolderPO> folderPOs2 = new HashSet<FolderPO>();
-		if (folderVOs != null && !folderVOs.isEmpty()) {
-			for (FolderVO folderVO : folderVOs) {
-				FolderPO folderPO = folderVO.toPo();
-				folderPOs2.add(folderPO);
-			}
-		}
-		folderDao.save(folderPOs2);
+		folderUpdate(institutionsArray);
 		List<FolderPO> newFolders = folderDao.findAll();
-		if(folderPOs2 != null && !folderPOs2.isEmpty()){
-			for (FolderPO folderPO : folderPOs2) {
-				if(null != folderPO.getParentPath() && !"".equals(folderPO.getParentPath())){
-					String[] parentPathStrings = folderPO.getParentPath().split("/");
-					StringBufferWrapper parentPath = new StringBufferWrapper();
-					if (newFolders != null && !newFolders.isEmpty()) {
-						for (FolderPO newfolderPO : newFolders) {
-							if (parentPathStrings != null && parentPathStrings.length > 0) {
-								for (int i = 1; i < parentPathStrings.length; i++) {
-									if (newfolderPO.getUuid().equals(parentPathStrings[i])) {
-										parentPath.append("/").append(newfolderPO.getId());
-									}
-									if (newfolderPO.getUuid().equals(parentPathStrings[parentPathStrings.length-1])) {
-										folderPO.setParentId(newfolderPO.getId());
-									}
-								}
-							}else {
-								folderPO.setParentId(-1l);
-							}
-						}
-					}
-					folderPO.setParentPath(parentPath.toString());
-				}else{
-					folderPO.setParentId(-1l);
-				}
-			}
-		}
-		folderDao.save(folderPOs2);
-		
 		//外域下设备信息
 		Set<BundlePO> bundlePOs = new HashSet<BundlePO>();
 		Set<BundlePO> removeBundlePOs = new HashSet<BundlePO>();
@@ -434,7 +370,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 				channelSchemePOs.removeAll(deletedChannels);
 				channelSchemeDao.delete(channel);
-				
+				removeChannelSchemePOs.removeAll(channel);
 			}
 			
 			bundleDao.delete(existedBundlePOs);
@@ -513,7 +449,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object devicePermissionAdd(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = wrapper.getJSONArray("foreign");
 		JSONArray institutionsArray = new JSONArray();
 		JSONArray devicesaArray = new JSONArray();
@@ -558,68 +494,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		
 		
 		//外域下组织机构信息
-		List<FolderVO> folderVOs = new ArrayList<FolderVO>();
-		List<FolderVO> removeFolderVOs = new ArrayList<FolderVO>();
-		for (int i = 0; i < institutionsArray.size(); i++) {
-			JSONObject jsonObject = institutionsArray.getJSONObject(i);
-			FolderVO folderVO = JSONObject.toJavaObject(jsonObject, FolderVO.class);
-			folderVO.setSourceType(SOURCE_TYPE.EXTERNAL);
-			folderVOs.add(folderVO);
-		}
-		List<FolderPO> existedFolderPOs = folderDao.findAll();
-		if (existedFolderPOs != null && !existedFolderPOs.isEmpty()) {
-			for (FolderPO folderPO : existedFolderPOs) {
-				if (folderVOs != null && !folderVOs.isEmpty()) {
-					for (FolderVO newFolderVO : folderVOs) {
-						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
-							folderPO.setName(newFolderVO.getName());
-							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
-							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
-							removeFolderVOs.add(newFolderVO);
-						}
-					}
-				}
-			}
-		}
-		folderVOs.removeAll(removeFolderVOs);
-		folderDao.save(existedFolderPOs);
-		List<FolderPO> folderPOs2 = new ArrayList<FolderPO>();
-		if (folderVOs != null && !folderVOs.isEmpty()) {
-			for (FolderVO folderVO : folderVOs) {
-				FolderPO folderPO = folderVO.toPo();
-				folderPOs2.add(folderPO);
-			}
-		}
-		folderDao.save(folderPOs2);
+		folderUpdate(institutionsArray);
 		List<FolderPO> newFolders = folderDao.findAll();
-		if(folderPOs2 != null && !folderPOs2.isEmpty()){
-			for (FolderPO folderPO : folderPOs2) {
-				if(null != folderPO.getParentPath() && !"".equals(folderPO.getParentPath())){
-					String[] parentPathStrings = folderPO.getParentPath().split("/");
-					StringBufferWrapper parentPath = new StringBufferWrapper();
-					if (newFolders != null && !newFolders.isEmpty()) {
-						for (FolderPO newfolderPO : newFolders) {
-							if (parentPathStrings != null && parentPathStrings.length > 0) {
-								for (int i = 1; i < parentPathStrings.length; i++) {
-									if (newfolderPO.getUuid().equals(parentPathStrings[i])) {
-										parentPath.append("/").append(newfolderPO.getId());
-									}
-									if (newfolderPO.getUuid().equals(parentPathStrings[parentPathStrings.length-1])) {
-										folderPO.setParentId(newfolderPO.getId());
-									}
-								}
-							}else {
-								folderPO.setParentId(-1l);
-							}
-						}
-					}
-					folderPO.setParentPath(parentPath.toString());
-				}else{
-					folderPO.setParentId(-1l);
-				}
-			}
-		}
-		folderDao.save(folderPOs2);
 		
 		//外域下设备信息
 		Set<String> bundleIds = new HashSet<String>();
@@ -739,7 +615,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object devicePermissionRemove(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> deleteBundleIds = new HashSet<String>();
 		JSONArray devicesArray = new JSONArray();
@@ -820,7 +696,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @throws Exception
 	 */
 	public Object devicePermissionChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray institutions = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
@@ -881,6 +757,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			folderVOs.add(folderVO);
 		}
 		List<FolderPO> existedFolderPOs = folderDao.findAll();
+		List<FolderPO> folderPOs2 = new ArrayList<FolderPO>();
 		if (existedFolderPOs != null && !existedFolderPOs.isEmpty()) {
 			for (FolderPO folderPO : existedFolderPOs) {
 				if (folderVOs != null && !folderVOs.isEmpty()) {
@@ -890,6 +767,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 							folderPO.setParentPath(newFolderVO.getParentPath());
 							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
 							removeFolderVOs.add(newFolderVO);
+							folderPOs2.add(folderPO);
 						}
 					}
 				}
@@ -897,7 +775,6 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
 		folderVOs.removeAll(removeFolderVOs);
 		folderDao.save(existedFolderPOs);
-		List<FolderPO> folderPOs2 = new ArrayList<FolderPO>();
 		if (folderVOs != null && !folderVOs.isEmpty()) {
 			for (FolderVO folderVO : folderVOs) {
 				FolderPO folderPO = folderVO.toPo();
@@ -947,7 +824,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return
 	 */
 	public Object deviceStatusChange(JSONHttpServletRequestWrapper wrapper)throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		Set<String> bundleIds = new HashSet<String>(); 
 		Map<String, ONLINE_STATUS> onlineStatus = new HashMap<String, ONLINE_STATUS>();
@@ -1145,6 +1022,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @return BundlePO 更新后的旧的设备信息
 	 */
 	public BundlePO bundlePOtoBundlePO(BundlePO oldPO , BundlePO newPO) throws Exception{
+		oldPO.setFolderId(newPO.getFolderId());
 		oldPO.setBundleName(newPO.getBundleName());
 		oldPO.setOnlineStatus(newPO.getOnlineStatus());
 		oldPO.setDeviceIp(newPO.getDeviceIp() == null ? null:newPO.getDeviceIp());
@@ -1166,7 +1044,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * <b>日期：</b>2021年1月11日 下午3:16:20
 	 */
 	public Object deviceInformationChange(JSONHttpServletRequestWrapper wrapper) throws Exception{
-		System.out.println(JSON.toJSONString(wrapper));
+		System.out.println(wrapper.toString());
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray extraInfo = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
@@ -1193,16 +1071,19 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			folderUpdate(institutionsArray);
 			
 			List<ExtraInfoPO> newextraInfoPOs = new ArrayList<ExtraInfoPO>();
-			for (int i = 0; i < extraInfo.size(); i++) {
-				JSONObject jsonObject = devicesJsonArray.getJSONObject(i); 
-//				BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
-				ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
-				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
-				newextraInfoPOs.add(extraInfoPO);
+			if(extraInfo!= null && extraInfo.size()>0){
+				for (int i = 0; i < extraInfo.size(); i++) {
+					JSONObject jsonObject = devicesJsonArray.getJSONObject(i); 
+//					BundleVO bundleVO =  JSONObject.toJavaObject(jsonObject,BundleVO.class);
+					ExtraInfoVO extraInfoVO = JSONObject.toJavaObject(jsonObject, ExtraInfoVO.class);
+					ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
+					newextraInfoPOs.add(extraInfoPO);
+				}
+				//除旧迎新
+				extraInfoService.deleteByBundleId(bundlePO.getBundleId());
+				extraInfoDao.save(newextraInfoPOs);
 			}
-			//除旧迎新
-			extraInfoService.deleteByBundleId(bundlePO.getBundleId());
-			extraInfoDao.save(newextraInfoPOs);
+			
 			
 			FolderPO bundleFolder = folderDao.findByUuid(folderuuid);
 			bundlePO = bundlePOtoBundlePO(bundlePO,newbundlePO);

@@ -40,6 +40,21 @@ public class SystemRoleController {
 	private OperationLogService operationLogService;
 	
 	/**
+	 * 查询全部系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月18日 上午9:38:30
+	 * @return List<SystemRoleVO> 系统角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/all")
+	public Object listAll(HttpServletRequest request) throws Exception{
+		
+		return systemRoleQuery.listAll();
+	}
+	
+	/**
 	 * 分页查询系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
