@@ -42,6 +42,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String startTime;
 	private String endTime;
 	private int count=0;
+	private String rotation;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -72,6 +73,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setResourceId(entity.getResourceId())
 		.setStartTime(DateUtil.format(entity.getStartTime(),"yyyy-MM-dd HH:mm:ss"))
 		.setEndTime(DateUtil.format(entity.getEndTime(),"yyyy-MM-dd HH:mm:ss"))
+		.setRotation(entity.getRotation())
 		.setIsRequired(entity.getIsRequired());
 		return this;
 	}
@@ -186,6 +188,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setAudioType(vo.getAudioType());
 		screenPO.setVideoType(vo.getVideoType());
 		screenPO.setUpdateTime(new Date());
+		screenPO.setRotation(vo.getRotation());
 		if(vo.getStartTime()!=null&&!vo.getStartTime().isEmpty()){
 			screenPO.setStartTime(DateUtil.parse(vo.getStartTime(),"yyyy-MM-dd HH:mm:ss"));
 		}
@@ -448,6 +451,18 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public void setCount(int count) {
 		this.count = count;
+	}
+
+
+
+
+	public String getRotation() {
+		return rotation;
+	}
+
+	public ScreenVO setRotation(String rotation) {
+		this.rotation = rotation;
+		return this;
 	}
 
 

@@ -5,6 +5,8 @@ package com.sumavision.tetris.business.common.service;/**
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.preview.PreviewDAO;
+import com.sumavision.tetris.application.preview.PreviewPO;
 import com.sumavision.tetris.business.common.ResultBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.NodeUtil;
@@ -16,6 +18,7 @@ import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
+import com.sumavision.tetris.business.transcode.vo.InputPreviewVO;
 import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
@@ -39,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,6 +73,9 @@ public class TaskService {
 
     @Autowired
     CapacityService capacityService;
+
+    @Autowired
+    PreviewDAO previewDao;
 
     @Autowired
     TranscodeTaskService transcodeTaskService;
@@ -604,22 +611,22 @@ public class TaskService {
                         && i.getSrt_ts().getSource_port().equals(inputBO.getSrt_ts().getSource_port())).findAny().orElse(null);
             }
             if(inputBO.getHls() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null && i.getHls().getUrl()==inputBO.getHls().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHls()!=null &&  i.getHls().getUrl().equals(inputBO.getHls().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getDash() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl()==inputBO.getDash().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getDash()!=null && i.getDash().getUrl().equals(inputBO.getDash().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getMss() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl()==inputBO.getMss().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getMss()!=null && i.getMss().getUrl().equals(inputBO.getMss().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtmp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl()==inputBO.getRtmp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtmp()!=null && i.getRtmp().getUrl().equals(inputBO.getRtmp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getRtsp() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl()==inputBO.getRtsp().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getRtsp()!=null && i.getRtsp().getUrl().equals(inputBO.getRtsp().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getHttp_flv() != null){
-                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl()==inputBO.getHttp_flv().getUrl()).findAny().orElse(null);
+                targetInputBO = inputs.getInput_array().stream().filter(i->i.getHttp_flv()!=null && i.getHttp_flv().getUrl().equals(inputBO.getHttp_flv().getUrl())).findAny().orElse(null);
             }
             if(inputBO.getSdi() != null){
                 targetInputBO = inputs.getInput_array().stream().filter(i->i.getSdi()!=null
@@ -725,6 +732,32 @@ public class TaskService {
         inputPO.setInput(JSON.toJSONString(inputBO));
         inputPO.setNodeId(inputBO.getId());
         taskInputDao.save(inputPO);
+    }
+
+    public void previewInput(InputPreviewVO inputPreviewVO) throws Exception {
+        if(inputPreviewVO.getOperate()==null || "CREATE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            transcodeTaskService.createPreviewForInput(inputPreviewVO);
+        }else if ("DELETE".equals(inputPreviewVO.getOperate().toUpperCase())){
+            deletePreviewForInput(inputPreviewVO);
+        }else{
+            throw new BaseException(StatusCode.FORBIDDEN,"unknown operate type",inputPreviewVO.getOperate());
+        }
+    }
+
+    public void deletePreviewForInput(InputPreviewVO inputPreviewVO) throws Exception {
+        PreviewPO previewPO = previewDao.findByInputId(inputPreviewVO.getDelInputId());
+        if (previewPO == null) {
+            return;
+        }
+        if (previewPO.getTransferTaskId() != null && !previewPO.getTransferTaskId().isEmpty()) {
+            deleteTranscodeTask(previewPO.getTransferTaskId());
+            previewDao.updateTransferTaskIdById(previewPO.getId(),"");
+        }
+        if (previewPO.getPreviewTaskId()!=null && !previewPO.getPreviewTaskId().isEmpty()){
+            deleteTranscodeTask(previewPO.getPreviewTaskId());
+            previewDao.updatePreviewTaskIdById(previewPO.getId(),"");
+        }
+        previewDao.delete(previewPO.getId());
     }
 }
 

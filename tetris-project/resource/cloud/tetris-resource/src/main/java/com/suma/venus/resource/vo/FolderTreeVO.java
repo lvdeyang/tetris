@@ -1,5 +1,8 @@
 package com.suma.venus.resource.vo;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
@@ -155,4 +158,22 @@ public class FolderTreeVO {
 		this.folderType = folderType;
 	}
 
+	public static class FolderIndecComparator implements Comparator<FolderTreeVO>{
+
+		@Override
+		public int compare(FolderTreeVO o1, FolderTreeVO o2) {
+			// TODO Auto-generated method stub
+			if (o1.getFolderIndex() == null && o2.getFolderIndex()==null) {
+				return o1.getName().compareTo(o2.getName());
+			}else if (o1.getFolderIndex()==null && o2.getFolderIndex()!=null ){
+				return -1;
+			}else if (o1.getFolderIndex() != null&&o2.getFolderIndex() == null) {
+				return 1;
+			}else {
+				return o1.getFolderIndex() - o2.getFolderIndex();
+			}
+		}
+		 
+	}
+	
 }

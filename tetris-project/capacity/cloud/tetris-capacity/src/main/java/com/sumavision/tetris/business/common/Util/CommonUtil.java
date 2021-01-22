@@ -50,6 +50,11 @@ public class CommonUtil {
         types.add("enum");
     }
 
+    /**
+     * 是否组播，true 是；false 否
+     * @param ip
+     * @return
+     */
     public static boolean isMulticast(String ip){
         //补全ip格式  224.1.1.1 -> 224.001.001.001
         String[] ipSplit = ip.split("\\.");
@@ -179,6 +184,45 @@ public class CommonUtil {
         return preProperties;
     }
 
+    /**
+     * @MethodName: findAllEqualByKey
+     * @Description: TODO 检查object中是否有任意成员及子成员中包含key，且key对应的value和目标value不相等
+     * @param object 1
+     * @param key 2
+     * @param rightValue 3
+     * @Return: java.lang.Boolean 如果全相等返回true,任意一个不等返回false
+     * @Author: Poemafar
+     * @Date: 2021/1/6 10:27
+     **/
+    public static Boolean findAllEqualByKey(Object object,String key,String rightValue){
+        if (object == null || object == "")
+            return Boolean.TRUE;
+        Object oJson = object;
+        Class<? extends Object> cls = oJson.getClass();
+        if (cls == JSONObject.class) {
+            JSONObject jo = (JSONObject) oJson;
+            if (jo.containsKey(key)) {
+                return jo.getString(key).equals(rightValue);
+            }
+            for (Object o : jo.values()) {
+                if (!findAllEqualByKey(o,key,rightValue)) {
+                    return Boolean.FALSE;
+                }
+            }
+        } else if (cls == JSONArray.class) {
+            JSONArray ja = (JSONArray) oJson;
+            int size = ja.size();
+            for (int i = 0; i < size; i++) {
+                Object o = ja.get(i);
+                if (o != null && o != "") {
+                    if (!findAllEqualByKey(o,key,rightValue)) {
+                        return Boolean.FALSE;
+                    }
+                }
+            }
+        }
+        return Boolean.TRUE;
+    }
 
     public static Boolean setValueByKeyFromJson(Object object, String key, Map<String,String> map) {
         if (object == null || object == "")

@@ -20,7 +20,10 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 	private Long userId;
 	private String outputType;
 	private String rtmpUrl;
-
+	/**码率控制*/
+	private String rateCtrl;
+	/**输出码率*/
+	private String rate;
 	
 	public Long getChannelId() {
 		return channelId;
@@ -111,7 +114,9 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		.setLocalIp(entity.getLocalIp())
 		.setOutputType(entity.getOutputType()==null?"":entity.getOutputType().getName())
 		.setRtmpUrl(entity.getRtmpUrl())
-		.setUserId(entity.getUserId());
+		.setUserId(entity.getUserId())
+		.setRate(entity.getRate())
+		.setRateCtrl(entity.getRateCtrl());
 		return this;
 	}
 	
@@ -139,6 +144,24 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 
 	public BroadAbilityBroadInfoVO setLocalIp(String localIp) {
 		this.localIp = localIp;
+		return this;
+	}
+
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public BroadAbilityBroadInfoVO setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+		return this;
+	}
+
+	public String getRate() {
+		return rate;
+	}
+
+	public BroadAbilityBroadInfoVO setRate(String rate) {
+		this.rate = rate;
 		return this;
 	}
 }

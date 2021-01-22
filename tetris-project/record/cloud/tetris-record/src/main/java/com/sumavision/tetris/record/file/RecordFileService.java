@@ -1,19 +1,14 @@
 package com.sumavision.tetris.record.file;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -123,6 +118,7 @@ public class RecordFileService {
 		String postForString = postWithParamsForString(mimsUrl, params);
 
 		System.out.println("upload to mims, resp=" + postForString);
+		
 		return postForString;
 
 	}
@@ -195,6 +191,9 @@ public class RecordFileService {
 	}
 
 	public void delRecordFile(RecordFilePO recordFilePO) {
+		
+		//TODO
+		
 
 	}
 	

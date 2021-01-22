@@ -14,8 +14,10 @@ import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQuery;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
+import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -37,6 +39,9 @@ public class ApiQtScheduleController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private MediaEncodeQuery mediaEncodeQuery;
 	
 	/**
 	 * 根据id数列请求排期表<br/>
@@ -68,4 +73,34 @@ public class ApiQtScheduleController {
 		jsonObject.put("schedules", scheduleQuery.questJSONSchedulesByChannelId(channelId, userIp));
 		return jsonObject;
 	}
+	
+	/**
+	 * 根据用户获取channelId<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月4日 下午7:07:56
+	 * @param userId
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryChannelId")
+	public Object getChannelId(HttpServletRequest request) throws Exception{
+		//获取用户id
+		UserVO userVO = userQuery.current();
+		Long userId = userVO.getId();
+		//根据用户id查询频道id
+		if(userId==null) return null;
+		return channelQuery.queryChannelId(userId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryEncryption")
+	public Object getScambleKey() throws Exception{
+		
+		return mediaEncodeQuery.queryKey();
+	}
+	
 }

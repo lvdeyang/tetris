@@ -37,6 +37,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------查本域以及外域信息-------------------------------");
 		return apiThirdpartMonitor_relationService.queryServerNodeInfo(wrapper);
 	}
 	
@@ -55,6 +56,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------外域连接断开通知-------------------------------");
 		return apiThirdpartMonitor_relationService.foreignServerNodeOff(wrapper);
 	}
 	
@@ -73,6 +75,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------通知对方域的组织机构以及设备信息-------------------------------");
 		return apiThirdpartMonitor_relationService.foreignServerNodeMessage(wrapper);
 	}
 	
@@ -91,6 +94,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 
+		System.out.println("-------------------------添加设备授权通知-------------------------------");
 		return apiThirdpartMonitor_relationService.devicePermissionAdd(wrapper);
 	}
 	
@@ -110,6 +114,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper =new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------删除设备授权通知-------------------------------");
 		return apiThirdpartMonitor_relationService.devicePermissionRemove(wrapper);
 	}
 	
@@ -129,6 +134,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------设备修改组织机构通知-------------------------------");
 		return apiThirdpartMonitor_relationService.devicePermissionChange(wrapper);
 	}
 	
@@ -149,6 +155,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------设备状态变动通知-------------------------------");
 		return apiThirdpartMonitor_relationService.deviceStatusChange(wrapper);
 	}
 	
@@ -167,6 +174,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
+		System.out.println("-------------------------外域连接通知（批量、不会同步对方域组织机构和设备信息）-------------------------------");
 		return apiThirdpartMonitor_relationService.foreignServerNodeOn(wrapper);
 	}
 	
@@ -185,6 +193,7 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		
  		String foreignName = wrapper.getString("foreign");
+ 		System.out.println("-------------------------查询外域下有权限的设备-------------------------------");
 		return apiThirdpartMonitor_relationService.foreignServerInformation(foreignName);
 	}
 	
@@ -203,5 +212,22 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
 		String layerId = wrapper.getString("layerId");
 		return apiThirdpartMonitor_relationService.queryPassbyMessage(layerId);
+	}
+	
+	/**
+	 * 修改设备信息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月11日 下午3:16:20
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value ="/device/information/change")
+	public Object deviceInformationChange(HttpServletRequest request)throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		
+		System.out.println("-------------------------修改设备信息-------------------------------");
+		return apiThirdpartMonitor_relationService.deviceInformationChange(wrapper);
 	}
 }

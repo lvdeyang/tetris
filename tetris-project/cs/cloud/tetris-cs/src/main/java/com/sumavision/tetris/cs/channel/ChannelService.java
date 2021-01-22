@@ -161,13 +161,19 @@ public class ChannelService {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
+			String videoCodec,
+			String audioCodec,
 			String backfileUrl,
 			String backfileDuration,
 			String backfileName,
-			Boolean rotation) throws Exception {
+			String backfileType,
+			String codeRate,
+			String resolution) throws Exception {
 		UserVO user = userQuery.current();
 		
 		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
+		VideoCodec channelVideoCodec = VideoCodec.fromName(videoCodec);
+		AudioCodec channelAudioCodec = AudioCodec.fromName(audioCodec);
 		ChannelPO channel = new ChannelPO();
 		channel.setName(name);
 		channel.setRemark(remark);
@@ -182,9 +188,13 @@ public class ChannelService {
 		channel.setTaskTemple(taskTemple);
 		channel.setRateCtrl(rateCtrl);
 		channel.setRate(rate);
-		channel.setRotation(rotation);
+		channel.setVideoCodec(channelVideoCodec.getName());
+		channel.setAudioCodec(channelAudioCodec.getName());
+		channel.setCodeRate(codeRate);
+		channel.setResolution(resolution);
 		channel.setBackfileDuration(backfileDuration);
 		channel.setBackfileName(backfileName);
+		channel.setBackfileType(backfileType);
 		channel.setBackfileUrl(backfileUrl);
 		//校验用户是否被占�?
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
@@ -340,10 +350,14 @@ public class ChannelService {
 			String taskTemple,
 			String rateCtrl,
 			String rate,
+			String codeRate,
+			String resolution,
 			String backfileUrl,
 			String backfileDuration,
 			String backfileName,
-			Boolean rotation) throws Exception {
+			String backfileType,
+			String videoCodec,
+			String audioCodec) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(id);
 		
 		if (channel.getAutoBroad()
@@ -379,10 +393,14 @@ public class ChannelService {
 		channel.setTaskTemple(taskTemple);
 		channel.setRateCtrl(rateCtrl);
 		channel.setRate(rate);
-		channel.setRotation(rotation);
+		channel.setCodeRate(codeRate);
+		channel.setResolution(resolution);
 		channel.setBackfileDuration(backfileDuration);
 		channel.setBackfileName(backfileName);
+		channel.setBackfileType(backfileType);
 		channel.setBackfileUrl(backfileUrl);
+		channel.setAudioCodec(audioCodec);
+		channel.setVideoCodec(videoCodec);
 		if (encryption != null) channel.setEncryption(encryption);
 		channelDao.save(channel);
 		

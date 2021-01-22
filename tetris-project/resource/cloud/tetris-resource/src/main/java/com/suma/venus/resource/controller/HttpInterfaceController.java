@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.AccessToken;
 import com.suma.venus.resource.base.bo.BatchLockBundleParam;
@@ -979,7 +980,7 @@ public class HttpInterfaceController {
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 					
-					System.out.println("------**发送Passby**------" + passByBO) ;
+					System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 				}
 				
 			} catch (Exception e) {
@@ -1090,7 +1091,7 @@ public class HttpInterfaceController {
 					}
 					tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 					
-					System.out.println("------**发送Passby**------" + passByBO) ;
+					System.out.println("------**发送Passby**------" + JSON.toJSONString(passByBO)) ;
 				}
 				
 				
@@ -1421,8 +1422,8 @@ public class HttpInterfaceController {
 	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public LayerHeartBeatResponse layerHeartBeat(@RequestBody LayerHeartBeatRequest request) {
-		 LOGGER.info("Layer heartbeat Request : " +
-		 JSONObject.toJSONString(request));
+//		 LOGGER.info("Layer heartbeat Request : " +
+//		 JSONObject.toJSONString(request));
 
 		LayerHeartBeatResponse resp = new LayerHeartBeatResponse();
 		com.suma.venus.resource.base.bo.ResponseBody respBody = new com.suma.venus.resource.base.bo.ResponseBody();

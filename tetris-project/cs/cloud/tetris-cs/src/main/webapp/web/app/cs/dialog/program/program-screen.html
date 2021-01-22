@@ -202,13 +202,43 @@
                     :data="options.currentScreen.data"
                     :default-sort="{prop:'index',order:'ascending'}"
                     style="width: 950px;height: 450px;overflow: auto;display: inline-block;">
-                <el-table-column width="30"></el-table-column>
-                <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
-                <el-table-column label="排序" width="60" prop="index"></el-table-column>
+                <el-table-column width="10"></el-table-column>
+                <el-table-column label="媒资名称" width="110" prop="name"></el-table-column>
+                <el-table-column label="排序" width="50" prop="index"></el-table-column>
                     <template v-if="channelData.autoBroad">
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>
+<!--
+                <el-table-column label="轮播次数" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.type=='VIDEO_STREAM' || scope.row.type=='AUDIO_STREAM'||scope.row.type=='PUSH_LIVE'">1</span>
+                        <el-input
+                                size="mini"
+                                wdith="20px"
+                                placeholder="次数"
+                                type="number"
+                                v-model="scope.row.duration / 1000"
+                                >
+                        </el-input>
+                    </template>
+                </el-table-column>-->
+
+                <el-table-column label="轮播次数" width="80" v-if="channelData.hasFile != false">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.type=='VIDEO_STREAM' || scope.row.type=='AUDIO_STREAM'||scope.row.type=='PUSH_LIVE'">{{1 }}</span>
+                        <el-input
+                                v-else
+                                size="mini"
+                                wdith="10px"
+                                placeholder="次数"
+                                type="number"
+                                @change="handleRotationChange(scope.row, $event)"
+                                v-model="scope.row.rotation">
+                        </el-input>
+                    </template>
+                </el-table-column>
+
                 <el-table-column label="时长/秒" width="80" v-if="channelData.hasFile != false">
                     <template slot-scope="scope">
                         <span v-if="scope.row.type=='VIDEO' || scope.row.type=='AUDIO'">{{ scope.row.duration / 1000 }}</span>

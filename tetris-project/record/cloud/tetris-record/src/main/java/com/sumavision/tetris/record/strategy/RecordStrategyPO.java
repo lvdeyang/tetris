@@ -47,7 +47,7 @@ public class RecordStrategyPO extends AbstractBasePO {
 	@Column(name = "sourceType")
 	private String sourceType;
 
-	// 源的Url，从媒资系统获取
+	// 源的Url，以后考虑从媒资系统获取
 	@Column(name = "sourceUrl")
 	private String sourceUrl;
 

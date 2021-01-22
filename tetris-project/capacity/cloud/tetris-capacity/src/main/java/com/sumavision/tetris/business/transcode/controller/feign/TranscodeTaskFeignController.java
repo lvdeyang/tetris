@@ -87,11 +87,10 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/preview/input")
 	public Object previewInput(
 			String inputInfo) throws Exception{
-		CreateInputPreviewVO inputVO = JSONObject.parseObject(inputInfo, CreateInputPreviewVO.class);
-		transcodeTaskService.previewInput(inputVO);
+		InputPreviewVO inputVO = JSONObject.parseObject(inputInfo, InputPreviewVO.class);
+		taskService.previewInput(inputVO);
 		return null;
 	}
-
 
 	/**
 	 * 删除流转码任务<br/>

@@ -82,8 +82,11 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资视频类型 */
 	private String videoType;
 	
-	/**是否必选节目*/
+	/** 是否必选节目*/
 	private Boolean isRequired;
+	
+	/** 轮播次数*/
+	private String rotation;
 	
 	private Date startTime;
 	
@@ -301,6 +304,14 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
+	}
+	@Column(name = "ROTATION")
+	public String getRotation() {
+		return rotation;
+	}
+
+	public void setRotation(String rotation) {
+		this.rotation = rotation;
 	}
 	
 	

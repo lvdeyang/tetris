@@ -173,8 +173,8 @@ public class TaskModifyService {
         //删除任务
         deleteTaskInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
 
-        //修改编码预处理
-        modifyEncodeProcessInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
+        //修改解码预处理
+        modifyDecodeProcessInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
 
         //增加编码
         addEncodeInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
@@ -182,10 +182,10 @@ public class TaskModifyService {
         //修改编码
         modifyEncodeInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
 
-        //修改编码模式
+        //修改解码模式
         modifyDecodeModeInModifyTask(taskSetVO,taskInputPOS,cmdQueue);
 
-        //删除编码,协议有问题
+        //删除编码
         deleteEncodeInModifyTask(taskSetVO,taskOutputPO,cmdQueue);
 
         //修改源
@@ -202,6 +202,7 @@ public class TaskModifyService {
 
         request.put("queue_id", UUID.randomUUID().toString());
         request.put("queue_request",cmdQueue);
+
         capacityService.sendCommandsByQueue(request,capacityIp,5656);
 
         taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));
@@ -302,7 +303,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之增加输出
+     * 修改任务之增加输出，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -320,12 +321,12 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之修改输出
+     * 修改任务之修改输出，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
      */
-    public void modifyOutputInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
+    public void modifyOutputInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue) throws BaseException {
         if (CollectionUtils.isNotEmpty(taskSetVO.getModify_output())){
             for (int i=0;i<taskSetVO.getModify_output().size();i++) {
                 List<OutputBO> oriOutputs = JSONObject.parseArray(taskOutputPO.getOutput(), OutputBO.class);
@@ -341,14 +342,14 @@ public class TaskModifyService {
                     oriOutputs.addAll(taskSetVO.getModify_output().stream().map(PutOutputRequest::getOutput).collect(Collectors.toList()));
                     taskOutputPO.setOutput(JSON.toJSONString(oriOutputs));
                 }else{
-                    LOGGER.warn("modify output not exist");
+                    throw new BaseException(StatusCode.FORBIDDEN,"modify output not exist");
                 }
             }
         }
     }
 
     /**
-     * 修改任务之删输出
+     * 修改任务之删输出，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -409,7 +410,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之添加任务节点
+     * 修改任务之添加任务节点，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -428,7 +429,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之删除任务节点
+     * 修改任务之删除任务节点，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -447,12 +448,12 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之修改编码预处理
+     * 修改任务之修改解码预处理
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
      */
-    public void modifyEncodeProcessInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
+    public void modifyDecodeProcessInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
         if (CollectionUtils.isNotEmpty(taskSetVO.getModify_decode_process())){
             for (int i=0;i<taskSetVO.getModify_decode_process().size();i++) {
                 PutTaskDecodeProcessRequest putTaskDecodeProcessRequest = taskSetVO.getModify_decode_process().get(i);
@@ -472,7 +473,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之增加编码
+     * 修改任务之增加编码，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -499,7 +500,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 修改任务之修改编码
+     * 修改任务之修改编码，，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue
@@ -571,7 +572,7 @@ public class TaskModifyService {
     }
 
     /**
-     * 删除编码,协议有问题
+     * 删除编码,，，已测
      * @param taskSetVO
      * @param taskOutputPO
      * @param cmdQueue

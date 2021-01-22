@@ -15,12 +15,12 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.64
+      ipAddress: 192.165.56.123
 #  profiles:
 #    active: pro
   datasource:
     base:
-      url: jdbc:mysql://192.165.56.70:3306/cs?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.58.123:3306/cs?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
@@ -66,7 +66,7 @@ spring:
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71
-  port: 8079
+  port: 8089
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -81,7 +81,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.70:8081/eureka/
+      defaultZone: http://192.165.58.123:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

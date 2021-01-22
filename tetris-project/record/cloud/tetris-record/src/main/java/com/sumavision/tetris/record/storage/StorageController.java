@@ -1,6 +1,7 @@
 package com.sumavision.tetris.record.storage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -12,9 +13,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.record.strategy.RecordStrategyDAO;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyStatus;
 
 @Controller
 @RequestMapping(value = "/record/storage")
@@ -28,12 +35,15 @@ public class StorageController {
 	@Autowired
 	private StorageDAO storageDAO;
 
+	@Autowired
+	private RecordStrategyDAO recordStrategyDAO;
+
 	@ResponseBody
 	@RequestMapping("/addStorage")
-	public Map<String, Object> addStorage(@RequestParam StorageVO storageVO) {
+	public Map<String, Object> addStorage(@RequestParam String storageVOStr) {
 
 		Map<String, Object> data = new HashMap<String, Object>();
-
+		StorageVO storageVO = JSONObject.parseObject(storageVOStr, StorageVO.class);
 		if (storageVO == null) {
 			data.put("errMsg", "参数错误");
 			return data;
@@ -61,7 +71,6 @@ public class StorageController {
 			return data;
 		}
 	}
-	
 
 	@ResponseBody
 	@RequestMapping(value = "/queryStorage")
@@ -74,7 +83,7 @@ public class StorageController {
 			Page<StoragePO> storagePOPage = storageDAO.findAll(pageable);
 			data.put("errMsg", "");
 			data.put("totalNum", storagePOPage.getTotalElements());
-			data.put("StorageVOs", StorageVO.fromPOList(storagePOPage.getContent()));
+			data.put("storageVOs", StorageVO.fromPOList(storagePOPage.getContent()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -82,16 +91,48 @@ public class StorageController {
 		}
 
 		return data;
-
 	}
-	
-	public Map<String, Object> checkIsExistRecordTask(@RequestParam Long storageId){
-		
+
+	@ResponseBody
+	@RequestMapping(value = "/queryAllStorage")
+	public Map<String, Object> queryAllStorage() {
+
 		Map<String, Object> data = new HashMap<String, Object>();
-		
-		
-		
-		
+
+		try {
+			List<StoragePO> storagePOList = storageDAO.findAll();
+			data.put("errMsg", "");
+			data.put("totalNum", storagePOList.size());
+			data.put("storageVOs", StorageVO.fromPOList(storagePOList));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			data.put("errMsg", "内部错误");
+		}
+
+		return data;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/checkIsExistRecordTask")
+	public Map<String, Object> checkIsExistRecordTask(@RequestParam Long storageId) {
+
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		try {
+			List<RecordStrategyPO> runningRecordStrategyPOList = recordStrategyDAO.findByStorageIdAndStatus(storageId,
+					EStrategyStatus.RUNNING);
+
+			if (!CollectionUtils.isEmpty(runningRecordStrategyPOList)) {
+				data.put("isExitRecordTask", true);
+			}
+
+			data.put("errMsg", "");
+
+		} catch (Exception e) {
+			data.put("errMsg", "内部错误");
+		}
+
 		return data;
 	}
 

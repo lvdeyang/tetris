@@ -3,6 +3,11 @@ package com.sumavision.tetris.omms.auth;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
 public class Configure {
 
 	/**

@@ -316,9 +316,11 @@ public class MonitorRecordTaskVO extends AbstractBaseVO<MonitorRecordTaskVO, Mon
 		set(entity);
 		
 		if(bo!=null&&bo.getResourceCodes()!=null&&bo.getResourceCodes().size()>0){
-			if(entity.getType().equals(MonitorRecordType.LOCAL_DEVICE)&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+			if((entity.getType().equals(MonitorRecordType.LOCAL_DEVICE) || entity.getType().equals(MonitorRecordType.XT_DEVICE))
+					&&bo.getResourceCodes().contains(entity.getAudioBundleId()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
 				this.setPrivilegeOfDownload(Boolean.TRUE);
-			}else if(entity.getType().equals(MonitorRecordType.LOCAL_USER)&&bo.getResourceCodes().contains(entity.getUserno()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
+			}else if((entity.getType().equals(MonitorRecordType.LOCAL_USER) || entity.getType().equals(MonitorRecordType.XT_USER))
+					&&bo.getResourceCodes().contains(entity.getUserno()+BUSINESS_OPR_TYPE.DOWNLOAD.getCode())){
 				this.setPrivilegeOfDownload(Boolean.TRUE);
 			}else{
 				this.setPrivilegeOfDownload(Boolean.FALSE);

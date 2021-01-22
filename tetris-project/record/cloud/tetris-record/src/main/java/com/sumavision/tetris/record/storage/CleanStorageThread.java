@@ -41,18 +41,21 @@ public class CleanStorageThread implements Runnable {
 
 		// 考虑可能有的多存储目录，按最复杂情况处理（其实也不复杂）
 		for (StoragePO storagePO : storagePOList) {
-			// 时间清理阈值 天数
-			Integer clean_timeThreshold = storagePO.getClean_timeThreshold();
 
 			// 1.首先对超时保存的进行清理
-			Date cleanTimeBefore = new Date(
-					Calendar.getInstance().getTimeInMillis() - ((long) clean_timeThreshold * 24 * 60 * 60 * 1000));
+			if (storagePO.getIsCheckTimeThreshold() != null && storagePO.getIsCheckTimeThreshold()) {
+				Integer clean_timeThreshold = storagePO.getClean_timeThreshold();
 
-			List<RecordFilePO> cleanRecordFileList = recordFileDAO
-					.findByRecordStrategyIdAndStopTimeBefore(storagePO.getId(), cleanTimeBefore);
+				Date cleanTimeBefore = new Date(
+						Calendar.getInstance().getTimeInMillis() - ((long) clean_timeThreshold * 24 * 60 * 60 * 1000));
 
-			if (!CollectionUtils.isEmpty(cleanRecordFileList)) {
-				recordFileService.delRecordFile(cleanRecordFileList);
+				List<RecordFilePO> cleanRecordFileList = recordFileDAO
+						.findByRecordStrategyIdAndStopTimeBefore(storagePO.getId(), cleanTimeBefore);
+
+				if (!CollectionUtils.isEmpty(cleanRecordFileList)) {
+					recordFileService.delRecordFile(cleanRecordFileList);
+				}
+
 			}
 
 			// 2.检查磁盘剩余空间比率，进行清理
