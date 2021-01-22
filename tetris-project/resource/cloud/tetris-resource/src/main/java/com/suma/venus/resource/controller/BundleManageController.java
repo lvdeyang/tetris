@@ -107,6 +107,7 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 import groovyjarjarasm.asm.tree.TryCatchBlockNode;
+import javassist.expr.NewArray;
 
 
 @Controller
@@ -476,6 +477,15 @@ public class BundleManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			String[] bundleIdArr = bundleIds.split(",");
+			try {
+				System.out.println("开始停转发了" + new Date().getTime());
+				monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
+				System.out.println("停转发结束了" +new Date().getTime());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			List<PassByBO> passByBOforeigns = new ArrayList<PassByBO>();
+			List<PassByBO> passByBOs = new ArrayList<PassByBO>();
 			for (String bundleId : bundleIdArr) {
 				try {
 					List<String> bundleIdString = new ArrayList<String>();
@@ -527,7 +537,8 @@ public class BundleManageController extends ControllerBase {
 								if (workNodePOs != null && !workNodePOs.isEmpty()) {
 									passByBOforeign.setLayer_id(workNodePOs.get(0).getNodeUid());
 								}
-								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBOforeign).getList());
+								passByBOforeigns.add(passByBOforeign);
+//								tetrisDispatchService.dispatch(passByBOforeigns);
 								
 								System.out.println("------**删除设备发送passby**------" + JSON.toJSONString(passByBOforeign)) ;
 							}
@@ -539,7 +550,7 @@ public class BundleManageController extends ControllerBase {
 				}
 				try {
 					//透传	
-					List<PassByBO> passByBOs = new ArrayList<PassByBO>();
+					
 					PassByBO passByBO = new PassByBO();
 					BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 					if(null != bundlePO.getAccessNodeUid() && !"".equals(bundlePO.getAccessNodeUid())){
@@ -549,9 +560,9 @@ public class BundleManageController extends ControllerBase {
 						bundleVO.setBundleId(bundleId);
 						passByBO.setPass_by_content(bundleVO);
 						passByBOs.add(passByBO);
-						tetrisDispatchService.dispatch(passByBOs);
+//						tetrisDispatchService.dispatch(passByBOs);
 					}
-					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
+//					monitorLiveDeviceFeign.stopLiveDevice(bundleIds);
 					
 					deleteByBundleId(bundleId);
 					//删除设备日志
@@ -564,7 +575,21 @@ public class BundleManageController extends ControllerBase {
 				}
 				
 			}
-			
+			try {
+				System.out.println("透传开始了" + new Date().getTime());
+				tetrisDispatchService.dispatch(passByBOs);
+				System.out.println("透传结束了" + new Date().getTime());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				System.out.println("传外域开始了" + new Date().getTime());
+				tetrisDispatchService.dispatch(passByBOforeigns);
+				System.out.println("------**删除设备发送passby**------" + JSON.toJSONString(passByBOforeigns)) ;
+				System.out.println("传外域结束了" + new Date().getTime());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete bundle : ", e);
 			data.put(ERRMSG, "内部错误");
@@ -644,17 +669,22 @@ public class BundleManageController extends ControllerBase {
 //			interfaceFromResource.delBundleRequest(bundle);
 
 		// 为了删除ldap上面的设备
-		if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {
-			// 从ldap删除
-			try {
-				List<LdapEquipPo> oldLdapEquips = ldapEquipDao.getEquipByIUuid(bundleId);
-				if (!CollectionUtils.isEmpty(oldLdapEquips)) {
-					ldapEquipDao.remove(oldLdapEquips.get(0));
-				}
-			} catch (Exception e) {
-				LOGGER.warn("delete bundle from ldap failed : ", e);
-			}
-		}
+		/**
+		 * 注释掉ladp方面，以提高删除速度
+		 */
+//		if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {
+//			// 从ldap删除
+//			try {
+//				System.out.println("ladp查询" + new Date().getTime());
+//				List<LdapEquipPo> oldLdapEquips = ldapEquipDao.getEquipByIUuid(bundleId);
+//				System.out.println("ladp查询结束" + new Date().getTime());
+//				if (!CollectionUtils.isEmpty(oldLdapEquips)) {
+//					ldapEquipDao.remove(oldLdapEquips.get(0));
+//				}
+//			} catch (Exception e) {
+//				LOGGER.warn("delete bundle from ldap failed : ", e);
+//			}
+//		}
 	}
 
 	@RequestMapping("/setAccessLayer")
