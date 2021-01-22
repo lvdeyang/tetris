@@ -182,7 +182,7 @@ public class TemplateTaskService {
                 }
             }
         }
-        if (map_sources!=null && !(indexSet.isEmpty() || indexSet.size()!=map_sources.size())) {//index要么都存在，要么都不存在
+        if (map_sources!=null && !(indexSet.isEmpty() || indexSet.size()==map_sources.size())) {//index要么都存在，要么都不存在
             throw new BaseException(StatusCode.FORBIDDEN, "not find input index");
         }
 
@@ -736,14 +736,12 @@ public class TemplateTaskService {
 
         for (int i = 0; i < combineTaskObj.getMap_outputs().size(); i++) {
             JSONObject taskOutput = combineTaskObj.getMap_outputs().getJSONObject(i);
-
             //处理
             OutputFactory outputFactory = new OutputFactory();
-            OutputBO outputBO = outputFactory.getOutputByTemplateOutput(missionBO,taskOutput);
+            String outputId = missionBO.getIdCtor().getId(i, IdConstructor.IdType.OUTPUT);
+            OutputBO outputBO = outputFactory.getOutputByTemplateOutput(missionBO,outputId,taskOutput);
             outputs.add(outputBO);
         }
-
-
         missionBO.setOutput_array(outputs);
     }
 
