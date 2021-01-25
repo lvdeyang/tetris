@@ -494,11 +494,6 @@ public class UserService{
 		
 		userQuery.checkPassword(password);
 		
-		List<UserPO> users = userDao.findByNickname(nickname);
-		if(users!=null && users.size()>0){
-			throw new NicknameAlreadyExistException(nickname);
-		}
-		
 		UserPO user = userDao.findByUsername(username);
 		if(user != null){
 			throw new UsernameAlreadyExistException(username);
@@ -756,10 +751,6 @@ public class UserService{
 			}
 		}
 		if(nickname!=null && !"".equals(nickname)){
-			List<UserPO> users = userDao.findByNicknameAndIdNot(nickname, id);
-			if(users!=null && users.size()>0){
-				throw new NicknameAlreadyExistException(nickname);
-			}
 			user.setNickname(nickname);
 		}
 		user.setMobile(mobile);

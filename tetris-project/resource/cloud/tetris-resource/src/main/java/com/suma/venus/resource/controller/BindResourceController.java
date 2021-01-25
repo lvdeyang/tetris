@@ -16,7 +16,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.geo.format.PointFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -185,7 +184,7 @@ public class BindResourceController extends ControllerBase {
 
 	@RequestMapping(value = "/queryBundlesOfRole", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> queryBundles(Long roleId, String bindType, String deviceModel, String keyword, String showAutoCreate, Long folderId, int pageNum, int countPerPage) {
+	public Map<String, Object> queryBundles(Long roleId, String bindType, String deviceModel, String keyword, String showAutoCreate, Long folderId, String codec, int pageNum, int countPerPage) {
 		boolean showAutoCreateBoolean = false;
 
 		if (!StringUtils.isEmpty(showAutoCreate) && showAutoCreate.equals("true")) {
@@ -194,13 +193,13 @@ public class BindResourceController extends ControllerBase {
 		
 		try {
 			if (BIND_TYPE_UNBINDED.equals(bindType)) {// 只查未绑定的资源
-				List<BundlePrivilegeBO> bundlePrivileges = getUnbindedBundles(queryUnbindedBundleIds(roleId, deviceModel, keyword));
+				List<BundlePrivilegeBO> bundlePrivileges = getUnbindedBundles(queryUnbindedBundleIds(roleId, deviceModel, keyword, codec));
 				return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
 			} else if (BIND_TYPE_BINDED.equals(bindType)) {// 只查已绑定的资源
-				List<BundlePrivilegeBO> bundlePrivileges = getBindedBundles(roleId, deviceModel, keyword);
+				List<BundlePrivilegeBO> bundlePrivileges = getBindedBundles(roleId, deviceModel, keyword, codec);
 				return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
 			} else {// 绑定和未绑定都查
-				List<BundlePrivilegeBO> bundlePrivileges = getBundles(roleId, deviceModel, keyword, folderId);
+				List<BundlePrivilegeBO> bundlePrivileges = getBundles(roleId, deviceModel, keyword, folderId , codec);
 				return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
 			}
 		} catch (Exception e) {
@@ -280,7 +279,7 @@ public class BindResourceController extends ControllerBase {
 		return bundlePrivileges;
 	}
 
-	private Set<String> queryUnbindedBundleIds(Long roleId, String deviceModel, String keyword) throws Exception {
+	private Set<String> queryUnbindedBundleIds(Long roleId, String deviceModel, String keyword ,String coderType) throws Exception {
 		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
 		if (bundleIds.isEmpty()) {
 			return null;
@@ -307,7 +306,7 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	/** 查询角色具有权限的符合查询条件的bundle资源 */
-	private List<BundlePrivilegeBO> getBindedBundles(Long roleId, String deviceModel, String keyword) throws Exception {
+	private List<BundlePrivilegeBO> getBindedBundles(Long roleId, String deviceModel, String keyword, String coderType) throws Exception {
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
 		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
 		if (bundleIds.isEmpty()) {
@@ -354,7 +353,7 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	/** 查询所有资源，并标记其中有权限的资源 */
-	private List<BundlePrivilegeBO> getBundles(Long roleId, String deviceModel, String keyword, Long folderId) throws Exception{
+	private List<BundlePrivilegeBO> getBundles(Long roleId, String deviceModel, String keyword, Long folderId, String coderType) throws Exception{
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
 		//Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, folderId);
 		//获取文件夹下的设备改为获取全部包含子文件夹
@@ -362,11 +361,13 @@ public class BindResourceController extends ControllerBase {
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
 		}else{
-			//过滤外域的设备
+			//过滤外域的设备h
 			Set<String> externalBundle = new HashSet<String>();
 			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
 			for(BundlePO bundlePO:bundlePOs){
 				if(bundlePO.getSourceType().equals(SOURCE_TYPE.EXTERNAL)){
+					externalBundle.add(bundlePO.getBundleId());
+				}else if (null != coderType && !"".equals(coderType) && !bundlePO.getCoderType().toString().equalsIgnoreCase(coderType)) {
 					externalBundle.add(bundlePO.getBundleId());
 				}
 			}

@@ -8,6 +8,7 @@ import com.sumavision.tetris.alarm.bo.OprlogParamBO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeign;
 
+
 @Component
 public class OperationLogService {
 	
