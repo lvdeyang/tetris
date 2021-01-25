@@ -32,10 +32,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -89,7 +86,8 @@ public class TemplateTaskService {
 //        JSONObject combineTaskObj = CommonUtil.coverJSONObject(templateObj,taskObj);             // 合并方法1
 //        LOGGER.info("task and template combine params: {}",combineTaskObj.toJSONString());
 //        TemplateTaskVO tmpBO = JSONObject.parseObject(combineTaskObj.toJSONString(),TemplateTaskVO.class);
-        TemplateTaskVO combineJobBO = combine(templateTaskVO,taskBO);             // 合并方法2
+        checkBusinessTaskParams(taskBO);//step1: 先检验一遍业务下发的参数；
+        TemplateTaskVO combineJobBO = combine(templateTaskVO,taskBO);  //step2: 合并本地模板参数和业务下发的参数
         LOGGER.info("combine params :{}",JSON.toJSONString(combineJobBO));
         //开始转换参数
         MissionBO missionBO = new MissionBO();
@@ -170,6 +168,56 @@ public class TemplateTaskService {
 
     }
 
+    public void checkBusinessTaskParams(TemplateTaskVO taskVO) throws BaseException {
+        JSONArray map_sources = taskVO.getMap_sources();
+        Set<Integer> indexSet = new HashSet<>();
+        for (int i = 0; i < map_sources.size(); i++) {
+            JSONObject sourceObj = map_sources.getJSONObject(i);
+            if (sourceObj.containsKey("index")) {
+                Integer index = sourceObj.getInteger("index");
+                if (indexSet.contains(index)) {
+                    throw new BaseException(StatusCode.FORBIDDEN,"param error,input index must not repeated");
+                }else{
+                    indexSet.add(index);
+                }
+            }
+        }
+        if (map_sources!=null && !(indexSet.isEmpty() || indexSet.size()==map_sources.size())) {//index要么都存在，要么都不存在
+            throw new BaseException(StatusCode.FORBIDDEN, "not find input index");
+        }
+
+        indexSet.clear();
+        JSONArray map_tasks = taskVO.getMap_tasks();
+        for (int i = 0; i < map_tasks.size(); i++) {
+            JSONObject taskObj = map_tasks.getJSONObject(i);
+            if (taskObj.containsKey("index")) {
+                Integer index = taskObj.getInteger("index");
+                if (indexSet.contains(index)) {
+                    throw new BaseException(StatusCode.FORBIDDEN,"param error, task index must not repeated");
+                }else{
+                    indexSet.add(index);
+                }
+            }
+        }
+        //判断输出
+        indexSet.clear();
+        JSONArray map_outputs = taskVO.getMap_outputs();
+        for (int i = 0; i < map_outputs.size(); i++) {
+            JSONObject outputObj = map_outputs.getJSONObject(i);
+            if (outputObj.containsKey("index")) {
+                Integer index = outputObj.getInteger("index");
+                if (indexSet.contains(index)) {
+                    throw new BaseException(StatusCode.FORBIDDEN,"param error, output index must not repeated");
+                }else{
+                    indexSet.add(index);
+                }
+            }
+        }
+        if (map_outputs!=null && !(indexSet.isEmpty() || indexSet.size()==map_outputs.size())) {//index要么都存在，要么都不存在
+            throw new BaseException(StatusCode.FORBIDDEN, "not find output index");
+        }
+
+    }
 
     /**
      * @MethodName: combine
@@ -189,12 +237,6 @@ public class TemplateTaskService {
         JSONArray combineIns = new JSONArray();
 
         Boolean hasFlag = taskVO.getMap_sources().getJSONObject(0).containsKey("index");
-        for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
-            JSONObject tIn = taskVO.getMap_sources().getJSONObject(i);
-            if (tIn.containsKey("index") ^ hasFlag) {//index要么都存在，要么都不存在
-                throw new BaseException(StatusCode.ERROR, "not find output index");
-            }
-        }
         if (!hasFlag) { //如果都不存在，就给他手动加个index
             for (int i = 0; i < taskVO.getMap_sources().size(); i++) {
                 taskVO.getMap_sources().getJSONObject(i).put("index",i+1);
@@ -260,12 +302,6 @@ public class TemplateTaskService {
         JSONArray combineOuts = new JSONArray();
         if (taskVO.getMap_outputs()!=null && !taskVO.getMap_outputs().isEmpty()) {
             Boolean extFlag = taskVO.getMap_outputs().getJSONObject(0).containsKey("index");
-            for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
-                JSONObject tOut = taskVO.getMap_outputs().getJSONObject(i);
-                if (tOut.containsKey("index") ^ extFlag) {//index要么都存在，要么都不存在
-                    throw new BaseException(StatusCode.ERROR, "not find output index");
-                }
-            }
             if (!extFlag) { //如果都不存在，就给他手动加个index
                 for (int i = 0; i < taskVO.getMap_outputs().size(); i++) {
                     taskVO.getMap_outputs().getJSONObject(i).put("index",i+1);
@@ -700,14 +736,12 @@ public class TemplateTaskService {
 
         for (int i = 0; i < combineTaskObj.getMap_outputs().size(); i++) {
             JSONObject taskOutput = combineTaskObj.getMap_outputs().getJSONObject(i);
-
             //处理
             OutputFactory outputFactory = new OutputFactory();
-            OutputBO outputBO = outputFactory.getOutputByTemplateOutput(missionBO,taskOutput);
+            String outputId = missionBO.getIdCtor().getId(i, IdConstructor.IdType.OUTPUT);
+            OutputBO outputBO = outputFactory.getOutputByTemplateOutput(missionBO,outputId,taskOutput);
             outputs.add(outputBO);
         }
-
-
         missionBO.setOutput_array(outputs);
     }
 
