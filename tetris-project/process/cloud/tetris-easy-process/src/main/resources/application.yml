@@ -1,9 +1,11 @@
 spring:
+  main: 
+    allow-bean-definition-overriding: true
   cache:
     type: ehcache
     ehcache:
       config: classpath:ehcache.xml
-  activiti:    check-process-definitions: true
+  activiti:    check-process-definitions: false
     database-schema-update: true
     #这里保存全部历史记录
     history-level: full
@@ -14,7 +16,7 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.85
 #  profiles:
 #    active: pro
   datasource:
@@ -84,7 +86,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.71:8081/eureka/
+      defaultZone: http://192.165.56.85:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

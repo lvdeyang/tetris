@@ -32,7 +32,7 @@ public class WebsocketMessageQuery {
 			WebsocketMessageType messageType, 
 			int currentPage, 
 			int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize, null);
 		Page<WebsocketMessagePO> pagedEntities =  websocketMessageDao.findByUserIdAndMessageTypeOrderByUpdateTimeDesc(userId, messageType, page);
 		List<WebsocketMessagePO> entities = pagedEntities.getContent();
 		if(entities==null || entities.size()<=0){

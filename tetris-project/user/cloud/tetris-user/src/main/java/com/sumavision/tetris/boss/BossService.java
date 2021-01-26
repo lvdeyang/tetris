@@ -41,7 +41,7 @@ public class BossService {
 	public void addUser(long userId){
 		try {
 			JSONObject json=new JSONObject();
-			UserPO userPO=userDao.findOne(userId);
+			UserPO userPO=userDao.findById(userId);
 			json.put("userId", userId);
 			json.put("userName", userPO.getUsername());
 			json.put("userUuid", userPO.getUuid());

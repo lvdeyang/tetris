@@ -59,7 +59,7 @@ public class SignQuery {
 			rows = SignVO.getConverter(SignVO.class).convert(entities, SignVO.class);
 			total = pagedEntites.getTotalElements();
 			if(addressIds.size() > 0){
-				List<AddressPO> addressEntities = addressDao.findAll(addressIds);
+				List<AddressPO> addressEntities = addressDao.findAllById(addressIds);
 				for(SignVO row:rows){
 					for(AddressPO addressEntity:addressEntities){
 						if(row.getAddressId().equals(addressEntity.getId())){
@@ -125,7 +125,7 @@ public class SignQuery {
 			Date endTime,
 			int currentPage, 
 			int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		String nameExpretion = null;
 		String addressNameExpretion = null;
 		if(name != null){

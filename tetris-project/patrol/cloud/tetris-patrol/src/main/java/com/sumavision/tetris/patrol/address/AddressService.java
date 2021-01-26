@@ -57,7 +57,7 @@ public class AddressService {
 	 * @return AddressVO 地址
 	 */
 	public AddressVO edit(Long id, String name) throws Exception{
-		AddressPO address = addressDao.findOne(id);
+		AddressPO address = addressDao.findById(id);
 		address.setName(name);
 		addressDao.save(address);
 		return new AddressVO().set(address)
@@ -80,7 +80,7 @@ public class AddressService {
 	 * @param Boolean deleteSigns 是否删除签到信息
 	 */
 	public void delete(Long id, Boolean deleteSigns) throws Exception{
-		AddressPO address = addressDao.findOne(id);
+		AddressPO address = addressDao.findById(id);
 		if(address == null) return;
 		addressDao.delete(address);
 		if(deleteSigns){

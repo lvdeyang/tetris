@@ -72,7 +72,7 @@ public class ApiServerFolderController {
 			List<MediaAudioStreamVO> audioStreamVOs = mediaAudioStreamQuery.loadAll();
 			return new ArrayListWrapper<Object>().addAll(videoVOs).addAll(audioVOs).addAll(pictureVOs).addAll(txtVOs).addAll(videoStreamVOs).addAll(audioStreamVOs).getList();
 		} else {
-			FolderPO folderPO = folderDAO.findOne(id);
+			FolderPO folderPO = folderDAO.findById(id);
 			if (folderPO != null) {
 				switch (folderPO.getType()) {
 				case COMPANY_VIDEO:

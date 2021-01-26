@@ -75,7 +75,7 @@ public class ServiceTypeService {
 		if(needAdd.size() <= 0){
 			throw new NoServiceTypesToAddException();
 		}else{
-			serviceTypeDao.save(needAdd);
+			serviceTypeDao.saveAll(needAdd);
 			List<OmmsSoftwareServiceTypeTreeNodeVO> nodes = new ArrayList<OmmsSoftwareServiceTypeTreeNodeVO>();
 			for(ServiceTypePO serviceType:needAdd){
 				nodes.add(new OmmsSoftwareServiceTypeTreeNodeVO().set(serviceType));
@@ -100,7 +100,7 @@ public class ServiceTypeService {
 	 * @param String columnValue 字段值
 	 */
 	public void saveColumn(Long id, String columnKey, String columnValue) throws Exception{
-		ServiceTypePO entity = serviceTypeDao.findOne(id);
+		ServiceTypePO entity = serviceTypeDao.findById(id);
 		if("name".equals(columnKey)){
 			entity.setName(columnValue);
 		}else if("installationDirectory".equals(columnKey)){
@@ -135,7 +135,7 @@ public class ServiceTypeService {
 		if (serviceDeploymentPOs !=null && !serviceDeploymentPOs.isEmpty()) {
 			throw new DeploymentNotNullException();
 		} else {
-			ServiceTypePO serviceTypePO = serviceTypeDao.findOne(id);
+			ServiceTypePO serviceTypePO = serviceTypeDao.findById(id);
 			List<InstallationPackagePO> installationPackagePOs = installationPackageDAO.findByServiceTypeId(id);
 			for (InstallationPackagePO installationPackagePO : installationPackagePOs) {
 				List<PropertiesPO> propertiesPOs  = propertiesDAO.findByInstallationPackageId(installationPackagePO.getId());
@@ -203,7 +203,7 @@ public class ServiceTypeService {
 		if(groupType == null || groupType.equals("")){
 			throw new NoChoiceServerTypeException();
 		}else{
-			ServiceTypePO serviceTypePO = serviceTypeDao.findOne(id);
+			ServiceTypePO serviceTypePO = serviceTypeDao.findById(id);
 			GroupType[] values = GroupType.values();
 			GroupType groupTypeValue = null;
 			for (GroupType value : values) {

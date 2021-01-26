@@ -117,7 +117,7 @@ public class MediaTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -169,7 +169,7 @@ public class MediaTxtController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		MediaTxtPO txt = mediaTxtDao.findById(id);
 		
 		List<String> tagList = new ArrayList<String>();
 		if(tags!=null && !tags.isEmpty()){
@@ -203,7 +203,7 @@ public class MediaTxtController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		
 		if(media == null){
 			throw new MediaTxtNotExistException(id);
@@ -235,7 +235,7 @@ public class MediaTxtController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaTxtPO media = mediaTxtDao.findOne(mediaId);
+		MediaTxtPO media = mediaTxtDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -247,7 +247,7 @@ public class MediaTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -282,7 +282,7 @@ public class MediaTxtController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaTxtPO media = mediaTxtDao.findOne(mediaId);
+		MediaTxtPO media = mediaTxtDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -294,7 +294,7 @@ public class MediaTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -352,7 +352,7 @@ public class MediaTxtController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		MediaTxtPO txt = mediaTxtDao.findById(id);
 		if(txt == null){
 			throw new MediaTxtNotExistException(id);
 		}

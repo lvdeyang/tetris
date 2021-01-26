@@ -1,13 +1,11 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
-import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaAudioFeign {

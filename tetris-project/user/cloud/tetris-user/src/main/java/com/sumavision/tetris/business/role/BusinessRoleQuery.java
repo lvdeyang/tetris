@@ -41,7 +41,7 @@ public class BusinessRoleQuery {
 	 */
 	public List<SystemRoleVO> findByIdIn(Collection<Long> ids) throws Exception{
 		if(ids==null || ids.size()<=0) return null;
-		List<SystemRolePO> entities = systemRoleDao.findAll(ids);
+		List<SystemRolePO> entities = systemRoleDao.findAllById(ids);
 		List<SystemRoleVO> roles = null;
 		if(entities!=null && entities.size()>0){
 			roles = new ArrayList<SystemRoleVO>();
@@ -150,7 +150,7 @@ public class BusinessRoleQuery {
 			SystemRoleType type, 
 			int currentPage, 
 			int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemRolePO> pagedEntities = systemRoleDao.findByCompanyIdAndTypeAndAutoGeneration(companyId, type, false, page);
 		return pagedEntities.getContent();
 	}
@@ -173,7 +173,7 @@ public class BusinessRoleQuery {
 			Collection<Long> exceptIds,
 			int currentPage,
 			int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemRolePO> pagedEntities = systemRoleDao.findByCompanyIdAndTypeAndIdNotInAndAutoGeneration(companyId, type, exceptIds, false, page);
 		return pagedEntities.getContent();
 	}

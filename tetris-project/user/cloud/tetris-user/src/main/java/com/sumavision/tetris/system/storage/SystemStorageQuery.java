@@ -24,7 +24,7 @@ public class SystemStorageQuery {
 	 * @return List<SystemStoragePO> 存储列表
 	 */
 	public List<SystemStoragePO> findAll(int currentPage, int pageSize) throws Exception{
-		Pageable pageable = new PageRequest(currentPage-1, pageSize);
+		Pageable pageable = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemStoragePO> pagedEntities = systemStorageDao.findAll(pageable);
 		if(pagedEntities == null) return null;
 		return pagedEntities.getContent();

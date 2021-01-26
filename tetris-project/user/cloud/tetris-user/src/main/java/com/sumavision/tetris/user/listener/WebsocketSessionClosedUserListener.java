@@ -42,7 +42,7 @@ public class WebsocketSessionClosedUserListener implements ApplicationListener<W
 		
 		
 		try{
-			UserPO user = userDAO.findOne(event.getUserId());
+			UserPO user = userDAO.findById(event.getUserId());
 			Date day=new Date();    
 			SimpleDateFormat offLineDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
 			OprlogParamBO log = new OprlogParamBO();

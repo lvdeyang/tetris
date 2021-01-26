@@ -1193,14 +1193,14 @@ public class ResourceService {
 			bundlePO.setFreeVideoSrcCnt(bundlePO.getMaxVideoSrcCnt());
 		}
 
-		channelSchemeDao.save(channelSchemePOList);
+		channelSchemeDao.saveAll(channelSchemePOList);
 		lockChannelParamDao.deleteBatchByBundleIds(bundleIdList);
 
-		screenSchemeDao.save(screenSchemePOList);
+		screenSchemeDao.saveAll(screenSchemePOList);
 		lockScreenParamDao.deleteBatchByBundleIds(bundleIdList);
 
 		lockBundleParamDao.deleteBatchByBundleIds(bundleIdList);
-		bundleDao.save(bundlePOList);
+		bundleDao.saveAll(bundlePOList);
 
 	}
 
@@ -1699,7 +1699,7 @@ public class ResourceService {
 				}
 			}
 
-			virtualResourceDao.save(virtualResourcePOs);
+			virtualResourceDao.saveAll(virtualResourcePOs);
 			
 			if(roleVO != null){
 				roleAndResourceIdBO.setRoleId(Long.valueOf(roleVO.getId()));
@@ -1857,8 +1857,8 @@ public class ResourceService {
 				List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resourceIds);
 				List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByResourceIdIn(resourceIds);
 				
-				privilegeDao.delete(privileges);
-				rolePrivilegeMapDao.delete(maps);
+				privilegeDao.deleteInBatch(privileges);
+				rolePrivilegeMapDao.deleteInBatch(maps);
 			}
 
 		} catch (Exception e) {
@@ -1893,7 +1893,7 @@ public class ResourceService {
 			virtualResourceDao.deleteByResourceId(resourceId);
 
 			// 保存新的
-			virtualResourceDao.save(toAddList);
+			virtualResourceDao.saveAll(toAddList);
 		} catch (Exception e) {
 			LOGGER.error("Fail to update on-demand resource" + resourceJson.toJSONString(), e);
 			return false;

@@ -26,7 +26,7 @@ public class JointConstraintExpressionQuery {
 	 * @return List<JointConstraintExpressionPO> 约束列表
 	 */
 	public List<JointConstraintExpressionPO> findByAccessPointId(Long accessPointId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<JointConstraintExpressionPO> constraints = jointConstraintExpressionDao.findByAccessPointId(accessPointId, page);
 		return constraints.getContent();
 	}

@@ -70,7 +70,7 @@ public class MaterialFileService {
 		materialFileDao.deleteInBatch(materials);
 		
 		//保存待删除存储文件数据
-		preRemoveFileDao.save(preRemoveFiles);
+		preRemoveFileDao.saveAll(preRemoveFiles);
 		
 		//调用flush使sql生效
 		preRemoveFileDao.flush();
@@ -153,7 +153,7 @@ public class MaterialFileService {
 			entity.setUpdateTime(date);
 			entities.add(entity);
 		}
-		materialFileDao.save(entities);
+		materialFileDao.saveAll(entities);
 		return entities;
 	}
 	

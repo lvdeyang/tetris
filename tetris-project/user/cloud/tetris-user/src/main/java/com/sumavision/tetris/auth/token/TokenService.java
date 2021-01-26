@@ -41,10 +41,10 @@ public class TokenService {
 	 * @return TokenPO token数据
 	 */
 	public TokenPO invalid(Long id) throws Exception{
-		TokenPO token = tokenDao.findOne(id);
+		TokenPO token = tokenDao.findById(id);
 		token.setToken(null);
 		token.setLastModifyTime(null);
-		UserPO user = userDAO.findOne(token.getUserId());
+		UserPO user = userDAO.findById(token.getUserId());
 		if(TerminalType.QT_ZK.equals(token.getType())){
 			UserVO userVO =  userQuery.current();
 			//指控终端强制下线校验
@@ -81,7 +81,7 @@ public class TokenService {
 				}
 			}
 			if(invalidTokens.size() > 0){
-				tokenDao.save(invalidTokens);
+				tokenDao.saveAll(invalidTokens);
 			}
 		}
 	}

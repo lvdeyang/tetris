@@ -139,7 +139,7 @@ public class ApiAndroidMediaVideoController {
 		
 		UserVO user = userQuery.current();
 
-		MediaVideoPO video = mediaVideoDAO.findOne(id);
+		MediaVideoPO video = mediaVideoDAO.findById(id);
 		
 		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, null, null, remark);
 		
@@ -161,7 +161,7 @@ public class ApiAndroidMediaVideoController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoPO media = mediaVideoDAO.findOne(id);
+		MediaVideoPO media = mediaVideoDAO.findById(id);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(id);
@@ -215,7 +215,7 @@ public class ApiAndroidMediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}

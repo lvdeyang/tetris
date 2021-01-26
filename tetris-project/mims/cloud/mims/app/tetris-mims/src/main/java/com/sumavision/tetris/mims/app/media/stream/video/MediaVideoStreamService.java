@@ -87,7 +87,7 @@ public class MediaVideoStreamService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		media.setReviewStatus(null);
 		mediaVideoStreamDao.save(media);
 	}
@@ -100,7 +100,7 @@ public class MediaVideoStreamService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaVideoStreamDao.save(media);
 	}
@@ -123,7 +123,7 @@ public class MediaVideoStreamService {
 			String keyWords, 
 			String remark, 
 			List<String> previewUrl) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		if(media == null){
 			throw new MediaVideoStreamNotExistException(id);
 		}
@@ -144,7 +144,7 @@ public class MediaVideoStreamService {
 	 * @param Long id 视频流媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaVideoStreamDao.save(media);
 	}
@@ -157,7 +157,7 @@ public class MediaVideoStreamService {
 	 * @param Long id 视频流媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		if(media != null){
 			mediaVideoStreamDao.delete(media);
 		}
@@ -172,7 +172,7 @@ public class MediaVideoStreamService {
 	 * @param Long id 视频流媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaVideoStreamDao.save(media);
 	}
@@ -202,7 +202,7 @@ public class MediaVideoStreamService {
 	 * @return List<MediaVideoStreamVO> 要删除的视频流媒资
 	 */
 	public List<MediaVideoStreamVO> removeByIds(Collection<Long> ids) throws Exception{
-		List<MediaVideoStreamPO> medias = mediaVideoStreamDao.findAll(ids);
+		List<MediaVideoStreamPO> medias = mediaVideoStreamDao.findAllById(ids);
 		for (MediaVideoStreamPO media : medias) {
 			media.setPreviewUrl(mediaVideoStreamUrlRelationQuery.getUrlFromStreamId(media.getId()));
 		}
@@ -264,7 +264,7 @@ public class MediaVideoStreamService {
 					videoStream.setProcessInstanceId(processInstanceId);
 					videoStream.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaVideoStreamDao.save(videoStreamsNeedProcess);
+				mediaVideoStreamDao.saveAll(videoStreamsNeedProcess);
 			}
 			
 		}else{
@@ -410,7 +410,7 @@ public class MediaVideoStreamService {
 			String thumbnail,
 			String addition) throws Exception{
 		
-		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findById(id);
 		if(videoStream == null){
 			throw new MediaVideoStreamNotExistException(id);
 		}

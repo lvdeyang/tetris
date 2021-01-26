@@ -37,7 +37,7 @@ public abstract class CommonService<T> {
 	
 	public void delete(Long id)  {
         try {
-            commonDao.delete(id);
+            commonDao.deleteById(id);
         } catch (Exception e) {
             LOGGER.error("Delete Error:", e);
             throw e;
@@ -49,7 +49,7 @@ public abstract class CommonService<T> {
 			return null;
 		}
 		try {
-			return commonDao.findOne(id);
+			return commonDao.findById(id);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			throw e;
@@ -62,7 +62,7 @@ public abstract class CommonService<T> {
 	
 	public void saveAll(List<T> pos) {
 		try {
-			commonDao.save(pos);
+			commonDao.saveAll(pos);
 		} catch (Exception e) {
 			LOGGER.error("Save " + pos.getClass().getSimpleName() + " Error:", e);
 			throw e;

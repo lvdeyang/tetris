@@ -49,7 +49,7 @@ public class SystemRoleMenuPermissionService {
 	 */
 	public List<SystemRoleMenuPermissionVO> bind(Long menuId, Collection<SystemRoleVO> roles) throws Exception{
 		
-		MenuPO menu = menuDao.findOne(menuId);
+		MenuPO menu = menuDao.findById(menuId);
 		if(menu == null){
 			throw new MenuNotExistException(menuId);
 		}
@@ -82,7 +82,7 @@ public class SystemRoleMenuPermissionService {
 			permission.setUpdateTime(new Date());
 			permissions.add(permission);
 		}
-		systemRoleMenuPermissionDao.save(permissions);
+		systemRoleMenuPermissionDao.saveAll(permissions);
 		
 		List<SystemRoleMenuPermissionVO> view_permissions = new ArrayList<SystemRoleMenuPermissionVO>();
 		for(SystemRoleMenuPermissionPO permission:permissions){
@@ -109,7 +109,7 @@ public class SystemRoleMenuPermissionService {
 	 * @return SystemRoleMenuPermissionVO 权限信息
 	 */
 	public SystemRoleMenuPermissionVO setHomePage(Long id) throws Exception{
-		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findOne(id);
+		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findById(id);
 		if(permission == null){
 			throw new SystemRoleMenuPermissionNotFoundException(id);
 		}
@@ -127,7 +127,7 @@ public class SystemRoleMenuPermissionService {
 					needSave.add(p);
 				}
 			}
-			systemRoleMenuPermissionDao.save(needSave);
+			systemRoleMenuPermissionDao.saveAll(needSave);
 		}
 		permission.setFlag(SystemRoleMenuPermissionFlag.HOME_PAGE);
 		systemRoleMenuPermissionDao.save(permission);

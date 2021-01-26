@@ -174,7 +174,7 @@ public class ProcessController {
 		
 		UserVO user = userQuery.current();
 		
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		
 		if(process == null){
 			throw new ProcessNotExistException(id);
@@ -203,7 +203,7 @@ public class ProcessController {
 		
 		UserVO user = userQuery.current();
 		
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		
 		if(process != null){
 			processService.delete(process);
@@ -257,7 +257,7 @@ public class ProcessController {
 		
 		UserVO user = userQuery.current();
 		
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		
 		if(process == null){
 			throw new ProcessNotExistException(id);
@@ -273,7 +273,7 @@ public class ProcessController {
 					restIds.add(accessPoint.getServiceId());
 				}
 			}
-			List<RestServicePO> restEntities = restServiceDao.findAll(restIds);
+			List<RestServicePO> restEntities = restServiceDao.findAllById(restIds);
 			for(RestServicePO entry:restEntities){
 				GroupEntryVO groupEntry = new GroupEntryVO().set(entry).setEntries(new ArrayList<EntryVO>());
 				groupEntries.add(groupEntry);
@@ -349,7 +349,7 @@ public class ProcessController {
 		
 		UserVO user = userQuery.current();
 		
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		
 		if(process == null){
 			throw new ProcessNotExistException(id);
@@ -357,7 +357,7 @@ public class ProcessController {
 		
 		List<Long> accessPointIdList = JSON.parseArray(accessPointIds, Long.class);
 		
-		List<AccessPointPO> accessPoints = accessPointDao.findAll(accessPointIdList);
+		List<AccessPointPO> accessPoints = accessPointDao.findAllById(accessPointIdList);
 		
 		if(accessPointIdList.size() != (accessPoints==null?0:accessPoints.size())){
 			if(accessPoints!=null && accessPoints.size()>0){
@@ -397,7 +397,7 @@ public class ProcessController {
 		
 		UserVO user = userQuery.current();
 		
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		
 		if(process == null){
 			throw new ProcessNotExistException(id);

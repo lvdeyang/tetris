@@ -57,7 +57,7 @@ public class DatabaseQuery {
 		Connection con = null;
 		ResultSet rs = null;
 		
-		DatabasePO databasePO = databaseDAO.findOne(id);
+		DatabasePO databasePO = databaseDAO.findById(id);
 		
 		StringBufferWrapper urlBufferWrapper = new StringBufferWrapper().append("jdbc:mysql://")
 				                               .append(databasePO.getDatabaseIP()).append(":").append(databasePO.getDatabasePort())
@@ -121,7 +121,7 @@ public class DatabaseQuery {
 				}
 			}
 			databasesPOs.removeAll(reDatabasesPOs);
-			databasesDAO.save(databasesPOs);
+			databasesDAO.saveAll(databasesPOs);
 		}
 		List<DatabasesPO> databasesPOs = databasesDAO.findByDatabaseId(id);
 		List<DatabasesVO> databasesVOs = new ArrayList<DatabasesVO>();
@@ -180,7 +180,7 @@ public class DatabaseQuery {
 	 * @return uri 下载路径
 	 */
 	public Map<String, String> downloadBackup(Long databaseBackupId)throws Exception{
-		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findOne(databaseBackupId);
+		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findById(databaseBackupId);
 		
 		
 		Map<String, String> data = new HashMapWrapper<String, String>().put("name", databaseBackupPO.getName())
@@ -239,7 +239,7 @@ public class DatabaseQuery {
 	 }
 
 	public String[] findDatabase(Long id) {
-		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findOne(id);
+		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findById(id);
 		if (null != databaseBackupPO.getBackupname() || !"".equals(databaseBackupPO.getBackupname())){
 			String[] name = databaseBackupPO.getBackupname().split(" ");
 			return name;

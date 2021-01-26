@@ -76,7 +76,7 @@ public class StreamTranscodingTaskService {
 	}
 	
 	public void sendStopCallback(Long messageId, Long assetId) throws Exception{
-		StreamTranscodingTaskPO taskPO = streamTranscodingTaskDAO.findOne(messageId);
+		StreamTranscodingTaskPO taskPO = streamTranscodingTaskDAO.findById(messageId);
 		
 		if (taskPO == null) return;
 		String recordCallbackUrl = taskPO.getRecordCallback();

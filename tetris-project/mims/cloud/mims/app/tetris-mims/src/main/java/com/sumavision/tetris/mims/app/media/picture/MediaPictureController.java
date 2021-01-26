@@ -45,7 +45,6 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.operation.accessRecord.OperationRecordService;
-import com.sumavision.tetris.mims.app.operation.accessRecord.OperationRecordVO;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
@@ -142,7 +141,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -191,7 +190,7 @@ public class MediaPictureController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaPicturePO picture = mediaPictureDao.findOne(id);
+		MediaPicturePO picture = mediaPictureDao.findById(id);
 		if(picture == null){
 			throw new MediaPictureNotExistException(id);
 		}
@@ -489,7 +488,7 @@ public class MediaPictureController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(id);
@@ -521,7 +520,7 @@ public class MediaPictureController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaPicturePO media = mediaPictureDao.findOne(mediaId);
+		MediaPicturePO media = mediaPictureDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(mediaId);
@@ -533,7 +532,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -568,7 +567,7 @@ public class MediaPictureController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(mediaId);
+		MediaPicturePO media = mediaPictureDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(mediaId);
@@ -580,7 +579,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -618,7 +617,7 @@ public class MediaPictureController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(id);

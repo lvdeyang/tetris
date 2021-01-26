@@ -57,7 +57,7 @@ public class CompanyQuery {
 	 * @return List<CompanyPO> 公司列表
 	 */
 	public List<CompanyPO> findAllOrderByUpdateTimeDesc(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<CompanyPO> companies = companyDao.findAllOrderByUpdateTimeDesc(page);
 		return companies.getContent();
 	}
@@ -82,7 +82,7 @@ public class CompanyQuery {
 		if(company.getThemeId() == null){
 			theme = systemThemeDao.findByUrl("");
 		}else{
-			theme = systemThemeDao.findOne(company.getThemeId());
+			theme = systemThemeDao.findById(company.getThemeId());
 		}
 		
 		company.setThemeId(theme.getId())

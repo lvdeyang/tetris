@@ -52,7 +52,7 @@ public class OrganizationUserPermissionQuery {
 			for(OrganizationUserPermissionPO permission:permissions){
 				userIds.add(Long.valueOf(permission.getUserId()));
 			}
-			List<UserPO> users = userDao.findAll(userIds);
+			List<UserPO> users = userDao.findAllById(userIds);
 			for(OrganizationUserPermissionPO permission:permissions){
 				for(UserPO user:users){
 					if(permission.getUserId().equals(user.getId().toString())){
@@ -79,7 +79,7 @@ public class OrganizationUserPermissionQuery {
 	 * @return List<OrganizationUserPermissionPO> 权限列表
 	 */
 	public List<OrganizationUserPermissionPO> findByOrganizationId(Long organizationId, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage -1, pageSize);
+		Pageable page = PageRequest.of(currentPage -1, pageSize);
 		Page<OrganizationUserPermissionPO> permissions = organizationUserPermissionDao.findByOrganizationId(organizationId, page);
 		return permissions.getContent();
 	}

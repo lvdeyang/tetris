@@ -86,7 +86,7 @@ public class StatisticsPartitionSizeThread implements AsynchronizedSystemInitial
 								e.printStackTrace();
 							}
 						}
-						systemStoragePartitionDao.save(partitions);
+						systemStoragePartitionDao.saveAll(partitions);
 					}catch(InterruptedException e){
 						e.printStackTrace();
 					}

@@ -52,7 +52,7 @@ public class HeartBeatThread implements AsynchronizedSystemInitialization{
 							boolean online = gadget.heartbeat(entity.getGadgetBasePath());
 							entity.setStatus(online?1:0);
 						}
-						systemStorageDao.save(entities);
+						systemStorageDao.saveAll(entities);
 					}catch(InterruptedException e){
 						e.printStackTrace();
 					}

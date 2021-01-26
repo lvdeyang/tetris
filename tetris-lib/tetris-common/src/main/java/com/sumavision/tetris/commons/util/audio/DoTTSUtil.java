@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TTS 文字转语音文件
@@ -19,8 +20,8 @@ import org.apache.log4j.Logger;
  * @author lzp 2019年7月31日 修改
  */
 public class DoTTSUtil {
-
-	public static final Logger LOGGER = Logger.getLogger(DoTTSUtil.class);
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(DoTTSUtil.class);
 
 	// TODO 暂定目录
 	// public static String webRootDir =

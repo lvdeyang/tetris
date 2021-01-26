@@ -119,7 +119,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 		}
 
 		if (!successSers.isEmpty()) {
-			serInfoDao.save(successSers);
+			serInfoDao.saveAll(successSers);
 		}
 
 		return successSers.size();
@@ -144,13 +144,13 @@ public class SerInfoAndNodeSyncLdapUtils {
 					serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 				}
 
-				serInfoDao.save(serInfoPOList);
+				serInfoDao.saveAll(serInfoPOList);
 			}
 
 			// 在删除从LDAP服务端下载的数据
 			List<SerInfoPO> externalSerInfoPOList = serInfoDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 			if (!CollectionUtils.isEmpty(externalSerInfoPOList)) {
-				serInfoDao.delete(externalSerInfoPOList);
+				serInfoDao.deleteInBatch(externalSerInfoPOList);
 			}
 
 			return "";
@@ -254,7 +254,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 		}
 
 		if (!successSerNodePOs.isEmpty()) {
-			serNodeDao.save(successSerNodePOs);
+			serNodeDao.saveAll(successSerNodePOs);
 		}
 
 		return successSerNodePOs.size();
@@ -285,13 +285,13 @@ public class SerInfoAndNodeSyncLdapUtils {
 
 				}
 
-				serNodeDao.save(serNodeList);
+				serNodeDao.saveAll(serNodeList);
 			}
 
 			// 再删除从LDAP服务端下载的数据
 			List<SerNodePO> externalSerNodePOList = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 			if (!CollectionUtils.isEmpty(externalSerNodePOList)) {
-				serNodeDao.delete(externalSerNodePOList);
+				serNodeDao.deleteInBatch(externalSerNodePOList);
 			}
 			
 			//清除关联关系

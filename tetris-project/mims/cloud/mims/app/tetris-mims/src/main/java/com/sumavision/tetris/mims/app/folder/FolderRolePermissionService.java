@@ -30,7 +30,7 @@ public class FolderRolePermissionService {
 	 * @param Long permissionId 授权id
 	 */
 	public void deletePermission(Long permissionId) throws Exception{
-		FolderRolePermissionPO permission = folderRolePermissionDao.findOne(permissionId);
+		FolderRolePermissionPO permission = folderRolePermissionDao.findById(permissionId);
 		if(permission != null){
 			folderRolePermissionDao.delete(permission);
 		}

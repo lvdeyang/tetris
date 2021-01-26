@@ -24,7 +24,7 @@ public class OperationPackageQuery {
 	 * @return OperationPackageVO 套餐信息
 	 */
 	public OperationPackageVO queryById(Long id) throws Exception {
-		OperationPackagePO packagePO = operationPackageDAO.findOne(id);
+		OperationPackagePO packagePO = operationPackageDAO.findById(id);
 		if (packagePO != null) {
 			return new OperationPackageVO().set(packagePO);
 		}
@@ -40,7 +40,7 @@ public class OperationPackageQuery {
 	 * @return List<OperationPackageVO> 套餐信息
 	 */
 	public List<OperationPackageVO> queryByIds(List<Long> ids) throws Exception {
-		List<OperationPackagePO> packagePO = operationPackageDAO.findAll(ids);
+		List<OperationPackagePO> packagePO = operationPackageDAO.findAllById(ids);
 		if (packagePO == null || packagePO.isEmpty()) throw new OperationPackageNotExistException();
 		return OperationPackageVO.getConverter(OperationPackageVO.class).convert(packagePO, OperationPackageVO.class);
 	}

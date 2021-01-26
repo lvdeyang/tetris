@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
-import com.sumavision.tetris.system.role.exception.UserBindMoreThanOnneSystemRoleException;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.exception.UserNotExistException;
@@ -45,7 +44,7 @@ public class UserSystemRolePermissionService {
 	 */
 	public List<UserSystemRolePermissionVO> bindSystemRole(Long userId, Collection<Long> roleIds) throws Exception{
 		
-		UserPO user = userDao.findOne(userId);
+		UserPO user = userDao.findById(userId);
 		if(user == null){
 			throw new UserNotExistException(userId);
 		}
@@ -56,7 +55,7 @@ public class UserSystemRolePermissionService {
 			//throw new UserBindMoreThanOnneSystemRoleException();
 		}
 		
-		List<SystemRolePO> roles = systemRoleDao.findAll(roleIds);
+		List<SystemRolePO> roles = systemRoleDao.findAllById(roleIds);
 		if(roles==null || roles.size()<=0) return null;
 		
 		List<UserSystemRolePermissionPO> existPermissions = userSystemRolePermissionDao.findByUserIdAndRoleIdIn(userId, roleIds);
@@ -83,7 +82,7 @@ public class UserSystemRolePermissionService {
 			}
 		}
 		
-		userSystemRolePermissionDao.save(permissions);
+		userSystemRolePermissionDao.saveAll(permissions);
 		
 		List<UserSystemRolePermissionVO> view_permissions = new ArrayList<UserSystemRolePermissionVO>();
 		for(UserSystemRolePermissionPO permission:permissions){
@@ -109,7 +108,7 @@ public class UserSystemRolePermissionService {
 	 */
 	public List<UserSystemRolePermissionVO> bindUser(Long roleId, Collection<Long> userIds) throws Exception{
 		
-		SystemRolePO role = systemRoleDao.findOne(roleId);
+		SystemRolePO role = systemRoleDao.findById(roleId);
 		if(role == null){
 			throw new SystemRoleNotExistException(roleId);
 		}
@@ -119,7 +118,7 @@ public class UserSystemRolePermissionService {
 			userSystemRolePermissionDao.deleteInBatch(deletePermissions);
 		}
 		
-		List<UserPO> users = userDao.findAll(userIds);
+		List<UserPO> users = userDao.findAllById(userIds);
 		if(users==null || users.size()<=0) return null;
 		
 		List<UserSystemRolePermissionPO> existPermissions = userSystemRolePermissionDao.findByRoleIdAndUserIdIn(roleId, userIds);
@@ -146,7 +145,7 @@ public class UserSystemRolePermissionService {
 			}
 		}
 		
-		userSystemRolePermissionDao.save(permissions);
+		userSystemRolePermissionDao.saveAll(permissions);
 		
 		List<UserSystemRolePermissionVO> view_permissions = new ArrayList<UserSystemRolePermissionVO>();
 		for(UserSystemRolePermissionPO permission:permissions){
@@ -170,7 +169,7 @@ public class UserSystemRolePermissionService {
 	 * @param Long id 权限id
 	 */
 	public void unbind(Long id) throws Exception{
-		UserSystemRolePermissionPO permission = userSystemRolePermissionDao.findOne(id);
+		UserSystemRolePermissionPO permission = userSystemRolePermissionDao.findById(id);
 		
 		if(permission != null){
 			userSystemRolePermissionDao.delete(permission);

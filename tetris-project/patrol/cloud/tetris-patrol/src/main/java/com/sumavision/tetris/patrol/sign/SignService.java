@@ -62,7 +62,7 @@ public class SignService {
 	 * @param Long id 签到信息id
 	 */
 	public void delete(Long id) throws Exception{
-		SignPO sign = signDao.findOne(id);
+		SignPO sign = signDao.findById(id);
 		if(sign != null){
 			signDao.delete(sign);
 		}

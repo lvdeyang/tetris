@@ -117,7 +117,7 @@ public class UserQuery {
 	 * @return UserVO 游客
 	 */
 	public UserVO findTourist(String userUuId) throws Exception{
-		UserPO user = userDao.findOne(Long.valueOf(userUuId));
+		UserPO user = userDao.findById(Long.valueOf(userUuId));
 		if(user.getUsername()==null || "".equals(user.getUsername())){
 			return new UserVO().set(user);
 		}
@@ -193,7 +193,7 @@ public class UserQuery {
 		TokenPO tokenEntity = tokenDao.findByToken(token);
 		if(tokenEntity == null) return null;
 		
-		UserPO userEntity = userDao.findOne(tokenEntity.getUserId());
+		UserPO userEntity = userDao.findById(tokenEntity.getUserId());
 		if(userEntity == null) return null;
 		
 		UserVO user = new UserVO();
@@ -226,7 +226,7 @@ public class UserQuery {
 			CompanyPO company = companyDao.findByUserId(userEntity.getId());
 			user.setCompanyInfo(company);
 			if(company.getThemeId() != null){
-				SystemThemePO theme = systemThemeDao.findOne(company.getThemeId());
+				SystemThemePO theme = systemThemeDao.findById(company.getThemeId());
 				if(theme == null){
 					user.setThemeUrl(SystemThemePO.DEFAULT_URL);
 				}else{
@@ -274,7 +274,7 @@ public class UserQuery {
 	 * @return List<UserPO> 用户列表
 	 */
 	public List<UserPO> findAllOrderByUpdateTimeDesc(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findAllOrderByUpdateTimeDesc(page);
 		return users.getContent();
 	}
@@ -310,7 +310,7 @@ public class UserQuery {
 	 * @return List<UserPO> 用户列表
 	 */
 	public List<UserPO> findWithExceptOrderByUpdateTimeDesc(Collection<Long> except, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findWithExceptOrderByUpdateTimeDesc(except, page);
 		return users.getContent();
 	}
@@ -336,7 +336,7 @@ public class UserQuery {
 		String usernoExpression = null;
 		if(userno != null) usernoExpression = new StringBufferWrapper().append("%").append(userno).append("%").toString();
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> pagedEntities = userDao.findByCondition(nicknameExpression, usernoExpression, page);
 		List<UserPO> entities = pagedEntities.getContent();
 		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
@@ -371,7 +371,7 @@ public class UserQuery {
 		String usernoExpression = null;
 		if(userno != null) usernoExpression = new StringBufferWrapper().append("%").append(userno).append("%").toString();
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> pagedEntities = userDao.findByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression, page);
 		List<UserPO> entities = pagedEntities.getContent();
 		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
@@ -410,7 +410,7 @@ public class UserQuery {
 				for(UserSystemRolePermissionPO permission:permissions){
 					roleIds.add(permission.getRoleId());
 				}
-				List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+				List<SystemRolePO> businessRoles = systemRoleDao.findAllById(roleIds);
 				for(UserVO row:rows){
 					List<SystemRoleVO> bindRoles = new ArrayList<SystemRoleVO>();
 					for(UserSystemRolePermissionPO permission:permissions){
@@ -526,7 +526,7 @@ public class UserQuery {
 	 * @return List<UserPO> 用户列表
 	 */
 	public List<UserPO> findByCompanyId(Long companyId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByCompanyId(companyId, page);
 		return users.getContent();
 	}
@@ -627,7 +627,7 @@ public class UserQuery {
 	 * @return List<UserPO> 用户列表
 	 */
 	public List<UserPO> findByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByCompanyIdWithExcept(companyId, except, page);
 		return users.getContent();
 	}
@@ -689,7 +689,7 @@ public class UserQuery {
 	 * @return List<UserPO> 用户列表
 	 */
 	public List<UserPO> findByRoleIdWithExcept(Long roleId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByRoleIdWithExcept(roleId, except, page);
 		return users.getContent();
 	}
@@ -915,7 +915,7 @@ public class UserQuery {
 	 */
 	public UserVO queryUserByIdAndType(Long userId, String terminalType) throws Exception{
 		
-		UserVO userVO = new UserVO().set(userDao.findOne(userId));
+		UserVO userVO = new UserVO().set(userDao.findById(userId));
 		TerminalType type = null;
 		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
 		TokenPO tokenPO = tokenDao.findByUserIdAndType(userId, type);
@@ -979,7 +979,7 @@ public class UserQuery {
 	 */
 	public Map<String, Object> listByCompanyIdAndLikeNameWithExcept(Long companyId, String userName, Collection<Long> except, int currentPage, int pageSize) throws Exception{
 		if(except == null) return listByCompanyIdAndLikeName(companyId, userName, currentPage, pageSize);
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> pageUsers = userDao.findByCompanyIdAndLikeNameWithExcept(companyId, userName, except, page);
 		List<UserPO> users = pageUsers.getContent();
 		List<UserVO> view_users = new ArrayList<UserVO>();
@@ -1005,7 +1005,7 @@ public class UserQuery {
 	 * @return Map<String, Object>
 	 */
 	public Map<String, Object> listByCompanyIdAndLikeName(Long companyId, String userName, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserPO> pageUsers = userDao.findByCompanyIdAndLikeName(companyId, userName, page);
 		List<UserPO> users = pageUsers.getContent();
 		List<UserVO> view_users = new ArrayList<UserVO>();

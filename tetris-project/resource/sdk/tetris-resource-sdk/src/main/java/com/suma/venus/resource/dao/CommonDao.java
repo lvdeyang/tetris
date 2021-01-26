@@ -17,17 +17,17 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CommonDao<T>{
-	public T findOne(Long id);
+	public T findById(Long id);
 	public List<T> findAll();
-	public List<T> findAll(Iterable<Long> ids);
+	public List<T> findAllById(Iterable<Long> ids);
 	public long count();
 	public void save(T t);
-	public List<T> save(Iterable<T> list);
+	public List<T> saveAll(Iterable<T> list);
 	public void delete(T t);
-	public void delete(Iterable<T> list);
-	public void delete(Long id);
+	public void deleteInBatch(Iterable<T> list);
+	public void deleteById(Long id);
 	public void deleteAll();
-	public boolean exists(Long id);	
+	public boolean existsById(Long id);	
 	public Page<T> findAll(Pageable pageable);
 	public List<T> findAll(Specification<T> spec);
 }

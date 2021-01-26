@@ -95,7 +95,7 @@ public class MaterialController {
 		if(!folderTool.hasPermission(user.getUuid(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
-		FolderPO current = folderDao.findOne(folderId);
+		FolderPO current = folderDao.findById(folderId);
 		
 		//获取当前文件夹的所有父目录
 		List<FolderPO> parentFolders = folderTool.getParentFolders(current);
@@ -164,7 +164,7 @@ public class MaterialController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -435,7 +435,7 @@ public class MaterialController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MaterialFilePO material = materialFileDao.findOne(id);
+		MaterialFilePO material = materialFileDao.findById(id);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(id);
@@ -469,7 +469,7 @@ public class MaterialController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MaterialFilePO material = materialFileDao.findOne(materialId);
+		MaterialFilePO material = materialFileDao.findById(materialId);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(materialId);
@@ -481,7 +481,7 @@ public class MaterialController {
 			throw new UserHasNoPermissionForMaterialException(user.getUuid(), material.getFolderId());
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -516,7 +516,7 @@ public class MaterialController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MaterialFilePO material = materialFileDao.findOne(materialId);
+		MaterialFilePO material = materialFileDao.findById(materialId);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(materialId);
@@ -528,7 +528,7 @@ public class MaterialController {
 			throw new UserHasNoPermissionForMaterialException(user.getUuid(), material.getFolderId());
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -566,7 +566,7 @@ public class MaterialController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MaterialFilePO material = materialFileDao.findOne(id);
+		MaterialFilePO material = materialFileDao.findById(id);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(id);
@@ -600,7 +600,7 @@ public class MaterialController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MaterialFilePO material = materialFileDao.findOne(id);
+		MaterialFilePO material = materialFileDao.findById(id);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(id);
@@ -637,7 +637,7 @@ public class MaterialController {
 			String txt,
 			HttpServletRequest request) throws Exception{
 		
-		MaterialFilePO material = materialFileDao.findOne(id);
+		MaterialFilePO material = materialFileDao.findById(id);
 		
 		if(material == null){
 			throw new MaterialFileNotExistException(id);

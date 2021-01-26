@@ -119,7 +119,7 @@ public class ApiAndroidPictureController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaPicturePO picture = mediaPictureDao.findOne(id);
+		MediaPicturePO picture = mediaPictureDao.findById(id);
 		if(picture == null){
 			throw new MediaPictureNotExistException(id);
 		}
@@ -144,7 +144,7 @@ public class ApiAndroidPictureController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(id);
@@ -198,7 +198,7 @@ public class ApiAndroidPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}

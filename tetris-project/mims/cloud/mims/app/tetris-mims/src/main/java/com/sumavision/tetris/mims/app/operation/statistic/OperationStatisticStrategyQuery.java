@@ -67,7 +67,7 @@ public class OperationStatisticStrategyQuery {
 	 * @return OperationStatisticDistridutionVO 策略信息
 	 */
 	public OperationStatisticStrategyVO queryById(Long id) throws Exception {
-		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findOne(id);
+		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findById(id);
 		return statisticDistridutionPO == null ? null : new OperationStatisticStrategyVO().set(statisticDistridutionPO);
 	}
 }

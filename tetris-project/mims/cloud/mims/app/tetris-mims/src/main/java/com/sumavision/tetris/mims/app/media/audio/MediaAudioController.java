@@ -135,7 +135,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -195,7 +195,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -246,7 +246,7 @@ public class MediaAudioController {
 		
 		UserVO user = userQuery.current();
 
-		MediaAudioPO audio = mediaAudioDao.findOne(id);
+		MediaAudioPO audio = mediaAudioDao.findById(id);
 		if(audio == null){
 			throw new MediaAudioNotExistException(id);
 		}
@@ -293,7 +293,7 @@ public class MediaAudioController {
 		
 		UserVO user = userQuery.current();
 
-		MediaAudioPO audio = mediaAudioDao.findOne(id);
+		MediaAudioPO audio = mediaAudioDao.findById(id);
 		audio.setIsTop(status);
 		mediaAudioDao.save(audio);
 		
@@ -579,7 +579,7 @@ public class MediaAudioController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		
 		if(media == null){
 			throw new MediaAudioNotExistException(id);
@@ -611,7 +611,7 @@ public class MediaAudioController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaAudioPO media = mediaAudioDao.findOne(mediaId);
+		MediaAudioPO media = mediaAudioDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaAudioNotExistException(mediaId);
@@ -623,7 +623,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -658,7 +658,7 @@ public class MediaAudioController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaAudioPO media = mediaAudioDao.findOne(mediaId);
+		MediaAudioPO media = mediaAudioDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaAudioNotExistException(mediaId);
@@ -670,7 +670,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}

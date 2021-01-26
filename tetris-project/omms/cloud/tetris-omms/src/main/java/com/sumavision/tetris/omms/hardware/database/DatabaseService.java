@@ -10,10 +10,8 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.net.ftp.FTP;
@@ -34,16 +32,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupDAO;
@@ -53,7 +50,6 @@ import com.sumavision.tetris.omms.hardware.database.databases.DatabasesDAO;
 import com.sumavision.tetris.omms.hardware.database.databases.DatabasesPO;
 import com.sumavision.tetris.omms.hardware.server.ServerDAO;
 import com.sumavision.tetris.omms.hardware.server.ServerPO;
-import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentService;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpCreateFolderFailException;
@@ -69,7 +65,7 @@ public class DatabaseService {
 	
 	public static final String RECOVER_FOLDER = "recoverbackup";
 	
-	private static final Logger log = Logger.getLogger(DatabaseService.class);
+	private static final Logger log = LoggerFactory.getLogger(DatabaseService.class);
 	
 	@Autowired
 	private DatabaseDAO databaseDAO;
@@ -101,7 +97,7 @@ public class DatabaseService {
 	public Object backupDatabases(Long id, String[] databases, String name, String remark)throws Exception{
 		
 		CloseableHttpClient client = null;
-		DatabasePO databasePO = databaseDAO.findOne(id);
+		DatabasePO databasePO = databaseDAO.findById(id);
 		Set<Long> databasesIds = new HashSet<Long>();
 		if(databases != null && databases.length > 0){
 			for (String data : databases) {
@@ -112,7 +108,7 @@ public class DatabaseService {
 		
 		try {
 			
-			ServerPO server = serverDAO.findOne(databasePO.getServerId());
+			ServerPO server = serverDAO.findById(databasePO.getServerId());
 			
 			
 			StringBufferWrapper databasesNames = new StringBufferWrapper();
@@ -242,7 +238,7 @@ public class DatabaseService {
 	public void enableFtp(Long serverId) throws Exception{
 		CloseableHttpClient client = null;
 		try {
-			ServerPO server = serverDAO.findOne(serverId);
+			ServerPO server = serverDAO.findById(serverId);
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -434,9 +430,9 @@ public class DatabaseService {
 	 * @throws Exception
 	 */
 	public Object recoverDatabase(Long databaseBackupId ,String databaseName) throws Exception{
-		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findOne(databaseBackupId);
-		DatabasePO databasePO = databaseDAO.findOne(databaseBackupPO.getDatabaseId());
-		ServerPO server = serverDAO.findOne(databasePO.getServerId());
+		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findById(databaseBackupId);
+		DatabasePO databasePO = databaseDAO.findById(databaseBackupPO.getDatabaseId());
+		ServerPO server = serverDAO.findById(databasePO.getServerId());
 		enableFtp(server.getId());
 		
 		//上传备份数据库到需要恢复的ftp服务器
@@ -589,12 +585,12 @@ public class DatabaseService {
  	 * @param id 备份数据库的id
 	 */   //此处未涉及服务器上数据的删除
 	public Boolean deleteBackup(Long id) throws Exception{
-		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findOne(id);
+		DatabaseBackupPO databaseBackupPO = databaseBackupDAO.findById(id);
 		boolean success = false;
 		FTPClient ftp = new FTPClient();
 		if (null != databaseBackupPO) {
-			DatabasePO databasePO = databaseDAO.findOne(databaseBackupPO.getDatabaseId());
-			ServerPO server = serverDAO.findOne(databasePO.getServerId());
+			DatabasePO databasePO = databaseDAO.findById(databaseBackupPO.getDatabaseId());
+			ServerPO server = serverDAO.findById(databasePO.getServerId());
 			try{
 				enableFtp(server.getId());
 				int reply;

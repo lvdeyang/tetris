@@ -197,7 +197,7 @@ public class ResourceRemoteService {
 				}
 			}
 			if (!toUpdateBundles.isEmpty()) {
-				bundleDao.save(toUpdateBundles);
+				bundleDao.saveAll(toUpdateBundles);
 			}
 
 			// 更新对应用户的在线状态
@@ -223,7 +223,7 @@ public class ResourceRemoteService {
 						}
 					}
 				}
-				folderUserMapDao.save(maps);
+				folderUserMapDao.saveAll(maps);
 			}
 		}
 

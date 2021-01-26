@@ -30,7 +30,7 @@ public class InstallationPackageHistoryQuery {
 			int currentPage, 
 			int pageSize
 			) throws Exception {
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<InstallationPackageHistoryPO> paged = installationPackageHistoryDAO.findByServiceTypeId(serviceTypeId, page);
 		List<InstallationPackageHistoryPO> entities = paged.getContent();
 		List<InstallationPackageHistoryVO> rows = InstallationPackageHistoryVO.getConverter(InstallationPackageHistoryVO.class).convert(entities, InstallationPackageHistoryVO.class);

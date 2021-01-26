@@ -127,7 +127,7 @@ public class ProcessService {
 		
 		ProcessPO template = null;
 		if(templateId != null){
-			template = processDao.findOne(templateId);
+			template = processDao.findById(templateId);
 			if(template == null){
 				throw new ProcessNotExistException(templateId);
 			}
@@ -193,7 +193,7 @@ public class ProcessService {
 				for(ProcessVariablePO variable:existVariables){
 					copyVariables.add(variable.copy(process.getId()));
 				}
-				processVariableDao.save(copyVariables);
+				processVariableDao.saveAll(copyVariables);
 			}
 			
 			//复制流程变量映射
@@ -203,7 +203,7 @@ public class ProcessService {
 				for(ProcessParamReferencePO paramReference:existParamReferences){
 					copyParamReferences.add(paramReference.copy(process.getId()));
 				}
-				processParamReferenceDao.save(copyParamReferences);
+				processParamReferenceDao.saveAll(copyParamReferences);
 			}
 		}
 		
@@ -240,7 +240,7 @@ public class ProcessService {
 				permission.setUpdateTime(new Date());
 				permissions.add(permission);
 			}
-			accessPointProcessPermissionDao.save(permissions);
+			accessPointProcessPermissionDao.saveAll(permissions);
 		}
 		
 		process.setBpmn(bpmn);

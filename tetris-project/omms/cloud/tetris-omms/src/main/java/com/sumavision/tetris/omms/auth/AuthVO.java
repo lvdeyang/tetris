@@ -1,6 +1,5 @@
 package com.sumavision.tetris.omms.auth;
 
-import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class AuthVO extends AbstractBaseVO<AuthVO, AuthPO>{

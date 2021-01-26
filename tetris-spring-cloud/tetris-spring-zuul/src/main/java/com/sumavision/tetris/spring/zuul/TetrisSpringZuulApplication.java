@@ -5,17 +5,16 @@ import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.cloud.netflix.zuul.filters.pre.ServletDetectionFilter;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -58,6 +57,29 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 	 * <b>日期：</b>2019年5月31日 上午11:51:29
 	 */
 	@Bean
+    public TomcatServletWebServerFactory containerFactory() {
+        return new TomcatServletWebServerFactory() {
+            protected void customizeConnector(Connector connector) {
+            	super.customizeConnector(connector);
+            	if(connector.getProtocolHandler() instanceof AbstractHttp11Protocol<?>){
+	                ((AbstractHttp11Protocol<?>)connector.getProtocolHandler()).setMaxSwallowSize(-1);
+	            }
+                /*int maxSize = 50000000;
+                super.customizeConnector(connector);
+                connector.setMaxPostSize(maxSize);
+                connector.setMaxSavePostSize(maxSize);
+                if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
+
+                    ((AbstractHttp11Protocol <?>) connector.getProtocolHandler()).setMaxSwallowSize(maxSize);
+                    logger.info("Set MaxSwallowSize "+ maxSize);
+                }*/
+            }
+        };
+
+    }
+	
+	/*2.x中被换了
+	@Bean
     public TomcatEmbeddedServletContainerFactory tomcatEmbeddedServletContainerFactory(){
         TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
         factory.addConnectorCustomizers(new TomcatConnectorCustomizer(){
@@ -69,7 +91,7 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 			}
         });
         return factory;
-    }
+    }*/
 	
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {

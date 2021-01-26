@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -71,13 +70,13 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 		List<MediaFileEquipmentPermissionBO> permissionBOs = new ArrayList<MediaFileEquipmentPermissionBO>();
 		switch (mediaType) {
 		case "picture":
-			List<MediaPicturePO> mediaPicturePOs = mediaPictureDAO.findAll(idList);
+			List<MediaPicturePO> mediaPicturePOs = mediaPictureDAO.findAllById(idList);
 			for (MediaPicturePO mediaPicturePO : mediaPicturePOs) {
 				permissionBOs.add(new MediaFileEquipmentPermissionBO().setFromPicturePO(mediaPicturePO));
 			}
 			break;
 		case "video":
-			List<MediaVideoPO> mediaVideoVOs = mediaVideoDAO.findAll(idList);
+			List<MediaVideoPO> mediaVideoVOs = mediaVideoDAO.findAllById(idList);
 			for (MediaVideoPO mediaVideoPO : mediaVideoVOs) {
 				permissionBOs.add(new MediaFileEquipmentPermissionBO().setFromVideoPO(mediaVideoPO));
 			}
@@ -116,7 +115,7 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 		
 		//添加文件夹
 		if(folderId != null){
-			FolderPO folder = folderDao.findOne(folderId);
+			FolderPO folder = folderDao.findById(folderId);
 			if(folder != null){
 				permissionService.addPermissionSend(folder, equipmentIp);
 			}

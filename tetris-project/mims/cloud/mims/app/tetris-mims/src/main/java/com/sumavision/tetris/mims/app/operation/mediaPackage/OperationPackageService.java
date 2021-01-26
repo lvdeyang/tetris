@@ -68,7 +68,7 @@ public class OperationPackageService {
 	 * @return OperationPackageVO
 	 */
 	public OperationPackageVO edit(Long packageId, String name, Long price, String remark) throws Exception {
-		OperationPackagePO packagePO = operationPackageDAO.findOne(packageId);
+		OperationPackagePO packagePO = operationPackageDAO.findById(packageId);
 		if (packagePO != null) {
 			if (!packageUsed(packageId) || packagePO.getPrice() == price) {
 				packagePO.setName(name);
@@ -100,7 +100,7 @@ public class OperationPackageService {
 	 * @return OperationPackageVO
 	 */
 	public OperationPackageVO copy(Long sourceId) throws Exception {
-		OperationPackagePO sourcePackage = operationPackageDAO.findOne(sourceId);
+		OperationPackagePO sourcePackage = operationPackageDAO.findById(sourceId);
 		return add(sourcePackage.getGroupId(), sourcePackage.getName(), sourcePackage.getPrice(), sourcePackage.getRemark());
 	}
 	
@@ -112,10 +112,10 @@ public class OperationPackageService {
 	 * @param Long packageId 套餐id
 	 */
 	public void delete(Long packageId) throws Exception {
-		OperationPackagePO packagePO = operationPackageDAO.findOne(packageId);
+		OperationPackagePO packagePO = operationPackageDAO.findById(packageId);
 		if (packagePO != null) {
 			if (!packageUsed(packageId)) {
-				operationPackageDAO.delete(packageId);
+				operationPackageDAO.deleteById(packageId);
 				mediaPermissionService.removeByPackageId(packageId);
 				mediaTypePermissionService.removeByPackageId(packageId);
 				streamPermissionService.removeByPackageId(packageId);
@@ -136,7 +136,7 @@ public class OperationPackageService {
 	 * @param Long packageId 套餐id
 	 */
 	public void setInvalid(Long packageId) throws Exception {
-		OperationPackagePO packagePO = operationPackageDAO.findOne(packageId);
+		OperationPackagePO packagePO = operationPackageDAO.findById(packageId);
 		if (packagePO != null) {
 			packagePO.setStatus(OperationPackageStatus.INVALID);
 			operationPackageDAO.save(packagePO);

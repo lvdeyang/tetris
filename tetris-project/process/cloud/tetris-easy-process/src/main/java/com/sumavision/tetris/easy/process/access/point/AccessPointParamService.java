@@ -76,7 +76,7 @@ public class AccessPointParamService {
 			throw new SerialAlreadyExistException(accessPointId, serial);
 		}*/
 		
-		AccessPointPO accessPoint = accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint = accessPointDao.findById(accessPointId);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(accessPointId);
@@ -85,7 +85,7 @@ public class AccessPointParamService {
 		AccessPointParamPO parentParam = null;
 		
 		if(parentId != null){
-			parentParam = accessPointParamDao.findOne(parentId);
+			parentParam = accessPointParamDao.findById(parentId);
 			if(parentParam == null){
 				throw new AccessPointParamNotExistException(parentId);
 			}
@@ -134,7 +134,7 @@ public class AccessPointParamService {
 	 */
 	public void delete(Long id) throws Exception{
 		
-		AccessPointParamPO param = accessPointParamDao.findOne(id);
+		AccessPointParamPO param = accessPointParamDao.findById(id);
 		
 		if(param == null) return;
 		

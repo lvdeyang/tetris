@@ -359,12 +359,12 @@ public class UpdateBatchBundlesUtil {
 
 		// 这种save的效率 ?
 		// 经测试，效率还可
-		bundleDao.save(bundlePOList);
-		channelSchemeDao.save(channelSchemePOList);
-		lockChannelParamDao.save(lockChannelParamPOList);
-		screenSchemeDao.save(screenSchemePOList);
-		lockScreenParamDao.save(lockScreenParamPOList);
-		lockBundleParamDao.save(lockBundleParamPOList);
+		bundleDao.saveAll(bundlePOList);
+		channelSchemeDao.saveAll(channelSchemePOList);
+		lockChannelParamDao.saveAll(lockChannelParamPOList);
+		screenSchemeDao.saveAll(screenSchemePOList);
+		lockScreenParamDao.saveAll(lockScreenParamPOList);
+		lockBundleParamDao.saveAll(lockBundleParamPOList);
 
 		LOGGER.info("lockAndUpdateBatchBundles after time=" + (System.currentTimeMillis() - startTime)
 				+ " , bundlePOList size=" + bundlePOList.size() + " , channelSchemePOList size="
@@ -507,9 +507,9 @@ public class UpdateBatchBundlesUtil {
 
 		}
 
-		channelSchemeDao.save(channelSchemePOList);
-		screenSchemeDao.save(screenSchemePOList);
-		bundleDao.save(bundlePOList);
+		channelSchemeDao.saveAll(channelSchemePOList);
+		screenSchemeDao.saveAll(screenSchemePOList);
+		bundleDao.saveAll(bundlePOList);
 
 		LOGGER.info("unlockAndUpdateBatchBundles saveAll cost time=" + (System.currentTimeMillis() - startTime)
 				+ " , channelSchemePOList size=" + channelSchemePOList.size() + " , screenSchemePOList size="

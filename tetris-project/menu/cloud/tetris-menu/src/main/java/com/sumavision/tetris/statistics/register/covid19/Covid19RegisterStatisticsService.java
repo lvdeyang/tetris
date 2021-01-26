@@ -101,7 +101,7 @@ public class Covid19RegisterStatisticsService {
 			Boolean coughOrFever,
 			Date closingTime,
 			String temperature) throws Exception{
-		Covid19RegisterStatisticsPO entity = covid19RegisterStatisticsDao.findOne(id);
+		Covid19RegisterStatisticsPO entity = covid19RegisterStatisticsDao.findById(id);
 		entity.setName(name);
 		entity.setAge(age);
 		entity.setCompany(company);

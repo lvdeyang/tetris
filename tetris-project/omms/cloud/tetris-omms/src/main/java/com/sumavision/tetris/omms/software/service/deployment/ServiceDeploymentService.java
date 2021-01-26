@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,8 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.mysql.fabric.xmlrpc.base.Array;
-import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -56,7 +53,6 @@ import com.sumavision.tetris.omms.hardware.database.DatabaseService;
 import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupDAO;
 import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupPO;
 import com.sumavision.tetris.omms.hardware.database.databaseBackup.DatabaseBackupVO;
-import com.sumavision.tetris.omms.hardware.database.databases.DatabasesPO;
 import com.sumavision.tetris.omms.hardware.server.ServerDAO;
 import com.sumavision.tetris.omms.hardware.server.ServerPO;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
@@ -134,9 +130,9 @@ public class ServiceDeploymentService {
 			Long serverId,
 			Long installationPackageId) throws Exception{
 		
-		ServerPO serverEntity = serverDao.findOne(serverId);
-		InstallationPackagePO installationPackageEntity = installationPackageDao.findOne(installationPackageId);
-		ServiceTypePO serviceTypeEntity = serviceTypeDao.findOne(installationPackageEntity.getServiceTypeId());
+		ServerPO serverEntity = serverDao.findById(serverId);
+		InstallationPackagePO installationPackageEntity = installationPackageDao.findById(installationPackageId);
+		ServiceTypePO serviceTypeEntity = serviceTypeDao.findById(installationPackageEntity.getServiceTypeId());
 		
 		ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findByServerIdAndServiceTypeId(serverId, installationPackageEntity.getServiceTypeId());
 		
@@ -383,13 +379,13 @@ public class ServiceDeploymentService {
 	public void install(Long deploymentId, String config) throws Exception{
 		CloseableHttpClient client = null;
 		try{
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
 			deployment.setStatus(ServiceDeploymentStatus.INSTALLED);
 			deployment.setConfig(config);
 			serviceDeploymentDao.save(deployment);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
+			ServerPO server = serverDao.findById(deployment.getServerId());
 			
-			InstallationPackagePO installationPackage = installationPackageDao.findOne(deployment.getInstallationPackageId());
+			InstallationPackagePO installationPackage = installationPackageDao.findById(deployment.getInstallationPackageId());
 			List<ProcessPO> list = processDAO.findByInstallationPackageId(installationPackage.getId());
 			List<ProcessDeploymentPO> list2 = new ArrayList<ProcessDeploymentPO>();
 			for (ProcessPO processPO : list) {
@@ -402,7 +398,7 @@ public class ServiceDeploymentService {
 				processDeployment.setDb(processPO.getDb());
 				list2.add(processDeployment);
 			}
-			processDeploymentDAO.save(list2);
+			processDeploymentDAO.saveAll(list2);
 			
 			StringBufferWrapper configBuffer = new StringBufferWrapper();
 			if(config!=null && !"".equals(config)){
@@ -471,11 +467,11 @@ public class ServiceDeploymentService {
 	@Transactional(rollbackFor = Exception.class)
 	public void update(Long deploymentId, Long updatePackageId, String config, Boolean isBackup, String notes) throws Exception{
 		
-		ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-		ServiceTypePO serviceType = serviceTypeDao.findOne(deployment.getServiceTypeId());
+		ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
+		ServiceTypePO serviceType = serviceTypeDao.findById(deployment.getServiceTypeId());
 		String deploymentName = serviceType.getName();
 		
-		InstallationPackagePO updateInstallationPackagePO = installationPackageDao.findOne(updatePackageId);
+		InstallationPackagePO updateInstallationPackagePO = installationPackageDao.findById(updatePackageId);
 		
 		if(isBackup){
 			backup(deploymentId, deploymentName, notes ,true);
@@ -490,14 +486,14 @@ public class ServiceDeploymentService {
 			deployment.setInstallFullPath(new StringBufferWrapper().append(RELATIVE_FOLDER).append("/").append(updateInstallationPackagePO.getFileName()).toString());
 			deployment.setConfig(config);
 			serviceDeploymentDao.save(deployment);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
+			ServerPO server = serverDao.findById(deployment.getServerId());
 			
 			List<ProcessDeploymentPO> oldProcessList = processDeploymentDAO.findByServiceDeploymentId(deploymentId);
 			if(oldProcessList.size() > 0){
 				processDeploymentDAO.deleteInBatch(oldProcessList);
 			}
 			
-			InstallationPackagePO installationPackage = installationPackageDao.findOne(deployment.getInstallationPackageId());
+			InstallationPackagePO installationPackage = installationPackageDao.findById(deployment.getInstallationPackageId());
 			List<ProcessPO> list = processDAO.findByInstallationPackageId(installationPackage.getId());
 			List<ProcessDeploymentPO> processList = new ArrayList<ProcessDeploymentPO>();
 			for (ProcessPO processPO : list) {
@@ -508,7 +504,7 @@ public class ServiceDeploymentService {
 				processDeployment.setServiceDeploymentId(deploymentId);
 				processList.add(processDeployment);
 			}
-			processDeploymentDAO.save(processList);
+			processDeploymentDAO.saveAll(processList);
 			
 			StringBufferWrapper configBuffer = new StringBufferWrapper();
 			if(config!=null && !"".equals(config)){
@@ -578,8 +574,8 @@ public class ServiceDeploymentService {
 	public void restart(Long deploymentId, String processId) throws Exception{
 		CloseableHttpClient client = null;
 		try {
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
+			ServerPO server = serverDao.findById(deployment.getServerId());
 			ProcessDeploymentPO processDeployment = processDeploymentDAO.findByProcessId(processId);
 			processDeployment.setStatus(ProcessDeploymentStatus.OFFLINE);
 			processDeploymentDAO.save(processDeployment);
@@ -636,8 +632,8 @@ public class ServiceDeploymentService {
 	 * @throws Exception
 	 */
 	public void databaseBackup(Long id) throws Exception{
-		ProcessDeploymentPO processDeployment = processDeploymentDAO.findOne(id);
-		ServiceDeploymentPO serviceDeployment = serviceDeploymentDao.findOne(processDeployment.getServiceDeploymentId());
+		ProcessDeploymentPO processDeployment = processDeploymentDAO.findById(id);
+		ServiceDeploymentPO serviceDeployment = serviceDeploymentDao.findById(processDeployment.getServiceDeploymentId());
 		String config = serviceDeployment.getConfig();
 		JSONObject jsonObject = JSON.parseObject(config);
 		String databaseIP = jsonObject.getString("databaseAddr");// 数据库IP
@@ -648,7 +644,7 @@ public class ServiceDeploymentService {
 		String[] arr = db.split("/");
 		String databaseName = arr[1];// 数据库名称
 		
-		ServiceTypePO serviceType = serviceTypeDao.findOne(serviceDeployment.getServiceTypeId());
+		ServiceTypePO serviceType = serviceTypeDao.findById(serviceDeployment.getServiceTypeId());
 		
 		String serviceTypeName = serviceType.getName();
 	}
@@ -664,9 +660,9 @@ public class ServiceDeploymentService {
 	public void uninstall(Long deploymentId, String type, String notes) throws Exception{
 		CloseableHttpClient client = null;
 		try{
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
-			ServiceTypePO serviceType = serviceTypeDao.findOne(deployment.getServiceTypeId());
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
+			ServerPO server = serverDao.findById(deployment.getServerId());
+			ServiceTypePO serviceType = serviceTypeDao.findById(deployment.getServiceTypeId());
 			String deploymentName = serviceType.getName();
 			
 			
@@ -740,7 +736,7 @@ public class ServiceDeploymentService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteDeploymentData(Long deploymentId) throws Exception{
-		ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
+		ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
 
 		List<ProcessDeploymentPO> processList = processDeploymentDAO.findByServiceDeploymentId(deploymentId);
 		if(processList.size() > 0){
@@ -767,9 +763,9 @@ public class ServiceDeploymentService {
 		CloseableHttpClient client = null;
 		try {
 			// 调小工具接口生成backfile.zip
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
-			InstallationPackagePO installationPackage = installationPackageDao.findOne(deployment.getInstallationPackageId());
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
+			ServerPO server = serverDao.findById(deployment.getServerId());
+			InstallationPackagePO installationPackage = installationPackageDao.findById(deployment.getInstallationPackageId());
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -968,12 +964,12 @@ public class ServiceDeploymentService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteBackup(Long backupId) throws Exception{
-		BackupInformationPO backupInformation = backupInformationDAO.findOne(backupId);
+		BackupInformationPO backupInformation = backupInformationDAO.findById(backupId);
 		String fullPath = backupInformation.getBackupFullPath();
 		String dirPath = fullPath.substring(0, fullPath.length()-12);
 		deleteDir(dirPath);
 		
-		backupInformationDAO.delete(backupId);
+		backupInformationDAO.deleteById(backupId);
 	}
 	
 	/**
@@ -1015,10 +1011,10 @@ public class ServiceDeploymentService {
 	@Transactional(rollbackFor = Exception.class)
 	public void restore(Long backupId ,Boolean database) throws Exception{
 		
-		BackupInformationPO backupInformation = backupInformationDAO.findOne(backupId);
-		InstallationPackagePO installationPackage = installationPackageDao.findOne(backupInformation.getInstallPackageId());
-		ServerPO server = serverDao.findOne(backupInformation.getServerId());
-		ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(backupInformation.getDeploymentId());
+		BackupInformationPO backupInformation = backupInformationDAO.findById(backupId);
+		InstallationPackagePO installationPackage = installationPackageDao.findById(backupInformation.getInstallPackageId());
+		ServerPO server = serverDao.findById(backupInformation.getServerId());
+		ServiceDeploymentPO deployment = serviceDeploymentDao.findById(backupInformation.getDeploymentId());
 		
 		String fileName = installationPackage.getFileName();
 		String folderName = fileName.substring(0, fileName.length()-4);
@@ -1246,8 +1242,8 @@ public class ServiceDeploymentService {
 	public void enableFtp(Long deploymentId) throws Exception{
 		CloseableHttpClient client = null;
 		try {
-			ServiceDeploymentPO deployment = serviceDeploymentDao.findOne(deploymentId);
-			ServerPO server = serverDao.findOne(deployment.getServerId());
+			ServiceDeploymentPO deployment = serviceDeploymentDao.findById(deploymentId);
+			ServerPO server = serverDao.findById(deployment.getServerId());
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -1303,7 +1299,7 @@ public class ServiceDeploymentService {
 	public void disableFtp(Long serverId) throws Exception{
 		CloseableHttpClient client = null;
 		try {
-			ServerPO server = serverDao.findOne(serverId);
+			ServerPO server = serverDao.findById(serverId);
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -1365,7 +1361,7 @@ public class ServiceDeploymentService {
 			}
 		}
 		if(needSaveProcess.size() > 0){
-			processDeploymentDAO.save(needSaveProcess);
+			processDeploymentDAO.saveAll(needSaveProcess);
 		}
 		if(needLoopProcess.size() > 0){
 			List<ServerPO> serverList = serverDao.findAll();
@@ -1429,7 +1425,7 @@ public class ServiceDeploymentService {
 			}
 			processList.add(process);
 		}
-		processDeploymentDAO.save(processList);
+		processDeploymentDAO.saveAll(processList);
 	}
 	
 	/**
@@ -1446,7 +1442,7 @@ public class ServiceDeploymentService {
 		for (ProcessDeploymentPO process : processList) {
 			process.setStatus(ProcessDeploymentStatus.OFFLINE);
 		}
-		processDeploymentDAO.save(processList);
+		processDeploymentDAO.saveAll(processList);
 	}
 	
 	/**
@@ -1544,14 +1540,14 @@ public class ServiceDeploymentService {
 		
 		try {
 			
-			ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findOne(serviceDeploymentId);
+			ServiceDeploymentPO serviceDeploymentPO = serviceDeploymentDao.findById(serviceDeploymentId);
 			String config = serviceDeploymentPO.getConfig();
 			JSONObject jsonObjectconfig = JSON.parseObject(config);
 			String databaseIP = jsonObjectconfig.getString("databaseAddr");// 数据库IP
 			String databasePort = jsonObjectconfig.getString("databaseport");// 数据库端口
 			DatabasePO databasePO = databaseDAO.findByDatabaseIPAndDatabasePort(databaseIP, databasePort);
 			
-			ServerPO server = serverDao.findOne(serverId);
+			ServerPO server = serverDao.findById(serverId);
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);

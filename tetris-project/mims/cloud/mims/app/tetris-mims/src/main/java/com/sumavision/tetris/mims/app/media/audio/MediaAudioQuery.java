@@ -135,7 +135,7 @@ public class MediaAudioQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaAudioVO>();
@@ -189,7 +189,7 @@ public class MediaAudioQuery {
 	 * @param id 音频id
 	 */
 	public MediaAudioPO loadById(Long id) throws Exception {
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		
 		if(media == null){
 			throw new MediaAudioNotExistException(id);
@@ -217,7 +217,7 @@ public class MediaAudioQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
 		if (id != null && id.length > 0) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaAudioVO>();
@@ -657,7 +657,7 @@ public class MediaAudioQuery {
 					if (userToTagPermission2 != null) {
 						List<String> tags = new ArrayList<String>();
 						for (int k = 0; k < userToTagPermission2.size() && k < 10; k++) {
-							TagPO tag = tagDAO.findOne(userToTagPermission2.get(k).getTagId());
+							TagPO tag = tagDAO.findById(userToTagPermission2.get(k).getTagId());
 							if (tag == null) continue;
 							tags.add(tag.getName());
 						}
@@ -710,7 +710,7 @@ public class MediaAudioQuery {
 			
 			List<String> tags = new ArrayList<String>();
 			for (TagDownloadPermissionPO tagDownloadPermissionPO : userToTagPermission) {
-				TagPO tag = tagDAO.findOne(tagDownloadPermissionPO.getTagId());
+				TagPO tag = tagDAO.findById(tagDownloadPermissionPO.getTagId());
 				if (tag == null || sameTags.contains(tag.getName())) continue;
 				tags.add(tag.getName());
 			}

@@ -74,7 +74,7 @@ public class ApiProcessMediaController {
 		
 		List<String> urls = Arrays.asList(urlList.split(","));
 		
-		FolderPO folder = folderDao.findOne(parentFolderId);
+		FolderPO folder = folderDao.findById(parentFolderId);
 		
 		if (folder == null) return null;
 		
@@ -192,7 +192,7 @@ public class ApiProcessMediaController {
 		if (ifAdd != null && ifAdd) {
 			TagPO tag = null;
 			if (tagId != null) {
-				tag = tagDAO.findOne(tagId);
+				tag = tagDAO.findById(tagId);
 			}
 			
 			switch (type.toLowerCase()) {

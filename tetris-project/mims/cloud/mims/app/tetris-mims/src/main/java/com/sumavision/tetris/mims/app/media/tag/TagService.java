@@ -67,11 +67,11 @@ public class TagService {
 		
 		List<TagPO> tagPOs=new ArrayList<TagPO>();
 		for (TagVO tagVO : tags) {
-			TagPO tagPO=tagDAO.findOne(tagVO.getId());
+			TagPO tagPO=tagDAO.findById(tagVO.getId());
 			tagPO.setHotCount(tagPO.getHotCount()==null?1l:tagPO.getHotCount()+1);
 			tagPOs.add(tagPO);
 		}
-		tagDAO.save(tagPOs);
+		tagDAO.saveAll(tagPOs);
 		
 		
 	}

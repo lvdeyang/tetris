@@ -65,7 +65,7 @@ public class SystemStorageService {
 	 * @param Long id 存储id
 	 */
 	public void remove(Long id) throws Exception{
-		SystemStoragePO entity = systemStorageDao.findOne(id);
+		SystemStoragePO entity = systemStorageDao.findById(id);
 		if(entity != null){
 			systemStorageDao.delete(entity);
 		}
@@ -99,7 +99,7 @@ public class SystemStorageService {
 			String gadgetBasePath,
 			String serverGadgetType,
 			String remark) throws Exception{
-		SystemStoragePO entity = systemStorageDao.findOne(id);
+		SystemStoragePO entity = systemStorageDao.findById(id);
 		if(entity == null){
 			throw new SystemStorageNotExistException(id, name);
 		}

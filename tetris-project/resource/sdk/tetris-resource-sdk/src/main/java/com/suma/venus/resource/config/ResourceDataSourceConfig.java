@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -39,10 +41,13 @@ public class ResourceDataSourceConfig {
 	@Autowired
 	private JpaProperties jpaProperties;
 	
+	@Autowired
+    private HibernateProperties hibernateProperties;
+	
     //配置EntityManager工厂实体
     @Bean(name = "resourceEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactoryResource(EntityManagerFactoryBuilder builder) {
-    	Map<String, String> properties = getVendorProperties(resourceDataSource);
+    	Map<String, Object> properties = getVendorProperties();
 		//properties.put("hibernate.autoReconnect", "true");
     	return builder
                 .dataSource(resourceDataSource)
@@ -73,7 +78,7 @@ public class ResourceDataSourceConfig {
     }
     
     //获取jpa配置信息
-    private Map<String, String> getVendorProperties(DataSource dataSource) {
-        return jpaProperties.getHibernateProperties(dataSource);
+    private Map<String, Object> getVendorProperties() {
+    	return hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
     }
 }

@@ -176,7 +176,7 @@ public class SignController {
 				for(SignPO sign:signs){
 					addressIds.add(sign.getAddressId());
 				}
-				List<AddressPO> addresses = addressDao.findAll(addressIds);
+				List<AddressPO> addresses = addressDao.findAllById(addressIds);
 				for(int i=0; i<signs.size(); i++){
 					SignPO sign = signs.get(i);
 					AddressPO targetAddress = null;

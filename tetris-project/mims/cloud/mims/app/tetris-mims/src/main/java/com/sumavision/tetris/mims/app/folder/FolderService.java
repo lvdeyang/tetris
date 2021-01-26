@@ -167,7 +167,7 @@ public class FolderService {
 	 */
 	public FolderPO addPersionalFolder(String userId, Long parentFolderId, String folderName, FolderType type) throws Exception{
 		
-		FolderPO parentFolder = folderDao.findOne(parentFolderId);
+		FolderPO parentFolder = folderDao.findById(parentFolderId);
 		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
 		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
 		
@@ -201,7 +201,7 @@ public class FolderService {
 	 * @return FolderPO 新建的文件夹
 	 */
 	public FolderPO addMediaFolder(String userId, String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
-		FolderPO parentFolder = folderDao.findOne(parentFolderId);
+		FolderPO parentFolder = folderDao.findById(parentFolderId);
 		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
 		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
 		
@@ -244,7 +244,7 @@ public class FolderService {
 	 * @return FolderPO 新建的文件夹
 	 */
 	public FolderPO addMediaFolderBindRole(Long userId, String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
-		FolderPO parentFolder = folderDao.findOne(parentFolderId);
+		FolderPO parentFolder = folderDao.findById(parentFolderId);
 		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
 		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
 		
@@ -466,7 +466,7 @@ public class FolderService {
 		List<FolderPO> totalFolders = new ArrayList<FolderPO>();
 		totalFolders.add(folder);
 		if(subFolders!=null && subFolders.size()>0) totalFolders.addAll(subFolders);
-		folderDao.save(totalFolders);
+		folderDao.saveAll(totalFolders);
 	}
 	
 	/**
@@ -506,7 +506,7 @@ public class FolderService {
 		}
 		
 		//保存一下
-		folderDao.save(totalCopyFolders);
+		folderDao.saveAll(totalCopyFolders);
 		
 		//生成权限
 		List<FolderUserPermissionPO> permissions = new ArrayList<FolderUserPermissionPO>();
@@ -517,7 +517,7 @@ public class FolderService {
 			permission.setUpdateTime(new Date());
 			permissions.add(permission);
 		}
-		folderUserPermissionDao.save(permissions);
+		folderUserPermissionDao.saveAll(permissions);
 		
 		//复制素材
 		List<MaterialFilePO> materials = materialFileQuery.findMaterialsByFolderIds(totalFolderIds);
@@ -527,7 +527,7 @@ public class FolderService {
 				totalCopyMaterials.add(material.copy());
 			}
 		}
-		materialFileDao.save(totalCopyMaterials);
+		materialFileDao.saveAll(totalCopyMaterials);
 		
 		//重组文件夹链
 		List<FolderPO> rootFolders = new ArrayListWrapper<FolderPO>().add(folder).getList();
@@ -544,8 +544,8 @@ public class FolderService {
 		}
 		
 		//保存数据
-		folderDao.save(totalCopyFolders);
-		materialFileDao.save(totalCopyMaterials);
+		folderDao.saveAll(totalCopyFolders);
+		materialFileDao.saveAll(totalCopyMaterials);
 		
 		return copiedFolder;
 	}
@@ -587,7 +587,7 @@ public class FolderService {
 		}
 		
 		//保存一下
-		folderDao.save(totalCopyFolders);
+		folderDao.saveAll(totalCopyFolders);
 		
 		//生成公司权限
 		List<FolderGroupPermissionPO> permissions0 = new ArrayList<FolderGroupPermissionPO>();
@@ -598,7 +598,7 @@ public class FolderService {
 			permission0.setUpdateTime(new Date());
 			permissions0.add(permission0);
 		}
-		folderGroupPermissionDao.save(permissions0);
+		folderGroupPermissionDao.saveAll(permissions0);
 		
 		//生成管理员权限
 		SystemRoleVO roleAdmin = businessRoleQuery.findCompanyAdminRole();
@@ -611,7 +611,7 @@ public class FolderService {
 			permission1.setUpdateTime(new Date());
 			permissions1.add(permission1);
 		}
-		folderRolePermissionDao.save(permissions1);
+		folderRolePermissionDao.saveAll(permissions1);
 		
 		List<FolderPO> rootFolders = new ArrayListWrapper<FolderPO>().add(folder).getList();
 		List<FolderPO> rootCopyFolders = new ArrayListWrapper<FolderPO>().add(folderTool.loopByUuid(folder.getUuid(), totalCopyFolders)).getList();
@@ -625,14 +625,14 @@ public class FolderService {
 			for(MediaPicturePO picture:pictures){
 				totalCopyPictures.add(picture.copy());
 			}
-			mediaPictureDao.save(totalCopyPictures);
+			mediaPictureDao.saveAll(totalCopyPictures);
 			//重组文件夹链
 			setMediaPictureFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, pictures, totalCopyPictures);
 			//生成新的uuid
 			for(MediaPicturePO picture:totalCopyPictures){
 				picture.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaPictureDao.save(totalCopyPictures);
+			mediaPictureDao.saveAll(totalCopyPictures);
 			resetFolderChain = true;
 		}
 		
@@ -643,14 +643,14 @@ public class FolderService {
 			for(MediaVideoPO video:videos){
 				totalCopyVideos.add(video.copy());
 			}
-			mediaVideoDao.save(totalCopyVideos);
+			mediaVideoDao.saveAll(totalCopyVideos);
 			//重组文件夹链
 			setMediaVideoFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, videos, totalCopyVideos);
 			//生成新的uuid
 			for(MediaVideoPO video:totalCopyVideos){
 				video.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaVideoDao.save(totalCopyVideos);
+			mediaVideoDao.saveAll(totalCopyVideos);
 			resetFolderChain = true;
 		}
 		
@@ -661,14 +661,14 @@ public class FolderService {
 			for(MediaAudioPO audio:audios){
 				totalCopyAudios.add(audio.copy());
 			}
-			mediaAudioDao.save(totalCopyAudios);
+			mediaAudioDao.saveAll(totalCopyAudios);
 			//重组文件夹链
 			setMediaAudioFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, audios, totalCopyAudios);
 			//生成新的uuid
 			for(MediaAudioPO audio:totalCopyAudios){
 				audio.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaAudioDao.save(totalCopyAudios);
+			mediaAudioDao.saveAll(totalCopyAudios);
 			resetFolderChain = true;
 		}
 		
@@ -679,14 +679,14 @@ public class FolderService {
 			for(MediaVideoStreamPO videoStream:videoStreams){
 				totalCopyVideoStreams.add(videoStream.copy());
 			}
-			mediaVideoStreamDao.save(totalCopyVideoStreams);
+			mediaVideoStreamDao.saveAll(totalCopyVideoStreams);
 			//重组文件夹链
 			setMediaVideoStreamFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, videoStreams, totalCopyVideoStreams);
 			//生成新的uuid
 			for(MediaVideoStreamPO videoStream:totalCopyVideoStreams){
 				videoStream.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaVideoStreamDao.save(totalCopyVideoStreams);
+			mediaVideoStreamDao.saveAll(totalCopyVideoStreams);
 			resetFolderChain = true;
 		}
 		
@@ -697,14 +697,14 @@ public class FolderService {
 			for(MediaAudioStreamPO audioStream:audioStreams){
 				totalCopyAudioStreams.add(audioStream.copy());
 			}
-			mediaAudioStreamDao.save(totalCopyAudioStreams);
+			mediaAudioStreamDao.saveAll(totalCopyAudioStreams);
 			//重组文件夹链
 			setMediaAudioStreamFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, audioStreams, totalCopyAudioStreams);
 			//生成新的uuid
 			for(MediaAudioStreamPO audioStream:totalCopyAudioStreams){
 				audioStream.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaAudioStreamDao.save(totalCopyAudioStreams);
+			mediaAudioStreamDao.saveAll(totalCopyAudioStreams);
 			resetFolderChain = true;
 		}
 		
@@ -715,14 +715,14 @@ public class FolderService {
 			for(MediaTxtPO txt:txts){
 				totalCopyTxts.add(txt.copy());
 			}
-			mediaTxtDao.save(totalCopyTxts);
+			mediaTxtDao.saveAll(totalCopyTxts);
 			//重组文件夹链
 			setMediaTxtFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, txts, totalCopyTxts);
 			//生成新的uuid
 			for(MediaTxtPO txt:totalCopyTxts){
 				txt.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			}
-			mediaTxtDao.save(totalCopyTxts);
+			mediaTxtDao.saveAll(totalCopyTxts);
 			resetFolderChain = true;
 		}
 		
@@ -736,7 +736,7 @@ public class FolderService {
 		}
 		
 		//保存数据
-		folderDao.save(totalCopyFolders);
+		folderDao.saveAll(totalCopyFolders);
 		
 		return copiedFolder;
 	}

@@ -84,7 +84,7 @@ public class MediaCompressQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaCompressVO>();

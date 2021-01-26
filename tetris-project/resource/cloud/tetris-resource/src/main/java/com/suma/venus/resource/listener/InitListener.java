@@ -1,10 +1,6 @@
 package com.suma.venus.resource.listener;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.Trigger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.suma.venus.message.service.MessageService;
 import com.suma.venus.resource.dao.BundleDao;
-import com.suma.venus.resource.mq.MQCallBackService;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.service.InitVerification;
@@ -68,7 +62,7 @@ public class InitListener implements ApplicationRunner {
 				po.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 			}
 
-			bundleDao.save(bundlePOs);
+			bundleDao.saveAll(bundlePOs);
 
 		}
 

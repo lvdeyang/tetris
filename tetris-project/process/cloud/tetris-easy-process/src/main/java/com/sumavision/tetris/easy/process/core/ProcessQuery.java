@@ -63,7 +63,7 @@ public class ProcessQuery {
 	 * @return ProcessVO 流程
 	 */
 	public ProcessVO findById(Long id) throws Exception{
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		if(process == null) return null;
 		return new ProcessVO().set(process);
 	}
@@ -77,7 +77,7 @@ public class ProcessQuery {
 	 * @return String bpmn文件
 	 */
 	public String findBpmnById(Long id) throws Exception{
-		ProcessPO process = processDao.findOne(id);
+		ProcessPO process = processDao.findById(id);
 		if(process == null) return null;
 		return process.getBpmn();
 	}
@@ -92,7 +92,7 @@ public class ProcessQuery {
 	 * @return List<ProcessPO> 流程列表
 	 */
 	public List<ProcessPO> findAll(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 		Page<ProcessPO> pagedProcesses = processDao.findAll(page);
 		return pagedProcesses.getContent();
 	}
@@ -157,7 +157,7 @@ public class ProcessQuery {
 	 * @return List<ProcessPO> 流程列表
 	 */
 	public List<ProcessPO> findByType(ProcessType type, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ProcessPO> pagedEntities = processDao.findByType(type, page);
 		if(pagedEntities != null) return pagedEntities.getContent();
 		return null;
@@ -174,7 +174,7 @@ public class ProcessQuery {
 	 * @return List<ProcessPO> 流程列表
 	 */
 	public List<ProcessPO> findByCompanyId(String companyId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ProcessPO> pagedEntities = processDao.findByCompanyId(companyId, page);
 		if(pagedEntities != null) return pagedEntities.getContent();
 		return null;
@@ -218,7 +218,7 @@ public class ProcessQuery {
 	 * @return List<ProcessPO> 流程列表
 	 */
 	public List<ProcessPO> findByCompanyIdWithExcept(String companyId, int currentPage, int pageSize, Collection<Long> except) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ProcessPO> pagedEntities = processDao.findByCompanyIdWithExcept(companyId,except, page);
 		if(pagedEntities != null) return pagedEntities.getContent();
 		return null;

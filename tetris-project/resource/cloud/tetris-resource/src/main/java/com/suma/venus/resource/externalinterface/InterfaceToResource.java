@@ -1,13 +1,12 @@
 package com.suma.venus.resource.externalinterface;
 
-import java.util.Map.Entry;
-import java.util.Set;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +35,9 @@ import com.suma.venus.resource.base.bo.ReleaseChannelRespParam;
 import com.suma.venus.resource.base.bo.ReleaseChannelResponseBody;
 import com.suma.venus.resource.base.bo.ResponseBody;
 import com.suma.venus.resource.base.bo.ResultBO;
-import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
-import com.suma.venus.resource.base.bo.RoleBO;
-import com.suma.venus.resource.base.bo.RoleResultBO;
 import com.suma.venus.resource.base.bo.UpdateResourceParam;
 import com.suma.venus.resource.base.bo.UpdateResourceRespParam;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
-import com.suma.venus.resource.base.bo.UserResultBO;
 import com.suma.venus.resource.bo.CreateBundleRequest;
 import com.suma.venus.resource.constant.VenusParamConstant;
 import com.suma.venus.resource.dao.FolderDao;
@@ -438,7 +433,7 @@ public class InterfaceToResource {
 		// 添加创建用户ID(userId)字段
 		virtualResourcePOs.add(new VirtualResourcePO("userId", String.valueOf(param.getUserId()), resourceId));
 
-		virtualResourceDao.save(virtualResourcePOs);
+		virtualResourceDao.saveAll(virtualResourcePOs);
 
 		// user和资源之间的权限关系待补充
 		Long userId = param.getUserId();
@@ -490,7 +485,7 @@ public class InterfaceToResource {
 			virtualResourcePOs.add(po);
 		}
 
-		virtualResourceDao.save(virtualResourcePOs);
+		virtualResourceDao.saveAll(virtualResourcePOs);
 		respBody.setResult(ResponseBody.SUCCESS);
 		return resp;
 	}
@@ -537,7 +532,7 @@ public class InterfaceToResource {
 
 		List<VirtualResourcePO> pos = virtualResourceDao.findByResourceId(resourceId);
 		if (!pos.isEmpty()) {
-			virtualResourceDao.delete(pos);
+			virtualResourceDao.deleteInBatch(pos);
 		}
 
 		respBody.setResult(ResponseBody.SUCCESS);

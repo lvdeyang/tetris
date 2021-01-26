@@ -84,7 +84,7 @@ public class MediaFileEquipmentPermissionService {
 //        }
 //        return null;
 		
-		FolderPO folder = folderDao.findOne(permissionBO.getFolderId());
+		FolderPO folder = folderDao.findById(permissionBO.getFolderId());
 		MediaFileEquipmentPermissionPO folderPermission = mediaFileEquipmentPermissionDAO.findByMediaIdAndMediaTypeAndEquipmentIp(folder.getId(), "folder", equipIp);
 		if(folderPermission == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "文件夹：" + folder.getName() + " 未创建！");

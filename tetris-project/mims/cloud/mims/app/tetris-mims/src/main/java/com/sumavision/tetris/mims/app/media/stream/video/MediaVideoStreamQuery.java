@@ -102,7 +102,7 @@ public class MediaVideoStreamQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaVideoStreamVO>();
@@ -171,7 +171,7 @@ public class MediaVideoStreamQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
 		if (id != null && id.length > 0) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaVideoStreamVO>();
@@ -322,7 +322,7 @@ public class MediaVideoStreamQuery {
 	 * @return MediaVideoStreamVO 视频流媒资信息
 	 */
 	public MediaVideoStreamVO findById(Long id) throws Exception {
-		MediaVideoStreamPO videoStreamPO = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO videoStreamPO = mediaVideoStreamDao.findById(id);
 		
 		if (videoStreamPO == null) return null;
 		

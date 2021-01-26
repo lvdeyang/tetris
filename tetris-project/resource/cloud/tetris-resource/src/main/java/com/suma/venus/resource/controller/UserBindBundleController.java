@@ -47,7 +47,7 @@ public class UserBindBundleController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception{
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<BundlePO> bundles = bundleDao.findBySearch(new StringBufferWrapper().append("%").append(bundleName).append("%").toString(), 
 														new StringBufferWrapper().append("%").append(bundleId).append("%").toString(),
 														new StringBufferWrapper().append("%").append(username).append("%").toString(),
@@ -76,7 +76,7 @@ public class UserBindBundleController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception{
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<BundlePO> bundles = bundleDao.findBySearch(new StringBufferWrapper().append("%").append(bundleName).append("%").toString(), 
 														new StringBufferWrapper().append("%").append(bundleId).append("%").toString(),
 														new StringBufferWrapper().append("%").append(username).append("%").toString(),
@@ -149,7 +149,7 @@ public class UserBindBundleController {
 		    	.setUserName(map.getUserName());
 			
 			if(map.getEncodeId() != null){
-				BundlePO encoder = bundleDao.findOne(map.getEncodeId());
+				BundlePO encoder = bundleDao.findById(map.getEncodeId());
 				bind.setEncodeId(map.getEncodeId())
 					.setEncodeBundleId(map.getEncodeBundleId())
 			    	.setEncodeBundleName(map.getEncodeBundleName())
@@ -158,7 +158,7 @@ public class UserBindBundleController {
 			    	.setEncodeUserName(encoder.getUsername());
 			}
 			if(map.getDecodeId() != null){
-				BundlePO decoder = bundleDao.findOne(map.getDecodeId());
+				BundlePO decoder = bundleDao.findById(map.getDecodeId());
 			    bind.setDecodeId(map.getDecodeId())
 			    	.setDecodeBundleId(map.getDecodeBundleId())
 			    	.setDecodeBundleName(map.getDecodeBundleName())

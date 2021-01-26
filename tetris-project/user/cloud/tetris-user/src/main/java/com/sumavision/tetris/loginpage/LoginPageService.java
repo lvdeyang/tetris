@@ -29,12 +29,12 @@ public class LoginPageService {
 	}
 	
 	public Object deleteLoginPage(long id){
-		loginPageDAO.delete(id);
+		loginPageDAO.deleteById(id);
 		return null;
 	}
 	
 	public Object useLoginPage(long id){
-		LoginPagePO loginPagePO=loginPageDAO.findOne(id);
+		LoginPagePO loginPagePO=loginPageDAO.findById(id);
 		if(loginPagePO.getIsCurrent()==true){
 			loginPagePO.setIsCurrent(false);
 		}else{

@@ -100,7 +100,7 @@ public class MediaPictureService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		media.setReviewStatus(null);
 		mediaPictureDao.save(media);
 	}
@@ -113,7 +113,7 @@ public class MediaPictureService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaPictureDao.save(media);
 	}
@@ -135,7 +135,7 @@ public class MediaPictureService {
 			String tags,
 			String keyWords,
 			String remarks) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		media.setName(name);
 		media.setTags(tags);
 		media.setKeyWords(keyWords);
@@ -152,7 +152,7 @@ public class MediaPictureService {
 	 * @param Long id 图片媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaPictureDao.save(media);
 	}
@@ -165,7 +165,7 @@ public class MediaPictureService {
 	 * @param Long id 图片媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		if(media != null){
 			List<MediaPicturePO> picturesCanBeDeleted = new ArrayListWrapper<MediaPicturePO>().add(media).getList();
 			
@@ -176,7 +176,7 @@ public class MediaPictureService {
 			mediaPictureDao.deleteInBatch(picturesCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -214,7 +214,7 @@ public class MediaPictureService {
 	 * @param Long id 图片媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaPicturePO media = mediaPictureDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaPictureDao.save(media);
 	}
@@ -281,7 +281,7 @@ public class MediaPictureService {
 					picture.setProcessInstanceId(processInstanceId);
 					picture.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaPictureDao.save(picturesNeedProcess);
+				mediaPictureDao.saveAll(picturesNeedProcess);
 			}
 		}else{
 			picturesCanBeDeleted.addAll(pictures);
@@ -295,7 +295,7 @@ public class MediaPictureService {
 			mediaPictureDao.deleteInBatch(picturesCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();

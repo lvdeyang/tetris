@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -166,7 +165,7 @@ public class ServerService {
 			String ftpUsername,
 			String ftpPort,
 			String ftpPassword) throws Exception{
-		ServerPO entity = serverDao.findOne(id);
+		ServerPO entity = serverDao.findById(id);
 		if(entity != null){
 			entity.setName(name);
 			entity.setGadgetPort(gadgetPort);
@@ -192,7 +191,7 @@ public class ServerService {
 	 * @return ServerPO 删除的服务器
 	 */
 	public ServerPO delete(Long id) throws Exception{
-		ServerPO entity = serverDao.findOne(id);
+		ServerPO entity = serverDao.findById(id);
 		if(entity != null){
 			serverDao.delete(entity);
 		}
@@ -222,7 +221,7 @@ public class ServerService {
 				needLoopServers.add(serverEntity);
 			}
 		}
-		if(needSaveServers.size() > 0) serverDao.save(needSaveServers);
+		if(needSaveServers.size() > 0) serverDao.saveAll(needSaveServers);
 		if(needLoopServers.size() > 0){
 			for(ServerPO server:needLoopServers){
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -250,7 +249,7 @@ public class ServerService {
 	@Transactional(rollbackFor = Exception.class)
 	public void setStatus(Long serverId, JSONObject serverInfo){
 		Date now = new Date();
-		ServerPO serverEntity = serverDao.findOne(serverId);
+		ServerPO serverEntity = serverDao.findById(serverId);
 		serverEntity.setStatus(ServerStatus.ONLINE);
 		serverDao.save(serverEntity);
 		
@@ -305,7 +304,7 @@ public class ServerService {
 				disk.setFree(Long.valueOf(storage.getString("avail").replace("MB", "")) * 1024);
 				disks.add(disk);
 			}
-			serverHardDiskDataDao.save(disks);
+			serverHardDiskDataDao.saveAll(disks);
 		}
 		
 		JSONArray networks = serverInfo.getJSONArray("network");
@@ -321,7 +320,7 @@ public class ServerService {
 				networkEntity.setRxkB(network.getString("down"));
 				networkEntities.add(networkEntity);
 			}
-			serverNetworkCardTrafficDataDao.save(networkEntities);
+			serverNetworkCardTrafficDataDao.saveAll(networkEntities);
 		}
 		
 	}
@@ -335,7 +334,7 @@ public class ServerService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void offlineStatus(Long serverId){
-		ServerPO serverEntity = serverDao.findOne(serverId);
+		ServerPO serverEntity = serverDao.findById(serverId);
 		serverEntity.setStatus(ServerStatus.OFFLINE);
 		serverDao.save(serverEntity);
 	}
@@ -430,7 +429,7 @@ public class ServerService {
 			String ip) throws Exception{
 		CloseableHttpClient client = null;
 		try{
-			ServerPO serverEntity = serverDao.findOne(id);
+			ServerPO serverEntity = serverDao.findById(id);
 			String oldIp = serverEntity.getIp();
 			serverEntity.setIp(ip);
 			serverDao.save(serverEntity);
@@ -463,7 +462,7 @@ public class ServerService {
 				param.put("config", configBuffer.toString());
 				params.add(param);
 			}
-			serviceDeploymentDao.save(needModifyIpDeployments);
+			serviceDeploymentDao.saveAll(needModifyIpDeployments);
 			
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			AuthScope authScope = new AuthScope(server.getIp(), Integer.parseInt(server.getGadgetPort()), "example.com", AuthScope.ANY_SCHEME);
@@ -518,7 +517,7 @@ public class ServerService {
 	 * @throws Exception
 	 */
 	public void deleteDatabase(Long databaseId) throws Exception{
-		databaseDAO.delete(databaseId);
+		databaseDAO.deleteById(databaseId);
 	}
 	
 	
@@ -538,7 +537,7 @@ public class ServerService {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(authFile.getInputStream()));
 		//reader.readLine();
 		//对接小工具下发授权并修改设备授权状态
-		ServerPO server = serverDao.findOne(id);
+		ServerPO server = serverDao.findById(id);
 		
 		
 		CloseableHttpClient faclient = null;
@@ -700,7 +699,7 @@ public class ServerService {
 	 * @throws Exception 
 	 */
 	public DatabaseVO addDatabase(Long serverId, String databaseIp, String databasePort, String databaseName, String username, String password) throws Exception{
-		ServerPO server = serverDao.findOne(serverId);
+		ServerPO server = serverDao.findById(serverId);
 		DatabasePO database = new DatabasePO();
 		database.setServerId(serverId);
 		database.setDatabaseIP(server.getIp());
@@ -724,7 +723,7 @@ public class ServerService {
 	public String exportDeviceid(Long id) throws Exception{
 		CloseableHttpClient client = null;
 		try{
-			ServerPO server = serverDao.findOne(id);
+			ServerPO server = serverDao.findById(id);
 			
 			JSONArray params = new JSONArray();
 			

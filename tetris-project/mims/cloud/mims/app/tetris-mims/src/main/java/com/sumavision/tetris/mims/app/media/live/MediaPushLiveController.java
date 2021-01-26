@@ -98,7 +98,7 @@ public class MediaPushLiveController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -150,7 +150,7 @@ public class MediaPushLiveController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaPushLivePO audioStream = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO audioStream = mediaPushLiveDAO.findById(id);
 		if(audioStream == null){
 			throw new MediaPushLiveNotExistException(id);
 		}
@@ -185,7 +185,7 @@ public class MediaPushLiveController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		
 		if(media == null){
 			throw new MediaPushLiveNotExistException(id);

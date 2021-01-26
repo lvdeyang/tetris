@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,20 +35,19 @@ import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.PrivilegePO;
-import com.suma.venus.resource.pojo.RolePrivilegeMap;
-import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
-import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.BundlePO.CoderType;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
+import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
-import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.suma.venus.resource.vo.SerNodeVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
@@ -176,7 +174,7 @@ public class OutlandService extends ControllerBase{
 				forserNodePO.setStatus(ConnectionStatus.OFF);
 //				forserNodePO.setOperate(ConnectionStatus.OFF);
 			}
-			serNodeDao.save(serNodePOs);
+			serNodeDao.saveAll(serNodePOs);
 		}
 		//发送消息
 		try {
@@ -291,7 +289,7 @@ public class OutlandService extends ControllerBase{
 					serNodeRolePermissionPOs.add(serNodeRolePermissionPO);
 				}
 			}
-			serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
+			serNodeRolePermissionDAO.saveAll(serNodeRolePermissionPOs);
 			
 			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
 			if (null != extraInfos) {
@@ -362,7 +360,7 @@ public class OutlandService extends ControllerBase{
 	 * @throws Exception
 	 */
 	public Object queryOutlandBundle(Long serNodeId)throws Exception{
-		SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
+		SerNodePO serNodePO = serNodeDao.findById(serNodeId);
 		List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
 //		List<BundlePO> bundlePOs = bundleDao.findAll();
 		Set<Long> folderIds = new HashSet<Long>();
@@ -409,7 +407,7 @@ public class OutlandService extends ControllerBase{
 	 * @return SerNodeVO 外域信息
 	 */
 	public SerNodeVO outlandOff (Long id)throws Exception{
-		SerNodePO serNodePO = serNodeDao.findOne(id);
+		SerNodePO serNodePO = serNodeDao.findById(id);
 		List<SerNodePO> localSerNodePO = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		SerNodeVO localSerNodeVO = new SerNodeVO();
 		Map<String, Object> local = new HashMap<String, Object>();
@@ -463,7 +461,7 @@ public class OutlandService extends ControllerBase{
 	 */
 	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
 		Map<String, Object> map = new HashMap<String, Object>();
-		SerNodePO serNodePO = serNodeDao.findOne(id);
+		SerNodePO serNodePO = serNodeDao.findById(id);
 		String oldname  = serNodePO.getNodeName();
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		serNodePO.setPassword(password);
@@ -497,7 +495,7 @@ public class OutlandService extends ControllerBase{
 		}
 		
 		List<SerNodeRolePermissionPO> oldserNodeRolePermissionPOs = serNodeRolePermissionDAO.findBySerNodeId(id);
-		serNodeRolePermissionDAO.delete(oldserNodeRolePermissionPOs);
+		serNodeRolePermissionDAO.deleteInBatch(oldserNodeRolePermissionPOs);
 		
 		List<Long> roleIDs = new ArrayList<Long>();
 		String[] roleString = roleIds.split(",");
@@ -514,7 +512,7 @@ public class OutlandService extends ControllerBase{
 				serNodeRolePermissionPOs.add(serNodeRolePermissionPO);
 			}
 		}
-		serNodeRolePermissionDAO.save(serNodeRolePermissionPOs);
+		serNodeRolePermissionDAO.saveAll(serNodeRolePermissionPOs);
 		
 		if(!oldname.equals(name)){
 			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(oldname);
@@ -572,7 +570,7 @@ public class OutlandService extends ControllerBase{
 	 * @return serNodeVO 外域信息
 	 */
 	public Object outlandOn(Long id)throws Exception{
-		SerNodePO serNodePO = serNodeDao.findOne(id);
+		SerNodePO serNodePO = serNodeDao.findById(id);
 		serNodePO.setOperate(ConnectionStatus.ON);
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		serNodeDao.save(serNodePO);
@@ -618,7 +616,7 @@ public class OutlandService extends ControllerBase{
 	 */
 	public Object outlandDelete(Long id)throws Exception{
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
-		SerNodePO serNodePO = serNodeDao.findOne(id);
+		SerNodePO serNodePO = serNodeDao.findById(id);
 		if (serNodePO != null) {
 			outlandOff(id);
 			List<String> bundleIds = new ArrayList<String>();
@@ -636,7 +634,7 @@ public class OutlandService extends ControllerBase{
 				String str = bundleId.toString();
 				String bundleidsStr = str.substring(0,str.length()-1);
 				monitorLiveDeviceFeign.stopLiveDevice(bundleidsStr);
-				bundleDao.delete(bundlePOs);
+				bundleDao.deleteInBatch(bundlePOs);
 			}
 			//删除授权
 			bundleIds.add("1-1");
@@ -648,14 +646,14 @@ public class OutlandService extends ControllerBase{
 				}
 				List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegeId);
 				if (rolePrivilegeMaps != null && rolePrivilegeMaps.size() > 0) {
-					rolePrivilegeMapDAO.delete(rolePrivilegeMaps);
+					rolePrivilegeMapDAO.deleteInBatch(rolePrivilegeMaps);
 				}
-				privilegeDAO.delete(privilegePOs);
+				privilegeDAO.deleteInBatch(privilegePOs);
 			}
 			//删除通道
 			List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundleIds);
 			if (channelSchemePOs != null && channelSchemePOs.size() > 0 ) {
-				channelSchemeDao.delete(channelSchemePOs);
+				channelSchemeDao.deleteInBatch(channelSchemePOs);
 			}
 			//删除目录
 			if(folderIds !=null&&folderIds.size()>0){
@@ -672,14 +670,14 @@ public class OutlandService extends ControllerBase{
 						}
 					}
 					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
-					folderDao.delete(folder2all);
+					folderDao.deleteInBatch(folder2all);
 				}
 			}
 			
 			//扩展参数
 			List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(bundleIds);
 			if(extraInfoPOs != null&& extraInfoPOs.size()>0){
-				extraInfoDao.delete(extraInfoPOs);
+				extraInfoDao.deleteInBatch(extraInfoPOs);
 			}
 			List<ExtraInfoPO> extraInfos = extraInfoDao.findBySerNodeId(serNodePO.getId());
 			if (extraInfos != null && extraInfos.size() >0) {
@@ -740,7 +738,7 @@ public class OutlandService extends ControllerBase{
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
-			SerNodePO serNodePO = serNodeDao.findOne(serNodeId);
+			SerNodePO serNodePO = serNodeDao.findById(serNodeId);
 			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId, coderType);
 			Set<String> bundleIds = new HashSet<String>();
 			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
@@ -890,7 +888,7 @@ public class OutlandService extends ControllerBase{
 				unbindprivilege.removeAll(bundleprivilegeList);
 				if (unbindprivilege != null && !unbindprivilege.isEmpty()) {
 					List<RolePrivilegeMap> unbindPermission = rolePrivilegeMapDAO.findByRoleIdAndResourceIdIn(roleId, unbindprivilege);
-					rolePrivilegeMapDAO.delete(unbindPermission);
+					rolePrivilegeMapDAO.deleteInBatch(unbindPermission);
 				}
 			}
 			if (bundleprivilegeList != null && !bundleprivilegeList.isEmpty()) {
@@ -908,7 +906,7 @@ public class OutlandService extends ControllerBase{
 							newbindPermission.add(rolePrivilegeMap);
 						}
 					}
-					rolePrivilegeMapDAO.save(newbindPermission);
+					rolePrivilegeMapDAO.saveAll(newbindPermission);
 				}
 			}
 			

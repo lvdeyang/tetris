@@ -28,7 +28,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.bouncycastle.crypto.signers.DSADigestSigner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,13 +63,13 @@ import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.FolderUserMap.FolderUserComparator;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.FolderUserMap.FolderUserComparator;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.FolderService;
@@ -209,7 +208,7 @@ public class FolderManageController extends ControllerBase {
 			// 调整同级数据的index
 			if(folder.getFolderIndex() != null){
 				int oldIndex = folder.getFolderIndex();
-				FolderPO parentFolder = folderDao.findOne(folder.getParentId());
+				FolderPO parentFolder = folderDao.findById(folder.getParentId());
 				if(parentFolder != null)handleOldParentFolderIndexChange(parentFolder, oldIndex);
 			}
 
@@ -246,7 +245,7 @@ public class FolderManageController extends ControllerBase {
 		try {
 			List<FolderTreeVO> bundleNodes = new LinkedList<FolderTreeVO>();
 			String[] bundleIdArr = bundleIds.split(",");
-			FolderPO folderPO = folderDao.findOne(folderId);
+			FolderPO folderPO = folderDao.findById(folderId);
 
 			List<String> bundleIdStrings = new ArrayList<String>();
 			int maxIndex = caculateMaxIndex(folderPO);
@@ -380,7 +379,7 @@ public class FolderManageController extends ControllerBase {
 			for (String bundleId : bundleIdArr) {
 				BundlePO bundle = bundleService.findByBundleId(bundleId);
 
-				FolderPO parentPO = folderDao.findOne(bundle.getFolderId());
+				FolderPO parentPO = folderDao.findById(bundle.getFolderId());
 
 				if (bundle.getFolderIndex() != null) {
 					handleOldParentFolderIndexChange(parentPO, bundle.getFolderIndex());
@@ -407,7 +406,7 @@ public class FolderManageController extends ControllerBase {
 		try {
 			
 			List<FolderTreeVO> userNodes = new LinkedList<FolderTreeVO>();
-			FolderPO folderPO = folderDao.findOne(folderId);
+			FolderPO folderPO = folderDao.findById(folderId);
 			
 			List<UserBO> users = JSONObject.parseArray(userIds, UserBO.class);
 
@@ -448,7 +447,7 @@ public class FolderManageController extends ControllerBase {
 				resetUserIds.add(Long.valueOf(userId));
 			}
 			List<FolderUserMap> maps = folderUserMapDao.findByUserIdIn(resetUserIds);
-			folderUserMapDao.delete(maps);
+			folderUserMapDao.deleteInBatch(maps);
 
 //			for (String username : usernameArr) {
 //
@@ -661,7 +660,7 @@ public class FolderManageController extends ControllerBase {
 			for(int i=0; i<sortUsers.size(); i++){
 				sortUsers.get(i).setFolderIndex(Long.parseLong(String.valueOf(i+1)));
 			}
-			folderUserMapDao.save(sortUsers);
+			folderUserMapDao.saveAll(sortUsers);
 		} catch (Exception e) {
 			LOGGER.error("Fail to init folder tree", e);
 			data.put(ERRMSG, "内部错误");
@@ -809,7 +808,7 @@ public class FolderManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			// 将bvc内部的目录树挂到该指定的目录下
-			FolderPO newFolderPO = folderDao.findOne(rootId);
+			FolderPO newFolderPO = folderDao.findById(rootId);
 			List<FolderPO> bvcRootFolders = folderDao.findBvcRootFolders();
 			for (FolderPO bvcRootFolder : bvcRootFolders) {
 				bvcRootFolder.setParentId(newFolderPO.getId());
@@ -847,7 +846,7 @@ public class FolderManageController extends ControllerBase {
 					continue;
 				}
 
-				FolderPO oldParentFolderPO = folderDao.findOne(bvcRootFolder.getParentId());
+				FolderPO oldParentFolderPO = folderDao.findById(bvcRootFolder.getParentId());
 
 				int oldIndex = bvcRootFolder.getFolderIndex();
 
@@ -874,7 +873,7 @@ public class FolderManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			
-			FolderPO folder = folderDao.findOne(folderId);
+			FolderPO folder = folderDao.findById(folderId);
 			if(folder == null){
 				data.put(ERRMSG, "未获取到文件夹，id："+folderId);
 				return data;
@@ -922,21 +921,21 @@ public class FolderManageController extends ControllerBase {
 
 			if (nodeType.equals("FOLDER")) {
 
-				changeFolderPO = folderDao.findOne(Long.valueOf(nodeId));
+				changeFolderPO = folderDao.findById(Long.valueOf(nodeId));
 
 				if (changeFolderPO.getParentId().longValue() == -1) {
 					rootFlag = true;
 				}
 
 				if (!rootFlag) {
-					oldParentPO = folderDao.findOne(changeFolderPO.getParentId());
+					oldParentPO = folderDao.findById(changeFolderPO.getParentId());
 				}
 
 				oldIndex = changeFolderPO.getFolderIndex();
 
 				if (changeType.equals("inner")) {
 
-					newParentPO = folderDao.findOne(Long.valueOf(newTargetId));
+					newParentPO = folderDao.findById(Long.valueOf(newTargetId));
 					changeFolderPO.setParentId(Long.valueOf(newTargetId));
 
 					// int maxIndex = caculateMaxIndex(newParentPO);
@@ -947,7 +946,7 @@ public class FolderManageController extends ControllerBase {
 
 				} else if (changeType.equals("before")) {
 
-					newParentPO = folderDao.findOne(newTargetParentId);
+					newParentPO = folderDao.findById(newTargetParentId);
 					changeFolderPO.setParentId(newTargetParentId);
 
 					if (newTargetType.equals("USER") || newTargetType.equals("BUNDLE")) {
@@ -961,7 +960,7 @@ public class FolderManageController extends ControllerBase {
 
 				} else if (changeType.equals("after")) {
 
-					newParentPO = folderDao.findOne(newTargetParentId);
+					newParentPO = folderDao.findById(newTargetParentId);
 					changeFolderPO.setParentId(newTargetParentId);
 					if (newTargetType.equals("USER") || newTargetType.equals("BUNDLE")) {
 						int maxIndex = caculateMaxfolderIndex(newParentPO, changeFolderPO);
@@ -1179,7 +1178,7 @@ public class FolderManageController extends ControllerBase {
 					}
 				}
 
-				folderDao.save(folderPOs);
+				folderDao.saveAll(folderPOs);
 			}
 
 			// 重新设置bvc内部根节点为目录树的根
@@ -1250,14 +1249,14 @@ public class FolderManageController extends ControllerBase {
 							bundlePO.setSyncStatus(SYNC_STATUS.ASYNC);
 						}
 
-						bundleDao.save(bundlePOs);
+						bundleDao.saveAll(bundlePOs);
 
 					}
 
 				}
 
 				// 再从本地删除从ldap下载下来的目录数据
-				folderDao.delete(externalFolderPOs);
+				folderDao.deleteInBatch(externalFolderPOs);
 			}
 			
 			departSyncLdapUtils.handleFolderUserCleanUpLdap();
@@ -1374,7 +1373,7 @@ public class FolderManageController extends ControllerBase {
 			}
 		}
 
-		folderDao.save(modifyFolders);
+		folderDao.saveAll(modifyFolders);
 
 		//TODO：暂时不支持 
 		/** // 查询所有同级bundles
@@ -1415,7 +1414,7 @@ public class FolderManageController extends ControllerBase {
 			}
 		}
 
-		folderDao.save(modifyFolders);
+		folderDao.saveAll(modifyFolders);
 
 		//TODO： 暂时不支持
 		/** // 查询所有同级bundles
@@ -1497,7 +1496,7 @@ public class FolderManageController extends ControllerBase {
 
 			// 添加子用户节点
 			try {
-				FolderPO folderPO = folderDao.findOne(parentId);
+				FolderPO folderPO = folderDao.findById(parentId);
 				/**Map<String, List<UserBO>> usersMap = userFeign.queryUsersByFolderUuid(folderPO.getUuid());
 				for (UserBO userBO : usersMap.get("users")) {
 					children.add(createUserNode(parentId, userBO));
@@ -1551,7 +1550,7 @@ public class FolderManageController extends ControllerBase {
 			// 添加子用户节点
 			if (withMembers) {
 				try {
-					FolderPO folderPO = folderDao.findOne(parentId);
+					FolderPO folderPO = folderDao.findById(parentId);
 					Map<String, List<UserBO>> usersMap = userFeign.queryUsersByFolderUuid(folderPO.getUuid());
 					for (UserBO userBO : usersMap.get("users")) {
 						children.add(createUserNode(parentId, userBO));
@@ -1932,7 +1931,7 @@ public class FolderManageController extends ControllerBase {
 
 		if (parentFolderPO.getParentId() != null && parentFolderPO.getParentId() != -1l) {
 
-			FolderPO tempPo = folderDao.findOne(parentFolderPO.getParentId());
+			FolderPO tempPo = folderDao.findById(parentFolderPO.getParentId());
 			if (tempPo != null) {
 				parentUuid = tempPo.getUuid();
 			}
@@ -2184,7 +2183,7 @@ public class FolderManageController extends ControllerBase {
 			
 		}
 		
-		folderUserMapDao.save(needSaveMaps);
+		folderUserMapDao.saveAll(needSaveMaps);
 
 		return successCnt;
 

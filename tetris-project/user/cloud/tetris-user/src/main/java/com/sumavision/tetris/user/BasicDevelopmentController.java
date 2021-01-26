@@ -74,7 +74,7 @@ public class BasicDevelopmentController {
 		
 		UserVO user = userQuery.current();
 		
-		UserPO userEntity = userDao.findOne(Long.valueOf(user.getUuid()));
+		UserPO userEntity = userDao.findById(Long.valueOf(user.getUuid()));
 		
 		if(!userEntity.getPassword().equals(sha265Encoder.encode(password))){
 			throw new PasswordErrorException();

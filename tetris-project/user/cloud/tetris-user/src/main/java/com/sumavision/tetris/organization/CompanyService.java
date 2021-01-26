@@ -89,7 +89,7 @@ public class CompanyService {
 			String fileName,
 			InputStream logo) throws Exception{
 		
-		CompanyPO entity = companyDao.findOne(companyId);
+		CompanyPO entity = companyDao.findById(companyId);
 		if(themeId != null){
 			entity.setThemeId(themeId);
 		}else{
@@ -156,7 +156,7 @@ public class CompanyService {
 		
 		companyDao.save(entity);
 		CompanyVO company = new CompanyVO().set(entity);
-		SystemThemePO currentTheme = systemThemeDao.findOne(company.getThemeId());
+		SystemThemePO currentTheme = systemThemeDao.findById(company.getThemeId());
 		company.setThemeId(currentTheme.getId())
 			   .setThemeName(currentTheme.getName())
 			   .setThemeUrl(currentTheme.getUrl());

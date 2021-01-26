@@ -47,7 +47,7 @@ public class ApiServerCompressController {
 			String param,
 			HttpServletRequest request) throws Exception{
 		
-		MediaCompressPO mediaCompress = mediaCompressDao.findOne(id);
+		MediaCompressPO mediaCompress = mediaCompressDao.findById(id);
 		
 		return mediaCompressService.parse(mediaCompress.getUploadTmpPath(), param);
 	}

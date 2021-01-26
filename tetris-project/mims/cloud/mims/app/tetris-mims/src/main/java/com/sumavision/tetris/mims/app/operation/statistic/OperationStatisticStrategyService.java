@@ -56,7 +56,7 @@ public class OperationStatisticStrategyService {
 	 * @return OperationStatisticDistridutionVO 结算策略信息
 	 */
 	public OperationStatisticStrategyVO edit(Long id, Integer producer, Integer operator) throws Exception {
-		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findOne(id);
+		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findById(id);
 		if (statisticDistridutionPO == null) throw new OperationStatisticStrategyNotExistException(id);
 		
 		if (checkUsed(id)) {
@@ -80,13 +80,13 @@ public class OperationStatisticStrategyService {
 	 * @return OperationStatisticDistridutionVO 结算策略信息
 	 */
 	public OperationStatisticStrategyVO remove(Long id) throws Exception {
-		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findOne(id);
+		OperationStatisticStrategyPO statisticDistridutionPO = statisticDistridutionDAO.findById(id);
 		if (statisticDistridutionPO == null) throw new OperationStatisticStrategyNotExistException(id);
 		if (checkUsed(id)) {
 			statisticDistridutionPO.setStatus(OperationPackageStatus.INVALID);
 			statisticDistridutionDAO.save(statisticDistridutionPO);
 		} else {
-			statisticDistridutionDAO.delete(id);
+			statisticDistridutionDAO.deleteById(id);
 		}
 		return new OperationStatisticStrategyVO().set(statisticDistridutionPO);
 	}

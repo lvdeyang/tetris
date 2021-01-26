@@ -69,7 +69,6 @@ import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
-import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
@@ -222,7 +221,7 @@ public class ApiServerMediaController {
 			}
 			folder = folders.get(0);
 		} else {
-			folder = folderDao.findOne(folderId);
+			folder = folderDao.findById(folderId);
 			if(folder == null){
 				throw new FolderNotExistException(new StringBufferWrapper().append("文件夹")
 																		   .append(folderId)
@@ -603,19 +602,19 @@ public class ApiServerMediaController {
 			List<Long> ids = Arrays.asList(idsString.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
 			switch (type.toLowerCase()) {
 			case "audio":
-				List<MediaAudioPO> audios = mediaAudioDao.findAll(ids);
+				List<MediaAudioPO> audios = mediaAudioDao.findAllById(ids);
 				mediaAudioService.remove(audios);
 				break;
 			case "video":
-				List<MediaVideoPO> videos = mediaVideoDao.findAll(ids);
+				List<MediaVideoPO> videos = mediaVideoDao.findAllById(ids);
 				mediaVideoService.remove(videos);
 				break;
 			case "picture":
-				List<MediaPicturePO> pictures = mediaPictureDao.findAll(ids);
+				List<MediaPicturePO> pictures = mediaPictureDao.findAllById(ids);
 				mediaPictureService.remove(pictures);
 				break;
 			case "txt":
-				List<MediaTxtPO> txts = mediaTxtDao.findAll(ids);
+				List<MediaTxtPO> txts = mediaTxtDao.findAllById(ids);
 				mediaTxtService.remove(txts);
 				break;
 			case "videostream":
@@ -851,7 +850,7 @@ public class ApiServerMediaController {
 		
 		switch (type) {
 		case "video":
-			MediaVideoPO video = mediaVideoDao.findOne(id);
+			MediaVideoPO video = mediaVideoDao.findById(id);
 			if(video == null){
 				throw new MediaVideoNotExistException(id);
 			}
@@ -861,7 +860,7 @@ public class ApiServerMediaController {
 			if (video.getDuration() != null) duration = video.getDuration().toString();
 			break;
 		case "audio":
-			MediaAudioPO audio = mediaAudioDao.findOne(id);
+			MediaAudioPO audio = mediaAudioDao.findById(id);
 			if(audio == null){
 				throw new MediaVideoNotExistException(id);
 			}
@@ -871,7 +870,7 @@ public class ApiServerMediaController {
 			if (audio.getDuration() != null) duration = audio.getDuration().toString();
 			break;
 		case "picture":
-			MediaPicturePO picture = mediaPictureDao.findOne(id);
+			MediaPicturePO picture = mediaPictureDao.findById(id);
 			if(picture == null){
 				throw new MediaVideoNotExistException(id);
 			}
@@ -880,7 +879,7 @@ public class ApiServerMediaController {
 			uri = stringBufferWrapper.append(picture.getPreviewUrl()).toString();
 			break;
 		case "txt":
-			MediaTxtPO txt = mediaTxtDao.findOne(id);
+			MediaTxtPO txt = mediaTxtDao.findById(id);
 			if(txt == null){
 				throw new MediaVideoNotExistException(id);
 			}

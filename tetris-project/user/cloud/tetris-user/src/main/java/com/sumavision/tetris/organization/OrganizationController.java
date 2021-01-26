@@ -81,14 +81,14 @@ public class OrganizationController {
 		
 		//TODO 权限校验
 		
-		CompanyPO company = companyDao.findOne(companyId);
+		CompanyPO company = companyDao.findById(companyId);
 		if(company == null){
 			throw new CompanyNotExistException(companyId);
 		}
 		
 		OrganizationPO parent = null;
 		if(parentId != null){
-			parent = organizationDao.findOne(parentId);
+			parent = organizationDao.findById(parentId);
 			if(parent == null){
 				throw new OrganizationNotExistException(parentId);
 			}
@@ -137,7 +137,7 @@ public class OrganizationController {
 		
 		//TODO 权限校验
 		
-		OrganizationPO organization = organizationDao.findOne(id);
+		OrganizationPO organization = organizationDao.findById(id);
 		if(organization == null){
 			throw new OrganizationNotExistException(id);
 		}
@@ -168,7 +168,7 @@ public class OrganizationController {
 		
 		//TODO 权限校验
 		
-		OrganizationPO organization = organizationDao.findOne(id);
+		OrganizationPO organization = organizationDao.findById(id);
 		
 		if(organization != null){
 			organizationService.delete(organization);

@@ -63,7 +63,7 @@ public class AccessPointParamController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint =  accessPointDao.findById(accessPointId);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(accessPointId);
@@ -94,7 +94,7 @@ public class AccessPointParamController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint =  accessPointDao.findById(accessPointId);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(accessPointId);

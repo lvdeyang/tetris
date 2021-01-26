@@ -95,7 +95,7 @@ public class MediaTxtService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		if(media.getUploadTmpPath() != null){
 			File file = FileUtil.writeString(media.getUploadTmpPath(), media.getContent());
 			media.setSize(file.length());
@@ -113,7 +113,7 @@ public class MediaTxtService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaTxtDao.save(media);
 	}
@@ -137,7 +137,7 @@ public class MediaTxtService {
 			String keyWords, 
 			String remark, 
 			String content) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		if(media == null){
 			throw new MediaVideoStreamNotExistException(id);
 		}
@@ -165,7 +165,7 @@ public class MediaTxtService {
 	 * @param Long id 文本媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaTxtDao.save(media);
 	}
@@ -178,7 +178,7 @@ public class MediaTxtService {
 	 * @param Long id 文本媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		if(media != null){
 			mediaTxtDao.delete(media);
 		}
@@ -192,7 +192,7 @@ public class MediaTxtService {
 	 * @param Long id 文本媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaTxtDao.save(media);
 	}
@@ -254,7 +254,7 @@ public class MediaTxtService {
 					txt.setProcessInstanceId(processInstanceId);
 					txt.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaTxtDao.save(txtNeedProcess);
+				mediaTxtDao.saveAll(txtNeedProcess);
 			}
 		}else{
 			txtCanBeDeleted.addAll(txtStreams);
@@ -268,7 +268,7 @@ public class MediaTxtService {
 			mediaTxtDao.deleteInBatch(txtCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -701,7 +701,7 @@ public class MediaTxtService {
 			}
 			folder = folders.get(0);
 		} else {
-			folder = folderDao.findOne(folderId);
+			folder = folderDao.findById(folderId);
 			if(folder == null){
 				throw new FolderNotExistException(new StringBufferWrapper().append("文件夹")
 																		   .append(folderId)
@@ -714,7 +714,7 @@ public class MediaTxtService {
 		String jsonDirPath = txtVO.getUploadTmpPath().replace(fileNameString, "");
 		CreateFileUtil.createJsonFile(jsonContent, jsonDirPath, name);
 		
-		MediaTxtPO txtPO = mediaTxtDao.findOne(txtVO.getId());
+		MediaTxtPO txtPO = mediaTxtDao.findById(txtVO.getId());
 		Long size = GetFileSizeUtil.getFileSize(new File(txtPO.getUploadTmpPath()));
 		txtPO.setSize(size);
 		txtPO.setContent(jsonContent);

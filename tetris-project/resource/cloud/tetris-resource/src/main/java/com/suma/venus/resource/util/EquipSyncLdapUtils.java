@@ -12,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.equip.dao.LdapEquipDao;
 import com.suma.application.ldap.equip.po.LdapEquipPo;
-
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
@@ -22,10 +21,10 @@ import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.ldap.LdapEquipInfoUtil;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 
@@ -115,11 +114,11 @@ public class EquipSyncLdapUtils {
 						if (ldapEquip.getEquipType() == 2) {
 							// 编码设备
 							// 配置两路编码通道(音频编码和视频编码各一路)
-							channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
+							channelSchemeDao.saveAll(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
 						} else if (ldapEquip.getEquipType() == 3) {
 							// 解码设备
 							// 配置两路解码通道(音频解码和视频解码各一路)
-							channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
+							channelSchemeDao.saveAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
 						} else {
 							// 按照模板最大通道数自动生成能力配置
 							bundleService.configDefaultAbility(bundle);
@@ -141,10 +140,10 @@ public class EquipSyncLdapUtils {
 
 		}
 		if (!successBundles.isEmpty()) {
-			bundleDao.save(successBundles);
+			bundleDao.saveAll(successBundles);
 		}
 		if(!successExtraInfos.isEmpty()){
-			extraInfoDao.save(successExtraInfos);
+			extraInfoDao.saveAll(successExtraInfos);
 		}
 		return successBundles.size();
 	}
@@ -203,7 +202,7 @@ public class EquipSyncLdapUtils {
 		}
 		
 		if (!successBundles.isEmpty()) {
-			bundleDao.save(successBundles);
+			bundleDao.saveAll(successBundles);
 		}
 		return successBundles.size();
 	}
@@ -231,7 +230,7 @@ public class EquipSyncLdapUtils {
 
 				bundlePO.setSyncStatus(SYNC_STATUS.ASYNC);
 			}
-			bundleDao.save(bundlePOList);
+			bundleDao.saveAll(bundlePOList);
 		}
 
 		// 再删除从LDAP服务端下载的数据

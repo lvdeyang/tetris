@@ -113,7 +113,7 @@ public class MediaAudioFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/quest/by/id")
 	public Object getById(Long id) throws Exception{
-		MediaAudioPO audio = mediaAudioDAO.findOne(id);
+		MediaAudioPO audio = mediaAudioDAO.findById(id);
 		if (audio == null) throw new MediaAudioNotExistException(id);
 		
 		return new MediaAudioVO().set(audio);

@@ -28,19 +28,19 @@ import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
@@ -171,10 +171,10 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				for (BundlePO bundlePO : bundlePOs) {
 					bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 				}
-				bundleDao.save(bundlePOs);
+				bundleDao.saveAll(bundlePOs);
 			}
 		}
-		serNodeDao.save(serNodePOs);
+		serNodeDao.saveAll(serNodePOs);
 		return null;
 	}
 	
@@ -204,7 +204,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				serNodePO.setStatus(ConnectionStatus.ON);
 			}
 		}
-		serNodeDao.save(serNodePOs);
+		serNodeDao.saveAll(serNodePOs);
 		return null;
 	}
 	
@@ -259,8 +259,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
 				extraInfoPOs.add(extraInfoPO);
 			}
-			extraInfoDao.delete(exExtraInfoPOs);
-			extraInfoDao.save(extraInfoPOs);
+			extraInfoDao.deleteInBatch(exExtraInfoPOs);
+			extraInfoDao.saveAll(extraInfoPOs);
 		}
 		
 		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
@@ -350,7 +350,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			}
 		}
 //		保存更新状态的设备		
-		bundleDao.save(needBundlePOs);
+		bundleDao.saveAll(needBundlePOs);
 		existedBundlePOs.removeAll(needBundlePOs);
 		if (existedBundlePOs != null && !existedBundlePOs.isEmpty()) {
 			List<String> delbundle = new ArrayList<String>();
@@ -369,21 +369,21 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 					}
 				}
 				channelSchemePOs.removeAll(deletedChannels);
-				channelSchemeDao.delete(channel);
+				channelSchemeDao.deleteInBatch(channel);
 				removeChannelSchemePOs.removeAll(channel);
 			}
 			
-			bundleDao.delete(existedBundlePOs);
+			bundleDao.deleteInBatch(existedBundlePOs);
 			List<ExtraInfoPO> extraInfoPOs2 = extraInfoDao.findByBundleIdIn(delbundle);
-			extraInfoDao.delete(extraInfoPOs2);
+			extraInfoDao.deleteInBatch(extraInfoPOs2);
 		}
 		if (bundlePOs.size()>0) {
-			bundleDao.save(bundlePOs);
+			bundleDao.saveAll(bundlePOs);
 		}
 		
 //		newchannelSchemePOs.remove(removeChannelSchemePOs);
-		channelSchemeDao.save(newchannelSchemePOs);
-		channelSchemeDao.save(removeChannelSchemePOs);
+		channelSchemeDao.saveAll(newchannelSchemePOs);
+		channelSchemeDao.saveAll(removeChannelSchemePOs);
 		
 		//外域下授权信息
 		oldBundleIds.add("-1");
@@ -419,15 +419,15 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				for (PrivilegePO privilegePO : olPrivilegesPos) {
 					mapId.add(privilegePO.getId());
 				}
-				privilegeDAO.delete(olPrivilegesPos);
+				privilegeDAO.deleteInBatch(olPrivilegesPos);
 			}
 		}
 		List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(mapId);
 		if (rolePrivilegeMaps != null && !rolePrivilegeMaps.isEmpty()) {
-			rolePrivilegeMapDAO.delete(rolePrivilegeMaps);
+			rolePrivilegeMapDAO.deleteInBatch(rolePrivilegeMaps);
 		}
 		if (newprivilegePos.size() > 0) {
-			privilegeDAO.save(newprivilegePos);
+			privilegeDAO.saveAll(newprivilegePos);
 		}
 		List<BundlePO> allbundlePOs = bundleDao.findAll();
 		Map<String, String> bundleModel = new HashMap<String, String>();
@@ -490,7 +490,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				newprivilegePos.add(privilegePO);
 			}
 		}
-		privilegeDAO.save(newprivilegePos);
+		privilegeDAO.saveAll(newprivilegePos);
 		
 		
 		//外域下组织机构信息
@@ -520,8 +520,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				ExtraInfoPO extraInfoPO = extraInfoVO.toPO();
 				extraInfoPOs.add(extraInfoPO);
 			}
-			extraInfoDao.delete(exExtraInfoPOs);
-			extraInfoDao.save(extraInfoPOs);
+			extraInfoDao.deleteInBatch(exExtraInfoPOs);
+			extraInfoDao.saveAll(extraInfoPOs);
 		}
 		
 		List<ChannelTemplatePO> templatePOs  = channelTemplateDao.findAll();
@@ -595,11 +595,11 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			}
 		}
 		bundlePOs.removeAll(removeBundlePOs);
-		bundleDao.save(bundlePOs);
+		bundleDao.saveAll(bundlePOs);
 		
 		//newchannelSchemePOs.remove(removeChannelSchemePOs);
-		channelSchemeDao.save(removeChannelSchemePOs);
-		channelSchemeDao.save(newchannelSchemePOs);
+		channelSchemeDao.saveAll(removeChannelSchemePOs);
+		channelSchemeDao.saveAll(newchannelSchemePOs);
 		//channelSchemeDao.save(channelSchemePOs);
 		
 		return null;
@@ -638,8 +638,8 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				privilegeIds.add(privilegePO.getId());
 			}
 			List<RolePrivilegeMap> rolePrivilegeMaps = rolePrivilegeMapDAO.findByPrivilegeIdIn(privilegeIds);
-			rolePrivilegeMapDAO.delete(rolePrivilegeMaps);
-			privilegeDAO.delete(unbindprivilegePOs);
+			rolePrivilegeMapDAO.deleteInBatch(rolePrivilegeMaps);
+			privilegeDAO.deleteInBatch(unbindprivilegePOs);
 		}
 		
 			//失去权限后停止转发
@@ -675,14 +675,14 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		}
 		deleteBundleIds.removeAll(bindBundleIds);
 		List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(deleteBundleIds);
-		bundleDao.delete(bundlePOs);
+		bundleDao.deleteInBatch(bundlePOs);
 		List<ChannelSchemePO> channels = channelSchemeDao.findByBundleIdIn(deleteBundleIds);
 		if (channels != null&&channels.size()>0) {
-			channelSchemeDao.delete(channels);
+			channelSchemeDao.deleteInBatch(channels);
 		}
 		//删除扩展参数
 		List<ExtraInfoPO> exExtraInfoPOs = extraInfoDao.findByBundleIdIn(deleteBundleIds);
-		extraInfoDao.delete(exExtraInfoPOs);
+		extraInfoDao.deleteInBatch(exExtraInfoPOs);
 		return null;
 	}
 	
@@ -731,7 +731,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 					}
 				}
 			}
-			bundleDao.save(bundlePOs);
+			bundleDao.saveAll(bundlePOs);
 		}
 		
 		return null;
@@ -774,14 +774,14 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			}
 		}
 		folderVOs.removeAll(removeFolderVOs);
-		folderDao.save(existedFolderPOs);
+		folderDao.saveAll(existedFolderPOs);
 		if (folderVOs != null && !folderVOs.isEmpty()) {
 			for (FolderVO folderVO : folderVOs) {
 				FolderPO folderPO = folderVO.toPo();
 				folderPOs2.add(folderPO);
 			}
 		}
-		folderDao.save(folderPOs2);
+		folderDao.saveAll(folderPOs2);
 		List<FolderPO> newFolders = folderDao.findAll();
 		if(folderPOs2 != null && !folderPOs2.isEmpty()){
 			for (FolderPO folderPO : folderPOs2) {
@@ -810,7 +810,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 			}
 		}
-		folderDao.save(folderPOs2);
+		folderDao.saveAll(folderPOs2);
 		return null;
 	}
 	
@@ -846,7 +846,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				System.out.println("bundle offline :" + bundlePO.getBundleId() + "----------*****外域影响***----------");
 			}
 		}
-		bundleDao.save(bundlePOs);
+		bundleDao.saveAll(bundlePOs);
 		return null;
 	}
 	
@@ -1081,7 +1081,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 				//除旧迎新
 				extraInfoService.deleteByBundleId(bundlePO.getBundleId());
-				extraInfoDao.save(newextraInfoPOs);
+				extraInfoDao.saveAll(newextraInfoPOs);
 			}
 			
 			

@@ -60,7 +60,7 @@ public class LoginQuery {
 	 */
 	public String queryRedirectUrl(String token) throws Exception{
 		TokenPO tokenEntity = tokenDao.findByToken(token);
-		UserPO user = userDao.findOne(tokenEntity.getUserId());
+		UserPO user = userDao.findById(tokenEntity.getUserId());
 		String redirectUrl = null;
 		MenuVO menu = null;
 		List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.SYSTEM);

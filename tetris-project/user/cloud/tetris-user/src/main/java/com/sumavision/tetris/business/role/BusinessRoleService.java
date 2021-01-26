@@ -78,7 +78,7 @@ public class BusinessRoleService {
 	 * @return SystemRoleVO 角色
 	 */
 	public SystemRoleVO edit(Long id, String name) throws Exception{
-		SystemRolePO role = systemRoleDao.findOne(id);
+		SystemRolePO role = systemRoleDao.findById(id);
 		if(role != null){
 			role.setName(name);
 			systemRoleDao.save(role);
@@ -95,7 +95,7 @@ public class BusinessRoleService {
 	 * @param Long id 角色id
 	 */
 	public void remove(Long id) throws Exception{
-		SystemRolePO role = systemRoleDao.findOne(id);
+		SystemRolePO role = systemRoleDao.findById(id);
 		if(role != null){
 			systemRoleDao.delete(role);
 			//发布业务角色删除事件

@@ -1,8 +1,6 @@
 package com.sumavision.tetris.system.role;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +34,7 @@ public class SystemRoleGroupService {
 	 */
 	public void delete(Long id) throws Exception{
 		
-		SystemRoleGroupPO group = systemRoleGroupDao.findOne(id);
+		SystemRoleGroupPO group = systemRoleGroupDao.findById(id);
 		if(group != null){
 			systemRoleGroupDao.delete(group);
 		}

@@ -47,7 +47,7 @@ public class MediaAudioStreamUrlRelationService {
 			}
 		}
 
-		mediaAudioStreamUrlRelationDAO.save(mediaVideoStreamUrlRelationPOs);
+		mediaAudioStreamUrlRelationDAO.saveAll(mediaVideoStreamUrlRelationPOs);
 
 		return mediaVideoStreamUrlRelationPOs;
 	}
@@ -77,7 +77,7 @@ public class MediaAudioStreamUrlRelationService {
 			}
 		}
 		
-		mediaAudioStreamUrlRelationDAO.save(addUrl);
+		mediaAudioStreamUrlRelationDAO.saveAll(addUrl);
 		
 		return mediaAudioStreamUrlRelationDAO.findByVideoStreamIdOrderByVisitCountAsc(streamId);
 	}
@@ -104,7 +104,7 @@ public class MediaAudioStreamUrlRelationService {
 				copyMedias.add(copyMedia);
 				mediaUrls.add(videoStream.getUrl());
 			}
-			mediaAudioStreamUrlRelationDAO.save(copyMedias);
+			mediaAudioStreamUrlRelationDAO.saveAll(copyMedias);
 			
 			return mediaUrls;
 		}else {

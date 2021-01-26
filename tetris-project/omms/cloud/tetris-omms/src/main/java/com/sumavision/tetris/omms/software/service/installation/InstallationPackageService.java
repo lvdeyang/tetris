@@ -62,7 +62,7 @@ public class InstallationPackageService {
 			String remark,
 			FileItem installationPackage) throws Exception{
 		
-		ServiceTypePO serviceType = serviceTypeDao.findOne(serviceTypeId);
+		ServiceTypePO serviceType = serviceTypeDao.findById(serviceTypeId);
 		if(serviceType == null){
 			throw new ServiceTypeNotFoundException(serviceTypeId);
 		}
@@ -139,7 +139,7 @@ public class InstallationPackageService {
 					property.setInstallationPackageId(packageEntity.getId());
 					properties.add(property);
 				}
-				propertiesDao.save(properties);
+				propertiesDao.saveAll(properties);
 				
 				JSONArray arr2 = jsonObject.getJSONArray("process");
 				for(int i = 0; i < arr2.size(); i++){
@@ -151,7 +151,7 @@ public class InstallationPackageService {
 					process.setDb(description2.getString("db"));
 					processes.add(process);
 				}
-				processDAO.save(processes);
+				processDAO.saveAll(processes);
 			}
 			
 			return new InstallationPackageVO().set(packageEntity);
@@ -178,7 +178,7 @@ public class InstallationPackageService {
 	 */
 	@Transactional
 	public void remove(Long id) throws Exception{
-		InstallationPackagePO packageEntity = installationPackageDao.findOne(id);
+		InstallationPackagePO packageEntity = installationPackageDao.findById(id);
 		if(packageEntity != null){
 			List<PropertiesPO> properties = propertiesDao.findByInstallationPackageId(packageEntity.getId());
 			if(properties!=null && properties.size()>0){

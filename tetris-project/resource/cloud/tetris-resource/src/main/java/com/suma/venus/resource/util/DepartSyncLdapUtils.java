@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.department.dao.LdapDepartmentDao;
 import com.suma.application.ldap.department.po.LdapDepartmentPo;
 import com.suma.application.ldap.user.dao.LdapUserDao;
@@ -198,7 +197,7 @@ public class DepartSyncLdapUtils {
 				}
 			}
 			
-			folderUserMapDao.save(needAddMaps);
+			folderUserMapDao.saveAll(needAddMaps);
 		}
 		
 	}
@@ -227,7 +226,7 @@ public class DepartSyncLdapUtils {
 		}
 
 		if (!successFolders.isEmpty()) {
-			folderDao.save(successFolders);
+			folderDao.saveAll(successFolders);
 		}
 		return successFolders.size();
 	}
@@ -275,7 +274,7 @@ public class DepartSyncLdapUtils {
 			ldapUserDao.removeAll(allLdapUsers);
 		}
 		
-		folderUserMapDao.save(maps);
+		folderUserMapDao.saveAll(maps);
 	}
 
 	public String handleCleanUpLdap() {
@@ -302,7 +301,7 @@ public class DepartSyncLdapUtils {
 		// 再从本地删除从ldap下载下来的数据
 		List<FolderPO> externalFolderPOs = folderDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 		if (!CollectionUtils.isEmpty(externalFolderPOs)) {
-			folderDao.delete(externalFolderPOs);
+			folderDao.deleteInBatch(externalFolderPOs);
 		}
 
 		return "";
@@ -324,7 +323,7 @@ public class DepartSyncLdapUtils {
 		
 		//删除本地下载的ldap数据
 		List<FolderUserMap> maps = folderUserMapDao.findFromLdapMap();
-		folderUserMapDao.delete(maps);
+		folderUserMapDao.deleteInBatch(maps);
 		
 		//删除ldap用户
 		userFeignService.deleteLdapUser();
@@ -333,7 +332,7 @@ public class DepartSyncLdapUtils {
 		for(FolderUserMap localMap: localMaps){
 			localMap.setSyncStatus(0);
 		}
-		folderUserMapDao.save(localMaps);
+		folderUserMapDao.saveAll(localMaps);
 	}
 
 }

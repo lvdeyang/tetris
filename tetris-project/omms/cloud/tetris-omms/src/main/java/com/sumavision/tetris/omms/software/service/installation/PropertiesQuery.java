@@ -59,7 +59,7 @@ public class PropertiesQuery {
 			Long installationPackageId,
 			int currentPage, 
 			int pageSize) throws Exception {
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<PropertiesPO> paged = propertiesDAO.findByInstallationPackageId(installationPackageId, page);
 		List<PropertiesPO> entities = paged.getContent();
 		List<PropertiesVO> rows = PropertiesVO.getConverter(PropertiesVO.class).convert(entities, PropertiesVO.class);
@@ -111,8 +111,8 @@ public class PropertiesQuery {
 	 * @throws Exception
 	 */
 	public List<PropertiesVO> findByDeploymentId(Long deploymentId) throws Exception{
-		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
-		InstallationPackagePO installationPackage = installationPackageDAO.findOne(deployment.getInstallationPackageId());
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findById(deploymentId);
+		InstallationPackagePO installationPackage = installationPackageDAO.findById(deployment.getInstallationPackageId());
 		List<PropertiesPO> packagePropertiesList = propertiesDAO.findByInstallationPackageId(installationPackage.getId());
 		List<PropertiesVO> list = PropertiesVO.getConverter(PropertiesVO.class).convert(packagePropertiesList, PropertiesVO.class);
 		
@@ -177,7 +177,7 @@ public class PropertiesQuery {
 		List<PropertiesPO> packagePropertiesList = propertiesDAO.findByInstallationPackageId(installationPackageId);
 		List<PropertiesVO> list = PropertiesVO.getConverter(PropertiesVO.class).convert(packagePropertiesList, PropertiesVO.class);
 		
-		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findById(deploymentId);
 		String config = deployment.getConfig();
 		JSONObject jsonObject = JSON.parseObject(config);
 		Set<String> propertyKeys = jsonObject.keySet();

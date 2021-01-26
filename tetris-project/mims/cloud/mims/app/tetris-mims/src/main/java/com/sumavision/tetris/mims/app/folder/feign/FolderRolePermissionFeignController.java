@@ -55,6 +55,6 @@ public class FolderRolePermissionFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/query")
 	public Object getById(Long folderId, HttpServletRequest request)throws Exception{
-		return new FolderTreeVO().set(folderDAO.findOne(folderId));
+		return new FolderTreeVO().set(folderDAO.findById(folderId));
 	};
 }

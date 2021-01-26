@@ -99,7 +99,7 @@ public class OperationPackageUserPermissionService {
 			if (statisticStrategyVO != null) userPermissionPO.setStatisticId(statisticStrategyVO.getId());;
 			packageUserPermissionPOs.add(userPermissionPO);
 		}
-		operationPackageUserPermissionDAO.save(packageUserPermissionPOs);
+		operationPackageUserPermissionDAO.saveAll(packageUserPermissionPOs);
 		
 		for (OperationPackageUserPermissionPO userPermissionPO : packageUserPermissionPOs) {
 			userPermissionVOs.add(new OperationPackageUserPermissionVO().set(userPermissionPO)
@@ -146,7 +146,7 @@ public class OperationPackageUserPermissionService {
 	 * @return OperationPackageUserPermissionVO 套餐绑定信息
 	 */
 	public void removePermissionById(Long id) throws Exception {
-		operationPackageUserPermissionDAO.delete(id);
+		operationPackageUserPermissionDAO.deleteById(id);
 	}
 	
 	/**
@@ -183,7 +183,7 @@ public class OperationPackageUserPermissionService {
 	 * @return OperationPackageUserPermissionVO 关联信息
 	 */
 	public OperationPackageUserPermissionVO setStatus(Long id, OperationPackageUserUseStatus status) throws Exception {
-		OperationPackageUserPermissionPO userPermissionPO = operationPackageUserPermissionDAO.findOne(id);
+		OperationPackageUserPermissionPO userPermissionPO = operationPackageUserPermissionDAO.findById(id);
 		if (userPermissionPO != null && userPermissionPO.getStatus() != status) {
 			userPermissionPO.setStatus(status);
 			operationPackageUserPermissionDAO.save(userPermissionPO);
@@ -216,7 +216,7 @@ public class OperationPackageUserPermissionService {
 	 * @param Long id 套餐关联关系id
 	 */
 	public void refreshStatus(Long id) throws Exception {
-		OperationPackageUserPermissionPO userPermissionPO = operationPackageUserPermissionDAO.findOne(id);
+		OperationPackageUserPermissionPO userPermissionPO = operationPackageUserPermissionDAO.findById(id);
 		if (userPermissionPO == null) return;
 		Long packageId = userPermissionPO.getPackageId();
 		

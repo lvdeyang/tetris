@@ -133,7 +133,7 @@ public class MediaCompressController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -179,7 +179,7 @@ public class MediaCompressController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaCompressPO compress = mediaCompressDao.findOne(id);
+		MediaCompressPO compress = mediaCompressDao.findById(id);
 		if(compress == null){
 			throw new MediaCompressNotExistException(id);
 		}
@@ -472,7 +472,7 @@ public class MediaCompressController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		
 		if(media == null){
 			throw new MediaCompressNotExistException(id);
@@ -504,7 +504,7 @@ public class MediaCompressController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaCompressPO media = mediaCompressDao.findOne(mediaId);
+		MediaCompressPO media = mediaCompressDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaCompressNotExistException(mediaId);
@@ -516,7 +516,7 @@ public class MediaCompressController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -551,7 +551,7 @@ public class MediaCompressController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaCompressPO media = mediaCompressDao.findOne(mediaId);
+		MediaCompressPO media = mediaCompressDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaCompressNotExistException(mediaId);
@@ -563,7 +563,7 @@ public class MediaCompressController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -601,7 +601,7 @@ public class MediaCompressController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		
 		if(media == null){
 			throw new MediaPictureNotExistException(id);

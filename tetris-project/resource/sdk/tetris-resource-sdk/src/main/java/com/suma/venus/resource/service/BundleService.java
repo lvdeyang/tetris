@@ -567,8 +567,8 @@ public class BundleService extends CommonService<BundlePO> {
 			configDefaultAbility(jv220);
 
 			// 保存数据库
-			bundleDao.save(bundlePOs);
-			channelSchemeDao.save(channelSchemePOs);
+			bundleDao.saveAll(bundlePOs);
+			channelSchemeDao.saveAll(channelSchemePOs);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -660,8 +660,8 @@ public class BundleService extends CommonService<BundlePO> {
 			configDefaultAbility(jv220);
 
 			// 保存数据库
-			bundleDao.save(bundlePOs);
-			channelSchemeDao.save(channelSchemePOs);
+			bundleDao.saveAll(bundlePOs);
+			channelSchemeDao.saveAll(channelSchemePOs);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -727,14 +727,14 @@ public class BundleService extends CommonService<BundlePO> {
 		//删除用户绑定编解码器关系
 		List<EncoderDecoderUserMap> bundleMaps = encoderDecoderUserMapDao.findByUserIdNotIn(userIds);
 		
-		bundleDao.delete(needRemoveBundles);
-		channelSchemeDao.delete(needRemoveChannels);
-		screenSchemeDao.delete(needRemoveScreens);
+		bundleDao.deleteInBatch(needRemoveBundles);
+		channelSchemeDao.deleteInBatch(needRemoveChannels);
+		screenSchemeDao.deleteInBatch(needRemoveScreens);
 		
-		folderUserMapDao.delete(maps);
-		privilegeDao.delete(privileges);
-		rolePrivilegeMapDao.delete(roleMaps);
-		encoderDecoderUserMapDao.delete(bundleMaps);
+		folderUserMapDao.deleteInBatch(maps);
+		privilegeDao.deleteInBatch(privileges);
+		rolePrivilegeMapDao.deleteInBatch(roleMaps);
+		encoderDecoderUserMapDao.deleteInBatch(bundleMaps);
 		
 	}
 	
@@ -794,14 +794,14 @@ public class BundleService extends CommonService<BundlePO> {
 		//删除用户绑定编解码器
 		List<EncoderDecoderUserMap> bundleMaps = encoderDecoderUserMapDao.findByUserIdIn(needRemoveUserIds);
 		
-		bundleDao.delete(needRemoveBundles);
-		channelSchemeDao.delete(needRemoveChannels);
-		screenSchemeDao.delete(needRemoveScreens);
+		bundleDao.deleteInBatch(needRemoveBundles);
+		channelSchemeDao.deleteInBatch(needRemoveChannels);
+		screenSchemeDao.deleteInBatch(needRemoveScreens);
 		
-		folderUserMapDao.delete(maps);
-		privilegeDao.delete(privileges);
-		rolePrivilegeMapDao.delete(roleMaps);
-		encoderDecoderUserMapDao.delete(bundleMaps);
+		folderUserMapDao.deleteInBatch(maps);
+		privilegeDao.deleteInBatch(privileges);
+		rolePrivilegeMapDao.deleteInBatch(roleMaps);
+		encoderDecoderUserMapDao.deleteInBatch(bundleMaps);
 		
 	}
 	

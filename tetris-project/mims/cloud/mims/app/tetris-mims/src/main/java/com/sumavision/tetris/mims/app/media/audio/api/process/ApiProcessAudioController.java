@@ -148,7 +148,7 @@ public class ApiProcessAudioController {
 	@RequestMapping(value = "/encode")
 	public Object audioEncode(Long mediaId, HttpServletRequest request) throws Exception{
 		
-		MediaAudioPO audio = mediaAudioDao.findOne(mediaId);
+		MediaAudioPO audio = mediaAudioDao.findById(mediaId);
 		
 		fileEncodeService.encodeAudioFile(audio);
 		

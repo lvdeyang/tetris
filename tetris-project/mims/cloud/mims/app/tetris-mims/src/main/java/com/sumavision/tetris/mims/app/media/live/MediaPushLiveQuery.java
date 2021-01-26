@@ -85,7 +85,7 @@ public class MediaPushLiveQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaPushLiveVO>();
@@ -205,7 +205,7 @@ public class MediaPushLiveQuery {
 	 * @return MediaPushLiveVO push直播媒资信息
 	 */
 	public MediaPushLiveVO findById(Long id) throws Exception {
-		MediaPushLivePO livePushPO = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO livePushPO = mediaPushLiveDAO.findById(id);
 		
 		if (livePushPO == null) return null;
 		

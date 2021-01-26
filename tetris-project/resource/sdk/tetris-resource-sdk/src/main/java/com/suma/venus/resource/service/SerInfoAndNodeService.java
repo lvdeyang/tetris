@@ -92,7 +92,7 @@ public class SerInfoAndNodeService {
 				}
 			}
 			
-			serNodeDao.save(serNodePOs);
+			serNodeDao.saveAll(serNodePOs);
 		}
 		
 	}

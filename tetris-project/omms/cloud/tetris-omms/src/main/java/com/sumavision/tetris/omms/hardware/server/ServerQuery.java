@@ -54,7 +54,7 @@ public class ServerQuery {
 			int currentPage, 
 			int pageSize) throws Exception{
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ServerPO> pagedEntities = serverDao.findAll(page);
 		List<ServerPO> entities = pagedEntities.getContent();
 		if(entities!=null && entities.size()>0){
@@ -76,7 +76,7 @@ public class ServerQuery {
 	 */
 	public Map<String, Object> queryStatus(Long id) throws Exception{
 		Map<String, Object> serverStatus = new HashMap<String, Object>();
-		ServerPO serverEntity = serverDao.findOne(id);
+		ServerPO serverEntity = serverDao.findById(id);
 		serverStatus.put("server", new ServerVO().set(serverEntity));
 		List<ServerOneDimensionalDataPO> oneDimensionalDataEntities = serverOneDimensionalDataDao.findLastDataByServerId(id);
 		if(oneDimensionalDataEntities!=null && oneDimensionalDataEntities.size()>0){

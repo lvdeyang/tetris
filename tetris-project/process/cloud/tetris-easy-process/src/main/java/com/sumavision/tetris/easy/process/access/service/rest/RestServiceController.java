@@ -131,7 +131,7 @@ public class RestServiceController {
 		
 		UserVO user = userTool.current();
 		
-		RestServicePO service = restServiceDao.findOne(id);
+		RestServicePO service = restServiceDao.findById(id);
 		
 		if(service == null){
 			throw new ServiceNotExistException(id);
@@ -164,7 +164,7 @@ public class RestServiceController {
 		
 		UserVO user = userTool.current();
 		
-		RestServicePO service = restServiceDao.findOne(id);
+		RestServicePO service = restServiceDao.findById(id);
 		
 		if(service == null){
 			throw new ServiceNotExistException(id);

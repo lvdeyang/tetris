@@ -169,7 +169,7 @@ public class MediaAudioService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		media.setReviewStatus(null);
 		mediaAudioDao.save(media);
 	}
@@ -182,7 +182,7 @@ public class MediaAudioService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaAudioDao.save(media);
 	}
@@ -204,7 +204,7 @@ public class MediaAudioService {
 			String tags,
 			String keyWords,
 			String remarks) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		media.setName(name);
 		media.setTags(tags);
 		media.setKeyWords(keyWords);
@@ -221,7 +221,7 @@ public class MediaAudioService {
 	 * @param Long id 音频媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaAudioDao.save(media);
 	}
@@ -234,7 +234,7 @@ public class MediaAudioService {
 	 * @param Long id 音频媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		if(media != null){
 			List<MediaAudioPO> audiosCanBeDeleted = new ArrayListWrapper<MediaAudioPO>().add(media).getList();
 			
@@ -254,7 +254,7 @@ public class MediaAudioService {
 			mediaAudioDao.deleteInBatch(audiosCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -320,7 +320,7 @@ public class MediaAudioService {
 	 * @param Long id 音频媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaAudioDao.save(media);
 	}
@@ -335,7 +335,7 @@ public class MediaAudioService {
 	 * @return processed List<MediaAudioVO> 待审核的数据列表
 	 */
 	public Map<String, Object> remove(List<Long> ids) throws Exception {
-		List<MediaAudioPO> mediaAudioPOs = mediaAudioDao.findAll(ids);
+		List<MediaAudioPO> mediaAudioPOs = mediaAudioDao.findAllById(ids);
 		if (mediaAudioPOs == null || mediaAudioPOs.isEmpty()) return null;
 		return remove(mediaAudioPOs);
 	}
@@ -402,7 +402,7 @@ public class MediaAudioService {
 					audio.setProcessInstanceId(processInstanceId);
 					audio.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaAudioDao.save(audiosNeedProcess);
+				mediaAudioDao.saveAll(audiosNeedProcess);
 			}
 		}else{
 			audiosCanBeDeleted.addAll(audios);
@@ -426,7 +426,7 @@ public class MediaAudioService {
 			audioFileEncodeDao.deleteInBatch(audioFileEncodePOs);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -511,7 +511,7 @@ public class MediaAudioService {
 			boolean encryption,
 			FolderPO folder) throws Exception{
 		
-		MediaTxtPO txt = mediaTxtDAO.findOne(txtId);
+		MediaTxtPO txt = mediaTxtDAO.findById(txtId);
 		if (txt == null) throw new MediaTxtNotExistException(txtId);
 		String txtContent = txt.getContent();
 		String audioName = new StringBufferWrapper().append(name).append(".wav").toString();
@@ -977,7 +977,7 @@ public class MediaAudioService {
 						editorPO.setUploadTempPath(uploadTempPath);
 						editorPO.setUpdateTime(new Date());
 						mediaFileEditorDAO.save(editorPO);
-						audios.add(mediaAudioDao.findOne(editorPO.getMediaId()));
+						audios.add(mediaAudioDao.findById(editorPO.getMediaId()));
 					} else {
 						MediaAudioPO audio = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
 						audios.add(audio);
@@ -1030,7 +1030,7 @@ public class MediaAudioService {
 	public MediaAudioVO downloadAdd(UserVO user, Long id) throws Exception {
 		//对接boss系统添加播放下载记录
 		bossService.playMedia(id, user.getUuid(), MediaType.AUDIO);
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		if(media == null) throw new MediaAudioNotExistException(id);
 		
 		Long downloadCount = media.getDownloadCount();
@@ -1068,7 +1068,7 @@ public class MediaAudioService {
 				
 			}
 			
-			tagDownloadPermissionDAO.save(savePO);
+			tagDownloadPermissionDAO.saveAll(savePO);
 			//增加关联标签热度值
 			tagService.addHotCount(allTag);
 //			if (!userAddTag.isEmpty()) {
@@ -1097,7 +1097,7 @@ public class MediaAudioService {
 	public MediaAudioVO refresh(Long id) throws Exception {
 		MediaAudioVO audio=new MediaAudioVO();
 		
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		if(media == null) throw new MediaAudioNotExistException(id);
 		
 		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("ftp://")

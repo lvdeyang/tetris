@@ -24,7 +24,7 @@ public class Covid19RegisterStatisticsQuery {
 	 * @return List<Covid19RegisterStatisticsVO> 登记列表
 	 */
 	public List<Covid19RegisterStatisticsVO> findAll(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<Covid19RegisterStatisticsPO> pagedEntities = covid19RegisterStatisticsDao.findAll(page);
 		List<Covid19RegisterStatisticsPO> entities = pagedEntities.getContent();
 		if(entities!=null && entities.size()>0){

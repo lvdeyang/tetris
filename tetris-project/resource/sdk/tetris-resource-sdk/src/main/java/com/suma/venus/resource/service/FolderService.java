@@ -100,7 +100,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 			rootOnDemandFolder.setFolderIndex(4);
 			rootFolders.add(rootOnDemandFolder);
 
-			folderDao.save(rootFolders);
+			folderDao.saveAll(rootFolders);
 		}
 	}
 
@@ -173,7 +173,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 			}
 		}
 		if(needSaveMaps.size() > 0){
-			folderUserMapDao.save(needSaveMaps);
+			folderUserMapDao.saveAll(needSaveMaps);
 		}
 	}
 
@@ -201,7 +201,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 					bundle.setFolderId(null);
 					bundle.setFolderIndex(null);
 				}
-				bundleDao.save(bundles);
+				bundleDao.saveAll(bundles);
 			}
 			folderDao.delete(po);
 		}

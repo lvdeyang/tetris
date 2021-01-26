@@ -103,7 +103,7 @@ public class MediaVideoStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -193,7 +193,7 @@ public class MediaVideoStreamController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(id);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
 		
 		if(media == null){
 			throw new MediaVideoStreamNotExistException(id);
@@ -225,7 +225,7 @@ public class MediaVideoStreamController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(mediaId);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -237,7 +237,7 @@ public class MediaVideoStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -272,7 +272,7 @@ public class MediaVideoStreamController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoStreamPO media = mediaVideoStreamDao.findOne(mediaId);
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -284,7 +284,7 @@ public class MediaVideoStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}

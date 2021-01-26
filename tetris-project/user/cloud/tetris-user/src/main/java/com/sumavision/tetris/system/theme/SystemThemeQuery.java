@@ -24,7 +24,7 @@ public class SystemThemeQuery {
 	 * @return List<SystemThemePO> 主题列表
 	 */
 	public List<SystemThemePO> load(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemThemePO> pagedEntities = systemThemeDao.findAll(page);
 		if(pagedEntities == null) return null;
 		return pagedEntities.getContent();
@@ -41,7 +41,7 @@ public class SystemThemeQuery {
 	 * @return List<SystemThemePO> 主题列表
 	 */
 	public List<SystemThemePO> loadWithExcept(int currentPage, int pageSize, Collection<Long> exceptIds) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemThemePO> pagedEntities = systemThemeDao.findByIdNotIn(exceptIds, page);
 		if(pagedEntities == null) return null;
 		return pagedEntities.getContent();

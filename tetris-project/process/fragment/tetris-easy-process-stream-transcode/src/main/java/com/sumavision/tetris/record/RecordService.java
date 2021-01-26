@@ -43,7 +43,7 @@ public class RecordService {
 	public void delete(Long messageId, Long recordId) throws Exception{
 		StreamTranscodingTaskRecordPermissionPO permissionPO;
 		if (recordId != null) {
-			permissionPO = streamTranscodingTaskRecordPermissionDAO.findOne(recordId);
+			permissionPO = streamTranscodingTaskRecordPermissionDAO.findById(recordId);
 		} else if (messageId != null) {
 			permissionPO = streamTranscodingTaskRecordPermissionDAO.findByMessageId(messageId);
 		} else {

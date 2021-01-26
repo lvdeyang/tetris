@@ -65,7 +65,7 @@ public class SystemRoleMenuPermissionController {
 		
 		//TODO 权限校验
 		
-		MenuPO menu = menuDao.findOne(menuId);
+		MenuPO menu = menuDao.findById(menuId);
 		if(menu == null){
 			throw new MenuNotExistException(menuId);
 		}
@@ -152,7 +152,7 @@ public class SystemRoleMenuPermissionController {
 		
 		//TODO 权限校验
 		
-		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findOne(id);
+		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findById(id);
 		
 		if(permission != null){
 			systemRoleMenuPermissionDao.delete(permission);

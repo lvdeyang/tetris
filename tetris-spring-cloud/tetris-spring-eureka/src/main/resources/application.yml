@@ -17,6 +17,8 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
 
 spring:
+  main: 
+    allow-bean-definition-overriding: true
   application:
     name: tetris-spring-eureka
   datasource:

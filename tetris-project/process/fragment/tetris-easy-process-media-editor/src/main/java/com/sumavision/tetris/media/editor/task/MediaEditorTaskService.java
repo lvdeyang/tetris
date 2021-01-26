@@ -70,7 +70,7 @@ public class MediaEditorTaskService {
 			permissionPO.setTags(permission.getTags());
 			permissions.add(permissionPO);
 		}
-		mediaEditorTaskRatePermissionDAO.save(permissions);
+		mediaEditorTaskRatePermissionDAO.saveAll(permissions);
 
 		return new MediaEditorTaskVO().set(mediaPO).setTranscodeIds(transcodeIds);
 	}
@@ -99,10 +99,10 @@ public class MediaEditorTaskService {
 			taskId = permissionPO.getTaskId();
 			permissionPO.setRate(100);
 		}
-		mediaEditorTaskRatePermissionDAO.save(transcodePOs);
+		mediaEditorTaskRatePermissionDAO.saveAll(transcodePOs);
 
 		// 存流程进度表
-		MediaEditorTaskPO taskPO = mediaEditorTaskDAO.findOne(taskId);
+		MediaEditorTaskPO taskPO = mediaEditorTaskDAO.findById(taskId);
 
 		if (taskPO == null)
 			return null;
@@ -156,6 +156,6 @@ public class MediaEditorTaskService {
 			}
 		}
 
-		mediaEditorTaskDAO.save(tasks);
+		mediaEditorTaskDAO.saveAll(tasks);
 	}
 }

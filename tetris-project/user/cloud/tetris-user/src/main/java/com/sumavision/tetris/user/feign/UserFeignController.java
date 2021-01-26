@@ -16,7 +16,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserCapacityPO;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
@@ -257,7 +256,7 @@ public class UserFeignController {
 		
 		UserVO userVO = userQuery.current();
 		
-		UserPO userPO = userDAO.findOne(id);
+		UserPO userPO = userDAO.findById(id);
 		
 		if(userPO == null) throw new UserNotExistException(id);
 		

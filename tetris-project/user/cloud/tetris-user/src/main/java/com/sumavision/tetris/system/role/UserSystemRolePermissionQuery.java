@@ -55,7 +55,7 @@ public class UserSystemRolePermissionQuery {
 			for(UserSystemRolePermissionPO permission:permissions){
 				roleIds.add(permission.getRoleId());
 			}
-			List<SystemRolePO> roles = systemRoleDao.findAll(roleIds);
+			List<SystemRolePO> roles = systemRoleDao.findAllById(roleIds);
 			for(UserSystemRolePermissionPO permission:permissions){
 				for(SystemRolePO role:roles){
 					if(permission.getRoleId().equals(role.getId())){
@@ -83,7 +83,7 @@ public class UserSystemRolePermissionQuery {
 	 * @return List<UserSystemRolePermissionPO> 权限列表
 	 */
 	public List<UserSystemRolePermissionPO> findByUserIdAndRoleType(Long userId, SystemRoleType roleType, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdAndRoleType(userId, roleType, page);
 		return permissions.getContent();
 	}
@@ -112,7 +112,7 @@ public class UserSystemRolePermissionQuery {
 				userIds.add(permission.getUserId());
 			}
 			
-			List<UserPO> users = userDao.findAll(userIds);
+			List<UserPO> users = userDao.findAllById(userIds);
 			for(UserSystemRolePermissionPO permission:permissions){
 				for(UserPO user:users){
 					if(permission.getUserId().equals(user.getId())){
@@ -139,7 +139,7 @@ public class UserSystemRolePermissionQuery {
 	 * @return List<UserSystemRolePermissionPO> 权限列表
 	 */
 	public List<UserSystemRolePermissionPO> findByRoleId(Long roleId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<UserSystemRolePermissionPO> roles = userSystemRolePermissionDao.findByRoleId(roleId, page);
 		return roles.getContent();
 	}

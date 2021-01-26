@@ -26,7 +26,6 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.picture.MediaPictureItemType;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
@@ -171,7 +170,7 @@ public class MediaVideoFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/quest/by/id")
 	public Object getById(Long id) throws Exception{
-		MediaVideoPO audio = mediaVideoDAO.findOne(id);
+		MediaVideoPO audio = mediaVideoDAO.findById(id);
 		if (audio == null) throw new MediaVideoNotExistException(id);
 		
 		return new MediaVideoVO().set(audio);
@@ -292,7 +291,7 @@ public class MediaVideoFeignController {
 				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 			}
 			
-			folder = folderDao.findOne(folderId);
+			folder = folderDao.findById(folderId);
 		}
 		
 		if(folder == null){

@@ -1,29 +1,23 @@
 package com.sumavision.tetris.menu;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.hibernate.mapping.Subclass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Node;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XMLReader;
 import com.sumavision.tetris.menu.MenuPO.MenuComparator;
-import com.sumavision.tetris.spring.eureka.application.EurekaFeign;
 import com.sumavision.tetris.spring.eureka.application.EurekaFeign.MemoryQuery;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserVO;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 /**
  * 菜单工具类<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -227,7 +221,7 @@ public class MenuQuery {
 			return null;
 		}
 		SystemRoleMenuPermissionPO permission = permissions.get(0);
-		MenuPO menu = menuDao.findOne(permission.getMenuId());
+		MenuPO menu = menuDao.findById(permission.getMenuId());
 		if(menu == null) return null;
 		return new MenuVO().set(menu);
 	}

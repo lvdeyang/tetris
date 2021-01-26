@@ -94,7 +94,7 @@ public class MediaAudioStreamQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaAudioStreamVO>();
@@ -153,7 +153,7 @@ public class MediaAudioStreamQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO_STREAM.toString());
 		if (id != null && id.length > 0) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaAudioStreamVO>();
@@ -219,7 +219,7 @@ public class MediaAudioStreamQuery {
 	 * @return MediaAudioStreamVO 音频流媒资信息
 	 */
 	public MediaAudioStreamVO findById(Long id) throws Exception {
-		MediaAudioStreamPO videoStreamPO = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO videoStreamPO = mediaAudioStreamDao.findById(id);
 		
 		if (videoStreamPO == null) return null;
 		

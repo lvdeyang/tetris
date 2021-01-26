@@ -46,7 +46,6 @@ import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtTaskVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
-import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtCannotMatchException;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtStatusErrorWhenUploadCancelException;
@@ -159,7 +158,7 @@ public class ApiAndroidTxtController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		MediaTxtPO txt = mediaTxtDao.findById(id);
 		
 		List<String> tagList = new ArrayList<String>();
 		if(tags != null){
@@ -191,7 +190,7 @@ public class ApiAndroidTxtController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaTxtPO media = mediaTxtDao.findOne(id);
+		MediaTxtPO media = mediaTxtDao.findById(id);
 		
 		if(media == null){
 			throw new MediaTxtNotExistException(id);
@@ -245,7 +244,7 @@ public class ApiAndroidTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}

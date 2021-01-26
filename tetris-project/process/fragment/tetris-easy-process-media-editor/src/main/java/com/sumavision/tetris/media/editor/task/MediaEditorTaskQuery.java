@@ -41,7 +41,7 @@ public class MediaEditorTaskQuery {
 
 		UserVO user = userQuery.current();
 
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 
 		Page<MediaEditorTaskPO> pagedTasks = mediaEditorTaskDao.findByUserIdAndStatus(user.getUuid(), status, page);
 
@@ -61,7 +61,7 @@ public class MediaEditorTaskQuery {
 	 */
 	public Object queryProgress(Long id) throws Exception {
 
-		MediaEditorTaskPO task = mediaEditorTaskDao.findOne(id);
+		MediaEditorTaskPO task = mediaEditorTaskDao.findById(id);
 
 		if (MediaEditorTaskStatus.APPROVING.equals(task.getStatus())) {
 			String processInstanceId = task.getProcessInstanceId();
@@ -135,6 +135,6 @@ public class MediaEditorTaskQuery {
 	 * @return List<MediaEditorTaskPO> 任务列表
 	 */
 	public List<MediaEditorTaskPO> getByIds(List<Long> ids){
-		return mediaEditorTaskDao.findAll(ids);
+		return mediaEditorTaskDao.findAllById(ids);
 	}
 }

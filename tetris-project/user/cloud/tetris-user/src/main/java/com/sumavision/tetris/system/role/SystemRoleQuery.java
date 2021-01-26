@@ -102,7 +102,7 @@ public class SystemRoleQuery {
 	 * @return List<SystemRolePO> 系统角色列表
 	 */
 	public List<SystemRolePO> findBySystemRoleGroupIdAndTypeOrderByUpdateTimeDesc(Long systemRoleGroupId, SystemRoleType type, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<SystemRolePO> roles = systemRoleDao.findBySystemRoleGroupIdAndTypeOrderByUpdateTimeDesc(systemRoleGroupId, type, page);
 		return roles.getContent();
 	}
@@ -146,7 +146,7 @@ public class SystemRoleQuery {
 			for(String roleId:roleIds){
 				transRoleIds.add(Long.valueOf(roleId));
 			}
-			roles = systemRoleDao.findAll(transRoleIds);
+			roles = systemRoleDao.findAllById(transRoleIds);
 		}
 		return packageSystemRolesWithGroup(roles);
 	}
@@ -165,7 +165,7 @@ public class SystemRoleQuery {
 			for(SystemRolePO role:roles){
 				groupIds.add(role.getSystemRoleGroupId());
 			}
-			List<SystemRoleGroupPO> groups = systemRoleGroupDao.findAll(groupIds);
+			List<SystemRoleGroupPO> groups = systemRoleGroupDao.findAllById(groupIds);
 			List<SystemRoleGroupVO> view_groups = new ArrayList<SystemRoleGroupVO>();
 			for(SystemRoleGroupPO group:groups){
 				SystemRoleGroupVO view_group = new SystemRoleGroupVO().set(group).setRoles(new ArrayList<SystemRoleVO>());
@@ -198,7 +198,7 @@ public class SystemRoleQuery {
 			for(String roleId:roleIds){
 				transRoleIds.add(Long.valueOf(roleId));
 			}
-			roles = systemRoleDao.findAll(transRoleIds);
+			roles = systemRoleDao.findAllById(transRoleIds);
 			
 			if(roles!=null && roles.size()>0){
 				List<SystemRoleVO> view_roles = new ArrayList<SystemRoleVO>();

@@ -52,7 +52,7 @@ public class QdBossService {
 	public void addMedia(long mediaId,MediaType mediaType){
 		try {
 			JSONObject json=new JSONObject();
-			MediaAudioPO mediaAudioPO=mediaAudioDAO.findOne(mediaId);
+			MediaAudioPO mediaAudioPO=mediaAudioDAO.findById(mediaId);
 			json.put("mediaId", mediaAudioPO.getUuid());
 			json.put("mediaName", mediaAudioPO.getName());
 			json.put("authorName", mediaAudioPO.getName());
@@ -60,7 +60,7 @@ public class QdBossService {
 			json.put("folderId", mediaAudioPO.getFolderId());
 			json.put("mediaType", mediaType);
 			json.put("authorId", mediaAudioPO.getAuthorId());
-			FolderPO folderPO=folderDAO.findOne(mediaAudioPO.getFolderId());
+			FolderPO folderPO=folderDAO.findById(mediaAudioPO.getFolderId());
 		    String parentPath=folderPO.getParentPath();
 		    System.out.println(parentPath);
 			json.put("folderName", generateFolderStrPath(parentPath)+File.separator+folderPO.getName());
@@ -87,7 +87,7 @@ public class QdBossService {
 	public void playMedia(long mediaId,String userId, MediaType mediaType){
 		try {
 			JSONObject json=new JSONObject();
-			MediaAudioPO mediaAudioPO=mediaAudioDAO.findOne(mediaId);
+			MediaAudioPO mediaAudioPO=mediaAudioDAO.findById(mediaId);
 			json.put("mediaId", mediaAudioPO.getUuid());
 			json.put("userId",userId);
 			json.put("mediaType", mediaType);
@@ -181,8 +181,8 @@ public class QdBossService {
 					}
 				}
 			}
-			mediaPriceDao.save(mediaPricePOs);
-			mediaPriceDao.save(mediaPricePOSave);
+			mediaPriceDao.saveAll(mediaPricePOs);
+			mediaPriceDao.saveAll(mediaPricePOSave);
 			code = "0";
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -208,7 +208,7 @@ public class QdBossService {
 		String[] folderIds=folderIdPath.split("/");
 		for (String idstr : folderIds) {
 			if("".equals(idstr)) continue;
-			FolderPO folder=folderDAO.findOne(Long.parseLong(idstr));
+			FolderPO folder=folderDAO.findById(Long.parseLong(idstr));
 			result+=File.separator+folder.getName();
 		}
 		return result;
@@ -270,7 +270,7 @@ public class QdBossService {
 						}
 						mediaPricePOList.add(mediaPricePO);
 					}
-					mediaPriceDao.save(mediaPricePOList);
+					mediaPriceDao.saveAll(mediaPricePOList);
 					code = "0";
 				}
 				else if (charged.equals("0")) {
@@ -278,7 +278,7 @@ public class QdBossService {
 						mediaPricePO.setTruePrice(0l);
 						mediaPricePOList.add(mediaPricePO);
 					}
-					mediaPriceDao.save(mediaPricePOList);
+					mediaPriceDao.saveAll(mediaPricePOList);
 					code = "0";
 				}else {
 					code = "计费同步失败！";

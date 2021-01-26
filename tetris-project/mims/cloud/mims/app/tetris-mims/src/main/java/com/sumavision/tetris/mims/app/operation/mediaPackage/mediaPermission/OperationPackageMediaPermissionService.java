@@ -37,7 +37,7 @@ public class OperationPackageMediaPermissionService {
 			permissionPO.setNum(permissionVO.getNum());
 			permissionPOs.add(permissionPO);
 		}
-		mediaPackagePermissionDAO.save(permissionPOs);
+		mediaPackagePermissionDAO.saveAll(permissionPOs);
 		return OperationPackageMediaPermissionVO.getConverter(OperationPackageMediaPermissionVO.class).convert(permissionPOs, OperationPackageMediaPermissionVO.class);
 	}
 	

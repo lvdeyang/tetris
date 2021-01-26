@@ -78,7 +78,7 @@ public class MediaAudioStreamService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		media.setReviewStatus(null);
 		mediaAudioStreamDao.save(media);
 	}
@@ -91,7 +91,7 @@ public class MediaAudioStreamService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaAudioStreamDao.save(media);
 	}
@@ -115,7 +115,7 @@ public class MediaAudioStreamService {
 			String keyWords, 
 			String remark, 
 			String previewUrl) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		if(media == null){
 			throw new MediaVideoStreamNotExistException(id);
 		}
@@ -136,7 +136,7 @@ public class MediaAudioStreamService {
 	 * @param Long id 音频流媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaAudioStreamDao.save(media);
 	}
@@ -149,7 +149,7 @@ public class MediaAudioStreamService {
 	 * @param Long id 音频流媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		if(media != null){
 			mediaAudioStreamDao.delete(media);
 		}
@@ -163,7 +163,7 @@ public class MediaAudioStreamService {
 	 * @param Long id 音频流媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaAudioStreamPO media = mediaAudioStreamDao.findOne(id);
+		MediaAudioStreamPO media = mediaAudioStreamDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaAudioStreamDao.save(media);
 	}
@@ -177,7 +177,7 @@ public class MediaAudioStreamService {
 	 * @return List<MediaVideoStreamVO> 要删除的音频流媒资
 	 */
 	public List<MediaAudioStreamVO> removeByIds(Collection<Long> ids) throws Exception{
-		List<MediaAudioStreamPO> medias = mediaAudioStreamDao.findAll(ids);
+		List<MediaAudioStreamPO> medias = mediaAudioStreamDao.findAllById(ids);
 //		for (MediaAudioStreamPO media : medias) {
 //			media.setPreviewUrl(mediaVideoStreamUrlRelationQuery.getUrlFromStreamId(media.getId()));
 //		}
@@ -247,7 +247,7 @@ public class MediaAudioStreamService {
 					audioStream.setProcessInstanceId(processInstanceId);
 					audioStream.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaAudioStreamDao.save(audioStreamsNeedProcess);
+				mediaAudioStreamDao.saveAll(audioStreamsNeedProcess);
 			}
 			
 		}else{

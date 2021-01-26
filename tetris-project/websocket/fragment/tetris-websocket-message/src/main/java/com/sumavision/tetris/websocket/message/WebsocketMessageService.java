@@ -76,7 +76,7 @@ public class WebsocketMessageService {
 				session.getBasicRemote().sendText(message.getMessage());
 				message.setConsumed(true);
 			}
-			websocketMessageDao.save(messages);
+			websocketMessageDao.saveAll(messages);
 		}
 	} 
 	
@@ -290,7 +290,7 @@ public class WebsocketMessageService {
 	 * @param Long id 消息id
 	 */
 	public void resend(Long id) throws Exception{
-		WebsocketMessagePO message = websocketMessageDao.findOne(id);
+		WebsocketMessagePO message = websocketMessageDao.findById(id);
 		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(message.getUserId().toString());
 		if(metadata == null) return;
 		if(metadata.getServerIp().equals(applicationConfig.getIp()) && 
@@ -353,12 +353,12 @@ public class WebsocketMessageService {
 	 * @param Collection<Long> ids 消息id列表
 	 */
 	public void consumeAll(Collection<Long> ids) throws Exception{
-		List<WebsocketMessagePO> messages = websocketMessageDao.findAll(ids);
+		List<WebsocketMessagePO> messages = websocketMessageDao.findAllById(ids);
 		if(messages!=null && messages.size()>0){
 			for(WebsocketMessagePO message:messages){
 				message.setConsumed(true);
 			}
-			websocketMessageDao.save(messages);
+			websocketMessageDao.saveAll(messages);
 		}
 	}
 
@@ -370,7 +370,7 @@ public class WebsocketMessageService {
 	 * @param Long id 消息id
 	 */
 	public void consume(Long id) throws Exception{
-		WebsocketMessagePO entity = websocketMessageDao.findOne(id);
+		WebsocketMessagePO entity = websocketMessageDao.findById(id);
 		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(entity.getUserId().toString());
 		if(metadata == null){
 			entity.setConsumed(true);

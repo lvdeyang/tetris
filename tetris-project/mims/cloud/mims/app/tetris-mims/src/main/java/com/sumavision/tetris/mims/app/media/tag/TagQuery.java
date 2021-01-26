@@ -51,7 +51,7 @@ public class TagQuery {
 	 * @return List<TagVO> 标签树
 	 */
 	public List<TagVO> getTagTreeByParent(UserVO user, Long parentId) throws Exception {
-		TagPO parent = tagDAO.findOne(parentId);
+		TagPO parent = tagDAO.findById(parentId);
 		if (parent == null) throw new TagNotExistsException(parentId);
 		
 		TagVO parentVO = new TagVO().set(parent);
@@ -149,7 +149,7 @@ public class TagQuery {
 	public TagVO queryById(Long tagId) throws Exception {
 		if (tagId == null) return null;
 		
-		TagPO tag = tagDAO.findOne(tagId);
+		TagPO tag = tagDAO.findById(tagId);
 		
 		return tag != null ? new TagVO().set(tag) : null;
 	}
@@ -163,7 +163,7 @@ public class TagQuery {
 	 * @return List<TagVO> 标签信息
 	 */
 	public List<TagVO> queryByIds(List<Long> tagIds) throws Exception {
-		return TagVO.getConverter(TagVO.class).convert(tagDAO.findAll(tagIds), TagVO.class);
+		return TagVO.getConverter(TagVO.class).convert(tagDAO.findAllById(tagIds), TagVO.class);
 	}
 	
 	/**

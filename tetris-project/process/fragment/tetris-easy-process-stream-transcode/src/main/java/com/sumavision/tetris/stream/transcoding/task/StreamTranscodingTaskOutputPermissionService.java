@@ -31,7 +31,7 @@ public class StreamTranscodingTaskOutputPermissionService {
 			permissionPO.setOutputPort(urlSplit[1]);
 			permissionPOs.add(permissionPO);
 		}
-		streamTranscodingTaskOutputPermissionDAO.save(permissionPOs);
+		streamTranscodingTaskOutputPermissionDAO.saveAll(permissionPOs);
 		return StreamTranscodingTaskOutputPermissionVO.getConverter(StreamTranscodingTaskOutputPermissionVO.class).convert(permissionPOs, StreamTranscodingTaskOutputPermissionVO.class);
 	}
 }

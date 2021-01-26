@@ -801,8 +801,8 @@ public class HttpInterfaceController {
 			}
 
 			// 保存数据库
-			bundleDao.save(bundlePOs);
-			channelSchemeDao.save(channelSchemePOs);
+			bundleDao.saveAll(bundlePOs);
+			channelSchemeDao.saveAll(channelSchemePOs);
 
 			result.setResult(true);
 		} catch (Exception e) {
@@ -1459,7 +1459,7 @@ public class HttpInterfaceController {
 	public Map<String, Object> onlineNodeBundle(@RequestParam Long id){
 		Map<String, Object> data =new HashMap<String, Object>(); 
 //		Map<String, Object> data = makeAjaxData();
-		WorkNodePO workNodePO = workNodeDao.findOne(id);
+		WorkNodePO workNodePO = workNodeDao.findById(id);
 		List<BundlePO> bundlePOs = bundleDao.findByAccessNodeUid(workNodePO.getNodeUid());
 		WorkNodeVO workNodeVO = new WorkNodeVO();
 		BeanUtils.copyProperties(workNodePO, workNodeVO,"type","onlineStatus");
@@ -1671,7 +1671,7 @@ public class HttpInterfaceController {
 						}
 					}
 					if (!toUpdateBundles.isEmpty()) {
-						bundleDao.save(toUpdateBundles);
+						bundleDao.saveAll(toUpdateBundles);
 					}
 
 					// 更新对应用户的在线状态
@@ -1870,7 +1870,7 @@ public class HttpInterfaceController {
 			bundle.setSyncStatus(SYNC_STATUS.SYNC);
 			// 配置编码通道
 			// 配置两路编码通道(音频编码和视频编码各一路)
-			channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
+			channelSchemeDao.saveAll(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
 			bundleDao.save(bundle);
 
 			// 给管理员默认角色绑定该设备权限
@@ -1926,7 +1926,7 @@ public class HttpInterfaceController {
 			bundle.setSyncStatus(SYNC_STATUS.SYNC);
 			// 配置解码通道
 			// 配置两路解码通道(音频解码和视频解码各一路)
-			channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
+			channelSchemeDao.saveAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
 			bundleDao.save(bundle);
 
 			// 给管理员默认角色绑定该设备权限
@@ -2036,8 +2036,8 @@ public class HttpInterfaceController {
 			}
 
 			// 保存数据库
-			bundleDao.save(bundlePOs);
-			channelSchemeDao.save(channelSchemePOs);
+			bundleDao.saveAll(bundlePOs);
+			channelSchemeDao.saveAll(channelSchemePOs);
 
 			result.setResult(true);
 		} catch (Exception e) {

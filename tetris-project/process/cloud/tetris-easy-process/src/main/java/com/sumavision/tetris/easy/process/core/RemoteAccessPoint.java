@@ -103,12 +103,12 @@ public class RemoteAccessPoint {
 	 */
 	public void invoke(DelegateExecution execution, Long accessPointId) throws Exception{
 		
-		AccessPointPO accessPoint = accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint = accessPointDao.findById(accessPointId);
 		
 		List<AccessPointParamPO> paramDefinitions = accessPointParamDao.findByAccessPointIdInAndDirection(new ArrayListWrapper<Long>().add(accessPoint.getId()).getList(), ParamDirection.FORWARD);
 		
 		if(ServiceType.REST.equals(accessPoint.getServiceType())){
-			RestServicePO restService = restServiceDao.findOne(accessPoint.getServiceId());
+			RestServicePO restService = restServiceDao.findById(accessPoint.getServiceId());
 			
 			invokeHttpAccessPoint(execution, restService, accessPoint, paramDefinitions);
 			

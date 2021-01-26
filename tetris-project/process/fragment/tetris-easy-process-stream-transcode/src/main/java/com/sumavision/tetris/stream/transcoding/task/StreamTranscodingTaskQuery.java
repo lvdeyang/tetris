@@ -24,7 +24,7 @@ public class StreamTranscodingTaskQuery {
 	}
 	
 	public StreamTranscodingTaskVO questByMessageId(Long messageId) throws Exception{
-		StreamTranscodingTaskPO taskPO = streamTranscodingTaskDAO.findOne(messageId);
+		StreamTranscodingTaskPO taskPO = streamTranscodingTaskDAO.findById(messageId);
 		
 		if (taskPO == null) throw new TaskMessageIdNotFoundException(messageId);
 		

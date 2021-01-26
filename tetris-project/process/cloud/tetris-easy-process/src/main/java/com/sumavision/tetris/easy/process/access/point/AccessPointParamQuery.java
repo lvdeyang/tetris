@@ -27,7 +27,7 @@ public class AccessPointParamQuery {
 	 * @return List<AccessPointParamPO> 参数列表
 	 */
 	public List<AccessPointParamPO> findByAccessPointId(Long accessPointId, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<AccessPointParamPO> params = accessPointParamDao.findByAccessPointId(accessPointId, page);
 		return params.getContent();
 	}

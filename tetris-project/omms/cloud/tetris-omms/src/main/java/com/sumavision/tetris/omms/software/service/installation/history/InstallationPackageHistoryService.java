@@ -19,7 +19,7 @@ public class InstallationPackageHistoryService {
 	 * @param id 安装包id
 	 */
 	public void deletePackage(Long id) {
-		InstallationPackageHistoryPO installationPackageHistoryPO = installationPackageHistoryDAO.findOne(id);
+		InstallationPackageHistoryPO installationPackageHistoryPO = installationPackageHistoryDAO.findById(id);
 		if (installationPackageHistoryPO != null) {
 			installationPackageHistoryDAO.delete(installationPackageHistoryPO);
 		}

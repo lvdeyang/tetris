@@ -69,7 +69,7 @@ public class MediaPushLiveService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		media.setReviewStatus(null);
 		mediaPushLiveDAO.save(media);
 	}
@@ -82,7 +82,7 @@ public class MediaPushLiveService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaPushLiveDAO.save(media);
 	}
@@ -114,7 +114,7 @@ public class MediaPushLiveService {
 			String videoPid,
 			String audioType,
 			String videoType) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		if(media == null){
 			throw new MediaPushLiveNotExistException(id);
 		}
@@ -139,7 +139,7 @@ public class MediaPushLiveService {
 	 * @param Long id push直播媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaPushLiveDAO.save(media);
 	}
@@ -152,7 +152,7 @@ public class MediaPushLiveService {
 	 * @param Long id push直播媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		if(media != null){
 			mediaPushLiveDAO.delete(media);
 		}
@@ -166,7 +166,7 @@ public class MediaPushLiveService {
 	 * @param Long id push直播媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
+		MediaPushLivePO media = mediaPushLiveDAO.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaPushLiveDAO.save(media);
 	}
@@ -180,7 +180,7 @@ public class MediaPushLiveService {
 	 * @return List<MediaPushLiveVO> 要删除的push直播媒资
 	 */
 	public List<MediaPushLiveVO> removeByIds(Collection<Long> ids) throws Exception{
-		List<MediaPushLivePO> medias = mediaPushLiveDAO.findAll(ids);
+		List<MediaPushLivePO> medias = mediaPushLiveDAO.findAllById(ids);
 		if (medias == null || medias.isEmpty()) return null; 
 		remove(medias);
 		return MediaPushLiveVO.getConverter(MediaPushLiveVO.class).convert(medias, MediaPushLiveVO.class);
@@ -246,7 +246,7 @@ public class MediaPushLiveService {
 					pushLive.setProcessInstanceId(processInstanceId);
 					pushLive.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaPushLiveDAO.save(pushLiveNeedProcess);
+				mediaPushLiveDAO.saveAll(pushLiveNeedProcess);
 			}
 			
 		}else{

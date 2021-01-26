@@ -195,7 +195,7 @@ public class MediaPictureFeignController {
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		List<MediaPicturePO> picturePOs = new ArrayList<MediaPicturePO>();
 		for (Long id : idList) {
-			MediaPicturePO media = mediaPictureDao.findOne(id);
+			MediaPicturePO media = mediaPictureDao.findById(id);
 			if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
 				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 			}
@@ -248,7 +248,7 @@ public class MediaPictureFeignController {
 				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 			}
 			
-			folder = folderDao.findOne(folderId);
+			folder = folderDao.findById(folderId);
 		}
 
 		if(folder == null){

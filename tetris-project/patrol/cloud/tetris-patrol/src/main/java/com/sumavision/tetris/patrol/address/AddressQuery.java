@@ -67,7 +67,7 @@ public class AddressQuery {
 	 * @return Page<AddressPO> 地址列表
 	 */
 	public Page<AddressPO> findByConditions(String name, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		String nameExpretion = null;
 		if(name != null){
 			nameExpretion = new StringBufferWrapper().append("%").append(name).append("%").toString();

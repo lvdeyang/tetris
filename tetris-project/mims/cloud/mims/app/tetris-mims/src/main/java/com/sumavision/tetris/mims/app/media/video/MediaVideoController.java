@@ -120,7 +120,7 @@ public class MediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -166,7 +166,7 @@ public class MediaVideoController {
 		
 		UserVO user = userQuery.current();
 
-		MediaVideoPO video = mediaVideoDao.findOne(id);
+		MediaVideoPO video = mediaVideoDao.findById(id);
 		if (video == null) {
 			throw new MediaVideoNotExistException(id);
 		}
@@ -455,7 +455,7 @@ public class MediaVideoController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(id);
@@ -487,7 +487,7 @@ public class MediaVideoController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaVideoPO media = mediaVideoDao.findOne(mediaId);
+		MediaVideoPO media = mediaVideoDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -499,7 +499,7 @@ public class MediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -534,7 +534,7 @@ public class MediaVideoController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoPO media = mediaVideoDao.findOne(mediaId);
+		MediaVideoPO media = mediaVideoDao.findById(mediaId);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(mediaId);
@@ -546,7 +546,7 @@ public class MediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO target = folderDao.findOne(targetId);
+		FolderPO target = folderDao.findById(targetId);
 		if(target == null){
 			throw new FolderNotExistException(targetId);
 		}
@@ -584,7 +584,7 @@ public class MediaVideoController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		
 		if(media == null){
 			throw new MediaVideoNotExistException(id);

@@ -62,7 +62,7 @@ public class MenuService {
 	 */
 	public MenuVO addSub(Long parentId) throws Exception{
 		
-		MenuPO parent = menuDao.findOne(parentId);
+		MenuPO parent = menuDao.findById(parentId);
 		if(parent == null){
 			throw new MenuNotExistException(parentId);
 		}
@@ -102,7 +102,7 @@ public class MenuService {
 	 */
 	public List<MenuVO> remove(Long id) throws Exception{
 		
-		MenuPO menu = menuDao.findOne(id);
+		MenuPO menu = menuDao.findById(id);
 		if(menu == null){
 			throw new MenuNotExistException(id);
 		}
@@ -149,7 +149,7 @@ public class MenuService {
             String style,
             int serial) throws Exception{
 		
-		MenuPO menu = menuDao.findOne(id);
+		MenuPO menu = menuDao.findById(id);
 		if(menu == null){
 			throw new MenuNotExistException(id);
 		}

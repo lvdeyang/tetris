@@ -44,7 +44,7 @@ public class OrganizationUserPermissionService {
 	 */
 	public List<OrganizationUserPermissionVO> bind(Long organizationId, List<String> userIds) throws Exception{
 		
-		OrganizationPO organization = organizationDao.findOne(organizationId);
+		OrganizationPO organization = organizationDao.findById(organizationId);
 		if(organization == null){
 			throw new OrganizationNotExistException(organizationId);
 		}
@@ -54,7 +54,7 @@ public class OrganizationUserPermissionService {
 			for(String userId:userIds){
 				transUserIds.add(Long.valueOf(userId));
 			}
-			List<UserPO> users = userDao.findAll(transUserIds);
+			List<UserPO> users = userDao.findAllById(transUserIds);
 			if(users!=null && users.size()>0){
 				List<OrganizationUserPermissionPO> permissions = new ArrayList<OrganizationUserPermissionPO>();
 				for(UserPO user:users){
@@ -64,7 +64,7 @@ public class OrganizationUserPermissionService {
 					permission.setUpdateTime(new Date());
 					permissions.add(permission);
 				}
-				organizationUserPermissionDao.save(permissions);
+				organizationUserPermissionDao.saveAll(permissions);
 				
 				List<OrganizationUserPermissionVO> view_permissions = new ArrayList<OrganizationUserPermissionVO>();
 				for(OrganizationUserPermissionPO permission:permissions){

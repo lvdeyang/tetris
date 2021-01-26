@@ -52,7 +52,7 @@ public class SystemThemeService {
 			String name,
 			String url) throws Exception{
 		
-		SystemThemePO theme = systemThemeDao.findOne(id);
+		SystemThemePO theme = systemThemeDao.findById(id);
 		if(theme == null){
 			throw new SystemThemeNotFoundException(id);
 		}
@@ -73,7 +73,7 @@ public class SystemThemeService {
 	 * @param Long id 主题id
 	 */
 	public void remove(Long id) throws Exception{
-		SystemThemePO theme = systemThemeDao.findOne(id);
+		SystemThemePO theme = systemThemeDao.findById(id);
 		if(theme == null) return;
 		systemThemeDao.delete(theme);
 	}

@@ -1,5 +1,6 @@
 package com.suma.venus.resource.task;
 
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class ResourceSyncLdapTask {
 			String token = loginService.doUserIdLogin(userId);
 			
 			org.apache.coyote.Request _coyoteRequest = new org.apache.coyote.Request();
-			Request _request = new Request();
+			Request _request = new Request(new Connector());
 			_request.setCoyoteRequest(_coyoteRequest);
 			RequestFacade _requFacade = new RequestFacade(_request);
 			

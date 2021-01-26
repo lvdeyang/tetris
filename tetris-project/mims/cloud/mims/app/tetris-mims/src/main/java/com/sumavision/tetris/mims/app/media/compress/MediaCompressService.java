@@ -54,7 +54,6 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.compress.api.server.ParamVO;
 import com.sumavision.tetris.mims.app.media.compress.api.server.SecureServiceXmlUtils;
 import com.sumavision.tetris.mims.app.media.compress.api.server.XmlVO.SignatureVO;
-import com.sumavision.tetris.mims.app.media.live.MediaPushLivePO;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveService;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveTypeAudio;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveTypeVideo;
@@ -159,7 +158,7 @@ public class MediaCompressService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		media.setReviewStatus(null);
 		mediaCompressDao.save(media);
 	}
@@ -172,7 +171,7 @@ public class MediaCompressService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaCompressDao.save(media);
 	}
@@ -194,7 +193,7 @@ public class MediaCompressService {
 			String tags,
 			String keyWords,
 			String remarks) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		media.setName(name);
 		media.setTags(tags);
 		media.setKeyWords(keyWords);
@@ -211,7 +210,7 @@ public class MediaCompressService {
 	 * @param Long id 播发媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaCompressDao.save(media);
 	}
@@ -224,7 +223,7 @@ public class MediaCompressService {
 	 * @param Long id 播发媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		if(media != null){
 			List<MediaCompressPO> videosCanBeDeleted = new ArrayListWrapper<MediaCompressPO>().add(media).getList();
 			
@@ -235,7 +234,7 @@ public class MediaCompressService {
 			mediaCompressDao.deleteInBatch(videosCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -273,7 +272,7 @@ public class MediaCompressService {
 	 * @param Long id 播发媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaCompressPO media = mediaCompressDao.findOne(id);
+		MediaCompressPO media = mediaCompressDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaCompressDao.save(media);
 	}
@@ -335,7 +334,7 @@ public class MediaCompressService {
 					compress.setProcessInstanceId(processInstanceId);
 					compress.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaCompressDao.save(compressNeedProcess);
+				mediaCompressDao.saveAll(compressNeedProcess);
 			}
 		}else{
 			compressCanBeDeleted.addAll(compresses);
@@ -349,7 +348,7 @@ public class MediaCompressService {
 			mediaCompressDao.deleteInBatch(compressCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();

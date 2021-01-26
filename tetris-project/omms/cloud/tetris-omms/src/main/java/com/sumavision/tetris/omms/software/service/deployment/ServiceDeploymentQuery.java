@@ -54,9 +54,9 @@ public class ServiceDeploymentQuery {
 	 * @return ServiceDeploymentVO 状态
 	 */
 	public ServiceDeploymentVO queryUploadStatus(Long serviceDeploymentId) throws Exception{
-		ServiceDeploymentPO deploymentEntity = serviceDeploymentDao.findOne(serviceDeploymentId);
-		InstallationPackagePO installPackageEntity = installationPackageDao.findOne(deploymentEntity.getInstallationPackageId());
-		ServiceTypePO serviceTypeEntity = serviceTypeDao.findOne(deploymentEntity.getServiceTypeId());
+		ServiceDeploymentPO deploymentEntity = serviceDeploymentDao.findById(serviceDeploymentId);
+		InstallationPackagePO installPackageEntity = installationPackageDao.findById(deploymentEntity.getInstallationPackageId());
+		ServiceTypePO serviceTypeEntity = serviceTypeDao.findById(deploymentEntity.getServiceTypeId());
 		return new ServiceDeploymentVO().set(deploymentEntity)
 										.setVersion(installPackageEntity.getVersion())
 										.setName(serviceTypeEntity.getName());
@@ -74,7 +74,7 @@ public class ServiceDeploymentQuery {
 			Long serverId,
 			int currentPage,
 			int pageSize)throws Exception{
-		Pageable pageable = new PageRequest(currentPage-1, pageSize);
+		Pageable pageable = PageRequest.of(currentPage-1, pageSize);
 		Page<ServiceDeploymentPO> paged = serviceDeploymentDao.findByServerId(serverId, pageable);
 		List<ServiceDeploymentPO> entities = paged.getContent();
 		List<ServiceDeploymentVO> rows = new ArrayList<ServiceDeploymentVO>();

@@ -56,7 +56,7 @@ public class JointConstraintExpressionController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint =  accessPointDao.findById(accessPointId);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(accessPointId);
@@ -91,7 +91,7 @@ public class JointConstraintExpressionController {
 		
 		UserVO user = userTool.current();
 		
-		JointConstraintExpressionPO constraint =  jointConstraintExpressionDao.findOne(id);
+		JointConstraintExpressionPO constraint =  jointConstraintExpressionDao.findById(id);
 		
 		if(constraint != null){
 			jointConstraintExpressionDao.delete(constraint);
@@ -121,7 +121,7 @@ public class JointConstraintExpressionController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
+		AccessPointPO accessPoint =  accessPointDao.findById(accessPointId);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(accessPointId);

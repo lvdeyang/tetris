@@ -38,7 +38,7 @@ public class ProcessVariableQuery {
 	 * @return List<ProcessVariablePO> 变量列表
 	 */
 	public List<ProcessVariablePO> findByProcessId(Long processId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage - 1,  pageSize);
+		Pageable page = PageRequest.of(currentPage - 1,  pageSize);
 		Page<ProcessVariablePO> entities = processVariableDao.findByProcessId(processId, page);
 		return entities.getContent();
 	}

@@ -89,7 +89,7 @@ public class ProcessParamReferenceController {
 			String reference,
 			HttpServletRequest request) throws Exception{
 		
-		ProcessParamReferencePO entity = processParamReferenceDao.findOne(id);
+		ProcessParamReferencePO entity = processParamReferenceDao.findById(id);
 		if(entity == null){
 			throw new ProcessParamReferenceNotExistException(id);
 		}
@@ -117,7 +117,7 @@ public class ProcessParamReferenceController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		ProcessParamReferencePO entity = processParamReferenceDao.findOne(id);
+		ProcessParamReferencePO entity = processParamReferenceDao.findById(id);
 		if(entity != null){
 			processParamReferenceDao.delete(entity);
 		}

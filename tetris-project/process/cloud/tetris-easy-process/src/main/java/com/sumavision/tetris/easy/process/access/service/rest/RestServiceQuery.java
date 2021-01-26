@@ -23,7 +23,7 @@ public class RestServiceQuery {
 	 * @return List<RestServicePO> rest服务列表
 	 */
 	public List<RestServicePO> findAll(int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<RestServicePO> pagedEntities = restServiceDao.findAll(page);
 		return pagedEntities.getContent();
 	}

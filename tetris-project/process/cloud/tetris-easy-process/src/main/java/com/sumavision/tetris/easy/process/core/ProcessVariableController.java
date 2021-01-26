@@ -58,7 +58,7 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		ProcessPO process = processDao.findOne(processId);
+		ProcessPO process = processDao.findById(processId);
 		
 		if(process == null){
 			throw new ProcessNotExistException(processId);
@@ -94,7 +94,7 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		ProcessPO process = processDao.findOne(processId);
+		ProcessPO process = processDao.findById(processId);
 		
 		if(process == null){
 			throw new ProcessNotExistException(processId);
@@ -163,7 +163,7 @@ public class ProcessVariableController {
 		
 		if("".equals(expressionValue)) expressionValue = null;
 		
-		ProcessPO process = processDao.findOne(processId);
+		ProcessPO process = processDao.findById(processId);
 		
 		if(process == null){
 			throw new ProcessNotExistException(processId);
@@ -204,7 +204,7 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		ProcessVariablePO variable = processVariableDao.findOne(id);
+		ProcessVariablePO variable = processVariableDao.findById(id);
 		
 		if(variable == null){
 			throw new ProcessVariableNotExistException(id);
@@ -235,7 +235,7 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		ProcessVariablePO variable = processVariableDao.findOne(id);
+		ProcessVariablePO variable = processVariableDao.findById(id);
 		
 		if(variable != null){
 			processVariableDao.delete(variable);

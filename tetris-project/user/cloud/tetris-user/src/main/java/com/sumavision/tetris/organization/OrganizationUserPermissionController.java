@@ -99,7 +99,7 @@ public class OrganizationUserPermissionController {
 		
 		//TODO 权限校验
 		
-		OrganizationUserPermissionPO permission = organizationUserPermissionDao.findOne(id);
+		OrganizationUserPermissionPO permission = organizationUserPermissionDao.findById(id);
 		
 		if(permission != null){
 			organizationUserPermissionDao.delete(permission);

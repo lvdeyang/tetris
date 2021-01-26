@@ -71,7 +71,7 @@ public class AccessPointController {
 			}
 		}
 		
-		List<AccessPointPO> entities = accessPointDao.findAll(accessPointIds);
+		List<AccessPointPO> entities = accessPointDao.findAllById(accessPointIds);
 		List<AccessPointVO> accessPoints = AccessPointVO.getConverter(AccessPointVO.class).convert(entities, AccessPointVO.class);
 		
 		return accessPoints;
@@ -103,7 +103,7 @@ public class AccessPointController {
 		
 		ServiceType e_serviceType = ServiceType.valueOf(serviceType);
 		if(e_serviceType.equals(ServiceType.REST)){
-			service = restServiceDao.findOne(serviceId);
+			service = restServiceDao.findById(serviceId);
 		}
 		
 		if(service == null){
@@ -182,7 +182,7 @@ public class AccessPointController {
 		
 		ServiceType e_serviceType = ServiceType.valueOf(serviceType);
 		if(e_serviceType.equals(ServiceType.REST)){
-			service = restServiceDao.findOne(serviceId);
+			service = restServiceDao.findById(serviceId);
 		}
 		
 		if(service == null){
@@ -227,7 +227,7 @@ public class AccessPointController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint = accessPointDao.findOne(id);
+		AccessPointPO accessPoint = accessPointDao.findById(id);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(id);
@@ -260,7 +260,7 @@ public class AccessPointController {
 		
 		UserVO user = userTool.current();
 		
-		AccessPointPO accessPoint = accessPointDao.findOne(id);
+		AccessPointPO accessPoint = accessPointDao.findById(id);
 		
 		if(accessPoint == null){
 			throw new AccessPointNotExistException(id);

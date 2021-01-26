@@ -46,7 +46,7 @@ public class MediaEditorTaskRatePermissionService {
 			}
 		}
 		
-		mediaEditorTaskRatePermissionDAO.save(permissions);
+		mediaEditorTaskRatePermissionDAO.saveAll(permissions);
 		
 		mediaEditorTaskService.freshMediaEditorStatus();
 	}

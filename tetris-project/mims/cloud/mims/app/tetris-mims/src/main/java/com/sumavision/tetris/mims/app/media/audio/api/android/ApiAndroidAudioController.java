@@ -121,7 +121,7 @@ public class ApiAndroidAudioController {
 		
 		UserVO user = userQuery.current();
 
-		MediaAudioPO audio = mediaAudioDao.findOne(id);
+		MediaAudioPO audio = mediaAudioDao.findById(id);
 		if(audio == null){
 			throw new MediaAudioNotExistException(id);
 		}
@@ -146,7 +146,7 @@ public class ApiAndroidAudioController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioDao.findById(id);
 		
 		if(media == null){
 			throw new MediaAudioNotExistException(id);
@@ -196,7 +196,7 @@ public class ApiAndroidAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}

@@ -1,19 +1,15 @@
 package com.sumavision.tetris.omms.auth;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -22,15 +18,11 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,26 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.commons.context.SpringContext;
-import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.omms.auth.exception.HttpGadgetEncryptionException;
-import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
-import com.sumavision.tetris.omms.hardware.database.DatabasePO;
-import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
-import com.sumavision.tetris.omms.hardware.server.ServerPO;
-import com.sumavision.tetris.omms.hardware.server.ServerVO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataDAO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataPO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
-import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
-import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
-import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
-import com.sumavision.tetris.omms.software.service.deployment.exception.HttpGadgetModifyIniException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -107,7 +82,7 @@ public class AuthService {
 	public AuthPO importDevice(
 			Long id,
 			FileItem deviceFile) throws Exception{
-		AuthPO entity = authDAO.findOne(id);
+		AuthPO entity = authDAO.findById(id);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(deviceFile.getInputStream()));
 		entity.setDeviceId(reader.readLine());
 		authDAO.save(entity);
@@ -134,7 +109,7 @@ public class AuthService {
 			String name,
 			String content,
 			String deviceId) throws Exception{
-		AuthPO entity = authDAO.findOne(id);
+		AuthPO entity = authDAO.findById(id);
 		if(entity != null){
 			entity.setName(name);
 			entity.setContent(content);
@@ -146,7 +121,7 @@ public class AuthService {
 	public AuthPO set(
 			Long id,
 			String content) throws Exception{
-		AuthPO entity = authDAO.findOne(id);
+		AuthPO entity = authDAO.findById(id);
 		if(entity != null){
 			entity.setContent(content);
 			authDAO.save(entity);
@@ -166,7 +141,7 @@ public class AuthService {
 	 * @throws Exception
 	 */
 	public AuthPO delete(Long id) throws Exception{
-		AuthPO entity = authDAO.findOne(id);
+		AuthPO entity = authDAO.findById(id);
 		if(entity != null){
 			authDAO.delete(entity);
 		}
@@ -188,7 +163,7 @@ public class AuthService {
 			int currentPage, 
 			int pageSize) throws Exception{
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<AuthPO> pagedEntities = authDAO.findAll(page);
 		List<AuthPO> entities = pagedEntities.getContent();
 		if(entities!=null && entities.size()>0){

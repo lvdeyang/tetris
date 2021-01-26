@@ -90,7 +90,7 @@ public class MediaTxtQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaTxtVO>();
@@ -151,7 +151,7 @@ public class MediaTxtQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_TXT.toString());
 		if (id != null && id.length > 0) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 			
 		List<Long> folderIds = new ArrayList<Long>();
@@ -261,7 +261,7 @@ public class MediaTxtQuery {
 	 */
 	public String queryContent(Long id) throws Exception{
 		
-		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		MediaTxtPO txt = mediaTxtDao.findById(id);
 		
 		if(txt == null){
 			throw new MediaTxtNotExistException(id);

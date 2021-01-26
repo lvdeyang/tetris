@@ -63,7 +63,7 @@ public class ApiAndroidFolderController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.PARENT_CREATE);
 		}
 		
-		FolderPO parent = folderDao.findOne(parentFolderId);
+		FolderPO parent = folderDao.findById(parentFolderId);
 		
 		if(parent == null){
 			throw new FolderNotExistException(parentFolderId);
@@ -96,7 +96,7 @@ public class ApiAndroidFolderController {
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -128,7 +128,7 @@ public class ApiAndroidFolderController {
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		FolderPO folder = folderDao.findById(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}

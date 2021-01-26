@@ -67,7 +67,7 @@ public class PropertiesService {
 			String valueType,
 			String propertyDefaultValue) throws Exception{
 		
-		PropertiesPO properties = propertiesDao.findOne(id);
+		PropertiesPO properties = propertiesDao.findById(id);
 		properties.setPropertyKey(propertyKey);
 		properties.setPropertyName(propertyName);
 		properties.setValueType(PropertyValueType.fromName(valueType));
@@ -85,7 +85,7 @@ public class PropertiesService {
 	 * @param Long id 属性id
 	 */
 	public void remove(Long id) throws Exception{
-		PropertiesPO properties = propertiesDao.findOne(id);
+		PropertiesPO properties = propertiesDao.findById(id);
 		if(properties != null){
 			propertiesDao.delete(properties);
 		}
@@ -100,7 +100,7 @@ public class PropertiesService {
 	 * @param Long 属性id
 	 */
 	public void delete(Long id) {
-		PropertiesPO propertiesPO = propertiesDao.findOne(id);
+		PropertiesPO propertiesPO = propertiesDao.findById(id);
 		if (propertiesPO != null) {
 			propertiesDao.delete(propertiesPO);
 		}
@@ -127,7 +127,7 @@ public class PropertiesService {
 			String propertyDefaultValue,
 			String valueSelect) throws Exception{
 		
-		PropertiesPO properties = propertiesDao.findOne(id);
+		PropertiesPO properties = propertiesDao.findById(id);
 		properties.setPropertyKey(propertyKey);
 		properties.setPropertyName(propertyName);
 		properties.setValueType(PropertyValueType.fromName(valueType));
@@ -183,7 +183,7 @@ public class PropertiesService {
 	 * @param config 配置参数
 	 */
 	public void modifyParameters(Long deploymentId, String config){
-		ServiceDeploymentPO deployment = serviceDeploymentDAO.findOne(deploymentId);
+		ServiceDeploymentPO deployment = serviceDeploymentDAO.findById(deploymentId);
 		deployment.setConfig(config);
 		serviceDeploymentDAO.save(deployment);
 	}

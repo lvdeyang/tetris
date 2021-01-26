@@ -1,15 +1,10 @@
 package com.sumavision.tetris.omms.auth;
 
-import java.io.BufferedOutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -119,7 +113,7 @@ public class AuthController {
 
     @RequestMapping(value = "/export/{id}")
 	public ResponseEntity<byte[]> handleExport(@PathVariable Long id,HttpServletRequest request) throws Exception{
-		AuthPO entity = authDAO.findOne(id);
+		AuthPO entity = authDAO.findById(id);
 		//从小工具获取加密内容  \r\n
 		Map<String,String> encryption = authService.encryption(entity);
 		

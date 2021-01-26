@@ -54,7 +54,6 @@ import com.sumavision.tetris.user.exception.DuplicateUsernameImportedException;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileNotExistException;
-import com.sumavision.tetris.user.exception.NicknameAlreadyExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
@@ -144,7 +143,7 @@ public class UserService{
 	 * @return UserVO 用户
 	 */
 	public UserVO lock(Long id) throws Exception{
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		if(user == null){
 			throw new UserNotExistException(id);
 		}
@@ -162,7 +161,7 @@ public class UserService{
 	 * @return UserVO 用户
 	 */
 	public UserVO unlock(Long id) throws Exception{
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		if(user == null){
 			throw new UserNotExistException(id);
 		}
@@ -202,7 +201,7 @@ public class UserService{
 	 * @param Long userId 游客id
 	 */
 	public void removeTourist(Long userId) throws Exception{
-		UserPO tourist = userDao.findOne(userId);
+		UserPO tourist = userDao.findById(userId);
 		if(tourist == null) return;
 		if(!UserClassify.TOURIST.equals(tourist.getClassify())){
 			throw new DeletedUserIsNotATouristException(userId);
@@ -221,7 +220,7 @@ public class UserService{
 	 */
 	public void removeTouristBatch(Collection<Long> userIds) throws Exception{
 		if(userIds!=null && userIds.size()>0){
-			List<UserPO> users = userDao.findAll(userIds);
+			List<UserPO> users = userDao.findAllById(userIds);
 			if(users!=null && users.size()>0){
 				TouristDeleteBatchEvent event = new TouristDeleteBatchEvent(applicationEventPublisher, userIds);
 				applicationEventPublisher.publishEvent(event);
@@ -280,7 +279,7 @@ public class UserService{
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
 		if(bindRoles!=null && !"".equals(bindRoles)){
 			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
-			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAllById(roleIds);
 			if(businessRoles!=null && businessRoles.size()>0){
 				for(SystemRolePO businessRole:businessRoles){
 					roles.add(new SystemRoleVO().set(businessRole));
@@ -359,7 +358,7 @@ public class UserService{
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
 		if(bindRoles!=null && !"".equals(bindRoles)){
 			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
-			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAllById(roleIds);
 			if(businessRoles!=null && businessRoles.size()>0){
 				for(SystemRolePO businessRole:businessRoles){
 					roles.add(new SystemRoleVO().set(businessRole));
@@ -405,7 +404,7 @@ public class UserService{
             String bindRoles,
             String worknodeUid) throws Exception{
 		
-		CompanyPO company = companyDao.findOne(companyId);
+		CompanyPO company = companyDao.findById(companyId);
 		
 		if(company == null){
 			throw new CompanyNotExistException(companyId);
@@ -431,7 +430,7 @@ public class UserService{
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
 		if(bindRoles!=null && !"".equals(bindRoles)){
 			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
-			List<SystemRolePO> businessRoles = systemRoleDao.findAll(roleIds);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAllById(roleIds);
 			if(businessRoles!=null && businessRoles.size()>0){
 				for(SystemRolePO businessRole:businessRoles){
 					roles.add(new SystemRoleVO().set(businessRole));
@@ -553,7 +552,7 @@ public class UserService{
 		
 		if(bindRoles != null){
 			List<Long> businessRoleIds = JSON.parseArray(bindRoles, Long.class);
-			List<SystemRolePO> businessRoles = systemRoleDao.findAll(businessRoleIds);
+			List<SystemRolePO> businessRoles = systemRoleDao.findAllById(businessRoleIds);
 			List<UserSystemRolePermissionPO> businessPermissions = new ArrayList<UserSystemRolePermissionPO>();
 			for(SystemRolePO businessRole:businessRoles){
 				UserSystemRolePermissionPO businessPermission = new UserSystemRolePermissionPO();
@@ -564,7 +563,7 @@ public class UserService{
 				businessPermission.setUpdateTime(new Date());
 				businessPermissions.add(businessPermission);
 			}
-			userSystemRolePermissionDao.save(businessPermissions);
+			userSystemRolePermissionDao.saveAll(businessPermissions);
 		}
 		
 		return user;
@@ -593,7 +592,7 @@ public class UserService{
 	 */
 	public void delete(Long id) throws Exception{
 		
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		
 		if(user == null) return;
 		
@@ -618,7 +617,7 @@ public class UserService{
 						scope.setClassify(UserClassify.NORMAL);
 					}
 				}
-				userDao.save(users);
+				userDao.saveAll(users);
 				
 				//删除部门
 				List<OrganizationPO> organizations = organizationDao.findByCompanyIdOrderBySerialAsc(company.getId());
@@ -665,7 +664,7 @@ public class UserService{
 				}
 			}
 			if(privatePermission != null){
-				SystemRolePO privateRole = systemRoleDao.findOne(privatePermission.getRoleId());
+				SystemRolePO privateRole = systemRoleDao.findById(privatePermission.getRoleId());
 				if(privateRole != null){
 					systemRoleDao.delete(privateRole);
 				}
@@ -720,7 +719,7 @@ public class UserService{
             Boolean resetPermissions,
             String bindRoles) throws Exception{
 		
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		
 		if(user == null) throw new UserNotExistException(id);
 		
@@ -771,7 +770,7 @@ public class UserService{
 			}
 			if(bindRoles != null){
 				List<Long> businessRoleIds = JSON.parseArray(bindRoles, Long.class);
-				List<SystemRolePO> businessRoles = systemRoleDao.findAll(businessRoleIds);
+				List<SystemRolePO> businessRoles = systemRoleDao.findAllById(businessRoleIds);
 				List<UserSystemRolePermissionPO> businessPermissions = new ArrayList<UserSystemRolePermissionPO>();
 				for(SystemRolePO businessRole:businessRoles){
 					UserSystemRolePermissionPO businessPermission = new UserSystemRolePermissionPO();
@@ -783,7 +782,7 @@ public class UserService{
 					businessPermissions.add(businessPermission);
 					roles.add(new SystemRoleVO().set(businessRole));
 				}
-				userSystemRolePermissionDao.save(businessPermissions);
+				userSystemRolePermissionDao.saveAll(businessPermissions);
 			}
 		}
 		result.setBusinessRoles(JSON.toJSONString(roles));
@@ -814,7 +813,7 @@ public class UserService{
             String hotCounts
             ) throws Exception{
 		
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		if(user == null) throw new UserNotExistException(id);
 		if(tags != null) {
 			user.setTags(tags);
@@ -835,7 +834,7 @@ public class UserService{
 		    	
 		    	userTagsPOs.add(userTagsPO);
 		    }
-		    userTagsDAO.save(userTagsPOs);
+		    userTagsDAO.saveAll(userTagsPOs);
 		}
 		userDao.save(user);
 		UserVO result = new UserVO().set(user);
@@ -865,7 +864,7 @@ public class UserService{
 		for (UserTagsPO userTagsPO : userTagsPOs) {
 			userTagsPO.setHotCount(hotCount);
 		}
-		userTagsDAO.save(userTagsPOs);
+		userTagsDAO.saveAll(userTagsPOs);
 		List<UserTagsVO> result = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
 		return result;
 	}
@@ -884,7 +883,7 @@ public class UserService{
 			userTagsPOs.addAll(tuserTagsPOs);
 		}
 		
-		userTagsDAO.save(userTagsPOs);
+		userTagsDAO.saveAll(userTagsPOs);
 		List<UserTagsVO> result = UserTagsVO.getConverter(UserTagsVO.class).convert(userTagsPOs, UserTagsVO.class);
 		return result;
 	}
@@ -942,7 +941,7 @@ public class UserService{
 			String oldPassword,
 			String newPassword) throws Exception{
 		
-		UserPO entity = userDao.findOne(userId);
+		UserPO entity = userDao.findById(userId);
 		
 		oldPassword = sha256Encoder.encode(oldPassword);
 		if(!entity.getPassword().equals(oldPassword)) throw new PasswordErrorException();
@@ -972,7 +971,7 @@ public class UserService{
             String newPassword,
             String repeat) throws Exception{
 		
-		UserPO user = userDao.findOne(id);
+		UserPO user = userDao.findById(id);
 		
 		if(user == null) throw new UserNotExistException(id);
 		
@@ -1110,7 +1109,7 @@ public class UserService{
 				throw new UsernameAlreadyExistException(duplicateUsernames);
 			}*/
 			
-			userDao.save(users);
+			userDao.saveAll(users);
 			List<UserSystemRolePermissionPO> systemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
 			List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
 			for(UserPO user:users){
@@ -1137,9 +1136,9 @@ public class UserService{
 				privateRole.setUpdateTime(new Date());
 				privateRoles.add(privateRole);
 			}
-			userSystemRolePermissionDao.save(systemRolePermissions);
-			companyUserPermissionDao.save(companyUserPermissions);
-			systemRoleDao.save(privateRoles);
+			userSystemRolePermissionDao.saveAll(systemRolePermissions);
+			companyUserPermissionDao.saveAll(companyUserPermissions);
+			systemRoleDao.saveAll(privateRoles);
 			
 			//私有角色授权
 			List<UserSystemRolePermissionPO> privatePermissions = new ArrayList<UserSystemRolePermissionPO>();
@@ -1158,7 +1157,7 @@ public class UserService{
 					}
 				}
 			}
-			userSystemRolePermissionDao.save(privatePermissions);
+			userSystemRolePermissionDao.saveAll(privatePermissions);
 		}
 		
 		if(roles.size() > 0){
@@ -1176,12 +1175,12 @@ public class UserService{
 					}
 					if(!exist) notExistRoles.add(role);
 				}
-				systemRoleDao.save(notExistRoles);
+				systemRoleDao.saveAll(notExistRoles);
 				roles = new ArrayList<SystemRolePO>();
 				roles.addAll(existRoles);
 				roles.addAll(notExistRoles);
 			}else{
-				systemRoleDao.save(roles);
+				systemRoleDao.saveAll(roles);
 			}
 			for(SystemRolePO role:roles){
 				for(int i=1; i<lines.length; i++){
@@ -1204,7 +1203,7 @@ public class UserService{
 				}
 			}
 			if(userSystemRolePermissions.size() > 0){
-				userSystemRolePermissionDao.save(userSystemRolePermissions);
+				userSystemRolePermissionDao.saveAll(userSystemRolePermissions);
 			}
 		}
 		
@@ -1281,7 +1280,7 @@ public class UserService{
 			userPOs.add(userPO);
 		}
 		
-		userDao.save(userPOs);
+		userDao.saveAll(userPOs);
 		
 		//绑定公司
 		CompanyPO company = companyDao.findByUserId(self.getId());
@@ -1293,7 +1292,7 @@ public class UserService{
 			permissions.add(permission);
 		}
 		
-		companyUserPermissionDao.save(permissions);
+		companyUserPermissionDao.saveAll(permissions);
 		
 		//创建私有角色
 		List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
@@ -1305,7 +1304,7 @@ public class UserService{
 			privateRole.setUpdateTime(new Date());
 			privateRoles.add(privateRole);
 		}
-		systemRoleDao.save(privateRoles);
+		systemRoleDao.saveAll(privateRoles);
 		
 		//用户关联角色
 		List<UserSystemRolePermissionPO> rolePermissions = new ArrayList<UserSystemRolePermissionPO>();
@@ -1325,7 +1324,7 @@ public class UserService{
 			permission.setUpdateTime(new Date());
 			rolePermissions.add(permission);
 		}
-		userSystemRolePermissionDao.save(rolePermissions);
+		userSystemRolePermissionDao.saveAll(rolePermissions);
 		
 		return userPOs;
 	}

@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.JSpinner.ListEditor;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import com.suma.venus.resource.pojo.BundlePO.CoderType;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -66,13 +65,12 @@ import com.suma.venus.resource.externalinterface.InterfaceFromResource;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundleLoginBlackListPO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.CoderType;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
-import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -83,6 +81,7 @@ import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
 import com.suma.venus.resource.pojo.VedioCapacityPO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
@@ -105,8 +104,6 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
-
-import groovyjarjarasm.asm.tree.TryCatchBlockNode;
 
 
 @Controller
@@ -319,10 +316,10 @@ public class BundleManageController extends ControllerBase {
 			if ("jv210".equals(bundlePO.getDeviceModel()) || "ws".equals(bundlePO.getDeviceModel())) {
 				if (CoderType.ENCODER.equals(bundleVO.getCoderType())) {
 					channelSchemeDao
-							.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
+							.saveAll(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
 				} else if (CoderType.DECODER.equals(bundleVO.getCoderType())) {
 					channelSchemeDao
-							.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
+							.saveAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 				} else {
 					bundleService.configDefaultAbility(bundlePO);
 				}
@@ -414,7 +411,7 @@ public class BundleManageController extends ControllerBase {
 				bundleIds.add(bundlePO.getBundleId());
 				BundleVO vo = BundleVO.fromPO(bundlePO);
 				if(bundlePO.getFolderId()!= null){
-					FolderPO folderPO = folderDao.findOne(bundlePO.getFolderId());
+					FolderPO folderPO = folderDao.findById(bundlePO.getFolderId());
 					if (null != folderPO) {
 						vo.setBundleFolderName(folderPO.getName());
 					}else {
@@ -430,7 +427,7 @@ public class BundleManageController extends ControllerBase {
 				bundles.add(vo);
 			}
 			
-			bundleDao.save(bundlePOs);
+			bundleDao.saveAll(bundlePOs);
 			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleIdIn(bundleIds);
 			if(extraInfos!=null && extraInfos.size()>0){
 				for(BundleVO bundle:bundles){
@@ -635,7 +632,7 @@ public class BundleManageController extends ControllerBase {
 			}
 		}
 
-		encoderDecoderUserMapDao.save(maps);
+		encoderDecoderUserMapDao.saveAll(maps);
 
 		// 删除设备账号对应的黑名单数据
 //			bundleLoginBlackListDao.deleteByLoginId(bundle.getCurrentLoginId());
@@ -778,7 +775,7 @@ public class BundleManageController extends ControllerBase {
 			for (ScreenSchemePO screenSchemePO : screenSchemePOs) {
 				screenSchemePO.setStatus(LockStatus.IDLE);
 			}
-			screenSchemeDao.save(screenSchemePOs);
+			screenSchemeDao.saveAll(screenSchemePOs);
 			lockScreenParamDao.deleteByBundleId(bundleId);
 
 			// 删除bundle整体锁定参数(如果有)
@@ -891,7 +888,7 @@ public class BundleManageController extends ControllerBase {
 				bundleVO.setEquipFactInfo(serNodePO.getNodeName());
 				local.put("name", serNodePO.getNodeName());
 				
-				FolderPO folderPO = folderDao.findOne(folderId);
+				FolderPO folderPO = folderDao.findById(folderId);
 				//存入组织机构的uuid
 				bundleVO.setInstitution(folderPO.getUuid());
 				//组织机构
@@ -1210,11 +1207,11 @@ public class BundleManageController extends ControllerBase {
 					if (null != encoderCell && "是".equals(encoderCell.getStringCellValue())) {
 						// 编码器
 						channelSchemeDao
-								.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
+								.saveAll(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
 					} else if (null != decoderCell && "是".equals(decoderCell.getStringCellValue())) {
 						// 解码器
 						channelSchemeDao
-								.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
+								.saveAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 					} else {
 						// 按照jv210模板自动生成能力配置
 						bundleService.configDefaultAbility(bundlePO);

@@ -127,7 +127,7 @@ public class MediaVideoService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewPassed(Long id) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		media.setReviewStatus(null);
 		mediaVideoDao.save(media);
 	}
@@ -140,7 +140,7 @@ public class MediaVideoService {
 	 * @param Long id 媒资id
 	 */
 	public void uploadReviewRefuse(Long id) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
 		mediaVideoDao.save(media);
 	}
@@ -162,7 +162,7 @@ public class MediaVideoService {
 			String tags,
 			String keyWords,
 			String remarks) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		media.setName(name);
 		media.setTags(tags);
 		media.setKeyWords(keyWords);
@@ -179,7 +179,7 @@ public class MediaVideoService {
 	 * @param Long id 视频媒资id
 	 */
 	public void editReviewRefuse(Long id) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
 		mediaVideoDao.save(media);
 	}
@@ -192,7 +192,7 @@ public class MediaVideoService {
 	 * @param Long id 视频媒资id
 	 */
 	public void deleteReviewPassed(Long id) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		if(media != null){
 			List<MediaVideoPO> videosCanBeDeleted = new ArrayListWrapper<MediaVideoPO>().add(media).getList();
 			
@@ -203,7 +203,7 @@ public class MediaVideoService {
 			mediaVideoDao.deleteInBatch(videosCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -261,7 +261,7 @@ public class MediaVideoService {
 	 * @param Long id 视频媒资id
 	 */
 	public void deleteReviewRefuse(Long id) throws Exception{
-		MediaVideoPO media = mediaVideoDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findById(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaVideoDao.save(media);
 	}
@@ -276,7 +276,7 @@ public class MediaVideoService {
 	 * @return processed List<MediaVideoVO> 待审核的数据列表
 	 */
 	public Map<String, Object> remove(List<Long> ids) throws Exception {
-		List<MediaVideoPO> mediaVideoPOs = mediaVideoDao.findAll(ids);
+		List<MediaVideoPO> mediaVideoPOs = mediaVideoDao.findAllById(ids);
 		if (mediaVideoPOs == null || mediaVideoPOs.isEmpty()) return null;
 		return remove(mediaVideoPOs);
 	}
@@ -343,7 +343,7 @@ public class MediaVideoService {
 					video.setProcessInstanceId(processInstanceId);
 					video.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
 				}
-				mediaVideoDao.save(videosNeedProcess);
+				mediaVideoDao.saveAll(videosNeedProcess);
 			}
 		}else{
 			videosCanBeDeleted.addAll(videos);
@@ -357,7 +357,7 @@ public class MediaVideoService {
 			mediaVideoDao.deleteInBatch(videosCanBeDeleted);
 			
 			//保存待删除存储文件数据
-			preRemoveFileDao.save(preRemoveFiles);
+			preRemoveFileDao.saveAll(preRemoveFiles);
 			
 			//调用flush使sql生效
 			preRemoveFileDao.flush();
@@ -857,7 +857,7 @@ public class MediaVideoService {
 						editorPO.setUploadTempPath(uploadTempPath);
 						editorPO.setUpdateTime(new Date());
 						mediaFileEditorDAO.save(editorPO);
-						videos.add(mediaVideoDao.findOne(editorPO.getMediaId()));
+						videos.add(mediaVideoDao.findById(editorPO.getMediaId()));
 					} else {
 						MediaVideoPO video = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
 						videos.add(video);

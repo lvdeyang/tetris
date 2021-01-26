@@ -65,7 +65,7 @@ public class FolderQuery {
 		for(int i=1; i<path.length; i++){
 			parentIds.add(Long.valueOf(path[i]));
 		}
-		return folderDao.findAll(parentIds);
+		return folderDao.findAllById(parentIds);
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class FolderQuery {
 		for(int i=1; i<path.length; i++){
 			parentIds.add(Long.valueOf(path[i]));
 		}
-		return folderDao.findAll(parentIds);
+		return folderDao.findAllById(parentIds);
 	}
 	
 	/**
@@ -283,7 +283,7 @@ public class FolderQuery {
 	 * @return String 面包屑路径
 	 */
 	public String generateFolderBreadCrumb(Long folderId) throws Exception{
-		FolderPO currentFolder = folderDao.findOne(folderId);
+		FolderPO currentFolder = folderDao.findById(folderId);
 		String parentPath = currentFolder.getParentPath();
 		if(parentPath == null){
 			return new StringBufferWrapper().append("/").append(currentFolder.getName()).toString();

@@ -43,7 +43,7 @@ public class MediaCompressFeignController {
 	@RequestMapping(value = "/query")
 	public Object query(Long id) throws Exception{
 		
-		return new MediaCompressVO().set(mediaCompressDao.findOne(id));
+		return new MediaCompressVO().set(mediaCompressDao.findById(id));
 	}
 	
 	/**

@@ -1,22 +1,17 @@
 package com.suma.venus.resource.ldap;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.equip.po.LdapEquipPo;
 import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.dao.FolderDao;
-import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.ChannelSchemeService;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 
 /**
  * ldap设备信息处理类
@@ -88,7 +83,7 @@ public class LdapEquipInfoUtil {
 			return null;
 		}
 		
-		FolderPO folder = folderDao.findOne(bundle.getFolderId());
+		FolderPO folder = folderDao.findById(bundle.getFolderId());
 		if(null == folder || null == folder.getToLdap() || !folder.getToLdap()){
 			return null;//如果所属分组无效，则不上传
 		}

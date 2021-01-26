@@ -107,7 +107,7 @@ public class MediaVideoQuery {
 			}
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}else{
-			FolderPO current = folderDao.findOne(folderId);
+			FolderPO current = folderDao.findById(folderId);
 			if(current == null) throw new FolderNotExistException(folderId);
 			
 			rows = new ArrayList<MediaVideoVO>();
@@ -166,7 +166,7 @@ public class MediaVideoQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
 		if (id != null && id.length > 0 && id[0] != null) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
@@ -202,7 +202,7 @@ public class MediaVideoQuery {
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
 		if (id != null && id.length > 0 && id[0] != null) {
 			folderTree = folderQuery.findSubFolders(id[0]);
-			folderTree.add(folderDao.findOne(id[0]));
+			folderTree.add(folderDao.findById(id[0]));
 		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();

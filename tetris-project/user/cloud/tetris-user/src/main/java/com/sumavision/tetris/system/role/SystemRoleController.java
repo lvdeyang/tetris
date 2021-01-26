@@ -102,7 +102,7 @@ public class SystemRoleController {
 		
 		//TODO 权限校验
 		
-		SystemRoleGroupPO group = systemRoleGroupDao.findOne(groupId);
+		SystemRoleGroupPO group = systemRoleGroupDao.findById(groupId);
 		
 		if(group == null){
 			throw new SystemRoleGroupNotExistException(groupId);
@@ -143,7 +143,7 @@ public class SystemRoleController {
 		
 		//TODO 权限校验
 		
-		SystemRolePO role = systemRoleDao.findOne(id);
+		SystemRolePO role = systemRoleDao.findById(id);
 		
 		if(role == null){
 			throw new SystemRoleNotExistException(id);
@@ -178,7 +178,7 @@ public class SystemRoleController {
 		
 		//TODO 权限校验
 		
-		SystemRolePO role = systemRoleDao.findOne(id);
+		SystemRolePO role = systemRoleDao.findById(id);
 		
 		if(role != null){
 			systemRoleService.delete(new ArrayListWrapper<SystemRolePO>().add(role).getList());

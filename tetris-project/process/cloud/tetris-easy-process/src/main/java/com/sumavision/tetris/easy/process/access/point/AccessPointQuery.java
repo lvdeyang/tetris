@@ -31,7 +31,7 @@ public class AccessPointQuery {
 	 * @return List<AccessPointPO> 接入点列表
 	 */
 	public List<AccessPointPO> findByServiceId(Long serviceId, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 		Page<AccessPointPO> accessPoints = accessPointDao.findByServiceId(serviceId, page);
 		return accessPoints.getContent();
 	}

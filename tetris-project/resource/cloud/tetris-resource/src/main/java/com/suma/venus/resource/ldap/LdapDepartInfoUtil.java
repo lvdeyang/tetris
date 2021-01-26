@@ -2,26 +2,17 @@ package com.suma.venus.resource.ldap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.alibaba.fastjson.JSONObject;
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.department.po.LdapDepartmentPo;
-import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderDao;
-import com.suma.venus.resource.dao.SerNodeDao;
-import com.suma.venus.resource.feign.UserQueryFeign;
-import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
-import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.SerNodePO;
 
 /**
  * ldap组织信息处理工具类
@@ -72,7 +63,7 @@ public class LdapDepartInfoUtil {
 		ldapDepart.setOrgRelation("NULL");
 		ldapDepart.setOrgCmdRelation("NULL");
 		if (null != folderPO.getParentId()) {
-			FolderPO parentFolder = folderDao.findOne(folderPO.getParentId());
+			FolderPO parentFolder = folderDao.findById(folderPO.getParentId());
 			if (null != parentFolder) {
 				ldapDepart.setOrgRelation(parentFolder.getUuid());
 //				ldapDepart.setOrgCmdRelation(parentFolder.getUuid());

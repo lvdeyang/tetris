@@ -645,7 +645,7 @@ public class UserQueryService {
 			maps.add(mapR);
 		}
 		
-		rolePrivilegeMapDao.save(maps);
+		rolePrivilegeMapDao.saveAll(maps);
 		
 		return true;
 	}
@@ -685,7 +685,7 @@ public class UserQueryService {
 		
 		List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByRoleIdAndPrivilegeIdIn(param.getRoleId(), privilegeIds);
 		if(maps != null && maps.size()>0){
-			rolePrivilegeMapDao.delete(maps);
+			rolePrivilegeMapDao.deleteInBatch(maps);
 		}
 		
 		List<PrivilegePO> needDeletePrivileges = new ArrayList<PrivilegePO>();
@@ -698,7 +698,7 @@ public class UserQueryService {
 			}
 		}
 		if(needDeletePrivileges.size() > 0){
-			privilegeDao.delete(needDeletePrivileges);
+			privilegeDao.deleteInBatch(needDeletePrivileges);
 		}
 		
 		return true;
@@ -757,7 +757,7 @@ public class UserQueryService {
 			
 		}
 		
-		bundleDao.save(bundles);
+		bundleDao.saveAll(bundles);
 	}
 	
 	/**
