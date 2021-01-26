@@ -26,6 +26,14 @@ public enum Type {
 		
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public static Type fromName(String name) throws Exception{
 		Type[] values = Type.values();
 		for(Type value:values){
