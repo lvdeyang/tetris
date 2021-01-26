@@ -94,7 +94,7 @@ public class RegionController {
 			throw new UserHasNotPermissionForRegionException(parentId, user);
 		}
 
-		RegionPO parent = regionDao.findOne(parentId);
+		RegionPO parent = regionDao.findById(parentId);
 		if (parent == null) {
 			throw new RegionNotExistException(parentId);
 		}
@@ -126,7 +126,7 @@ public class RegionController {
 			throw new UserHasNotPermissionForRegionException(id, user);
 		}
 
-		RegionPO regionPO = regionDao.findOne(id);
+		RegionPO regionPO = regionDao.findById(id);
 		if (regionPO == null) {
 			throw new RegionNotExistException(id);
 		}
@@ -155,7 +155,7 @@ public class RegionController {
 			throw new UserHasNotPermissionForRegionException(id, user);
 		}
 		
-		RegionPO regionPO = regionDao.findOne(id);
+		RegionPO regionPO = regionDao.findById(id);
 
 		if (regionPO != null) {
 			regionService.remove(regionPO);
@@ -188,12 +188,12 @@ public class RegionController {
 			throw new UserHasNotPermissionForRegionException(targetId, user);
 		}
 
-		RegionPO sourceRegion = regionDao.findOne(sourceId);
+		RegionPO sourceRegion = regionDao.findById(sourceId);
 		if (sourceRegion == null) {
 			throw new RegionNotExistException(sourceId);
 		}
 
-		RegionPO targetRegion = regionDao.findOne(targetId);
+		RegionPO targetRegion = regionDao.findById(targetId);
 		if (targetRegion == null) {
 			throw new RegionNotExistException(targetId);
 		}
@@ -231,7 +231,7 @@ public class RegionController {
 			throw new UserHasNotPermissionForRegionException(id, user);
 		}
 
-		RegionPO region = regionDao.findOne(id);
+		RegionPO region = regionDao.findById(id);
 		if (region == null) {
 			throw new RegionNotExistException(id);
 		}

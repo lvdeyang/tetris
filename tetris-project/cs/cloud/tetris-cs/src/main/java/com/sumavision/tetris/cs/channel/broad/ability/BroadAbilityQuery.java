@@ -81,7 +81,7 @@ public class BroadAbilityQuery {
 	 * @param Long channelId 频道id
 	 */
 	public void saveBroad(Long channelId) throws Exception{
-		ChannelPO channel = channelDao.findOne(channelId);
+		ChannelPO channel = channelDao.findById(channelId);
 		if (channel != null) {
 			abilityInfoSendQuery.save(channelId, channel.getEncryption());
 		}
@@ -95,7 +95,7 @@ public class BroadAbilityQuery {
 	 * @param Long channelId 频道id
 	 */
 	public void saveBroad(Long channelId, List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs) throws Exception{
-		ChannelPO channel = channelDao.findOne(channelId);
+		ChannelPO channel = channelDao.findById(channelId);
 		if (channel != null) {
 			abilityInfoSendQuery.save(channelId, channel.getEncryption(), broadAbilityBroadInfoVOs);
 		}

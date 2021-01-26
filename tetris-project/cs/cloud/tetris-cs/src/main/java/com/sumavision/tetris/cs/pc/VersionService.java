@@ -50,7 +50,7 @@ public class VersionService {
 		VersionVO versionVO=versionQuery.getVersion();
 		VersionPO versionPO=new VersionPO();
 		if(versionVO.getId()!=null){
-			versionPO=versionDAO.findOne(versionVO.getId());
+			versionPO=versionDAO.findById(versionVO.getId());
 		}
 		versionPO.setVersion(version);
 		versionPO.setUrl(url);

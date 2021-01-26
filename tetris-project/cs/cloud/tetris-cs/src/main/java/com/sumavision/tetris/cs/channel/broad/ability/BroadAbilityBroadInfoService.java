@@ -73,7 +73,7 @@ public class BroadAbilityBroadInfoService {
 	 */
 	public List<BroadAbilityBroadInfoPO> saveInfoList(Long channelId, List<BroadAbilityBroadInfoVO> infoVOs) throws Exception {
 		if (infoVOs == null || infoVOs.isEmpty()) return null;
-		ChannelPO channelPO = channelDAO.findOne(channelId);
+		ChannelPO channelPO = channelDAO.findById(channelId);
 		if (channelPO == null) return null; 
 		
 		List<BroadAbilityBroadInfoPO> aliveInfoPOs = broadAbilityBroadInfoDAO.findByChannelId(channelId);
@@ -142,7 +142,7 @@ public class BroadAbilityBroadInfoService {
 			saveInfoPOs.add(infoPO);
 		}
 		
-		broadAbilityBroadInfoDAO.save(saveInfoPOs);
+		broadAbilityBroadInfoDAO.saveAll(saveInfoPOs);
 		
 		return saveInfoPOs;
 	}
@@ -234,7 +234,7 @@ public class BroadAbilityBroadInfoService {
 			for (UserVO user : userVOs) {
 				if (userId.equals(user.getId())) {
 					Long sameChannelId = abilityBroadInfoPOs.get(0).getChannelId();
-					ChannelPO channelPO = channelDAO.findOne(sameChannelId);
+					ChannelPO channelPO = channelDAO.findById(sameChannelId);
 					throw new ChannelUdpUserIdAlreadyExistException(user.getNickname(), channelPO != null ? channelPO.getName() : "不详");
 				}
 			}

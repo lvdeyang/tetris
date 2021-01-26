@@ -154,7 +154,7 @@ public class ApiProcessChannelController {
 	public Object stop(String messageId, HttpServletRequest request) throws Exception {
 		BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByProcessInstanceId(messageId);
 		if (remotePO != null) {
-			ChannelPO channel = channelDAO.findOne(remotePO.getChannelId());
+			ChannelPO channel = channelDAO.findById(remotePO.getChannelId());
 			if (ChannelType.REMOTE.toString().equals(channel.getType())) {
 				channelService.stopBroadcast(remotePO.getChannelId());
 			}

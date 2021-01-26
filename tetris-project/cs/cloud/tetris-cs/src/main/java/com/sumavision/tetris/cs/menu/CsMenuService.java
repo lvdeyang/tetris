@@ -74,12 +74,12 @@ public class CsMenuService {
 	 * @return CsMenuVO cs媒资目录
 	 */
 	public CsMenuPO topPO(Long id, Long newParentId) {
-		CsMenuPO menuPO = menuDao.findOne(id);
+		CsMenuPO menuPO = menuDao.findById(id);
 		if (newParentId == -1) {
 			menuPO.setParentId(-1l);
 			menuPO.setParentPath(".");
 		} else {
-			CsMenuPO parentPO = menuDao.findOne(newParentId);
+			CsMenuPO parentPO = menuDao.findById(newParentId);
 			String parentPath = parentPO.getParentPath() + "/" + parentPO.getName();
 			menuPO.setParentId(newParentId);
 			menuPO.setParentPath(parentPath);
@@ -101,7 +101,7 @@ public class CsMenuService {
 	 * @return CsMenuPO cs媒资目录
 	 */
 	public CsMenuPO editPO(Long id, String name, String remark) {
-		CsMenuPO menuPO = menuDao.findOne(id);
+		CsMenuPO menuPO = menuDao.findById(id);
 		menuPO.setName(name);
 		menuPO.setRemark(remark);
 
@@ -121,7 +121,7 @@ public class CsMenuService {
 	 * @return CsMenuPO 添加的cs媒资目录
 	 */
 	public CsMenuPO appendPO(Long id, Long channelId, String name) {
-		CsMenuPO parentPO = menuDao.findOne(id);
+		CsMenuPO parentPO = menuDao.findById(id);
 		String parentPath = parentPO.getParentPath() + "/" + parentPO.getName();
 		
 		CsMenuPO menuPO = new CsMenuPO();
@@ -145,7 +145,7 @@ public class CsMenuService {
 	 * @return CsMenuPO cs媒资目录
 	 */
 	public CsMenuPO removePO(Long menuId) throws Exception {
-		CsMenuPO menuPO = menuDao.findOne(menuId);
+		CsMenuPO menuPO = menuDao.findById(menuId);
 
 		if(menuPO != null){
 			menuDao.delete(menuPO);

@@ -24,7 +24,6 @@ import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleService;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
-import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -94,7 +93,7 @@ public class ApiTerminalController {
 		
 		UserVO userVO = new UserVO().setGroupId(groupId);
 
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.query(userVO, id, page);
 
 		return column;
@@ -113,7 +112,7 @@ public class ApiTerminalController {
 		
 		UserVO userVO = new UserVO().setId(userId).setGroupId(groupId);
 
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.query(userVO, id, page);
 
 		return column;
@@ -137,7 +136,7 @@ public class ApiTerminalController {
 
 		UserVO user = new UserVO().setGroupId(groupId);
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryCommand(user, page);
 
 		return column;
@@ -162,7 +161,7 @@ public class ApiTerminalController {
 
 		UserVO user = new UserVO().setId(userId).setGroupId(groupId);
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryCommand(user, page);
 
 		return column;
@@ -222,7 +221,7 @@ public class ApiTerminalController {
 		
 		UserVO user = new UserVO().setGroupId(groupId);
 
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryByRegion(user, id, province, city, district, page);
 
 		return column;
@@ -255,7 +254,7 @@ public class ApiTerminalController {
 		
 		UserVO user = new UserVO().setId(userId).setGroupId(groupId);
 
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryByRegion(user, id, province, city, district, page);
 
 		return column;
@@ -280,7 +279,7 @@ public class ApiTerminalController {
 		
 		UserVO user = new UserVO().setGroupId(groupId);
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		List<ArticleVO> list = columnService.search(user, search, page);
 		
 		return new HashMapWrapper<String, Object>().put("articles", list)
@@ -307,7 +306,7 @@ public class ApiTerminalController {
 		
 		UserVO user = new UserVO().setId(userId).setGroupId(groupId);
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		List<ArticleVO> list = columnService.search(user, search, page);
 		
 		return new HashMapWrapper<String, Object>().put("articles", list)

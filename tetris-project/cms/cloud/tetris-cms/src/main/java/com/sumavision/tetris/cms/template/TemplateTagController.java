@@ -91,7 +91,7 @@ public class TemplateTagController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO parent = templateTagDao.findOne(parentId);
+		TemplateTagPO parent = templateTagDao.findById(parentId);
 		if(parent == null){
 			throw new TemplateTagNotExistException(parentId);
 		}
@@ -123,7 +123,7 @@ public class TemplateTagController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO tag = templateTagDao.findOne(id);
+		TemplateTagPO tag = templateTagDao.findById(id);
 		if(tag == null){
 			throw new TemplateTagNotExistException(id);
 		}
@@ -151,7 +151,7 @@ public class TemplateTagController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO tag = templateTagDao.findOne(id);	
+		TemplateTagPO tag = templateTagDao.findById(id);	
 		
 		if(tag != null){
 			templateTagService.remove(tag);
@@ -181,12 +181,12 @@ public class TemplateTagController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO sourceTag = templateTagDao.findOne(sourceId);	
+		TemplateTagPO sourceTag = templateTagDao.findById(sourceId);	
 		if(sourceTag == null){
 			throw new TemplateTagNotExistException(sourceId);
 		}
 		
-		TemplateTagPO targetTag = templateTagDao.findOne(targetId);
+		TemplateTagPO targetTag = templateTagDao.findById(targetId);
 		if(targetTag == null){
 			throw new TemplateTagNotExistException(targetId);
 		}
@@ -223,7 +223,7 @@ public class TemplateTagController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO tag = templateTagDao.findOne(id);	
+		TemplateTagPO tag = templateTagDao.findById(id);	
 		if(tag == null){
 			throw new TemplateTagNotExistException(id);
 		}

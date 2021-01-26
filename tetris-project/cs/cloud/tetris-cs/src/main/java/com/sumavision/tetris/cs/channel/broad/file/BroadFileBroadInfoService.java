@@ -62,7 +62,7 @@ public class BroadFileBroadInfoService {
 			for (UserVO user : userVOs) {
 				if (userId.equals(user.getId())) {
 					Long sameChannelId = fileBroadInfoPOs.get(0).getChannelId();
-					ChannelPO channelPO = channelDAO.findOne(sameChannelId);
+					ChannelPO channelPO = channelDAO.findById(sameChannelId);
 					throw new ChannelUdpUserIdAlreadyExistException(user.getNickname(), channelPO != null ? channelPO.getName() : "不详");
 				}
 			}
@@ -82,7 +82,7 @@ public class BroadFileBroadInfoService {
 			broadFileBroadInfoDAO.deleteByChannelId(channelId);
 			return new ArrayList<BroadFileBroadInfoPO>();
 		};
-		ChannelPO channelPO = channelDAO.findOne(channelId);
+		ChannelPO channelPO = channelDAO.findById(channelId);
 		if (channelPO == null) return null; 
 
 		List<BroadFileBroadInfoPO> aliveInfoPOs = broadFileBroadInfoDAO.findByChannelId(channelId);
@@ -120,7 +120,7 @@ public class BroadFileBroadInfoService {
 			saveInfoPOs.add(infoPO);
 		}
 		
-		broadFileBroadInfoDAO.save(saveInfoPOs);
+		broadFileBroadInfoDAO.saveAll(saveInfoPOs);
 		
 		return saveInfoPOs;
 	}

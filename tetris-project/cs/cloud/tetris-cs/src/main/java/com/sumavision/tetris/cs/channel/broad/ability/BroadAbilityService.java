@@ -1525,7 +1525,7 @@ public class BroadAbilityService {
 			outputPO.setLocalIp(outParamVO.getLocalIp());
 			outputPOs.add(outputPO);
 		}
-		broadTranscodeOutputDAO.save(outputPOs);
+		broadTranscodeOutputDAO.saveAll(outputPOs);
 		
 		//获取当前正在执行任务，给任务添加输出
 		List<BroadTranscodeTaskPO> transcodePOs = broadTranscodeTaskDAO.findByChannelIdAndTranscodeType(channelId, BroadTranscodeType.STREAM_TRANSCODE.toString());
@@ -2111,8 +2111,8 @@ public class BroadAbilityService {
 	
 	private Map<String , Object> startVoiceprint (Long scheduleId) throws Exception{
 		Map<String, Object> data = new HashMap<String, Object>();
-		SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
-		ChannelPO channelPO = channelDao.findOne(schedulePO.getChannelId());
+		SchedulePO schedulePO = scheduleDAO.findById(scheduleId);
+		ChannelPO channelPO = channelDao.findById(schedulePO.getChannelId());
 		List<BroadAbilityBroadInfoPO> broadAbilityBroadInfoPOs = broadAbilityBroadInfoDAO.findByChannelId(channelPO.getId());
 		List<Long> broadUserIds = new ArrayList<Long>();
 		if (! broadAbilityBroadInfoPOs.isEmpty()) {

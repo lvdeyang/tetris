@@ -62,7 +62,7 @@ public class CsResourceService {
 			saveResources.add(newresource);
 		}
 		if (!saveResources.isEmpty()) {
-			resourceDao.save(saveResources);
+			resourceDao.saveAll(saveResources);
 			returnList.addAll(CsResourceVO.getConverter(CsResourceVO.class).convert(saveResources, CsResourceVO.class));
 		}
 
@@ -80,9 +80,9 @@ public class CsResourceService {
 	}
 	
 	public CsResourceVO removeResource(Long resourceId) throws Exception{
-		 CsResourcePO resource = resourceDao.findOne(resourceId);
+		 CsResourcePO resource = resourceDao.findById(resourceId);
 		
-		 resourceDao.delete(resourceId);
+		 resourceDao.deleteById(resourceId);
 		  
 		 screenService.dealWithResourceRemove(resource.getChannelId(),resourceId);
 		
@@ -91,7 +91,7 @@ public class CsResourceService {
 
 	
 	public void removeallResource(List<Long> ids) throws Exception{
-		List<CsResourcePO> es = resourceDao.findAll(ids);
+		List<CsResourcePO> es = resourceDao.findAllById(ids);
 		resourceDao.deleteInBatch(es);
 		for(CsResourcePO e:es){
 			screenService.dealWithResourceRemove(e.getChannelId(),e.getId());

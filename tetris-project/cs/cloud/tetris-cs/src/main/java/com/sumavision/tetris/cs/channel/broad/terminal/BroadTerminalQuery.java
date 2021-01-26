@@ -93,7 +93,7 @@ public class BroadTerminalQuery {
 						if (id != null && !id.isEmpty()) {
 							Long channelId = versionSendQuery.getChannelId(id);
 							if (channelId != null) {
-								ChannelPO channelPO = channelDao.findOne(channelId);
+								ChannelPO channelPO = channelDao.findById(channelId);
 								if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
 									String status = ChannelBroadStatus.fromStatusNum(item.getString("status"));
 									if (!status.isEmpty()) {

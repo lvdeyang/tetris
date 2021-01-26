@@ -155,7 +155,7 @@ public class ApiTerminalChannelController {
 
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		Long channelId = requestWrapper.getLong("channelId");
-		channelDAO.delete(channelId);
+		channelDAO.deleteById(channelId);
 		return "";
 	}
 }

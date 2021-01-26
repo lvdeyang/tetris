@@ -129,7 +129,7 @@ public class TemplateTagService {
 				template.setTemplateTagId(null);
 			}
 		}
-		templateDao.save(templates);
+		templateDao.saveAll(templates);
 		
 		if(subTags == null) subTags = new ArrayList<TemplateTagPO>();
 		subTags.add(tag);
@@ -173,7 +173,7 @@ public class TemplateTagService {
 		if(subTags==null || subTags.size()<=0) subTags = new ArrayList<TemplateTagPO>();
 		subTags.add(sourceTag);
 		
-		templateTagDao.save(subTags);
+		templateTagDao.saveAll(subTags);
 	}
 	
 	/**
@@ -204,7 +204,7 @@ public class TemplateTagService {
 		
 		if(subTags == null) subTags = new ArrayList<TemplateTagPO>();
 		subTags.add(tag);
-		templateTagDao.save(subTags);
+		templateTagDao.saveAll(subTags);
 		
 	}
 	

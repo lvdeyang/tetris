@@ -254,7 +254,7 @@ public class ArticleController {
 			throw new UserHasNotPermissionForArticleException(id, user);
 		}
 		
-		ArticlePO article = articleDao.findOne(id);
+		ArticlePO article = articleDao.findById(id);
 		if(article == null){
 			throw new ArticleNotExistException(id);
 		}
@@ -312,7 +312,7 @@ public class ArticleController {
 			throw new UserHasNotPermissionForArticleException(id, user);
 		}
 		
-		ArticlePO article = articleDao.findOne(id);
+		ArticlePO article = articleDao.findById(id);
 		
 		articleService.remove(article);
 		
@@ -341,7 +341,7 @@ public class ArticleController {
 			throw new UserHasNotPermissionForArticleException(id, user);
 		}
 		
-		ArticlePO article = articleDao.findOne(id);
+		ArticlePO article = articleDao.findById(id);
 		if(article == null){
 			throw new ArticleNotExistException(id);
 		}
@@ -374,7 +374,7 @@ public class ArticleController {
 			throw new UserHasNotPermissionForArticleException(id, user);
 		}
 		
-		ArticlePO article = articleDao.findOne(id);
+		ArticlePO article = articleDao.findById(id);
 		if(article == null){
 			throw new ArticleNotExistException(id);
 		}
@@ -477,7 +477,7 @@ public class ArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ArticlePO> articlePages = null;
 		if(user.getGroupId() != null){
 			articlePages = articleDao.findAllWithGroupIdBySearch(new StringBufferWrapper().append("%").append(name).append("%").toString(),

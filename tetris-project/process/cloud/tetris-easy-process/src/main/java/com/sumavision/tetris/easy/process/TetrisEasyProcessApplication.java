@@ -19,11 +19,11 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
 			   basePackages = {"com.sumavision.tetris"})
 @ServletComponentScan(basePackages = {"com.sumavision.tetris"})
-@EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class, SecurityAutoConfiguration.class})
 @EnableCaching
 @EnableFeignClients("com.sumavision.tetris")
 @EnableEurekaClient
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication
 public class TetrisEasyProcessApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {

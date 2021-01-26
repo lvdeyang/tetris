@@ -72,7 +72,7 @@ public class CsResourceQuery {
 	 * @return CsResourceVO 媒资
 	 */
 	public CsResourceVO queryResourceById(Long resourceId) throws Exception {
-		CsResourcePO resource = csSourceDao.findOne(resourceId);
+		CsResourcePO resource = csSourceDao.findById(resourceId);
 
 		return new CsResourceVO().set(resource);
 	}
@@ -85,7 +85,7 @@ public class CsResourceQuery {
 	 * @param List<Long> resourceIds 媒资id数组
 	 */
 	public List<CsResourceVO> queryResourceByIds(List<Long> resourceIds) throws Exception {
-		List<CsResourcePO> resourcePOs = csSourceDao.findAll(resourceIds);
+		List<CsResourcePO> resourcePOs = csSourceDao.findAllById(resourceIds);
 		return CsResourceVO.getConverter(CsResourceVO.class).convert(resourcePOs, CsResourceVO.class);
 	}
 

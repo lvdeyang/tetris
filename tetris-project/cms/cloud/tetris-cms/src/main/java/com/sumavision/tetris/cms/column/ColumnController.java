@@ -5,19 +5,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.cms.article.ArticleVO;
-import com.sumavision.tetris.cms.article.exception.UserHasNotPermissionForArticleException;
 import com.sumavision.tetris.cms.column.exception.UserHasNotPermissionForColumnException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagMoveFailException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -79,7 +74,7 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(parentId, user);
 		}
 
-		ColumnPO parent = columnDao.findOne(parentId);
+		ColumnPO parent = columnDao.findById(parentId);
 		if (parent == null) {
 			throw new TemplateTagNotExistException(parentId);
 		}
@@ -102,7 +97,7 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(id, user);
 		}
 
-		ColumnPO columnPO = columnDao.findOne(id);
+		ColumnPO columnPO = columnDao.findById(id);
 		if (columnPO == null) {
 			throw new TemplateTagNotExistException(id);
 		}
@@ -124,7 +119,7 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(id, user);
 		}
 
-		ColumnPO columnPO = columnDao.findOne(id);
+		ColumnPO columnPO = columnDao.findById(id);
 
 		if (columnPO != null) {
 			columnService.remove(columnPO);
@@ -148,12 +143,12 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(targetId, user);
 		}
 
-		ColumnPO sourceCol = columnDao.findOne(sourceId);
+		ColumnPO sourceCol = columnDao.findById(sourceId);
 		if (sourceCol == null) {
 			throw new TemplateTagNotExistException(sourceId);
 		}
 
-		ColumnPO targetCol = columnDao.findOne(targetId);
+		ColumnPO targetCol = columnDao.findById(targetId);
 		if (targetCol == null) {
 			throw new TemplateTagNotExistException(targetId);
 		}
@@ -183,7 +178,7 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(id, user);
 		}
 
-		ColumnPO col = columnDao.findOne(id);
+		ColumnPO col = columnDao.findById(id);
 		if (col == null) {
 			throw new TemplateTagNotExistException(id);
 		}
@@ -207,7 +202,7 @@ public class ColumnController {
 			throw new UserHasNotPermissionForColumnException(columnId, user);
 		}	
 		
-		ColumnPO col = columnDao.findOne(columnId);
+		ColumnPO col = columnDao.findById(columnId);
 		if (col == null) {
 			throw new TemplateTagNotExistException(columnId);
 		}

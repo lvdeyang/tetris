@@ -11,10 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.api.ApiServerScheduleCastVO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoDAO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoDAO;
-import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -123,7 +120,7 @@ public class ScheduleService {
 	 * @param scheduleId 排期id
 	 */
 	public ScheduleVO remove(Long scheduleId) throws Exception{
-		SchedulePO schedule = scheduleDAO.findOne(scheduleId);
+		SchedulePO schedule = scheduleDAO.findById(scheduleId);
 		
 		if (schedule == null) throw new ScheduleNotExistsException(scheduleId);
 		
@@ -145,7 +142,7 @@ public class ScheduleService {
 	public List<ScheduleVO> removeInBatch(List<Long> scheduleIds) throws Exception{
 		if (scheduleIds == null || scheduleIds.isEmpty()) return null;
 		
-		List<SchedulePO> schedulePOs = scheduleDAO.findAll(scheduleIds);
+		List<SchedulePO> schedulePOs = scheduleDAO.findAllById(scheduleIds);
 		
 		if (schedulePOs == null || schedulePOs.isEmpty()) return null;
 		
@@ -169,7 +166,7 @@ public class ScheduleService {
 	 * @return ScheduleVO 排期信息
 	 */
 	public ScheduleVO edit(Long scheduleId, String broadDate, String endDate, String remark) throws Exception{
-		SchedulePO schedule = scheduleDAO.findOne(scheduleId);
+		SchedulePO schedule = scheduleDAO.findById(scheduleId);
 		
 		if (schedule == null) throw new ScheduleNotExistsException(scheduleId);
 		

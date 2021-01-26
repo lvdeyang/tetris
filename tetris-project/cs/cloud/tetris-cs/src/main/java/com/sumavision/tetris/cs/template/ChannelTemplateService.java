@@ -1,6 +1,5 @@
 package com.sumavision.tetris.cs.template;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.cs.channel.BroadWay;
-import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveQuery;
@@ -41,7 +37,7 @@ public class ChannelTemplateService {
 	
 	public Map<String, Object> findAll(Integer currentPage, Integer pageSize) throws Exception {
 		List<ChannelTemplatePO> temps;
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 		Page<ChannelTemplatePO> pageTemps = channelTemplateDao.findAll(page);
 		temps = pageTemps.getContent();
 		List<ChannelTemplateVo> tempVOs = ChannelTemplateVo.getConverter(ChannelTemplateVo.class).convert(temps, ChannelTemplateVo.class);
@@ -65,12 +61,12 @@ public class ChannelTemplateService {
 	}
 	
 	public void remove(Long tempId) throws Exception {
-		channelTemplateDao.delete(tempId);
+		channelTemplateDao.deleteById(tempId);
 	}
 	
 	public Map<String, Object> findAllPros(Integer currentPage, Integer pageSize,long tempId) throws Exception {
 		List<TemplateProgramePO> temppros;
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 		Page<TemplateProgramePO> pageTemppros = templateProgrameDao.PagefindAllByTemplateId(tempId,page);
 		temppros = pageTemppros.getContent();
 		List<TemplateProgrameVo> tempproVOs = ChannelTemplateVo.getConverter(TemplateProgrameVo.class).convert(temppros, TemplateProgrameVo.class);
@@ -108,7 +104,7 @@ public class ChannelTemplateService {
 	}
 	
 	public void removepro(Long tempproId) throws Exception {
-		templateProgrameDao.delete(tempproId);
+		templateProgrameDao.deleteById(tempproId);
 	}
 	
 	@Autowired

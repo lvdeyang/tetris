@@ -72,7 +72,7 @@ public class AbilityInfoSendQuery {
 			savePOs.add(abilityInfoSendPO);
 		}
 		
-		abilityInfoSendDAO.save(savePOs);
+		abilityInfoSendDAO.saveAll(savePOs);
 	}
 	
 	public void save(Long channelId, Boolean encryption, List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs) throws Exception{
@@ -94,6 +94,6 @@ public class AbilityInfoSendQuery {
 			savePOs.add(abilityInfoSendPO);
 		}
 		
-		abilityInfoSendDAO.save(savePOs);
+		abilityInfoSendDAO.saveAll(savePOs);
 	}
 }

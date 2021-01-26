@@ -47,7 +47,7 @@ public class AreaService {
 				returnList.add(new AreaVO().set(area));
 			}
 		}
-		areaDao.save(saveList);
+		areaDao.saveAll(saveList);
 		return returnList;
 	}
 	

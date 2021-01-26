@@ -167,7 +167,7 @@ public class RegionService {
 			subRegions = new ArrayList<RegionPO>();
 		subRegions.add(sourceRegion);
 
-		regionDao.save(subRegions);
+		regionDao.saveAll(subRegions);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class RegionService {
 		if (subRegions == null)
 			subRegions = new ArrayList<RegionPO>();
 		subRegions.add(regionPO);
-		regionDao.save(subRegions);
+		regionDao.saveAll(subRegions);
 
 	}
 	

@@ -222,7 +222,7 @@ public class ArticleService {
 				bindRegion.setRegionName(regionPO.getName());
 				articleRegionPermissions.add(bindRegion);
 			}
-			articleRegionPermissionDao.save(articleRegionPermissions);
+			articleRegionPermissionDao.saveAll(articleRegionPermissions);
 		}		
 		
 		//绑定栏目
@@ -250,7 +250,7 @@ public class ArticleService {
 				bindColumn.setColumnCode(columnPO.getCode());
 				columnRelationArticles.add(bindColumn);
 			}
-			columnRelationArticleDao.save(columnRelationArticles);
+			columnRelationArticleDao.saveAll(columnRelationArticles);
 		}
 		
 		addPermission(user, article);
@@ -352,7 +352,7 @@ public class ArticleService {
 				bindClassify.setClassifyName(classify.getString("name"));
 				articleClassifyPermissions.add(bindClassify);
 			}
-			articleClassifyPermissionDao.save(articleClassifyPermissions);
+			articleClassifyPermissionDao.saveAll(articleClassifyPermissions);
 		}
 
 		//绑定地区
@@ -366,7 +366,7 @@ public class ArticleService {
 				bindRegion.setRegionName(region.getString("name"));
 				articleRegionPermissions.add(bindRegion);
 			}
-			articleRegionPermissionDao.save(articleRegionPermissions);
+			articleRegionPermissionDao.saveAll(articleRegionPermissions);
 		}
 		
 		addPermission(user, article);
@@ -490,7 +490,7 @@ public class ArticleService {
 				bindClassify.setClassifyName(classify.getString("name"));
 				articleClassifyPermissions.add(bindClassify);
 			}
-			articleClassifyPermissionDao.save(articleClassifyPermissions);
+			articleClassifyPermissionDao.saveAll(articleClassifyPermissions);
 		}
 
 		//绑定地区
@@ -504,7 +504,7 @@ public class ArticleService {
 				bindRegion.setRegionName(region.getString("name"));
 				articleRegionPermissions.add(bindRegion);
 			}
-			articleRegionPermissionDao.save(articleRegionPermissions);
+			articleRegionPermissionDao.saveAll(articleRegionPermissions);
 		}
 		
 		return article;
@@ -668,7 +668,7 @@ public class ArticleService {
 			}
 		}
 		if(permissions.size() > 0){
-			articleMediaPermissionDao.save(permissions);
+			articleMediaPermissionDao.saveAll(permissions);
 		}
 	}
 	

@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.user.UserVO;
@@ -40,7 +39,7 @@ public class ClassifyQuery {
 	 * @return List<ClassifyPO> 分类列表
 	 */
 	public List<ClassifyPO> findAll(int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ClassifyPO> classifies = classifyDao.findAll(page);
 		return classifies.getContent();
 	}
@@ -57,7 +56,7 @@ public class ClassifyQuery {
 	 * @return Page<ClassifyPO> 分类列表
 	 */
 	public Page<ClassifyPO> findAllByUser(UserVO user, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		if(user.getGroupId() != null){
 			return classifyDao.findAllByGroupId(user.getGroupId(), page);
 		}else if(user.getUuid() != null){
@@ -97,7 +96,7 @@ public class ClassifyQuery {
 	 * @return List<ClassifyPO> rows 用户列表
 	 */
 	public Map<String, Object> listWithExcept(UserVO user, Collection<Long> except, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ClassifyPO> pages = null;
 		if(user.getGroupId() != null){
 			pages = classifyDao.findWithExceptByGroupId(except, user.getGroupId(), page);

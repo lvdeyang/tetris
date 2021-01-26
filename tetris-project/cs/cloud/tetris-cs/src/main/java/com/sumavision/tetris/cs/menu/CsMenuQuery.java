@@ -145,7 +145,7 @@ public class CsMenuQuery {
 	 * @return CsMenuVO cs媒资
 	 */
 	public CsMenuVO getMenuByMenuId(Long menuId) throws Exception{
-		CsMenuPO menu = menuDao.findOne(menuId);
+		CsMenuPO menu = menuDao.findById(menuId);
 		return new CsMenuVO().set(menu);
 	}
 }

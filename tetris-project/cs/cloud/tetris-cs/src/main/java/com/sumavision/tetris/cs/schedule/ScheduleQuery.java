@@ -64,7 +64,7 @@ public class ScheduleQuery {
 	 * @return ScheduleVO 排期信息
 	 */
 	public ScheduleVO getById(Long scheduleId) throws Exception {
-		SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
+		SchedulePO schedulePO = scheduleDAO.findById(scheduleId);
 		
 		return new ScheduleVO().set(schedulePO);
 	}
@@ -81,7 +81,7 @@ public class ScheduleQuery {
 	 * @return List<ScheduleVO> 排期信息
 	 */
 	public Map<String, Object> getByChannelId(Long channelId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
+		Pageable page = PageRequest.of(currentPage - 1, pageSize);
 		Page<SchedulePO> schedulePages = scheduleDAO.findByChannelId(channelId, page);
 		List<SchedulePO> schedules = schedulePages.getContent();
 		List<ScheduleVO> scheduleVOs = ScheduleVO.getConverter(ScheduleVO.class).convert(schedules, ScheduleVO.class);

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -41,7 +40,7 @@ public class ArticleQuery {
 	 * @return List<ArticlePO> 文章列表
 	 */
 	public List<ArticlePO> findAll(int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ArticlePO> articles = articleDao.findAll(page);
 		return articles.getContent();
 	}
@@ -50,7 +49,7 @@ public class ArticleQuery {
 	public List<ArticleVO> findAllOrderByUpdateTime(String groupId,int currentPage, int pageSize) throws Exception{
 		
 		
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 	    
 		Page<ArticlePO> articles = articleDao.findAllByGroupId(groupId,page);
 		List<ArticleVO> articleVOs=new ArrayList<ArticleVO>();
@@ -72,7 +71,7 @@ public class ArticleQuery {
 	 * @return Page<ArticlePO> 文章列表
 	 */
 	public Page<ArticlePO> findAllByUser(UserVO user, int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ArticlePO> articles = null;
 		if(user.getGroupId() != null){
 			articles = articleDao.findAllByGroupId(user.getGroupId(), page);
@@ -103,7 +102,7 @@ public class ArticleQuery {
 						String region, String classify,
 						String beginTime,String endTime,
 						int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ArticlePO> articles = articleDao.findAllBySearch(new StringBufferWrapper().append("%").append(name).append("%").toString(),
 											new StringBufferWrapper().append("%").append(author).append("%").toString(),
 											new StringBufferWrapper().append("%").append(region).append("%").toString(), 
@@ -219,7 +218,7 @@ public class ArticleQuery {
 	 * @return List<ArticleVO> rows 用户列表
 	 */
 	public Map<String, Object> listWithExcept(UserVO user, Collection<Long> except, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Pageable page = PageRequest.of(currentPage-1, pageSize);
 		Page<ArticlePO> pages = null;
 		if(user.getGroupId() != null){
 			pages = articleDao.findWithExceptByGroupId(except, user.getGroupId(), page);

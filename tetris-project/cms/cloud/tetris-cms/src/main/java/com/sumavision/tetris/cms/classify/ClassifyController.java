@@ -119,7 +119,7 @@ public class ClassifyController {
 			throw new UserHasNotPermissionForClassifyException(id, user);
 		}
 		
-		ClassifyPO classify = classifyDao.findOne(id);
+		ClassifyPO classify = classifyDao.findById(id);
 		if(classify == null){
 			throw new ClassifyNotExistException(id);
 		}
@@ -149,7 +149,7 @@ public class ClassifyController {
 			throw new UserHasNotPermissionForClassifyException(id, user);
 		}
 		
-		ClassifyPO classify = classifyDao.findOne(id);
+		ClassifyPO classify = classifyDao.findById(id);
 		
 		if(classify != null){
 			classifyService.remove(classify);

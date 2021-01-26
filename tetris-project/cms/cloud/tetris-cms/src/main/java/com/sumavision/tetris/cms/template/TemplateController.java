@@ -152,7 +152,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplateTagPO tag = templateTagDao.findOne(tagId);
+		TemplateTagPO tag = templateTagDao.findById(tagId);
 		
 		TemplatePO template = templateService.add(user, name, type, templateId, icon, style, serial, remark, tag);
 		
@@ -177,7 +177,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplatePO template = templateDao.findOne(id);
+		TemplatePO template = templateDao.findById(id);
 		
 		if(template != null){
 			templateDao.delete(template);
@@ -213,7 +213,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplatePO template = templateDao.findOne(id);
+		TemplatePO template = templateDao.findById(id);
 		
 		if(template == null){
 			throw new TemplateNotExistException(id);
@@ -251,7 +251,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplatePO template = templateDao.findOne(id);
+		TemplatePO template = templateDao.findById(id);
 		if(template == null){
 			throw new TemplateNotExistException(id);
 		}
@@ -264,7 +264,7 @@ public class TemplateController {
 				templateDao.save(template);
 			}
 		}else{
-			TemplateTagPO tag = templateTagDao.findOne(tagId);
+			TemplateTagPO tag = templateTagDao.findById(tagId);
 			if(tag == null) throw new TemplateTagNotExistException(tagId);
 			if(tag.getId().equals(template.getTemplateTagId())){
 				return false;
@@ -300,7 +300,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplatePO template = templateDao.findOne(id);
+		TemplatePO template = templateDao.findById(id);
 		if(template == null){
 			throw new TemplateNotExistException(id);
 		}
@@ -334,7 +334,7 @@ public class TemplateController {
 		
 		//TODO 权限校验
 		
-		TemplatePO template = templateDao.findOne(id);
+		TemplatePO template = templateDao.findById(id);
 		if(template == null){
 			throw new TemplateNotExistException(id);
 		}

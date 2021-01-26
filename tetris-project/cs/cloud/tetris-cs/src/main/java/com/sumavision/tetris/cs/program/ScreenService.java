@@ -41,7 +41,7 @@ public class ScreenService {
 
 			screenPOList.add(screenPO);
 		}
-		screenDao.save(screenPOList);
+		screenDao.saveAll(screenPOList);
 		screenVOList.addAll(ScreenVO.getConverter(ScreenVO.class).convert(screenPOList, ScreenVO.class));
 
 		return screenVOList;
@@ -91,7 +91,7 @@ public class ScreenService {
 				}
 			}
 			if (needSaveList.size() > 0) {
-				screenDao.save(needSaveList);
+				screenDao.saveAll(needSaveList);
 			}
 		}
 	}

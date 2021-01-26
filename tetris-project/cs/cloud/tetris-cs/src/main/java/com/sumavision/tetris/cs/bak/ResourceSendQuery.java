@@ -79,7 +79,7 @@ public class ResourceSendQuery {
 				}
 			}
 			if (save) {
-				resourceSendDao.save(saveResource);
+				resourceSendDao.saveAll(saveResource);
 			}
 		}
 

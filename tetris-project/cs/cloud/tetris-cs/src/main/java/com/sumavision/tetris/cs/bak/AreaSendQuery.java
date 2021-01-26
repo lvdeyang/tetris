@@ -44,7 +44,7 @@ public class AreaSendQuery {
 				areaSend.setParentId(item.getParentId());
 				saveList.add(areaSend);
 			}
-			areaSendDao.save(saveList);
+			areaSendDao.saveAll(saveList);
 		}
 	}
 	

@@ -275,7 +275,7 @@ public class ColumnRelationArticleController {
 		
 		//TODO 权限校验
 		
-		ColumnRelationArticlePO relation = columnRelationArticleDao.findOne(id);
+		ColumnRelationArticlePO relation = columnRelationArticleDao.findById(id);
 		
 		if(relation != null){
 			columnRelationArticleDao.delete(relation);
@@ -303,7 +303,7 @@ public class ColumnRelationArticleController {
 		
 		//TODO 权限校验
 		
-		ColumnRelationArticlePO relation = columnRelationArticleDao.findOne(id);
+		ColumnRelationArticlePO relation = columnRelationArticleDao.findById(id);
 		
 		if(relation != null){
 			relation.setCommand(true);
@@ -333,7 +333,7 @@ public class ColumnRelationArticleController {
 		
 		//TODO 权限校验
 		
-		ColumnRelationArticlePO relation = columnRelationArticleDao.findOne(id);
+		ColumnRelationArticlePO relation = columnRelationArticleDao.findById(id);
 		
 		if(relation != null){
 			relation.setCommand(false);
@@ -374,7 +374,7 @@ public class ColumnRelationArticleController {
 			columnIds.add(relation.getColumnId());
 		}
 		
-		columns = columnDao.findAll(columnIds);
+		columns = columnDao.findAllById(columnIds);
 		
 		return ColumnVO.getConverter(ColumnVO.class).convert(columns, ColumnVO.class);
 	}	

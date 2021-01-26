@@ -192,7 +192,7 @@ public class ColumnService {
 			subCols = new ArrayList<ColumnPO>();
 		subCols.add(sourceCol);
 
-		columnDao.save(subCols);
+		columnDao.saveAll(subCols);
 	}
 	
 	/**
@@ -225,7 +225,7 @@ public class ColumnService {
 							oldOrder = relation.getColumnOrder();
 							relation.setColumnOrder(newOrder);
 							upRelation.setColumnOrder(oldOrder);
-							columnDao.save(relations);
+							columnDao.saveAll(relations);
 							break;
 						}
 					}
@@ -278,7 +278,7 @@ public class ColumnService {
 		if (subColumns == null)
 			subColumns = new ArrayList<ColumnPO>();
 		subColumns.add(columnPO);
-		columnDao.save(subColumns);
+		columnDao.saveAll(subColumns);
 
 	}
 	
@@ -291,7 +291,7 @@ public class ColumnService {
 	 */
 	public ColumnVO query(UserVO user, Long columnId, Pageable page) throws Exception {
 		
-		ColumnPO column = columnDao.findOne(columnId);
+		ColumnPO column = columnDao.findById(columnId);
 		
 		ColumnVO view_column = new ColumnVO().set(column);
 		
@@ -312,7 +312,7 @@ public class ColumnService {
 			articleIds.add(columnRelationArticle.getArticleId());
 		}
 		if(articleIds != null && articleIds.size()>0){
-			List<ArticlePO> articles = articleDao.findAll(articleIds);
+			List<ArticlePO> articles = articleDao.findAllById(articleIds);
 			List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
 			if(articles != null && articles.size()>0){
 				List<ArticleVO> view_articles = new ArrayList<ArticleVO>();
@@ -376,7 +376,7 @@ public class ColumnService {
 			}
 			
 			if(articleIds != null && articleIds.size()>0){
-				List<ArticlePO> articles = articleDao.findAll(articleIds);
+				List<ArticlePO> articles = articleDao.findAllById(articleIds);
 				List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
 				if(articles != null && articles.size()>0){
 					List<ArticleVO> view_articles = new ArrayList<ArticleVO>();
@@ -427,7 +427,7 @@ public class ColumnService {
 	 */
 	public ColumnVO queryByRegion(UserVO user, Long columnId, String province, String city, String district, Pageable page) throws Exception {
 		
-		ColumnPO column = columnDao.findOne(columnId);
+		ColumnPO column = columnDao.findById(columnId);
 		
 		ColumnVO view_column = new ColumnVO().set(column);
 		
@@ -471,7 +471,7 @@ public class ColumnService {
 			 
 			List<ColumnRelationArticlePO> columnRelationArticles = columnRelationArticleDao.findByColumnId(columnId);
 			if(articleIds != null && articleIds.size()>0){
-				List<ArticlePO> articles = articleDao.findAll(articleIds);
+				List<ArticlePO> articles = articleDao.findAllById(articleIds);
 				List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
 				if(articles != null && articles.size()>0){
 					List<ArticleVO> view_articles = new ArrayList<ArticleVO>();
@@ -543,7 +543,7 @@ public class ColumnService {
 				articleIds.add(relation.getArticleId());
 			}
 			
-			List<ArticlePO> articles = articleDao.findAll(articleIds);
+			List<ArticlePO> articles = articleDao.findAllById(articleIds);
 			for(ColumnRelationArticlePO relation: relations){
 				for(ArticlePO article: articles){			
 					if(relation.getArticleId().equals(article.getId())){
@@ -607,10 +607,10 @@ public class ColumnService {
 		}
 		
 		if(addBoolean && articleHistoryPOs.size() >= 20){
-			articleHistoryDAO.delete(articleHistoryPOs.get(articleHistoryPOs.size() - 1).getId());
+			articleHistoryDAO.deleteById(articleHistoryPOs.get(articleHistoryPOs.size() - 1).getId());
 		}
 		
-		ArticleVO articleVO = new ArticleVO().set(articleDao.findOne(articleId));
+		ArticleVO articleVO = new ArticleVO().set(articleDao.findById(articleId));
 		if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(), articleId) != null){
 			articleVO.setKeep(true);
 		}
@@ -637,11 +637,11 @@ public class ColumnService {
 		if(articleHistoryPOs.size() > 0){
 			Collections.sort(articleHistoryPOs, new ArticleHistoryPO.ArticleTimeComparator());
 			for(ArticleHistoryPO item:articleHistoryPOs){
-				ArticlePO articlePO = articleDao.findOne(item.getArticleId());
+				ArticlePO articlePO = articleDao.findById(item.getArticleId());
 				if (articlePO != null) {
 					ArticleVO articleVO = new ArticleVO().set(articlePO);
 					articleVO.setColumnId(item.getColumnId());
-					articleVO.setColumnName(columnDao.findOne(item.getColumnId()).getName());
+					articleVO.setColumnName(columnDao.findById(item.getColumnId()).getName());
 					articleVO.setWatchTime(item.getUpdateTime());
 					if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(),item.getArticleId()) != null){
 						articleVO.setKeep(true);
@@ -675,7 +675,7 @@ public class ColumnService {
 		List<ArticleHistoryPO> articleHistoryPOs = articleHistoryDAO.findByUserId(user.getId());
 		List<ArticleVO> articleVOs = new ArrayList<ArticleVO>();
 		for (ArticleHistoryPO articleHistoryPO : articleHistoryPOs) {
-			ArticlePO articlePO = articleDao.findOne(articleHistoryPO.getArticleId());
+			ArticlePO articlePO = articleDao.findById(articleHistoryPO.getArticleId());
 			if (articlePO != null) {
 				ArticleVO articleVO = new ArticleVO().set(articlePO);
 				if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(),articleHistoryPO.getArticleId()) != null){
@@ -749,10 +749,10 @@ public class ColumnService {
 		}
 		
 		if(addBoolean && articleKeepPOs.size() >= 20){
-			articleKeepDAO.delete(articleKeepPOs.get(articleKeepPOs.size() - 1).getId());
+			articleKeepDAO.deleteById(articleKeepPOs.get(articleKeepPOs.size() - 1).getId());
 		}
  		
- 		return new ArticleVO().set(articleDao.findOne(articleId)).setKeep(true);
+ 		return new ArticleVO().set(articleDao.findById(articleId)).setKeep(true);
 	}
 	
 	/**
@@ -774,11 +774,11 @@ public class ColumnService {
 		if(articleKeepPOs.size() > 0){
 			Collections.sort(articleKeepPOs, new ArticleKeepPO.ArticleTimeComparator());
 			for(ArticleKeepPO item:articleKeepPOs){
-				ArticlePO articlePO = articleDao.findOne(item.getArticleId());
+				ArticlePO articlePO = articleDao.findById(item.getArticleId());
 				if (articlePO != null) {
 					ArticleVO articleVO = new ArticleVO().set(articlePO);
 					articleVO.setColumnId(item.getColumnId());
-					articleVO.setColumnName(columnDao.findOne(item.getColumnId()).getName());
+					articleVO.setColumnName(columnDao.findById(item.getColumnId()).getName());
 					articleVO.setWatchTime(item.getUpdateTime());
 					articleVO.setKeep(true);
 					articleList.add(articleVO);
@@ -811,7 +811,7 @@ public class ColumnService {
 		List<ArticleKeepPO> articleKeepPOs = articleKeepDAO.findByUserId(user.getId());
 		List<ArticleVO> articleVOs = new ArrayList<ArticleVO>();
 		for (ArticleKeepPO articleKeepPO : articleKeepPOs) {
-			ArticlePO articlePO = articleDao.findOne(articleKeepPO.getArticleId());
+			ArticlePO articlePO = articleDao.findById(articleKeepPO.getArticleId());
 			if (articlePO != null) {
 				articleVOs.add(new ArticleVO().set(articlePO).setKeep(true));
 			}

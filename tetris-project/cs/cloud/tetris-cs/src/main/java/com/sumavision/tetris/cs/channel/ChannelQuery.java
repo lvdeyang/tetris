@@ -78,7 +78,7 @@ public class ChannelQuery {
 			freshBroadStatus(channelDao.findAllByGroupIAndType(user.getGroupId(), type.toString()));
 			channels = channelDao.findAllByGroupIAndType(user.getGroupId(), type.toString());
 		} else {
-			Pageable page = new PageRequest(currentPage - 1, pageSize);
+			Pageable page = PageRequest.of(currentPage - 1, pageSize);
 			Page<ChannelPO> pageChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
 			freshBroadStatus(pageChannels.getContent());
 			newPageChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
@@ -163,7 +163,7 @@ public class ChannelQuery {
 	 * @return ChannelPO 频道
 	 */
 	public ChannelPO findByChannelId(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
+		ChannelPO channel = channelDao.findById(channelId);
 		if (channel == null) throw new ChannelNotExistsException(channelId);
 		return channel;
 	}
@@ -177,7 +177,7 @@ public class ChannelQuery {
 	 * @return String 频道状态
 	 */
 	public String getBroadstatus(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
+		ChannelPO channel = channelDao.findById(channelId);
 		if (channel == null) throw new ChannelNotExistsException(channelId);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.TERMINAL_BROAD) {

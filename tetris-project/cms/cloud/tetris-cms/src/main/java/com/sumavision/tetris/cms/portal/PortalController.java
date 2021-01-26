@@ -13,10 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticleMediaPermissionDAO;
@@ -25,7 +22,6 @@ import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleQuery;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
-import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.ColumnQuery;
 import com.sumavision.tetris.cms.column.ColumnService;
 import com.sumavision.tetris.cms.column.ColumnVO;
@@ -93,7 +89,7 @@ public class PortalController {
 			HttpServletRequest request) throws Exception {
 
 		UserVO user = userQuery.current();
-		Pageable page = new PageRequest(0, 10);
+		Pageable page = PageRequest.of(0, 10);
 		ColumnVO column = columnService.queryCommand(user, page);
 
 		return column;
@@ -113,7 +109,7 @@ public class PortalController {
 			HttpServletRequest request) throws Exception {
 		
 		UserVO userVO = userQuery.current();
-		Pageable page = new PageRequest(0, 100);
+		Pageable page = PageRequest.of(0, 100);
 		ColumnVO column = columnService.query(userVO, id, page);
 
 		return column;
@@ -140,7 +136,7 @@ public class PortalController {
 			List<ArticleMediaPermissionPO> articleMediaPermissionPOs=articleMediaPermissionDAO.findByMediaId(mediaAudioVO.getId());
 		    if(articleMediaPermissionPOs!=null&&!articleMediaPermissionPOs.isEmpty()){
 		    	ArticleVO articleVO=new ArticleVO();
-		    	articleVO.set(articleDao.findOne(articleMediaPermissionPOs.get(0).getArticleId()));
+		    	articleVO.set(articleDao.findById(articleMediaPermissionPOs.get(0).getArticleId()));
 		    	articleVO.setMediaDownloadCount(mediaAudioVO.getDownloadCount());
 		    	articleVOs.add(articleVO);
 		    }
@@ -167,7 +163,7 @@ public class PortalController {
 			List<ArticleMediaPermissionPO> articleMediaPermissionPOs=articleMediaPermissionDAO.findByMediaId(mediaAudioVO.getId());
 		    if(articleMediaPermissionPOs!=null&&!articleMediaPermissionPOs.isEmpty()){
 		    	ArticleVO articleVO=new ArticleVO();
-		    	articleVO.set(articleDao.findOne(articleMediaPermissionPOs.get(0).getArticleId()));
+		    	articleVO.set(articleDao.findById(articleMediaPermissionPOs.get(0).getArticleId()));
 		    	articleVOs.add(articleVO);
 		    }
 		}
@@ -189,7 +185,7 @@ public class PortalController {
 			HttpServletRequest request) throws Exception {
 
 		Map<String, Object> ret=new HashMap<String, Object>();
-        ArticlePO articlePO=articleDao.findOne(articleId);
+        ArticlePO articlePO=articleDao.findById(articleId);
         ret.put("articleName", articlePO.getName());
         List<ArticleMediaPermissionPO> amPos=articleMediaPermissionDAO.findByArticleId(articleId);
         if(amPos!=null&&!amPos.isEmpty()){
@@ -207,7 +203,7 @@ public class PortalController {
 			@PathVariable Long articleId,
 			HttpServletRequest request) throws Exception {
 
-        ArticlePO articlePO=articleDao.findOne(articleId);
+        ArticlePO articlePO=articleDao.findById(articleId);
         List<ArticleMediaPermissionPO> amPos=articleMediaPermissionDAO.findByArticleId(articleId);
         if(amPos!=null&&!amPos.isEmpty()){
         	MediaAudioVO mediaAudioVO=mediaAudioQuery.download(amPos.get(0).getMediaId());

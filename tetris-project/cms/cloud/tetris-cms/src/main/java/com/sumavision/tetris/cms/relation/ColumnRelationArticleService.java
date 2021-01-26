@@ -14,14 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
-import com.sumavision.tetris.cms.article.ArticleRegionPermissionPO;
-import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.exception.ColumnNotExistException;
 import com.sumavision.tetris.lib.aliyun.push.AliPushService;
-import com.sumavision.tetris.lib.aliyun.push.AliSendSmsService;
 
 /**
  * 栏目关联文章增删改操作<br/>
@@ -56,7 +53,7 @@ public class ColumnRelationArticleService {
 	 */
 	public List<ColumnRelationArticleVO> bindArticle(Long columnId, List<String> articleIds) throws Exception{
 		
-		ColumnPO column = columnDao.findOne(columnId);
+		ColumnPO column = columnDao.findById(columnId);
 		if(column == null){
 			throw new ColumnNotExistException(columnId);
 		}
@@ -73,7 +70,7 @@ public class ColumnRelationArticleService {
 			for(String articleId:articleIds){
 				transUserIds.add(Long.valueOf(articleId));
 			}
-			List<ArticlePO> articles = articleDao.findAll(transUserIds);
+			List<ArticlePO> articles = articleDao.findAllById(transUserIds);
 			if(articles!=null && articles.size()>0){
 				List<ColumnRelationArticlePO> relations = new ArrayList<ColumnRelationArticlePO>();
 				for(ArticlePO article: articles){
@@ -90,7 +87,7 @@ public class ColumnRelationArticleService {
 					relation.setCommand(false);
 					relations.add(relation);
 				}
-				columnRelationArticleDao.save(relations);
+				columnRelationArticleDao.saveAll(relations);
 				
 				List<ColumnRelationArticleVO> view_relations = ColumnRelationArticleVO.getConverter(ColumnRelationArticleVO.class).convert(relations, ColumnRelationArticleVO.class);
 				
@@ -111,7 +108,7 @@ public class ColumnRelationArticleService {
 	 */
 	public List<ColumnRelationArticleVO> bindColumn(Long articleId, List<String> columnIds) throws Exception{
 		
-		ArticlePO article = articleDao.findOne(articleId);
+		ArticlePO article = articleDao.findById(articleId);
 		if(article == null){
 			throw new ArticleNotExistException(articleId);
 		}
@@ -156,7 +153,7 @@ public class ColumnRelationArticleService {
 		columnRelationArticleDao.deleteInBatch(needRemoveRelations);
 		
 		if(needAddColumns!=null && needAddColumns.size()>0){
-			List<ColumnPO> columns = columnDao.findAll(needAddColumns);
+			List<ColumnPO> columns = columnDao.findAllById(needAddColumns);
 			if(columns!=null && columns.size()>0){
 				List<ColumnRelationArticlePO> relations = new ArrayList<ColumnRelationArticlePO>();
 				for(ColumnPO column: columns){
@@ -173,7 +170,7 @@ public class ColumnRelationArticleService {
 					relation.setCommand(false);
 					relations.add(relation);
 				}
-				columnRelationArticleDao.save(relations);
+				columnRelationArticleDao.saveAll(relations);
 				
 				List<ColumnRelationArticleVO> view_relations = ColumnRelationArticleVO.getConverter(ColumnRelationArticleVO.class).convert(relations, ColumnRelationArticleVO.class);
 				
@@ -209,7 +206,7 @@ public class ColumnRelationArticleService {
 						oldOrder = relation.getArticleOrder();
 						relation.setArticleOrder(newOrder);
 						upRelation.setArticleOrder(oldOrder);
-						columnRelationArticleDao.save(relations);
+						columnRelationArticleDao.saveAll(relations);
 						break;
 					}
 				}
@@ -245,7 +242,7 @@ public class ColumnRelationArticleService {
 						oldOrder = relation.getArticleOrder();
 						relation.setArticleOrder(newOrder);
 						downRelation.setArticleOrder(oldOrder);
-						columnRelationArticleDao.save(relations);
+						columnRelationArticleDao.saveAll(relations);
 						break;
 					}
 				}
@@ -282,7 +279,7 @@ public class ColumnRelationArticleService {
 							}
 						}
 					}
-					columnRelationArticleDao.save(relations);
+					columnRelationArticleDao.saveAll(relations);
 					break;
 				}
 			}
@@ -318,7 +315,7 @@ public class ColumnRelationArticleService {
 							}
 						}
 					}
-					columnRelationArticleDao.save(relations);
+					columnRelationArticleDao.saveAll(relations);
 					break;
 				}
 			}
@@ -337,7 +334,7 @@ public class ColumnRelationArticleService {
 	 */
 	public void inform(Long columnId, Long articleId) throws Exception{
 		
-		ArticlePO article = articleDao.findOne(articleId);		
+		ArticlePO article = articleDao.findById(articleId);		
 		
 		JSONObject param = new JSONObject();
 		param.put("url", article.getPreviewUrl());
