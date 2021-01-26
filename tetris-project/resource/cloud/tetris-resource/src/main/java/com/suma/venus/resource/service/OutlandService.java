@@ -304,9 +304,9 @@ public class OutlandService extends ControllerBase{
 			SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 			
 			//扩展参数
+			JSONObject params = new JSONObject();
 			List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
 			if(extraInfoPOs!=null && extraInfoPOs.size()>0){
-				JSONObject params = new JSONObject();
 				for(ExtraInfoPO extraInfo:extraInfoPOs){
 					params.put(extraInfo.getName(), extraInfo.getValue());
 				}
@@ -332,6 +332,7 @@ public class OutlandService extends ControllerBase{
 				pass_by_content.put("cmd", "foreignAdd");
 				pass_by_content.put("local", localSerNodeVO);
 				pass_by_content.put("foreign", foreign);
+				pass_by_content.put("extraInfo", params);
 				passByBO.setPass_by_content(pass_by_content);
 				if (workNodePOs != null && !workNodePOs.isEmpty()) {
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
@@ -487,9 +488,9 @@ public class OutlandService extends ControllerBase{
 		}		
 		
 		//扩展参数
+		JSONObject params = new JSONObject();
 		List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
 		if(extraInfoPOs!=null && extraInfoPOs.size()>0){
-			JSONObject params = new JSONObject();
 			for(ExtraInfoPO extraInfo:extraInfoPOs){
 				params.put(extraInfo.getName(), extraInfo.getValue());
 			}
@@ -549,6 +550,7 @@ public class OutlandService extends ControllerBase{
 			pass_by_content.put("cmd", "foreignEdit");
 			pass_by_content.put("local", local);
 			pass_by_content.put("foreign", foreign);
+			pass_by_content.put("extraInfo", params);
 			passByBO.setPass_by_content(pass_by_content);
 			if (workNodePOs != null && !workNodePOs.isEmpty()) {
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
