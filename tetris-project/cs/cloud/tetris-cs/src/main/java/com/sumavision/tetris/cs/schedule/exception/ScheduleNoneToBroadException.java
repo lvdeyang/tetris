@@ -16,7 +16,7 @@ public class ScheduleNoneToBroadException extends BaseException{
 	private static final Logger LOG = LoggerFactory.getLogger(ScheduleNoneToBroadException.class);
 	
 	public ScheduleNoneToBroadException(String name) {
-		super(StatusCode.ERROR, "当前频道无排期或无分屏设置");
+		super(StatusCode.FORBIDDEN, "当前频道无排期或无分屏设置");
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("频道：")
 				.append(name)

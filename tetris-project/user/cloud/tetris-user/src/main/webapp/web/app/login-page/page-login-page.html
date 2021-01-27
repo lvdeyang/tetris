@@ -7,11 +7,10 @@
     </template>
     <template>
 
-
         <div style="width:100%; height:100%; position:relative;">
             <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading"
                      :element-loading-text=loadingText>
-                <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
+                <div style="position:absolute; left:0; top:0; right:700px;; bottom:0; padding:20px;">
                     <div style="width:100%; height:100%; position:relative;">
                         <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
                             <el-button size="small" type="primary" @click="handleAddPage()">
@@ -19,55 +18,37 @@
                                 添加页面
                             </el-button>
                         </div>
-                        <div style="height:48px; position:absolute; left:110px; top:0; width:100%;">
-                            <el-button size="small" type="primary" @click="handleAddPage()">
-                                <span class="icon-plus" style="margin-right:5px;"></span>
-                                添加变量
-                            </el-button>
-                        </div>
 
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
                             <el-table
                                     :data="loginPage.data"
+                                    highlight-current-row
+                                    @current-change="getPageVariableList"
                                     tooltip-effect="dark"
                                     style="width: 100%"
                                     @selection-change="">
                                 <el-table-column type="selection" width="55"></el-table-column>
-                                <el-table-column label="登陆页面名称" width="300" prop="name"></el-table-column>
-                                <el-table-column label="使用状态" width="300" prop="isCurrent"></el-table-column>
-                                <el-table-column label="备注" width="300" prop="remark"></el-table-column>
+                                <el-table-column label="登陆页面名称" width="250" prop="name"></el-table-column>
+
+                                <el-table-column label="备注" width="250" prop="remark"></el-table-column>
+
+                                <el-table-column label="使用状态" width="250" >
+                                    <template slot-scope="scope">
+                                        <el-switch
+                                                v-model="scope.row.isCurrent"
+                                                @change="handleUseLoginPage(scope)">
+                                        </el-switch>
+                                    </template>
+                                </el-table-column>
+
                                 <el-table-column label="操作">
                                     <template slot-scope="scope">
                                         <el-tooltip class="item" effect="dark" content="编辑" placement="bottom">
                                             <el-button type="text" icon="feather-icon-edit"
                                                        class="LoginPageButtonManage"
-                                                       @click="handleChooseVariable()">
+                                                       @click="handleEditLoginPage(scope)">
                                             </el-button>
                                         </el-tooltip>
-
-                                        <el-tooltip class="item" effect="dark" content="预览" placement="bottom">
-                                            <el-button type="text" icon="el-icon-view"
-                                                       class="LoginPageButtonManage"
-                                                       @click="">
-                                            </el-button>
-                                        </el-tooltip>
-
-                                        <el-tooltip class="item" effect="dark" content="使用" placement="bottom">
-                                            <el-button type="text" icon="feather-icon-play-circle"
-                                                       class="LoginPageButtonManage"
-                                                       @click="handleUseLoginPage(scope)">
-                                            </el-button>
-
-                                        </el-tooltip>
-
-                                        <el-tooltip class="item" effect="dark" content="停止使用" placement="bottom"
-                                                    v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='使用中'">
-                                            <el-button type="text" icon="feather-icon-stop-circle"
-                                                       class="LoginPageButtonManage"
-                                                       @click="">
-                                            </el-button>
-                                        </el-tooltip>
-
 
                                         <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
                                             <el-button type="text" icon="el-icon-delete"
@@ -79,11 +60,39 @@
                             </el-table>
                         </div>
                     </div>
+                </div>
 
-                    </div>
+                <el-card class="box-card" shadow="never" style="float: right;width:40%; height:760px;" v-loading="loading"
+                         :element-loading-text=loadingText>
+                    <span>变量选择</span>
+                    <el-tree
+                            v-loading="variableResource.tree.loading"
+                            :props="variableResource.tree.props"
+                            :data="variableResource.tree.data"
+                            :check-strictly="true"
+                            node-key="id"
+                            ref="variableTree"
+                            :check-strictly=false
+                            show-checkbox
+                            @check="getVariableTreeCheckedChange"
+                            :expand-on-click-node="false"
+                            default-expand-all
+                            highlight-current
+                            style="padding: 20px;max-height: 400px;overflow-y:auto">
+                                    <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                                          slot-scope="{node, data}">
+                                        <span style="font-size:14px;">
+                                             <span>{{data.name}}</span>
+                                        </span>
+                                    </span>
+                    </el-tree>
+                    <el-button  style="position:absolute; bottom: 50px;right: 50px;" size="medium" type="primary" @click=""
+                               :loading="variableResource.loading">确 定
+                    </el-button>
+
+                </el-card>
             </el-card>
         </div>
-
 
         <el-dialog
                 title="添加页面"
@@ -91,16 +100,15 @@
                 width="650px"
                 :before-close="handleAddPageClose">
 
-            <div style="height:500px;">
+            <div style="height:200px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="120px" style="padding-right: 20px">
                         <el-form-item label="页面名称">
                             <el-input v-model="dialog.addPage.name"></el-input>
                         </el-form-item>
 
-
                         <el-form-item label="页面模板">
-                            <el-input type="textarea" v-model="dialog.addPage.tpl"></el-input>
+                            <el-input type="textarea" v-model="dialog.addPage.tpl" ></el-input>
                         </el-form-item>
 
                         <el-form-item label="备注">
@@ -120,74 +128,32 @@
         </el-dialog>
 
         <el-dialog
-                title="页面配置"
-                :visible.sync="dialog.chooseVariable.visible"
+                title="修改页面"
+                :visible.sync="dialog.editPage.visible"
                 width="500px"
                 append-to-body
-                :before-close="handleChooseVariableClose">
+                :before-close="handleEditLoginPageClose">
             <el-form ref="form" label-width="120px" style="padding-right: 20px">
                 <el-form-item label="页面名称">
-                    <el-input v-model="dialog.addPage.name"></el-input>
+                    <el-input v-model="dialog.editPage.name"></el-input>
                 </el-form-item>
 
-
                 <el-form-item label="页面模板">
-                    <el-input type="textarea" v-model="dialog.addPage.tpl"></el-input>
+                    <el-input type="textarea" v-model="dialog.editPage.tpl"></el-input>
                 </el-form-item>
 
                 <el-form-item label="备注">
-                    <el-input v-model="dialog.addPage.remark"></el-input>
+                    <el-input v-model="dialog.editPage.remark"></el-input>
                 </el-form-item>
 
             </el-form>
-
-           <!-- <el-tree
-                    v-loading="dialog.editMenu.dialog.chooseResource.tree.loading"
-                    ref="menuResourceTree"
-                    :props="dialog.editMenu.dialog.chooseResource.tree.props"
-                    :data="dialog.editMenu.dialog.chooseResource.tree.data"
-                    node-key="type + id"
-                    :check-strictly=false
-                    show-checkbox
-                    @check="handleMenuResourceCheckChange"
-                    :expand-on-click-node="false"
-                    default-expand-all
-                    highlight-current
-                    style="padding: 20px;max-height: 400px;overflow-y:auto">
-                        <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
-                              slot-scope="{node, data}">
-                                <span style="font-size:14px;">
-                                     <span>{{data.name}}</span>
-                                </span>
-                        </span>
-            </el-tree>-->
                 <span slot="footer" class="dialog-footer">
-                    <el-button size="medium" @click="dialog.chooseVariable.visible=false">取 消</el-button>
-                    <el-button size="medium" type="primary" @click="handleChooseVariableCommit()"
-                               :loading="dialog.chooseVariable.loading">确 定
+                    <el-button size="medium" @click="dialog.editPage.visible=false">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="handleEditLoginPageCommit()"
+                               :loading="dialog.editPage.loading">确 定
                     </el-button>
                 </span>
         </el-dialog>
-
-        <!--  <el-table
-                :data="tableData"
-                style="width: 100%">
-            <el-table-column
-                    prop="date"
-                    label="日期"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="name"
-                    label="姓名"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="address"
-                    label="地址">
-            </el-table-column>
-        </el-table>-->
-
 
     </template>
 </mi-frame>
