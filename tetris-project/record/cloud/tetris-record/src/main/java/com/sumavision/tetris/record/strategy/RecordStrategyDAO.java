@@ -30,6 +30,11 @@ public interface RecordStrategyDAO extends BaseDAO<RecordStrategyPO> {
 	void deleteBySourceId(Long sourceId);
 	
 	List<RecordStrategyPO> findByDeviceId(Long deviceId);
+	
+	List<RecordStrategyPO> findByStorageId(Long storageId);
 
 	List<RecordStrategyPO> findByDeviceIdAndStatus(Long deviceId, RecordStrategyPO.EStrategyStatus status);
+	
+	List<RecordStrategyPO> findByStorageIdAndStatus(Long storageId, RecordStrategyPO.EStrategyStatus status);
+	
 }

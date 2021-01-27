@@ -1,18 +1,14 @@
 package com.sumavision.tetris.record.file;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -37,11 +33,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sumavision.tetris.record.external.ffmpeg.FFMpegTransThread;
 import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
 import com.sumavision.tetris.record.storage.StorageDAO;
 import com.sumavision.tetris.record.storage.StoragePO;
 import com.sumavision.tetris.record.strategy.RecordStrategyDAO;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO;
+
+import ch.qos.logback.classic.Logger;
 
 @Service
 public class RecordFileService {
@@ -121,7 +120,20 @@ public class RecordFileService {
 		String postForString = postWithParamsForString(mimsUrl, params);
 
 		System.out.println("upload to mims, resp=" + postForString);
+		
 		return postForString;
+
+	}
+
+	public void startffMpegTrans(RecordFilePO recordFilePO, RecordStrategyPO recordStrategyPO) {
+
+		// TODO
+		StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+
+		FFMpegTransThread ffMpegTransThread = new FFMpegTransThread(recordFilePO, storagePO, recordStrategyPO, this,
+				recordFileDAO);
+
+		ffMpegTransThread.run();
 
 	}
 
@@ -139,7 +151,9 @@ public class RecordFileService {
 			String vodPath = null;
 			try {
 				String recordXmlUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + "/record.xml";
-
+				
+				
+				
 				System.out.println("recordXmlUrl" + recordXmlUrl);
 
 				// String t = restTemplate.getForObject(recordXmlUrl, String.class);
@@ -178,6 +192,23 @@ public class RecordFileService {
 		urlMap.put("ftpUrl", ftpUrl);
 
 		return urlMap;
+	}
+
+	public void delRecordFile(RecordFilePO recordFilePO) {
+		
+		//TODO
+		
+
+	}
+	
+	
+	
+	public void delRecordFile(List<RecordFilePO> recordFilePOList) {
+
+		for (RecordFilePO recordFilePO : recordFilePOList) {
+			delRecordFile(recordFilePO);
+		}
+
 	}
 
 	public String getWithOutParams(String url) {

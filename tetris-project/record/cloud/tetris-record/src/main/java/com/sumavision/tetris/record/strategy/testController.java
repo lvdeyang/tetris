@@ -1,6 +1,7 @@
 package com.sumavision.tetris.record.strategy;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.record.file.RecordFileDAO;
+import com.sumavision.tetris.record.file.RecordFilePO;
+import com.sumavision.tetris.record.file.RecordFileService;
+import com.sumavision.tetris.record.storage.StorageDAO;
+import com.sumavision.tetris.record.storage.StoragePO;
+import com.sumavision.tetris.record.storage.StorageService;
 
 @Controller
 @RequestMapping(value = "/record/test")
@@ -18,6 +25,18 @@ public class testController {
 
 	@Autowired
 	private CapacityService capacityService;
+
+	@Autowired
+	private StorageService storageService;
+
+	@Autowired
+	private StorageDAO storageDAO;
+
+	@Autowired
+	private RecordFileService recordFileService;
+
+	@Autowired
+	private RecordFileDAO recordFileDAO;
 
 	@ResponseBody
 	@RequestMapping(value = "/addRecord")
@@ -61,7 +80,7 @@ public class testController {
 	@RequestMapping(value = "/delRecord")
 	public Map<String, Object> delRecord(@RequestParam String id) {
 		Map<String, Object> data = new HashMap<String, Object>();
-		
+
 		try {
 			System.out.println("delrecord id=" + id);
 			capacityService.deleteRecord(id);
@@ -70,7 +89,52 @@ public class testController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
+		return data;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/getSpace")
+	public Map<String, Object> getSpace() {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		try {
+
+			StoragePO storagePO = storageDAO.findAll().get(0);
+			Integer usedSpace = storageService.updateRecordSpace(storagePO);
+			Integer diskUsedPct = storageService.updateDiskUsedPct(storagePO);
+			data.put("usedSpace", usedSpace);
+			data.put("diskUsedPct", diskUsedPct);
+
+		} catch (Exception e) {
+			data.put("errMsg", e.toString());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return data;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/getCleanRecordFileList")
+	public Map<String, Object> getCleanRecordFileList() {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		try {
+
+			StoragePO storagePO = storageDAO.findAll().get(0);
+
+			List<RecordFilePO> recordFilePOsDesc = recordFileDAO.findByStorageIdOrderByStopTimeDesc(storagePO.getId());
+
+
+			data.put("recordFilePOsDesc", JSONObject.toJSONString(recordFilePOsDesc));
+
+		} catch (Exception e) {
+			data.put("errMsg", e.toString());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return data;
 	}
 

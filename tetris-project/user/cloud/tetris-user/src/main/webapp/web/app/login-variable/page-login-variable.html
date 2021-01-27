@@ -1,0 +1,158 @@
+<mi-frame id="page-login-variable-wrapper" :menus="menus" :user="user" :groups="groups">
+    <template slot="title">变量管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>变量管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加变量</el-button>
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            style="width:100%"
+                            >
+                        <!--formatter:function(value,row,index){-->
+                        <!--return '<img src="' + row.image + '" width="80px;" height="80px;"/>';-->
+                        <!--}-->
+
+                        <el-table-column
+                                label="value值"
+                                width="80px">
+                            <template slot-scope="scope" v-if="scope.row.type=='img'">
+                                <el-popover trigger="hover">
+                                    <div slot="reference">
+                                        <img :src="scope.row.value" class="imageView">
+                                    </div>
+                                </el-popover>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="value值类型"
+                                prop="type">
+                        </el-table-column>
+                        <el-table-column
+                                label="变量类型名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="变量类型key"
+                                prop="variableKey">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+
+                                <el-tooltip class="item" effect="dark" content="查看修改" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-view" style="font-size:20px; padding:0;" @click="checkVariable(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="刪除" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="预览" placement="bottom-end" v-if="scope.row.type=='img'">
+                                    <el-button type="text" icon="el-icon-picture" style="font-size:20px; padding:0;" @click="handlePreview(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+        </el-card>
+
+        <template>
+            <!-- 添加变量-->
+            <el-dialog
+                    title="添加变量"
+                    :visible.sync="dialog.add.visible"
+                    width="800px"
+                    :before-close="handleAddVariableClose"
+                    :close-on-click-modal="false">
+
+                <el-form label-width="80px" :rules="rules">
+                <el-form-item label="变量类型" prop="typeInput">
+                    <el-input v-model="dialog.add.variableType" @click.native="handleChangeType"></el-input>
+                </el-form-item>
+                <el-form-item label="value值" width="150" v-if="dialog.add.type=='text'" prop="textInput">
+                    <el-input type="textarea" v-model="dialog.add.text"></el-input>
+                </el-form-item>
+                <!--<el-form label-width="80px">-->
+                    <el-form-item v-if="dialog.add.type=='img'">
+                        <input type="file" id="file" style="display:none;" @change="handleFileSelected"/>
+                        <el-button type="text" @click="handleSelectFile">上传文件</el-button>
+                        <div v-if="dialog.add.file">
+                            <span class="el-icon-document" style="font-size:16px;"></span>
+                            <span>{{dialog.add.file.name}}</span>
+                        </div>
+                    </el-form-item>
+                <!--</el-form>-->
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddVariableClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddVariableSubmit" :loading="dialog.add.loading">确定</el-button>
+            </span>
+            </el-dialog>
+
+            <!-- 文件上传 -->
+            <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected" :require-type="dialog.upload.fileType" :multiple="dialog.upload.multiple"></mi-upload-dialog>
+
+            <el-dialog
+                    title="修改文本"
+                    :visible.sync="dialog.edit.visible"
+                    width="800px"
+                    :before-close="handleEditVariableClose"
+                    :close-on-click-modal="false">
+                <el-form label-width="80px">
+                    <el-form-item label="变量类型">
+                        <el-input v-model="dialog.edit.variableType" @click.native="handleChangeType"></el-input>
+                    </el-form-item>
+                    <el-form-item label="文本内容" width="150" v-if="dialog.edit.type=='text'">
+                        <el-input type="textarea" v-model="dialog.edit.text"></el-input>
+                    </el-form-item>
+                    <el-form label-width="80px">
+                        <el-form-item v-if="dialog.edit.type=='img'">
+                            <input type="file" id="fileUpdate" style="display:none;" @change="handleFileSelectedUpdate"/>
+                            <el-button type="text" @click="handleSelectFileUpdate">上传文件</el-button>
+                            <div v-if="dialog.edit.file">
+                                <span class="el-icon-document" style="font-size:16px;"></span>
+                                <span>{{dialog.edit.file.name}}</span>
+                            </div>
+                        </el-form-item>
+                    </el-form>
+                </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditVariableClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditVariableSubmit" :loading="dialog.edit.loading">确定</el-button>
+            </span>
+            </el-dialog>
+
+            <!-- 预览图片-->
+            <mi-lightbox ref="Lightbox">
+                <template slot-scope="scope">
+                    <el-popover trigger="hover">
+                        <div slot="reference">
+                            <img :src="scope.row.value">
+                        </div>
+                    </el-popover>
+                </template>
+            </mi-lightbox>
+
+            <!-- 变量类型弹窗-->
+            <el-dialog title="请选择变量类型" :visible.sync="dialog.dialogVariableTypes.dialogVariableTypesVisible" width="500px">
+                <el-table ref="variableTypes" :data="dialog.dialogVariableTypes.variableTypes" :row-key="dialog.dialogVariableTypes.variableTypes.id" width="100%" height="400"
+                          @current-change="currentRowChange" highlight-current-row>
+                    <el-table-column prop="name" label="名称" width="200"></el-table-column>
+                    <el-table-column prop="type" label="类型" width="200"></el-table-column>
+                </el-table>
+                <el-button type="primary" size="small" @click="handleBindType" style="margin-top:15px"><span
+                        class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;确定</el-button>
+
+            </el-dialog>
+        </template>
+    </template>
+</mi-frame>

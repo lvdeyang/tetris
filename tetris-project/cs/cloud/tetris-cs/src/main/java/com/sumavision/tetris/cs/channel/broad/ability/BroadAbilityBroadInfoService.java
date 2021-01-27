@@ -119,12 +119,14 @@ public class BroadAbilityBroadInfoService {
 				infoPO.setUserId(broadAbilityBroadInfoVO.getUserId());
                 infoPO.setRtmpUrl(broadAbilityBroadInfoVO.getRtmpUrl()); 
                 infoPO.setLocalIp(broadAbilityBroadInfoVO.getLocalIp());
-                infoPO.setRate(broadAbilityBroadInfoVO.getRate());
-                infoPO.setRateCtrl(broadAbilityBroadInfoVO.getRateCtrl());
+                //infoPO.setRate(broadAbilityBroadInfoVO.getRate());
+                //infoPO.setRateCtrl(broadAbilityBroadInfoVO.getRateCtrl());
 			}else{
 				infoPO.setChannelId(channelId);
 				infoPO.setUserId(broadAbilityBroadInfoVO.getUserId());
 				infoPO.setPreviewUrlEndPort(broadAbilityBroadInfoVO.getPreviewUrlEndPort());
+				infoPO.setRate(broadAbilityBroadInfoVO.getRate());
+                infoPO.setRateCtrl(broadAbilityBroadInfoVO.getRateCtrl());
 				String previewIp = broadAbilityBroadInfoVO.getPreviewUrlIp();
 				String previewPort = broadAbilityBroadInfoVO.getPreviewUrlPort();
 				if (previewIp != null && previewPort != null) {

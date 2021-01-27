@@ -78,6 +78,7 @@ import com.sumavision.tetris.cs.schedule.ScheduleDAO;
 import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
+import com.sumavision.tetris.cs.schedule.exception.ScheduleExpiredException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
 import com.sumavision.tetris.easy.process.stream.transcode.OutParamVO;
@@ -366,6 +367,8 @@ public class BroadAbilityService {
 					UserVO user = userVOs.get(0);
 					webSocketSendUsers.add(user);
 					broadAbilityBroadInfoVO.setPreviewUrlIp(user.getIp());
+					broadAbilityBroadInfoVO.setRate(channel.getRate());
+					broadAbilityBroadInfoVO.setRateCtrl(channel.getRateCtrl());
 				}
 			}
 		}
@@ -425,7 +428,12 @@ public class BroadAbilityService {
 			//Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
 			//		: broadDateLong + querySchedulePlayTime(scheduleVO.getId());
 			
-			if (finishTime < now) continue;
+			if (finishTime < now){
+				if(i+1==scheduleVOs.size()){
+					throw new ScheduleExpiredException(channel.getName());
+				}
+				continue;
+			} 
 			
 			List<BroadAbilityBroadRequestVO> broadRequestVOs = new ArrayList<BroadAbilityBroadRequestVO>();
 			Integer outputIndex = 0;
@@ -451,7 +459,6 @@ public class BroadAbilityService {
 							}else{
 								inputPrevFileVO.setCount(1);
 							}
-							
 							
 							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
 							.setDuration(Long.parseLong(screenVO.getDuration()))
@@ -498,46 +505,39 @@ public class BroadAbilityService {
 					}
 				}
 				
-				
 				if (!requestInputPrevVOs.isEmpty()) {
 					broadRequestVO.setMap_sources(requestInputPrevVOs);
 					List<BroadAbilityBroadRequestOutputVO> outputVOs = new ArrayList<BroadAbilityBroadRequestOutputVO>();
 					//Task
 					List<BroadAbilityRequestTaskVO> taskVO = new ArrayList<>();
+					
+					if("audio".equals(mediaType)){
+						taskVO.add(new BroadAbilityRequestTaskVO()
+								.setIndex(1)
+								.setCodec(channel.getAudioCodec()));
+					}else {
+						taskVO.add(new BroadAbilityRequestTaskVO()
+								.setIndex(1)
+								.setCodec(channel.getVideoCodec())
+								.setResolution(channel.getResolution())
+								.setBitrate(channel.getCodeRate()));
+						taskVO.add(new BroadAbilityRequestTaskVO()
+								.setIndex(2)
+								.setCodec(channel.getAudioCodec()));
+					}
 					//获取输出信息
+					int outputCount=1;
 					for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
 						
-						/*outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-								.setIndex(1)
-								.setType(broadAbilityBroadInfoVO.getOutputType())
-								.setUrl(broadAbilityBroadInfoVO.getRtmpUrl())
-								.setLocalIp(abilityIp)
-								.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
-								.setBitrate(broadAbilityBroadInfoVO.getRate()));*/	
-						
-						if("audio".equals(mediaType)){
-							taskVO.add(new BroadAbilityRequestTaskVO()
-									.setIndex(1)
-									.setCodec(channel.getAudioCodec()));
-						}else {
-							taskVO.add(new BroadAbilityRequestTaskVO()
-									.setIndex(1)
-									.setCodec(channel.getVideoCodec())
-									.setResolution(channel.getResolution())
-									.setBitrate(channel.getCodeRate()));
-							taskVO.add(new BroadAbilityRequestTaskVO()
-									.setIndex(2)
-									.setCodec(channel.getAudioCodec()));
-						}
 						//rtmp，视频只支持H264、H265，音频只支持mp3、aac、heaac
 						if(broadAbilityBroadInfoVO.getOutputType().equals(OutputType.RTMP.getName())){
 							outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-									.setIndex(1)
+									.setIndex(outputCount++)
 									.setType("RTMP")
 									.setUrl(broadAbilityBroadInfoVO.getRtmpUrl())
-									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
-									.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
-									.setBitrate(broadAbilityBroadInfoVO.getRate()));
+									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp()));
+									//.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+									//.setBitrate(broadAbilityBroadInfoVO.getRate()));
 									//RTMP不支持加密
 									//.setScramble_mode( channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none")
 									//.setScramble_key(channel.getEncryption() != null && channel.getEncryption() ? "30313233343536373839414243444546" : ""));
@@ -558,18 +558,18 @@ public class BroadAbilityService {
 							}
 							if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
 								outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-										.setIndex(1)
+										.setIndex(outputCount++)
 										.setUrl(new StringBufferWrapper().append("udp://").append(ip).append(":").append(port).toString())
 										.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
 										.setType(broadAbilityBroadInfoVO.getOutputType())
-										.setBitrate(broadAbilityBroadInfoVO.getRate())
-										.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+										//.setBitrate(broadAbilityBroadInfoVO.getRate())
+										//.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+										.setBitrate(channel.getRate())
+										.setRate_ctrl(channel.getRateCtrl())
 										.setScramble_mode( channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none")
 										.setScramble_key(channel.getEncryption() != null && channel.getEncryption() ? "30313233343536373839414243444546" : ""));
-										//.setScramble_key(channel.getEncryption() != null && channel.getEncryption() ? getKey() : "")
 							}
 						}
-						
 					}
 					if (!outputVOs.isEmpty()) {
 						//旧协议  
@@ -632,7 +632,7 @@ public class BroadAbilityService {
 								firstDuration = duration - passed;
 								if (file != null) {
 									file.get(0).setDuration(firstDuration).setSeek(passed);
-									file.get(0).setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
+									file.get(0).setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + passed), DateUtil.dateTimePattern));
 								} else {
 									//stream.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
 									//stream.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern));
@@ -708,7 +708,6 @@ public class BroadAbilityService {
 					}
 				}
 			}
-			
 			if (broad && !previewIdList.isEmpty()) {
 				//requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
 			}
@@ -839,7 +838,6 @@ public class BroadAbilityService {
 			    } 
 			    //放入当前节目
 				//resetList.add(screens.get(i));
-				
 			    //页面设置的播放时长
 				long expectedDuration=endTime.getTime()-startTime.getTime();
 				//获取循环节目的播放总时长
@@ -1893,7 +1891,7 @@ public class BroadAbilityService {
 
 		Boolean broad = false;
 		//遍历排期单
-		for (int i = 0; i < scheduleVOs.size(); i++) {
+		/*for (int i = 0; i < scheduleVOs.size(); i++) {
 			final ScheduleVO scheduleVO = scheduleVOs.get(i);
 			//当前long时间
 			Long now = DateUtil.getLongDate();
@@ -1908,8 +1906,8 @@ public class BroadAbilityService {
 			if (finishTime < now) continue;
 			
 			//获取分屏信息
-//			JSONObject useTemplate = adapter.screenTemplate(scheduleVO.getProgram().getScreenId());
-//			JSONArray screens = useTemplate.getJSONArray("screen");
+			//JSONObject useTemplate = adapter.screenTemplate(scheduleVO.getProgram().getScreenId());
+			//JSONArray screens = useTemplate.getJSONArray("screen");
 			TemplateVO template = programQuery.getScreen2Template(scheduleVO.getId(), adapter.getAllTemplate());
 			if (template == null) return;
 			
@@ -2096,10 +2094,296 @@ public class BroadAbilityService {
 					}
 					
 				}
+			}*/
+		for (int i = 0; i < scheduleVOs.size(); i++) {
+			final ScheduleVO scheduleVO = scheduleVOs.get(i);
+			//当前long时间
+			Long now = DateUtil.getLongDate();
+			//开始播发"yyyy-MM-dd HH:mm:ss"时间
+			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
+			//开始播发long时间
+			final Long broadDateLong = broadDate.getTime();
+			//单节目单结束时间
+			
+			
+			TemplateVO template = programQuery.getScreen2Template(scheduleVO.getId(), adapter.getAllTemplate());
+			if (template == null) return;
+			
+			
+			long scheduleTime=0;
+			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
+			for (TemplateScreenVO templateVO : templateScreenVOs) {
+				List<ScreenVO> screenVOs = templateVO.getData();
+				if (screenVOs==null||screenVOs.isEmpty()) continue;
+				Collections.sort(screenVOs, new ScreenVO.ScreenVOOrderComparator());
+				//判断有没有垫播
+				if(channel.getBackfileDuration()!=null&&channel.getBackfileName()!=null&&!channel.getBackfileDuration().isEmpty()&&!channel.getBackfileName().isEmpty()){
+					//这里重新根据开始，结束时间计算duration
+					templateVO.setData(resetScreenDuration(broadDate,screenVOs,channel));
+				}else{
+					templateVO.setData(resetDurationWithoutBackfile(broadDate, screenVOs, channel));
+				}
+				long tempScheduleTime=querySchedulePlayTimeByScreens(screenVOs);
+				
+				if(scheduleTime<tempScheduleTime){
+					scheduleTime=tempScheduleTime;
+				}
+			}
+			//计算整体结束时间，判断节目播发时间是否已经过期
+			Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
+							: broadDateLong + scheduleTime;
+			
+			if (finishTime < now) continue;
+			
+			List<BroadAbilityBroadRequestVO> broadRequestVOs = new ArrayList<BroadAbilityBroadRequestVO>();
+			Integer outputIndex = 0;
+			//遍历分屏，获取各分屏信息和节目单数组
+			for (TemplateScreenVO templateVO : templateScreenVOs) {
+				List<ScreenVO> screenVOs = templateVO.getData();
+				BroadAbilityBroadRequestVO broadRequestVO = new BroadAbilityBroadRequestVO();
+				List<BroadAbilityBroadRequestInputPrevVO> requestInputPrevVOs = new ArrayList<BroadAbilityBroadRequestInputPrevVO>();
+				String mediaType = "";
+				//遍历节目单数组，添加任务输入
+				for (ScreenVO screenVO : screenVOs) {
+					String type = screenVO.getType();
+					String screenDuration = screenVO.getDuration();
+					if (screenDuration == null || screenDuration.isEmpty() || screenDuration.equals("-")) continue;
+					if (type != null) {
+						switch (type) {
+						case "AUDIO":
+						case "VIDEO":
+							BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
+							List<BroadAbilityBroadRequestInputPrevFileVO> fileArray = new ArrayList<BroadAbilityBroadRequestInputPrevFileVO>();
+							if(screenVO.getCount()!=0){
+								inputPrevFileVO.setCount(screenVO.getCount());
+							}else{
+								inputPrevFileVO.setCount(1);
+							}
+							
+							
+							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
+							.setDuration(Long.parseLong(screenVO.getDuration()))
+							.setSeek(0l);
+							fileArray.add(inputPrevFileVO);
+							//设置file类型源的sources
+							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile_array(fileArray));
+							break;
+						case "AUDIO_STREAM":
+						case "VIDEO_STREAM":
+							BroadAbilityBroadRequestInputPrevStreamVO inputStreamVO = new BroadAbilityBroadRequestInputPrevStreamVO().setDuration(Long.parseLong(screenDuration));
+							if (type.equals("AUDIO_STREAM")) {
+								inputStreamVO.setUrl(screenVO.getPreviewUrl());
+							} else {
+								String url = screenVO.getPreviewUrl();
+								if (url.isEmpty()) continue;
+								List<String> urls = JSONArray.parseArray(url, String.class);
+								if (urls.isEmpty()) continue;
+								inputStreamVO.setUrl(urls.get(0));
+							}
+							inputStreamVO.setLocalIp(abilityIp);
+							//根据url判断源类型
+							String urlString = inputStreamVO.getUrl();
+							if(urlString.contains("RTMP")||urlString.contains("rtmp")){
+								inputStreamVO.setType("rtmp");
+							}else{
+								inputStreamVO.setType("udp_ts");
+							}
+							
+							//设置stream类型源的sources
+							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setStream(inputStreamVO));
+						default:
+							break;
+						}
+						if (mediaType.isEmpty()) {
+							if ("AUDIO".equals(type) || "AUDIO_STREAM".equals(type)) mediaType = "audio";
+							if ("VIDEO".equals(type) || "VIDEO_STREAM".equals(type)) mediaType = "video";
+						}
+					}
+				}
+				
+				
+				if (!requestInputPrevVOs.isEmpty()) {
+					broadRequestVO.setMap_sources(requestInputPrevVOs);
+					List<BroadAbilityBroadRequestOutputVO> outputVOs = new ArrayList<BroadAbilityBroadRequestOutputVO>();
+					//Task
+					List<BroadAbilityRequestTaskVO> taskVO = new ArrayList<>();
+					//获取输出信息
+					for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {	
+						if("audio".equals(mediaType)){
+							taskVO.add(new BroadAbilityRequestTaskVO()
+									.setIndex(1)
+									.setCodec(channel.getAudioCodec()));
+						}else {
+							taskVO.add(new BroadAbilityRequestTaskVO()
+									.setIndex(1)
+									.setCodec(channel.getVideoCodec())
+									.setResolution(channel.getResolution())
+									.setBitrate(channel.getCodeRate()));
+							taskVO.add(new BroadAbilityRequestTaskVO()
+									.setIndex(2)
+									.setCodec(channel.getAudioCodec()));
+						}
+						if(broadAbilityBroadInfoVO.getOutputType().equals(OutputType.RTMP.getName())){
+							outputVOs.add(new BroadAbilityBroadRequestOutputVO()
+									.setIndex(1)
+									.setType("RTMP")
+									.setUrl(broadAbilityBroadInfoVO.getRtmpUrl())
+									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
+									.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+									.setBitrate(broadAbilityBroadInfoVO.getRate()));
+						}else{
+							String ip = broadAbilityBroadInfoVO.getPreviewUrlIp();
+							String port = "";
+							if (outputIndex == 0) {
+								port = broadAbilityBroadInfoVO.getPreviewUrlPort();
+							} else {
+								String endPortString = broadAbilityBroadInfoVO.getPreviewUrlEndPort();
+								if (endPortString == null || endPortString.isEmpty()) continue;
+								Integer startPort = Integer.parseInt(broadAbilityBroadInfoVO.getPreviewUrlPort());
+								Integer endPort = Integer.parseInt(endPortString);
+								if (startPort + outputIndex <= endPort) {
+									port = "" + (startPort + outputIndex);
+								}
+							}
+							if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
+								outputVOs.add(new BroadAbilityBroadRequestOutputVO()
+										.setIndex(1)
+										.setUrl(new StringBufferWrapper().append("udp://").append(ip).append(":").append(port).toString())
+										.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
+										.setType(broadAbilityBroadInfoVO.getOutputType())
+										.setBitrate(broadAbilityBroadInfoVO.getRate())
+										.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+										.setScramble_mode( channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none")
+										.setScramble_key(channel.getEncryption() != null && channel.getEncryption() ? "30313233343536373839414243444546" : ""));
+							}
+						}
+						
+					}
+					if (!outputVOs.isEmpty()) {
+						broadRequestVO.setMap_outputs(outputVOs).setTask_ip(abilityIp).setTemplate("PUSH_COMMON").setMap_tasks(taskVO).setMediaType(mediaType);
+						broadRequestVOs.add(broadRequestVO);
+						outputIndex++;
+					}
+				}
 			}
 			
-			if (broad && !previewIdList.isEmpty()) {
-				//requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
+			now = DateUtil.getLongDate();
+			if (finishTime < now || broadRequestVOs.isEmpty()) continue;
+			int previewIndex=0;
+			//遍历每个分屏任务
+			for (BroadAbilityBroadRequestVO requestVO : broadRequestVOs) {
+				List<BroadAbilityBroadRequestInputPrevVO> inputVOs = requestVO.getMap_sources();
+				//获取源媒体类型
+				String mediaType;
+				mediaType = requestVO.getMediaType();
+				requestVO.setMediaType(null);
+				//将sources设为空,发送协议使用inputPreVO
+				requestVO.setMap_sources(new ArrayList<BroadAbilityBroadRequestInputPrevVO>());
+				
+				//是否是第一个定时器，第一个定时器计算是否跳过和seek，发送添加任务
+				Boolean first = true;
+				int firstIndex = 0;
+				Long firstDuration = 0l;
+				//记录各节目切换预留时间
+				Long forwardDealTime = 0l;
+				//所有时长相加，用于计算流的开始结束绝对时间
+				Long total = 0l;
+				//下一个切换节目线程等待时间
+				Long nextDelayTime = DateUtil.getLongDate() > broadDateLong ? 0l : broadDateLong - DateUtil.getLongDate();
+				//当前排期单开始时间早于当前时间
+				Long passed = nextDelayTime == 0 ? DateUtil.getLongDate() - broadDateLong : 0;
+				//切换源预留时间
+				Long dealTime = 2000l;
+				//标记当前任务
+				Long previewId = previewIdList.get(previewIndex);
+				previewIndex++;
+				//遍历该分屏下的所有节目
+				for (int j = 0; j < inputVOs.size(); j++) {
+					BroadAbilityBroadRequestInputPrevVO inputPrevVO = inputVOs.get(j);
+					List<BroadAbilityBroadRequestInputPrevFileVO> file = inputPrevVO.getFile_array();
+					BroadAbilityBroadRequestInputPrevStreamVO stream = inputPrevVO.getStream();
+					Long duration = 0l;
+					if (file != null) {
+						duration = file.get(0).getDuration(); 
+					} else if (stream != null){
+						duration = stream.getDuration();
+					}
+					if (duration != null && duration != 0) {
+						
+						
+						if (first) {
+							if (passed > 0 && duration <= passed) {
+								passed = passed - duration;
+							} else {
+								
+								//实际播发的第一个节目
+								broad = true;
+								firstDuration = duration - passed;
+								Long newForwardDealTime = firstDuration > 10000 ? 10000 : (firstDuration / 2);
+								if (file != null) {
+									file.get(0).setDuration(firstDuration).setSeek(passed);
+								} else {
+									inputPrevVO.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total ), DateUtil.dateTimePattern))
+												.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern))
+												.setUrl(stream.getUrl())
+												.setLocalIp(stream.getLocalIp())
+												.setType(stream.getType());
+									inputPrevVO.setStream(null);
+								}
+								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
+										.setMediaType(mediaType)
+										.setProgram(inputPrevVO);
+								requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
+								nextDelayTime = nextDelayTime + firstDuration-newForwardDealTime;
+								forwardDealTime = newForwardDealTime;
+								firstIndex = j;
+								first = false;
+							}
+							total += duration;
+						} else {
+							//第二个节目
+							Long newForwardDealTime = duration > 10000 ? 10000 : (duration / 2);
+							if (firstIndex + 1 == j) {
+								if (stream != null) {
+									inputPrevVO.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern))
+												.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern))
+												.setUrl(stream.getUrl())
+												.setLocalIp(stream.getLocalIp())
+												.setType(stream.getType());
+									inputPrevVO.setStream(null);
+								}
+								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
+										.setMediaType(mediaType)
+										.setProgram(inputPrevVO);
+								requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
+								nextDelayTime = nextDelayTime + duration + forwardDealTime - newForwardDealTime;
+							} else {
+								if (stream != null) {
+									inputPrevVO.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern))
+												.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern))
+												.setUrl(stream.getUrl())
+												.setLocalIp(stream.getLocalIp())
+												.setType(stream.getType());
+									inputPrevVO.setStream(null);
+								}
+								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
+										.setMediaType(mediaType)
+										.setProgram(inputPrevVO);
+								requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
+								nextDelayTime = nextDelayTime + duration + forwardDealTime - newForwardDealTime;
+							}
+							total += duration;
+							forwardDealTime = newForwardDealTime;
+						}
+					} else {
+						if (firstIndex + 1 == j) firstIndex++;
+					}
+					System.out.println(JSONObject.toJSONString(requestVO));
+					if(j == inputVOs.size() - 1 &&requestVO.getMap_sources().size()==1){
+						requestVO.getMap_sources().add(new BroadAbilityBroadRequestInputPrevVO().setIndex(3).setMediaType(mediaType).setType("schedule").setPre(1));
+						requestAddTask(channelId, 0l, JSONObject.toJSONString(requestVO), previewId, abilityIp);
+					}
+				}
 			}
 		}
 		

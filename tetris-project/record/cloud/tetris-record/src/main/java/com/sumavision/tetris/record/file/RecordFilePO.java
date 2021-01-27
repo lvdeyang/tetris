@@ -21,7 +21,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  *
  */
 @Entity
-@Table(name = "recordFile")
+@Table(name = "record_file")
 public class RecordFilePO extends AbstractBasePO {
 
 	private static final long serialVersionUID = 1L;
@@ -60,7 +60,11 @@ public class RecordFilePO extends AbstractBasePO {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "injectStatus")
 	private EInjectStatus injectStatus;
-	
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "ffMpegTransStatus")
+	private EFFMpegTransStatus ffMpegTransStatus;
+
 	@Value("${realIP}")
 	private String centerIP;
 
@@ -84,6 +88,20 @@ public class RecordFilePO extends AbstractBasePO {
 		private String name;
 
 		private EInjectStatus(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+	}
+
+	public enum EFFMpegTransStatus {
+		TRANS_WAIT("待注入"), TRANS_SUCCESS("已注入"), TRANS_ERROR("注入失败");
+
+		private String name;
+
+		private EFFMpegTransStatus(String name) {
 			this.name = name;
 		}
 
@@ -162,6 +180,14 @@ public class RecordFilePO extends AbstractBasePO {
 
 	public void setInjectStatus(EInjectStatus injectStatus) {
 		this.injectStatus = injectStatus;
+	}
+
+	public EFFMpegTransStatus getFfMpegTransStatus() {
+		return ffMpegTransStatus;
+	}
+
+	public void setFfMpegTransStatus(EFFMpegTransStatus ffMpegTransStatus) {
+		this.ffMpegTransStatus = ffMpegTransStatus;
 	}
 
 }
