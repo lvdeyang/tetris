@@ -76,7 +76,7 @@ public class TaskController {
 		}
 		
 		if(ips != null && ips.size() > 0){
-			PageRequest page = new PageRequest(currentPage-1, pageSize);
+			PageRequest page =  PageRequest.of(currentPage-1, pageSize);
 			
 			Page<TaskPO> pages = taskDao.findByIpIn(ips, page);
 			List<TaskPO> tasks = pages.getContent();
@@ -113,7 +113,7 @@ public class TaskController {
 		}
 		
 		if(ips != null && ips.size() > 0){
-			PageRequest page = new PageRequest(currentPage-1, pageSize);
+			PageRequest page = PageRequest.of(currentPage-1, pageSize);
 			
 			Page<TaskPO> pages = taskDao.findByIpIn(ips, page);
 			List<TaskPO> tasks = pages.getContent();

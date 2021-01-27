@@ -191,11 +191,11 @@ public class HeartBeatService {
 						}
 
 						if(needAddHeartBeatBundles != null && needAddHeartBeatBundles.size() > 0){
-							heartBeatBundleDao.save(needAddHeartBeatBundles);
+							heartBeatBundleDao.saveAll(needAddHeartBeatBundles);
 						}
 						
 						if(needUpdateBundles != null && needUpdateBundles.size() > 0){
-							heartBeatBundleDao.save(needUpdateBundles);
+							heartBeatBundleDao.saveAll(needUpdateBundles);
 						}
 						
 						List<HeartBeatBundlePO> allBundles = heartBeatBundleDao.findAll();
@@ -311,11 +311,11 @@ public class HeartBeatService {
 		}
 
 		if(needAddHeartBeatBundles != null && needAddHeartBeatBundles.size() > 0){
-			heartBeatBundleDao.save(needAddHeartBeatBundles);
+			heartBeatBundleDao.saveAll(needAddHeartBeatBundles);
 		}
 		
 		if(needUpdateBundles != null && needUpdateBundles.size() > 0){
-			heartBeatBundleDao.save(needUpdateBundles);
+			heartBeatBundleDao.saveAll(needUpdateBundles);
 		}
 	}	
 	

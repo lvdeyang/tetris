@@ -1,14 +1,10 @@
 package com.sumavision.signal.bvc.config;
 
-import java.sql.SQLException;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.sql.DataSource;
-
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -21,7 +17,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * 主数据源详细配置
@@ -41,6 +39,9 @@ public class BaseDataSourceConfig {
 	
 	@Autowired
 	private JpaProperties jpaProperties;
+
+    @Autowired
+    private HibernateProperties hibernateProperties;
 	
     //自身数据库
     @Primary
@@ -57,7 +58,7 @@ public class BaseDataSourceConfig {
     public LocalContainerEntityManagerFactoryBean baseEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(baseDataSource)
-                .properties(getVendorProperties(baseDataSource))
+                .properties(getVendorProperties())
                 .packages("com.sumavision.signal.bvc") //设置应用DataSource的基础包名
                 .persistenceUnit("basePersistenceUnit")
                 .build();
@@ -78,7 +79,7 @@ public class BaseDataSourceConfig {
     }
     
     //获取jpa配置信息
-    private Map<String, String> getVendorProperties(DataSource dataSource) {
-        return jpaProperties.getHibernateProperties(dataSource);
+    private Map<String, Object> getVendorProperties() {
+        return hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
     }
 }
