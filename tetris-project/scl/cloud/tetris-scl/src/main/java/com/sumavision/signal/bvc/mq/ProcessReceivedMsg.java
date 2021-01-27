@@ -426,7 +426,7 @@ public class ProcessReceivedMsg {
     				newTasks.add(task);
             	}
             	
-            	taskDao.save(newTasks);
+            	taskDao.saveAll(newTasks);
             	
             	if(main != null){
                 	taskExecuteService.taskCreatePost(main.getIp(), mapping, srcMapping.getDstAddress(), srcMapping.getDstPort());
@@ -465,7 +465,7 @@ public class ProcessReceivedMsg {
         				newTasks.add(task);
                 	}
                 	
-                	taskDao.save(newTasks);
+                	taskDao.saveAll(newTasks);
                 	
         			if(main != null){
                     	taskExecuteService.taskCreatePost(main.getIp(), mapping, srcMapping.getDstAddress(), srcMapping.getDstPort());
@@ -833,7 +833,7 @@ public class ProcessReceivedMsg {
     			}
     		}
 
-    		portMappingDao.save(mappingPOs);
+    		portMappingDao.saveAll(mappingPOs);
     		
     		for(PortMappingPO mappingPO: mappingPOs){
     			mappingIds.add(mappingPO.getId());

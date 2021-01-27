@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.mysql.fabric.Response;
+
 import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
 import com.sumavision.signal.bvc.entity.enumeration.ChannelType;
@@ -216,7 +216,7 @@ public class NetworkService {
     			inputs.add(input);
     		}
     		
-    		networkInputDao.save(inputs);
+    		networkInputDao.saveAll(inputs);
     	}
     	
     	//创建网络输出资源
@@ -252,7 +252,7 @@ public class NetworkService {
     			outputs.add(output);
     		}
     		
-    		networkOutputDao.save(outputs);
+    		networkOutputDao.saveAll(outputs);
     	}
     	
     	//查找切换任务
@@ -540,7 +540,7 @@ public class NetworkService {
         	
         	List<SwitchResponseBO> switchResponse = networkHttpService.switchData(netBundle.getNetIp(), requests);
     		
-        	networkMapDao.save(needSwitchMaps);
+        	networkMapDao.saveAll(needSwitchMaps);
     	}
     	
     	if(needCutMaps.size() > 0){

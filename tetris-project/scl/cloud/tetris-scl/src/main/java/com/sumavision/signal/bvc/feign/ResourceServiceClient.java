@@ -1,21 +1,14 @@
 package com.sumavision.signal.bvc.feign;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.cloud.netflix.feign.FeignClient;
+import com.suma.venus.resource.base.bo.*;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.suma.venus.resource.base.bo.BundleOfflineRequest;
-import com.suma.venus.resource.base.bo.BundleOfflineResponse;
-import com.suma.venus.resource.base.bo.BundleOnlineRequest;
-import com.suma.venus.resource.base.bo.BundleOnlineResp;
-import com.suma.venus.resource.base.bo.GetBundleInfoRequest;
-import com.suma.venus.resource.base.bo.LayerHeartBeatRequest;
-import com.suma.venus.resource.base.bo.LayerHeartBeatResponse;
-import com.sumavision.tetris.config.feign.FeignConfiguration;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 资源层调用feign接口<br/>
