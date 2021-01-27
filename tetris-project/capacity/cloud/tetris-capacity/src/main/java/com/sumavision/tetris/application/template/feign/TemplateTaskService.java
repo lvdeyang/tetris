@@ -633,7 +633,7 @@ public class TemplateTaskService {
     public JSONObject combineAudioEncode(JSONObject tmplTaskObj,String params){
         JSONObject combineObj = CommonUtil.coverJSONObject(JSON.parseObject(params),tmplTaskObj);
         if (tmplTaskObj.containsKey("abitrate")){
-            combineObj.put("bitrate",tmplTaskObj.getLong("abitrate").toString());
+            combineObj.put("bitrate",tmplTaskObj.getString("abitrate"));
         }else if (tmplTaskObj.containsKey("bitrate")) {
             combineObj.put("bitrate",tmplTaskObj.getString("bitrate"));
         }else{
