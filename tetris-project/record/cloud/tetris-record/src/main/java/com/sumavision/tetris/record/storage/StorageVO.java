@@ -1,17 +1,14 @@
 package com.sumavision.tetris.record.storage;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.Type;
+import org.springframework.beans.BeanUtils;
 
-import com.sumavision.tetris.orm.po.AbstractBasePO;
+public class StorageVO {
 
-@Entity
-@Table(name = "record_storage")
-public class StoragePO extends AbstractBasePO {
-
-	private static final long serialVersionUID = 1L;
+	private Long id;
 
 	private String name;
 
@@ -24,8 +21,6 @@ public class StoragePO extends AbstractBasePO {
 	private String ftpPassword;
 
 	private String httpBasePath;
-
-	// private Integer size;
 
 	private String description;
 
@@ -40,17 +35,49 @@ public class StoragePO extends AbstractBasePO {
 	/** 磁盘清理-任务保存时间阈值(天) **/
 	private Integer clean_timeThreshold;
 
-	@Type(type = "yes_no")
-	private Boolean isMounted = true;
-	
-	@Type(type = "yes_no")
+	private Boolean isMounted;
+
 	private Boolean isCheckTimeThreshold;
-	
-	@Type(type = "yes_no")
+
 	private Boolean isCheckRecordMaxSpaceThreshold;
 
-	@Type(type = "yes_no")
 	private Boolean isCheckDiskUsedSpacePctThreshold;
+
+	public static StorageVO fromPO(StoragePO po) {
+		StorageVO vo = new StorageVO();
+
+		BeanUtils.copyProperties(po, vo);
+
+		return vo;
+	}
+
+	public static List<StorageVO> fromPOList(List<StoragePO> StoragePOList) {
+
+		List<StorageVO> VOList = new ArrayList<StorageVO>();
+
+		for (StoragePO po : StoragePOList) {
+			VOList.add(fromPO(po));
+		}
+		return VOList;
+	}
+
+	public static StoragePO fromVO2PO(StorageVO vo) {
+		
+		StoragePO po = new StoragePO();
+		
+		BeanUtils.copyProperties(vo, po);
+		
+		return po;
+		
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
@@ -99,16 +126,6 @@ public class StoragePO extends AbstractBasePO {
 	public void setHttpBasePath(String httpBasePath) {
 		this.httpBasePath = httpBasePath;
 	}
-	
-	/*
-	public Integer getSize() {
-		return size;
-	}
-
-	public void setSize(Integer size) {
-		this.size = size;
-	}
-	*/
 
 	public String getDescription() {
 		return description;
@@ -116,6 +133,14 @@ public class StoragePO extends AbstractBasePO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getLocalFFMpegOutputPath() {
+		return localFFMpegOutputPath;
+	}
+
+	public void setLocalFFMpegOutputPath(String localFFMpegOutputPath) {
+		this.localFFMpegOutputPath = localFFMpegOutputPath;
 	}
 
 	public Integer getClean_recordMaxSpaceThreshold() {
@@ -142,6 +167,14 @@ public class StoragePO extends AbstractBasePO {
 		this.clean_timeThreshold = clean_timeThreshold;
 	}
 
+	public Boolean getIsMounted() {
+		return isMounted;
+	}
+
+	public void setIsMounted(Boolean isMounted) {
+		this.isMounted = isMounted;
+	}
+
 	public Boolean getIsCheckTimeThreshold() {
 		return isCheckTimeThreshold;
 	}
@@ -164,22 +197,6 @@ public class StoragePO extends AbstractBasePO {
 
 	public void setIsCheckDiskUsedSpacePctThreshold(Boolean isCheckDiskUsedSpacePctThreshold) {
 		this.isCheckDiskUsedSpacePctThreshold = isCheckDiskUsedSpacePctThreshold;
-	}
-
-	public String getLocalFFMpegOutputPath() {
-		return localFFMpegOutputPath;
-	}
-
-	public void setLocalFFMpegOutputPath(String localFFMpegOutputPath) {
-		this.localFFMpegOutputPath = localFFMpegOutputPath;
-	}
-
-	public Boolean getIsMounted() {
-		return isMounted;
-	}
-
-	public void setIsMounted(Boolean isMounted) {
-		this.isMounted = isMounted;
 	}
 
 }

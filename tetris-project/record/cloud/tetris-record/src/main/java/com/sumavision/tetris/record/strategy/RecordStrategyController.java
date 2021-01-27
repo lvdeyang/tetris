@@ -123,6 +123,27 @@ public class RecordStrategyController {
 		return data;
 
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/queryStrategyDetail")
+	public Object queryStrategyDetail() {
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			List<RecordStrategyPO> recordStrategyPOList = recordStrategyDAO.findAll();
+			data.put("errMsg", "");
+			data.put("recordStrategyVOs", RecordStrategyVO.fromPOList(recordStrategyPOList));
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			data.put("errMsg", "内部错误");
+		}
+
+		return data;
+
+	}
+
 
 	@RequestMapping("/queryStrategyItems")
 	@ResponseBody
@@ -182,7 +203,7 @@ public class RecordStrategyController {
 
 	@RequestMapping("/addRecordStrategy")
 	@ResponseBody
-	public Object addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
+	public Map<String, Object> addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
 			@RequestParam(value = "name") String name,
 			@RequestParam(value = "status", required = false) String statusStr,
 			@RequestParam(value = "type") String typeStr,

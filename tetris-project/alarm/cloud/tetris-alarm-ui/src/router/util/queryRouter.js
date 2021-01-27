@@ -110,6 +110,8 @@ if (!getRouter) {
 
       router.addRoutes(assembleVueRouter(routerData))
 
+      console.log('router=' + JSON.stringify(router))
+
       // 获取活动页
       var activeMenu = getActiveMenu(getRouter)
 
