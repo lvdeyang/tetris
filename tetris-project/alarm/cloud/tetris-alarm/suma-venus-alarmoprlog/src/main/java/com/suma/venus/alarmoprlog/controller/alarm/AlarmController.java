@@ -83,20 +83,20 @@ public class AlarmController {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = {"/tiggerAlarm", "triggerAlarm"}, method = RequestMethod.POST)
+	@RequestMapping(value = { "/tiggerAlarm", "triggerAlarm" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> httpTriggerAlarm(@RequestBody AlarmParamBO alarmParamBO) {
 		// ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-		
-		try{
+
+		try {
 			alarmParamBO.setType("alarm");
 			LOGGER.info("receive alarmParamBO=" + JSONObject.toJSONString(alarmParamBO) + ", add to queue");
 			HandleReceiveAlarmThread.push(alarmParamBO);
-			
+
 			data.put("errMsg", "");
 			return data;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: handle exception
 			data.put("errMsg", "exception");
 			return data;
@@ -119,7 +119,7 @@ public class AlarmController {
 			LOGGER.info("----------handleRecovery finish");
 			data.put("errMsg", "");
 			return data;
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			data.put("errMsg", "exception");
@@ -140,13 +140,8 @@ public class AlarmController {
 		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		// TODO
-		// Pageable pageable = PageRequest.of(queryAlarmVO.getPageIndex(),
-		// queryAlarmVO.getPageSize(), Sort.Direction.DESC,
-		// "id");
-
-		Pageable pageable = new PageRequest(queryAlarmVO.getPageIndex(), queryAlarmVO.getPageSize(),
-				Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(queryAlarmVO.getPageIndex(), queryAlarmVO.getPageSize(), Sort.Direction.DESC,
+				"id");
 
 		try {
 
@@ -326,7 +321,7 @@ public class AlarmController {
 
 			List<RawAlarmPO> rawAlarmPOs = rawAlarmDAO.findByAlarmPOId(alarmPOId);
 
-			alarmDAO.delete(alarmPOId);
+			alarmDAO.deleteById(alarmPOId);
 
 			// TODO
 			rawAlarmDAO.deleteInBatch(rawAlarmPOs);

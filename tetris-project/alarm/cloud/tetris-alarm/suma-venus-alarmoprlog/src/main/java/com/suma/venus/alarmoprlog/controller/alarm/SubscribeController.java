@@ -138,7 +138,7 @@ public class SubscribeController {
 		Map<String, Object> data = new HashMap<String, Object>();
 
 		try {
-			SubscribeAlarmPO subscribeAlarmPO = subscribeAlarmDAO.findOne(id);
+			SubscribeAlarmPO subscribeAlarmPO = subscribeAlarmDAO.findById(id).get();
 			if (subscribeAlarmPO == null) {
 				data.put("errMsg", "参数错误");
 				return data;
@@ -208,9 +208,7 @@ public class SubscribeController {
 
 		try {
 
-			// Pageable pageable = PageRequest.of(pageIndex, pageSize);
-
-			Pageable pageable = new PageRequest(pageIndex, pageSize);
+			Pageable pageable = PageRequest.of(pageIndex, pageSize);
 
 			Page<SubscribeAlarmPO> subscribeAlarmPOPage = subscribeAlarmDAO.findByKeywordContaining(pageable,
 					keyword == null ? "" : keyword);

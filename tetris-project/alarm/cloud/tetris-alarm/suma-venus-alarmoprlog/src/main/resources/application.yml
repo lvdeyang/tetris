@@ -7,14 +7,18 @@ spring:
   application:
     name: tetris-alarm
   cloud:
+    client:
+      ipAddress: 10.10.40.24
     inetutils:
       preferred-networks: 10.10.40.27
+  main:
+    allow-bean-definition-overriding: true
   datasource:
-     url: jdbc:mysql://10.10.40.207:3306/alarm?characterEncoding=utf-8&useUnicode=true
+     url: jdbc:mysql://10.10.40.104:3306/alarm?characterEncoding=utf-8&useUnicode=true
      username: root
      password: sumavisionrd
-     driver-class-name: com.mysql.jdbc.Driver
-     driverClassName: com.mysql.jdbc.Driver
+     driver-class-name: com.mysql.cj.jdbc.Driver
+     driverClassName: com.mysql.cj.jdbc.Driver
      druid:
       initial-size: 10
       min-idle: 20
@@ -23,7 +27,6 @@ spring:
       test-while-idle : true
       time-between-eviction-runs-millis : 600000
       min-evictable-idle-time-millis : 3600000
-    
   jpa:
     database: mysql
     show-sql: false
@@ -43,7 +46,7 @@ eureka:
     instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
   client:
     serviceUrl:
-      defaultZone:  http://10.10.40.207:8081/eureka/
+      defaultZone:  http://10.10.40.104:8081/eureka/
 
 
 #security:

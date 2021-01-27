@@ -72,7 +72,7 @@ public class OprlogController {
 			String[] idArr = ids.split(",");
 
 			for (String id : idArr) {
-				oprlogDAO.delete(Long.valueOf(id));
+				oprlogDAO.deleteById(Long.valueOf(id));
 			}
 
 		} catch (Exception e) {
@@ -92,12 +92,8 @@ public class OprlogController {
 
 		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-
-		// Pageable pageable = PageRequest.of(queryOprlogVO.getPageIndex(),
-		// queryOprlogVO.getPageSize(),
-		// Sort.Direction.DESC, "id");
-
-		Pageable pageable = new PageRequest(queryOprlogVO.getPageIndex(), queryOprlogVO.getPageSize(),
+		
+		Pageable pageable = PageRequest.of(queryOprlogVO.getPageIndex(), queryOprlogVO.getPageSize(),
 				Sort.Direction.DESC, "id");
 
 		try {
