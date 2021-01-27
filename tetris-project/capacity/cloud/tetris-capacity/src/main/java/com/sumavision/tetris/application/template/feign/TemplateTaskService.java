@@ -623,9 +623,6 @@ public class TemplateTaskService {
             if (bitrate > combineObj.getLong("max_bitrate")){
                 combineObj.put("max_bitrate",bitrate);
             }
-        }else{
-            combineObj.put("bitrate",6000);
-            combineObj.put("max_bitrate",6000);
         }
         return combineObj;
     }
@@ -636,8 +633,6 @@ public class TemplateTaskService {
             combineObj.put("bitrate",tmplTaskObj.getString("abitrate"));
         }else if (tmplTaskObj.containsKey("bitrate")) {
             combineObj.put("bitrate",tmplTaskObj.getString("bitrate"));
-        }else{
-            combineObj.put("bitrate","128");
         }
         if (tmplTaskObj.containsKey("sample_rate")){
             combineObj.put("sample_rate",String.valueOf(tmplTaskObj.getInteger("sample_rate")/1000.0f));
