@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
-
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.alarmoprlog.orm.dao.IAlarmDAO;
 import com.suma.venus.alarmoprlog.orm.dao.IAlarmInfoDAO;
@@ -67,8 +66,8 @@ public class TestController {
 
 	// @Autowired
 	// private BundleFeignService bundleFeignService;
-	
-	// @Autowired 
+
+	// @Autowired
 	// private CapacityService capacityService;
 
 	@RequestMapping(value = "/addAlarmPO", method = RequestMethod.POST)
@@ -133,7 +132,8 @@ public class TestController {
 			// queryAlarmVO.setLastCreateTime(lastTime);
 
 			@SuppressWarnings("deprecation")
-			Pageable pageable = new PageRequest(0, 2, Sort.Direction.DESC, "id");
+			// Pageable pageable = new PageRequest(0, 2, Sort.Direction.DESC, "id");
+			Pageable pageable = PageRequest.of(0, 2, Sort.Direction.DESC, "id");
 
 			Page<AlarmPO> alarmPOs = alarmService.queryAlarmByQueryVOPage(queryAlarmVO, pageable);
 
@@ -234,7 +234,8 @@ public class TestController {
 
 		Map<String, String> map = null;
 		try {
-			// map = bundleFeignService.addTransCodeDevice("testchenmo", "10.10.40.27", 5656);
+			// map = bundleFeignService.addTransCodeDevice("testchenmo", "10.10.40.27",
+			// 5656);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -268,13 +269,12 @@ public class TestController {
 		JSONObject jsObject = new JSONObject();
 		jsObject.put("span_ms", 3000);
 		jsObject.put("loss_times", 10);
-		
-		
+
 		JSONObject alarmListObject = new JSONObject();
 		alarmListObject.put("ts_plp_high", jsObject);
-		
+
 		String str = alarmListObject.toJSONString();
-		
+
 		try {
 			// capacityService.putAlarmlist("10.10.40.228", str);
 		} catch (Exception e) {
@@ -284,7 +284,7 @@ public class TestController {
 
 		return "true";
 	}
-	
+
 	// 推送数据接口
 	@ResponseBody
 	@RequestMapping("/testPutAlarmList")
@@ -292,17 +292,15 @@ public class TestController {
 		JSONObject jsObject = new JSONObject();
 		jsObject.put("span_ms", 3000);
 		jsObject.put("loss_times", 30);
-		
-		
+
 		JSONObject ts_plp_highObject = new JSONObject();
 		ts_plp_highObject.put("ts_plp_high", jsObject);
-		
+
 		JSONObject alarmListObject = new JSONObject();
 		alarmListObject.put("alarm_list", ts_plp_highObject);
-		
-		
+
 		String str = alarmListObject.toJSONString();
-		
+
 		try {
 			// capacityService.putAlarmlist(bundle_ip, str);
 		} catch (Exception e) {

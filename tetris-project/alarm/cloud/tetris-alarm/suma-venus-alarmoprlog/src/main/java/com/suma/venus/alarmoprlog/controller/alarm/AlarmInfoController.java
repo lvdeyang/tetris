@@ -65,9 +65,7 @@ public class AlarmInfoController {
 
 		try {
 
-			//Pageable pageable = PageRequest.of(pageIndex, pageSize);
-			Pageable pageable = new PageRequest(pageIndex, pageSize);
-			
+			Pageable pageable = PageRequest.of(pageIndex, pageSize);
 
 			Page<AlarmInfoPO> alarmInfoPage = alarmInfoDAO.findByKeywordContaining(pageable,
 					keyword == null ? "" : keyword);
