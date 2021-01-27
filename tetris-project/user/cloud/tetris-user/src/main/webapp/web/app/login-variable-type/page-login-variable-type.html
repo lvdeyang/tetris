@@ -1,0 +1,113 @@
+<mi-frame id="page-login-variable-type-wrapper" :menus="menus" :user="user" :groups="groups">
+    <template slot="title">变量类型管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>变量类型管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加变量类型</el-button>
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="变量类型名"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="value值类型"
+                                prop="type">
+                        </el-table-column>
+                        <el-table-column
+                                label="变量类型key"
+                                prop="variableKey">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-setting" style="font-size:20px; padding:0;" @click="editVariable(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="刪除" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+        </el-card>
+
+        <template>
+            <el-dialog
+                    title="添加变量类型"
+                    :visible.sync="dialog.add.visible"
+                    width="800px"
+                    :before-close="handleAddVariableClose"
+                    :close-on-click-modal="false">
+
+                <el-form label-width="100px">
+                    <el-form-item label="变量类型名" width="150">
+                        <el-input v-model="dialog.add.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="value值类型">
+                        <el-select v-model="dialog.add.type" style="width: 100%;">
+                            <el-option
+                                    v-for="type in types"
+                                    :key="type"
+                                    :label="type"
+                                    :value="type">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="变量类型key" width="150">
+                        <el-input type="textarea" v-model="dialog.add.variableKey"></el-input>
+                    </el-form-item>
+                </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddVariableClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddVariableSubmit" :loading="dialog.add.loading">确定</el-button>
+            </span>
+            </el-dialog>
+
+            <el-dialog
+                    title="修改变量类型"
+                    :visible.sync="dialog.edit.visible"
+                    width="800px"
+                    :before-close="handleEditVariableClose"
+                    :close-on-click-modal="false">
+
+                <el-form label-width="100px">
+                    <el-form-item label="变量类型名" width="150">
+                        <el-input v-model="dialog.edit.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="value值类型">
+                        <el-select v-model="dialog.edit.type" style="width: 100%;">
+                            <el-option
+                                    v-for="type in types"
+                                    :key="type"
+                                    :label="type"
+                                    :value="type">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="变量类型key" width="150">
+                        <el-input type="textarea" v-model="dialog.edit.variableKey"></el-input>
+                    </el-form-item>
+                </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditVariableClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditVariableSubmit" :loading="dialog.edit.loading">确定</el-button>
+            </span>
+            </el-dialog>
+        </template>
+
+</mi-frame>

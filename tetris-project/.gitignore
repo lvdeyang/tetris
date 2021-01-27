@@ -7,7 +7,7 @@
 .project
 /.idea/
 *.iml
-*.xml
+
 *.idea
 *.sh
 *.MF

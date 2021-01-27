@@ -8,5 +8,5 @@ const useLocalRouteConst = false
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
   USELOCALROUTE : useLocalRouteConst,
-  RECORD_ROOT:  useLocalRouteConst? '"http://__requestIP__:8098"' : '"http://10.10.40.27:8098"'
+  RECORD_ROOT:  useLocalRouteConst? '"http://__requestIP__:8090"' : '"http://10.10.40.27:8090"'
 })

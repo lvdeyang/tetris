@@ -43,11 +43,9 @@
             <span style="font-size:16px;" class="el-icon-video-pause"></span>
           </el-button>
 
-          <!-- TODO
           <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="handleShowDetail(scope.$index, scope.row)">
                 <span style="font-size:16px;" class="el-icon-document"></span>
           </el-button>
-          -->
           <el-button type="text" size="small" style="padding:0; margin-left:5px;"  @click="handleDel(scope.$index, scope.row)">
                 <span style="font-size:16px;" class="el-icon-delete"></span>
           </el-button>
@@ -68,49 +66,76 @@
     </el-col>
 
     <!--编辑、新增界面-->
-    <el-dialog title="添加录制策略" :visible.sync="addStrategyFormVisible" :close-on-click-modal="false">
-      <el-form :model="addStrategyForm"  ref="editForm">
-        <el-form :inline="true" >
-          <el-form-item label="输入源类型" prop="sourceType"  size="mini" label-width="100px">
-            <el-select
-                v-model="addStrategyForm.sourceType"
-                placeholder="请选择"
-                style="width: 150px"
-              >
-              <el-option
-                v-for="item in sourceTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-                ></el-option>
-              </el-select>
-          </el-form-item>
-          <el-form-item label="输入源Url" prop="sourceUrl" size="mini" label-width="80px" >
-            <el-input v-model="addStrategyForm.sourceUrl" auto-complete="off" style="width:250px"></el-input>
-          </el-form-item>
-        </el-form>
-        <el-form :inline="true" >
-            <el-form-item label="录制策略类型" prop="type" size="mini" label-width="100px">
-            <template>
-              <el-select
-                v-model="addStrategyForm.type"
-                placeholder="请选择"
-                @change="strategyTypeSelectChange()"
-                style="width: 150px"
-              >
-              <el-option
-                v-for="item in strategyTypeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-                ></el-option>
-              </el-select>
-            </template>
-          </el-form-item>
-          <el-form-item label="策略名称" prop="name" size="mini" label-width="80px">
-            <el-input v-model="addStrategyForm.name" auto-complete="off" v-bind:readonly="editBtnVisible" style="width:250px"></el-input>
-          </el-form-item>
-        </el-form>
+    <el-dialog title="添加录制策略" :visible.sync="addStrategyFormVisible" :close-on-click-modal="false" width="700px">
+      <el-form :model="addStrategyForm"  ref="editForm" size="small" label-width="100px">
+          <el-row>
+              <el-col :span="8">
+                <el-form-item label="输入源类型" prop="sourceType">
+                  <el-select
+                      v-model="addStrategyForm.sourceType"
+                      placeholder="请选择"
+                    >
+                    <el-option
+                      v-for="item in sourceTypeOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                      ></el-option>
+                    </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="16">
+                  <el-form-item label="输入源Url" prop="sourceUrl">
+                    <el-input v-model="addStrategyForm.sourceUrl" auto-complete="off"></el-input>
+                  </el-form-item>
+              </el-col>
+          </el-row>
+          <el-row>
+              <el-col :span="8">
+                    <el-form-item label="策略名称" prop="name">
+                      <el-input v-model="addStrategyForm.name" auto-complete="off" v-bind:readonly="editBtnVisible"></el-input>
+                    </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                    <el-form-item label="选择存储" prop="storageId"  >
+                      <template>
+                        <el-select
+                          v-model="addStrategyForm.storageId"
+                          placeholder="请选择"
+                        >
+                        <el-option
+                          v-for="item in storageVOs"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id"
+                          ></el-option>
+                        </el-select>
+                      </template>
+                  </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                  <el-form-item label="策略类型" prop="type">
+                   <template>
+                      <el-select
+                          v-model="addStrategyForm.type"
+                          placeholder="请选择"
+                          @change="strategyTypeSelectChange()"
+                        >
+                        <el-option
+                            v-for="item in strategyTypeOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        ></el-option>
+                      </el-select>
+                    </template>
+                  </el-form-item>
+              </el-col>
+
+          </el-row>  
+          <el-row>
+             
+          </el-row>
 
         <el-form :inline="true" >
           <el-form-item label="录制文件自动注入媒资" prop="autoInjectToMims"  size="mini" label-width="160px">
@@ -226,17 +251,20 @@
           </el-table-column>
           <el-table-column prop="recordDate" label="录制日期" width="160px">
             <template slot-scope="scope">
-              <el-date-picker
-                size="mini"
-                v-model="scope.row.recordDate"
-                placeholder="录制日期"
-                value-format="yyyy-MM-dd"
-              ></el-date-picker>
+              <div style="width:160px">
+                <el-date-picker
+                  size="mini"
+                  v-model="scope.row.recordDate"
+                  placeholder="录制日期"
+                  value-format="yyyy-MM-dd"
+                  align="center"
+                ></el-date-picker>
+              </div>
               <!--<span>{{scope.row.startTime}}</span>-->
             </template>
           </el-table-column>
           <el-table-column prop="startTime" label="开始时间"  width="160px">
-            <template slot-scope="scope">
+           <template slot-scope="scope">
               <el-time-picker
                 size="mini"
                 v-model="scope.row.startTime"
@@ -278,6 +306,133 @@
         <el-button size="small" @click.native="addStrategyFormVisible = false">关闭</el-button>
       </div>
     </el-dialog>
+
+    <!--详情界面-->
+    <el-dialog title="添加录制策略" :visible.sync="strategyDetailFormVisible" :close-on-click-modal="false" width="700px">
+      <el-form :model="strategyDetailForm"  ref="strategyDetailForm" size="small" label-width="100px">
+          <el-row>
+              <el-col :span="8">
+                <el-form-item label="输入源类型" prop="sourceType">
+                    <el-input v-model="strategyDetailForm.sourceType" auto-complete="off"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="16">
+                  <el-form-item label="输入源Url" prop="sourceUrl">
+                    <el-input v-model="strategyDetailForm.sourceUrl" auto-complete="off"></el-input>
+                  </el-form-item>
+              </el-col>
+          </el-row>
+          <el-row>
+              <el-col :span="8">
+                    <el-form-item label="策略名称" prop="name">
+                      <el-input v-model="strategyDetailForm.name" auto-complete="off"></el-input>
+                    </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                  <el-form-item label="存储" prop="storageName">
+                      <el-input v-model="strategyDetailForm.storageName" auto-complete="off"></el-input>
+                  </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                   <el-form-item label="策略类型" prop="type">
+                      <el-input v-model="strategyDetailForm.type" auto-complete="off"></el-input>
+                    </el-form-item>
+              </el-col>
+          </el-row>
+
+        <el-form :inline="true" >
+          <el-form-item label="录制文件自动注入媒资" prop="autoInjectToMims"  size="mini" label-width="160px">
+            <el-switch
+              v-model="strategyDetailForm.autoInjectToMims"
+              active-color="#13ce66"
+              inactive-color="#ff4949"></el-switch>
+          </el-form-item>
+        </el-form>
+
+        <!--循环定时策略相关-->
+        <el-form-item label="策略起止日期" prop="cyclesDateRange">
+             <el-input v-model="strategyDetailForm.cyclesDateRange" auto-complete="off" v-if="strategyDetailForm.type=='CYCLE_SCHEDULE'"></el-input>
+        </el-form-item>
+        <el-form-item label="执行周期" prop="cyclesDateRange" v-if="addStrategyForm.type=='CYCLE_SCHEDULE'">
+             <el-input v-model="strategyDetailForm.loopCycles" auto-complete="off" v-if="strategyDetailForm.type=='CYCLE_SCHEDULE'"></el-input>
+        </el-form-item>
+        <el-table
+          :data="strategyDetailForm.cycleItemVOs"
+          v-if="strategyDetailForm.type=='CYCLE_SCHEDULE'"
+          highlight-current-row
+          border
+          :row-style="{height: '35px'}"
+          :header-cell-style="{padding:'5px 0'}"
+          :header-row-style="{height: '35px'}"
+          :cell-style="{padding:'5px 0'}"
+          style="width: 602px;"
+        >
+          <el-table-column prop="name" label="时段名称" width="200px" style="height: 30px;">
+            <template slot-scope="scope">
+              <el-input
+                v-model="scope.row.name"
+                size="mini"
+                controls-position="right"
+                placeholder="时段名称"
+              ></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="startTime" label="开始时间" width="160px">
+            <template slot-scope="scope">
+                <el-input v-model="strategyDetailForm.loopCycles" auto-complete="off"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间"  width="160px">
+            <template slot-scope="scope">
+              <el-time-picker
+                size="mini"
+                v-model="scope.row.endTime"
+                placeholder="结束时间"
+                value-format="HH:mm:ss"
+              ></el-time-picker>
+              <!--<span>{{scope.row.endTime}}</span>-->
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!--自定义定时策略相关-->
+        <el-table
+          :data="strategyDetailForm.customItemVOs"
+          v-if="strategyDetailForm.type=='CUSTOM_SCHEDULE'"
+          highlight-current-row
+          border
+          :row-style="{height: '35px'}"
+          :header-cell-style="{padding: '5px 0'}"
+          :header-row-style="{height: '35px'}"
+          :cell-style="{padding: '5px 0'}"
+          style="width: 622px;"
+        >
+          <el-table-column prop="recordDate" label="录制日期" width="160px">
+            <template slot-scope="scope">
+                <el-input v-model="recordDate" auto-complete="off"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="startTime" label="开始时间"  width="160px">
+           <template slot-scope="scope">
+                <el-input v-model="startTime" auto-complete="off"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间"  width="160px">
+            <template slot-scope="scope">
+               <el-input v-model="endTime" auto-complete="off"></el-input>
+              <!--<span>{{scope.row.endTime}}</span>-->
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <!-- <el-button size="small" @click="handleEdit()" v-if="editBtnVisible">修改</el-button>-->
+        <!-- <el-button size="small" @click="handleQuerySourceFromMims()" v-if="addBtnVisible">查询源测试</el-button>-->
+        <el-button size="small" @click.native="strategyDetailFormVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
+
+
   </section>
 </template>
 
@@ -287,7 +442,8 @@ import globalRouter from '../../router/util/globalRouter'
 // import globalVar from '../../components/Global.vue'
 // import NProgress from 'nprogress'
 import {
-  queryRecordStrategy, addRecordStrategy, queryStrategyItems, startRecord, stopRecord, delRecordStrategy, querySourceFromMims
+  queryRecordStrategy, addRecordStrategy, queryStrategyItems, startRecord, stopRecord, delRecordStrategy, querySourceFromMims, 
+  queryAllStorage
 } from '../../api/api'
 
 export default {
@@ -299,6 +455,10 @@ export default {
       page: 1,
       listLoading: false,
       sels: [], // 列表选中列
+      storageVOs: [],
+      
+      strategyDetailForm: {},
+      strategyDetailFormVisible: false,
 
       strategyTypeOptions: [
         {
@@ -488,6 +648,7 @@ export default {
         type: this.addStrategyForm.type,
         sourceType: this.addStrategyForm.sourceType,
         sourceUrl: this.addStrategyForm.sourceUrl,
+        storageId: this.addStrategyForm.storageId,
         loopCycles: loopCyclesString,
         startDate: startDateTemp,
         endDate: endDateTemp,
@@ -569,22 +730,11 @@ export default {
     handleShowAddStrategy: function () {
       this.resetForm('addStrategyForm')
       this.resetItemVOs()
-      this.addBtnVisible = true
-      this.addStrategyFormVisible = true
-      this.editBtnVisible = false
-      this.cyclesFormVisible = false
-    },
+      
+      let para = {}
 
-    handleShowDetail: function (index, row) {
-      this.resetForm('addStrategyForm')
-      this.resetItemVOs()
-      console.log(JSON.stringify(row))
-
-      if (row.type === 'CUSTOM_SCHEDULE') {
-        let para = {
-          strategyId: row.id
-        }
-        queryStrategyItems(para).then(res => {
+      queryAllStorage().then( res => {
+          this.listLoading = true
           if (res.errMsg !== null && res.errMsg !== '') {
             this.$message({
               message: res.errMsg,
@@ -593,12 +743,26 @@ export default {
             })
           } else {
             console.log(JSON.stringify(res))
+            this.storageVOs = res.storageVOs;
+            this.addStrategyForm.storageId = this.storageVOs[0].id;
           }
 
           this.listLoading = false
-        // NProgress.done();
-        })
-      }
+        }
+      )
+
+      this.addBtnVisible = true
+      this.addStrategyFormVisible = true
+      this.editBtnVisible = false
+      this.cyclesFormVisible = false
+    },
+
+    handleShowDetail: function (index, row) {
+      this.resetForm('strategyDetailForm')
+      //this.resetItemVOs()
+      console.log(JSON.stringify(row))
+
+      this.strategyDetailFormVisible = true;
     },
 
     handleDel: function (index, row) {

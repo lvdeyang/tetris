@@ -119,21 +119,36 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			workNodePO1.setType(NodeType.ACCESS_QTLIANGWANG);
 			workNodeDao.save(workNodePO1);
 		}
-		
 		Map<String, Object> data = makeAjaxData();
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		Map<String, Object> local = new HashMap<String, Object>();
 		local.put("name", serNodePO.getNodeName());
 		List<Map<String, Object>> foreign = new ArrayList<Map<String,Object>>();
 		List<SerNodePO> serNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
+		List<Long> serNodeIds = new ArrayList<Long>();
 		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
 			for (SerNodePO serNodePO2 : serNodePOs) {
+				serNodeIds.add(serNodePO2.getId());
+ 			}
+		}
+		List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeIdIn(serNodeIds);
+		if (serNodePOs != null&& !serNodePOs.isEmpty()) {
+			for (SerNodePO serNodePO2 : serNodePOs) {
+				JSONObject params = new JSONObject();
+				if(extraInfoPOs!=null && extraInfoPOs.size()>0){
+					for(ExtraInfoPO extraInfo:extraInfoPOs){
+						if (serNodePO2.getId().equals(extraInfo.getSerNodeId())) {
+							params.put(extraInfo.getName(), extraInfo.getValue());
+						}
+					}
+				}
 				Map<String, Object> fo = new HashMap<String, Object>();
 				fo.put("name", serNodePO2.getNodeName());
 				fo.put("password", serNodePO2.getPassword());
 				fo.put("ip", serNodePO2.getIp());
 				fo.put("port", serNodePO2.getPort());
 				fo.put("operate", serNodePO2.getOperate());
+				fo.put("extraInfo", params);
 				foreign.add(fo);
  			}
 		}

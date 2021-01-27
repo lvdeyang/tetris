@@ -214,17 +214,20 @@ public class FolderManageController extends ControllerBase {
 
 			folderService.delete(folder);
 
-			// 从ldap删除
-			if (!SOURCE_TYPE.EXTERNAL.equals(folder.getSourceType())) {
-				try {
-					List<LdapDepartmentPo> ldapDeparts = ldapDepartmentDao.getDepartByUuid(folder.getUuid());
-					if (CollectionUtils.isEmpty(ldapDeparts)) {
-						ldapDepartmentDao.remove(ldapDeparts.get(0));
-					}
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-			}
+			// 从ldap删除 
+			/**
+			 * 从ldap删除注释掉，为了25项目删除目录时的效率
+			 */
+//			if (!SOURCE_TYPE.EXTERNAL.equals(folder.getSourceType())) {
+//				try {
+//					List<LdapDepartmentPo> ldapDeparts = ldapDepartmentDao.getDepartByUuid(folder.getUuid());
+//					if (CollectionUtils.isEmpty(ldapDeparts)) {
+//						ldapDepartmentDao.remove(ldapDeparts.get(0));
+//					}
+//				} catch (Exception e) {
+//					// TODO: handle exception
+//				}
+//			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete folder by id : " + id, e);
 			data.put(ERRMSG, "内部错误");
