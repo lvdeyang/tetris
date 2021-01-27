@@ -40,6 +40,8 @@ import com.sumavision.tetris.record.storage.StoragePO;
 import com.sumavision.tetris.record.strategy.RecordStrategyDAO;
 import com.sumavision.tetris.record.strategy.RecordStrategyPO;
 
+import ch.qos.logback.classic.Logger;
+
 @Service
 public class RecordFileService {
 
@@ -149,7 +151,9 @@ public class RecordFileService {
 			String vodPath = null;
 			try {
 				String recordXmlUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + "/record.xml";
-
+				
+				
+				
 				System.out.println("recordXmlUrl" + recordXmlUrl);
 
 				// String t = restTemplate.getForObject(recordXmlUrl, String.class);
