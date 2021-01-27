@@ -6,12 +6,12 @@ spring:
     name: tetris-record
   cloud:
     client:
-      ipAddress: 10.10.40.24
+      ipAddress: 10.10.40.27
     inetutils:
-      preferred-networks: 10.10.40.24
+      preferred-networks: 10.10.40.27
 
   datasource:
-      url: jdbc:mysql://localhost:3306/record?characterEncoding=utf-8&useUnicode=true&&useSSL=false
+      url: jdbc:mysql://10.10.40.104:3306/record?characterEncoding=utf-8&useUnicode=true&&useSSL=false
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
@@ -39,11 +39,11 @@ eureka:
     lease-expiration-duration-in-seconds: 10
     lease-renewal-interval-in-seconds: 3
     preferIpAddress: true
-    ipAddress: 10.10.40.24
+    ipAddress: 10.10.40.27
     instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
   client:
     serviceUrl:
-      defaultZone:  http://10.10.40.184:8081/eureka/
+      defaultZone:  http://10.10.40.104:8081/eureka/
 ribbon:
   eager-load:
       enabled: true
@@ -66,11 +66,12 @@ hystrix:
             timeoutInMilliseconds: 5000
           strategy: SEMAPHORE
 localRecordBasePath: /home/record/
-ftpBasePath: ftp://suma:suma123@10.10.40.103/
-httpBasePath: http://10.10.40.103:9081/record/
-storageSize: 80
-cleanSpaceThreshold: 60
-cleanTimeThreshold: 30
+localFFMpegOutputPath: /home/output/
+ftpBasePath: ftp://suma:suma123@10.10.40.104/
+httpBasePath: http://10.10.40.104:9081/record/
+clean_diskUsedPercentThreshold: 78
+clean_recordMaxSpaceThreshold: 10
+clean_timeThreshold: 30
 taskTemplateName: RECORD_COMMON
 
 

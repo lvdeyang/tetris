@@ -646,9 +646,9 @@ public class MonitorLiveDeviceService {
 			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 			userno = user.getUserNo();
 		}
-		if(!live.getUserId().equals(userId)){
-			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
-		}
+//		if(!live.getUserId().equals(userId)){
+//			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
+//		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
 			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){
@@ -682,9 +682,9 @@ public class MonitorLiveDeviceService {
 			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 			userno = user.getUserNo();
 		}
-		if(!live.getUserId().equals(userId)){
-			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
-		}
+//		if(!live.getUserId().equals(userId)){
+//			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveId);
+//		}
 		
 		if(stopAndDelete == null){
 			if(LiveType.XT_LOCAL.equals(live.getType())){
@@ -743,9 +743,9 @@ public class MonitorLiveDeviceService {
 					UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 					userno = user.getUserNo();
 				}
-				if(!live.getUserId().equals(userId)){
-					throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, live.getId());
-				}
+//				if(!live.getUserId().equals(userId)){
+//					throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, live.getId());
+//				}
 				
 				if(stopAndDelete == null){
 					if(LiveType.XT_LOCAL.equals(live.getType())){
@@ -798,9 +798,9 @@ public class MonitorLiveDeviceService {
 			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 			userno = user.getUserNo();
 		}
-		if(!live.getUserId().equals(userId)){
-			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveUuid);
-		}
+//		if(!live.getUserId().equals(userId)){
+//			throw new UserHasNoPermissionToRemoveLiveDeviceException(userId, liveUuid);
+//		}
 		if(LiveType.XT_LOCAL.equals(live.getType())){
 			stopXtSeeLocal(live, userId, userno, null);
 		}else if(LiveType.LOCAL_XT.equals(live.getType())){

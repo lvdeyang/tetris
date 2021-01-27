@@ -36,10 +36,9 @@ public class OutputFactory {
     /**
      * 模板输出转化成转换输出
      */
-    public OutputBO getOutputByTemplateOutput(MissionBO missionBO, JSONObject taskOutputObj) throws BaseException {
+    public OutputBO getOutputByTemplateOutput(MissionBO missionBO,String outputId, JSONObject taskOutputObj) throws BaseException {
         OutputBO transOutputBO = new OutputBO();
-        Integer idx = missionBO.getOutput_array().size();
-        transOutputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.OUTPUT));
+        transOutputBO.setId(outputId);
         ProtocolType outType =  ProtocolType.getProtocolType(taskOutputObj.getString("type"));
         switch (outType){
             case UDP_TS:
@@ -93,8 +92,14 @@ public class OutputFactory {
         CommonTsOutputBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),CommonTsOutputBO.class);
         if (taskOutput.containsKey("bitrate")){
             outputBO.setBitrate(taskOutput.getInteger("bitrate")*1000);
+        }else{
+            outputBO.setBitrate(8000*1000);
         }
-        outputBO.setRate_ctrl(outputBO.getRate_ctrl().toUpperCase(Locale.ENGLISH));
+        if (taskOutput.containsKey("rate_ctrl")){
+            outputBO.setRate_ctrl(outputBO.getRate_ctrl().toUpperCase(Locale.ENGLISH));
+        }else{
+            outputBO.setRate_ctrl("VBR");
+        }
         if (outputBO.getIp()==null){
             outputBO.setIp(IpV4Util.getIpFromUrl(taskOutput.getString("url")));
         }
@@ -107,7 +112,15 @@ public class OutputFactory {
 
         List<OutputProgramBO> outputProgramBOS =new ArrayList();
         if (!taskOutput.containsKey("programs")){
-            outputProgramBOS.add(new OutputProgramBO());//直接按转换默认的走
+            OutputProgramBO outputProgramBO = new OutputProgramBO();
+            outputProgramBO.setProgram_number(1);
+            outputProgramBO.setProvider("suma");
+            outputProgramBO.setPcr_pid(101);
+            outputProgramBO.setPmt_pid(100);
+            outputProgramBO.setName("Suma");
+            outputProgramBO.setCharacter_set("default");
+            outputProgramBO.setOutputMedias(missionBO,null);
+            outputProgramBOS.add(outputProgramBO);//直接按转换默认的走
         }else{
             for (int i = 0; i < taskOutput.getJSONArray("programs").size(); i++) {
                 JSONObject outputProgramObj = taskOutput.getJSONArray("programs").getJSONObject(i);
@@ -150,7 +163,15 @@ public class OutputFactory {
                 outputProgramBOS.add(program);
             }
         }else{
-
+            OutputProgramBO outputProgramBO = new OutputProgramBO();
+            outputProgramBO.setProgram_number(1);
+            outputProgramBO.setProvider("suma");
+            outputProgramBO.setPcr_pid(101);
+            outputProgramBO.setPmt_pid(100);
+            outputProgramBO.setName("Suma");
+            outputProgramBO.setCharacter_set("default");
+            outputProgramBO.setOutputMedias(missionBO,null);
+            outputProgramBOS.add(outputProgramBO);//直接按转换默认的走
         }
 
         outputBO.setProgram_array(outputProgramBOS);
@@ -186,7 +207,15 @@ public class OutputFactory {
                 outputProgramBOS.add(program);
             }
         }else{
-
+            OutputProgramBO outputProgramBO = new OutputProgramBO();
+            outputProgramBO.setProgram_number(1);
+            outputProgramBO.setProvider("suma");
+            outputProgramBO.setPcr_pid(101);
+            outputProgramBO.setPmt_pid(100);
+            outputProgramBO.setName("Suma");
+            outputProgramBO.setCharacter_set("default");
+            outputProgramBO.setOutputMedias(missionBO,null);
+            outputProgramBOS.add(outputProgramBO);//直接按转换默认的走
         }
 
         outputBO.setProgram_array(outputProgramBOS);

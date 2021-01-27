@@ -600,32 +600,6 @@ public class CommandQueryController {
 			}
 		}
 		
-		//没有文件的文件夹不显示
-		/*1.通过设备集合拿到文件夹id
-		 * 2.通过文件夹id找文件夹路径，分离出父文件夹id
-		 * 3找到所有不为空文件夹给folders
-		 * */
-		Set<Long> folderIds=new HashSet<Long>();//所有文件夹id
-		Map<Long,FolderBO> folderMap=folders.stream().collect(Collectors.toMap(FolderBO::getId, Function.identity()));
-		bundles.stream().map(BundleBO::getFolderId).collect(Collectors.toSet()).stream().map(folderId->{
-			Optional<FolderBO> folderBo=Optional.ofNullable(folderMap).map(folderMAP->{return folderMAP.get(folderId);});
-			if(folderBo.isPresent()){//空值校验
-				folderIds.add(folderId);
-				String parentPath=folderBo.get().getParentPath();
-				if(parentPath!=null && !"".equals(parentPath)){
-					folderIds.addAll(Arrays.asList(parentPath.replaceFirst("/", "").split("/")).stream().map(Long::valueOf).collect(Collectors.toList()));
-				} 
-			}
-			return  folderId;
-		}).collect(Collectors.toSet());
-		
-		folders =folderIds.stream().map(folderId->{
-			return folderMap.get(folderId);
-		}).collect(Collectors.toList());
-		
-		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
-		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
-		
 		//根据bundleIds从资源层查询channels
 		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);
 		if(queryChannels != null){
@@ -652,6 +626,32 @@ public class CommandQueryController {
 				filteredBundles.add(bundle);
 			}
 		}
+		
+		//没有文件的文件夹不显示
+		/*1.通过设备集合拿到文件夹id
+		 * 2.通过文件夹id找文件夹路径，分离出父文件夹id
+		 * 3找到所有不为空文件夹给folders
+		 * */
+		Set<Long> folderIds=new HashSet<Long>();//所有文件夹id
+		Map<Long,FolderBO> folderMap=folders.stream().collect(Collectors.toMap(FolderBO::getId, Function.identity()));
+		filteredBundles.stream().map(BundleBO::getFolderId).collect(Collectors.toSet()).stream().map(folderId->{
+			Optional<FolderBO> folderBo=Optional.ofNullable(folderMap).map(folderMAP->{return folderMAP.get(folderId);});
+			if(folderBo.isPresent()){//空值校验
+				folderIds.add(folderId);
+				String parentPath=folderBo.get().getParentPath();
+				if(parentPath!=null && !"".equals(parentPath)){
+					folderIds.addAll(Arrays.asList(parentPath.replaceFirst("/", "").split("/")).stream().map(Long::valueOf).collect(Collectors.toList()));
+				} 
+			}
+			return  folderId;
+		}).collect(Collectors.toSet());
+		
+		folders =folderIds.stream().map(folderId->{
+			return folderMap.get(folderId);
+		}).collect(Collectors.toList());
+		
+		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
@@ -720,7 +720,7 @@ public class CommandQueryController {
 //							_root.getName();
 				}
 //				if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType()) || 
-				if(ConnectionStatus.ON.equals(targetSerNode.getStatus())){
+				if(!ConnectionStatus.OFF.equals(targetSerNode.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(targetSerNode.getSourceType())){
 						_root.setName(new StringBufferWrapper().append(serName)
 													   .toString());
@@ -747,7 +747,7 @@ public class CommandQueryController {
 				}
 				if(finded) continue;
 				String name = null;
-				if(ConnectionStatus.ON.equals(serNodeEntity.getStatus())){
+				if(!ConnectionStatus.OFF.equals(serNodeEntity.getStatus())){
 					if(SOURCE_TYPE.SYSTEM.equals(serNodeEntity.getSourceType())){
 						name = serNodeEntity.getNodeName();
 					}else{
