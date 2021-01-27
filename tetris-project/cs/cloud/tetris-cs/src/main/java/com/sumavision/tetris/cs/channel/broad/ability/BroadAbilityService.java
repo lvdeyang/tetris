@@ -78,6 +78,7 @@ import com.sumavision.tetris.cs.schedule.ScheduleDAO;
 import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
+import com.sumavision.tetris.cs.schedule.exception.ScheduleExpiredException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
 import com.sumavision.tetris.easy.process.stream.transcode.OutParamVO;
@@ -427,7 +428,12 @@ public class BroadAbilityService {
 			//Long finishTime = scheduleVO.getEndDate() != null && !scheduleVO.getEndDate().isEmpty() ? DateUtil.parse(scheduleVO.getEndDate(), DateUtil.dateTimePattern).getTime()
 			//		: broadDateLong + querySchedulePlayTime(scheduleVO.getId());
 			
-			if (finishTime < now) continue;
+			if (finishTime < now){
+				if(i+1==scheduleVOs.size()){
+					throw new ScheduleExpiredException(channel.getName());
+				}
+				continue;
+			} 
 			
 			List<BroadAbilityBroadRequestVO> broadRequestVOs = new ArrayList<BroadAbilityBroadRequestVO>();
 			Integer outputIndex = 0;
@@ -526,7 +532,7 @@ public class BroadAbilityService {
 						//rtmp，视频只支持H264、H265，音频只支持mp3、aac、heaac
 						if(broadAbilityBroadInfoVO.getOutputType().equals(OutputType.RTMP.getName())){
 							outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-									.setIndex(outputCount)
+									.setIndex(outputCount++)
 									.setType("RTMP")
 									.setUrl(broadAbilityBroadInfoVO.getRtmpUrl())
 									.setLocalIp(broadAbilityBroadInfoVO.getLocalIp()));
@@ -552,17 +558,18 @@ public class BroadAbilityService {
 							}
 							if (ip != null && !ip.isEmpty() && !port.isEmpty()) {
 								outputVOs.add(new BroadAbilityBroadRequestOutputVO()
-										.setIndex(outputCount)
+										.setIndex(outputCount++)
 										.setUrl(new StringBufferWrapper().append("udp://").append(ip).append(":").append(port).toString())
 										.setLocalIp(broadAbilityBroadInfoVO.getLocalIp())
 										.setType(broadAbilityBroadInfoVO.getOutputType())
-										.setBitrate(broadAbilityBroadInfoVO.getRate())
-										.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+										//.setBitrate(broadAbilityBroadInfoVO.getRate())
+										//.setRate_ctrl(broadAbilityBroadInfoVO.getRateCtrl())
+										.setBitrate(channel.getRate())
+										.setRate_ctrl(channel.getRateCtrl())
 										.setScramble_mode( channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none")
 										.setScramble_key(channel.getEncryption() != null && channel.getEncryption() ? "30313233343536373839414243444546" : ""));
 							}
 						}
-						outputCount++;
 					}
 					if (!outputVOs.isEmpty()) {
 						//旧协议  
@@ -701,7 +708,6 @@ public class BroadAbilityService {
 					}
 				}
 			}
-			
 			if (broad && !previewIdList.isEmpty()) {
 				//requestRemoveTask(channelId, finishTime, previewIdList, i == scheduleVOs.size() - 1);
 			}
@@ -832,7 +838,6 @@ public class BroadAbilityService {
 			    } 
 			    //放入当前节目
 				//resetList.add(screens.get(i));
-				
 			    //页面设置的播放时长
 				long expectedDuration=endTime.getTime()-startTime.getTime();
 				//获取循环节目的播放总时长
