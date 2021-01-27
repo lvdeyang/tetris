@@ -1,0 +1,138 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+  
+    <groupId>com.sumavision.tetris</groupId>
+    <artifactId>tetris-patrol</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    
+    <packaging>war</packaging>
+    
+    <name>tetris-patrol</name>
+  	<description>tetris-patrol</description>
+  	
+  	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.5.RELEASE</version>
+		<relativePath/>
+	</parent>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Hoxton.SR9</spring-cloud.version>
+	</properties>
+	
+	<dependencies>
+		
+		<!-- mysql驱动 -->
+		<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+		
+		<!-- druid连接池 -->
+		<dependency>
+		   <groupId>com.alibaba</groupId>
+		   <artifactId>druid-spring-boot-starter</artifactId>
+		   <version>1.1.10</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-common</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-mvc</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-orm</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- menu-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-menu-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- user-sdk -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-user-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- tetris-ui -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-ui</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- eureka依赖 -->
+		<dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		
+		<!-- jsp热部署
+		<dependency> 
+	        <groupId>org.springframework.boot</groupId> 
+	        <artifactId>spring-boot-devtools</artifactId> 
+	        <optional>true</optional> 
+	    </dependency> -->
+	    <!-- 这个需要为 true 热部署才有效 -->
+
+	    <!-- office -->
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>4.1.2</version>
+		</dependency>
+	    
+	</dependencies>
+	
+	<dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <build>
+    	<finalName>tetris-patrol</finalName>
+	    <plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			
+			<plugin>
+		       	<groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-compiler-plugin</artifactId>
+		        <configuration>
+		            <source>1.8</source>
+		            <target>1.8</target>
+		            <encoding>utf-8</encoding>
+		        </configuration>
+	        </plugin>
+		</plugins>
+    </build>
+</project>
