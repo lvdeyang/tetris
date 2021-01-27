@@ -280,7 +280,7 @@ public class BvcService {
 		
 		if(output != null){
 			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
+			TaskInputPO input = taskInputDao.findById(output.getInputId());
 			
 			if(input != null){
 				

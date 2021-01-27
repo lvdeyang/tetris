@@ -180,7 +180,7 @@ public class BackupService {
             LOGGER.info("备机不自动切换，{}",devicePO.getBackType());
             return false;
         }
-        DeviceGroupPO deviceGroupPO = deviceGroupDao.findOne(devicePO.getDeviceGroupId());
+        DeviceGroupPO deviceGroupPO = deviceGroupDao.findById(devicePO.getDeviceGroupId());
         if (deviceGroupPO!=null && !deviceGroupPO.getAutoBackupFlag()){
             LOGGER.info("设备分组{}自动备份未开",deviceGroupPO.getName());
             return false;

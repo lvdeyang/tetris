@@ -1231,13 +1231,13 @@ public class TranscodeTaskService {
 			if(output.getInputId() != null){
 
 				//单源
-				taskInput = taskInputDao.findOne(output.getInputId());
+				taskInput = taskInputDao.findById(output.getInputId());
 
 			}else if(output.getInputList() != null){
 				//多源
 				List<Long> inputIds = JSONArray.parseArray(output.getInputList(), Long.class);
 				if (inputIds.size()==1){
-					taskInput = taskInputDao.findOne(inputIds.get(0));
+					taskInput = taskInputDao.findById(inputIds.get(0));
 				}else {
 					List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);
 					for (TaskInputPO inputPO : inputPOs) {
@@ -1329,7 +1329,7 @@ public class TranscodeTaskService {
 				throw new IllegalArgumentException("盖播不存在！");
 			}
 
-			TaskInputPO cover = taskInputDao.findOne(output.getCoverId());
+			TaskInputPO cover = taskInputDao.findById(output.getCoverId());
 
 			if(cover != null){
 

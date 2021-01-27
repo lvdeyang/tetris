@@ -10,6 +10,8 @@ spring:
     #history-level: full
   application:
     name: tetris-capacity
+  main:
+    allow-bean-definition-overriding: true
   cloud:
 #    config:
 #      uri: http://192.165.56.71:8081

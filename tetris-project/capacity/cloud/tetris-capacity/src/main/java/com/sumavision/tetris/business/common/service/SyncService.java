@@ -295,7 +295,7 @@ public class SyncService {
 						}
 					}
 				}
-				taskInputDao.save(inputs);
+				taskInputDao.saveAll(inputs);
 				taskOutputDao.delete(output);
 			}
 		}

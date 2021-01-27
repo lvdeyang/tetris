@@ -5,6 +5,8 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -39,6 +41,9 @@ public class BaseDatasource {
 	
 	@Autowired
 	private JpaProperties jpaProperties;
+
+	@Autowired
+    private HibernateProperties hibernateProperties;
 	
     //自身数据库
     @Primary
@@ -55,7 +60,7 @@ public class BaseDatasource {
     public LocalContainerEntityManagerFactoryBean baseEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(baseDataSource)
-                .properties(getVendorProperties(baseDataSource))
+                .properties(getVendorProperties())
                 .persistenceUnit("basePersistenceUnit")
         		.packages("com.sumavision.tetris") //扫描entity
                 .build();
@@ -76,8 +81,8 @@ public class BaseDatasource {
     }
     
     //获取jpa配置信息
-    private Map<String, String> getVendorProperties(DataSource dataSource) {
-        return jpaProperties.getHibernateProperties(dataSource);
+    private Map<String, Object> getVendorProperties() {
+        return hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(),new HibernateSettings());
     }
 	
 }

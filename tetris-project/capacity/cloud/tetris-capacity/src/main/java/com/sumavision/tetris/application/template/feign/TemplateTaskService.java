@@ -366,7 +366,7 @@ public class TemplateTaskService {
      * 删除模板
      */
     public void deleteTemplate(Long id){
-        templateDAO.delete(id);
+        templateDAO.deleteById(id);
     }
 
     public void generateInputBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws  BaseException{

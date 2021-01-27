@@ -39,7 +39,7 @@ public class NetCardService {
         for (int i = 0 ; i < nets.size() ; i++) {
             JSONObject net = nets.getJSONObject(i);
             Long id = net.getLong("id");
-            NetCardInfoPO netCardInfoPO = netCardInfoDao.findOne(id);
+            NetCardInfoPO netCardInfoPO = netCardInfoDao.findById(id);
             if(net.containsKey("inputNetGroupId")) {
                 Long inputNetGroupId = net.getLong("inputNetGroupId");
                 netCardInfoPO.setInputNetGroupId(inputNetGroupId);
@@ -53,7 +53,7 @@ public class NetCardService {
     }
 
     public List<NetCardInfoPO> getNetCardInfo(Long deviceId) throws BaseException {
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         return getNetCardInfo(devicePO);
     }
 
@@ -64,13 +64,13 @@ public class NetCardService {
     }
 
     public List<NetCardInfoPO> setNet(Long deviceId ,  JSONObject object) throws BaseException {
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         netCardHttpUnit.setNetCard(devicePO, object);
         return getNetCardInfo(deviceId);
     }
 
     public List<NetCardInfoPO> setNet(Long deviceId , String type ,  JSONObject object) throws BaseException {
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         netCardHttpUnit.setNetCard(devicePO, type , object);
         return getNetCardInfo(deviceId);
     }
@@ -113,7 +113,7 @@ public class NetCardService {
             if (t_ == null)
                 old.add(n_);
         }
-        netCardInfoDao.save(old);
+        netCardInfoDao.saveAll(old);
         return flag;
     }
 
@@ -156,7 +156,7 @@ public class NetCardService {
     	List<NetCardInfoPO> netCardList = netCardInfoDao.findByDeviceId(deviceId);
     	netCardList.forEach(netCard -> netCard.setInputNetGroupId(null));
     	netCardList.forEach(netCard -> netCard.setOutputNetGroupId(null));
-    	netCardInfoDao.save(netCardList);
+    	netCardInfoDao.saveAll(netCardList);
     }
 
     private ConcurrentHashMap<Long , String> map = new ConcurrentHashMap<>();
