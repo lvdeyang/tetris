@@ -61,7 +61,6 @@ public class NetGroupService {
 
     public void delete(Long id) throws BaseException {
         NetGroupPO netGroupPO = netGroupDao.findById(id);
-        System.out.println("llla");
         netGroupPO.setUpdateTime(new Date());
         netGroupDao.delete(netGroupPO);
     }
