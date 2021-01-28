@@ -1,9 +1,7 @@
 package com.sumavision.signal.bvc.network.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
 import com.sumavision.signal.bvc.entity.enumeration.ChannelType;
-import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.Jv210Param;
-import com.sumavision.signal.bvc.entity.enumeration.TaskStatus;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
-import com.sumavision.signal.bvc.entity.po.TaskPO;
-import com.sumavision.signal.bvc.entity.po.TerminalBindRepeaterPO;
 import com.sumavision.signal.bvc.http.HttpAsyncClient;
 import com.sumavision.signal.bvc.http.HttpClient;
 import com.sumavision.signal.bvc.mq.ProcessReceivedMsg;

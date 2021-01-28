@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +19,6 @@ import com.sumavision.signal.bvc.entity.dao.TaskDAO;
 import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.RepeaterType;
 import com.sumavision.signal.bvc.entity.enumeration.TaskStatus;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import com.sumavision.signal.bvc.entity.po.RepeaterPO;
 import com.sumavision.signal.bvc.entity.po.TaskPO;
 import com.sumavision.signal.bvc.entity.vo.PortMappingVO;

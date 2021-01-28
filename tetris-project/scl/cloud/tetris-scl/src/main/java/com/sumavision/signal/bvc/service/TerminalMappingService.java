@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sumavision.signal.bvc.entity.po.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,6 @@ import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.RepeaterType;
 import com.sumavision.signal.bvc.entity.enumeration.SrcType;
 import com.sumavision.signal.bvc.entity.enumeration.TaskStatus;
-import com.sumavision.signal.bvc.entity.po.InternetAccessPO;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
-import com.sumavision.signal.bvc.entity.po.RepeaterPO;
-import com.sumavision.signal.bvc.entity.po.TaskPO;
-import com.sumavision.signal.bvc.entity.po.TerminalBindRepeaterPO;
 import com.sumavision.signal.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.signal.bvc.resource.util.ResourceQueryUtil;
 

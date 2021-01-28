@@ -3,6 +3,7 @@ package com.sumavision.signal.bvc.entity.dao;
 import java.util.Collection;
 import java.util.List;
 
+import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +12,6 @@ import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.SrcType;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = PortMappingPO.class, idClass = long.class)
