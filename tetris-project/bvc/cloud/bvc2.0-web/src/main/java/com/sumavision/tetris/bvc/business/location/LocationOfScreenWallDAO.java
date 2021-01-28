@@ -33,6 +33,8 @@ public interface LocationOfScreenWallDAO extends MetBaseDAO<LocationOfScreenWall
 	 */
 	public List<LocationOfScreenWallPO> findByMonitorLiveDeviceIdIn(List<Long> monitorLiveDeviceIds);
 	
+	public LocationOfScreenWallPO findByMonitorLiveDeviceId(Long monitorLiveDeviceId);
+	
 	/**
 	 * 删除转发任务id对应屏幕墙<br/>
 	 * <b>作者:</b>lx<br/>
@@ -43,7 +45,7 @@ public interface LocationOfScreenWallDAO extends MetBaseDAO<LocationOfScreenWall
 	public void deleteByMonitorLiveDeviceIdIn(Collection<Long> monitorLiveDeviceIdList);
 	
 	/**
-	 * 根据屏幕墙布局非对应id和设备id查找<br/>
+	 * 根据屏幕墙布局的!=layoutId和设备id查找<br/>
 	 * <b>作者:</b>lx<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月26日 下午2:19:55
