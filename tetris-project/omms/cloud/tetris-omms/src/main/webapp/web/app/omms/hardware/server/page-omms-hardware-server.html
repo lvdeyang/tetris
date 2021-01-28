@@ -11,6 +11,7 @@
 
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加服务器</el-button>
+            <el-button type="warning" size="small" @click="setAlarm"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;设置告警</el-button>
             <!--<el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除服务�?</el-button>-->
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
@@ -77,8 +78,12 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                width="350px">
+                                width="380px">
                             <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="告警" placement="bottom-end">
+                                    <el-button type="primary" size="mini" icon="el-icon-star-off" @click="showAlarm" v-if="scope.row.status === '在线'" circle ></el-button>
+                                    <el-button type="warning" size="mini" icon="el-icon-star-off" @click="showAlarm" v-if="scope.row.status === '离线'" circle></el-button>
+                                </el-tooltip>
                              	<el-tooltip class="item" effect="dark" content="导入授权" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-upload2" style="font-size:20px; padding:0;" @click="importAuth(scope)"></el-button>
                                 </el-tooltip>
@@ -260,6 +265,65 @@
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleImportAuthClose">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleImportAuthSubmit" :loading="dialog.importAuth.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="设置告警限制"
+                :visible.sync="dialog.setAlarm.visible"
+                width="500px"
+                :before-close="handleSetAlarmClose"
+                :close-on-click-modal="false">
+            <el-form label-width="120px">
+                <el-form-item label="cpu使用率(%)">
+                    <el-input v-model="dialog.setAlarm.cpuRate"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-form label-width="120px">
+                <el-form-item label="内存使用率(%)">
+                    <el-input v-model="dialog.setAlarm.memoryRate"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-form label-width="120px">
+                <el-form-item label="硬盘使用率(%)">
+                    <el-input v-model="dialog.setAlarm.diskRate"></el-input>
+                </el-form-item>
+            </el-form>
+            <el-form label-width="120px">
+                <el-form-item label="单个进程CPU使用率(%)">
+                    <el-input v-model="dialog.setAlarm.processCpu"></el-input>
+                </el-form-item>
+            </el-form>
+
+             <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSetAlarmClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSetAlarmSubmit" :loading="dialog.setAlarm.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="告警列表"
+                :visible.sync="dialog.alarmMessage.visible"
+                width="500px"
+                :before-close="showAlarmClose"
+                :close-on-click-modal="false">
+            <el-table
+                    :data="dialog.alarmMessage.data"
+                    ::row-key="rowKey">
+                <el-table-column prop="name" label="名称" width="200"></el-table-column>
+                <el-table-column
+                        label="操作"
+                        width="350px">
+                    <template slot-scope="scope">
+                        <el-tooltip class="item" effect="dark" content="详情" placement="bottom-end">
+                            <el-button type="primary" size="mini" @click="alarmDetails(scope)">详情</el-button>
+                        </el-tooltip>
+                    </template>
+                </el-table-column>
+            </el-table>
+             <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="showAlarmClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="showAlarmClose" :loading="dialog.alarmMessage.loading">确定</el-button>
             </span>
         </el-dialog>
 

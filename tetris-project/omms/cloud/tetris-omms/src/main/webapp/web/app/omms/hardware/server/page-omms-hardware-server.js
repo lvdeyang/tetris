@@ -80,7 +80,20 @@ define([
                         loading:false,
                         id:0,
                         file:''
-                    }
+                    },
+                    setAlarm:{
+                        visible:false,
+                        loading:false,
+                        cpuRate:'',
+                        memoryRate:'',
+                        diskRate:'',
+                        processCpu:'',
+                    },
+                    alarmMessage:{
+                        visible:false,
+                        loading:false,
+                        data:[],
+                    },
                 }
             },
             computed:{
@@ -388,6 +401,53 @@ define([
                 handleCurrentChange:function(currentPage){
                     var self = this;
                     self.load(currentPage);
+                },
+                setAlarm:function(){
+                    var self=this;
+                    ajax.post('/server/query/limit/rate',null,function(data,status){
+                        if(status !== 200) return;
+                        self.dialog.setAlarm.cpuRate = data.cpuRate;
+                        self.dialog.setAlarm.memoryRate = data.memoryRate;
+                        self.dialog.setAlarm.diskRate = data.diskRate;
+                        self.dialog.setAlarm.processCpu = data.processCpu;
+                    })
+                    self.dialog.setAlarm.visible = true;
+                },
+                //processCpu
+                handleSetAlarmClose:function(){
+                    var self = this;
+                    self.dialog.setAlarm.visible = false;
+                    self.dialog.setAlarm.loading = false;
+                    self.dialog.setAlarm.cpuRate = '';
+                    self.dialog.setAlarm.memoryRate = '';
+                    self.dialog.setAlarm.diskRate = '';
+                    self.dialog.setAlarm.processCpu = '';
+                },
+                handleSetAlarmSubmit:function(){
+                    var self = this;
+                    var params = new FormData();
+                    params.append('cpuRate', self.dialog.setAlarm.cpuRate);
+                    params.append('memoryRate', self.dialog.setAlarm.memoryRate);
+                    params.append('diskRate', self.dialog.setAlarm.diskRate);
+                    params.append('processCpu', self.dialog.setAlarm.processCpu);
+                    ajax.upload('/server/edit/limit/rate',params,function(data,status){
+                        self.dialog.setAlarm.visible = false;
+                        self.dialog.setAlarm.loading = false;
+                        if(status !== 200) return;
+                        self.dialog.setAlarm.cpuRate = data.cpuRate;
+                        self.dialog.setAlarm.memoryRate = data.memoryRate;
+                        self.dialog.setAlarm.diskRate = data.diskRate;
+                        self.dialog.setAlarm.processCpu = data.processCpu;
+                    })
+                },
+                showAlarm:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.alarmMessage.visible = true;
+                },
+                showAlarmClose:function(){
+                    var self = this;
+                    self.dialog.alarmMessage.visible = false;
                 }
             },
             mounted:function(){

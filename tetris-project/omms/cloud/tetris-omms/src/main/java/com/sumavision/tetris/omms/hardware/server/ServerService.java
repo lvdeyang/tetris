@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,12 +51,17 @@ import com.sumavision.tetris.omms.hardware.database.DatabaseDAO;
 import com.sumavision.tetris.omms.hardware.database.DatabasePO;
 import com.sumavision.tetris.omms.hardware.database.DatabaseService;
 import com.sumavision.tetris.omms.hardware.database.DatabaseVO;
+import com.sumavision.tetris.omms.hardware.server.data.ServerAlarmDAO;
+import com.sumavision.tetris.omms.hardware.server.data.ServerAlarmPO;
+import com.sumavision.tetris.omms.hardware.server.data.ServerAlarmVO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerHardDiskDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
+import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsageDAO;
+import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsagePO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentPO;
 import com.sumavision.tetris.omms.software.service.deployment.exception.FtpChangeFolderFailException;
@@ -92,6 +96,12 @@ public class ServerService {
 	
 	@Autowired
 	private DatabaseService databaseService;
+	
+	@Autowired
+	private ServerAlarmDAO serverAlarmDAO;
+	
+	@Autowired
+	private ServerProcessUsageDAO serverProcessUsageDAO;
 	
 	/**
 	 * 添加一个服务器<br/>
@@ -248,7 +258,7 @@ public class ServerService {
 	 * @param JSONObject serverInfo 服务器信息
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void setStatus(Long serverId, JSONObject serverInfo){
+	public void setStatus(Long serverId, JSONObject serverInfo)throws Exception{
 		Date now = new Date();
 		ServerPO serverEntity = serverDao.findOne(serverId);
 		serverEntity.setStatus(ServerStatus.ONLINE);
@@ -290,6 +300,8 @@ public class ServerService {
 		basicInfo.setServerId(serverId);
 		basicInfo.setUpdateTime(now);
 		serverOneDimensionalDataDao.save(basicInfo);
+		processUsageTest(basicInfo, serverInfo);
+		singleCpuTest(basicInfo, serverInfo);
 		
 		JSONArray storages = serverInfo.getJSONArray("storage");
 		if(storages!=null && storages.size()>0){
@@ -913,5 +925,134 @@ public class ServerService {
 	
 	private String encodeFtpText(String text) throws Exception{
 		return new String(text.getBytes("utf-8"), "iso-8859-1");
+	}
+
+	/**
+	 * 修改CPU、内存、硬盘告警限制<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月26日 下午2:02:44
+	 * @param cpuRate CPU告警限度
+	 * @param memoryRate 内存告警限度
+	 * @param diskRate 硬盘告警限度
+	 * @param processCpu 
+	 * @return ServerAlarmVO
+	 */
+	public ServerAlarmVO editLimitRate(Long cpuRate, Long memoryRate, Long diskRate, Long processCpu) throws Exception {
+		List<ServerAlarmPO> serverAlarmPOs = serverAlarmDAO.findAll();
+		ServerAlarmVO serverAlarmVO = new ServerAlarmVO();
+		if (serverAlarmPOs != null && serverAlarmPOs.size() > 0) {
+			ServerAlarmPO serverAlarmPO = serverAlarmPOs.get(0);
+			serverAlarmPO.setCpuRate(cpuRate);
+			serverAlarmPO.setDiskRate(diskRate);
+			serverAlarmPO.setMemoryRate(memoryRate);
+			serverAlarmPO.setProcessCpu(processCpu);
+			serverAlarmDAO.save(serverAlarmPO);
+			serverAlarmVO.set(serverAlarmPO);
+		}
+		return serverAlarmVO;
+	}
+	
+	/**
+	 * 服务器CPU超过限制保存进程占用率<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月27日 下午4:43:57
+	 * @param basicInfo
+	 * @param serverInfo
+	 */
+	public void processUsageTest(ServerOneDimensionalDataPO basicInfo, JSONObject serverInfo) throws Exception{
+		List<ServerAlarmPO> serverAlarmPOs = serverAlarmDAO.findAll();
+		if (serverAlarmPOs != null && serverAlarmPOs.size()>0) {
+			ServerAlarmPO serverAlarmPO = serverAlarmPOs.get(0);
+			if (basicInfo.getCpuOccupy() > serverAlarmPO.getCpuRate()) {
+				StringBufferWrapper message = new StringBufferWrapper().append("CPU使用率达到了 ")
+																		.append(basicInfo.getCpuOccupy()).append("%");
+				basicInfo.setAlarmMessage(message.toString());
+				serverOneDimensionalDataDao.save(basicInfo);
+				List<ServerProcessUsagePO> serverProcessUsagePOs = new ArrayList<ServerProcessUsagePO>();
+				JSONArray process = serverInfo.getJSONArray("process");
+				if (process != null && process.size() > 0) {
+					Integer member = 0;
+					if (process.size()>10) {
+						member = 10;
+					}else {
+						member = process.size();
+					}
+					for (int i = 0; i < member; i++) {
+						JSONObject jsonObject = process.getJSONObject(i);
+						ServerProcessUsagePO serverProcessUsagePO = new ServerProcessUsagePO();
+						serverProcessUsagePO.setDataId(basicInfo.getId());
+						serverProcessUsagePO.setName(jsonObject.getString("name"));
+						serverProcessUsagePO.setCpuUsage(jsonObject.getString("cpu_use"));
+						serverProcessUsagePO.setMemoryUsage(jsonObject.getString("mem_use"));
+						serverProcessUsagePOs.add(serverProcessUsagePO);
+					}
+					serverProcessUsageDAO.save(serverProcessUsagePOs);
+				}
+				ServerPO serverPO = serverDao.findOne(basicInfo.getServerId());
+				serverPO.setIsAlarm(true);
+				serverDao.save(serverPO);
+			}
+		}
+	}
+
+	/**
+	 * 单个进程CPU超过限制<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月27日 下午6:15:06
+	 * @param basicInfo
+	 * @param serverInfo
+	 * @throws Exception
+	 */
+	public void singleCpuTest(ServerOneDimensionalDataPO basicInfo, JSONObject serverInfo) throws Exception{
+		List<ServerAlarmPO> serverAlarmPOs = serverAlarmDAO.findAll();
+		if (serverAlarmPOs != null && serverAlarmPOs.size()>0) {
+			ServerAlarmPO serverAlarmPO = serverAlarmPOs.get(0);
+			List<ServerProcessUsagePO> serverProcessUsagePOs = new ArrayList<ServerProcessUsagePO>();
+			StringBufferWrapper message = new StringBufferWrapper();
+ 			JSONArray process = serverInfo.getJSONArray("process");
+			if (process != null && process.size() > 0) {
+				for (int i = 0; i < process.size(); i++) {
+					JSONObject jsonObject = process.getJSONObject(i);
+					if (Float.parseFloat(jsonObject.getString("cpu_use")) > serverAlarmPO.getProcessCpu()) {
+						ServerProcessUsagePO serverProcessUsagePO = new ServerProcessUsagePO();
+						serverProcessUsagePO.setDataId(basicInfo.getId());
+						serverProcessUsagePO.setName(jsonObject.getString("name"));
+						serverProcessUsagePO.setCpuUsage(jsonObject.getString("cpu_use"));
+						serverProcessUsagePO.setMemoryUsage(jsonObject.getString("mem_use"));
+						serverProcessUsagePOs.add(serverProcessUsagePO);
+						message.append("进程 ")
+								.append(serverProcessUsagePO.getName())
+								.append(" CPU使用达到了 ")
+								.append(serverProcessUsagePO.getCpuUsage())
+								.append(System.getProperty("line.separator"));
+					}
+				}
+				basicInfo.setAlarmMessage(message.toString());
+				serverOneDimensionalDataDao.save(basicInfo);
+				ServerPO serverPO = serverDao.findOne(basicInfo.getServerId());
+				serverPO.setIsAlarm(true);
+				serverDao.save(serverPO);
+				serverProcessUsageDAO.save(serverProcessUsagePOs);
+			}
+		}
+	}
+	
+	public static void main(String[] args){
+		Float aFloat = 4.45F;
+		Long bLong = 3L;
+		if (aFloat > bLong) {
+			System.out.println(true);
+		}else {
+			System.out.println(false);
+		}
+		
+		ServerOneDimensionalDataPO basicInfo = new ServerOneDimensionalDataPO();
+		System.out.println(basicInfo.getId());
 	}
 }
