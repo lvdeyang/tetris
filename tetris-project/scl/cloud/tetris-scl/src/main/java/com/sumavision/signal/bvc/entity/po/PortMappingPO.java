@@ -10,9 +10,6 @@ import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.SrcType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
-/**
- * 业务bundle与接入任务之间的映射
- */
 @Entity
 @Table(name = "BVC_PORT_MAPPING")
 public class PortMappingPO extends AbstractBasePO{
