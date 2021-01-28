@@ -31,7 +31,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * @since    JDK 1.8  
  * @see        
  */
-@SpringBootTest
+/*@SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 public class SpringbootAppTest {
@@ -42,5 +42,5 @@ public class SpringbootAppTest {
 
 
     }
-}
+}*/
   
