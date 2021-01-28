@@ -584,6 +584,7 @@ define([
                 },
                 handleAddProgramCommit: function () {
                     var self = this;
+
                     if (self.dialog.addProgram.autoBroad && !self.dialog.addProgram.autoBroadStart) {
                         this.$message({
                             message: '请选择自动播发起始时间',
@@ -591,6 +592,7 @@ define([
                         });
                         return;
                     }
+
                     if (self.dialog.addProgram.broadWay == self.broadWayStream && self.dialog.addProgram.outputQtUsers.length <= 0 && self.dialog.addProgram.outputPushUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.addProgram.output.length; i++) {
@@ -1132,6 +1134,15 @@ define([
                     self.dialog.setOutput.data.videoCodec = self.dialog.setOutput.videoCodec;
                     self.dialog.setOutput.data.audioCodec = self.dialog.setOutput.audioCodec;
                     self.dialog.setOutput.data.resolution = self.dialog.setOutput.resolution;
+
+                    if(self.dialog.setOutput.data.codeRate>self.dialog.setOutput.data.rate){
+                        this.$message({
+                            message: '输出码率应大于编码码率',
+                            type: 'warning'
+                        });
+                        self.dialog.setOutput.loading = false;
+                        return;
+                    }
 
                     self.handleSetOutputClose();
                 },
@@ -2181,6 +2192,7 @@ define([
                             }
                         }, null, ajax.NO_ERROR_CATCH_CODE);
                     } else {
+
                         self.$confirm("当前状态正常，是否执行播发任务?", "提示", {
                             type: 'wraning',
                             confirmButtonText: '确定',
