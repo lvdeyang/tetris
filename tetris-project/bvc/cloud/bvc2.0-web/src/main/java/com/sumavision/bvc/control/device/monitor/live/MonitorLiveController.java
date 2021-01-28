@@ -401,7 +401,7 @@ public class MonitorLiveController {
 		}
 		if(lives.size() == 1){
 			MonitorLiveDevicePO live = lives.get(0);
-			hasReset = locationOfScreenWallService.hasLiveForScreenWallAndReset(live, dstBundleId, dstVideoBundleName, user);
+			hasReset = locationOfScreenWallService.hasLiveForScreenWallAndReset(live, videoBundleId, videoBundleName, user);
 		}
 		if(!hasReset){
 			if(!queryUtil.isLdapBundle(srcBundle)){
@@ -432,8 +432,10 @@ public class MonitorLiveController {
 		}
 
 		operationLogService.send(user.getName(), "新建转发", srcBundle.getBundleName() + " 转发给 " + dstBundle.getBundleName());
-		
-		return new MonitorLiveDeviceVO().set(entity);
+		if(entity != null){
+			return new MonitorLiveDeviceVO().set(entity);
+		}
+		return null;
 	}
 	
 	/**
@@ -1010,7 +1012,7 @@ public class MonitorLiveController {
 		
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
-		locationOfScreenWallService.hasLiveForScreenWallAndExchangeStatus(idList, true, user.getUserno(), user.getId());
+		locationOfScreenWallService.hasLiveForScreenWallAndUnbind(idList, user);
 		
 		monitorLiveDeviceService.stop(idList, user.getId(), user.getUserno(), stopAndDelete);
 		

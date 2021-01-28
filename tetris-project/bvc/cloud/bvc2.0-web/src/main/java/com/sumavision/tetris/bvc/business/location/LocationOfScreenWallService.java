@@ -395,10 +395,10 @@ public class LocationOfScreenWallService {
 	 * @param live
 	 * @return
 	 */
-	public boolean hasLiveForScreenWallAndReset(MonitorLiveDevicePO live , String dstBundleId, String dstBundleName, UserVO user) throws Exception{
+	public boolean hasLiveForScreenWallAndReset(MonitorLiveDevicePO live , String videoBundleId, String videoBundleName, UserVO user) throws Exception{
 		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findByMonitorLiveDeviceId(live.getId());
 		if(screenWall != null){
-			bindEncoder(dstBundleId, dstBundleName, screenWall.getLocationX(), screenWall.getLocationY(), screenWall.getLocationTemplateLayoutId(), user);
+			bindEncoder(videoBundleId, videoBundleName, screenWall.getLocationX(), screenWall.getLocationY(), screenWall.getLocationTemplateLayoutId(), user);
 			return true;
 		}
 		return false;
@@ -417,7 +417,23 @@ public class LocationOfScreenWallService {
 	public void hasLiveForScreenWallAndExchangeStatus(List<Long> liveIds, Boolean stopOrStart, String userNo, Long userId) throws Exception{
 		List<LocationOfScreenWallPO> screenWallList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(liveIds);
 		for(LocationOfScreenWallPO screenWall : screenWallList){
-			exchangeLocationStatus(screenWall.getMonitorLiveDeviceId(), stopOrStart, userNo, userId);
+			exchangeLocationStatus(screenWall.getId(), stopOrStart, userNo, userId);
+			liveIds.remove(screenWall.getMonitorLiveDeviceId());
+		}
+	}
+	
+	/**
+	 * 查找屏幕墙上是否有对应live,并且解绑<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午3:29:59
+	 * @param liveIds 转发id集合
+	 * @param user 业务人员
+	 */
+	public void hasLiveForScreenWallAndUnbind(List<Long> liveIds,UserVO user) throws Exception{
+		List<LocationOfScreenWallPO> screenWallList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(liveIds);
+		for(LocationOfScreenWallPO screenWall : screenWallList){
+			unbindEncoder(screenWall.getId(), user);
 			liveIds.remove(screenWall.getMonitorLiveDeviceId());
 		}
 	}
