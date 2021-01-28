@@ -202,7 +202,10 @@
 			<artifactId>netty-all</artifactId>
 			<version>4.1.19.Final</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 		
 	</dependencies>
 	<dependencyManagement>
