@@ -66,7 +66,7 @@ public class TerminalMappingService {
 	 */
 	public void remove(Long id) throws Exception{
 		
-		TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findOne(id);
+		TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findById(id);
 		
 		List<PortMappingPO> portMappingPOs = portMappingDao.findBySrcBundleIdOrDstBundleId(bind.getBundleId(), bind.getBundleId()); 
 		
@@ -101,7 +101,7 @@ public class TerminalMappingService {
 	 */
 	public void removeAll(List<Long> ids) throws Exception{
 		
-		List<TerminalBindRepeaterPO> binds = terminalBindRepeaterDao.findAll(ids);
+		List<TerminalBindRepeaterPO> binds = terminalBindRepeaterDao.findAllById(ids);
 		
 		List<String> bundleIds = new ArrayList<String>();
 		for(TerminalBindRepeaterPO bind: binds){
@@ -347,7 +347,7 @@ public class TerminalMappingService {
 			
 		}
 		
-		portMappingDao.save(allMappings);
+		portMappingDao.saveAll(allMappings);
 		
 		return allMappings;
 	}
@@ -575,7 +575,7 @@ public class TerminalMappingService {
 			}
 		}
 		
-		portMappingDao.save(allMappings);
+		portMappingDao.saveAll(allMappings);
 		
 		return allMappings;
 	}
@@ -907,7 +907,7 @@ public class TerminalMappingService {
 					}
 				}
 				
-				portMappingDao.save(needAddMappings);
+				portMappingDao.saveAll(needAddMappings);
 				
 				for(PortMappingPO mappingPO: needAddMappings){
 					if(main != null){
@@ -920,7 +920,7 @@ public class TerminalMappingService {
 				}
 			}
 			
-			terminalBindRepeaterDao.save(binds);
+			terminalBindRepeaterDao.saveAll(binds);
 		}
 		
 		return binds;

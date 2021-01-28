@@ -5,9 +5,9 @@ spring:
     name: tetris-spring-zuul
   cloud:
     client:
-      ipAddress: 192.165.56.85
+      ipAddress: 192.165.56.111
     inetutils:
-      preferred-networks: 192.165.56.85
+      preferred-networks: 192.165.56.111
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/zuul?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
@@ -98,7 +98,7 @@ eureka:
   client:
 #注册中心地址
     service-url:
-      defaultZone: http://192.165.56.85:8081/eureka/
+      defaultZone: http://192.165.56.111:8081/eureka/
 #security:
 #  basic:
 #    enabled: false

@@ -1247,6 +1247,7 @@ public class TranscodeTaskService {
 							break;
 						}
 					}
+					throw new BaseException(StatusCode.FORBIDDEN,"任务输入异常");
 				}
 			}
 

@@ -70,6 +70,7 @@ import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserService;
 import com.sumavision.tetris.user.UserVO;
 
 import it.sauronsoftware.jave.Encoder;
@@ -159,6 +160,9 @@ public class MediaAudioService {
 	
 	@Autowired
 	CapacityService capacityService;
+	
+	@Autowired
+	private UserService userService;
 	
 	
 	/**
@@ -1071,6 +1075,9 @@ public class MediaAudioService {
 			tagDownloadPermissionDAO.saveAll(savePO);
 			//增加关联标签热度值
 			tagService.addHotCount(allTag);
+			
+			userService.addTagHotcount(user.getId(), media.getTags());
+			
 //			if (!userAddTag.isEmpty()) {
 //				userTag.addAll(userAddTag);
 //				String newUserTag = StringUtils.join(userTag.toArray(), ",");

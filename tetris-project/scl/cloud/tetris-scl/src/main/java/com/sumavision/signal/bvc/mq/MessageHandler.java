@@ -200,13 +200,6 @@ public class MessageHandler {
 
         String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
         processOpenBundle5GMsg(bundle);
-//        if(deviceModel != null){
-//            if(deviceModel.equals("5G")){
-//                processOpenBundle5GMsg(bundle);
-//            }
-//        }else{
-//
-//        }
     }
 
     /**处理colse_bundle信息

@@ -43,4 +43,12 @@ public interface RecordFileDAO extends BaseDAO<RecordFilePO>{
 	// List<String> listDayStrField(Long stgyId);
 
 	List<RecordFilePO> findByRecordStrategyIdAndStopTimeBefore(Long recordStgId, Date date);
+	
+	List<RecordFilePO> findByStorageIdAndStopTimeBefore(Long storageId, Date date);
+	
+	List<RecordFilePO> findByStorageIdOrderByStopTimeDesc(Long storageId);
+	
+	//List<RecordFilePO> findByStorageIdOrderByStopTimeAsc(Long storageId);
+	
+
 }

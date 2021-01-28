@@ -80,3 +80,10 @@ export const queryRecordFile = params => { return axiosInstance.post(`${basePath
 export const delRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/del`, qs.stringify(params)).then(res => res.data) }
 export const previewRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/preview`, qs.stringify(params)).then(res => res.data) }
 export const uploadFileToMims = params => { return axiosInstance.post(`${basePath}/record/file/uploadToMims`, qs.stringify(params)).then(res => res.data) }
+
+//存储
+export const addStorage = params => { return axiosInstance.post(`${basePath}/record/storage/addStorage`, qs.stringify(params)).then(res => res.data) }
+export const queryStorage = params => { return axiosInstance.post(`${basePath}/record/storage/queryStorage`, qs.stringify(params)).then(res => res.data) }
+export const queryAllStorage = params => { return axiosInstance.post(`${basePath}/record/storage/queryAllStorage`, qs.stringify(params)).then(res => res.data) }
+export const delStorage = params => { return axiosInstance.post(`${basePath}/record/storage/delStorage`, qs.stringify(params)).then(res => res.data) }
+export const checkIsExistRecordTask = params => { return axiosInstance.post(`${basePath}/record/storage/checkIsExistRecordTask`, qs.stringify(params)).then(res => res.data) }

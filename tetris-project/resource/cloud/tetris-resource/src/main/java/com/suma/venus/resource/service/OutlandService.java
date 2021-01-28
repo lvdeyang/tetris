@@ -302,9 +302,9 @@ public class OutlandService extends ControllerBase{
 			SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 			
 			//扩展参数
+			JSONObject params = new JSONObject();
 			List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
 			if(extraInfoPOs!=null && extraInfoPOs.size()>0){
-				JSONObject params = new JSONObject();
 				for(ExtraInfoPO extraInfo:extraInfoPOs){
 					params.put(extraInfo.getName(), extraInfo.getValue());
 				}
@@ -330,6 +330,7 @@ public class OutlandService extends ControllerBase{
 				pass_by_content.put("cmd", "foreignAdd");
 				pass_by_content.put("local", localSerNodeVO);
 				pass_by_content.put("foreign", foreign);
+				pass_by_content.put("extraInfo", params);
 				passByBO.setPass_by_content(pass_by_content);
 				if (workNodePOs != null && !workNodePOs.isEmpty()) {
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
@@ -485,9 +486,9 @@ public class OutlandService extends ControllerBase{
 		}		
 		
 		//扩展参数
+		JSONObject params = new JSONObject();
 		List<ExtraInfoPO> extraInfoPOs = extraInfoService.findBySerNodeId(serNodePO.getId());
 		if(extraInfoPOs!=null && extraInfoPOs.size()>0){
-			JSONObject params = new JSONObject();
 			for(ExtraInfoPO extraInfo:extraInfoPOs){
 				params.put(extraInfo.getName(), extraInfo.getValue());
 			}
@@ -520,6 +521,7 @@ public class OutlandService extends ControllerBase{
 				for (BundlePO bundlePO : bundlePOs) {
 					bundlePO.setEquipFactInfo(name);
 				}
+				bundleDao.saveAll(bundlePOs);
 			}
 		}
 		
@@ -546,6 +548,7 @@ public class OutlandService extends ControllerBase{
 			pass_by_content.put("cmd", "foreignEdit");
 			pass_by_content.put("local", local);
 			pass_by_content.put("foreign", foreign);
+			pass_by_content.put("extraInfo", params);
 			passByBO.setPass_by_content(pass_by_content);
 			if (workNodePOs != null && !workNodePOs.isEmpty()) {
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
@@ -739,7 +742,17 @@ public class OutlandService extends ControllerBase{
 		try {
 			List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
 			SerNodePO serNodePO = serNodeDao.findById(serNodeId);
-			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId, coderType);
+			Set<String> bundleIdsall = bundleService.queryBundleSetByMultiParams(deviceModel, SOURCE_TYPE.EXTERNAL.toString(), keyword, folderId);
+			List<BundlePO> allbundlePOs = bundleDao.findByBundleIdIn(bundleIdsall);
+			Set<String> externalBundle = new HashSet<String>();
+			if (null != allbundlePOs && allbundlePOs.size() > 0) {
+				for (BundlePO bundlePO : allbundlePOs) {
+					if (null != coderType && !"".equals(coderType) && !bundlePO.getCoderType().toString().equalsIgnoreCase(coderType)) {
+						externalBundle.add(bundlePO.getBundleId());
+					}
+				}
+				bundleIdsall.removeAll(externalBundle);
+			}
 			Set<String> bundleIds = new HashSet<String>();
 			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfo(serNodePO.getNodeName());
 			//测试数据用
@@ -1015,6 +1028,14 @@ public class OutlandService extends ControllerBase{
 	
 	private FolderTreeVO createBundleNode(Long parentId, BundlePO bundle) {
 		FolderTreeVO bundleNodeVO = FolderTreeVO.fromBundlePO(bundle);
+		List<ExtraInfoPO> extraInfoPOs = extraInfoService.findByBundleId(bundle.getBundleId());
+		if (extraInfoPOs != null&& extraInfoPOs.size()>0) {
+			JSONObject params = new JSONObject();
+			for(ExtraInfoPO extraInfo:extraInfoPOs){
+				params.put(extraInfo.getName(), extraInfo.getValue());
+			}
+			bundleNodeVO.setParam(params);
+		}
 		bundleNodeVO.setId(BUNDLE_NODE_ID_BASE + bundle.getId());
 		bundleNodeVO.setParentId(parentId);
 		bundleNodeVO.setName(bundle.getBundleName());

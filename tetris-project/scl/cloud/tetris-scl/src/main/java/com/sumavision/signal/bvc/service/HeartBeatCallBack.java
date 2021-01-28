@@ -45,7 +45,7 @@ public class HeartBeatCallBack extends HttpCallBack<Long, Object, Object, Object
 			ResourceServiceClient resourceServiceClient = SpringContext.getBean(ResourceServiceClient.class);
 			HeartBeatService heartBeatService = SpringContext.getBean(HeartBeatService.class);
 			
-			HeartBeatBundlePO bundle = heartBeatBundleDao.findOne(id);
+			HeartBeatBundlePO bundle = heartBeatBundleDao.findById(id);
 			
 			if(res.equals("<html>0<*1*></html>")){
 				//修改状态
@@ -109,7 +109,7 @@ public class HeartBeatCallBack extends HttpCallBack<Long, Object, Object, Object
 		Long id = this.getParam1();
 		HeartBeatBundleDAO heartBeatBundleDao = SpringContext.getBean(HeartBeatBundleDAO.class);
 		ResourceServiceClient resourceServiceClient = SpringContext.getBean(ResourceServiceClient.class);
-		HeartBeatBundlePO bundle = heartBeatBundleDao.findOne(id);
+		HeartBeatBundlePO bundle = heartBeatBundleDao.findById(id);
 		
 		//修改状态
 		if(bundle.getOnlineStatus().equals(OnlineStatus.ONLINE)){

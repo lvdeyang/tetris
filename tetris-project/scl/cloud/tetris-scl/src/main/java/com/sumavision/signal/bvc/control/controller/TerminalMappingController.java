@@ -182,7 +182,7 @@ public class TerminalMappingController {
 		
 		List<PortMappingPO> mappings = terminalMappingService.generatePortMapping(access,binds);
 		
-		terminalBindRepeaterDao.save(binds);
+		terminalBindRepeaterDao.saveAll(binds);
 		
 		return binds;
 	}

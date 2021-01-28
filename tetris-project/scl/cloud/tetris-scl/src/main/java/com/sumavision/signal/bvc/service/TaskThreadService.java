@@ -118,7 +118,7 @@ public class TaskThreadService {
 							}
 							
 							if(needAddTasks.size() > 0){
-								taskDao.save(needAddTasks);
+								taskDao.saveAll(needAddTasks);
 							}
 						}
 						
@@ -173,7 +173,7 @@ public class TaskThreadService {
 							}
 							
 							if(needUpdateTasks.size() > 0){
-								taskDao.save(needUpdateTasks);
+								taskDao.saveAll(needUpdateTasks);
 							}
 						}
 						

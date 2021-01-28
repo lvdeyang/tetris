@@ -52,7 +52,7 @@ public class RepeaterService {
 	 */
 	public void removeRepeater(Long id) throws Exception{
 		
-		RepeaterPO repeater = repeaterDao.findOne(id);
+		RepeaterPO repeater = repeaterDao.findById(id);
 		List<TerminalBindRepeaterPO> binds = terminalBindRepeaterDao.findByRepeaterId(id);
 		
 		List<String> bundleIds = new ArrayList<String>();
@@ -70,7 +70,7 @@ public class RepeaterService {
 		portMappingDao.deleteBySrcBundleIdInOrDstBundleIdIn(bundleIds, bundleIds);
 		terminalBindRepeaterDao.deleteByRepeaterId(id);
 		internetAccessDao.deleteByRepeaterId(id);
-		repeaterDao.delete(id);
+		repeaterDao.deleteById(id);
 		
 	}
 	
@@ -85,7 +85,7 @@ public class RepeaterService {
 		
 		portMappingDao.deleteBySrcAccessIdOrDstAccessId(id, id);
 		terminalBindRepeaterDao.deleteByAccessId(id);
-		internetAccessDao.delete(id);
+		internetAccessDao.deleteById(id);
 		
 	}
 	

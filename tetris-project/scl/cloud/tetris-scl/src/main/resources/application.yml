@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: tetris-scl
   cloud:
@@ -6,7 +8,7 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 10.10.40.24
+      ipAddress: 192.165.56.64
   profiles:
     active: pro
   datasource:
@@ -28,7 +30,7 @@ spring:
       min-evictable-idle-time-millis : 3600000
     resource:
    
-      url: jdbc:mysql://10.10.40.103:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
+      url: jdbc:mysql://192.165.56.131:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -86,7 +88,7 @@ eureka:
   client:
     serviceUrl:
 
-      defaultZone: http://10.10.40.103:8081/eureka/
+      defaultZone: http://192.165.56.131:8081/eureka/
 #      defaultZone: http://192.165.56.16:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}

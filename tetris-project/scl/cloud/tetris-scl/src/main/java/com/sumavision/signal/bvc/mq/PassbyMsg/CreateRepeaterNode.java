@@ -115,7 +115,7 @@ public class CreateRepeaterNode extends AbstractPassbyMsg {
                 }
             }
 
-            portMappingDao.save(mappingPOs);
+            portMappingDao.saveAll(mappingPOs);
 
             for(PortMappingPO mappingPO: mappingPOs){
                 mappingIds.add(mappingPO.getId());

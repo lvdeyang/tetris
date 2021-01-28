@@ -59,7 +59,7 @@ public class PortMappingController {
 			int currentPage,
 			HttpServletRequest request) throws Exception{
 		
-		PageRequest page = new PageRequest(currentPage-1, pageSize);
+		PageRequest page =  PageRequest.of(currentPage-1, pageSize);
 		
 		List<RepeaterPO> repeaters = repeaterDao.findByType(RepeaterType.MAIN);
 		Page<PortMappingPO> mappingPages = portMappingDao.findByDstType(DstType.TERMINAL, page);
@@ -111,7 +111,7 @@ public class PortMappingController {
 			int currentPage,
 			HttpServletRequest request) throws Exception{
 		
-		PageRequest page = new PageRequest(currentPage-1, pageSize);
+		PageRequest page = PageRequest.of(currentPage-1, pageSize);
 		
 		List<RepeaterPO> repeaters = repeaterDao.findByType(RepeaterType.BACKUP);
 		Page<PortMappingPO> mappingPages = portMappingDao.findByDstType(DstType.TERMINAL, page);
@@ -161,7 +161,7 @@ public class PortMappingController {
 			String netIp,
 			HttpServletRequest request) throws Exception{
 		
-		PortMappingPO mapping = portMappingDao.findOne(id);
+		PortMappingPO mapping = portMappingDao.findById(id);
 		
 		TaskPO task = taskDao.findByMappingIdAndIp(id, netIp);
 		

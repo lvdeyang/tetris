@@ -279,7 +279,7 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	private Set<String> queryUnbindedBundleIds(Long roleId, String deviceModel, String keyword ,String coderType) throws Exception {
-		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null, coderType);
+		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
 		if (bundleIds.isEmpty()) {
 			return null;
 		}
@@ -307,7 +307,7 @@ public class BindResourceController extends ControllerBase {
 	/** 查询角色具有权限的符合查询条件的bundle资源 */
 	private List<BundlePrivilegeBO> getBindedBundles(Long roleId, String deviceModel, String keyword, String coderType) throws Exception {
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
-		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null, coderType);
+		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
 		}
@@ -356,15 +356,17 @@ public class BindResourceController extends ControllerBase {
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
 		//Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, folderId);
 		//获取文件夹下的设备改为获取全部包含子文件夹
-		Set<String> bundleIds = bundleService.queryBundleSetByMultiParams(deviceModel, null, keyword, folderId, coderType);
+		Set<String> bundleIds = bundleService.queryBundleSetByMultiParams(deviceModel, null, keyword, folderId);
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
 		}else{
-			//过滤外域的设备
+			//过滤外域的设备h
 			Set<String> externalBundle = new HashSet<String>();
 			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
 			for(BundlePO bundlePO:bundlePOs){
 				if(bundlePO.getSourceType().equals(SOURCE_TYPE.EXTERNAL)){
+					externalBundle.add(bundlePO.getBundleId());
+				}else if (null != coderType && !"".equals(coderType) && !bundlePO.getCoderType().toString().equalsIgnoreCase(coderType)) {
 					externalBundle.add(bundlePO.getBundleId());
 				}
 			}
