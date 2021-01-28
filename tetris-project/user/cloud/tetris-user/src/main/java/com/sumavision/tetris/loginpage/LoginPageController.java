@@ -97,4 +97,29 @@ public class LoginPageController {
 		return null;
 	}
 	
+	/**
+	 * 修改登陆页面<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月20日 上午11:39:40
+	 * @param id
+	 * @param name
+	 * @param remark
+	 * @param tpl
+	 * @return
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit")
+	public Object editLoginPage(long id,String name,String remark,String tpl){
+		return loginPageService.editLoginPage(id, name, remark, tpl);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/make")
+	public Object makeLoginPage(long id){
+		return null;
+	}
+	
 }
