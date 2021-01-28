@@ -85,7 +85,7 @@ public class DeviceGroupController {
     @RequestMapping(value = "/updateAutoBackupFlag" , method = RequestMethod.POST)
     public ResponseEntity<String> updateAutoBackupFlag(@RequestParam Long id,@RequestParam Boolean flag,HttpServletRequest request) {
         try {
-            DeviceGroupPO deviceGroupPO = deviceGroupDao.findOne(id);
+            DeviceGroupPO deviceGroupPO = deviceGroupDao.findById(id);
             deviceGroupPO.setAutoBackupFlag(flag);
             deviceGroupDao.save(deviceGroupPO);
         } catch (Exception e) {

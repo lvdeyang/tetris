@@ -206,7 +206,7 @@ public class TaskService {
                 output.setCoverId(null);
                 output.setOutput(null);
                 output.setTask(null);
-                taskInputDao.save(inputs);
+                taskInputDao.saveAll(inputs);
                 taskOutputDao.save(output);
             } catch (ObjectOptimisticLockingFailureException e) {
                 // 版本不对，version校验
@@ -413,7 +413,7 @@ public class TaskService {
      * @return
      */
     public Boolean beUseForInputWithoutTask(Long inputId,String taskId){
-        TaskInputPO input = taskInputDao.findOne(inputId);
+        TaskInputPO input = taskInputDao.findById(inputId);
         if (input.getAnalysis()>0){
             return true;
         }
@@ -700,7 +700,7 @@ public class TaskService {
                 }
             }
 
-            taskInputDao.save(inputPOs);
+            taskInputDao.saveAll(inputPOs);
             taskOutputDao.deleteInBatch(outputs);
 
         }
@@ -759,7 +759,7 @@ public class TaskService {
             deleteTranscodeTask(previewPO.getPreviewTaskId());
             previewDao.updatePreviewTaskIdById(previewPO.getId(),"");
         }
-        previewDao.delete(previewPO.getId());
+        previewDao.deleteById(previewPO.getId());
     }
 }
 

@@ -143,7 +143,7 @@ public class TaskModifyService {
             }
         }
 
-        //删除输入
+        //删除输入 todo 此处有坑
         if (Objects.nonNull(taskSetVO.getDelete_input()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_input().getInput_array())){
             cmdQueue.add(getRequest(RequestMethod.DELETE, UrlConstant.URL_INPUT,JSON.toJSONString(taskSetVO.getDelete_input())));
 //			capacityService.deleteInputs(capacityIp, taskSetVO.getDelete_input());

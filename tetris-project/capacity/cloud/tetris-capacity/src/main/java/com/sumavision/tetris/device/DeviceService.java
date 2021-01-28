@@ -100,7 +100,7 @@ public class DeviceService {
     }
 
     public void deleteDevice(Long deviceId){
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         if(devicePO == null){
            return;
         }
@@ -215,7 +215,7 @@ public class DeviceService {
      * */
     public ResOptVO configDevice(Long deviceId , JSONArray nets) throws BaseException {
 
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         //检查网卡分组配置是否正确
         ResOptVO resOptVO = checkNetGroupConfig(devicePO.getId(),nets);
         if (!resOptVO.getBeSuccess()){
@@ -277,7 +277,7 @@ public class DeviceService {
         for (int i=0;i<nets.size();i++){
             JSONObject net = nets.getJSONObject(i);
             Long netCardInfoId = net.getLong("id");
-            NetCardInfoPO netCardInfoPO = netCardInfoDao.findOne(netCardInfoId);
+            NetCardInfoPO netCardInfoPO = netCardInfoDao.findById(netCardInfoId);
             if (net.containsKey("outputNetGroupId") && net.getLong("outputNetGroupId")!=null && netCardInfoPO!=null &&  netCardInfoPO.getBeCtrl()){
                 return true;
             }
@@ -287,14 +287,14 @@ public class DeviceService {
 
     public ResOptVO checkNetGroupConfig(Long deviceId , JSONArray nets) throws BaseException {
         Set<String> netGroupSet = new HashSet<>();
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         for (int i = 0 ; i < nets.size() ; i++) {
             JSONObject net = nets.getJSONObject(i);
             Long inNet = net.getLong("inputNetGroupId");
             Long outNet = net.getLong("outputNetGroupId");
 
             if (inNet != null ){
-                NetGroupPO inNetGroupPO = netGroupDao.findOne(inNet);
+                NetGroupPO inNetGroupPO = netGroupDao.findById(inNet);
                 if (inNetGroupPO!=null){
                     if (netGroupSet.contains(inNetGroupPO.getNetName()) ){
                         throw new BaseException(StatusCode.FORBIDDEN,"网卡分组配置重复");
@@ -305,7 +305,7 @@ public class DeviceService {
             }
 
             if (outNet != null) {
-                NetGroupPO outNetGroupPO = netGroupDao.findOne(outNet);
+                NetGroupPO outNetGroupPO = netGroupDao.findById(outNet);
                 if (outNetGroupPO != null) {
                     if (netGroupSet.contains(outNetGroupPO.getNetName()) ){
                         throw new BaseException(StatusCode.FORBIDDEN,"网卡分组配置重复");
@@ -365,13 +365,13 @@ public class DeviceService {
         Set<String> netGroups = new HashSet<>();
         netCardInfoDao.findByDeviceId(devicePO.getId()).stream().forEach(net->{
             if (net.getInputNetGroupId()!=null){
-                NetGroupPO netGroupPO = netGroupDao.findOne(net.getInputNetGroupId());
+                NetGroupPO netGroupPO = netGroupDao.findById(net.getInputNetGroupId());
                 if (netGroupPO!=null){
                     netGroups.add(netGroupPO.getNetName());
                 }
             }
             if (net.getOutputNetGroupId()!=null){
-                NetGroupPO netGroupPO = netGroupDao.findOne(net.getOutputNetGroupId());
+                NetGroupPO netGroupPO = netGroupDao.findById(net.getOutputNetGroupId());
                 if (netGroupPO!=null){
                     netGroups.add(netGroupPO.getNetName());
                 }
@@ -381,7 +381,7 @@ public class DeviceService {
     }
 
     public void editDevice(Long id,Long groupId,String name,String backTypeStr) throws Exception {
-        DevicePO one = deviceDao.findOne(id);
+        DevicePO one = deviceDao.findById(id);
         if (one==null){
             throw new BaseException(StatusCode.FORBIDDEN,"未找到设备");
         }
@@ -401,7 +401,7 @@ public class DeviceService {
      * */
     public boolean resetDevice(Long deviceId){
         LOGGER.info("resetDevice id:{}",deviceId);
-        DevicePO devicePO = deviceDao.findOne(deviceId);
+        DevicePO devicePO = deviceDao.findById(deviceId);
         netCardService.resetNetCardNetGroup(devicePO.getId());
         deviceDao.updateNetConfigById(deviceId,false);
         updateDataNetIds(devicePO.getDeviceGroupId());
@@ -410,7 +410,7 @@ public class DeviceService {
     }
 
     public void refreshNetcard(Long id) throws BaseException {
-        DevicePO devicePO = deviceDao.findOne(id);
+        DevicePO devicePO = deviceDao.findById(id);
         if (devicePO != null) {
             netCardService.getNetCardInfo(devicePO);//不更新控制口
             NetCardInfoPO netCardInfoPO = netCardInfoDao.findByIpv4OrVirtualIpv4(devicePO.getDeviceIp() , devicePO.getDeviceIp());
@@ -420,7 +420,7 @@ public class DeviceService {
     }
 
     public DevicePO getDeviceByIdWithNullCheck(Long id) throws BaseException {
-        DevicePO one = deviceDao.findOne(id);
+        DevicePO one = deviceDao.findById(id);
         if (one==null){
             throw new BaseException(StatusCode.FORBIDDEN,"设备不存在");
         }
@@ -438,7 +438,7 @@ public class DeviceService {
         DevicePO tgtDev = getDeviceByIdWithNullCheck(tgtDevId);
 
 
-        DeviceGroupPO deviceGroup = deviceGroupDao.findOne(srcDev.getDeviceGroupId());
+        DeviceGroupPO deviceGroup = deviceGroupDao.findById(srcDev.getDeviceGroupId());
         if (BackupStrategy.NPLUSM.equals(deviceGroup.getBackupStrategy())) {
             //N+M 手动切换
             SwitchMode mode = SwitchMode.MASTER2SLAVE;

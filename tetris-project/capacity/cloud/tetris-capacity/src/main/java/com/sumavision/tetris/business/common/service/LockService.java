@@ -1,15 +1,5 @@
 package com.sumavision.tetris.business.common.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -17,7 +7,6 @@ import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
-import com.sumavision.tetris.business.yjgb.vo.StreamTranscodingVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
@@ -28,9 +17,15 @@ import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javassist.bytecode.analysis.ControlFlow.Catcher;
-import redis.clients.jedis.Jedis;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Transactional(rollbackFor = Exception.class)
 @Service
@@ -311,7 +306,7 @@ public class LockService {
 		
 		if(output != null){
 			
-			TaskInputPO input = taskInputDao.findOne(output.getInputId());
+			TaskInputPO input = taskInputDao.findById(output.getInputId());
 			
 			if(input != null){
 				

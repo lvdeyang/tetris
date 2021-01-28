@@ -246,12 +246,12 @@ public class AlarmService {
 	}
 
 	public void netCardNoticeHandleFromXtool(String netStatus,Long deviceId){
-		DevicePO devicePO = deviceDao.findOne(deviceId);
+		DevicePO devicePO = deviceDao.findById(deviceId);
 		if(devicePO == null){
 			LOGGER.error("handleNetCardNotice err, device null");
 			return;
 		}
-		DeviceGroupPO deviceGroupPO = deviceGroupDao.findOne(devicePO.getDeviceGroupId());
+		DeviceGroupPO deviceGroupPO = deviceGroupDao.findById(devicePO.getDeviceGroupId());
 		if(deviceGroupPO == null){
 			LOGGER.error("handleNetCardNotice err, deviceGroupPO null");
 			return;

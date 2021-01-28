@@ -924,7 +924,7 @@ public class ScheduleService {
 		TaskInputPO scheduleInput = new TaskInputPO();
 
 		if (output.getScheduleId() != null) {
-			scheduleInput = taskInputDao.findOne(output.getScheduleId());
+			scheduleInput = taskInputDao.findById(output.getScheduleId());
 		}else{
 			List<TaskInputPO> inputs = taskInputDao.findByTaskUuidAndType(taskUuid, BusinessType.PUSH);
 			for (int i = 0; i < inputs.size(); i++) {
@@ -973,7 +973,7 @@ public class ScheduleService {
 				}
 				InputBO curInput = JSONObject.parseObject(taskInput.getInput(),InputBO.class);
 				inputIdRequests.add(new InputIdRequest(curInput.getId()));
-				taskInputDao.save(taskInputPOS);
+				taskInputDao.saveAll(taskInputPOS);
 			}
 			deleteScheduleRequest.setDelete_inputs(inputIdRequests);
 			capacityService.clearSchedule(output.getCapacityIp(),capacityProps.getPort(),inputId,deleteScheduleRequest);
@@ -1156,7 +1156,7 @@ public class ScheduleService {
 				}
 			}
 			
-			taskInputDao.save(inputs);
+			taskInputDao.saveAll(inputs);
 		}
 		
 		List<CapacityDeleteBO> bos = new ArrayList<CapacityDeleteBO>();

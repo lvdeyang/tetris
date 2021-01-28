@@ -39,7 +39,7 @@ public class DeviceGroupService {
      * @Date: 2020/12/23 8:45
      **/
     public void editDeviceGroup(Long id, String name,String backupStrategy) throws BaseException {
-        DeviceGroupPO temp = deviceGroupDao.findOne(id);
+        DeviceGroupPO temp = deviceGroupDao.findById(id);
         temp.setUpdateTime(new Date());
         if (!name.equals(temp.getName())){
             saveCheck(name);
@@ -81,7 +81,7 @@ public class DeviceGroupService {
 
 
     public DeviceGroupVO getDeviceGroup(Long id) {
-        DeviceGroupPO deviceGroupPO = deviceGroupDao.findOne(id);
+        DeviceGroupPO deviceGroupPO = deviceGroupDao.findById(id);
         List<DevicePO> devicePOS = deviceDao.findByDeviceGroupId(deviceGroupPO.getId());
         DeviceGroupVO deviceGroupVO = new DeviceGroupVO(deviceGroupPO,devicePOS);
         return deviceGroupVO;
@@ -111,7 +111,7 @@ public class DeviceGroupService {
     }
 
     public void delete(Long id) {
-        DeviceGroupPO deviceGroupPO = deviceGroupDao.findOne(id);
+        DeviceGroupPO deviceGroupPO = deviceGroupDao.findById(id);
         delete(deviceGroupPO);
     }
 

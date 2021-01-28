@@ -213,7 +213,7 @@ public class DirectorTaskService {
 					}
 				}
 				
-				taskInputDao.save(inputs);
+				taskInputDao.saveAll(inputs);
 
 			} catch (ObjectOptimisticLockingFailureException e) {
 				
@@ -312,7 +312,7 @@ public class DirectorTaskService {
 		
 		allRequestProcess(requestBOs);
 		
-		taskOutputDao.save(taskOutputs);
+		taskOutputDao.saveAll(taskOutputs);
 		
 	}
 	
@@ -383,7 +383,7 @@ public class DirectorTaskService {
 			}
 		}
 		
-		taskOutputDao.save(taskOutputs);
+		taskOutputDao.saveAll(taskOutputs);
 		
 	}
 	
@@ -1263,7 +1263,7 @@ public class DirectorTaskService {
 		List<Long> inputIds = JSONArray.parseArray(job.getInputList(), Long.class);
 		InputBO backBO = null;
 		for (int i = 0; i < inputIds.size(); i++) {
-			TaskInputPO inputPO = taskInputDao.findOne(inputIds.get(i));
+			TaskInputPO inputPO = taskInputDao.findById(inputIds.get(i));
 			if (inputPO == null){
 				continue;
 			}
