@@ -395,13 +395,14 @@ public class LocationOfScreenWallService {
 	 * @param live
 	 * @return
 	 */
-	public boolean hasLiveForScreenWallAndReset(MonitorLiveDevicePO live , String videoBundleId, String videoBundleName, UserVO user) throws Exception{
+	public MonitorLiveDevicePO hasLiveForScreenWallAndReset(MonitorLiveDevicePO live , String videoBundleId, String videoBundleName, UserVO user) throws Exception{
 		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findByMonitorLiveDeviceId(live.getId());
 		if(screenWall != null){
-			bindEncoder(videoBundleId, videoBundleName, screenWall.getLocationX(), screenWall.getLocationY(), screenWall.getLocationTemplateLayoutId(), user);
-			return true;
+			screenWall = bindEncoder(videoBundleId, videoBundleName, screenWall.getLocationX(), screenWall.getLocationY(), screenWall.getLocationTemplateLayoutId(), user);
+			MonitorLiveDevicePO newLive = monitorLiveDeviceDao.findOne(screenWall.getMonitorLiveDeviceId());
+			return newLive;
 		}
-		return false;
+		return null;
 	}
 	
 	/**

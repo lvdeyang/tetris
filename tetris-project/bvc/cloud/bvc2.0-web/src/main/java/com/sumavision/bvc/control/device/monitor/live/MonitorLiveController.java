@@ -395,15 +395,17 @@ public class MonitorLiveController {
 		//如果屏幕墙包含此解码器当成重新绑定编码器进行处理。如果屏幕墙没有包含，就走原来的创建
 		
 		List<MonitorLiveDevicePO> lives = monitorLiveDeviceDao.findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId);
-		boolean hasReset = false;
 		if(lives.size() > 1){
 			throw new BaseException(StatusCode.FORBIDDEN, "配置转发目的时，找到多个转发目的对应的转发没有停止");
 		}
 		if(lives.size() == 1){
 			MonitorLiveDevicePO live = lives.get(0);
-			hasReset = locationOfScreenWallService.hasLiveForScreenWallAndReset(live, videoBundleId, videoBundleName, user);
+			MonitorLiveDevicePO newLive = locationOfScreenWallService.hasLiveForScreenWallAndReset(live, videoBundleId, videoBundleName, user);
+			if(newLive != null){
+				entity = newLive;
+			}
 		}
-		if(!hasReset){
+		if(entity == null){
 			if(!queryUtil.isLdapBundle(srcBundle)){
 				
 				entity = monitorLiveDeviceService.startLocalSeeLocal(
@@ -432,10 +434,7 @@ public class MonitorLiveController {
 		}
 
 		operationLogService.send(user.getName(), "新建转发", srcBundle.getBundleName() + " 转发给 " + dstBundle.getBundleName());
-		if(entity != null){
-			return new MonitorLiveDeviceVO().set(entity);
-		}
-		return null;
+		return new MonitorLiveDeviceVO().set(entity);
 	}
 	
 	/**
