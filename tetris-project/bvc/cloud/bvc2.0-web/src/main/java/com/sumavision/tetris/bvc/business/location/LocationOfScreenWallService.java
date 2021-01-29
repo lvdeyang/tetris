@@ -386,5 +386,57 @@ public class LocationOfScreenWallService {
 			monitorLiveDeviceService.stop(liveIds, userId, userno, Boolean.TRUE);
 		}
 	}
-
+	
+	/**
+	 * 查找屏幕墙上是否有对应live,并且重新布置编码器<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午2:31:41
+	 * @param live
+	 * @return
+	 */
+	public MonitorLiveDevicePO hasLiveForScreenWallAndReset(MonitorLiveDevicePO live , String videoBundleId, String videoBundleName, UserVO user) throws Exception{
+		LocationOfScreenWallPO screenWall = locationOfScreenWallDao.findByMonitorLiveDeviceId(live.getId());
+		if(screenWall != null){
+			screenWall = bindEncoder(videoBundleId, videoBundleName, screenWall.getLocationX(), screenWall.getLocationY(), screenWall.getLocationTemplateLayoutId(), user);
+			MonitorLiveDevicePO newLive = monitorLiveDeviceDao.findOne(screenWall.getMonitorLiveDeviceId());
+			return newLive;
+		}
+		return null;
+	}
+	
+	/**
+	 * 查找屏幕墙上是否有对应live,并且修改状态<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午3:29:59
+	 * @param liveIds 转发id集合
+	 * @param stopOrStart TRUE停止,FALSE开始
+	 * @param userNo 业务人员名字
+	 * @param userId 业务人员id
+	 */
+	public void hasLiveForScreenWallAndExchangeStatus(List<Long> liveIds, Boolean stopOrStart, String userNo, Long userId) throws Exception{
+		List<LocationOfScreenWallPO> screenWallList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(liveIds);
+		for(LocationOfScreenWallPO screenWall : screenWallList){
+			exchangeLocationStatus(screenWall.getId(), stopOrStart, userNo, userId);
+			liveIds.remove(screenWall.getMonitorLiveDeviceId());
+		}
+	}
+	
+	/**
+	 * 查找屏幕墙上是否有对应live,并且解绑<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午3:29:59
+	 * @param liveIds 转发id集合
+	 * @param user 业务人员
+	 */
+	public void hasLiveForScreenWallAndUnbind(List<Long> liveIds,UserVO user) throws Exception{
+		List<LocationOfScreenWallPO> screenWallList = locationOfScreenWallDao.findByMonitorLiveDeviceIdIn(liveIds);
+		for(LocationOfScreenWallPO screenWall : screenWallList){
+			unbindEncoder(screenWall.getId(), user);
+			liveIds.remove(screenWall.getMonitorLiveDeviceId());
+		}
+	}
+	
 }
