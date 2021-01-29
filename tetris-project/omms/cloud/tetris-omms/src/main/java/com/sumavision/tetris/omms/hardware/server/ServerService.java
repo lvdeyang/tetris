@@ -60,6 +60,7 @@ import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficD
 import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
+import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataVO;
 import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsageDAO;
 import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsagePO;
 import com.sumavision.tetris.omms.software.service.deployment.ServiceDeploymentDAO;
@@ -102,6 +103,9 @@ public class ServerService {
 	
 	@Autowired
 	private ServerProcessUsageDAO serverProcessUsageDAO;
+	
+	@Autowired
+	private ServerOneDimensionalDataDAO serverOneDimensionalDataDAO;
 	
 	/**
 	 * 添加一个服务器<br/>
@@ -965,6 +969,7 @@ public class ServerService {
 	 */
 	public void processUsageTest(ServerOneDimensionalDataPO basicInfo, JSONObject serverInfo) throws Exception{
 		List<ServerAlarmPO> serverAlarmPOs = serverAlarmDAO.findAll();
+		Date date = new Date();
 		if (serverAlarmPOs != null && serverAlarmPOs.size()>0) {
 			ServerAlarmPO serverAlarmPO = serverAlarmPOs.get(0);
 			if (basicInfo.getCpuOccupy() > serverAlarmPO.getCpuRate()) {
@@ -973,7 +978,7 @@ public class ServerService {
 				basicInfo.setAlarmMessage(message.toString());
 				serverOneDimensionalDataDao.save(basicInfo);
 				List<ServerProcessUsagePO> serverProcessUsagePOs = new ArrayList<ServerProcessUsagePO>();
-				JSONArray process = serverInfo.getJSONArray("process");
+				JSONArray process = serverInfo.getJSONArray("Process");
 				if (process != null && process.size() > 0) {
 					Integer member = 0;
 					if (process.size()>10) {
@@ -986,6 +991,7 @@ public class ServerService {
 						ServerProcessUsagePO serverProcessUsagePO = new ServerProcessUsagePO();
 						serverProcessUsagePO.setDataId(basicInfo.getId());
 						serverProcessUsagePO.setName(jsonObject.getString("name"));
+						serverProcessUsagePO.setUpdateTime(date);
 						serverProcessUsagePO.setCpuUsage(jsonObject.getString("cpu_use"));
 						serverProcessUsagePO.setMemoryUsage(jsonObject.getString("mem_use"));
 						serverProcessUsagePOs.add(serverProcessUsagePO);
@@ -1011,48 +1017,62 @@ public class ServerService {
 	 */
 	public void singleCpuTest(ServerOneDimensionalDataPO basicInfo, JSONObject serverInfo) throws Exception{
 		List<ServerAlarmPO> serverAlarmPOs = serverAlarmDAO.findAll();
+		Date date = new Date();
 		if (serverAlarmPOs != null && serverAlarmPOs.size()>0) {
 			ServerAlarmPO serverAlarmPO = serverAlarmPOs.get(0);
 			List<ServerProcessUsagePO> serverProcessUsagePOs = new ArrayList<ServerProcessUsagePO>();
 			StringBufferWrapper message = new StringBufferWrapper();
- 			JSONArray process = serverInfo.getJSONArray("process");
+			ServerPO serverPO = serverDao.findOne(basicInfo.getServerId());
+ 			JSONArray process = serverInfo.getJSONArray("Process");
 			if (process != null && process.size() > 0) {
 				for (int i = 0; i < process.size(); i++) {
 					JSONObject jsonObject = process.getJSONObject(i);
 					if (Float.parseFloat(jsonObject.getString("cpu_use")) > serverAlarmPO.getProcessCpu()) {
 						ServerProcessUsagePO serverProcessUsagePO = new ServerProcessUsagePO();
 						serverProcessUsagePO.setDataId(basicInfo.getId());
+						serverProcessUsagePO.setUpdateTime(date);
 						serverProcessUsagePO.setName(jsonObject.getString("name"));
 						serverProcessUsagePO.setCpuUsage(jsonObject.getString("cpu_use"));
 						serverProcessUsagePO.setMemoryUsage(jsonObject.getString("mem_use"));
 						serverProcessUsagePOs.add(serverProcessUsagePO);
-						message.append("进程 ")
+						message = new StringBufferWrapper().append("进程 ")
 								.append(serverProcessUsagePO.getName())
 								.append(" CPU使用达到了 ")
 								.append(serverProcessUsagePO.getCpuUsage())
 								.append(System.getProperty("line.separator"));
+						basicInfo.setAlarmMessage(message.toString());
+						serverPO.setIsAlarm(true);
 					}
 				}
-				basicInfo.setAlarmMessage(message.toString());
+				
 				serverOneDimensionalDataDao.save(basicInfo);
-				ServerPO serverPO = serverDao.findOne(basicInfo.getServerId());
-				serverPO.setIsAlarm(true);
 				serverDao.save(serverPO);
 				serverProcessUsageDAO.save(serverProcessUsagePOs);
 			}
 		}
 	}
 	
-	public static void main(String[] args){
-		Float aFloat = 4.45F;
-		Long bLong = 3L;
-		if (aFloat > bLong) {
-			System.out.println(true);
-		}else {
-			System.out.println(false);
+	/**
+	 * 删除告警信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午7:55:04
+	 * @param serverId 服务器id
+	 */
+	public Object deleteAlarmMessage(Long serverId) {
+		List<ServerOneDimensionalDataPO> serverOneDimensionalDataPOs = serverOneDimensionalDataDAO.findByServerIdAndAlarmMessageNotNULL(serverId);
+		List<Long> dataIds = new ArrayList<Long>();
+		if(serverOneDimensionalDataPOs != null && serverOneDimensionalDataPOs.size() > 0){
+			for (ServerOneDimensionalDataPO serverOneDimensionalDataPO : serverOneDimensionalDataPOs) {
+				serverOneDimensionalDataPO.setAlarmMessage(null);
+				dataIds.add(serverOneDimensionalDataPO.getId());
+			}
 		}
-		
-		ServerOneDimensionalDataPO basicInfo = new ServerOneDimensionalDataPO();
-		System.out.println(basicInfo.getId());
+		List<ServerProcessUsagePO> serverProcessUsagePOs = serverProcessUsageDAO.findByDataIdIn(dataIds);
+		if (serverProcessUsagePOs != null && serverProcessUsagePOs.size() >0) {
+			serverProcessUsageDAO.deleteInBatch(serverProcessUsagePOs);
+		}
+		return null;
 	}
 }

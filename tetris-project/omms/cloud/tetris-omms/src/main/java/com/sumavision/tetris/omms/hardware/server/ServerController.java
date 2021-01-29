@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
-import com.sumavision.tetris.omms.auth.AuthPO;
-import com.sumavision.tetris.omms.auth.AuthVO;
 
 @Controller
 @RequestMapping(value = "/server")
@@ -362,4 +360,36 @@ public class ServerController {
 		
 	}
 	
+	/**
+	 * 查询具体的进程CPU占用率<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午6:20:27
+	 * @param dataId 服务器数据id
+	 * @return List<ServerProcessUsageVO> 进程的详细数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/show/alarm/details")
+	public Object showAlarmDetails(Long dataId)throws Exception{
+		
+		return serverQuery.showAlarmDetails(dataId);
+	}
+	
+	/**
+	 * 删除告警信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午7:55:04
+	 * @param serverId 服务器id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/alarm/message")
+	public Object deleteAlarmMessage(Long serverId)throws Exception{
+		
+		return serverService.deleteAlarmMessage(serverId);
+	}
 }

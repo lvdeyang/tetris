@@ -26,6 +26,9 @@ import com.sumavision.tetris.omms.hardware.server.data.ServerNetworkCardTrafficD
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataDAO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataPO;
 import com.sumavision.tetris.omms.hardware.server.data.ServerOneDimensionalDataVO;
+import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsageDAO;
+import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsagePO;
+import com.sumavision.tetris.omms.hardware.server.data.process.ServerProcessUsageVO;
 
 @Component
 public class ServerQuery {
@@ -50,6 +53,9 @@ public class ServerQuery {
 	
 	@Autowired
 	private ServerOneDimensionalDataDAO serverOneDimensionalDataDAO;
+	
+	@Autowired
+	private ServerProcessUsageDAO serverProcessUsageDAO;
 	
 	/**
 	 * 分页查询服务器<br/>
@@ -172,5 +178,26 @@ public class ServerQuery {
 			}
 		}
 		return serverOneDimensionalDataVOs;
+	}
+
+	/**
+	 * 查询具体的进程CPU占用率<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午6:20:27
+	 * @param dataId 服务器数据id
+	 * @return List<ServerProcessUsageVO> 进程的详细数据
+	 */
+	public List<ServerProcessUsageVO> showAlarmDetails(Long dataId) throws Exception{
+		List<ServerProcessUsagePO> serverProcessUsagePOs =serverProcessUsageDAO.findByDataId(dataId);
+		List<ServerProcessUsageVO> serverProcessUsageVOs = new ArrayList<ServerProcessUsageVO>();
+		if(serverProcessUsagePOs != null && serverProcessUsagePOs.size() >0){
+			for (ServerProcessUsagePO serverProcessUsagePO : serverProcessUsagePOs) {
+				ServerProcessUsageVO serverProcessUsageVO = new ServerProcessUsageVO().set(serverProcessUsagePO);
+				serverProcessUsageVOs.add(serverProcessUsageVO);
+			}
+		}
+		return serverProcessUsageVOs;
 	}
 }

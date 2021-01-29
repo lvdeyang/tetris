@@ -93,6 +93,12 @@ define([
                         visible:false,
                         loading:false,
                         data:[],
+                        serverId:'',
+                    },
+                    details:{
+                        visible:false,
+                        loading:false,
+                        data:[],
                     },
                 }
             },
@@ -443,12 +449,53 @@ define([
                 showAlarm:function(scope){
                     var self = this;
                     var row = scope.row;
+                    var serverId = row.id;
+                    self.dialog.alarmMessage.serverId = serverId;
                     self.dialog.alarmMessage.visible = true;
+                    ajax.post('/server/show/alarm/message',{serverId},function(data,status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.alarmMessage.data.push(data[i]);
+                            }
+                        }
+                    })
                 },
                 showAlarmClose:function(){
                     var self = this;
                     self.dialog.alarmMessage.visible = false;
-                }
+                    self.dialog.alarmMessage.loading = false;
+                    self.dialog.alarmMessage.data = [];
+                },
+                alarmDetails:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    var dataId = row.id;
+                    self.dialog.details.visible = true;
+                    ajax.post('/server/show/alarm/details',{dataId},function(data,status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.details.data.push(data[i]);
+                            }
+                        }
+                    })
+                },
+                showDetailsClose:function(){
+                    var self = this;
+                    self.dialog.details.visible = false;
+                    self.dialog.details.loading = false;
+                    self.dialog.details.data = [];
+                },
+                showAlarmDelete:function(){
+                    var self = this;
+                    var serverId = self.dialog.alarmMessage.serverId;
+                    ajax.post('/server/delete/alarm/message',{serverId},function(data,status){
+                        if(status !== 200) return;
+                        self.dialog.alarmMessage.visible = false;
+                        self.dialog.alarmMessage.data = [];
+                    })
+                },
             },
             mounted:function(){
                 var self = this;
