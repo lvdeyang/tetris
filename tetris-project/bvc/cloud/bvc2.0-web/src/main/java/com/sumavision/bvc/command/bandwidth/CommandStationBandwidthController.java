@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -15,9 +15,6 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @RequestMapping("/command/station/bandwidth")
 public class CommandStationBandwidthController {
 
-	@Autowired
-	private UserUtils userUtils;
-	
 	@Autowired
 	private CommandStationBandwidthDAO commandStationBandwidthDao;
 	
@@ -44,8 +41,9 @@ public class CommandStationBandwidthController {
 			Integer singleWidth,
 			String identity) throws Exception{
 		
-		CommandStationBandwidthPO station=new CommandStationBandwidthPO();
+		commandStationBandwidthService.alreadyExist(stationName, identity);
 		
+		CommandStationBandwidthPO station=new CommandStationBandwidthPO();
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
@@ -85,6 +83,7 @@ public class CommandStationBandwidthController {
 	 * @param singleWidth 单个带宽
 	 * @return
 	 * @throws ParseException
+	 * @throws BaseException 
 	 */
 	@JsonBody
 	@ResponseBody
@@ -94,7 +93,9 @@ public class CommandStationBandwidthController {
 			String stationName,
 			Integer totalWidth,
 			Integer singleWidth,
-			String identity) throws ParseException{
+			String identity) throws Exception{
+		
+		commandStationBandwidthService.alreadyExist(stationName, identity);
 
 		CommandStationBandwidthPO station=commandStationBandwidthDao.findOne(id);
 		
@@ -120,7 +121,7 @@ public class CommandStationBandwidthController {
 	@RequestMapping(value="/query")
 	public Object query(){
 		
-		commandStationBandwidthService.syncSerNodeToStation();
+//		commandStationBandwidthService.syncSerNodeToStation();
 		return new HashMapWrapper<String, Object>().put("rows", commandStationBandwidthDao.findAll()).getMap();
 		
 	}
