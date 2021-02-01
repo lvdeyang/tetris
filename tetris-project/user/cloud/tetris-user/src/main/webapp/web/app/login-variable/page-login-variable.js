@@ -70,6 +70,7 @@ define([
                         variableKey:'',
                         variableType:'',
                         variableTypeId:'',
+                        typeName:'',
                         file:'',
                     },
                     upload:{
@@ -248,6 +249,7 @@ define([
                     self.dialog.edit.variableKey = row.variableKey;
                     self.dialog.edit.text = row.value;
                     self.dialog.edit.variableType = row.type;
+                    self.dialog.edit.typeName = row.typeName;
                     self.dialog.edit.variableTypeId = row.variableTypeId;
                     self.dialog.edit.visible = true;
                 },

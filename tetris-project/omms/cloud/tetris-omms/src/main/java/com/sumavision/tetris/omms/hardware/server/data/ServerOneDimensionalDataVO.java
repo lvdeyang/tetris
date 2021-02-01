@@ -50,6 +50,19 @@ public class ServerOneDimensionalDataVO extends AbstractBaseVO<ServerOneDimensio
 	
 	/** 风扇转速 */
 	private Long fanspeed;
+	
+	/** 告警信息 */
+	private String alarmMessage;
+	
+
+	public String getAlarmMessage() {
+		return alarmMessage;
+	}
+
+	public ServerOneDimensionalDataVO setAlarmMessage(String alarmMessage) {
+		this.alarmMessage = alarmMessage;
+		return this;
+	}
 
 	public Long getMemoryTotal() {
 		return memoryTotal;
@@ -204,7 +217,8 @@ public class ServerOneDimensionalDataVO extends AbstractBaseVO<ServerOneDimensio
 			.setLastRebootTime(entity.getLastRebootTime())
 			.setUpTime(entity.getUpTime())
 			.setTemperature(entity.getTemperature())
-			.setFanspeed(entity.getFanspeed());
+			.setFanspeed(entity.getFanspeed())
+			.setAlarmMessage(entity.getAlarmMessage());
 		return this;
 	}
 	
