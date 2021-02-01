@@ -18,6 +18,7 @@ public class VariableVO extends AbstractBaseVO<VariableVO,VariablePO>{
 	/**	类型*/
 	private String type;
 	
+
 	public String getVariableTypeId() {
 		return variableTypeId;
 	}
@@ -69,5 +70,6 @@ public class VariableVO extends AbstractBaseVO<VariableVO,VariablePO>{
 			.setValue(entity.getValue());
 		return this;
 	}
+
 
 }
