@@ -83,7 +83,7 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private String resolution;
 	
 	/**是否轮播*/
-	private boolean rotation;
+	//private boolean rotation;
 	
 	/**垫播媒资地址*/
 	private String backfileUrl;
@@ -201,14 +201,14 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		return this;
 	}
 
-	public boolean isRotation() {
+	/*public boolean isRotation() {
 		return rotation;
 	}
 
 	public ChannelVO setRotation(boolean rotation) {
 		this.rotation = rotation;
 		return this;
-	}
+	}*/
 
 	public String getTranscodeTemplateId() {
 		return transcodeTemplateId;
