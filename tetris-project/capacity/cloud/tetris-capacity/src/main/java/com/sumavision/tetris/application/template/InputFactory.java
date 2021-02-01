@@ -8,6 +8,7 @@ import com.sumavision.tetris.business.common.MissionBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.enumeration.MediaType;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
+import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.capacity.bo.input.*;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -32,6 +33,24 @@ public class InputFactory{
         return null;
     }
 
+
+    public InputBO getBackupInputByTemplateInput(MissionBO missionBO, JSONObject backup) throws BaseException {
+        InputBO inputBO = new InputBO();
+        Integer idx = missionBO.getInputMap().size();
+        inputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.INPUT));
+        if (missionBO.getTaskType()== TaskType.PASSBY) {
+            inputBO.setBack_up_passby(new BackUpPassByBO(missionBO,backup));
+        }else if (missionBO.getTaskType()==TaskType.PACKAGE){
+            inputBO.setBack_up_es(new BackUpEsAndRawBO(missionBO,backup));
+        }else if (missionBO.getTaskType()==TaskType.TRANS){
+            inputBO.setBack_up_raw(new BackUpEsAndRawBO(missionBO,backup));
+        }else{
+            throw new BaseException(StatusCode.ERROR,"not support task type: " + missionBO.getTaskType());
+        }
+        setProgramArrayForInput(missionBO,inputBO,backup);
+
+        return inputBO;
+    }
 
     public InputBO getInputByTemplateInput(MissionBO missionBO, SourceVO tmplInputBO) throws BaseException {
 
@@ -100,6 +119,8 @@ public class InputFactory{
             case SCHEDULE://schedule要最后处理
                 inputBO.setSchedule(new InputScheduleBO(tmplInputBO));
                 break;
+            case BACKUP://特殊输入，单独处理
+                break;
  //todo 暂不考虑主备垫
             default:
                 throw new BaseException(StatusCode.ERROR,"not support input package type" + tmplInputBO.getType());
@@ -161,6 +182,52 @@ public class InputFactory{
                 programBOList.add(program);
             }else{
                 throw new BaseException(StatusCode.ERROR,"not support input media type"+tmplInputBO.getMediaType());
+            }
+        }
+        inputBO.setProgram_array(programBOList);
+    }
+
+    public void setProgramArrayForInput(MissionBO missionBO,InputBO inputBO,JSONObject inputObj) throws BaseException {
+        List<ProgramBO> programBOList = new ArrayList<>();
+        if (inputObj.containsKey("program_array")){ //模板里有了节目组就不用拼接了
+            programBOList = JSONArray.parseArray(inputObj.getString("program_array"),ProgramBO.class);
+            if (inputObj.containsKey("mediaType") && inputObj.getString("mediaType").equals("audio")){
+                programBOList.get(0).setVideo_array(null);
+            }
+        }else{
+            if(!inputObj.containsKey("mediaType") || inputObj.getString("mediaType").equals("video")){
+                ProgramBO program = new ProgramBO().setProgram_number(1)
+                        .setVideo_array(new ArrayList())
+                        .setAudio_array(new ArrayList())
+                        .setMedia_type_once_map(new JSONObject());
+
+                ProgramVideoBO video = new ProgramVideoBO().setPid(513)
+                        .setDecode_mode("cpu");
+//                missionBO.getMediaTypeMap().put(513, "video");
+
+                ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
+                        .setDecode_mode("cpu");
+//                missionBO.getMediaTypeMap().put(514, "audio");
+
+                program.getVideo_array().add(video);
+                program.getAudio_array().add(audio);
+
+                programBOList.add(program);
+            }else if(inputObj.getString("mediaType").equals("audio")){
+
+                ProgramBO program = new ProgramBO().setProgram_number(1)
+                        .setAudio_array(new ArrayList())
+                        .setMedia_type_once_map(new JSONObject());
+
+                ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
+                        .setDecode_mode("cpu");
+//                missionBO.getMediaTypeMap().put(514, "audio");
+
+                program.getAudio_array().add(audio);
+
+                programBOList.add(program);
+            }else{
+                throw new BaseException(StatusCode.ERROR,"not support input media type"+inputObj.getString("mediaType"));
             }
         }
         inputBO.setProgram_array(programBOList);

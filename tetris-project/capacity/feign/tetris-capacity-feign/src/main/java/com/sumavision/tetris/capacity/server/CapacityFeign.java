@@ -431,5 +431,23 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/director/task/feign/task/transfer")
 	public JSONObject transferTask(@RequestParam("task") String taskInfo) throws Exception;
 
+	@RequestMapping(value = "/template/task/feign/delete")
+	public JSONObject deleteTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/template/task/feign/source/switch")
+	public JSONObject switchBackupForTask(@RequestParam("task") String taskInfo) throws Exception;
+
+
+	@RequestMapping(value = "/template/task/feign/source/add")
+	public JSONObject addSourcesForTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/template/task/feign/source/delete")
+	public JSONObject deleteSourceForTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/template/task/feign/output/add")
+	public JSONObject addOutputsForTask(@RequestParam("task") String taskInfo) throws Exception;
+
+	@RequestMapping(value = "/template/task/feign/output/delete")
+	public JSONObject deleteOutputForTask(@RequestParam("task") String taskInfo) throws Exception;
 
 }

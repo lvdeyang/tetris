@@ -143,16 +143,22 @@ public class TaskModifyService {
             }
         }
 
-        //删除输入 todo 此处有坑
+        //删除输入 先判断该输入是否其他任务再用，有用则不删除
         if (Objects.nonNull(taskSetVO.getDelete_input()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_input().getInput_array())){
-            cmdQueue.add(getRequest(RequestMethod.DELETE, UrlConstant.URL_INPUT,JSON.toJSONString(taskSetVO.getDelete_input())));
-//			capacityService.deleteInputs(capacityIp, taskSetVO.getDelete_input());
             List<String> delInputList = taskSetVO.getDelete_input().getInput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
-            taskInputPOS.stream().forEach(i->{
-                InputBO inputBO = JSONObject.parseObject(i.getInput(),InputBO.class);
-                if (delInputList.contains(inputBO.getId())){
-                    taskInputDao.delete(i);
-                    inputIds.remove(i.getId());
+            taskInputPOS.stream().forEach(input->{
+                if (delInputList.contains(input.getNodeId()) ){
+                    if (taskService.beUseForInputWithoutTask(input.getId(),taskUuid)) {
+                        if (input.getCount()>1) {//没删之前，那就至少两个任务占用
+                            input.setCount(input.getCount()-1);
+                            input.setUpdateTime(new Date());
+                            taskInputDao.save(input);
+                        }
+                    }else{
+                        cmdQueue.add(getRequest(RequestMethod.DELETE, UrlConstant.URL_INPUT,JSON.toJSONString(taskSetVO.getDelete_input())));
+                        taskInputDao.delete(input);
+                    }
+                    inputIds.remove(input.getId());
                 }
             });
             taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));

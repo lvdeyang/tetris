@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 @RepositoryDefinition(domainClass = TaskOutputPO.class, idClass = Long.class)
 public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 
+	public List<TaskOutputPO> findByTaskUuid(String taskUuid);
 	public TaskOutputPO findByTaskUuidAndType(String taskUuid, BusinessType type);
 	public TaskOutputPO findByCapacityIpAndTaskUuidAndType(String deviceIp,String taskUuid, BusinessType type);
 
