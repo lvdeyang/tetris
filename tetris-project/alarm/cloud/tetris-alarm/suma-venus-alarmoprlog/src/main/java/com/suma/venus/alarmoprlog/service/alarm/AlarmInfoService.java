@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,7 +36,7 @@ public class AlarmInfoService {
 		Workbook workbook = null;
 		try {
 			workbook = WorkbookFactory.create(is);
-		} catch (InvalidFormatException | IOException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			data.put("errMsg", "Open excel file error");
 		}
@@ -49,8 +50,7 @@ public class AlarmInfoService {
 			AlarmInfoPO alarmInfoPO;
 			try {
 				Row row = sheet.getRow(i);
-
-				row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);
+				row.getCell(0).setCellType(CellType.STRING);
 				if (StringUtils.isEmpty(row.getCell(0).getStringCellValue())
 						|| StringUtils.isEmpty(row.getCell(1).getStringCellValue())
 						|| transferAlarmLevel(row.getCell(3).getStringCellValue()) == null) {
@@ -107,7 +107,7 @@ public class AlarmInfoService {
 		switch (str) {
 		case "INFO":
 			return EAlarmLevel.INFO;
-		case "MINOR":                                                                                                                                                                                                                                                                                                                                                                                                     
+		case "MINOR":
 			return EAlarmLevel.MINOR;
 		case "MAJOR":
 			return EAlarmLevel.MAJOR;
