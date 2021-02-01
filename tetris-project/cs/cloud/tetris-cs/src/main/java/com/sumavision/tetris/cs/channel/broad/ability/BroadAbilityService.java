@@ -2437,6 +2437,7 @@ public class BroadAbilityService {
 		data.put("userId", broadUserIds);
 		data.put("uuid",schedulePO.getUuid());
 		data.put("channelName", channelPO.getName());
+		System.out.println(data.toString());
 		return data;
 	}
 	
