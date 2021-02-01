@@ -16,8 +16,27 @@ public class VariableVO extends AbstractBaseVO<VariableVO,VariablePO>{
 	private String variableKey;
 	
 	/**	类型*/
-	private String type;
+	private Type type;
 	
+	private String typeName;
+	
+	public Type getType() {
+		return type;
+	}
+
+	public VariableVO setType(Type type) {
+		this.type = type;
+		return this;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public VariableVO setTypeName(String typeName) {
+		this.typeName = typeName;
+		return this;
+	}
 
 	public String getVariableTypeId() {
 		return variableTypeId;
@@ -53,14 +72,6 @@ public class VariableVO extends AbstractBaseVO<VariableVO,VariablePO>{
 	public VariableVO setVariableKey(String variableKey) {
 		this.variableKey = variableKey;
 		return this;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	@Override
