@@ -11,8 +11,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <b>日期：</b>2021年1月13日 下午3:40:50
  */
 public enum Type {
-	IMG("img"),
-	TEXT("text");
+	IMG("图片"),
+	TEXT("文本");
 	
 	/** value值类型名称 */
 	private String name;

@@ -34,6 +34,9 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 	//设置最大文件尺寸，这里是50MB
 	private long maxSize = 1024*1024*50;
 	
+	//feign上传最大文件尺寸多设2M以免传不上来
+	private long overflowSize = 1024*1024*2;
+	
 	private Map<String, Object> params;
 	
 	private HttpServletRequest nativeRequest;
@@ -52,7 +55,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		super(request);
 		this.nativeRequest = request;
 		//this.cachedRequest = new CachedHttpServletRequestWrapper(request);
-		this.maxSize = maxSize;
+		this.maxSize = maxSize + overflowSize;
 		this.params = new HashMap<String, Object>();
 		parse();
 	}
@@ -62,7 +65,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		this.nativeRequest = request;
 		//this.cachedRequest = new CachedHttpServletRequestWrapper(request);
 		this.bufferSize = bufferSize;
-		this.maxSize = maxSize;
+		this.maxSize = maxSize + overflowSize;
 		this.params = new HashMap<String, Object>();
 		parse();
 	}
@@ -79,7 +82,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		super(request.getNativeRequest());
 		this.nativeRequest = request.getNativeRequest();
 		//this.cachedRequest = request;
-		this.maxSize = maxSize;
+		this.maxSize = maxSize + overflowSize;
 		this.params = new HashMap<String, Object>();
 		parse();
 	}
@@ -89,7 +92,7 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		this.nativeRequest = request.getNativeRequest();
 		//this.cachedRequest = request;
 		this.bufferSize = bufferSize;
-		this.maxSize = maxSize;
+		this.maxSize = maxSize + overflowSize;
 		this.params = new HashMap<String, Object>();
 		parse();
 	}

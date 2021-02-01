@@ -43,6 +43,17 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 	/** 服务器状态 */
 	private String status;
 	
+	/** 是否存在告警 */
+	private Boolean isAlarm;
+	
+	public Boolean getIsAlarm() {
+		return isAlarm;
+	}
+
+	public void setIsAlarm(Boolean isAlarm) {
+		this.isAlarm = isAlarm;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -177,7 +188,8 @@ public class ServerVO extends AbstractBaseVO<ServerVO, ServerPO>{
 			.setStatus(entity.getStatus().getName())
 			.setFtpUsername(entity.getFtpUsername())
 			.setFtpPort(entity.getFtpPort())
-			.setFtpPassword(entity.getFtpPassword());
+			.setFtpPassword(entity.getFtpPassword())
+			.setIsAlarm(entity.getIsAlarm() == null?false:entity.getIsAlarm());;
 		return this;
 	}
 

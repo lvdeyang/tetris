@@ -40,6 +40,7 @@ define([
                         visible: false,
                         type:'',
                         name:'',
+                        typeName:'',
                         variableKey:'',
                     },
                     edit:{
@@ -48,6 +49,7 @@ define([
                         id:'',
                         type:'',
                         name:'',
+                        typeName:'',
                         variableKey:'',
                     },
                 }
@@ -158,6 +160,7 @@ define([
                     self.dialog.edit.name = row.name;
                     self.dialog.edit.variableKey = row.variableKey;
                     self.dialog.edit.type = row.type;
+                    self.dialog.edit.typeName=row.typeName;
                     self.dialog.edit.visible = true;
                 },
                 handleEditVariableSubmit:function(){
@@ -188,7 +191,7 @@ define([
                             id:self.dialog.edit.id,
                             name:self.dialog.edit.name,
                             variableKey:self.dialog.edit.variableKey,
-                            type:self.dialog.edit.type
+                            type:self.dialog.edit.typeName
                         },function(data,status){
                             self.dialog.edit.loading = false;
                             if(status != 200) return;
@@ -207,6 +210,7 @@ define([
                     self.dialog.edit.name = '';
                     self.dialog.edit.variableKey = '';
                     self.dialog.edit.type = '';
+                    self.dialog.edit.typeName='',
                     self.dialog.edit.loading = false;
                     self.dialog.edit.visible = false;
                 },
