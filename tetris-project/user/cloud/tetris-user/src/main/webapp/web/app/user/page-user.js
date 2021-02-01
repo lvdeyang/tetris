@@ -1,6 +1,4 @@
-/**
- * Created by lvdeyang on 2018/12/24 0024.
- */
+
 define([
     'text!' + window.APPPATH + 'user/page-user.html',
     window.APPPATH + 'user/page-user.i18n',

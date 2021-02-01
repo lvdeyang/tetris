@@ -172,8 +172,8 @@ public class ChannelService {
 		UserVO user = userQuery.current();
 		
 		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
-		VideoCodec channelVideoCodec = VideoCodec.fromName(videoCodec);
-		AudioCodec channelAudioCodec = AudioCodec.fromName(audioCodec);
+		
+		
 		ChannelPO channel = new ChannelPO();
 		channel.setName(name);
 		channel.setRemark(remark);
@@ -188,8 +188,18 @@ public class ChannelService {
 		channel.setTaskTemple(taskTemple);
 		channel.setRateCtrl(rateCtrl);
 		channel.setRate(rate);
-		channel.setVideoCodec(channelVideoCodec.getName());
-		channel.setAudioCodec(channelAudioCodec.getName());
+		if(videoCodec==null||"".equals(videoCodec)){
+			channel.setVideoCodec("");
+		}else {
+			VideoCodec channelVideoCodec = VideoCodec.fromName(videoCodec);
+			channel.setVideoCodec(channelVideoCodec.getName());
+		}
+		if(audioCodec==null||"".equals(audioCodec)){
+			channel.setAudioCodec("");
+		}else {
+			AudioCodec channelAudioCodec = AudioCodec.fromName(audioCodec);
+			channel.setAudioCodec(channelAudioCodec.getName());
+		}
 		channel.setCodeRate(codeRate);
 		channel.setResolution(resolution);
 		channel.setBackfileDuration(backfileDuration);

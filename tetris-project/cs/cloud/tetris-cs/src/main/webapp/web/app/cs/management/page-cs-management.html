@@ -589,8 +589,7 @@
                             </el-form-item>
 
                             <el-form-item label="编码码率">
-                                <el-input v-model="dialog.setOutput.codeRate" placeholder="编码码率"  oninput="value=value.replace(/[^\d]/g,'')"
-                                          maxLength='9'></el-input>
+                                <el-input v-model="dialog.setOutput.codeRate" placeholder="编码码率"  oninput="value=value.replace(/[^\d]/g,'')"> <i slot="suffix" style="font-style:normal;margin-right: 10px;">kbps</i></el-input>
                             </el-form-item>
 
                             <el-form-item label="音频编码类型">
@@ -612,7 +611,7 @@
                             </el-form-item>
 
                             <el-form-item label="输出码率">
-                                <el-input v-model="dialog.setOutput.rate" placeholder="输出码率" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
+                                <el-input v-model="dialog.setOutput.rate" placeholder="输出码率" oninput="value=value.replace(/[^\d]/g,'')"><i slot="suffix" style="font-style:normal;margin-right: 10px;">kbps</i></el-input>
                             </el-form-item>
 
 
@@ -737,9 +736,8 @@
                     </el-button>
                 </span>
             </el-dialog>
-            
-            
-           
+
+
 
             <el-container style="height:500px">
                 <el-container style="border-right: 1px solid #eee;width: 550px">

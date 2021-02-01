@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.SrcType;
 import com.sumavision.signal.bvc.entity.enumeration.TaskStatus;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
 import com.sumavision.signal.bvc.entity.po.TaskPO;
 import com.sumavision.signal.bvc.entity.po.TerminalBindRepeaterPO;
 
