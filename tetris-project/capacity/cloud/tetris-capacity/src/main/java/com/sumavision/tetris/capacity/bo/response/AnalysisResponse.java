@@ -12,6 +12,11 @@ public class AnalysisResponse {
 	
 	private InputResultResponse input;
 
+	/**
+	 * 刷源设备；
+	 */
+	private String device_ip;
+
 	public String getMsg_id() {
 		return msg_id;
 	}
@@ -29,5 +34,13 @@ public class AnalysisResponse {
 		this.input = input;
 		return this;
 	}
-	
+
+	public String getDevice_ip() {
+		return device_ip;
+	}
+
+	public AnalysisResponse setDevice_ip(String device_ip) {
+		this.device_ip = device_ip;
+		return this;
+	}
 }

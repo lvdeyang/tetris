@@ -7,29 +7,23 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.preview.PreviewDAO;
 import com.sumavision.tetris.application.preview.PreviewPO;
-import com.sumavision.tetris.business.common.ResultBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.NodeUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
-import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.InputPreviewVO;
 import com.sumavision.tetris.business.transcode.vo.TaskVO;
-import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
-import com.sumavision.tetris.capacity.bo.input.InputBaseBO;
 import com.sumavision.tetris.capacity.bo.input.InputWrapperBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateInputsResponse;
 import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
-import com.sumavision.tetris.capacity.bo.response.ResultResponse;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
@@ -42,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,8 +81,7 @@ public class TaskService {
      * @param outType
      * @param outUrl
      */
-    public ResultBO transferStream(String transModuleIp,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
-        ResultBO resultBO = new ResultBO();
+    public String transferStream(String transModuleIp,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
 
         IdConstructor idCtor = new IdConstructor(missionId);
 
@@ -106,8 +98,9 @@ public class TaskService {
         OutputBO outputBO = nodeUtil.getPassbyOutputInCommond(idCtor,outType,outUrl,transModuleIp);
         outputBOS.add(outputBO);
         transcodeTaskService.save(idCtor.getJobId(), transModuleIp, inputBOS, taskBOS, outputBOS, busType);
-        resultBO.setMissionId(idCtor.getJobId());
-        return resultBO;
+        JSONObject result = new JSONObject();
+        result.put("missionId",idCtor.getJobId());
+        return result.toJSONString();
     }
 
     public void deleteTranscodeTask(TaskVO taskVO) throws Exception{

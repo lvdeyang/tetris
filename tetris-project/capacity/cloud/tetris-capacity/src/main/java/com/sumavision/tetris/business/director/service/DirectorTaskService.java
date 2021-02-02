@@ -2,15 +2,11 @@ package com.sumavision.tetris.business.director.service;
 
 import java.util.*;
 
-import com.google.common.collect.Lists;
-import com.sumavision.tetris.business.common.ResultBO;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
-import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.director.vo.*;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
-import com.sumavision.tetris.capacity.bo.request.PutTaskSourceRequest;
 import com.sumavision.tetris.capacity.constant.EncodeConstant.*;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.sts.transformTemplate.jni.TransformJniLib;
@@ -54,8 +50,6 @@ import com.sumavision.tetris.capacity.bo.task.DynamicPictureOsdBO;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.FpsConvertBO;
 import com.sumavision.tetris.capacity.bo.task.G711BO;
-import com.sumavision.tetris.capacity.bo.task.H264BO;
-import com.sumavision.tetris.capacity.bo.task.H265BO;
 import com.sumavision.tetris.capacity.bo.task.OsdBO;
 import com.sumavision.tetris.capacity.bo.task.PictureOsdObjectBO;
 import com.sumavision.tetris.capacity.bo.task.PreProcessingBO;
@@ -1246,8 +1240,7 @@ public class DirectorTaskService {
 		ProtocolType inType = ProtocolType.getProtocolType(transferVO.getInType());
 		ProtocolType outType = ProtocolType.getProtocolType(transferVO.getOutType());
 		String srtMode = transferVO.getSrtMode();
-		ResultBO resultBO = taskService.transferStream(transferVO.getDevice_ip(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
-		return JSON.toJSONString(resultBO);
+		return  taskService.transferStream(transferVO.getDevice_ip(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
 	}
 
 	public void switchTask(String jobId, String targetInputId) throws Exception {

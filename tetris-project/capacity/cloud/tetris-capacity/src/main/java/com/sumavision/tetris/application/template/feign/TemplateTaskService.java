@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.template.*;
 import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.business.common.ResultCode;
+import com.sumavision.tetris.business.common.ResultVO;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -146,13 +148,11 @@ public class TemplateTaskService {
             TaskOutputPO output = taskService.delete(taskId, taskOutputPO.getType());
             if(output != null){
                 taskOutputDAO.delete(output);
-                resultVO.setResult_code(0);
+                resultVO.setCodeAndMessage(ResultCode.SUCCESS);
             }
         } catch (Exception e) {
             LOGGER.error("fail to delete task",e);
-            resultVO.setResult_code(1);
-            resultVO.setMessage("fail to delete task");
-            throw new BaseException(StatusCode.ERROR,"fail to delete task");
+            resultVO.setCodeAndMessage(ResultCode.FAIL).setDetail("fail to delete task, exp:"+e);
         }
         return resultVO;
     }

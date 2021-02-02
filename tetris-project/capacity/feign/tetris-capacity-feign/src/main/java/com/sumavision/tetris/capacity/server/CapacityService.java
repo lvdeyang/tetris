@@ -293,6 +293,18 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.getAllTemplate(), String.class);
 	}
 
+/**
+ * @MethodName: refreshSource
+ * @Description: TODO 通用刷源接口
+ * @param source 1
+ * @Return: java.lang.String
+ * @Author: Poemafar
+ * @Date: 2021/2/1 11:49
+ **/
+	public String refreshSource(String source)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.refreshSource(source),String.class);
+	}
+
 	/**
 	 * @MethodName: deleteTask
 	 * @Description: TODO 通用删任务接口：导播用

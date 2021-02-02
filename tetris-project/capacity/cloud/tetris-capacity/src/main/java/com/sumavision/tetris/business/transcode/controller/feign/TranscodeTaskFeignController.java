@@ -12,6 +12,7 @@ import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.*;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
+import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -127,7 +128,7 @@ public class TranscodeTaskFeignController {
 	public Object analysisInput(
 			String analysisInput) throws Exception{
 		AnalysisInputVO analysisInputVO = JSON.parseObject(analysisInput, AnalysisInputVO.class);
-		String response = transcodeTaskService.analysisInput(analysisInputVO);
+		AnalysisResponse response = transcodeTaskService.analysisInput(analysisInputVO);
 		return response;
 	}
 

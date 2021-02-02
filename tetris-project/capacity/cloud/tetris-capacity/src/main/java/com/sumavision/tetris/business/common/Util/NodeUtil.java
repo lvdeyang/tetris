@@ -70,6 +70,8 @@ public class NodeUtil {
         return null;
     }
 
+
+
     public InputBO getPassbyInputInCommand(IdConstructor idCtor,ProtocolType type, String url,String srtMode, String localIp){
         InputBO inputBO = new InputBO();
         inputBO.setId(idCtor.getId(0, IdConstructor.IdType.INPUT));

@@ -82,7 +82,8 @@ public class BackUpPassByBO {
 		if (!sourceObj.containsKey("select_index")) {
 			this.select_index = "0";
 		}else {
-			this.select_index = sourceObj.getString("select_index");
+            Integer selectIdx = sourceObj.getInteger("select_index")-1;
+            this.select_index = selectIdx.toString();
 		}
 		if (sourceObj.containsKey("trigger_list")) {
 			this.trigger_list = JSON.parseObject(sourceObj.getString("trigger_list"),TriggerListBO.class) ;

@@ -4,6 +4,7 @@ package com.sumavision.tetris.business.common.bo;/**
 
 
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
+import com.sumavision.tetris.business.common.vo.RefreshSourceVO;
 import com.sumavision.tetris.commons.exception.BaseException;
 
 /**
@@ -131,6 +132,11 @@ public class MediaSourceBO {
 
     public MediaSourceBO(){}
 
-
-
+    public MediaSourceBO(RefreshSourceVO refreshSourceVO,String localIp) throws BaseException {
+        this.url = refreshSourceVO.getUrl();
+        this.localIp = localIp;
+        this.protocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
+        this.mode = refreshSourceVO.getSrtMode();
+        this.latency = refreshSourceVO.getLatency();
+    }
 }
