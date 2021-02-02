@@ -3,11 +3,12 @@
  */
 package com.sumavision.tetris.loginpage;
 
-import org.springframework.data.repository.RepositoryDefinition;
+import java.util.List;
 
+import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
-import antlr.collections.List;
+
 
 /**
  * 类型概述<br/>
@@ -17,6 +18,6 @@ import antlr.collections.List;
  */
 @RepositoryDefinition(domainClass = PageVariablePO.class, idClass = Long.class)
 public interface PageVariableDAO extends BaseDAO<PageVariablePO>{
-	
+	public List<PageVariablePO> findByLoginPageId(Long loginPageId);
 	
 }

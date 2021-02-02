@@ -330,7 +330,7 @@ public class OutlandService extends ControllerBase{
 				pass_by_content.put("cmd", "foreignAdd");
 				pass_by_content.put("local", localSerNodeVO);
 				pass_by_content.put("foreign", foreign);
-				pass_by_content.put("extraInfo", params);
+//				pass_by_content.put("extraInfo", params);
 				passByBO.setPass_by_content(pass_by_content);
 				if (workNodePOs != null && !workNodePOs.isEmpty()) {
 					passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
@@ -523,6 +523,13 @@ public class OutlandService extends ControllerBase{
 				}
 				bundleDao.saveAll(bundlePOs);
 			}
+			List<FolderPO> folderPOs = folderDao.findByFolderFactInfo(oldname);
+			if(folderPOs != null && folderPOs.size()>0){
+				for (FolderPO folderPO : folderPOs) {
+					folderPO.setFolderFactInfo(name);
+				}
+				folderDao.saveAll(folderPOs);
+			}
 		}
 		
 		//外域连接断开日志
@@ -548,7 +555,7 @@ public class OutlandService extends ControllerBase{
 			pass_by_content.put("cmd", "foreignEdit");
 			pass_by_content.put("local", local);
 			pass_by_content.put("foreign", foreign);
-			pass_by_content.put("extraInfo", params);
+//			pass_by_content.put("extraInfo", params);
 			passByBO.setPass_by_content(pass_by_content);
 			if (workNodePOs != null && !workNodePOs.isEmpty()) {
 				passByBO.setLayer_id(workNodePOs.get(0).getNodeUid());
@@ -659,22 +666,26 @@ public class OutlandService extends ControllerBase{
 				channelSchemeDao.deleteInBatch(channelSchemePOs);
 			}
 			//删除目录
-			if(folderIds !=null&&folderIds.size()>0){
-				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-				if (folderPOs != null && folderPOs.size() > 0) {
-					for (FolderPO folderPO : folderPOs) {
-						if (folderPO.getParentPath() != null && !"".equals(folderPO.getParentPath())) {
-							String[] pathId = folderPO.getParentPath().split("/");
-							if (pathId.length > 1) {
-								for (int i = 1; i < pathId.length; i++) {
-									folderIds.add(Long.valueOf(pathId[i]));
-								}
-							}
-						}
-					}
-					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
-					folderDao.deleteInBatch(folder2all);
-				}
+//			if(folderIds !=null&&folderIds.size()>0){
+//				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+//				if (folderPOs != null && folderPOs.size() > 0) {
+//					for (FolderPO folderPO : folderPOs) {
+//						if (folderPO.getParentPath() != null && !"".equals(folderPO.getParentPath())) {
+//							String[] pathId = folderPO.getParentPath().split("/");
+//							if (pathId.length > 1) {
+//								for (int i = 1; i < pathId.length; i++) {
+//									folderIds.add(Long.valueOf(pathId[i]));
+//								}
+//							}
+//						}
+//					}
+//					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
+//					folderDao.delete(folder2all);
+//				}
+//			}
+			List<FolderPO> folderPOs = folderDao.findByFolderFactInfo(name);
+			if (folderPOs != null && folderPOs.size() >0 ) {
+				folderDao.deleteInBatch(folderPOs);
 			}
 			
 			//扩展参数

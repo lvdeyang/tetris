@@ -16,7 +16,6 @@ import com.sumavision.tetris.alarm.bo.OprlogParamBO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
 import com.sumavision.tetris.alarm.bo.http.SubscribeParamBO;
-import com.sumavision.tetris.mvc.ext.response.json.aop.JsonBodyWrapper;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component

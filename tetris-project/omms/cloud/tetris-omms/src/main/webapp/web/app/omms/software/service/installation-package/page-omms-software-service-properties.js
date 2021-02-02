@@ -169,7 +169,7 @@ define([
                     var self = this;
                     var row = scope.row;
                     self.dialog.editProperties.visible = true;
-                    self.dialog.editProperties.id = row.id
+                    self.dialog.editProperties.id = row.id;
                     self.dialog.editProperties.propertyKey = row.propertyKey;
                     self.dialog.editProperties.propertyName = row.propertyName;
                     self.dialog.editProperties.valueType = row.valueTypeName;
