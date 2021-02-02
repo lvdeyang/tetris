@@ -1,7 +1,7 @@
-package com.sumavision.signal.bvc.entity.po.director;
+package com.sumavision.signal.bvc.director.po;
 
-import com.sumavision.signal.bvc.entity.enumeration.director.RateControlType;
-import com.sumavision.signal.bvc.entity.enumeration.director.SwitchType;
+import com.sumavision.signal.bvc.director.enumeration.RateControlType;
+import com.sumavision.signal.bvc.director.enumeration.SwitchType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 import javax.persistence.*;

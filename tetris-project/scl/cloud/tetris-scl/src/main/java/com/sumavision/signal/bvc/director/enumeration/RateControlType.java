@@ -1,16 +1,14 @@
-package com.sumavision.signal.bvc.entity.enumeration.director;
+package com.sumavision.signal.bvc.director.enumeration;
 
-import com.sumavision.signal.bvc.entity.enumeration.InternetAccessType;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
-public enum SwitchType {
-    CUT("直接切换"),
-    FRAME("按帧切换"),
-    TRANSCODE("转码切换");
+public enum RateControlType {
+    CBR("CBR"),
+    VBR("VBR");
 
     private String name;
 
-    private SwitchType(String name){
+    private RateControlType(String name){
         this.name = name;
     }
 
@@ -24,9 +22,9 @@ public enum SwitchType {
      * @throws Exception
      * @return SwitchType
      */
-    public static final SwitchType fromName(String name) throws Exception{
-        SwitchType[] values = SwitchType.values();
-        for(SwitchType value:values){
+    public static final RateControlType fromName(String name) throws Exception{
+        RateControlType[] values = RateControlType.values();
+        for(RateControlType value:values){
             if(value.getName().equals(name)){
                 return value;
             }

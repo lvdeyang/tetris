@@ -1,4 +1,4 @@
-package com.sumavision.signal.bvc.entity.po.director;
+package com.sumavision.signal.bvc.director.po;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -6,16 +6,17 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 转发目的
+ * 转发源
  */
 @Entity
-@Table(name = "BVC_DIRECTOR_DST")
-public class DirectorTaskDstPO extends AbstractBasePO{
+@Table(name = "BVC_DIRECTOR_SRC")
+public class DirectorTaskSrcPO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;
 	private Long taskId;
 	private String bundleId;
 	private String channelId;
+	private Integer sortIndex;
 
 	public Long getTaskId() {
 		return taskId;
@@ -39,5 +40,13 @@ public class DirectorTaskDstPO extends AbstractBasePO{
 
 	public void setChannelId(String channelId) {
 		this.channelId = channelId;
+	}
+
+	public Integer getSortIndex() {
+		return sortIndex;
+	}
+
+	public void setSortIndex(Integer sortIndex) {
+		this.sortIndex = sortIndex;
 	}
 }

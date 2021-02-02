@@ -13,6 +13,12 @@ import com.sumavision.signal.bvc.capacity.bo.source.MediaSourceBO;
 import com.sumavision.signal.bvc.common.enumeration.CommonConstants.*;
 import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
+import com.sumavision.signal.bvc.director.dao.DirectorTaskDAO;
+import com.sumavision.signal.bvc.director.dao.DirectorTaskDstDAO;
+import com.sumavision.signal.bvc.director.dao.DirectorTaskSrcDAO;
+import com.sumavision.signal.bvc.director.po.DirectorTaskDstPO;
+import com.sumavision.signal.bvc.director.po.DirectorTaskPO;
+import com.sumavision.signal.bvc.director.po.DirectorTaskSrcPO;
 import com.sumavision.signal.bvc.entity.dao.*;
 import com.sumavision.signal.bvc.entity.enumeration.*;
 import com.sumavision.signal.bvc.entity.po.*;
@@ -122,6 +128,13 @@ public class MessageHandler {
     @Value("${constant.package.output.type:rtmp}")
     private String packageOutputType;
 
+    @Autowired
+    private DirectorTaskDAO directorTaskDAO;
+    @Autowired
+    private DirectorTaskSrcDAO directorTaskSrcDAO;
+    @Autowired
+    private DirectorTaskDstDAO directorTaskDstDAO;
+
     /*
      * 根据接口协议的数据类型解析msg中的方法名，根据相应方法名注入上层解析接口进行处理
      */
@@ -159,47 +172,50 @@ public class MessageHandler {
     private void processOpenBundleMsg(ResponseBO responseBo) throws Exception{
 
         String openBundleRequestString = responseBo.getMessage().getMessage_body().getString("open_bundle_request");
-//        String openBundleRequestString = "{\n" +
-//                "\t\t\"bundle\": {\n" +
-//                "\t\t\t\"bundle_id\": \"115ff998d61644e28fd0f395874dd86e\",\n" +
-//                "\t\t\t\"bundle_type\": \"VenusTerminal\",\n" +
-//                "\t\t\t\"device_model\": \"5G\",\n" +
-//                "\t\t\t\"channels\": [{\n" +
-//                "\t\t\t\t\"channel_id\": \"VenusVideoIn_1\",\n" +
-//                "\t\t\t\t\"channel_param\": {\n" +
-//                "\t\t\t\t\t\"base_type\": \"VenusVideoIn\",\n" +
-//                "\t\t\t\t\t\"base_param\": {\n" +
-//                "\t\t\t\t\t\t\"codec\": \"h264\",\n" +
-//                "\t\t\t\t\t\t\"fps\": \"25.0\",\n" +
-//                "\t\t\t\t\t\t\"bitrate\": 1000000,\n" +
-//                "\t\t\t\t\t\t\"resolution\": \"1920x1080\",\n" +
-//                "\t\t\t\t\t\t\"input_interface\":\"COLOR_BAR\",\n" +
-//                "\t\t\t\t\t\t\"output_interface\":\"CTRL\"\n" +
-//                "\t\t\t\t\t}\n" +
-//                "\t\t\t\t},\n" +
-//                "\t\t\t\t\"channel_status\": \"Open\"\n" +
-//                "\t\t\t}, {\n" +
-//                "\t\t\t\t\"channel_id\": \"VenusAudioIn_1\",\n" +
-//                "\t\t\t\t\"channel_param\": {\n" +
-//                "\t\t\t\t\t\"base_type\": \"VenusAudioIn\",\n" +
-//                "\t\t\t\t\t\"base_param\": {\n" +
-//                "\t\t\t\t\t\t\"codec\": \"aac\",\n" +
-//                "\t\t\t\t\t\t\"sample_rate\": 48000,\n" +
-//                "\t\t\t\t\t\t\"bitrate\": 64000\n" +
-//                "\t\t\t\t\t}\n" +
-//                "\t\t\t\t},\n" +
-//                "\t\t\t\t\"channel_status\": \"Open\"\n" +
-//                "\t\t\t}],\n" +
-//                "\t\t\t\"operate_index\": 230\n" +
-//                "\t\t}\n" +
-//                "\t}";
         JSONObject openBundleRequest = JSON.parseObject(openBundleRequestString);
         BundleBO bundle = openBundleRequest.getObject("bundle", BundleBO.class);
         String bundleType = bundle.getBundle_type();
         String deviceModel = bundle.getDevice_model();
+        if(deviceModel.equals("virtual")){
+            //添加源
+            JSONObject json=JSONObject.parseObject(bundle.getPass_by_str());
+            List<DirectorTaskPO> directorTaskPOs=directorTaskDAO.findByBusinessId(json.getString("businessId"));
+            DirectorTaskPO directorTaskPO=new DirectorTaskPO();
+            if(directorTaskPOs==null||directorTaskPOs.isEmpty()){
+                directorTaskPO.setBusinessId(json.getString("businessId"));
+                directorTaskDAO.save(directorTaskPO);
+            }else{
+                directorTaskPO=directorTaskPOs.get(0);
+            }
+            for (ChannelBO channelBo:bundle.getChannels()) {
 
-        String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
-        processOpenBundle5GMsg(bundle);
+                if("VenusOut".equals(channelBo.getChannel_param().getBase_type())){
+                    DirectorTaskSrcPO directorTaskSrcPO=new DirectorTaskSrcPO();
+                    directorTaskSrcPO.setBundleId(bundle.getBundle_id());
+                    directorTaskSrcPO.setTaskId(directorTaskPO.getId());
+                    directorTaskSrcPO.setChannelId(channelBo.getChannel_id());
+                    directorTaskSrcPO.setSortIndex(json.getInteger("index"));
+                    directorTaskSrcDAO.save(directorTaskSrcPO);
+                }else if("VenusIn".equals(channelBo.getChannel_param().getBase_type())){
+                    DirectorTaskDstPO directorTaskDstPO=new DirectorTaskDstPO();
+                    directorTaskDstPO.setTaskId(directorTaskPO.getId());
+                    directorTaskDstPO.setBundleId(bundle.getBundle_id());
+                    directorTaskDstPO.setChannelId(channelBo.getChannel_id());
+                    directorTaskDstDAO.save(directorTaskDstPO);
+
+                    if(directorTaskPOs==null||directorTaskPOs.isEmpty()){
+                        //todo 添加备份源，添加转码任务，添加输出
+
+                    }else{
+                        //todo 单纯的给任务添加输出
+                    }
+                }
+            }
+
+        }else{
+            String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
+            processOpenBundle5GMsg(bundle);
+        }
     }
 
     /**处理colse_bundle信息
@@ -212,10 +228,44 @@ public class MessageHandler {
 
         String bundleType = bundle.getBundle_type();
         String deviceModel = bundle.getDevice_model();
+        if(deviceModel.equals("virtual")){
+            JSONObject json=JSONObject.parseObject(bundle.getPass_by_str());
+            String businessId=json.getString("businessId");
+            List<DirectorTaskPO> directorTaskPOs=directorTaskDAO.findByBusinessId(json.getString("businessId"));
+            if(directorTaskPOs!=null&&directorTaskPOs.isEmpty()){
+                Long taskId=directorTaskPOs.get(0).getId();
+                for (ChannelBO channelBo:bundle.getChannels()) {
 
-        String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
+                    if("VenusOut".equals(channelBo.getChannel_param().getBase_type())){
+                        List<DirectorTaskSrcPO> directorTaskSrcPOs=directorTaskSrcDAO.findByBundleIdAndTaskId(bundle.getBundle_id(),
+                                taskId);
+                        //todo 给任务下发删除备份源
+                        directorTaskSrcDAO.deleteInBatch(directorTaskSrcPOs);
+                    }else if("VenusIn".equals(channelBo.getChannel_param().getBase_type())){
+                        List<DirectorTaskDstPO> directorTaskDstPOS=directorTaskDstDAO.findByBundleIdAndTaskId(bundle.getBundle_id(),
+                                directorTaskPOs.get(0).getId());
+                        //todo 给任务下发删除输出
 
-        processCloseBundle5GMsg(bundle);
+                        //判断是否需要下发删除任务
+                        List<DirectorTaskDstPO> existOuts=directorTaskDstDAO.findByTaskId(taskId);
+                        if(existOuts==null||existOuts.isEmpty()){
+                            //todo 下发删除任务
+
+                            directorTaskDAO.deleteById(taskId);
+                            //删除所有的源
+                            directorTaskSrcDAO.deleteByTaskId(taskId);
+                        }
+
+                        directorTaskDstDAO.deleteInBatch(directorTaskDstPOS);
+                    }
+                }
+
+            }
+        }else{
+            String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
+            processCloseBundle5GMsg(bundle);
+        }
+
     }
 
     /**处理pass_by信息信息
@@ -223,15 +273,6 @@ public class MessageHandler {
     public void processPassByMsg(ResponseBO responseBo) throws Exception{
 
         String passbyString = responseBo.getMessage().getMessage_body().getString("pass_by");
-//        String passbyString = "{\n" +
-//                "\t\t\"bundle_id\": \"7460f6374c07a5bcbf674f74b\",\n" +
-//                "\t\t\"layer_id\": \"jv210-56127\",\n" +
-//                "\t\t\"type\": \"creatInputSource\",\n" +
-//                "\t\t\"pass_by_content\": {\n" +
-//                "\t\t\t\"type\": \"udp_ts\",\n" +
-//                "\t\t\t\"url\": \"udp://10.10.40.103:12345\"\n" +
-//                "\t\t}\n" +
-//                "\t}";
         PassbyBO passby = JSON.parseObject(passbyString, PassbyBO.class);
 
         PassbyMsgFactory passbyMsgFactory = new PassbyMsgFactory();
