@@ -21,13 +21,13 @@ import com.sumavision.tetris.capacity.constant.UrlConstant;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.*;
@@ -85,7 +85,7 @@ public class TaskModifyService {
         JSONArray cmdQueue = new JSONArray();
 
         //增加输入
-        if (Objects.nonNull(taskSetVO.getCreate_input())&& CollectionUtils.isNotEmpty(taskSetVO.getCreate_input().getInput_array())){
+        if (Objects.nonNull(taskSetVO.getCreate_input())&& !CollectionUtils.isEmpty(taskSetVO.getCreate_input().getInput_array())){
             List<InputBO> inputBOS = new ArrayList<>();//需要新下发创建输入的
             for (int i = 0; i < taskSetVO.getCreate_input().getInput_array().size(); i++) {
                 InputBO curInputBO = taskSetVO.getCreate_input().getInput_array().get(i);
@@ -124,7 +124,7 @@ public class TaskModifyService {
         }
 
         //修改输入参数
-        if (CollectionUtils.isNotEmpty(taskSetVO.getModify_input_params())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getModify_input_params())){
             for (int i=0;i<taskSetVO.getModify_input_params().size();i++) {
                 PutInputsRequest putInputsRequest = taskSetVO.getModify_input_params().get(i);
                 InputBO inputBO = putInputsRequest.getInput();
@@ -144,7 +144,7 @@ public class TaskModifyService {
         }
 
         //删除输入 先判断该输入是否其他任务再用，有用则不删除
-        if (Objects.nonNull(taskSetVO.getDelete_input()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_input().getInput_array())){
+        if (Objects.nonNull(taskSetVO.getDelete_input()) && !CollectionUtils.isEmpty(taskSetVO.getDelete_input().getInput_array())){
             List<String> delInputList = taskSetVO.getDelete_input().getInput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
             taskInputPOS.stream().forEach(input->{
                 if (delInputList.contains(input.getNodeId()) ){
@@ -231,7 +231,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void addProgramInModifyTask(TaskSetVO taskSetVO,List<TaskInputPO> taskInputPOS,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getCreate_program()) && CollectionUtils.isNotEmpty(taskSetVO.getCreate_program().getProgram_array())){
+        if (Objects.nonNull(taskSetVO.getCreate_program()) && !CollectionUtils.isEmpty(taskSetVO.getCreate_program().getProgram_array())){
             CreateProgramsRequest createProgramsRequest = taskSetVO.getCreate_program();
             StringBuilder sb = new StringBuilder().append(UrlConstant.URL_INPUT).append("/")
                     .append(createProgramsRequest.getInput_id()).append("/")
@@ -258,7 +258,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void deleteProgramInModifyTask(TaskSetVO taskSetVO,List<TaskInputPO> taskInputPOS,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getDelete_program()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_program().getProgram_array())){
+        if (Objects.nonNull(taskSetVO.getDelete_program()) && !CollectionUtils.isEmpty(taskSetVO.getDelete_program().getProgram_array())){
             DeleteProgramRequest deleteProgramRequest = taskSetVO.getDelete_program();
             StringBuilder sb = new StringBuilder().append(UrlConstant.URL_INPUT).append("/")
                     .append(deleteProgramRequest.getInput_id()).append("/")
@@ -287,7 +287,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void modifySourceInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (CollectionUtils.isNotEmpty(taskSetVO.getModify_source())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getModify_source())){
             for (int i=0;i<taskSetVO.getModify_source().size();i++) {
                 PutTaskSourceRequest putTaskSourceRequest = taskSetVO.getModify_source().get(i);
                 StringBuilder sb = new StringBuilder().append(UrlConstant.URL_TASK).append("/")
@@ -315,7 +315,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void addOutputInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getAdd_output()) && CollectionUtils.isNotEmpty(taskSetVO.getAdd_output().getOutput_array())) {
+        if (Objects.nonNull(taskSetVO.getAdd_output()) && !CollectionUtils.isEmpty(taskSetVO.getAdd_output().getOutput_array())) {
             cmdQueue.add(getRequest(RequestMethod.POST, UrlConstant.URL_OUTPUT,JSON.toJSONString(taskSetVO.getAdd_output())));
 //			CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(taskSetVO.getAdd_output(),capacityIp);
 //			List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, capacityIp);
@@ -333,7 +333,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void modifyOutputInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue) throws BaseException {
-        if (CollectionUtils.isNotEmpty(taskSetVO.getModify_output())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getModify_output())){
             for (int i=0;i<taskSetVO.getModify_output().size();i++) {
                 List<OutputBO> oriOutputs = JSONObject.parseArray(taskOutputPO.getOutput(), OutputBO.class);
                 List<String> needModifyOutIds = taskSetVO.getModify_output().stream().map(PutOutputRequest::getOutput).map(OutputBO::getId).collect(Collectors.toList());
@@ -361,7 +361,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void deleteOutputInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getDelete_output()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_output().getOutput_array())) {
+        if (Objects.nonNull(taskSetVO.getDelete_output()) && !CollectionUtils.isEmpty(taskSetVO.getDelete_output().getOutput_array())) {
             List<OutputBO> oriOutputs = JSONObject.parseArray(taskOutputPO.getOutput(), OutputBO.class);
             List<String> needDeleteOutIds = taskSetVO.getDelete_output().getOutput_array().stream().map(IdRequest::getId).collect(Collectors.toList());
             List<OutputBO> needDelOutputs = oriOutputs.stream().filter(o->needDeleteOutIds.contains(o.getId())).collect(Collectors.toList());
@@ -383,7 +383,7 @@ public class TaskModifyService {
      * @throws Exception
      */
     public void modifyBackupModeInModifyTask(TaskSetVO inputSetVO,List<TaskInputPO> taskInputPOS,JSONArray cmdQueue) throws Exception {
-        if (CollectionUtils.isNotEmpty(inputSetVO.getModify_backup_mode())) {
+        if (!CollectionUtils.isEmpty(inputSetVO.getModify_backup_mode())) {
             for (int i = 0; i < inputSetVO.getModify_backup_mode().size(); i++) {
                 PutBackupModeRequest putBackupModeRequest = inputSetVO.getModify_backup_mode().get(i);
                 for (int i1 = 0; i1 < taskInputPOS.size(); i1++) {
@@ -422,7 +422,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void addTaskInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getAdd_task()) && CollectionUtils.isNotEmpty(taskSetVO.getAdd_task().getTask_array())){
+        if (Objects.nonNull(taskSetVO.getAdd_task()) && !CollectionUtils.isEmpty(taskSetVO.getAdd_task().getTask_array())){
             CreateTaskRequest createTaskRequest = taskSetVO.getAdd_task();
             cmdQueue.add(getRequest(RequestMethod.POST, UrlConstant.URL_TASK,JSON.toJSONString(createTaskRequest)));
 //			capacityService.createTasksWithMsgId(createTaskRequest,capacityIp);
@@ -441,7 +441,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void deleteTaskInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (Objects.nonNull(taskSetVO.getDelete_task()) && CollectionUtils.isNotEmpty(taskSetVO.getDelete_task().getTask_array())){
+        if (Objects.nonNull(taskSetVO.getDelete_task()) && !CollectionUtils.isEmpty(taskSetVO.getDelete_task().getTask_array())){
             DeleteTasksRequest deleteTasksRequest = taskSetVO.getDelete_task();
             cmdQueue.add(getRequest(RequestMethod.DELETE, UrlConstant.URL_TASK,JSON.toJSONString(deleteTasksRequest)));
 //			capacityService.deleteTasksWithMsgId(deleteTasksRequest,capacityIp);
@@ -460,7 +460,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void modifyDecodeProcessInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (CollectionUtils.isNotEmpty(taskSetVO.getModify_decode_process())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getModify_decode_process())){
             for (int i=0;i<taskSetVO.getModify_decode_process().size();i++) {
                 PutTaskDecodeProcessRequest putTaskDecodeProcessRequest = taskSetVO.getModify_decode_process().get(i);
                 StringBuilder sb = new StringBuilder().append(UrlConstant.URL_TASK).append("/")
@@ -485,7 +485,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void addEncodeInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (CollectionUtils.isNotEmpty(taskSetVO.getAdd_encoders())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getAdd_encoders())){
             for (int i=0;i<taskSetVO.getAdd_encoders().size();i++) {
                 AddTaskEncodeRequest addTaskEncodeRequest = taskSetVO.getAdd_encoders().get(i);
                 List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
@@ -512,7 +512,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void modifyEncodeInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (CollectionUtils.isNotEmpty(taskSetVO.getModify_encoders())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getModify_encoders())){
             for (int i=0;i<taskSetVO.getModify_encoders().size();i++) {
                 PutTaskEncodeRequest putTaskEncodeRequest = taskSetVO.getModify_encoders().get(i);
                 List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);
@@ -541,7 +541,7 @@ public class TaskModifyService {
      * @throws Exception
      */
     public void modifyDecodeModeInModifyTask(TaskSetVO taskSetVO,List<TaskInputPO> taskInputPOS,JSONArray cmdQueue) throws Exception {
-        if ( CollectionUtils.isNotEmpty(taskSetVO.getModify_decode_mode())){
+        if ( !CollectionUtils.isEmpty(taskSetVO.getModify_decode_mode())){
             for (int i = 0; i < taskSetVO.getModify_decode_mode().size(); i++) {
                 PatchDecodeRequest patchDecodeRequest = taskSetVO.getModify_decode_mode().get(i);
 
@@ -584,7 +584,7 @@ public class TaskModifyService {
      * @param cmdQueue
      */
     public void deleteEncodeInModifyTask(TaskSetVO taskSetVO,TaskOutputPO taskOutputPO,JSONArray cmdQueue){
-        if (CollectionUtils.isNotEmpty(taskSetVO.getDelete_encoders())){
+        if (!CollectionUtils.isEmpty(taskSetVO.getDelete_encoders())){
             for (int i=0;i<taskSetVO.getDelete_encoders().size();i++) {
                 DeleteTaskEncodeResponse deleteTaskEncodeResponse = taskSetVO.getDelete_encoders().get(i);
                 List<TaskBO> oriTaskBOS = JSONObject.parseArray(taskOutputPO.getTask(), TaskBO.class);

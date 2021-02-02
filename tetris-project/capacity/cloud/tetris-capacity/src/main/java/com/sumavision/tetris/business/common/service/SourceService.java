@@ -3,7 +3,6 @@ package com.sumavision.tetris.business.common.service;/**
  */
 
 import com.alibaba.fastjson.JSON;
-import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.business.common.ResultCode;
 import com.sumavision.tetris.business.common.ResultVO;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
@@ -24,10 +23,9 @@ import com.sumavision.tetris.device.DeviceDao;
 import com.sumavision.tetris.device.DevicePO;
 import com.sumavision.tetris.device.netcard.NetCardInfoDao;
 import com.sumavision.tetris.device.netcard.NetCardInfoPO;
-import org.apache.commons.collections.CollectionUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -70,7 +68,7 @@ public class SourceService {
             DevicePO device = deviceDao.findByDeviceIp(deviceIp);
             if (device!=null){
                 List<NetCardInfoPO> nets = netCardInfoDao.findByDeviceId(device.getId());
-                if (CollectionUtils.isNotEmpty(nets) && nets.stream().anyMatch(n->n.getInputNetGroupId()!=null)) {
+                if (!CollectionUtils.isEmpty(nets) && nets.stream().anyMatch(n->n.getInputNetGroupId()!=null)) {
                     localIp = nets.stream().filter(n->n.getInputNetGroupId()!=null).findFirst().get().getIpv4();
                 }else {
                     localIp = deviceIp;
@@ -111,7 +109,7 @@ public class SourceService {
         String dstIp = IpV4Util.getIpFromUrl(url);
         if (bePush && !CommonUtil.isMulticast(dstIp)){ //推流单播
             List<NetCardInfoPO> nets = netCardInfoDao.findByIpv4(dstIp);
-            if (CollectionUtils.isNotEmpty(nets)) {
+            if (!CollectionUtils.isEmpty(nets)) {
                 DevicePO device = deviceDao.findById(nets.get(0).getDeviceId());
                 if (device != null) {
                     deviceIp = device.getDeviceIp();
@@ -123,7 +121,7 @@ public class SourceService {
             }
         }else{
             List<DevicePO> devices = deviceDao.findByFunUnitStatus(FunUnitStatus.NORMAL);
-            if (CollectionUtils.isNotEmpty(devices)) {
+            if (!CollectionUtils.isEmpty(devices)) {
                 deviceIp = devices.get(0).getDeviceIp();
             }else{
                 throw new BaseException(StatusCode.FORBIDDEN,"no device for refresh source");
