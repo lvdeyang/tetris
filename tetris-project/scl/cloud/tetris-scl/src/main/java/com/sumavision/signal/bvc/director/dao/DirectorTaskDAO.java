@@ -1,11 +1,12 @@
-package com.sumavision.signal.bvc.entity.dao.director;/**
+package com.sumavision.signal.bvc.director.dao;/**
  * Created by Poemafar on 2020/9/2 20:17
  */
 
-import com.sumavision.signal.bvc.entity.po.ProgramPO;
-import com.sumavision.signal.bvc.entity.po.director.DirectorTaskPO;
+import com.sumavision.signal.bvc.director.po.DirectorTaskPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 import org.springframework.data.repository.RepositoryDefinition;
+
+import java.util.List;
 
 /**
  * @ClassName:
@@ -17,5 +18,6 @@ import org.springframework.data.repository.RepositoryDefinition;
 @RepositoryDefinition(domainClass = DirectorTaskPO.class, idClass = long.class)
 public interface DirectorTaskDAO extends BaseDAO<DirectorTaskPO> {
 
+    public List<DirectorTaskPO> findByBusinessId(String businessId);
 
 }

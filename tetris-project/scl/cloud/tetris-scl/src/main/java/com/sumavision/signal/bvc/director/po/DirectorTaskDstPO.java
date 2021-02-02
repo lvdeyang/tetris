@@ -1,18 +1,16 @@
-package com.sumavision.signal.bvc.entity.po.director;
+package com.sumavision.signal.bvc.director.po;
 
-import com.sumavision.signal.bvc.entity.enumeration.director.RateControlType;
-import com.sumavision.signal.bvc.entity.enumeration.director.SwitchType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 转发源
+ * 转发目的
  */
 @Entity
-@Table(name = "BVC_DIRECTOR_SRC")
-public class DirectorTaskSrcPO extends AbstractBasePO{
+@Table(name = "BVC_DIRECTOR_DST")
+public class DirectorTaskDstPO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;
 	private Long taskId;

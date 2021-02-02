@@ -30,9 +30,9 @@ spring:
       min-evictable-idle-time-millis : 3600000
     resource:
    
-      url: jdbc:mysql://192.165.56.131:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
-      username: sumadb
-      password: Sumavision@300079
+      url: jdbc:mysql://192.165.56.64:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true
+      username: root
+      password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -88,7 +88,7 @@ eureka:
   client:
     serviceUrl:
 
-      defaultZone: http://192.165.56.131:8081/eureka/
+      defaultZone: http://192.165.56.64:8081/eureka/
 #      defaultZone: http://192.165.56.16:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
