@@ -38,6 +38,9 @@ public class SourceBO {
 	
 	BundlePO videoBundle;
 	
+	/** 设备id*/
+	private String bundleId;
+	
 	BundlePO audioBundle;
 
 	BusinessInfoType businessInfoType;
@@ -241,6 +244,14 @@ public class SourceBO {
 
 	public SourceBO setSrcAudioCode(String srcAudioCode) {
 		this.srcAudioCode = srcAudioCode;
+		return this;
+	}
+	public String getBundleId() {
+		return bundleId;
+	}
+
+	public SourceBO setBundleId(String bundleId) {
+		this.bundleId = bundleId;
 		return this;
 	}
 	

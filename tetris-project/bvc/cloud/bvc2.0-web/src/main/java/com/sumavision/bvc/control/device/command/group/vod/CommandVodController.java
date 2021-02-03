@@ -486,6 +486,36 @@ public class CommandVodController {
 			return _player;
 		}
 	}
+	
+//	/**
+//	 * 点播外域设备<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2021年2月2日 下午5:34:13
+//	 * @param deviceId 设备id
+//	 * @param bundleName 设备名称
+//	 */
+//	@JsonBody
+//	@ResponseBody
+//	@RequestMapping(value = "/out/device/start")
+//	public Object outDeviceStart(
+//			String deviceId,
+//			String bundleName,
+//			HttpServletRequest request) throws Exception {
+//
+//		Long id = userUtils.getUserIdFromSession(request);
+//
+//		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
+//			UserBO user = userUtils.queryUserById(id);
+//			
+//			businessReturnService.init(Boolean.TRUE);
+//			vodService.outDeviceStart(user, bundleName, deviceId, null);
+//
+//			BusinessPlayerVO _player = new BusinessPlayerVO();
+//
+//			return _player;
+//		}
+//	}
 
 	/**
 	 * 指定播放器，点播设备<br/>
@@ -532,32 +562,47 @@ public class CommandVodController {
 			if(allowNewPage){
 				vodService.deviceStart(user, deviceId, -1);
 			}else {
-				vodService.deviceStart(user, deviceId, null);
+				vodService.deviceStart(user, deviceId, serial);
 			}
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 
 			return _player;
 		}
-
-		/*
-		 * Long id = userUtils.getUserIdFromSession(request);
-		 * 
-		 * synchronized (new
-		 * StringBuffer().append(lockStartPrefix).append(id).toString().intern()
-		 * ) { UserBO user = userUtils.queryUserById(id);
-		 * 
-		 * // UserBO admin =
-		 * resourceService.queryUserInfoByUsername(CommandCommonConstant.
-		 * USER_NAME); UserBO admin = new UserBO(); admin.setId(-1L);
-		 * 
-		 * CommandGroupUserPlayerPO player =
-		 * commandVodService.deviceStart_Cascade(user, deviceId, admin, serial);
-		 * BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
-		 * 
-		 * return _player; }
-		 */
 	}
+		
+	/**
+	 * 点播外域设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月2日 下午5:33:20
+	 * @param bundleId 设备id
+	 * @param serial 播放器序号
+	 * @param bundleName
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/foreign/device/start/player")
+	public Object foreignDeviceStartSpecifyPlayer(
+			String bundleId, 
+			Integer serial, 
+			String bundleName,
+			HttpServletRequest request) throws Exception {
+
+		Long id = userUtils.getUserIdFromSession(request);
+
+		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
+			UserBO user = userUtils.queryUserById(id);
+			
+			businessReturnService.init(Boolean.TRUE);
+			vodService.foreignDeviceStart(user, bundleName,bundleId, serial);
+
+			BusinessPlayerVO _player = new BusinessPlayerVO();
+
+			return _player;
+		}
+	}	
+
 
 	/**
 	 * 批量点播设备<br/>
@@ -652,6 +697,33 @@ public class CommandVodController {
 			}
 		}
 	}
+	
+//	/**
+//	 * 停止点播外域设备<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2021年2月2日 下午6:38:26
+//	 * @param businessId 业务组id
+//	 */
+//	@JsonBody
+//	@ResponseBody
+//	@RequestMapping(value = "/foreign/device/stop")
+//	public Object foreignDeviceStop(Long businessId, HttpServletRequest request) throws Exception {
+//		
+//		synchronized (new StringBuffer().append(lockUserPrefix).append(businessId).toString().intern()) {
+//			synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
+//
+//				Long id = userUtils.getUserIdFromSession(request);
+//				UserBO user = userUtils.queryUserById(id);
+//				
+//				businessReturnService.init(Boolean.TRUE);
+//				vodService.foreignDeviceStop(user, businessId);
+//
+//				return new HashMapWrapper<String, Object>().put("serial", 111).getMap();
+//
+//			}
+//		}
+//	}
 
 	@JsonBody
 	@ResponseBody
