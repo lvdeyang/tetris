@@ -1,8 +1,10 @@
 package com.sumavision.tetris.capacity.bo.input;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,6 +40,29 @@ public class ProgramOutputBO {
 	}
 
 	public ProgramOutputBO() {
+	}
+
+	public ProgramOutputBO(ProgramBO programBO){
+		this.program_number=programBO.getProgram_number();
+		List<ProgramElementBO> elementBOS = new ArrayList<>();
+		List<PidIndexBO> pidIndexBOS = new ArrayList<>();
+		pidIndexBOS.add(new PidIndexBO().setPid_index(0));
+		List<ProgramVideoBO> videos = programBO.getVideo_array();
+		if (!CollectionUtils.isEmpty(videos)) {
+			ProgramElementBO eleBO = new ProgramElementBO().setPid(videos.get(0).getPid()).setProgram_switch_array(pidIndexBOS);
+			elementBOS.add(eleBO);
+		}
+		List<ProgramAudioBO> audios = programBO.getAudio_array();
+		if (!CollectionUtils.isEmpty(audios)) {
+			ProgramElementBO eleBO = new ProgramElementBO().setPid(audios.get(0).getPid()).setProgram_switch_array(pidIndexBOS);
+			elementBOS.add(eleBO);
+		}
+		List<ProgramSubtitleBO> subtitles = programBO.getSubtitle_array();
+		if (!CollectionUtils.isEmpty(subtitles)) {
+			ProgramElementBO eleBO = new ProgramElementBO().setPid(subtitles.get(0).getPid()).setProgram_switch_array(pidIndexBOS);
+			elementBOS.add(eleBO);
+		}
+		this.element_array=elementBOS;
 	}
 
 }

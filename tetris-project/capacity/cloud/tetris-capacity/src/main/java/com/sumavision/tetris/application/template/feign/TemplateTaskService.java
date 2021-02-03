@@ -78,8 +78,8 @@ public class TemplateTaskService {
      * @Author: Poemafar
      * @Date: 2020/12/11 8:37
      **/
-    public String addTask(TemplateTaskVO taskBO) throws Exception {
-        TemplatePO tmpPO = getTemplateByName(taskBO.getTemplate());
+    public String addTask(TemplateTaskVO taskVO) throws Exception {
+        TemplatePO tmpPO = getTemplateByName(taskVO.getTemplate());
         TemplateTaskVO templateTaskVO = JSON.parseObject(tmpPO.getBody(), TemplateTaskVO.class);
         //组合
 //        TemplateTaskVO tmpBO = CommonUtil.combineSydwCore(templateTaskVO,taskVO);
@@ -88,14 +88,14 @@ public class TemplateTaskService {
 //        JSONObject combineTaskObj = CommonUtil.coverJSONObject(templateObj,taskObj);             // 合并方法1
 //        LOGGER.info("task and template combine params: {}",combineTaskObj.toJSONString());
 //        TemplateTaskVO tmpBO = JSONObject.parseObject(combineTaskObj.toJSONString(),TemplateTaskVO.class);
-        checkBusinessTaskParams(taskBO);//step1: 先检验一遍业务下发的参数；
-        TemplateTaskVO combineJobBO = combine(templateTaskVO,taskBO);  //step2: 合并本地模板参数和业务下发的参数
+        checkBusinessTaskParams(taskVO,tmpPO.getTaskType());//step1: 先检验一遍业务下发的参数；
+        TemplateTaskVO combineJobBO = combine(templateTaskVO,taskVO);  //step2: 合并本地模板参数和业务下发的参数
         LOGGER.info("combine params :{}",JSON.toJSONString(combineJobBO));
         //开始转换参数
         MissionBO missionBO = new MissionBO();
         missionBO.setIdCtor(new IdConstructor());
         missionBO.setTaskType(tmpPO.getTaskType());
-        missionBO.setDevice_ip(taskBO.getTask_ip());
+        missionBO.setDevice_ip(taskVO.getTask_ip());
 
         generateInputBOS(missionBO,combineJobBO);//兼容透传输入
         if (TaskType.TRANS==tmpPO.getTaskType()) {
@@ -201,7 +201,7 @@ public class TemplateTaskService {
 
     }
 
-    public void checkBusinessTaskParams(TemplateTaskVO taskVO) throws BaseException {
+    public void checkBusinessTaskParams(TemplateTaskVO taskVO,TaskType taskType) throws BaseException {
         JSONArray map_sources = taskVO.getMap_sources();
         Set<Integer> indexSet = new HashSet<>();
         for (int i = 0; i < map_sources.size(); i++) {
@@ -221,17 +221,23 @@ public class TemplateTaskService {
 
         indexSet.clear();
         JSONArray map_tasks = taskVO.getMap_tasks();
-        for (int i = 0; i < map_tasks.size(); i++) {
-            JSONObject taskObj = map_tasks.getJSONObject(i);
-            if (taskObj.containsKey("index")) {
-                Integer index = taskObj.getInteger("index");
-                if (indexSet.contains(index)) {
-                    throw new BaseException(StatusCode.FORBIDDEN,"param error, task index must not repeated");
-                }else{
-                    indexSet.add(index);
+        if (taskType == TaskType.TRANS && map_tasks==null) {
+            throw new BaseException(StatusCode.FORBIDDEN,"task[TRANS] params must not null");
+        }
+        if (map_tasks != null) {
+            for (int i = 0; i < map_tasks.size(); i++) {
+                JSONObject taskObj = map_tasks.getJSONObject(i);
+                if (taskObj.containsKey("index")) {
+                    Integer index = taskObj.getInteger("index");
+                    if (indexSet.contains(index)) {
+                        throw new BaseException(StatusCode.FORBIDDEN,"param error, task index must not repeated");
+                    }else{
+                        indexSet.add(index);
+                    }
                 }
             }
         }
+
         //判断输出
         indexSet.clear();
         JSONArray map_outputs = taskVO.getMap_outputs();

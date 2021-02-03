@@ -1247,32 +1247,26 @@ public class TranscodeTaskService {
 							break;
 						}
 					}
-					throw new BaseException(StatusCode.FORBIDDEN,"任务输入异常");
+
 				}
 			}
-
-			if(taskInput != null){
-
+			if (taskInput == null) {
+				throw new BaseException(StatusCode.FORBIDDEN,"cannot found cover target input");
+			}else{
 				String coverUuid = new StringBufferWrapper().append(COVER)
 						.append("-")
 						.append(taskInput.getId())
 						.toString();
-
 				InputBO exsitInputBO = JSON.parseObject(taskInput.getInput(), InputBO.class);
-
 				input.getCover().getProgram_array().iterator().next().setInput_id(exsitInputBO.getId());
-
 				CheckInputBO check = transferNormalInput(input, coverUuid, taskId);
 				InputBO coverInput = check.getInputBO();
-
 				if(!check.isExist()){
-
 					//向能力添加盖播input
 					AllRequest all = new AllRequest();
 					all.setInput_array(new ArrayListWrapper<InputBO>().add(coverInput).getList());
 					AllResponse response = capacityService.createAllAddMsgId(all, capacityIp, capacityProps.getPort());
 					responseService.allResponseProcess(response);
-
 				}
 
 				//切换task中input
@@ -1287,11 +1281,9 @@ public class TranscodeTaskService {
 
 					}
 					if(task.getRaw_source() != null){
-
 						TaskSourceBO sourceBO = task.getRaw_source();
 						sourceBO.setInput_id(coverInput.getId());
 						source.setRaw_source(sourceBO);
-
 					}
 					if(task.getPassby_source() != null){
 
@@ -1300,10 +1292,8 @@ public class TranscodeTaskService {
 						source.setPassby_source(sourceBO);
 
 					}
-
 					capacityService.modifyTaskSourceAddMsgId(task.getId(), capacityIp, source);
 				}
-
 				output.setTask(JSON.toJSONString(tasks));
 				output.setCoverId(check.getInputId());
 

@@ -85,6 +85,9 @@ public enum ProtocolType {
                 return FILE;
             case "schedule":
                 return SCHEDULE;
+            case "back_up":
+            case "backup":
+                return BACKUP;
         }
         throw new BaseException(StatusCode.FORBIDDEN,"unknown protocol type:"+type);
     }
