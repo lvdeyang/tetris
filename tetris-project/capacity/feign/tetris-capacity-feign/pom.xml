@@ -6,7 +6,11 @@
 
   	<groupId>com.sumavision.tetris</groupId>
   	<artifactId>tetris-capacity-feign</artifactId>
-  	<version>0.0.1-SNAPSHOT</version>
+  	<version>0.0.2-SNAPSHOT</version>
+	<description>
+		1.新增刷表接口
+		2.新增导播相关接口
+	</description>
   	<packaging>jar</packaging>
 
  	<name>tetris-capacity-feign</name>

@@ -2,6 +2,7 @@ package com.sumavision.tetris.application.aop;/**
  * Created by Poemafar on 2020/12/4 14:52
  */
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.application.annotation.OprLog;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -99,7 +100,7 @@ public class LogAspect {
         sbo.append("[").append(logAnnotation.name()).append("]")
                 .append("<").append(method.getName().toLowerCase(Locale.ENGLISH)).append(">")
                 .append("(ack@").append(uuid).append(")")
-                .append(". #RESULT: "+ data)
+                .append(". #RESULT: "+ JSON.toJSONString(data))
                 .append(". #TOTAL: ").append(System.currentTimeMillis()-beginTime).append("ms");
         LOG.info("{}",sbo.toString());
 

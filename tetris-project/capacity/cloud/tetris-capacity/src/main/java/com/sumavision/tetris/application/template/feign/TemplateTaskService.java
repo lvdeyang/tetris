@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.template.*;
 import com.sumavision.tetris.business.common.MissionBO;
+import com.sumavision.tetris.business.common.ResultCode;
+import com.sumavision.tetris.business.common.ResultVO;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -95,7 +97,7 @@ public class TemplateTaskService {
         missionBO.setTaskType(tmpPO.getTaskType());
         missionBO.setDevice_ip(taskBO.getTask_ip());
 
-        generateInputBOS(missionBO,combineJobBO);
+        generateInputBOS(missionBO,combineJobBO);//兼容透传输入
         if (TaskType.TRANS==tmpPO.getTaskType()) {
             generateTaskBOS(missionBO, combineJobBO);
         }else if (TaskType.PACKAGE==tmpPO.getTaskType()){
@@ -122,6 +124,37 @@ public class TemplateTaskService {
         ResponseVO responseVO = new ResponseVO();
         responseVO.setTaskId(missionBO.getIdCtor().getJobId());
         return JSON.toJSONString(responseVO);
+    }
+
+    /**
+     * @MethodName: deleteTask
+     * @Description: TODO 根据任务ID删任务
+     * @param taskId 1
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/1/29 14:40
+     **/
+    public ResultVO deleteTask(String taskId) throws BaseException {
+        ResultVO resultVO = new ResultVO();
+        List<TaskOutputPO> tasks = taskOutputDAO.findByTaskUuid(taskId);
+        if (tasks==null||tasks.isEmpty()){
+            LOGGER.warn("delete task not exist, taskId:{}",taskId);
+        }
+        if (tasks.size()>1) {
+            throw new BaseException(StatusCode.FORBIDDEN,"found more than one task, taskId:"+taskId);
+        }
+        TaskOutputPO taskOutputPO = tasks.get(0);
+        try {
+            TaskOutputPO output = taskService.delete(taskId, taskOutputPO.getType());
+            if(output != null){
+                taskOutputDAO.delete(output);
+                resultVO.setCodeAndMessage(ResultCode.SUCCESS);
+            }
+        } catch (Exception e) {
+            LOGGER.error("fail to delete task",e);
+            resultVO.setCodeAndMessage(ResultCode.FAIL).setDetail("fail to delete task, exp:"+e);
+        }
+        return resultVO;
     }
 
     public void createTaskByTemplate(MissionBO missionBO,TemplateTaskVO jobBO,BusinessType businessType) throws Exception {
@@ -423,6 +456,12 @@ public class TemplateTaskService {
             SourceVO sourceVO = JSON.parseObject(inputObj.toJSONString(),SourceVO.class);
             InputBO inputBO = inputFactory.getInputByTemplateInput(missionBO, sourceVO);
             missionBO.getInputMap().put(sourceVO.getIndex(),inputBO);
+        }
+
+        JSONObject backup = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "backup".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
+        if (backup != null) {
+            InputBO inputBO = inputFactory.getBackupInputByTemplateInput(missionBO, backup);
+            missionBO.getInputMap().put(backup.getInteger("index"),inputBO);
         }
 
     }

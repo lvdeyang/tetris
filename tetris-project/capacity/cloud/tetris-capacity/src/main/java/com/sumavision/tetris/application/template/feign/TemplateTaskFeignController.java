@@ -36,9 +36,13 @@ public class TemplateTaskFeignController {
     @OprLog(name = "template")
     @JsonBody
     @ResponseBody
-    @RequestMapping(value = "/getAll")
-    public Object getAllTemplate() throws Exception{
-        return templateTaskService.getAllTemplate();
+    @RequestMapping(value = "/delete")
+    public Object getAllTemplate(String task) throws Exception{
+        JSONObject taskObj = JSONObject.parseObject(task);
+        String taskId = taskObj.getString("task_id");
+        return templateTaskService.deleteTask(taskId);
     }
+
+
 
 }

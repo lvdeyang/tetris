@@ -3,6 +3,7 @@ package com.sumavision.tetris.application.template;/**
  */
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 
 import java.security.PrivateKey;
@@ -75,6 +76,11 @@ public class SourceVO {
     private Integer prev;
 
     private Integer next;
+
+    //---------backup------
+    private String select_index;
+
+    private String trigger_list;
 
     //------input program结构----
     private JSONArray program_array;
@@ -310,5 +316,23 @@ public class SourceVO {
 
     public void setStream_type(String stream_type) {
         this.stream_type = stream_type;
+    }
+
+    public String getSelect_index() {
+        return select_index;
+    }
+
+    public SourceVO setSelect_index(String select_index) {
+        this.select_index = select_index;
+        return this;
+    }
+
+    public String getTrigger_list() {
+        return trigger_list;
+    }
+
+    public SourceVO setTrigger_list(String trigger_list) {
+        this.trigger_list = trigger_list;
+        return this;
     }
 }

@@ -10,10 +10,7 @@ import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName: MissionBO
@@ -37,17 +34,17 @@ public class MissionBO {
     List<OutputBO> output_array = new ArrayList();
 
     /**
-     * 输入索引号和对应的INPUTBO
+     * 输入索引号和对应的INPUTBO,,,按索引自动排序
      */
-    Map<Integer,InputBO> inputMap = new HashMap<>();
+    Map<Integer,InputBO> inputMap = new TreeMap(Comparator.naturalOrder());
 
 
     /**
      * 用于记录templatevo输出 index 和 转换参数 编码ID的映射关系
      */
-    Map<Integer,String> outEncodeMap = new HashMap<>();
+    Map<Integer,String> outEncodeMap = new TreeMap<>(Comparator.naturalOrder());
 
-    Map<Integer, String> mediaTypeMap = new HashMap<>();
+    Map<Integer, String> mediaTypeMap = new TreeMap<>(Comparator.naturalOrder());
 
     public IdConstructor getIdCtor() {
         return idCtor;

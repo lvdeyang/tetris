@@ -10,6 +10,7 @@ import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.capacity.bo.output.*;
+import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.device.DeviceDao;
@@ -136,8 +137,8 @@ public class TransformService {
 		inputBO.setFile(inputFileBO);
 		inputBO.setNormal_map(new JSONObject());
 		analysisInputVO.setInput(inputBO);
-		String response = transcodeTaskService.analysisInput(analysisInputVO);
-		return response;
+		AnalysisResponse response =  transcodeTaskService.analysisInput(analysisInputVO);
+		return JSON.toJSONString(response);
 	}
 
 	/**

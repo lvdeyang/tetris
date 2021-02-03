@@ -2,9 +2,8 @@ package com.sumavision.tetris.device;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
-import com.sumavision.tetris.application.alarm.AlarmCode;
 import com.sumavision.tetris.application.alarm.service.AlarmService;
+import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BackType;
@@ -26,7 +25,6 @@ import com.sumavision.tetris.device.netgroup.NetGroupDao;
 import com.sumavision.tetris.device.netgroup.NetGroupPO;
 import com.sumavision.tetris.device.xtool.httptool.NetCardHttpUnit;
 import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
-import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -328,7 +326,8 @@ public class DeviceService {
                 return  new ResOptVO(true);
             }
             Set configedNets = getNetsFromDevice(refDevice);
-            if(SetUtils.isEqualSet(netGroupSet,configedNets)){
+
+            if(CommonUtil.isEqualSet(netGroupSet,configedNets)){
                 return  new ResOptVO(true);
             }else{
                 ResOptVO resOptVO = new ResOptVO();
@@ -342,7 +341,7 @@ public class DeviceService {
         }else{
             DevicePO refDevice = devicePOS.get(0);
             Set configedNets = getNetsFromDevice(refDevice);
-            if (SetUtils.isEqualSet(netGroupSet,configedNets)){
+            if (CommonUtil.isEqualSet(netGroupSet,configedNets)){
                 return  new ResOptVO(true);
             }else{
                 ResOptVO resOptVO = new ResOptVO();

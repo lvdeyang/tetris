@@ -13,9 +13,7 @@ import org.json.JSONTokener;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -252,6 +250,20 @@ public class CommonUtil {
         }
         return Boolean.FALSE;
     }
+
+    //判断set是否相等
+    public static boolean isEqualSet(final Collection set1,final Collection set2){
+        if (set1==set2){
+            return true;
+        }
+        if (set1==null || set2==null || set1.size()!=set2.size()) {
+            return false;
+        }
+
+        return set1.containsAll(set2);
+    }
+
+
 //    /**
 //     * 该方法是用于相同对象不同属性值的合并<br>
 //     * 如果两个相同对象中同一属性都有值，那么sourceBean中的值会覆盖tagetBean重点的值<br>

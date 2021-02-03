@@ -46,4 +46,23 @@ public class BackUpProgramBO {
 		return this;
 	}
 
+	public BackUpProgramBO() {
+	}
+
+	public BackUpProgramBO(String input_id,ProgramBO programBO) {
+		this.input_id = input_id;
+		this.program_number = programBO.getProgram_number();
+		if (programBO.getVideo_array() != null && !programBO.getVideo_array().isEmpty()) {
+			ProgramVideoBO programVideoBO = programBO.getVideo_array().get(0);
+			this.element_array.add(new ProgramElementBO().setType("video").setPid(programVideoBO.getPid()));
+		}
+		if (programBO.getAudio_array() != null && !programBO.getAudio_array().isEmpty()) {
+			ProgramAudioBO programAudioBO = programBO.getAudio_array().get(0);
+			this.element_array.add(new ProgramElementBO().setType("audio").setPid(programAudioBO.getPid()));
+		}
+		if (programBO.getSubtitle_array() != null && !programBO.getSubtitle_array().isEmpty()) {
+			ProgramSubtitleBO programSubtitleBO = programBO.getSubtitle_array().get(0);
+			this.element_array.add(new ProgramElementBO().setType("subtitle").setPid(programSubtitleBO.getPid()));
+		}
+	}
 }

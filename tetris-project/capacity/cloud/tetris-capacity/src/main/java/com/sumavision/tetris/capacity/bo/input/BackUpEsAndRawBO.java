@@ -1,7 +1,10 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.MissionBO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -90,5 +93,52 @@ public class BackUpEsAndRawBO {
 
 	public void setOptions(JSONObject options) {
 		this.options = options;
+	}
+
+	public BackUpEsAndRawBO() {
+	}
+
+	public BackUpEsAndRawBO(MissionBO missionBO, JSONObject sourceObj) {
+		if (!sourceObj.containsKey("mode")) {
+			this.mode = "higher_first";
+		}else{
+			this.mode = sourceObj.getString("mode");
+		}
+		if (!sourceObj.containsKey("select_index")) {
+			this.select_index = "0";
+		}else {
+			Integer selectIdx = sourceObj.getInteger("select_index")-1;
+			this.select_index = selectIdx.toString();
+		}
+		if (sourceObj.containsKey("trigger_list")) {
+			this.trigger_list = JSON.parseObject(sourceObj.getString("trigger_list"),TriggerListBO.class) ;
+		}
+		if (sourceObj.containsKey("i_frame_switch")) {
+			JSONObject opt = new JSONObject();
+			opt.put("i_frame_switch",sourceObj.getBooleanValue("i_frame_switch"));
+			this.options = opt;
+		}else if (sourceObj.containsKey("options")){
+			this.options = sourceObj.getJSONObject("options");
+		}
+		//todo 未完待开发,outprog
+		if (sourceObj.containsKey("program_array")) {
+			List<BackUpProgramBO> program_array = JSON.parseArray(sourceObj.getString("program_array"), BackUpProgramBO.class);
+			this.setProgram_array(program_array);
+		}else {
+			List<BackUpProgramBO> program_array = new ArrayList<>();
+			for (Integer index : missionBO.getInputMap().keySet()) {
+				InputBO inputBO = missionBO.getInputMap().get(index);
+				BackUpProgramBO backUpProgramBO = null;
+				if (inputBO.getProgram_array().size()>1 && sourceObj.containsKey("select_program_number")) {
+					ProgramBO programBO = inputBO.getProgram_array().stream().filter(p -> sourceObj.getInteger("select_program_number").equals(p.getProgram_number())).findFirst().get();
+					backUpProgramBO = new BackUpProgramBO(inputBO.getId(),programBO);
+				}else{
+					ProgramBO programBO = inputBO.getProgram_array().get(0);
+					backUpProgramBO = new BackUpProgramBO(inputBO.getId(),programBO);
+				}
+				program_array.add(backUpProgramBO);
+			}
+			this.setProgram_array(program_array);
+		}
 	}
 }

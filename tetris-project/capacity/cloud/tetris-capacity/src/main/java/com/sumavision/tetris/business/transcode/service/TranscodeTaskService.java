@@ -118,7 +118,7 @@ public class TranscodeTaskService {
 	 * @param AnalysisInputVO analysisInput 刷源信息
 	 * @return String input转String
 	 */
-	public String analysisInput(AnalysisInputVO analysisInput) throws Exception{
+	public AnalysisResponse analysisInput(AnalysisInputVO analysisInput) throws Exception{
 
 		String uuid = UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -210,7 +210,7 @@ public class TranscodeTaskService {
 			//删源
 			capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 
-			return JSON.toJSONString(response.getInput());
+			return response;
 
 		}else{
 
@@ -219,7 +219,7 @@ public class TranscodeTaskService {
 			//刷源
 			AnalysisResponse response = capacityService.getAnalysis(inputId, capacityIp);
 
-			return JSON.toJSONString(response.getInput());
+			return response;
 		}
 
 	}

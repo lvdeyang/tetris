@@ -293,4 +293,88 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.getAllTemplate(), String.class);
 	}
 
+/**
+ * @MethodName: refreshSource
+ * @Description: TODO 通用刷源接口
+ * @param source 1
+ * @Return: java.lang.String
+ * @Author: Poemafar
+ * @Date: 2021/2/1 11:49
+ **/
+	public String refreshSource(String source)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.refreshSource(source),String.class);
+	}
+
+	/**
+	 * @MethodName: deleteTask
+	 * @Description: TODO 通用删任务接口：导播用
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 14:26
+	 **/
+	public String deleteTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.deleteTask(task),String.class);
+	}
+
+	/**
+	 * @MethodName: switchBackupForTask
+	 * @Description: TODO 任务切换备源
+	 * @param task 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 15:38
+	 **/
+	public String switchBackupForTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.switchBackupForTask(task),String.class);
+	}
+
+	/**
+	 * @MethodName: addSourcesForTask
+	 * @Description: TODO 已有任务添加源
+	 * @param task 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 15:40
+	 **/
+	public String addSourcesForTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addSourcesForTask(task),String.class);
+	}
+
+	/**
+	 * @MethodName: deleteSourceForTask
+	 * @Description: TODO 已有任务删除源
+	 * @param task 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 15:43
+	 **/
+	public String deleteSourceForTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.deleteSourceForTask(task),String.class);
+	}
+
+	/**
+	 * @MethodName: addOutputsForTask
+	 * @Description: TODO 已有任务添加输出
+	 * @param task 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 15:44
+	 **/
+	public String addOutputsForTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addOutputsForTask(task),String.class);
+	}
+
+	/**
+	 * @MethodName: deleteOutputForTask
+	 * @Description: TODO 已有任务删除输出
+	 * @param task 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/1/29 15:45
+	 **/
+	public String deleteOutputForTask(String task)throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.deleteOutputForTask(task),String.class);
+	}
+
+
 }
