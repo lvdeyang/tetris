@@ -65,6 +65,17 @@ public class ServerOneDimensionalDataPO extends AbstractBasePO{
 	
 	/** 服务器id */
 	private Long serverId;
+	
+	/** 告警信息 */
+	private String alarmMessage;
+	
+	public String getAlarmMessage() {
+		return alarmMessage;
+	}
+
+	public void setAlarmMessage(String alarmMessage) {
+		this.alarmMessage = alarmMessage;
+	}
 
 	@Column(name = "MEMORY_TOTAL")
 	public Long getMemoryTotal() {

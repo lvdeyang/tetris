@@ -2,8 +2,9 @@ package com.sumavision.tetris.record.strategy;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -13,9 +14,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * 录制任务 子任务PO 一个recordtaskItem 可以看做一次具体收录动作从启动 到 停止 的过程
  * 一个录制任务对应N个录制子任务，比如多个定时任务，每一个定时周期是一个收录子任务
  * 
- * 
  * @author chenmo
- * 
  * 
  * 
  */
@@ -38,8 +37,26 @@ public class RecordStrategyItemPO extends AbstractBasePO {
 	private Date stopTime;
 
 	// 录制状态,0,未录制，1：正在录制，2，录制完成，3：录制失败，4：暂停
-	@Column(name = "status")
-	private Integer status;
+	//@Column(name = "status")
+	//private Integer status;
+	
+	@Enumerated(EnumType.STRING)
+	private EStrategyItemStatus strategyItemStatus;
+	
+	public enum EStrategyItemStatus {
+		WAIT("未录制"), RECORDING("正在录制"), RECORD_FINISH("录制完成"), RECORD_FAIL("录制失败"), RECORD_PAUSE("录制暂停");
+
+		private String name;
+
+		private EStrategyItemStatus(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+	}
+	
 
 	public String getName() {
 		return name;
@@ -57,12 +74,12 @@ public class RecordStrategyItemPO extends AbstractBasePO {
 		this.recordStrategyId = recordStrategyId;
 	}
 
-	public Integer getStatus() {
-		return status;
+	public EStrategyItemStatus getStrategyItemStatus() {
+		return strategyItemStatus;
 	}
 
-	public void setStatus(Integer status) {
-		this.status = status;
+	public void setStrategyItemStatus(EStrategyItemStatus strategyItemStatus) {
+		this.strategyItemStatus = strategyItemStatus;
 	}
 
 	public Date getStartTime() {

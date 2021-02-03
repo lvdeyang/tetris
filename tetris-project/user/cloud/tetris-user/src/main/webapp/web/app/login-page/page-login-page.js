@@ -40,6 +40,59 @@ define([
                     data: [],
                     multipleSelection: []
                 },
+                variableTreeResource:{
+                    data:[2,5]
+                },
+                editVariableTreeResource:{
+                    data:[]
+                },
+                editVariable:{
+                    data:[],
+                    loading:false,
+                    visible: false,
+                },
+                variableResource:{
+                    loading: false,
+                    tree: {
+                        props: {
+                            label: "name",
+                            children: "children"
+                        },
+                        data: [{
+                            //id: 1,
+                            name: '背景图片',
+                            children: [{
+                                id: 2,
+                                name: '背景图1'
+                            }, {
+                                id: 3,
+                                name: '背景图2'
+                            }]
+                        }, {
+                            //id: 4,
+                            name: 'logo图片',
+                            children: [{
+                                id: 5,
+                                name: 'logo图1'
+                            }, {
+                                id: 6,
+                                name: 'logo图2'
+                            }]
+                        }, {
+                            //id: 7,
+                            name: '标题',
+                            children: [{
+                                id: 8,
+                                name: '标题1'
+                            }, {
+                                id: 9,
+                                name: '标题2'
+                            }]
+                        }],
+                        loading: false
+                    },
+                    chooseNode: []
+                },
                 dialog:{
                     addPage:{
                         loading:false,
@@ -49,16 +102,52 @@ define([
                         isCurrent:'',
                         remark:''
                     },
-
-                    chooseVariable:{
+                    editPage:{
+                        data:[],
                         loading:false,
                         visible: false,
-                    }
+                        name:'',
+                        tpl:'',
+                        remark:'',
+                        isCurrent:''
+                    },
                 }
-
-
             },
             methods:{
+                //显示变量配置表
+                getPageVariableList:function(currentRow, oldRow){
+                    var self = this;
+                    this.rowData = currentRow;
+                    var questData={
+                        id:this.rowData.id
+                    };
+                   /* ajax.post('', questData, function (data, status) {
+                        if (status != 200) return;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.variableResource.tree.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);*/
+                    self.setVariableTreeCheckedChange();
+                },
+
+                getVariableTreeCheckedChange:function(){
+                    var self = this;
+                    console.log(this.$refs.variableTree.getCheckedKeys());
+                    this.variableTreeResource.data=this.$refs.variableTree.getCheckedKeys();
+                    var questData={
+                        list:this.variableTreeResource.data
+                    }
+                    /*ajax.post('/pageVariable/get', questData, function (data, status) {
+                        if (status != 200) return;
+
+                    }, null, ajax.NO_ERROR_CATCH_CODE);*/
+                },
+                setVariableTreeCheckedChange:function(){
+                    var self = this;
+                    this.$refs.variableTree.setCheckedKeys([this.variableTreeResource.data]);
+                },
                 //显示已配置好的页面数据
                 getPageList: function () {
                     var self = this;
@@ -71,16 +160,19 @@ define([
                         self.loading = false;
                         if (status != 200) return;
                         self.loginPage.data = data;
-                        data.forEach(function(item){
+                        /*data.forEach(function(item){
                             if(item.isCurrent){
+                                useStatus=true;
+                                self.loginPage.data.push[useStatus];
                                 item.isCurrent='使用中'
                             }else{
+                                self.loginPage.data.push[useStatus];
                                 item.isCurrent='未使用'}
-                            })
+                            })*/
                         //self.loginPage.page.total = data.total;
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
-                toggleSelection: function (rows) {
+                /*toggleSelection: function (rows) {
                     if (rows) {
                         for (var i = 0; i < rows.length; i++) {
                             this.$refs.multipleTable.toggleRowSelection(rows[i]);
@@ -88,7 +180,7 @@ define([
                     } else {
                         this.$refs.multipleTable.clearSelection();
                     }
-                },
+                },*/
                 //添加页面
                 handleAddPage:function(){
                     var self = this;
@@ -120,7 +212,7 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
 
-                //使用
+                //使用页面
                 handleUseLoginPage:function(scope){
                     var self = this;
                     var row = scope.row;
@@ -135,17 +227,54 @@ define([
                 },
 
                 //编辑按钮，配置页面
-                handleChooseVariable:function(){
+                handleEditLoginPage:function(scope){
                     var self = this;
-                    self.dialog.chooseVariable.visible=true;
+                    var row = scope.row;
+                    self.dialog.editPage.data = row;
+                    self.dialog.editPage.name=row.name;
+                    self.dialog.editPage.tpl=row.tpl;
+                    self.dialog.editPage.isCurrent=row.isCurrent;
+                    self.dialog.editPage.remark=row.remark;
+                    self.dialog.editPage.visible=true;
                 },
-                handleChooseVariableCommit: function (){
-                    self.dialog.chooseVariable.visible=false;
-                },
-                handleChooseVariableClose:function(){
+                handleEditLoginPageCommit: function (){
                     var self = this;
-                    self.dialog.chooseVariable.visible=false;
-            },
+                    var newName = self.dialog.editPage.name;
+                    var newRemark = self.dialog.editPage.remark;
+                    var newTpl = self.dialog.editPage.tpl;
+                    var questData={
+                        id: self.dialog.editPage.data.id,
+                        name:newName,
+                        remark:newRemark,
+                        tpl:newTpl
+                    };
+                    ajax.post('/login/page/edit', questData, function (data, status) {
+                        self.dialog.addPage.loading = false;
+                        if (status != 200) return;
+                        self.handleEditLoginPageClose();
+                        self.getPageList();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+
+                },
+
+                handleEditLoginPageClose:function(){
+                    var self = this;
+                    self.dialog.editPage.visible=false;
+                 },
+
+                //好像没用
+                /*editVariable:function(scope){
+                    var self = this;
+                    self.editVariable.data = scope.row;
+                    self.editVariable.visible=true
+                },
+
+                handleEditVariableClose:function(){
+                    var self = this;
+                    self.editVariable.data = "";
+                    self.editVariable.visible = false;
+                },*/
+
                 //删除按钮，删除一条页面数据
                 rowDelete: function (scope) {
                     var self = this;

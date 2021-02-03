@@ -1,7 +1,5 @@
 package com.suma.venus.resource.vo;
 
-import org.springframework.data.geo.format.PointFormatter;
-
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -36,6 +34,8 @@ public class FolderVO {
 
 	private SOURCE_TYPE sourceType = SOURCE_TYPE.SYSTEM;
 	
+	private String folderFactInfo;
+	
 	public static FolderVO fromFolderPO(FolderPO po){
 		FolderVO vo = new FolderVO();
 		vo.setId(po.getId());
@@ -47,6 +47,7 @@ public class FolderVO {
 		vo.setUuid(po.getUuid());
 		vo.setBeBvcRoot(po.getBeBvcRoot());
 		vo.setSourceType(po.getSourceType());
+		vo.setFolderFactInfo(po.getFolderFactInfo());
 		return vo;
 	}
 	
@@ -61,10 +62,18 @@ public class FolderVO {
 		po.setUuid(this.getUuid());
 		po.setBeBvcRoot(this.getBeBvcRoot());
 		po.setSourceType(this.getSourceType());
+		po.setFolderFactInfo(this.getFolderFactInfo());
 		return po;
 	}
 
-	
+	public String getFolderFactInfo() {
+		return folderFactInfo;
+	}
+
+	public void setFolderFactInfo(String folderFactInfo) {
+		this.folderFactInfo = folderFactInfo;
+	}
+
 	public Long getId() {
 		return id;
 	}

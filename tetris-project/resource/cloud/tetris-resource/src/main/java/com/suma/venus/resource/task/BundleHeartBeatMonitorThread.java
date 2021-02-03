@@ -57,8 +57,6 @@ public class BundleHeartBeatMonitorThread implements Runnable {
 				}
 
 				bundleHeartBeatService.removeBundleStatus(e.getKey());
-				// TODO 发出告警
-
 			}
 		}
 	}

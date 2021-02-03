@@ -52,6 +52,17 @@ public class FolderPO extends CommonPO<FolderPO> {
 		ON_DEMAND, // 点播文件夹
 		USER // 用户文件夹
 	}
+	
+	public String folderFactInfo;
+	
+	@Column
+	public String getFolderFactInfo() {
+		return folderFactInfo;
+	}
+
+	public void setFolderFactInfo(String folderFactInfo) {
+		this.folderFactInfo = folderFactInfo;
+	}
 
 	@Column
 	public String getName() {
@@ -161,6 +172,7 @@ public class FolderPO extends CommonPO<FolderPO> {
 		result = prime * result + ((syncStatus == null) ? 0 : syncStatus.hashCode());
 		result = prime * result + ((toLdap == null) ? 0 : toLdap.hashCode());
 		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		result = prime * result + ((folderFactInfo == null) ? 0 : folderFactInfo.hashCode());
 		return result;
 	}
 
@@ -213,6 +225,8 @@ public class FolderPO extends CommonPO<FolderPO> {
 			if (other.uuid != null)
 				return false;
 		} else if (!uuid.equals(other.uuid))
+			return false;
+		if (folderFactInfo != other.folderFactInfo)
 			return false;
 		return true;
 	}

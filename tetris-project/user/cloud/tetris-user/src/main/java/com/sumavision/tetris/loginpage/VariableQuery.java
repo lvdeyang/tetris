@@ -40,7 +40,8 @@ public class VariableQuery {
 				for (VariableVO variableVO : variableVOs) {
 					for (VariableTypePO variableTypePO : variableTypePOs) {
 						if (variableVO.getVariableTypeId().equals(variableTypePO.getId().toString())) {
-							variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType().getName());
+							variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType());
+							variableVO.setTypeName(variableTypePO.getType().getName());
 							variableVO.setVariableKey(variableTypePO.getVariableKey());
 							variableVO.setName(variableTypePO.getName());
 						}

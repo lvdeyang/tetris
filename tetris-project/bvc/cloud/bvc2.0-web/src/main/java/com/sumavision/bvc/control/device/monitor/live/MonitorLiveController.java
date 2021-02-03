@@ -57,6 +57,9 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.location.LocationOfScreenWallService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -68,6 +71,9 @@ public class MonitorLiveController {
 
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private LocationOfScreenWallService locationOfScreenWallService;
 
 	@Autowired
 	private MonitorLiveService monitorLiveService;
@@ -386,33 +392,48 @@ public class MonitorLiveController {
 		String audioBaseType = encodeAudio.getBaseType();
 		String audioChannelName = encodeAudio.getName();
 		
-		if(!queryUtil.isLdapBundle(srcBundle)){
-			entity = monitorLiveDeviceService.startLocalSeeLocal(
-					osdId, 
-					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
-					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
-					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
-					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
-					type, user.getId(), user.getUserno(), 
-					false, null);
-		}else{
-			
-			videoLayerId = resourceRemoteService.queryLocalLayerId();
-			videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
-			audioLayerId = videoLayerId;
-			audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
-			
-			entity = monitorLiveDeviceService.startLocalSeeXt(
-					osdId, 
-					videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
-					audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
-					dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
-					dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
-					type, user.getId(), user.getUserno());
+		//如果屏幕墙包含此解码器当成重新绑定编码器进行处理。如果屏幕墙没有包含，就走原来的创建
+		
+		List<MonitorLiveDevicePO> lives = monitorLiveDeviceDao.findByDstVideoBundleIdAndDstVideoChannelIdAndDstAudioBundleIdAndDstAudioChannelId(dstVideoBundleId, dstVideoChannelId, dstAudioBundleId, dstAudioChannelId);
+		if(lives.size() > 1){
+			throw new BaseException(StatusCode.FORBIDDEN, "配置转发目的时，找到多个转发目的对应的转发没有停止");
+		}
+		if(lives.size() == 1){
+			MonitorLiveDevicePO live = lives.get(0);
+			MonitorLiveDevicePO newLive = locationOfScreenWallService.hasLiveForScreenWallAndReset(live, videoBundleId, videoBundleName, user);
+			if(newLive != null){
+				entity = newLive;
+			}
+		}
+		if(entity == null){
+			if(!queryUtil.isLdapBundle(srcBundle)){
+				
+				entity = monitorLiveDeviceService.startLocalSeeLocal(
+						osdId, 
+						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
+						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
+						dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
+						dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
+						type, user.getId(), user.getUserno(), 
+						false, null);
+			}else{
+				
+				videoLayerId = resourceRemoteService.queryLocalLayerId();
+				videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+				audioLayerId = videoLayerId;
+				audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+				
+				entity = monitorLiveDeviceService.startLocalSeeXt(
+						osdId, 
+						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, 
+						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, 
+						dstVideoBundleId, dstVideoBundleName, dstVideoBundleType, dstVideoLayerId, dstVideoChannelId, dstVideoBaseType, 
+						dstAudioBundleId, dstAudioBundleName, dstAudioBundleType, dstAudioLayerId, dstAudioChannelId, dstAudioBaseType, 
+						type, user.getId(), user.getUserno());
+			}
 		}
 
 		operationLogService.send(user.getName(), "新建转发", srcBundle.getBundleName() + " 转发给 " + dstBundle.getBundleName());
-		
 		return new MonitorLiveDeviceVO().set(entity);
 	}
 	
@@ -990,6 +1011,8 @@ public class MonitorLiveController {
 		
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
+		locationOfScreenWallService.hasLiveForScreenWallAndUnbind(idList, user);
+		
 		monitorLiveDeviceService.stop(idList, user.getId(), user.getUserno(), stopAndDelete);
 		
 		return null;
@@ -1080,9 +1103,12 @@ public class MonitorLiveController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		List<Long> idList = JSONArray.parseArray(ids, Long.class);
+		List<Long> liveIdList = JSONArray.parseArray(ids, Long.class);
 		
-		monitorLiveDeviceService.stopToRestart(idList, user.getId());
+		//判断屏幕墙中是否有对应任务,有的话走屏幕墙的重新执行
+		locationOfScreenWallService.hasLiveForScreenWallAndExchangeStatus(liveIdList, false, user.getUserno(), user.getId());
+		
+		monitorLiveDeviceService.stopToRestart(liveIdList, user.getId());
 		
 		return null;
 	}

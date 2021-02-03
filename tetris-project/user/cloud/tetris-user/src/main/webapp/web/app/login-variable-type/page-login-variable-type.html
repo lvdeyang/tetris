@@ -21,7 +21,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="value值类型"
-                                prop="type">
+                                prop="typeName">
                         </el-table-column>
                         <el-table-column
                                 label="变量类型key"
@@ -89,7 +89,7 @@
                         <el-input v-model="dialog.edit.name"></el-input>
                     </el-form-item>
                     <el-form-item label="value值类型">
-                        <el-select v-model="dialog.edit.type" style="width: 100%;">
+                        <el-select v-model="dialog.edit.typeName" style="width: 100%;">
                             <el-option
                                     v-for="type in types"
                                     :key="type"

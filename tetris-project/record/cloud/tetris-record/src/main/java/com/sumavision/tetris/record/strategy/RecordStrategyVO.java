@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.springframework.util.StringUtils;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.record.strategy.RecordStrategyPO.EStrategyType;
 
 public class RecordStrategyVO {
 
@@ -32,6 +37,8 @@ public class RecordStrategyVO {
 
 	private String recordTimeSlotJson;
 
+	private String strategyDetailString;
+
 	private int delStatus;
 
 	public int getDelStatus() {
@@ -47,7 +54,7 @@ public class RecordStrategyVO {
 		vo.setId(po.getId());
 		vo.setName(po.getName());
 		vo.setSourceId(po.getSourceId());
-		vo.setSourceInfo(po.getSourceType() + " : " + po.getSourceUrl());
+		vo.setSourceInfo("(" + po.getSourceType() + ")" + po.getSourceUrl());
 		vo.setStatus(po.getStatus().getName());
 		vo.setType(po.getType().getName());
 		vo.setDelStatus(po.getDelStatus());
@@ -55,6 +62,54 @@ public class RecordStrategyVO {
 		vo.setCreateTime(po.getCreateTime());
 		vo.setStartDate(po.getStartDate());
 		vo.setEndDate(po.getEndDate());
+
+		if (po.getType().equals(EStrategyType.CYCLE_SCHEDULE)) {
+
+			StringBuilder sb = new StringBuilder();
+
+			if (po.getLoopCycles().contains("7")) {
+				sb.append("每天, ");
+			} else {
+				String[] weekStrArr = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+
+				String[] loopCycleArr = po.getLoopCycles().split(",");
+
+				sb.append("每");
+
+				for (String loopCycleItem : loopCycleArr) {
+					if (!StringUtils.isEmpty(loopCycleItem)) {
+						sb.append(weekStrArr[Integer.valueOf(loopCycleItem)] + "、");
+					}
+
+				}
+
+				sb.deleteCharAt(sb.length() - 1);
+				sb.append(" : ");
+			}
+
+			JSONArray jsonArray = JSONArray.parseArray(po.getRecordTimeSlotJson());
+
+			if (jsonArray != null) {
+
+				JSONObject jsonObject = jsonArray.getJSONObject(0);
+
+				sb.append("(");
+				sb.append(jsonObject.getString("name"));
+				sb.append(")");
+
+				sb.append(jsonObject.getString("startTime"));
+				sb.append("-");
+				sb.append(jsonObject.getString("endTime"));
+
+				vo.setStrategyDetailString(sb.toString());
+			}
+
+		} else if (po.getType().equals(EStrategyType.CUSTOM_SCHEDULE)) {
+
+			// TODO
+
+		}
+
 		return vo;
 	}
 
@@ -177,6 +232,14 @@ public class RecordStrategyVO {
 
 	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getStrategyDetailString() {
+		return strategyDetailString;
+	}
+
+	public void setStrategyDetailString(String strategyDetailString) {
+		this.strategyDetailString = strategyDetailString;
 	}
 
 }
