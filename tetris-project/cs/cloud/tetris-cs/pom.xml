@@ -103,7 +103,7 @@
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 		  	<artifactId>tetris-capacity-feign</artifactId>
-		  	<version>0.0.1-SNAPSHOT</version>
+		  	<version>0.0.2-SNAPSHOT</version>
 		</dependency> 
 		
 		<!-- tetris-alarm-feign -->
@@ -162,6 +162,14 @@
 		            <target>1.8</target>
 		            <encoding>utf-8</encoding>
 		        </configuration>
+	        </plugin>
+	        
+	        <plugin>
+	          	<groupId>org.apache.maven.plugins</groupId>
+	          	<artifactId>maven-war-plugin</artifactId>
+	          	<configuration>
+		            <failOnMissingWebXml>false</failOnMissingWebXml>
+	          	</configuration>
 	        </plugin>
 		</plugins>
     </build>
