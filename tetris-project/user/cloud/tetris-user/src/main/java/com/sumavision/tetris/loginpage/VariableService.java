@@ -30,7 +30,8 @@ public class VariableService {
 		variableDAO.save(variablePO);
 		VariableTypePO  variableTypePO = variableTypeDAO.findOne(Long.valueOf(variableTypeId));
 		VariableVO variableVO = new VariableVO().set(variablePO);
-		variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType().getName());
+		variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType());
+		variableVO.setTypeName(variableTypePO.getType().getName());
 		variableVO.setVariableKey(variableTypePO.getVariableKey());
 		variableVO.setName(variableTypePO.getName());
 		return variableVO;
@@ -68,7 +69,8 @@ public class VariableService {
 		variableDAO.save(variablePO);
 		VariableTypePO  variableTypePO = variableTypeDAO.findOne(Long.valueOf(variableTypeId));
 		VariableVO variableVO = new VariableVO().set(variablePO);
-		variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType().getName());
+		variableVO.setType(variableTypePO.getType()==null?null:variableTypePO.getType());
+		variableVO.setTypeName(variableTypePO.getType().getName());
 		variableVO.setVariableKey(variableTypePO.getVariableKey());
 		variableVO.setName(variableTypePO.getName());
 		return variableVO;

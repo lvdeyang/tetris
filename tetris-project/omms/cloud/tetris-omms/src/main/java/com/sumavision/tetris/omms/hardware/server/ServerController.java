@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
-import com.sumavision.tetris.omms.auth.AuthPO;
-import com.sumavision.tetris.omms.auth.AuthVO;
 
 @Controller
 @RequestMapping(value = "/server")
@@ -302,5 +300,96 @@ public class ServerController {
         	utf8Bytes[i+3] = fileBytes[i];
         }
         return new ResponseEntity<byte[]>(utf8Bytes, headers, HttpStatus.OK);
+	}
+	
+	/**
+	 * 查询和开启告警<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月26日 下午1:47:58
+	 * @return ServerAlarmVO cpu、内存、硬盘使用告警限制，默认80、80、80
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/limit/rate")
+	public Object queryLimitRate()throws Exception{
+		
+		return serverQuery.queryLimitRate();
+	}
+	
+	/**
+	 * 修改CPU、内存、硬盘告警限制<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月26日 下午2:02:44
+	 * @param cpuRate CPU告警限度
+	 * @param memoryRate 内存告警限度
+	 * @param diskRate 硬盘告警限度
+	 * @return ServerAlarmVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit/limit/rate")
+	public Object editLimitRate(HttpServletRequest request)throws Exception{
+		
+		MultipartHttpServletRequestWrapper requestWrapper = new MultipartHttpServletRequestWrapper(request, -1);
+		Long cpuRate = requestWrapper.getLong("cpuRate");
+		Long memoryRate = requestWrapper.getLong("memoryRate");
+		Long diskRate = requestWrapper.getLong("diskRate");
+		Long processCpu = requestWrapper.getLong("processCpu");
+		
+		return serverService.editLimitRate(cpuRate, memoryRate, diskRate, processCpu);
+	}
+	
+	/**
+	 * 查询存在告警信息的服务器数据<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 上午10:00:18
+	 * @param serverId 服务器id
+	 * @return List<ServerOneDimensionalDataVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/show/alarm/message")
+	public Object showAlarmMessage(Long serverId)throws Exception{
+		
+		return serverQuery.showAlarmMessage(serverId);
+		
+	}
+	
+	/**
+	 * 查询具体的进程CPU占用率<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午6:20:27
+	 * @param dataId 服务器数据id
+	 * @return List<ServerProcessUsageVO> 进程的详细数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/show/alarm/details")
+	public Object showAlarmDetails(Long dataId)throws Exception{
+		
+		return serverQuery.showAlarmDetails(dataId);
+	}
+	
+	/**
+	 * 删除告警信息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月28日 下午7:55:04
+	 * @param serverId 服务器id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/alarm/message")
+	public Object deleteAlarmMessage(Long serverId)throws Exception{
+		
+		return serverService.deleteAlarmMessage(serverId);
 	}
 }

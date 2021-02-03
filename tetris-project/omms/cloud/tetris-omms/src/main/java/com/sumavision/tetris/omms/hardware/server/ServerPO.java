@@ -59,6 +59,18 @@ public class ServerPO extends AbstractBasePO{
 	
 	/** 服务器状态 */
 	private ServerStatus status;
+	
+	/** 是否存在告警 */
+	private Boolean isAlarm;
+	
+	@Column(name = "IS_ALARM")
+	public Boolean getIsAlarm() {
+		return isAlarm;
+	}
+
+	public void setIsAlarm(Boolean isAlarm) {
+		this.isAlarm = isAlarm;
+	}
 
 	@Column(name = "NAME")
 	public String getName() {

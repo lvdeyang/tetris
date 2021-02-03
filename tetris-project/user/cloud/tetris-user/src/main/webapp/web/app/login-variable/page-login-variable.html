@@ -22,7 +22,7 @@
                         <el-table-column
                                 label="value值"
                                 width="80px">
-                            <template slot-scope="scope" v-if="scope.row.type=='img'">
+                            <template slot-scope="scope" v-if="scope.row.type=='IMG'">
                                 <el-popover trigger="hover">
                                     <div slot="reference">
                                         <img :src="scope.row.value" class="imageView">
@@ -32,7 +32,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="value值类型"
-                                prop="type">
+                                prop="typeName">
                         </el-table-column>
                         <el-table-column
                                 label="变量类型名称"
@@ -53,7 +53,7 @@
                                 <el-tooltip class="item" effect="dark" content="刪除" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="预览" placement="bottom-end" v-if="scope.row.type=='img'">
+                                <el-tooltip class="item" effect="dark" content="预览" placement="bottom-end" v-if="scope.row.type=='IMG'">
                                     <el-button type="text" icon="el-icon-picture" style="font-size:20px; padding:0;" @click="handlePreview(scope)"></el-button>
                                 </el-tooltip>
                             </template>
@@ -76,11 +76,11 @@
                 <el-form-item label="变量类型" prop="typeInput">
                     <el-input v-model="dialog.add.variableType" @click.native="handleChangeType"></el-input>
                 </el-form-item>
-                <el-form-item label="value值" width="150" v-if="dialog.add.type=='text'" prop="textInput">
+                <el-form-item label="value值" width="150" v-if="dialog.add.type=='TEXT'" prop="textInput">
                     <el-input type="textarea" v-model="dialog.add.text"></el-input>
                 </el-form-item>
                 <!--<el-form label-width="80px">-->
-                    <el-form-item v-if="dialog.add.type=='img'">
+                    <el-form-item v-if="dialog.add.type=='IMG'">
                         <input type="file" id="file" style="display:none;" @change="handleFileSelected"/>
                         <el-button type="text" @click="handleSelectFile">上传文件</el-button>
                         <div v-if="dialog.add.file">
@@ -108,13 +108,13 @@
                     :close-on-click-modal="false">
                 <el-form label-width="80px">
                     <el-form-item label="变量类型">
-                        <el-input v-model="dialog.edit.variableType" @click.native="handleChangeType"></el-input>
+                        <el-input v-model="dialog.edit.typeName" @click.native="handleChangeType"></el-input>
                     </el-form-item>
-                    <el-form-item label="文本内容" width="150" v-if="dialog.edit.type=='text'">
+                    <el-form-item label="文本内容" width="150" v-if="dialog.edit.type=='TEXT'">
                         <el-input type="textarea" v-model="dialog.edit.text"></el-input>
                     </el-form-item>
                     <el-form label-width="80px">
-                        <el-form-item v-if="dialog.edit.type=='img'">
+                        <el-form-item v-if="dialog.edit.type=='IMG'">
                             <input type="file" id="fileUpdate" style="display:none;" @change="handleFileSelectedUpdate"/>
                             <el-button type="text" @click="handleSelectFileUpdate">上传文件</el-button>
                             <div v-if="dialog.edit.file">
@@ -147,7 +147,7 @@
                 <el-table ref="variableTypes" :data="dialog.dialogVariableTypes.variableTypes" :row-key="dialog.dialogVariableTypes.variableTypes.id" width="100%" height="400"
                           @current-change="currentRowChange" highlight-current-row>
                     <el-table-column prop="name" label="名称" width="200"></el-table-column>
-                    <el-table-column prop="type" label="类型" width="200"></el-table-column>
+                    <el-table-column prop="typeName" label="类型" width="200"></el-table-column>
                 </el-table>
                 <el-button type="primary" size="small" @click="handleBindType" style="margin-top:15px"><span
                         class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;确定</el-button>

@@ -148,7 +148,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				fo.put("ip", serNodePO2.getIp());
 				fo.put("port", serNodePO2.getPort());
 				fo.put("operate", serNodePO2.getOperate());
-				fo.put("extraInfo", params);
+//				fo.put("extraInfo", params);
 				foreign.add(fo);
  			}
 		}
@@ -250,7 +250,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			serverNodeName.add(name);
 		}
 
-		folderUpdate(institutionsArray);
+		folderUpdate(institutionsArray, name);
 		List<FolderPO> newFolders = folderDao.findAll();
 		//外域下设备信息
 		Set<BundlePO> bundlePOs = new HashSet<BundlePO>();
@@ -509,7 +509,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		
 		
 		//外域下组织机构信息
-		folderUpdate(institutionsArray);
+		folderUpdate(institutionsArray,name);
 		List<FolderPO> newFolders = folderDao.findAll();
 		
 		//外域下设备信息
@@ -715,13 +715,14 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		JSONArray foreign = new JSONArray(wrapper.getJSONArray("foreign"));
 		JSONArray institutions = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
+		String name = new String();
 		for (int i = 0; i < foreign.size(); i++) {
 			JSONObject jsonObject = foreign.getJSONObject(i);
-			String sername = jsonObject.getString("name");
+			name = jsonObject.getString("name");
 			institutions = jsonObject.getJSONArray("institutions");
 			devicesJsonArray = jsonObject.getJSONArray("devices");
 		}
-		folderUpdate(institutions);
+		folderUpdate(institutions, name);
 		List<FolderPO> folderPOs = folderDao.findAll();
 		if(devicesJsonArray != null && devicesJsonArray.size() > 0){
 			Map<String, String> bundleIdfolderuuid = new HashMap<String, String>();
@@ -761,7 +762,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 * @param institutionsArray
 	 * @throws Exception
 	 */
-	public Object folderUpdate(JSONArray institutionsArray)throws Exception{
+	public Object folderUpdate(JSONArray institutionsArray, String name)throws Exception{
 		
 		List<FolderVO> folderVOs = new ArrayList<FolderVO>();
 		List<FolderVO> removeFolderVOs = new ArrayList<FolderVO>();
@@ -769,6 +770,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			JSONObject jsonObject = institutionsArray.getJSONObject(i);
 			FolderVO folderVO = JSONObject.toJavaObject(jsonObject, FolderVO.class);
 			folderVO.setSourceType(SOURCE_TYPE.EXTERNAL);
+			folderVO.setFolderFactInfo(name);
 			folderVOs.add(folderVO);
 		}
 		List<FolderPO> existedFolderPOs = folderDao.findAll();
@@ -780,6 +782,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 						if (folderPO.getUuid().equals(newFolderVO.getUuid())) {
 							folderPO.setName(newFolderVO.getName());
 							folderPO.setParentPath(newFolderVO.getParentPath());
+							folderPO.setFolderFactInfo(name);
 							folderPO.setFolderIndex(newFolderVO.getFolderIndex());
 							removeFolderVOs.add(newFolderVO);
 							folderPOs2.add(folderPO);
@@ -943,6 +946,11 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		List<FolderPO> bundleFolderPOs = folderDao.findByIdIn(folderIds);
 		if(bundleFolderPOs != null && !bundleFolderPOs.isEmpty()){
 			for (FolderPO folderPO : bundleFolderPOs) {
+				String parentPath = folderPO.getParentPath();
+				if(parentPath==null || "".equals(parentPath)) {
+					allFolderIds.add(folderPO.getId());
+					continue;
+				}
 				String[] allfolderIds = folderPO.getParentPath().split("/");
 				for (int i = 1; i < allfolderIds.length; i++) {
 					allFolderIds.add(Long.parseLong(allfolderIds[i]));
@@ -1064,9 +1072,10 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		JSONArray extraInfo = new JSONArray();
 		JSONArray devicesJsonArray = new JSONArray();
 		JSONArray institutionsArray = new JSONArray();
+		String name = new String();
 		for (int i = 0; i < foreign.size(); i++) {
 			JSONObject jsonObject = foreign.getJSONObject(i);
-			String sername = jsonObject.getString("name");
+			name = jsonObject.getString("name");
 			institutionsArray = foreign.getJSONObject(i).getJSONArray("institutions");
 			devicesJsonArray = jsonObject.getJSONArray("devices");
 			extraInfo = jsonObject.getJSONArray("extraInfo");
@@ -1083,7 +1092,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		if (null != bundlePO) {
 			
 			//附带组织机构
-			folderUpdate(institutionsArray);
+			folderUpdate(institutionsArray, name);
 			
 			List<ExtraInfoPO> newextraInfoPOs = new ArrayList<ExtraInfoPO>();
 			if(extraInfo!= null && extraInfo.size()>0){
