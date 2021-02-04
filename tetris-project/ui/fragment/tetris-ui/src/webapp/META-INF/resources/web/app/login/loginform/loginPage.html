@@ -1,0 +1,19 @@
+
+<div class="login-button" style="width:100%; height:100%;">
+    <div style="height:45px; border-bottom:1px solid #eef1f4;">
+        <div>密码登录</div>
+    </div>
+    <form @submit.navite="doPasswordLogin" v-if="mode==='password'" style="margin-top:20px;" action="/do/password/login" method="POST">
+        <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号">
+            <span slot="prefix" class="feather-icon-user" style="font-size:20px; position:relative; top:9px;"></span>
+        </el-input>
+        <el-input type="password" v-model="passwordInput" class="border-radius-2px" placeholder="密码" style="margin-top:20px;">
+            <span slot="prefix" class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></span>
+        </el-input>
+        <input name="password" type="hidden" v-model="passwordEncode">
+        <div style="margin-top:20px;">
+            <hr style="border:0; clear:both; padding:0; margin:0;"/>
+        </div>
+        <button type="submit" class="el-button el-button--primary" style="margin-top:20px; width:100%; border-radius:2px;">登录</button>
+    </form>
+</div>
