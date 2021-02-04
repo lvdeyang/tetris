@@ -420,4 +420,5 @@ public class AreaQuery {
 			this.subColumns = subColumns;
 		}
 	}
+	
 }
