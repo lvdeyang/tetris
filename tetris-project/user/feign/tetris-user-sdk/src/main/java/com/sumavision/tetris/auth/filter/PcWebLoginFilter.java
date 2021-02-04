@@ -83,7 +83,8 @@ public class PcWebLoginFilter implements Filter{
 		}
 		
 		if("/".equals(requestUri)){
-			response.sendRedirect("/web/app/login/login.html");
+			//response.sendRedirect("/web/app/login/login.html");
+			response.sendRedirect("/getLoginPage/get");
 			return;
 		}
 		
@@ -192,6 +193,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/device/group/record/download/file")
 												   .add("/sign/sign/page/*")
 												   .add("/sign/add")
+												   .add("/getLoginPage/get")
 												   .getList();
 	}
 	
