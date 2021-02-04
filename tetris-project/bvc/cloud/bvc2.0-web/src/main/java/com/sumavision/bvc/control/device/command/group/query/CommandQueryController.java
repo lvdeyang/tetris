@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -195,6 +197,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -963,16 +968,22 @@ public class CommandQueryController {
 		//获取userId
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		if(uuid == null){
+			uuid = UUID.randomUUID().toString().replace("-", "");
+		}
+		
 		Map<String,String> passByContent = new HashMap<String, String>();
 		passByContent.put("folderPath", folderPath);
 		passByContent.put("serNodeNamePath", serNodeNamePath);
 		passByContent.put("childType", childType.toString());
 		passByContent.put("uuid", uuid);
 		passByContent.put("userId", userId.toString());
+		passByContent.put("cmd", "search_foreign");
 		
+		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		PassByBO passBy = new PassByBO();
-		passBy.setType("search_foreign");
 		passBy.setPass_by_content(passByContent);
+		passBy.setLayer_id(localLayerId);
 		
 		LogicBO logic = new LogicBO();
 		logic.setPass_by(new ArrayListWrapper<PassByBO>().add(passBy).getList());
