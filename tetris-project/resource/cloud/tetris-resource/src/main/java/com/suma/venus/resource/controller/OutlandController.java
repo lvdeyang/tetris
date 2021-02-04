@@ -6,12 +6,14 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.service.OutlandService;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.bvc.business.query.QueryForeignInformation;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -24,6 +26,9 @@ public class OutlandController extends ControllerBase{
 	
 	@Autowired
 	private TetrisDispatchService tetrisDispatchService;
+	
+	@Autowired
+	private QueryForeignInformation queryForeignInformation;
 	
 	/**
 	 * 查询本域<br/>
@@ -230,4 +235,41 @@ public class OutlandController extends ControllerBase{
 		
 		return outlandService.submitBundlePrivilege(roleId, preBundlePrivilege, bundleprivilege);
 	}
+	
+	/**
+	 * 获取ws地址<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月3日 下午2:46:13
+	 * @return String ws地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/websocket/addr")
+	public Object websocketAddr()throws Exception{
+		
+		return outlandService.websocketAddr();
+	}
+	
+	/**
+	 * 查询外域目录设备信息<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月3日 下午3:42:12
+	 * @param folderPath 目录路径
+	 * @param serNodeNamePath 外域路径
+	 * @param childType 类型
+	 * @param uuid 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "find/institution/tree/foreign/bundle")
+	public Object queryForeignInformation(
+			String folderPath,
+			String serNodeNamePath,
+			String childType,
+			String uuid)throws Exception{
+		
+		return queryForeignInformation.stopLiveDevice(folderPath, serNodeNamePath, childType, uuid);
+	} 
 }
