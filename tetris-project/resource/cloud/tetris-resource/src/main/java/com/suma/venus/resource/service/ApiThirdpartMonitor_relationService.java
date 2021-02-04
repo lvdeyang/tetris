@@ -49,8 +49,13 @@ import com.suma.venus.resource.vo.FolderVO;
 import com.suma.venus.resource.vo.LianwangPassbyVO;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceFeign;
 import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
+import com.sumavision.tetris.websocket.message.WebsocketMessageType;
+import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -100,6 +105,12 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	
 	@Autowired
 	private OutlandService outlandService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	/**
 	 * 查本域以及外域信息<br/>
@@ -179,6 +190,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		if (serNodePOs != null && !serNodePOs.isEmpty()) {
 			for (SerNodePO serNodePO : serNodePOs) {
 				serNodePO.setStatus(ConnectionStatus.OFF);
+				
+				//外域连接断开日志
+				operationLogService.send("", "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
 			}
 			//断开时外域的设备设为离线状态
 			List<BundlePO> bundlePOs = bundleDao.findByEquipFactInfoIn(serverNodeName);
@@ -1114,6 +1128,26 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 			bundlePO.setFolderId(bundleFolder.getId());
 			bundleDao.save(bundlePO);
 		}
+		return null;
+	}
+
+	/**
+	 * 外域信息推送<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月3日 下午3:26:31
+	 * @param userId 用户id
+	 * @param message 外域信息
+	 */
+	public Object onForeignResourceReceive(String userId, JSONObject message) {
+		try {
+			websocketMessageService.push(userId, null, message, null, null);
+		} catch (Exception e) {
+			System.out.println( "消息推送失败" + message);
+			e.printStackTrace();
+		}
+		
 		return null;
 	}
 	
