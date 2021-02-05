@@ -685,7 +685,7 @@ public class VodService {
 	
 	/** 重构点播设备 */
 	@Transactional(rollbackFor = Exception.class)
-	public void foreignDeviceStart(UserBO user, String bundleName, String bundleId,Integer serial) throws Exception{
+	public void foreignDeviceStart(UserBO user, String bundleName, String bundleId,Integer serial, String multiAddr, String multiSrcIp, Boolean isMulticast) throws Exception{
 		
 		TerminalPO deviceTerminal = terminalDao.findByType(TerminalType.JV210);
 		TerminalPO userTerminal = terminalDao.findByType(TerminalType.QT_ZK);
@@ -700,6 +700,9 @@ public class VodService {
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
 		if(serial!=null && serial != -1) group.setLocationIndex(serial);
+		group.setMultiAddr(multiAddr);
+		group.setMultiSrcIp(multiSrcIp);
+		group.setIsMulticast(isMulticast);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();

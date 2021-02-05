@@ -587,6 +587,9 @@ public class CommandVodController {
 			String bundleId, 
 			Integer serial, 
 			String bundleName,
+			String multiAddr,
+			String multiSrcIp,
+			Boolean isMulticast,
 			HttpServletRequest request) throws Exception {
 
 		Long id = userUtils.getUserIdFromSession(request);
@@ -595,7 +598,7 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 			
 			businessReturnService.init(Boolean.TRUE);
-			vodService.foreignDeviceStart(user, bundleName,bundleId, serial);
+			vodService.foreignDeviceStart(user, bundleName,bundleId, serial, multiAddr, multiSrcIp, isMulticast);
 
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 

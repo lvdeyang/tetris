@@ -831,6 +831,7 @@ public class CommandQueryController {
 		List<BundlePO> queryBundles = queryAllBundles.stream().filter(bundle -> {
 			return SOURCE_TYPE.SYSTEM.equals(bundle.getSourceType());
 		}).collect(Collectors.toList());
+		System.out.println("本域的设备有：" + queryBundles);
 		if(queryBundles==null || queryBundles.size()<=0) return _roots;
 		List<String> bundleIds = new ArrayList<String>();
 		for(BundlePO bundleBody:queryBundles){
@@ -995,6 +996,7 @@ public class CommandQueryController {
 			}
 		}
 		
+		System.out.println("外域的设备： "+JSONarray);
 		return JSONarray;
 	}
 	
