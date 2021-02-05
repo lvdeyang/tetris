@@ -2435,6 +2435,7 @@ public class BroadAbilityService {
 				screenVO.setName(screenPO.getName());
 				screenVO.setIsRequired(screenPO.getIsRequired());
 				screenVOs.add(screenVO);
+				screen.put("duration", screenPO.getDuration());
 				screen.put("previewUrl", screenPO.getPreviewUrl());
 				screen.put("downloadUrl", downloadUrl);
 				screen.put("name", screenPO.getName());
