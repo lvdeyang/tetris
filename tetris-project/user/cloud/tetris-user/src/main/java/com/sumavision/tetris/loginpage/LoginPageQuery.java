@@ -26,7 +26,7 @@ public class LoginPageQuery {
 	@Autowired
 	private LoginPageDAO loginPageDAO;
 	
-	public Object listLoginPage(){
+	public List<LoginPagePO> listLoginPage(){
 		List<LoginPagePO> list = new ArrayList<>();
 		list = loginPageDAO.findAll();
 		return list;
