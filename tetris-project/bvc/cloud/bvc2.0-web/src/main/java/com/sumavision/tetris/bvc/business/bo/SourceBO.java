@@ -66,6 +66,7 @@ public class SourceBO {
 	String srcAudioName;
 	
 	String srcAudioCode;
+
 	
 	public OriginType getOriginType() {
 		return originType;
@@ -254,5 +255,5 @@ public class SourceBO {
 		this.bundleId = bundleId;
 		return this;
 	}
-	
+
 }
