@@ -387,7 +387,7 @@ public class UserQuery {
 				if (tokenPOs != null && !tokenPOs.isEmpty()) {
 					for (TokenPO tokenPO : tokenPOs) {
 						if (userVO.getId().equals(tokenPO.getUserId()) && (userVO.getStatus() == null || userVO.getStatus().equals("OFFLINE"))) {
-							userVO.setStatus(tokenPO.getStatus().toString());
+							userVO.setStatus(UserStatus.OFFLINE.toString());
 							wrapper.append(tokenPO.getId()).append(",");
 						}
 					}

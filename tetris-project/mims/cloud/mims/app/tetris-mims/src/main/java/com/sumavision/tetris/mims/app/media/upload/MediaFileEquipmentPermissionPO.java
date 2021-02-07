@@ -3,11 +3,12 @@ package com.sumavision.tetris.mims.app.media.upload;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
-@Table(name = "MIMS_MEDIA_FILE_EQUIPMENT_PERMISSION")
+@Table(name = "MIMS_MEDIA_FILE_EQUIPMENT_PERMISSION", uniqueConstraints = {@UniqueConstraint(columnNames={"MEDIA_ID", "MEDIA_TYPE", "EQUIPMENT_IP"})})
 public class MediaFileEquipmentPermissionPO extends AbstractBasePO{
 	/**
 	 * 
