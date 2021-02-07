@@ -18,6 +18,7 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.cloud.netflix.zuul.filters.pre.ServletDetectionFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.retry.annotation.EnableRetry;
 
 import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.MultipartFilter;
@@ -44,6 +45,7 @@ import com.sumavision.tetris.spring.zuul.auth.filter.zoom.ApiZoomQtLoginFilter;
 @EnableEurekaClient
 @EnableFeignClients("com.sumavision.tetris")
 @EnableDiscoveryClient
+@EnableRetry
 @SpringBootApplication
 public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 
