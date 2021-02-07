@@ -1142,6 +1142,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 */
 	public Object onForeignResourceReceive(String userId, JSONObject message) {
 		try {
+			message.put("businessType", "foreignUpdate");
 			websocketMessageService.push(userId, null, message, null, null);
 		} catch (Exception e) {
 			System.out.println( "消息推送失败" + message);
