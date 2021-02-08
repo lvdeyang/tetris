@@ -39,6 +39,16 @@ public class MediaSourceBO {
 
     String key_len;
 
+    /**
+     * 文件循环次数
+     */
+    Integer loop_count=-1;
+
+    /**
+     * 卡类型
+     */
+    String card_type="blackmagic";
+
     public String getUrl() {
         return url;
     }
@@ -130,6 +140,24 @@ public class MediaSourceBO {
         this.key_len = key_len;
     }
 
+    public Integer getLoop_count() {
+        return loop_count;
+    }
+
+    public MediaSourceBO setLoop_count(Integer loop_count) {
+        this.loop_count = loop_count;
+        return this;
+    }
+
+    public String getCard_type() {
+        return card_type;
+    }
+
+    public MediaSourceBO setCard_type(String card_type) {
+        this.card_type = card_type;
+        return this;
+    }
+
     public MediaSourceBO(){}
 
     public MediaSourceBO(RefreshSourceVO refreshSourceVO,String localIp) throws BaseException {
@@ -138,5 +166,13 @@ public class MediaSourceBO {
         this.protocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
         this.mode = refreshSourceVO.getSrtMode();
         this.latency = refreshSourceVO.getLatency();
+        if (refreshSourceVO.getLoopCount() != null) {
+            this.loop_count = refreshSourceVO.getLoopCount();
+        }
+        if (refreshSourceVO.getCardType() != null) {
+            this.card_type=refreshSourceVO.getCardType();
+        }
     }
+
+
 }

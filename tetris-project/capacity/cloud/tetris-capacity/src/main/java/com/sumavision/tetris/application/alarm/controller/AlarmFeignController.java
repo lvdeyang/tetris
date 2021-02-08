@@ -2,6 +2,9 @@ package com.sumavision.tetris.application.alarm.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.capacity.constant.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,12 +34,20 @@ public class AlarmFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/set/alarmUrl")
 	public Object setAlarmUrl(
-			String capacityIp,
-			HttpServletRequest request) throws Exception{
-		
-		alarmService.setAlarmUrl(capacityIp);
-		
+			String capacity) throws Exception{
+		String capacityIp;
+		Integer capacityPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(capacity)) {
+			JSONObject device=JSON.parseObject(capacity);
+			capacityIp=device.getString("capacityIp");
+			capacityPort=device.getInteger("capacityPort");
+		}else{
+			capacityIp = capacity;
+		}
+		alarmService.setAlarmUrl(capacityIp,capacityPort);
 		return null;
 	}
+
+
 	
 }

@@ -17,6 +17,7 @@ import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -70,6 +71,7 @@ public class TaskModifyService {
 //先发命令
         String taskUuid = taskSetVO.getTask_link_id().toString();
         String capacityIp = taskSetVO.getDevice_ip();
+        Integer capacityPort=taskSetVO.getDevice_port();
         //修改任务前，先判断下任务同步着没
 //		syncService.checkAndSyncTask(taskUuid,BusinessType.TRANSCODE);
         TaskOutputPO taskOutputPO = taskOutputDao.findByTaskUuidAndType(taskUuid, businessType);
@@ -209,7 +211,7 @@ public class TaskModifyService {
         request.put("queue_id", UUID.randomUUID().toString());
         request.put("queue_request",cmdQueue);
 
-        capacityService.sendCommandsByQueue(request,capacityIp,5656);
+        capacityService.sendCommandsByQueue(request,capacityIp,capacityPort);
 
         taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));
         taskOutputDao.save(taskOutputPO);

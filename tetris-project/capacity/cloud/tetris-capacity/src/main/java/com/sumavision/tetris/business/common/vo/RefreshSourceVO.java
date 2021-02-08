@@ -23,6 +23,16 @@ public class RefreshSourceVO {
 
     private Integer latency;
 
+    /**
+     * 文件循环次数，默认无限
+     */
+    private Integer loopCount;
+
+    /**
+     * SDI卡类型
+     */
+    String cardType;
+
     public String getDeviceIp() {
         return deviceIp;
     }
@@ -74,6 +84,24 @@ public class RefreshSourceVO {
 
     public RefreshSourceVO setLatency(Integer latency) {
         this.latency = latency;
+        return this;
+    }
+
+    public Integer getLoopCount() {
+        return loopCount;
+    }
+
+    public RefreshSourceVO setLoopCount(Integer loopCount) {
+        this.loopCount = loopCount;
+        return this;
+    }
+
+    public String getCardType() {
+        return cardType;
+    }
+
+    public RefreshSourceVO setCardType(String cardType) {
+        this.cardType = cardType;
         return this;
     }
 }

@@ -12,7 +12,7 @@ public class CapacityProps {
 	private String ip;
 	
 	@Value("${port}")
-	private Long port;
+	private Integer port;
 	
 	@Value("${zuul.ip}")
 	private String zuulIp;
@@ -24,7 +24,7 @@ public class CapacityProps {
 		return ip;
 	}
 
-	public Long getPort() {
+	public Integer getPort() {
 		return port;
 	}
 

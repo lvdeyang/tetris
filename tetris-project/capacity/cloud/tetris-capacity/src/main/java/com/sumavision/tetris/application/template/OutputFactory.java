@@ -7,6 +7,7 @@ import com.sumavision.tetris.business.common.MissionBO;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
+import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
@@ -20,8 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static com.sumavision.tetris.business.common.enumeration.ProtocolType.RTP_TS;
-import static com.sumavision.tetris.business.common.enumeration.ProtocolType.UDP_TS;
+import static com.sumavision.tetris.business.common.enumeration.ProtocolType.*;
 
 /**
  * @ClassName: OutputFactory
@@ -40,18 +40,33 @@ public class OutputFactory {
         OutputBO transOutputBO = new OutputBO();
         transOutputBO.setId(outputId);
         ProtocolType outType =  ProtocolType.getProtocolType(taskOutputObj.getString("type"));
+        if (missionBO.getTaskType()== TaskType.PASSBY) {
+            outType = getPassbyType(outType);
+        }
         switch (outType){
             case UDP_TS:
                 transOutputBO.setUdp_ts(getCommonTsOutputBO(missionBO,taskOutputObj));
                 break;
+            case UDP_PASSBY:
+                transOutputBO.setUdp_passby(new OutputPassbyBO(missionBO,taskOutputObj));
+                break;
             case RTP_TS:
                 transOutputBO.setRtp_ts(getCommonTsOutputBO(missionBO,taskOutputObj));
+                break;
+            case RTP_TS_PASSBY:
+                transOutputBO.setRtp_ts_passby(new OutputPassbyBO(missionBO,taskOutputObj));
                 break;
             case HTTP_TS:
                 transOutputBO.setHttp_ts(getOutputHttpTsBO(missionBO,taskOutputObj));
                 break;
+            case HTTP_TS_PASSBY:
+                transOutputBO.setHttp_ts_passby(new OutputHttpTsPassbyBO(missionBO,taskOutputObj));
+                break;
             case SRT_TS:
                 transOutputBO.setSrt_ts(getOutputSrtTsBO(missionBO,taskOutputObj));
+                break;
+            case SRT_TS_PASSBY:
+                transOutputBO.setSrt_ts_passby(getOutputSrtTsPassbyBO(missionBO,taskOutputObj));
                 break;
             case HLS:
                 transOutputBO.setHls(getOutputHlsBO(missionBO,taskOutputObj));
@@ -76,6 +91,9 @@ public class OutputFactory {
                 break;
             case ZIXI_TS:
                 transOutputBO.setZixi_ts(getOutputZiXiBO(missionBO,taskOutputObj));
+                break;
+            case ZIXI_TS_PASSBY:
+                transOutputBO.setZixi_passby(getOutputZiXiBO(missionBO,taskOutputObj));
                 break;
             case ASI:
 
@@ -221,6 +239,28 @@ public class OutputFactory {
         outputBO.setProgram_array(outputProgramBOS);
         return outputBO;
 
+    }
+
+    public OutputSrtTsPassbyBO getOutputSrtTsPassbyBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
+        OutputSrtTsPassbyBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputSrtTsPassbyBO.class);
+        if (taskOutput.containsKey("maxbw")){
+            outputBO.setMaxbw(taskOutput.getInteger("maxbw")*1000);
+        }
+        if (outputBO.getIp()==null){
+            outputBO.setIp(IpV4Util.getIpFromUrl(taskOutput.getString("url")));
+        }
+        if (outputBO.getPort()==null){
+            outputBO.setPort(IpV4Util.getPortFromUrl(taskOutput.getString("url")));
+        }
+        if (outputBO.getLocal_ip()==null){
+            outputBO.setLocal_ip(missionBO.getDevice_ip());//没写出流网口IP的话，直接用控制口IP
+        }
+
+        TaskBO taskBO = missionBO.getTask_array().get(0);
+        EncodeBO encodeBO = taskBO.getEncode_array().get(0);
+        BaseMediaBO baseMediaBO = new BaseMediaBO().setTask_id(taskBO.getId()).setEncode_id(encodeBO.getEncode_id());
+        outputBO.setMedia(baseMediaBO);
+        return outputBO;
     }
 
 

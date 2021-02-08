@@ -12,6 +12,7 @@ import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.config.ServerProps;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -84,7 +85,7 @@ public class AlarmService {
 	 * <b>日期：</b>2020年1月13日 下午2:50:30
 	 * @param String ip 能力ip
 	 */
-	public void setAlarmUrl(String ip) throws Exception{
+	public void setAlarmUrl(String ip,Integer port) throws Exception{
 		
 		String eurake = serverProps.getDefaultZone().split("http://")[1].split(":")[0];
 		
@@ -94,15 +95,17 @@ public class AlarmService {
 												   .append(8082)
 												   .append("/tetris-capacity/api/thirdpart/capacity/alarm/notify?bundle_ip=")
 												   .append(ip)
+													.append("&bundle_port=")
+													.append(port)
 												   .toString();
-		ResultCodeResponse response = capacityService.putAlarmUrl(ip, capacityProps.getPort(), alarmUrl);
+		ResultCodeResponse response = capacityService.putAlarmUrl(ip, port, alarmUrl);
 		if(response.getResult_code().equals(1)){
 			throw new BaseException(StatusCode.ERROR, "url格式错误");
 		}
 	}
 
 	public String getAlarmUrl(String ip) throws Exception {
-		return capacityService.getAlarmUrl(ip,5656L);
+		return capacityService.getAlarmUrl(ip, Constant.TRANSFORM_PORT);
 	}
 
 	
@@ -114,14 +117,14 @@ public class AlarmService {
 	 * @param String capacityIp 能力ip
 	 * @param AlarmVO alarm 告警参数
 	 */
-	public void alarmNotify(String capacityIp, AlarmVO alarm) throws Exception{
+	public void alarmNotify(String capacityIp,Integer capacityPort, AlarmVO alarm) throws Exception{
 		
 		String alarmCode = alarm.getCodec();
 		
 		try {
 			if("11070001".equals(alarmCode)){
 				LOGGER.info("transform online");
-				syncService.syncTransform(capacityIp);
+				syncService.syncTransform(capacityIp,capacityPort);
 			}
 		} catch (Exception e) {
 			LOGGER.error("sync fail",e);

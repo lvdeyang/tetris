@@ -34,7 +34,7 @@ public class CapacityManagementService {
 		capacity.setType(CapacityType.fromName(type));
 		
 		//查询授权信息并持久化,TODO:先做了封装和转码的audio,没做转码video
-		JSONObject authorizationJsonObject = capacityService.getAuthorizationAddMsgId(ip, capacity.getPort());
+		JSONObject authorizationJsonObject = capacityService.getAuthorizationAddMsgId(ip, capacity.getPort().intValue());
 		String authorizationInfo = JSON.toJSONString(authorizationJsonObject);
 		
 		AuthorizationInfoBO authorizationInfoBO = JSONObject.parseObject(authorizationInfo, AuthorizationInfoBO.class);

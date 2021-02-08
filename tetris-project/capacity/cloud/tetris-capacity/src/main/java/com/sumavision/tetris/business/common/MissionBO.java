@@ -25,6 +25,8 @@ public class MissionBO {
 
     String device_ip;
 
+    Integer device_port=5656;
+
     TaskType taskType;
 
 //    List<InputBO> input_array = new ArrayList();
@@ -116,5 +118,14 @@ public class MissionBO {
 
     public void setInputMap(Map<Integer, InputBO> inputMap) {
         this.inputMap = inputMap;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public MissionBO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
+        return this;
     }
 }

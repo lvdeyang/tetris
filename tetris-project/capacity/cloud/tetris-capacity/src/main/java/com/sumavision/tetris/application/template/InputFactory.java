@@ -34,40 +34,12 @@ public class InputFactory{
         return null;
     }
 
-
-    /**
-     * @MethodName: getBackupInputByTemplateInput
-     * @Description: TODO 生成backup input
-     * @param missionBO 1
-     * @param backup 2
-     * @Return: com.sumavision.tetris.capacity.bo.input.InputBO
-     * @Author: Poemafar
-     * @Date: 2021/2/3 11:33
-     **/
-    public InputBO getBackupInputByTemplateInput(MissionBO missionBO, JSONObject backup) throws BaseException {
-        InputBO inputBO = new InputBO();
-        Integer idx = missionBO.getInputMap().size();
-        inputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.INPUT));
-        if (missionBO.getTaskType()== TaskType.PASSBY) {
-            inputBO.setBack_up_passby(new BackUpPassByBO(missionBO,backup));
-        }else if (missionBO.getTaskType()==TaskType.PACKAGE){
-            inputBO.setBack_up_es(new BackUpEsAndRawBO(missionBO,backup));
-        }else if (missionBO.getTaskType()==TaskType.TRANS){
-            inputBO.setBack_up_raw(new BackUpEsAndRawBO(missionBO,backup));
-        }else{
-            throw new BaseException(StatusCode.ERROR,"not support task type: " + missionBO.getTaskType());
-        }
-        setProgramArrayForInput(inputBO,backup);
-
-        return inputBO;
-    }
-
     public InputBO getInputByTemplateInput(MissionBO missionBO, SourceVO tmplInputBO) throws BaseException {
-
         InputBO inputBO = new InputBO();
         Integer idx = missionBO.getInputMap().size();
         inputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.INPUT));
         ProtocolType inputType = ProtocolType.getProtocolType(tmplInputBO.getType());
+        JSONObject inputObj = JSONObject.parseObject(JSON.toJSONString(tmplInputBO));
         switch (inputType) {
             case UDP_TS:
                 if (null == tmplInputBO.getLocal_ip()){
@@ -130,12 +102,20 @@ public class InputFactory{
                 inputBO.setSchedule(new InputScheduleBO(tmplInputBO));
                 break;
             case BACKUP://特殊输入，单独处理
+                if (missionBO.getTaskType()== TaskType.PASSBY) {
+                    inputBO.setBack_up_passby(new BackUpPassByBO(missionBO,inputObj));
+                }else if (missionBO.getTaskType()==TaskType.PACKAGE){
+                    inputBO.setBack_up_es(new BackUpEsAndRawBO(missionBO,inputObj));
+                }else if (missionBO.getTaskType()==TaskType.TRANS){
+                    inputBO.setBack_up_raw(new BackUpEsAndRawBO(missionBO,inputObj));
+                }else{
+                    throw new BaseException(StatusCode.ERROR,"not support task type: " + missionBO.getTaskType());
+                }
                 break;
- //todo 暂不考虑主备垫
             default:
                 throw new BaseException(StatusCode.ERROR,"not support input package type" + tmplInputBO.getType());
         }
-        JSONObject inputObj = JSONObject.parseObject(JSON.toJSONString(tmplInputBO));
+
         setProgramArrayForInput(inputBO,inputObj);
 
         return inputBO;

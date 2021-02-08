@@ -59,7 +59,9 @@ public class InputBO extends InputBaseBO<InputBO>{
                 this.setHttp_flv(httpflv);
                 break;
             case SDI:
-                this.setSdi(new SdiBO(mediaSourceBO.getUrl()));
+            case SDIIP:
+                SdiBO sdiBO = new SdiBO(mediaSourceBO);
+                this.setSdi(sdiBO);
                 break;
             case ZIXI_TS:
                 InputZiXiBO ziXiBO = new InputZiXiBO();
@@ -70,7 +72,7 @@ public class InputBO extends InputBaseBO<InputBO>{
             case FILE:
                 InputFileObjectBO fileObjectBO = new InputFileObjectBO();
                 fileObjectBO.setUrl(mediaSourceBO.getUrl());
-                fileObjectBO.setLoop_count(-1);
+                fileObjectBO.setLoop_count(mediaSourceBO.getLoop_count());
                 List<InputFileObjectBO> file_array = new ArrayList<>();
                 file_array.add(fileObjectBO);
                 this.setFile(new InputFileBO(file_array));

@@ -8,6 +8,7 @@ import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
 import com.sumavision.tetris.business.common.vo.SyncResponseVO;
 import com.sumavision.tetris.business.common.vo.SyncVO;
 import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.device.DeviceDao;
@@ -65,14 +66,14 @@ public class SyncService {
 	 * <b>日期：</b>2020年5月8日 上午11:48:12
 	 * @param String deviceIp 转换模块ip
 	 */
-	public synchronized void syncTransform(String deviceIp) throws Exception{
+	public synchronized void syncTransform(String deviceIp,Integer port) throws Exception{
 
 		LOG.info("[transform-sync] start, deviceIp :{}",deviceIp);
 		//直接清掉不同步的任务
 		deleteUnSyncTasksByDevice(deviceIp);
 
 		//获取转换模块上全部信息
-		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp);
+		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp,port);
 		
 		List<InputBO> _inputs = entirety.getInput_array();
 		List<TaskBO> _tasks = entirety.getTask_array();
@@ -238,7 +239,7 @@ public class SyncService {
 			if(needAddOutputs.size() > 0){
 				add.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(needAddOutputs).getList());
 			}
-			capacityService.createAllAddMsgId(add, deviceIp, capacityProps.getPort());
+			capacityService.createAllAddMsgId(add, deviceIp, port);
 		}
 		
 		//删除
@@ -316,9 +317,13 @@ public class SyncService {
 		if (deviceIp==null || deviceIp.isEmpty()){
 			throw new BaseException(StatusCode.ERROR,"fail to sync, not found deviceIp");
 		}
+		Integer devicePort= Constant.TRANSFORM_PORT;
+		if (syncVO.getDevicePort() != null) {
+			devicePort=syncVO.getDevicePort();
+		}
 		BusinessType businessType = BusinessType.valueOf(syncVO.getBusinessType().toUpperCase(Locale.ENGLISH));
 
-		syncTransform(deviceIp);//先保证能力服务和转换的同步
+		syncTransform(deviceIp,devicePort);//先保证能力服务和转换的同步
 		List<String> jobIds = syncVO.getJobIds();
 		List<String> lessJobIds = new ArrayList<>();
 		List<String> moreJobIds = new ArrayList<>();
@@ -356,8 +361,8 @@ public class SyncService {
 		}
 	}
 
-	public void syncInputs(String deviceIp, List<TaskInputPO> inputs) throws Exception {
-		GetInputsResponse getInputsResponse = capacityService.getInputs(deviceIp);
+	public void syncInputs(String deviceIp,Integer port, List<TaskInputPO> inputs) throws Exception {
+		GetInputsResponse getInputsResponse = capacityService.getInputs(deviceIp,port);
 		List tInputIds = getInputsResponse.getInput_array().stream().map(InputBO::getId).collect(Collectors.toList());
 		for (int i = 0; i < inputs.size(); i++) {
 			TaskInputPO inputPO = inputs.get(i);

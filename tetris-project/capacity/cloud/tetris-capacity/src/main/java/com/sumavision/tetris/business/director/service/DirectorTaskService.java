@@ -1226,7 +1226,7 @@ public class DirectorTaskService {
 		List<TaskBO> taskBOs = transcode.getTask_array();
 		List<OutputBO> outputBOs = transcode.getOutput_array();
 
-		transcodeTaskService.save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, BusinessType.DIRECTOR);
+		transcodeTaskService.save(taskUuid, capacityIp,transcode.getDevice_port(), inputBOs, taskBOs, outputBOs, BusinessType.DIRECTOR);
 	}
 
 	public void delTask(String taskId) throws Exception {
@@ -1240,7 +1240,7 @@ public class DirectorTaskService {
 		ProtocolType inType = ProtocolType.getProtocolType(transferVO.getInType());
 		ProtocolType outType = ProtocolType.getProtocolType(transferVO.getOutType());
 		String srtMode = transferVO.getSrtMode();
-		return  taskService.transferStream(transferVO.getDevice_ip(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
+		return  taskService.transferStream(transferVO.getDevice_ip(),transferVO.getDevice_port(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
 	}
 
 	public void switchTask(String jobId, String targetInputId) throws Exception {

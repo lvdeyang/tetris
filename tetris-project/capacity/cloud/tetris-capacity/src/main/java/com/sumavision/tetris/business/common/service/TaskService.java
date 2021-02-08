@@ -81,7 +81,7 @@ public class TaskService {
      * @param outType
      * @param outUrl
      */
-    public String transferStream(String transModuleIp,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
+    public String transferStream(String transModuleIp,Integer transModulePort,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
 
         IdConstructor idCtor = new IdConstructor(missionId);
 
@@ -97,7 +97,7 @@ public class TaskService {
         //输出
         OutputBO outputBO = nodeUtil.getPassbyOutputInCommond(idCtor,outType,outUrl,transModuleIp);
         outputBOS.add(outputBO);
-        transcodeTaskService.save(idCtor.getJobId(), transModuleIp, inputBOS, taskBOS, outputBOS, busType);
+        transcodeTaskService.save(idCtor.getJobId(), transModuleIp,transModulePort, inputBOS, taskBOS, outputBOS, busType);
         JSONObject result = new JSONObject();
         result.put("missionId",idCtor.getJobId());
         return result.toJSONString();
@@ -233,7 +233,7 @@ public class TaskService {
 
         GetEntiretiesResponse entirety= null;
         try {
-            entirety = capacityService.getEntireties(output.getCapacityIp());
+            entirety = capacityService.getEntireties(output.getCapacityIp(),5656);
         } catch (Exception e) {
             taskOutputDao.updateSyncStatusById(output.getId(),1);
             throw e;

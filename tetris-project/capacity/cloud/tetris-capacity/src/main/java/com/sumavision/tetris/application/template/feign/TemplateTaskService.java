@@ -15,6 +15,7 @@ import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.MediaType;
+import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.enumeration.TaskType;
 import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
@@ -96,17 +97,13 @@ public class TemplateTaskService {
         missionBO.setIdCtor(new IdConstructor());
         missionBO.setTaskType(tmpPO.getTaskType());
         missionBO.setDevice_ip(taskVO.getTask_ip());
-
-        generateInputBOS(missionBO,combineJobBO);//兼容透传输入
-        if (TaskType.TRANS==tmpPO.getTaskType()) {
-            generateTaskBOS(missionBO, combineJobBO);
-        }else if (TaskType.PACKAGE==tmpPO.getTaskType()){
-            generatePackageTaskBOS(missionBO);
-        }else if (TaskType.PASSBY==tmpPO.getTaskType()){
-//            generateTaskBOS();
-        }else {
-            throw new IllegalArgumentException("unknown taskType: "+tmpPO.getTaskType());
+        if (taskVO.getTask_port() != null) {
+            missionBO.setDevice_port(taskVO.getTask_port());
         }
+
+//      流程：将模板协议 转成 转换协议
+        generateInputBOS(missionBO,combineJobBO);
+        generateTaskBOS(missionBO,combineJobBO);
         generateOutputBOS(missionBO,combineJobBO);
 
         try {
@@ -163,7 +160,7 @@ public class TemplateTaskService {
             List<InputBO> taskInputBOS = new ArrayList<>();
             List<InputBO> scheInputBOS = new ArrayList<>();
             taskInputBOS.add(missionBO.getInputMap().get(schedule.getInteger("index")));
-            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(), taskInputBOS, missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
+            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(),missionBO.getDevice_port(), taskInputBOS, missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
             List<ScheduleProgramBO> schedules = new ArrayList();
             TaskOutputPO taskOutput = taskOutputDAO.findByTaskUuidAndType(missionBO.getIdCtor().getJobId(), businessType);
             for (int i = 0; i < jobBO.getMap_sources().size(); i++) {
@@ -196,7 +193,7 @@ public class TemplateTaskService {
                 taskOutputDAO.save(taskOutput);
             }
         }else {
-            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(), missionBO.getInputMap().values().stream().collect(Collectors.toList()), missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
+            transcodeTaskService.save(missionBO.getIdCtor().getJobId(), missionBO.getDevice_ip(),missionBO.getDevice_port(), missionBO.getInputMap().values().stream().collect(Collectors.toList()), missionBO.getTask_array(), missionBO.getOutput_array(), businessType);
         }
 
     }
@@ -444,6 +441,15 @@ public class TemplateTaskService {
         templateDAO.deleteById(id);
     }
 
+    /**
+     * @MethodName: generateInputBOS
+     * @Description:  生成转换协议 inputs节点信息
+     * @param missionBO 1 保存转换协议参数
+     * @param tmplBO 2 业务与模板合并后的参数
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/2/3 16:35
+     **/
     public void generateInputBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws  BaseException{
         //如果有schedule，则它的输入的媒体类型应该和schedule一样
         JSONObject schedule = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
@@ -455,6 +461,18 @@ public class TemplateTaskService {
             });
         }
 
+         //调整特殊输入的顺序
+        JSONArray temp = new JSONArray();
+        Iterator<Object> iterator = tmplBO.getMap_sources().iterator();
+        while(iterator.hasNext()){
+            JSONObject source = (JSONObject) iterator.next();
+            if (ProtocolType.beSpecialType(source.getString("type"))) {
+                temp.add(source);
+                iterator.remove();
+            }
+        }
+        tmplBO.getMap_sources().addAll(temp);
+
         //生成INPUTBO
         InputFactory inputFactory = new InputFactory();
         for (int i = 0; i < tmplBO.getMap_sources().size(); i++) {
@@ -463,13 +481,48 @@ public class TemplateTaskService {
             InputBO inputBO = inputFactory.getInputByTemplateInput(missionBO, sourceVO);
             missionBO.getInputMap().put(sourceVO.getIndex(),inputBO);
         }
+    }
 
-        JSONObject backup = (JSONObject)tmplBO.getMap_sources().stream().filter(s -> "backup".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
-        if (backup != null) {
-            InputBO inputBO = inputFactory.getBackupInputByTemplateInput(missionBO, backup);
-            missionBO.getInputMap().put(backup.getInteger("index"),inputBO);
+    /**
+     * @MethodName: generateTaskBOS
+     * @Description:  生成转换协议 tasks节点信息
+     * @param missionBO 1 保存转换协议参数
+     * @param combineJobBO 2 业务与模板合并后的参数
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/2/3 16:34
+     **/
+    public void generateTaskBOS(MissionBO missionBO,TemplateTaskVO combineJobBO) throws BaseException {
+        if (TaskType.TRANS==missionBO.getTaskType()) {
+            generateTransTaskBOS(missionBO, combineJobBO);
+        }else if (TaskType.PACKAGE==missionBO.getTaskType()){
+            generatePackageTaskBOS(missionBO);
+        }else if (TaskType.PASSBY==missionBO.getTaskType()){
+            generatePassbyTaskBOS(missionBO);
+        }else {
+            throw new IllegalArgumentException("unknown taskType: "+missionBO.getTaskType());
         }
+    }
 
+    /**
+     * @MethodName: generatePassbyTaskBOS
+     * @Description: 透传任务
+     * @param missionBO 1
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/2/3 16:35
+     **/
+    public void generatePassbyTaskBOS(MissionBO missionBO) throws BaseException {
+        List<TaskBO> taskBOS = new ArrayList();
+        TaskBO passbyBO = new TaskBO();
+        passbyBO.setId(missionBO.getIdCtor().getId(0, IdConstructor.IdType.TASK));
+        passbyBO.setType("passby");
+        passbyBO.setTaskSource(missionBO,null);
+        List<EncodeBO> encodeBOS= new ArrayList<>();
+        encodeBOS.add(new EncodeBO().setPassby(new JSONObject()).setEncode_id(missionBO.getIdCtor().getId(0, IdConstructor.IdType.ENCODE)));
+        passbyBO.setEncode_array(encodeBOS);
+        taskBOS.add(passbyBO);
+        missionBO.setTask_array(taskBOS);
     }
 
     public void generatePackageTaskBOS(MissionBO missionBO) throws BaseException {
@@ -513,7 +566,7 @@ public class TemplateTaskService {
      * @throws BaseException
      * @throws CommonException
      */
-    public void generateTaskBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws BaseException {
+    public void generateTransTaskBOS(MissionBO missionBO, TemplateTaskVO tmplBO) throws BaseException {
         List<TaskBO> taskBOS = new ArrayList();
         TaskBO videoTaskBO = new TaskBO();
         List<EncodeBO> vEncodeBOS = new ArrayList<>();
@@ -775,13 +828,22 @@ public class TemplateTaskService {
     }
 
 
-
-    public void generateOutputBOS(MissionBO missionBO, TemplateTaskVO combineTaskObj) throws Exception {
+    /**
+     * @MethodName: generateOutputBOS
+     * @MethodName: generateTaskBOS
+     * @Description:  生成转换协议 outputs节点信息
+     * @param missionBO 1 保存转换协议参数
+     * @param combineJobBO 2 业务与模板合并后的参数
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/2/3 16:36
+     **/
+    public void generateOutputBOS(MissionBO missionBO, TemplateTaskVO combineJobBO) throws Exception {
 
         List<OutputBO> outputs = new ArrayList();
 
-        for (int i = 0; i < combineTaskObj.getMap_outputs().size(); i++) {
-            JSONObject taskOutput = combineTaskObj.getMap_outputs().getJSONObject(i);
+        for (int i = 0; i < combineJobBO.getMap_outputs().size(); i++) {
+            JSONObject taskOutput = combineJobBO.getMap_outputs().getJSONObject(i);
             //处理
             OutputFactory outputFactory = new OutputFactory();
             String outputId = missionBO.getIdCtor().getId(i, IdConstructor.IdType.OUTPUT);

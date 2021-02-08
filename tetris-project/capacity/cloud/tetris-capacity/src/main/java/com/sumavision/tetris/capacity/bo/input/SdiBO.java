@@ -1,6 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.bo.MediaSourceBO;
 
 /**
  * sdi参数<br/>
@@ -65,5 +66,16 @@ public class SdiBO {
 		setCard_type(url.substring(url.indexOf(":") + 3, url.indexOf("/",6)));
 		setCard_no(Integer.parseInt(url.substring(url.indexOf(" ")+1).split("/")[0])) ;
 		setCard_port(Integer.parseInt(url.substring(url.indexOf(" ")+1).split("/")[1])) ;
+	}
+
+	public SdiBO(MediaSourceBO mediaSourceBO){
+		this.card_type = mediaSourceBO.getCard_type();
+		String url=mediaSourceBO.getUrl();
+		String urlNoHeader = url.substring(url.indexOf("://"));
+		setCard_no(Integer.parseInt(urlNoHeader.substring(3,urlNoHeader.lastIndexOf(":"))) ) ;
+		setCard_port(Integer.parseInt(urlNoHeader.substring(urlNoHeader.lastIndexOf(":")+1))) ;
+//		if (this.card_type.equals("blackmagic")) {
+//			this.blackmagic=new JSONObject();
+//		}
 	}
 }

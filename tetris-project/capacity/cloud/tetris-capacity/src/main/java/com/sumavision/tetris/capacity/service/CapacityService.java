@@ -44,11 +44,11 @@ public class CapacityService {
      *
      * @return GetInputsResponse
      */
-    public GetInputsResponse getInputs(String transfromIp) throws Exception {
+    public GetInputsResponse getInputs(String transfromIp,Integer transfromPort) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
-        return getInputs(msg_id, transfromIp);
+        return getInputs(msg_id, transfromIp,transfromPort);
     }
 
     /**
@@ -60,12 +60,12 @@ public class CapacityService {
      * @param msg_id 消息id
      * @return GetInputsRespBO 输入信息
      */
-    private GetInputsResponse getInputs(String msg_id, String transformIp) throws Exception {
+    private GetInputsResponse getInputs(String msg_id, String transformIp,Integer transformPort) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(transformIp)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(transformPort)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_INPUT)
                 .append("?msg_id=")
@@ -91,7 +91,7 @@ public class CapacityService {
      * @param AllRequest all
      * @return AllResponse
      */
-    public AllResponse createAllAddMsgId(AllRequest all, String ip, Long port) throws Exception {
+    public AllResponse createAllAddMsgId(AllRequest all, String ip, Integer port) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         all.setMsg_id(msg_id);
@@ -107,7 +107,7 @@ public class CapacityService {
      *
      * @return AllResponse
      */
-    private AllResponse createAll(AllRequest all, String ip, Long port) throws Exception {
+    private AllResponse createAll(AllRequest all, String ip, Integer port) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
@@ -150,7 +150,7 @@ public class CapacityService {
         return res;
     }
 
-    public void deleteAllIgnoreTransError(AllRequest all, String ip, Long port) {
+    public void deleteAllIgnoreTransError(AllRequest all, String ip, Integer port) {
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         all.setMsg_id(msg_id);
         try {
@@ -168,7 +168,7 @@ public class CapacityService {
      *
      * @param AllRequest all
      */
-    public AllResponse deleteAllAddMsgId(AllRequest all, String ip, Long port) throws Exception {
+    public AllResponse deleteAllAddMsgId(AllRequest all, String ip, Integer port) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         all.setMsg_id(msg_id);
@@ -181,10 +181,9 @@ public class CapacityService {
      * <b>作者:</b>wjw<br/>
      * <b>版本：</b>1.0<br/>
      * <b>日期：</b>2019年11月28日 下午3:20:44
-     *
      * @param AllRequest all
      */
-    private AllResponse deleteAll(AllRequest all, String ip, Long port) throws Exception {
+    private AllResponse deleteAll(AllRequest all, String ip, Integer port) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
@@ -1558,11 +1557,11 @@ public class CapacityService {
      *
      * @return GetEntiretiesResponse
      */
-    public GetEntiretiesResponse getEntireties(String capacityIp) throws Exception {
+    public GetEntiretiesResponse getEntireties(String capacityIp,Integer capacityPort) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
-        return getEntireties(msg_id, capacityIp);
+        return getEntireties(msg_id, capacityIp,capacityPort);
 
     }
 
@@ -1575,12 +1574,12 @@ public class CapacityService {
      * @param String msg_id 消息id
      * @return GetEntiretiesResponse 返回
      */
-    private GetEntiretiesResponse getEntireties(String msg_id, String capacityIp) throws Exception {
+    private GetEntiretiesResponse getEntireties(String msg_id, String capacityIp,Integer capacityPort) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(capacityIp)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(capacityPort)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_ENTIRETY)
                 .append("?msg_id=")
@@ -1644,7 +1643,7 @@ public class CapacityService {
      * <b>版本：</b>1.0<br/>
      * <b>日期：</b>2019年12月5日 下午2:39:50
      */
-    public JSONObject getAuthorizationAddMsgId(String ip, Long port) throws Exception {
+    public JSONObject getAuthorizationAddMsgId(String ip, Integer port) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -1657,7 +1656,7 @@ public class CapacityService {
      * <b>版本：</b>1.0<br/>
      * <b>日期：</b>2019年12月5日 下午2:27:54
      */
-    private JSONObject getAuthorization(String msg_id, String ip, Long port) throws Exception {
+    private JSONObject getAuthorization(String msg_id, String ip, Integer port) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
@@ -1691,10 +1690,10 @@ public class CapacityService {
      * @param String inputId 输入id(back_up)
      * @param String index 索引
      * @param String ip 能力ip
-     * @param Long   port 能力端口
+     * @param Integer   port 能力端口
      * @return ResultCodeResponse
      */
-    public ResultCodeResponse changeBackUp(String inputId, String index, String mode, String ip, Long port) throws Exception {
+    public ResultCodeResponse changeBackUp(String inputId, String index, String mode, String ip, Integer port) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -1735,7 +1734,7 @@ public class CapacityService {
      * @Author: Poemafar
      * @Date: 2020/12/30 14:09
      **/
-    public String getAlarmUrl(String ip, Long port) throws Exception {
+    public String getAlarmUrl(String ip, Integer port) throws Exception {
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
@@ -1755,17 +1754,16 @@ public class CapacityService {
     }
 
     /**
-     * 设置告警地址请求<br/>
-     * <b>作者:</b>wjw<br/>
-     * <b>版本：</b>1.0<br/>
-     * <b>日期：</b>2020年1月13日 下午1:46:57
-     *
-     * @param String ip 能力ip
-     * @param Long   port 能力port
-     * @param String alarmUrl 告警url
-     * @return ResultCodeResponse
-     */
-    public ResultCodeResponse putAlarmUrl(String ip, Long port, String alarmUrl) throws Exception {
+     * @MethodName: putAlarmUrl
+     * @Description: 设置告警请求地址
+     * @param ip 转换IP
+     * @param port 转换端口
+     * @param alarmUrl 告警地址
+     * @Return: com.sumavision.tetris.capacity.bo.request.ResultCodeResponse
+     * @Author: Poemafar
+     * @Date: 2021/2/7 17:02
+     **/
+    public ResultCodeResponse putAlarmUrl(String ip, Integer port, String alarmUrl) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -1805,7 +1803,7 @@ public class CapacityService {
      * @param String heartbeatUrl 心跳地址
      * @return ResultCodeResponse
      */
-    public ResultCodeResponse putHeartbeatUrl(String ip, Long port, String heartbeatUrl) throws Exception {
+    public ResultCodeResponse putHeartbeatUrl(String ip, Integer port, String heartbeatUrl) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -1846,7 +1844,7 @@ public class CapacityService {
      * @param PutScheduleRequest scheduleRequest 追加排期参数
      * @return ResultCodeResponse
      */
-    public ResultCodeResponse putSchedule(String ip, Long port, String inputId, PutScheduleRequest scheduleRequest) throws Exception {
+    public ResultCodeResponse putSchedule(String ip, Integer port, String inputId, PutScheduleRequest scheduleRequest) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         scheduleRequest.setMsg_id(msg_id);
@@ -1883,7 +1881,7 @@ public class CapacityService {
      * @param scheduleRequest
      * @throws Exception
      */
-    public void clearSchedule(String ip, Long port, String inputId, DeleteScheduleRequest scheduleRequest) throws Exception {
+    public void clearSchedule(String ip, Integer port, String inputId, DeleteScheduleRequest scheduleRequest) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         scheduleRequest.setMsg_id(msg_id);
@@ -1918,7 +1916,7 @@ public class CapacityService {
      * @param String alarmList 告警列表信息
      * @return ResultCodeResponse
      */
-    public ResultCodeResponse putAlarmList(String ip, Long port, String alarmList) throws Exception {
+    public ResultCodeResponse putAlarmList(String ip, Integer port, String alarmList) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 

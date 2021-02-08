@@ -250,7 +250,7 @@ public class InitApplication implements ApplicationRunner {
                     deviceDao.save(devicePO);
                     try {
                         //尝试设置告警地址
-                        alarmService.setAlarmUrl(devicePO.getDeviceIp());
+                        alarmService.setAlarmUrl(devicePO.getDeviceIp(),devicePO.getDevicePort());
                     } catch (Exception e) {
                         LOGGER.error("告警地址设置失败",e);
                     }
@@ -275,7 +275,7 @@ public class InitApplication implements ApplicationRunner {
                     if ("OFF_LINE".equals(bundle.getBundle_status())) {
                         deviceDao.updateFunUnitStatusById(FunUnitStatus.OFF_LINE,devicePO.getId());
                     } else if ("ONLINE".equals(bundle.getBundle_status())&& !FunUnitStatus.NORMAL.equals(devicePO.getFunUnitStatus())) {
-                        syncService.syncTransform(devicePO.getDeviceIp());
+                        syncService.syncTransform(devicePO.getDeviceIp(),devicePO.getDevicePort());
                     }
                 } catch (Exception e) {
                     LOGGER.info("device cannot find from resource service, "+devicePO.getId(),e);

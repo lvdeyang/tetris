@@ -47,11 +47,13 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 
 	public List<TaskInputPO> findByTypeAndCapacityIp(BusinessType type, String capacityIp);
 
-	@Modifying
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
 	@Query("update TaskInputPO input set input.syncStatus = ?2 where input.id = ?1")
 	public void updateSyncStatusById(Long id, Integer syncStatus);
 
-	@Modifying
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
 	@Query("update TaskInputPO input set input.analysis = ?2 where input.id = ?1")
 	public void updateAnalysisById(Long id, Integer syncStatus);
 

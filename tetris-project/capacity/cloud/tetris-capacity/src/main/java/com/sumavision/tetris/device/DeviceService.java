@@ -170,7 +170,7 @@ public class DeviceService {
         }
         deviceDao.save(devicePO);
         try {
-            alarmService.setAlarmUrl(deviceIp);//离线的时候就会设置失败
+            alarmService.setAlarmUrl(deviceIp,port);//离线的时候就会设置失败
         } catch (Exception e) {
             LOGGER.error("设置告警地址失败",e);
         }
@@ -221,7 +221,7 @@ public class DeviceService {
         }
         //设置告警地址
         try {
-            alarmService.setAlarmUrl(devicePO.getDeviceIp());
+            alarmService.setAlarmUrl(devicePO.getDeviceIp(),devicePO.getDevicePort());
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(StatusCode.ERROR,"告警地址设置失败");
@@ -461,7 +461,7 @@ public class DeviceService {
 
     public void syncDevice(Long id) throws Exception {
         DevicePO device = getDeviceByIdWithNullCheck(id);
-        syncService.syncTransform(device.getDeviceIp());
+        syncService.syncTransform(device.getDeviceIp(),device.getDevicePort());
         deviceDao.updateFunUnitStatusById(FunUnitStatus.NORMAL,id);
     }
 
