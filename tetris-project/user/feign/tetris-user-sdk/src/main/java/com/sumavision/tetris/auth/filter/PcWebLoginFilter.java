@@ -83,7 +83,8 @@ public class PcWebLoginFilter implements Filter{
 		}
 		
 		if("/".equals(requestUri)){
-			response.sendRedirect("/web/app/login/login.html");
+			//response.sendRedirect("/web/app/login/login.html");
+			response.sendRedirect("/getLoginPage/get");
 			return;
 		}
 		
@@ -185,6 +186,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/taskPreview/queryPreviewUrlList")
 												   .add("/tetris-sts/*")
 												   .add("/eb-insert-web/*")
+												   .add("/tar/*")
 												   .add("/eb-monitor-web/*")
 												   .add("/eb-resource-web/*")
 												   .add("/eb-screendisplay-web/*")
@@ -192,6 +194,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/device/group/record/download/file")
 												   .add("/sign/sign/page/*")
 												   .add("/sign/add")
+												   .add("/getLoginPage/get")
 												   .getList();
 	}
 	

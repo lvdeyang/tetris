@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -15,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.validation.constraints.Size;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.discovery.converters.Auto;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.capacity.server.CapacityService;
 import com.sumavision.tetris.capacity.server.PushService;
@@ -54,7 +51,6 @@ import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadR
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestInputPrevFileVO;
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestInputPrevStreamVO;
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestInputPrevVO;
-import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestInputVO;
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestOutputVO;
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityBroadRequestVO;
 import com.sumavision.tetris.cs.channel.broad.ability.request.BroadAbilityRequestTaskVO;
@@ -80,6 +76,7 @@ import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleExpiredException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
+import com.sumavision.tetris.cs.util.http.HttpUtil;
 import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
 import com.sumavision.tetris.easy.process.stream.transcode.OutParamVO;
 import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeProfileVO;
@@ -89,7 +86,6 @@ import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
-import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 //import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
@@ -720,6 +716,7 @@ public class BroadAbilityService {
 			List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
 			for (SchedulePO schedulePO : schedulePOs) {
 				startVoiceprint(schedulePO.getId());
+				
 			}
 		}
 	}
@@ -2414,10 +2411,12 @@ public class BroadAbilityService {
 				  .append(":")
 				  .append(mimsServerPropsQuery.queryProps().getFtpPort());
 		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		List<Map<String, String>> program = new ArrayList<Map<String,String>>();
 		if(broadUserIds.size()>0){
 			ProgramPO programPO = programDAO.findByScheduleId(scheduleId);
 			List<ScreenPO> screenPOs = screenDAO.findByProgramId(programPO.getId());
 			for (ScreenPO screenPO : screenPOs) {
+				Map<String,String> screen = new HashMap<String, String>();
 				ScreenVO screenVO = new ScreenVO();
 				screenVO.setPreviewUrl(screenPO.getPreviewUrl());
 				String downloadUrl = null;
@@ -2425,23 +2424,56 @@ public class BroadAbilityService {
 				for(int i = 3;i < urlString.length;i++){
 					downloadUrl = dUrl.append("/").append(urlString[i]).toString();
 				}
+				String isRequired = null;
+				if (screenPO.getIsRequired() != null && screenPO.getIsRequired().equals(true)) {
+					isRequired = "1";
+				}else {
+					isRequired = "0";
+				}
 				screenVO.setDownloadUrl(downloadUrl);
 				screenVO.setUuid(screenPO.getMimsUuid());
 				screenVO.setName(screenPO.getName());
 				screenVO.setIsRequired(screenPO.getIsRequired());
 				screenVOs.add(screenVO);
+				screen.put("duration", screenPO.getDuration());
+				screen.put("previewUrl", screenPO.getPreviewUrl());
+				screen.put("downloadUrl", downloadUrl);
+				screen.put("name", screenPO.getName());
+				screen.put("isRequired", isRequired);
+				screen.put("mimsUuid", screenPO.getMimsUuid());
+				program.add(screen);
 			}
 		}
-		data.put("program", screenVOs);
+		data.put("program", program);
 		data.put("effectTime",schedulePO.getBroadDate());
 		data.put("userId", broadUserIds);
 		data.put("uuid",schedulePO.getUuid());
 		data.put("channelName", channelPO.getName());
 		System.out.println(data.toString());
+		voiceprintPost(data);
 		return data;
 	}
 	
-	
+	/**
+	 * 声纹比对<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月4日 下午4:41:24
+	 */
+	public void voiceprintPost(Map<String, Object> map) throws Exception{
+		String fileString = adapter.readVoiceIp();
+		JSONObject ipFile = JSONObject.parseObject(fileString);
+		String url = ipFile.getString("ipAddr");
+		String jsonMessage = JSONObject.toJSONString(map);
+		JSONObject  jsonObject =JSONObject.parseObject(jsonMessage);
+		try {
+			HttpUtil.httpPost(url, jsonObject,true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
 
 }

@@ -28,22 +28,6 @@ public class LoginPageController {
 	private LoginPageQuery loginPageQuery;
 	
 	
-	/**
-	 * 获取登陆页面列表<br/>
-	 * <b>作者:</b>zhouaining<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2021年1月19日 下午1:58:08
-	 * @param request
-	 * @return
-	 * @throws Exception
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/list")
-	public Object listLoginPage(HttpServletRequest request) throws Exception{
-		
-		return loginPageQuery.listLoginPage();
-	}
 	
 	/**
 	 * 添加登陆页面<br/>
@@ -82,6 +66,23 @@ public class LoginPageController {
 	}
 	
 	/**
+	 * 获取登陆页面列表<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月19日 下午1:58:08
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list")
+	public Object listLoginPage(HttpServletRequest request) throws Exception{
+		
+		return loginPageQuery.listLoginPage();
+	}
+	
+	/**
 	 * 使用登陆页面<br/>
 	 * <b>作者:</b>zhouaining<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -114,12 +115,4 @@ public class LoginPageController {
 	public Object editLoginPage(long id,String name,String remark,String tpl){
 		return loginPageService.editLoginPage(id, name, remark, tpl);
 	}
-	
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/make")
-	public Object makeLoginPage(long id){
-		return null;
-	}
-	
 }
