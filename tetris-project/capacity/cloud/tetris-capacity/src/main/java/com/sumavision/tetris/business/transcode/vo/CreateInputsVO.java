@@ -19,6 +19,8 @@ public class CreateInputsVO {
 
     private String device_ip;
 
+    private Integer device_port;
+
     private List<InputBO> input_array;
 
     public String getMsg_id() {
@@ -43,5 +45,14 @@ public class CreateInputsVO {
 
     public void setInput_array(List<InputBO> input_array) {
         this.input_array = input_array;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public CreateInputsVO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
+        return this;
     }
 }

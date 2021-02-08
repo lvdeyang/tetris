@@ -10,6 +10,8 @@ public class RecordVO {
 	
 	private String deviceIp;
 
+	private Integer devicePort;
+
 	/** udp/rtp/http/hls/rtsp/rtmp */
 	private String type;
 	
@@ -52,5 +54,13 @@ public class RecordVO {
 		this.outputParam = outputParam;
 		return this;
 	}
-	
+
+	public Integer getDevicePort() {
+		return devicePort;
+	}
+
+	public RecordVO setDevicePort(Integer devicePort) {
+		this.devicePort = devicePort;
+		return this;
+	}
 }

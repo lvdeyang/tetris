@@ -10,6 +10,8 @@ public class InputSetVO implements Serializable {
 
     private String device_ip;
 
+    private Integer device_port;
+
     private ArrayList<PutElementsRequest> modify_program_param;
 
     private ArrayList<PutBackupModeRequest> modify_backup_mode;
@@ -37,5 +39,14 @@ public class InputSetVO implements Serializable {
 
     public void setModify_backup_mode(ArrayList<PutBackupModeRequest> modify_backup_mode) {
         this.modify_backup_mode = modify_backup_mode;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public InputSetVO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
+        return this;
     }
 }

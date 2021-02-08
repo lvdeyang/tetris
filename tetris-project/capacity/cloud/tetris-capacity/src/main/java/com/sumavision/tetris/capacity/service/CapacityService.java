@@ -213,12 +213,12 @@ public class CapacityService {
      * @param CreateInputsRequest input 不带msg_id的input
      * @return CreateInputsResponse
      */
-    public CreateInputsResponse createInputsWithMsgId(String ip, CreateInputsRequest input) throws Exception {
+    public CreateInputsResponse createInputsWithMsgId(String ip,Integer port, CreateInputsRequest input) throws Exception {
         if (StringUtils.isBlank(input.getMsg_id())) {
             String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
             input.setMsg_id(msg_id);
         }
-        return createInputsToTransform(ip, input);
+        return createInputsToTransform(ip,port, input);
 
     }
 
@@ -231,8 +231,8 @@ public class CapacityService {
      * @param CreateInputsRequest input 不带msg_id的input
      * @return CreateInputsResponse
      */
-    public CreateInputsResponse createInputs(String ip, CreateInputsRequest input) throws Exception {
-        return createInputsToTransform(ip, input);
+    public CreateInputsResponse createInputs(String ip,Integer port, CreateInputsRequest input) throws Exception {
+        return createInputsToTransform(ip,port, input);
     }
 
     /**
@@ -244,12 +244,12 @@ public class CapacityService {
      * @param CreateInputsRequest input 输入参数
      * @return CreateInputsResponse 创建输入返回
      */
-    private CreateInputsResponse createInputsToTransform(String ip, CreateInputsRequest input) throws Exception {
+    private CreateInputsResponse createInputsToTransform(String ip,Integer port, CreateInputsRequest input) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(port)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_INPUT)
                 .toString();
@@ -275,12 +275,12 @@ public class CapacityService {
      *
      * @param DeleteInputsRequest input 不带msg_id的input
      */
-    public void deleteInputsAddMsgId(DeleteInputsRequest input, String capacityIp) throws Exception {
+    public void deleteInputsAddMsgId(DeleteInputsRequest input, String capacityIp,Integer capacityPort) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
         input.setMsg_id(msg_id);
 
-        deleteInputsToTransform(capacityIp, input);
+        deleteInputsToTransform(capacityIp,capacityPort, input);
 
     }
 
@@ -292,8 +292,8 @@ public class CapacityService {
      *
      * @param DeleteInputsRequest input 不带msg_id的input
      */
-    public void deleteInputs(String capacityIp, DeleteInputsRequest input) throws Exception {
-        deleteInputsToTransform(capacityIp, input);
+    public void deleteInputs(String capacityIp,Integer capacityPort, DeleteInputsRequest input) throws Exception {
+        deleteInputsToTransform(capacityIp, capacityPort, input);
     }
 
 
@@ -305,12 +305,12 @@ public class CapacityService {
      *
      * @param DeleteInputsRequest input 删除输入请求
      */
-    private void deleteInputsToTransform(String capacityIp, DeleteInputsRequest input) throws Exception {
+    private void deleteInputsToTransform(String capacityIp,Integer capacityPort, DeleteInputsRequest input) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(capacityIp)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(capacityPort)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_INPUT)
                 .toString();
@@ -1343,12 +1343,12 @@ public class CapacityService {
      * @param CreateOutputsRequest output 不带msg_id的 输出
      * @return CreateOutputsResponse
      */
-    public CreateOutputsResponse createOutputsWithMsgId(CreateOutputsRequest output, String capacityIp) throws Exception {
+    public CreateOutputsResponse createOutputsWithMsgId(CreateOutputsRequest output, String capacityIp, Integer capacityPort) throws Exception {
         if (StringUtils.isBlank(output.getMsg_id())) {
             String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
             output.setMsg_id(msg_id);
         }
-        return createOutputs(output, capacityIp);
+        return createOutputs(output, capacityIp, capacityPort);
     }
 
     /**
@@ -1360,12 +1360,12 @@ public class CapacityService {
      * @param CreateOutputsRequest output 创建输出参数
      * @return CreateOutputsResponse 返回
      */
-    private CreateOutputsResponse createOutputs(CreateOutputsRequest output, String capacityIp) throws Exception {
+    private CreateOutputsResponse createOutputs(CreateOutputsRequest output, String capacityIp,Integer capacityPort) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(capacityIp)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(capacityPort)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_OUTPUT)
                 .toString();
@@ -1391,13 +1391,13 @@ public class CapacityService {
      *
      * @param DeleteOutputsRequest output 不带msg_id的output
      */
-    public void deleteOutputsWithMsgId(DeleteOutputsRequest output, String capacityIp) throws Exception {
+    public void deleteOutputsWithMsgId(DeleteOutputsRequest output, String capacityIp,Integer capacityPort) throws Exception {
         if (StringUtils.isBlank(output.getMsg_id())) {
             String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
             output.setMsg_id(msg_id);
         }
 
-        deleteOutputs(output, capacityIp);
+        deleteOutputs(output, capacityIp,capacityPort);
     }
 
     /**
@@ -1408,12 +1408,12 @@ public class CapacityService {
      *
      * @param DeleteOutputsRequest output 输出
      */
-    private void deleteOutputs(DeleteOutputsRequest output, String capacityIp) throws Exception {
+    private void deleteOutputs(DeleteOutputsRequest output, String capacityIp,Integer capacityPort) throws Exception {
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(capacityIp)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(capacityPort)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.URL_OUTPUT)
                 .toString();
@@ -1950,18 +1950,18 @@ public class CapacityService {
      *
      * @return GetTaskResponse
      */
-    public PlatformResponse getPlatforms(String ip) throws Exception {
-        return getPlatformsToTransform(ip);
+    public PlatformResponse getPlatforms(String ip,Integer port) throws Exception {
+        return getPlatformsToTransform(ip,port);
     }
 
-    public PlatformResponse getPlatformsToTransform(String ip) throws Exception {
+    public PlatformResponse getPlatformsToTransform(String ip,Integer port) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 
         String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
                 .append(ip)
                 .append(":")
-                .append(capacityProps.getPort())
+                .append(port)
                 .append(UrlConstant.URL_VERSION).append("/")
                 .append(UrlConstant.GET_PLATFORM)
                 .append("?msg_id=")
@@ -2001,7 +2001,7 @@ public class CapacityService {
         return res.toJSONString();
     }
 
-    public String deleteAnalysisStreamToTransform(String ip, String inputId) throws Exception {
+    public String deleteAnalysisStreamToTransform(String ip,Integer port, String inputId) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 

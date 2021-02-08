@@ -5,6 +5,8 @@ import java.util.List;
 public class StreamTranscodingVO {
 	/** 转码模块ip */
 	private String deviceIp;
+	/** 转码端口 **/
+	private Integer devicePort;
 	/** 是否转码 */
 	private boolean isTranscoding;
 	/** 是否添加收录输出 */
@@ -102,5 +104,14 @@ public class StreamTranscodingVO {
 
 	public void setDeviceIp(String deviceIp) {
 		this.deviceIp = deviceIp;
+	}
+
+	public Integer getDevicePort() {
+		return devicePort;
+	}
+
+	public StreamTranscodingVO setDevicePort(Integer devicePort) {
+		this.devicePort = devicePort;
+		return this;
 	}
 }

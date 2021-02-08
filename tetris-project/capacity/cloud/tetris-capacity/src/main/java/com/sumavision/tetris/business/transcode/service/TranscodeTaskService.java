@@ -24,6 +24,7 @@ import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.bo.task.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
 import com.sumavision.tetris.capacity.service.CapacityService;
@@ -128,6 +129,12 @@ public class TranscodeTaskService {
 
 		String capacityIp = analysisInput.getDevice_ip();
 
+
+		Integer capacityPort = Constant.TRANSFORM_PORT;
+		if (analysisInput.getDevice_port() != null) {
+			capacityPort=analysisInput.getDevice_port();
+		}
+
 		String uniq = "";
 		if(inputBO.getUdp_ts() != null){
 			uniq = new StringBuffer().append(inputBO.getUdp_ts().getSource_ip())
@@ -202,13 +209,13 @@ public class TranscodeTaskService {
 			allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
 
 			//添源
-			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
 			responseService.allResponseProcess(allResponse);
 			//刷源
 			AnalysisResponse response = capacityService.getAnalysis(uuid, capacityIp);
 
 			//删源
-			capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
 
 			return response;
 
@@ -599,14 +606,15 @@ public class TranscodeTaskService {
 	}
 
 
-
-
-
 	public String addInputs(CreateInputsVO createInputsVO) throws Exception {
 
 		String deviceIp = createInputsVO.getDevice_ip();
 		if (deviceIp == null || deviceIp.isEmpty()){
 			throw new  Exception("cannot parse capacity ip");
+		}
+		Integer devicePort = Constant.TRANSFORM_PORT;
+		if (createInputsVO.getDevice_port() != null) {
+			devicePort=createInputsVO.getDevice_port();
 		}
 
 		for (int i = 0; i < createInputsVO.getInput_array().size(); i++) {
@@ -642,7 +650,7 @@ public class TranscodeTaskService {
 		CreateInputsRequest createInputsRequest = new CreateInputsRequest();
 		createInputsRequest.setMsg_id(createInputsVO.getMsg_id());
 		createInputsRequest.setInput_array(createInputsVO.getInput_array());
-		CreateInputsResponse createInputsResponse = capacityService.createInputs(deviceIp, createInputsRequest);
+		CreateInputsResponse createInputsResponse = capacityService.createInputs(deviceIp,devicePort, createInputsRequest);
 		return JSON.toJSONString(createInputsResponse);
 	}
 
@@ -804,6 +812,7 @@ public class TranscodeTaskService {
 			output.setTaskUuid(taskUuid);
 			output.setType(businessType);
 			output.setCapacityIp(capacityIp);
+			output.setCapacityPort(capacityPort);
 			output.setUpdateTime(new Date());
 			taskOutputDao.save(output);
 
@@ -1428,10 +1437,10 @@ public class TranscodeTaskService {
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
 		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
 		//创建输出
-		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, task.getCapacityIp());
+		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, task.getCapacityIp(), task.getCapacityPort());
 
 		//创建输出返回处理 -- 回滚
-		responseService.outputResponseProcess(outputResponse, null, null, task.getCapacityIp());
+		responseService.outputResponseProcess(outputResponse, null, null, task.getCapacityIp(),task.getCapacityPort());
 
 		List<OutputBO> oriOutputs = JSON.parseArray(task.getOutput(),OutputBO.class);
 		oriOutputs.addAll(outputs);
@@ -1479,7 +1488,7 @@ public class TranscodeTaskService {
 				delete.getOutput_array().add(idRequest);
 			}
 
-			capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp());
+			capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp(), taskPO.getCapacityPort());
 
 			taskPO.setOutput(JSON.toJSONString(outputs));
 			taskOutputDao.save(taskPO);
@@ -1508,8 +1517,8 @@ public class TranscodeTaskService {
 	 * <b>日期：</b>2020年6月23日 下午2:41:38
 	 * @param String ip 转换模块ip
 	 */
-	public String getPlatform(String ip) throws Exception {
-		PlatformResponse platformResponse = capacityService.getPlatforms(ip);
+	public String getPlatform(String ip,Integer port) throws Exception {
+		PlatformResponse platformResponse = capacityService.getPlatforms(ip,port);
 		List<String> platforms = new ArrayList<>();
 		platformResponse.getPlatform_array().stream().forEach(p->{
 			JSONObject jsonObject = JSON.parseObject(p);
@@ -1530,24 +1539,29 @@ public class TranscodeTaskService {
 			return "";
 		}
 		String responseBody = "";
+		Integer devicePort=Constant.TRANSFORM_PORT;
+		if (asVO.getDevicePort() != null) {
+			devicePort=asVO.getDevicePort();
+		}
+		String deviceIp=asVO.getDeviceIp();
 		if ("start".equals(asVO.getType())){
-			taskService.addInputsAfterRepeat(asVO.getDeviceIp(),asVO.getInput_array(),busType);
+			taskService.addInputsAfterRepeat(deviceIp,devicePort,asVO.getInput_array(),busType);
 			String uniq = taskService.generateUniq(asVO.getInput_array().get(0));
 			TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-			responseBody = capacityService.startAnalysisStreamToTransform(asVO.getDeviceIp(),inputPO.getNodeId());
+			responseBody = capacityService.startAnalysisStreamToTransform(deviceIp,inputPO.getNodeId());
 			taskInputDao.updateAnalysisById(inputPO.getId(),1);//开启分析
 		}else if ("delete".equals(asVO.getType())){
 			String uniq = taskService.generateUniq(asVO.getInput_array().get(0));
 			TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
 			if (inputPO!=null && inputPO.getAnalysis()!=0){
-				responseBody = capacityService.deleteAnalysisStreamToTransform(asVO.getDeviceIp(), inputPO.getNodeId());
+				responseBody = capacityService.deleteAnalysisStreamToTransform(deviceIp,devicePort, inputPO.getNodeId());
 				taskInputDao.updateAnalysisById(inputPO.getId(),0);//关掉分析
-				taskService.deleteInputsAfterCheckRepeat(asVO.getDeviceIp(),asVO.getInput_array());
+				taskService.deleteInputsAfterCheckRepeat(deviceIp,devicePort,asVO.getInput_array());
 			}
 		}else if ("get".equals(asVO.getType())){
 			String uniq = taskService.generateUniq(asVO.getInput_array().get(0));
 			TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-			responseBody = capacityService.getAnalysisStreamToTransform(asVO.getDeviceIp(), inputPO.getNodeId());
+			responseBody = capacityService.getAnalysisStreamToTransform(deviceIp, inputPO.getNodeId());
 		}else{
 			throw new IllegalArgumentException("not support type: "+ asVO.getType());
 		}

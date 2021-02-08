@@ -438,7 +438,7 @@ public class TaskService {
      * @Author: Poemafar
      * @Date: 2020/12/4 9:44
      **/
-    public void addInputsAfterRepeat(String deviceIp, List<InputBO> inputBOS, BusinessType busType) throws Exception {
+    public void addInputsAfterRepeat(String deviceIp,Integer devicePort, List<InputBO> inputBOS, BusinessType busType) throws Exception {
         List<InputBO> needSendInputArray = new ArrayList<>();
         for (int i = 0; i < inputBOS.size(); i++) {
             InputBO inputBO = inputBOS.get(i);
@@ -477,7 +477,7 @@ public class TaskService {
         CreateInputsRequest createInputsRequest = new CreateInputsRequest();
         createInputsRequest.setMsg_id(UUID.randomUUID().toString());
         createInputsRequest.setInput_array(needSendInputArray);
-        capacityService.createInputs(deviceIp, createInputsRequest);
+        capacityService.createInputs(deviceIp,devicePort, createInputsRequest);
     }
 
 
@@ -491,7 +491,7 @@ public class TaskService {
      * @Author: Poemafar
      * @Date: 2021/1/4 17:59
      **/
-    public InputWrapperBO addInputInDatabase(String deviceIp, InputBO inputBO, BusinessType busType) throws Exception {
+    public InputWrapperBO addInputInDatabase(String deviceIp,Integer devicePort, InputBO inputBO, BusinessType busType) throws Exception {
         Boolean beCreate = null;
         String uniq = generateUniq(inputBO);
         TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
@@ -504,6 +504,7 @@ public class TaskService {
             inputPO.setInput(JSON.toJSONString(inputBO));
             inputPO.setNodeId(inputBO.getId());
             inputPO.setCapacityIp(deviceIp);
+            inputPO.setCapacityPort(devicePort);
             beCreate=Boolean.TRUE;
             taskInputDao.save(inputPO);
         } else if (inputPO.getCount().equals(0)) {
@@ -514,6 +515,7 @@ public class TaskService {
             inputPO.setUpdateTime(inputPO.getCreateTime());
             inputPO.setCount(inputPO.getCount() + 1);
             inputPO.setCapacityIp(deviceIp);
+            inputPO.setCapacityPort(devicePort);
             beCreate=Boolean.TRUE;
             taskInputDao.save(inputPO);
         } else {
@@ -535,7 +537,7 @@ public class TaskService {
  * @Author: Poemafar
  * @Date: 2020/12/4 10:42
  **/
-    public void deleteInputsAfterCheckRepeat(String deviceIp, List<InputBO> inputBOS) throws Exception {
+    public void deleteInputsAfterCheckRepeat(String deviceIp,Integer devicePort, List<InputBO> inputBOS) throws Exception {
         DeleteInputsRequest deleteInputsRequest = new DeleteInputsRequest();
         List<IdRequest> needDelInputs = new ArrayList<>();
         for (int i = 0; i < inputBOS.size(); i++) {
@@ -553,7 +555,7 @@ public class TaskService {
         }
         deleteInputsRequest.setMsg_id(UUID.randomUUID().toString());
         deleteInputsRequest.setInput_array(needDelInputs);
-        capacityService.deleteInputs(deviceIp,deleteInputsRequest);
+        capacityService.deleteInputs(deviceIp,devicePort,deleteInputsRequest);
     }
 
     public Boolean beUseForInputAtAnyTask(Long inputId){

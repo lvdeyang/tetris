@@ -25,7 +25,7 @@ public class MissionBO {
 
     String device_ip;
 
-    Integer device_port=5656;
+    Integer device_port;
 
     TaskType taskType;
 

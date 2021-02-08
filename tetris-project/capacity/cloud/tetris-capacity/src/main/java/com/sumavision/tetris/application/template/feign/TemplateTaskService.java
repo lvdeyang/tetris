@@ -25,6 +25,7 @@ import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.capacity.bo.input.*;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.task.*;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -155,6 +156,12 @@ public class TemplateTaskService {
     }
 
     public void createTaskByTemplate(MissionBO missionBO,TemplateTaskVO jobBO,BusinessType businessType) throws Exception {
+        String capacityIp = missionBO.getDevice_ip();
+        Integer capacityPort = Constant.TRANSFORM_PORT;
+        if (missionBO.getDevice_port() != null) {
+            capacityPort=missionBO.getDevice_port();
+        }
+
         JSONObject schedule = (JSONObject)jobBO.getMap_sources().stream().filter(s -> "schedule".equals(((JSONObject) s).getString("type").toLowerCase())).findAny().orElse(null);
         if (schedule!=null){ //排期任务的输入只能有个排期
             List<InputBO> taskInputBOS = new ArrayList<>();
@@ -168,7 +175,7 @@ public class TemplateTaskService {
                 if (schedule.containsKey("prev") && sourceObj.getInteger("index").equals(schedule.getInteger("prev"))){
                     InputBO preInputBO = missionBO.getInputMap().get(schedule.getInteger("prev"));
                     schedules.add(getScheduleProgram(preInputBO,sourceObj));
-                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(missionBO.getDevice_ip(),preInputBO,businessType);
+                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(capacityIp,capacityPort,preInputBO,businessType);
                     taskOutput.setPrevId(inputWrapperBO.getTaskInputPO().getId());
                     if (inputWrapperBO.getBeCreate()){
                         scheInputBOS.add(preInputBO);
@@ -177,7 +184,7 @@ public class TemplateTaskService {
                 if (schedule.containsKey("next")  && sourceObj.getInteger("index").equals(schedule.getInteger("next") )){
                     InputBO nextInputBO = missionBO.getInputMap().get(schedule.getInteger("next"));
                     schedules.add(getScheduleProgram(nextInputBO,sourceObj));
-                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(missionBO.getDevice_ip(),nextInputBO,businessType);
+                    InputWrapperBO inputWrapperBO = taskService.addInputInDatabase(capacityIp,capacityPort,nextInputBO,businessType);
                     taskOutput.setNextId(inputWrapperBO.getTaskInputPO().getId());
                     if (inputWrapperBO.getBeCreate()){
                         scheInputBOS.add(nextInputBO);
@@ -187,7 +194,7 @@ public class TemplateTaskService {
 
             if (!schedules.isEmpty()) {
                 InputBO scheduleBO = missionBO.getInputMap().get(schedule.getInteger("index"));
-                scheduleService.sendSchedule(missionBO.getDevice_ip(), scheduleBO.getId(), null, scheInputBOS, schedules);
+                scheduleService.sendSchedule(missionBO.getDevice_ip(),missionBO.getDevice_port(), scheduleBO.getId(), null, scheInputBOS, schedules);
                 taskOutput.setScheduleId(taskInputDAO.findByUniq(taskService.generateUniq(scheduleBO)).getId());
                 taskOutput.setUpdateTime(new Date());
                 taskOutputDAO.save(taskOutput);

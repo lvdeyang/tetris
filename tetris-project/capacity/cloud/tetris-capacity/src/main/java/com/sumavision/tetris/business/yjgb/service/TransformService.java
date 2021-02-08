@@ -11,6 +11,7 @@ import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.capacity.bo.output.*;
 import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.device.DeviceDao;
@@ -212,8 +213,13 @@ public class TransformService {
 		}
 		
 		String recordName = new StringBufferWrapper().append("/home/hls/").append(uuid).toString();
-			
-		save(streamTranscodingVO.getDeviceIp(), uuid, uniq, BusinessType.YJGB, isRecord, recordName, record == null? null: record.getRecordCallback(), streamTranscodingVO);
+
+		Integer capacityPort = Constant.TRANSFORM_PORT;
+		if (streamTranscodingVO.getDevicePort() != null) {
+			capacityPort = streamTranscodingVO.getDevicePort();
+		}
+
+		save(streamTranscodingVO.getDeviceIp(),capacityPort, uuid, uniq, BusinessType.YJGB, isRecord, recordName, record == null? null: record.getRecordCallback(), streamTranscodingVO);
 		
 		return uuid;
 		
@@ -237,6 +243,7 @@ public class TransformService {
 	 */
 	public void save(
 			String capacityIp,
+			Integer capacityPort,
 			String taskUuid, 
 			String uniq, 
 			BusinessType businessType,
@@ -271,6 +278,8 @@ public class TransformService {
 				input.setTaskUuid(taskUuid);
 				input.setInput(JSON.toJSONString(inputBO));
 				input.setNodeId(inputBO.getId());
+				input.setCapacityIp(capacityIp);
+				input.setCapacityPort(capacityPort);
 				input.setType(businessType);
 				taskInputDao.save(input);
 				
@@ -285,6 +294,7 @@ public class TransformService {
 				output.setType(businessType);
 				output.setRecordCallbackUrl(recordCallBackUrl);
 				output.setCapacityIp(capacityIp);
+				output.setCapacityPort(capacityPort);
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -293,7 +303,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -302,11 +312,11 @@ public class TransformService {
 				//数据已存在（ip，port校验）
 				System.out.println("校验输入已存在");
 				Thread.sleep(300);
-				save(capacityIp, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
+				save(capacityIp,capacityPort, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
 				throw e;
 				
 			} catch (Exception e) {
@@ -373,7 +383,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp,capacityPort);
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -382,11 +392,11 @@ public class TransformService {
 				// 版本不对，version校验
 				System.out.println("save校验version版本不对");
 				Thread.sleep(300);
-				save(capacityIp, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
+				save(capacityIp,capacityPort, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
 				throw e;
 				
 			} catch (Exception e) {
@@ -492,10 +502,10 @@ public class TransformService {
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
 		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 		//创建输出
-		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, output.getCapacityIp());
+		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, output.getCapacityIp(),output.getCapacityPort());
 		
 		//创建输出返回处理 -- 回滚
-		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, output.getCapacityIp());
+		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, output.getCapacityIp(), output.getCapacityPort());
 		
 		outputs.addAll(outputBOs);
 		
@@ -547,7 +557,7 @@ public class TransformService {
 				delete.getOutput_array().add(idRequest);
 			}
 
-			capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp());
+			capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp(),taskPO.getCapacityPort());
 			
 			taskPO.setOutput(JSON.toJSONString(outputs));
 			taskOutputDao.save(taskPO);
@@ -579,7 +589,7 @@ public class TransformService {
 			delete.getOutput_array().add(idRequest);
 		}
 
-		capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp());
+		capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp(),taskPO.getCapacityPort());
 		
 		taskPO.setOutput(null);
 		taskOutputDao.save(taskPO);

@@ -82,7 +82,7 @@ public class ResponseService {
 	 * @param CreateInputsResponse inputResponse 创建输入返回
 	 * @return List<String> 成功的inputIds
 	 */
-	public List<String> inputResponseProcess(CreateInputsResponse inputResponse, String capacityIp) throws Exception{
+	public List<String> inputResponseProcess(CreateInputsResponse inputResponse, String capacityIp, Integer capacityPort) throws Exception{
 		
 		List<ResultResponse> input_response_array = inputResponse.getInput_array();
 		
@@ -100,7 +100,7 @@ public class ResponseService {
 		
 		if(responses.size() > 0){
 			//删除成功的输入
-			deleteInputs(ids, capacityIp);
+			deleteInputs(ids, capacityIp, capacityPort);
 			
 			ids.removeAll(ids);
 			
@@ -121,7 +121,7 @@ public class ResponseService {
 	 * @param List<String> inputIds 成功的inputIds
 	 * @return List<String> 成功的taskIds
 	 */
-	public List<String> taskResponseProcess(CreateTaskResponse taskResponse, List<String> inputIds, String capacityIp) throws Exception{
+	public List<String> taskResponseProcess(CreateTaskResponse taskResponse, List<String> inputIds, String capacityIp, Integer capacityPort) throws Exception{
 		
 		List<ResultResponse> task_response_array = taskResponse.getTask_array();
 		
@@ -141,7 +141,7 @@ public class ResponseService {
 			//删除任务
 			deleteTasks(ids, capacityIp);
 			//删除输入
-			deleteInputs(inputIds, capacityIp);
+			deleteInputs(inputIds, capacityIp,capacityPort);
 			
 			ids.removeAll(ids);
 			inputIds.removeAll(inputIds);
@@ -162,7 +162,7 @@ public class ResponseService {
 	 * @param taskIds
 	 * @param inputIds
 	 */
-	public List<String> outputResponseProcess(CreateOutputsResponse outputsResponse, List<String> taskIds, List<String> inputIds, String capacityIp) throws Exception{
+	public List<String> outputResponseProcess(CreateOutputsResponse outputsResponse, List<String> taskIds, List<String> inputIds, String capacityIp,Integer capacityPort) throws Exception{
 		
 		List<ResultResponse> output_response_array = outputsResponse.getOutput_array();
 		
@@ -181,7 +181,7 @@ public class ResponseService {
 		if(responses.size() > 0){
 			//删除输出
 			if(ids != null && ids.size() > 0){
-				deleteOutputs(ids, capacityIp);
+				deleteOutputs(ids, capacityIp,capacityPort);
 				ids.removeAll(ids);
 			}
 			//删除任务
@@ -191,7 +191,7 @@ public class ResponseService {
 			}
 			//删除输入
 			if(inputIds != null && inputIds.size() > 0){
-				deleteInputs(inputIds, capacityIp);
+				deleteInputs(inputIds, capacityIp,capacityPort);
 				inputIds.removeAll(inputIds);
 			}
 
@@ -210,7 +210,7 @@ public class ResponseService {
 	 * <b>日期：</b>2019年11月20日 上午10:02:44
 	 * @param List<String> ids 需要删除的inputId
 	 */
-	public void deleteInputs(List<String> ids, String capacityIp) throws Exception{
+	public void deleteInputs(List<String> ids, String capacityIp,Integer capacityPort) throws Exception{
 		
 		if(ids != null && ids.size() > 0){
 			DeleteInputsRequest delete = new DeleteInputsRequest().setInput_array(new ArrayList<IdRequest>());
@@ -219,7 +219,7 @@ public class ResponseService {
 				delete.getInput_array().add(request);
 			}
 			
-			capacityService.deleteInputsAddMsgId(delete, capacityIp);
+			capacityService.deleteInputsAddMsgId(delete, capacityIp,capacityPort);
 		}
 
 	}
@@ -252,7 +252,7 @@ public class ResponseService {
 	 * <b>日期：</b>2019年11月20日 下午1:19:27
 	 * @param List<String> ids 需要删除的outputIds
 	 */
-	public void deleteOutputs(List<String> ids, String capacityIp) throws Exception{
+	public void deleteOutputs(List<String> ids, String capacityIp,Integer capacityPort) throws Exception{
 		
 		if(ids != null && ids.size() > 0){
 			DeleteOutputsRequest delete = new DeleteOutputsRequest().setOutput_array(new ArrayList<IdRequest>());
@@ -261,7 +261,7 @@ public class ResponseService {
 				delete.getOutput_array().add(request);
 			}
 			
-			capacityService.deleteOutputsWithMsgId(delete, capacityIp);
+			capacityService.deleteOutputsWithMsgId(delete, capacityIp, capacityPort);
 		}
 
 	}

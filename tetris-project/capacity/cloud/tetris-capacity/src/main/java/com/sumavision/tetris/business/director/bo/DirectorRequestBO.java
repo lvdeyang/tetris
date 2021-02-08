@@ -11,6 +11,8 @@ import com.sumavision.tetris.capacity.bo.request.AllRequest;
 public class DirectorRequestBO {
 
 	private String capacityIp;
+
+	private Integer capacityPort;
 	
 	private AllRequest request;
 
@@ -29,5 +31,13 @@ public class DirectorRequestBO {
 	public void setRequest(AllRequest request) {
 		this.request = request;
 	}
-	
+
+	public Integer getCapacityPort() {
+		return capacityPort;
+	}
+
+	public DirectorRequestBO setCapacityPort(Integer capacityPort) {
+		this.capacityPort = capacityPort;
+		return this;
+	}
 }

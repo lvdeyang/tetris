@@ -13,6 +13,7 @@ import com.sumavision.tetris.business.transcode.vo.*;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -394,7 +395,8 @@ public class TranscodeTaskFeignController {
 	public Object getPlatform(
 			String ip,
 			HttpServletRequest request) throws Exception{
-		String response = transcodeTaskService.getPlatform(ip);
+		Integer port = Constant.TRANSFORM_PORT;
+		String response = transcodeTaskService.getPlatform(ip,port);
 		return response;
 	}
 

@@ -12,6 +12,9 @@ public class AnalysisInputVO {
 
 	/** 能力ip */
 	private String device_ip;
+
+	/** 能力端口 */
+	private Integer device_port;
 	
 	/** 输入信息 */
 	private InputBO input;
@@ -31,5 +34,13 @@ public class AnalysisInputVO {
 	public void setInput(InputBO input) {
 		this.input = input;
 	}
-	
+
+	public Integer getDevice_port() {
+		return device_port;
+	}
+
+	public AnalysisInputVO setDevice_port(Integer device_port) {
+		this.device_port = device_port;
+		return this;
+	}
 }

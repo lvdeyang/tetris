@@ -25,6 +25,8 @@ public class TaskOutputPO extends AbstractBasePO{
 	private String output;
 	
 	private String capacityIp;
+
+	private Integer capacityPort;
 	
 	private BusinessType type;
 	
@@ -149,6 +151,15 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
+	}
+
+	public Integer getCapacityPort() {
+		return capacityPort;
+	}
+
+	public TaskOutputPO setCapacityPort(Integer capacityPort) {
+		this.capacityPort = capacityPort;
+		return this;
 	}
 
 	public Long getCoverId() {
