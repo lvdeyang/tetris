@@ -41,8 +41,8 @@ public class RecordTimerBO {
 	public static RecordTimerBO transFromRecordStrategyPO(RecordStrategyPO recordStrategyPO, DeviceDAO deviceDAO,
 			StorageDAO storageDAO) {
 
-		DevicePO devicePO = deviceDAO.findOne(recordStrategyPO.getDeviceId());
-		StoragePO storagePO = storageDAO.findOne(recordStrategyPO.getStorageId());
+		DevicePO devicePO = deviceDAO.findById(recordStrategyPO.getDeviceId());
+		StoragePO storagePO = storageDAO.findById(recordStrategyPO.getStorageId());
 
 		RecordTimerBO recordTimerBO = new RecordTimerBO();
 		recordTimerBO.setSourceId(recordStrategyPO.getSourceId());

@@ -668,7 +668,7 @@ public class RecordStrategyService {
 		// 删recordfile记录
 		recordFileDao.deleteByStgyId(stgId);
 		recordStrategyItemDAO.deleteByRecordStrategyId(stgId);
-		recordStrategyDAO.delete(stgId);
+		recordStrategyDAO.deleteById(stgId);
 	}
 
 	public void stopStrategyRecord(RecordStrategyPO stgPO) throws Exception {
@@ -713,7 +713,7 @@ public class RecordStrategyService {
 			Date operateTime, boolean isStartRecord) {
 
 		if (recordStrategyPO == null) {
-			recordStrategyPO = recordStrategyDAO.findOne(recordTimerBOTemp.getRecordStrategyId());
+			recordStrategyPO = recordStrategyDAO.findById(recordTimerBOTemp.getRecordStrategyId());
 		}
 
 		if (isStartRecord) {

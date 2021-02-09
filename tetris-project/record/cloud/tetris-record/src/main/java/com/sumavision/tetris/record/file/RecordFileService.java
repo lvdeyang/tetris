@@ -85,10 +85,10 @@ public class RecordFileService {
 
 	public String uploadMims(RecordFilePO recordFilePO) throws Exception {
 
-		StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+		StoragePO storagePO = storageDAO.findById(recordFilePO.getStorageId());
 		Map<String, String> recordFileUrlMap = getFileUrl(recordFilePO, storagePO);
 
-		RecordStrategyPO recordStrategyPO = recordStrategyDAO.findOne(recordFilePO.getRecordStrategyId());
+		RecordStrategyPO recordStrategyPO = recordStrategyDAO.findById(recordFilePO.getRecordStrategyId());
 		SimpleDateFormat myFmt = new SimpleDateFormat("yyyMMdd-HHmmss");
 
 		String startTime = myFmt.format(recordFilePO.getStartTime());
@@ -128,7 +128,7 @@ public class RecordFileService {
 	public void startffMpegTrans(RecordFilePO recordFilePO, RecordStrategyPO recordStrategyPO) {
 
 		// TODO
-		StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+		StoragePO storagePO = storageDAO.findById(recordFilePO.getStorageId());
 
 		FFMpegTransThread ffMpegTransThread = new FFMpegTransThread(recordFilePO, storagePO, recordStrategyPO, this,
 				recordFileDAO);
