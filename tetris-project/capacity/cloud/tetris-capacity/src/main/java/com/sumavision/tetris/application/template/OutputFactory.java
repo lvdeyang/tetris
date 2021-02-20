@@ -2,9 +2,9 @@ package com.sumavision.tetris.application.template;/**
  * Created by Poemafar on 2020/11/4 15:12
  */
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.MissionBO;
-import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.enumeration.TaskType;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static com.sumavision.tetris.business.common.enumeration.ProtocolType.*;
+import static com.sumavision.tetris.business.common.enumeration.ProtocolType.getPassbyType;
 
 /**
  * @ClassName: OutputFactory
@@ -107,7 +107,7 @@ public class OutputFactory {
 
     public CommonTsOutputBO getCommonTsOutputBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
 
-        CommonTsOutputBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),CommonTsOutputBO.class);
+        CommonTsOutputBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),CommonTsOutputBO.class);
         if (taskOutput.containsKey("bitrate")){
             outputBO.setBitrate(taskOutput.getInteger("bitrate")*1000);
         }else{
@@ -142,7 +142,7 @@ public class OutputFactory {
         }else{
             for (int i = 0; i < taskOutput.getJSONArray("programs").size(); i++) {
                 JSONObject outputProgramObj = taskOutput.getJSONArray("programs").getJSONObject(i);
-                OutputProgramBO program = JSONObject.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
+                OutputProgramBO program = JSON.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
                 program.setOutputMedias(missionBO,outputProgramObj.getJSONArray("medias"));
                 outputProgramBOS.add(program);
             }
@@ -154,7 +154,7 @@ public class OutputFactory {
     }
 
     public OutputHttpTsBO getOutputHttpTsBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputHttpTsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputHttpTsBO.class);
+        OutputHttpTsBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputHttpTsBO.class);
         if (taskOutput.containsKey("bitrate")){
             outputBO.setBitrate(taskOutput.getInteger("bitrate")*1000);
         }
@@ -176,7 +176,7 @@ public class OutputFactory {
         if (taskOutput.containsKey("programs")){
             for (int i = 0; i < taskOutput.getJSONArray("programs").size(); i++) {
                 JSONObject outputProgramObj = taskOutput.getJSONArray("programs").getJSONObject(i);
-                OutputProgramBO program = JSONObject.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
+                OutputProgramBO program = JSON.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
                 program.setOutputMedias(missionBO,outputProgramObj.getJSONArray("medias"));
                 outputProgramBOS.add(program);
             }
@@ -198,7 +198,7 @@ public class OutputFactory {
     }
 
     public OutputSrtTsBO getOutputSrtTsBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputSrtTsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputSrtTsBO.class);
+        OutputSrtTsBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputSrtTsBO.class);
         if (taskOutput.containsKey("maxbw")){
             outputBO.setMaxbw(taskOutput.getInteger("maxbw")*1000);
         }
@@ -220,7 +220,7 @@ public class OutputFactory {
         if (taskOutput.containsKey("programs")){
             for (int i = 0; i < taskOutput.getJSONArray("programs").size(); i++) {
                 JSONObject outputProgramObj = taskOutput.getJSONArray("programs").getJSONObject(i);
-                OutputProgramBO program = JSONObject.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
+                OutputProgramBO program = JSON.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class) ;
                 program.setOutputMedias(missionBO,outputProgramObj.getJSONArray("medias"));
                 outputProgramBOS.add(program);
             }
@@ -242,7 +242,7 @@ public class OutputFactory {
     }
 
     public OutputSrtTsPassbyBO getOutputSrtTsPassbyBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputSrtTsPassbyBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputSrtTsPassbyBO.class);
+        OutputSrtTsPassbyBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputSrtTsPassbyBO.class);
         if (taskOutput.containsKey("maxbw")){
             outputBO.setMaxbw(taskOutput.getInteger("maxbw")*1000);
         }
@@ -265,12 +265,12 @@ public class OutputFactory {
 
 
     public OutputHlsBO getOutputHlsBO(MissionBO missionBO,JSONObject taskOutput) {
-        OutputHlsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputHlsBO.class);
+        OutputHlsBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputHlsBO.class);
 
         if (outputBO.getPlaylist_name()==null){
            outputBO.setPlaylist_name(IpV4Util.getNameFromUrl(taskOutput.getString("url")));
         }
-        OutputStorageBO outputStorageBO = JSONObject.parseObject(taskOutput.toJSONString(),OutputStorageBO.class);
+        OutputStorageBO outputStorageBO = JSON.parseObject(taskOutput.toJSONString(),OutputStorageBO.class);
 
         String url = taskOutput.getString("url");
         if (url.contains("m3u8")){
@@ -334,11 +334,11 @@ public class OutputFactory {
     }
 
     public OutputDashBO getOutputDashBO(MissionBO missionBO,JSONObject taskOutput) {
-        OutputDashBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputDashBO.class);
+        OutputDashBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputDashBO.class);
         if (outputBO.getPlaylist_name()==null){
             outputBO.setPlaylist_name(IpV4Util.getNameFromUrl(taskOutput.getString("url")));
         }
-        OutputStorageBO outputStorageBO = JSONObject.parseObject(taskOutput.toJSONString(),OutputStorageBO.class);
+        OutputStorageBO outputStorageBO = JSON.parseObject(taskOutput.toJSONString(),OutputStorageBO.class);
 
         String url = taskOutput.getString("url");
         if (url.contains("mpd")){
@@ -351,7 +351,14 @@ public class OutputFactory {
             url = "file";
         }
         outputStorageBO.setUrl(url);
-        outputBO.setStorage(outputStorageBO);
+
+        if (taskOutput.containsKey("storage_array")) {
+            outputBO.setStorage_array(JSON.parseArray(taskOutput.getString("storage_array"),OutputStorageBO.class));
+        }else {
+            ArrayList<OutputStorageBO> outputStorageBOS = new ArrayList<>();
+            outputStorageBOS.add(outputStorageBO);
+            outputBO.setStorage_array(outputStorageBOS);
+        }
 
         List<OutputMediaGroupBO> medias = new ArrayList<>();
 
@@ -400,7 +407,7 @@ public class OutputFactory {
     }
 
     public OutputRtspBO getOutputRtspBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputRtspBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputRtspBO.class);
+        OutputRtspBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputRtspBO.class);
         if (outputBO.getIp()==null){
             outputBO.setIp(IpV4Util.getIpFromUrl(taskOutput.getString("url")));
         }
@@ -421,7 +428,8 @@ public class OutputFactory {
                 Integer pid = null;
                 if (t.getEs_source()!=null){
                     pid = t.getEs_source().getElement_pid();
-                }else if (t.getRaw_source()!=null){
+                }
+                if (t.getRaw_source()!=null){
                     pid = t.getRaw_source().getElement_pid();
                 }
                 String outMediaType = "none";
@@ -456,7 +464,8 @@ public class OutputFactory {
                     if (taskBO.getType().equals("passby")){
                         if (taskBO.getEs_source()!=null){
                             pid = taskBO.getEs_source().getElement_pid();
-                        }else if (taskBO.getRaw_source()!=null){
+                        }
+                        if (taskBO.getRaw_source()!=null){
                             pid = taskBO.getRaw_source().getElement_pid();
                         }
                         outMediaType = TemplateUtil.getInstance().getTaskInputElementType(missionBO.getInputMap().values().stream().collect(Collectors.toList()), pid);
@@ -481,7 +490,7 @@ public class OutputFactory {
     }
 
     public OutputRtpEsBO getOutputRtpEsBO(MissionBO missionBO, JSONObject taskOutput) {
-        OutputRtpEsBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputRtpEsBO.class);
+        OutputRtpEsBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputRtpEsBO.class);
         if (outputBO.getIp()==null){
             outputBO.setIp(IpV4Util.getIpFromUrl(taskOutput.getString("url")));
         }
@@ -514,7 +523,7 @@ public class OutputFactory {
     }
 
     public OutputRtmpBO getOutputRtmpBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputRtmpBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputRtmpBO.class);
+        OutputRtmpBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputRtmpBO.class);
         if (outputBO.getServer_url()==null){
             outputBO.setServer_url(taskOutput.getString("url"));
         }
@@ -532,7 +541,7 @@ public class OutputFactory {
         }else{
             for (int i = 0; i < taskOutput.getJSONArray("medias").size(); i++) {
                 JSONObject mediaObj = taskOutput.getJSONArray("medias").getJSONObject(i);
-                String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getString("track_id"));
+                String encodeId = missionBO.getOutEncodeMap().get(mediaObj.getInteger("track_id"));
                 BaseMediaBO outputMediaBO = new BaseMediaBO();
                 for (int j = 0; j < missionBO.getTask_array().size(); j++) {
                     TaskBO taskBO = missionBO.getTask_array().get(j);
@@ -554,7 +563,7 @@ public class OutputFactory {
     }
 
     public OutputHlsRecordBO getOutputHlsRecordBO(MissionBO missionBO,JSONObject taskOutput) {
-        OutputHlsRecordBO outputBO  = JSONObject.parseObject(taskOutput.toJSONString(),OutputHlsRecordBO.class);
+        OutputHlsRecordBO outputBO  = JSON.parseObject(taskOutput.toJSONString(),OutputHlsRecordBO.class);
         if (outputBO.getName()==null){
             outputBO.setName(taskOutput.getString("url"));
         }
@@ -591,14 +600,14 @@ public class OutputFactory {
     }
 
     public OutputZiXiBO getOutputZiXiBO(MissionBO missionBO, JSONObject taskOutput) throws BaseException {
-        OutputZiXiBO outputBO = JSONObject.parseObject(taskOutput.toJSONString(), OutputZiXiBO.class);
+        OutputZiXiBO outputBO = JSON.parseObject(taskOutput.toJSONString(), OutputZiXiBO.class);
 
         List<OutputProgramBO> outputProgramBOS = new ArrayList();
 
         if (taskOutput.containsKey("programs")) {
             for (int i = 0; i < taskOutput.getJSONArray("programs").size(); i++) {
                 JSONObject outputProgramObj = taskOutput.getJSONArray("programs").getJSONObject(i);
-                OutputProgramBO program = JSONObject.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class);
+                OutputProgramBO program = JSON.parseObject(outputProgramObj.toJSONString(), OutputProgramBO.class);
                 program.setOutputMedias(missionBO, outputProgramObj.getJSONArray("medias"));
                 outputProgramBOS.add(program);
             }
