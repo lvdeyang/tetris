@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.annotation.OprLog;
 import com.sumavision.tetris.capacity.constant.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,21 +31,22 @@ public class AlarmFeignController {
 	 * <b>日期：</b>2020年1月13日 下午2:56:20
 	 * @param String capacityIp 能力ip
 	 */
+	@OprLog
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set/alarmUrl")
 	public Object setAlarmUrl(
-			String capacity) throws Exception{
-		String capacityIp;
-		Integer capacityPort= Constant.TRANSFORM_PORT;
-		if (JSON.isValidObject(capacity)) {
-			JSONObject device=JSON.parseObject(capacity);
-			capacityIp=device.getString("capacityIp");
-			capacityPort=device.getInteger("capacityPort");
+			String capacityIp) throws Exception{
+		String transformIp;
+		Integer transformPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(capacityIp)) {
+			JSONObject device=JSON.parseObject(capacityIp);
+			transformIp=device.getString("capacityIp");
+			transformPort=device.getInteger("capacityPort");
 		}else{
-			capacityIp = capacity;
+			transformIp = capacityIp;
 		}
-		alarmService.setAlarmUrl(capacityIp,capacityPort);
+		alarmService.setAlarmUrl(transformIp,transformPort);
 		return null;
 	}
 

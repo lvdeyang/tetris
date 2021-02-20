@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.package5g.controller.feign;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ public class PackageFeignController {
 	@Autowired
 	private PackageService packageService;
 
+	@OprLog(name = "5G")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
