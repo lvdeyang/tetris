@@ -11,7 +11,7 @@ define(function(){
         tableColumnName:'角色',
         tableColumnOperation:'操作',
         tipHandleRowEdit:'修改角色',
-        tipGotoBindUser:'授权用户',
+        tipHandleBindMenu:'功能授权',
         tipHandleRowDelete:'删除角色',
         dialogCreateSystemRoleGroupTitle:'新建系统角色组',
         placeholderCreateSystemRoleGroupName:'起个名吧！',
@@ -22,13 +22,15 @@ define(function(){
         handleEditSystemRoleGroupCancel:'取消',
         handleEditSystemRoleGroupSubmit:'确定',
         dialogCreateSystemRoleTitle:'新建系统角色',
+        dialogCreateCompanySystemRoleTitle:'新建企业系统角色',
         placeholderCreateSystemRoleName:'起个名吧！',
         handleCreateSystemRoleCancel:'取消',
         handleCreateSystemRoleSubmit:'确定',
         dialogEditSystemRoleTitle:'编辑系统角色',
         placeholderEditSystemRoleName:'改个名吧！',
         handleEditSystemRoleCancel:'取消',
-        handleEditSystemRoleSubmit:'确定'
+        handleEditSystemRoleSubmit:'确定',
+        dialogBindMenuTitle:'功能授权'
     };
 
     return{

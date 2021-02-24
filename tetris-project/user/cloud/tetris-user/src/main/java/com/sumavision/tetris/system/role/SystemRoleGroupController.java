@@ -2,7 +2,9 @@ package com.sumavision.tetris.system.role;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,7 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.organization.CompanyDAO;
+import com.sumavision.tetris.organization.CompanyPO;
 import com.sumavision.tetris.system.role.exception.SystemRoleGroupNotExistException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -29,6 +34,9 @@ public class SystemRoleGroupController {
 	
 	@Autowired
 	private SystemRoleGroupService systemRoleGroupService;
+	
+	@Autowired
+	private CompanyDAO companyDao;
 	
 	/**
 	 * 获取全部系统角色组<br/>
@@ -49,8 +57,20 @@ public class SystemRoleGroupController {
 		List<SystemRoleGroupPO> roles = systemRoleGroupDao.findAllOrderByUpdateTimeDesc();
 		List<SystemRoleGroupVO> view_roles = new ArrayList<SystemRoleGroupVO>();
 		if(roles!=null && roles.size()>0){
+			Set<Long> companyIds = new HashSetWrapper<Long>().add(-1l).getSet();
 			for(SystemRoleGroupPO role:roles){
 				view_roles.add(new SystemRoleGroupVO().set(role));
+				companyIds.add(role.getCompanyId());
+			}
+			List<CompanyPO> companyEntities = companyDao.findAllById(companyIds);
+			if(companyEntities!=null && companyEntities.size()>0){
+				for(CompanyPO companyEntity:companyEntities){
+					for(SystemRoleGroupVO view_role:view_roles){
+						if(companyEntity.getId().equals(view_role.getCompanyId())){
+							view_role.setCompanyName(companyEntity.getName());
+						}
+					}
+				}
 			}
 		}
 		
@@ -63,6 +83,7 @@ public class SystemRoleGroupController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月23日 上午11:34:07
 	 * @param String name 系统角色组名称
+	 * @param Long companyId 企业id
 	 * @return SystemRoleGroupVO 系统角色组
 	 */
 	@JsonBody
@@ -70,6 +91,7 @@ public class SystemRoleGroupController {
 	@RequestMapping(value = "/add")
 	public Object add(
 			String name,
+			Long companyId,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -78,11 +100,19 @@ public class SystemRoleGroupController {
 		
 		SystemRoleGroupPO group = new SystemRoleGroupPO();
 		group.setName(name);
+		if(companyId != null) group.setCompanyId(companyId);
 		group.setAutoGeneration(false);
 		group.setUpdateTime(new Date());
 		systemRoleGroupDao.save(group);
 		
-		return new SystemRoleGroupVO().set(group);
+		SystemRoleGroupVO roleGroup = new SystemRoleGroupVO().set(group);
+		
+		if(companyId != null){
+			CompanyPO companyEntity = companyDao.findById(companyId);
+			roleGroup.setCompanyName(companyEntity.getName());
+		}
+		
+		return roleGroup;
 	}
 	
 	/**

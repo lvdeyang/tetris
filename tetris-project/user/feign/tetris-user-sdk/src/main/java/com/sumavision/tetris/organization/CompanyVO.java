@@ -1,10 +1,13 @@
 package com.sumavision.tetris.organization;
 
-import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+public class CompanyVO{
 
-public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
-
+	private Long id;
+	
+	private String uuid;
+	
+	private String updateTime;
+	
 	/** 公司名称 */
 	private String name;
 	
@@ -41,6 +44,33 @@ public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
 	/** 平台缩略名称 */
 	private String platformShortName;
 	
+	public Long getId() {
+		return id;
+	}
+
+	public CompanyVO setId(Long id) {
+		this.id = id;
+		return this;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public CompanyVO setUuid(String uuid) {
+		this.uuid = uuid;
+		return this;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public CompanyVO setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+		return this;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -146,30 +176,6 @@ public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
 
 	public CompanyVO setPlatformShortName(String platformShortName) {
 		this.platformShortName = platformShortName;
-		return this;
-	}
-
-	@Override
-	public CompanyVO set(CompanyPO entity) throws Exception {
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setSystemRoleId(entity.getSystemRoleId())
-			.setHomeLink(entity.getHomeLink()==null?"":entity.getHomeLink())
-			.setThemeId(entity.getThemeId())
-			.setLogo(entity.getLogo())
-			.setLogoStyle(entity.getLogoStyle())
-			.setLogoShortName(entity.getLogoShortName())
-			.setPlatformFullName(entity.getPlatformFullName())
-			.setPlatformShortName(entity.getPlatformShortName());
-		
-		if(this.getLogo() == null) this.setLogo(CompanyPO.DEFAULT_LOGO);
-		if(this.getLogoStyle() == null) this.setLogoStyle(CompanyPO.DEFAULT_LOGOSTYLE);
-		if(this.getLogoShortName() == null) this.setLogoShortName(CompanyPO.DEFAULT_LOGOSHORTNAME);
-		if(this.getPlatformFullName() == null) this.setPlatformFullName(CompanyPO.DEFAULT_PLATFORMFULLNAME);
-		if(this.getPlatformShortName() == null) this.setPlatformShortName(CompanyPO.DEFAULT_PLATFORMSHORTNAME);
-		
 		return this;
 	}
 

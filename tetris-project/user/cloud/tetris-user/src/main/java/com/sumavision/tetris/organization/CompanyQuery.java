@@ -2,6 +2,7 @@ package com.sumavision.tetris.organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
+import com.sumavision.tetris.system.role.SystemRoleDAO;
+import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 
@@ -22,6 +26,9 @@ import com.sumavision.tetris.system.theme.SystemThemePO;
 @Component
 public class CompanyQuery {
 
+	@Autowired
+	private SystemRoleDAO systemRoleDao;
+	
 	@Autowired
 	private CompanyDAO companyDao;
 	
@@ -42,9 +49,40 @@ public class CompanyQuery {
 		long total = companyDao.count();
 		List<CompanyPO> companies = findAllOrderByUpdateTimeDesc(currentPage, pageSize);
 		List<CompanyVO> view_companies = CompanyVO.getConverter(CompanyVO.class).convert(companies, CompanyVO.class);
+		
+		if(view_companies!=null && view_companies.size()>0){
+			Set<Long> systemRoleIds = new HashSetWrapper<Long>().add(-1l).getSet();
+			for(CompanyVO component:view_companies){
+				if(component.getSystemRoleId() != null) systemRoleIds.add(component.getSystemRoleId());
+			}
+			List<SystemRolePO> systemRoles = systemRoleDao.findByIdIn(systemRoleIds);
+			if(systemRoles!=null && systemRoles.size()>0){
+				for(CompanyVO component:view_companies){
+					for(SystemRolePO systemRole:systemRoles){
+						if(systemRole.getId().equals(component.getSystemRoleId())){
+							component.setSystemRoleName(systemRole.getName());
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", view_companies)
 												   .getMap();
+	}
+	
+	/**
+	 * 查询全部的企业<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 下午2:22:09
+	 * @return List<CompanyVO> 企业列表
+	 */
+	public List<CompanyVO> listAll() throws Exception{
+		List<CompanyPO> companyEntities = companyDao.findAll();
+		return CompanyVO.getConverter(CompanyVO.class).convert(companyEntities, CompanyVO.class);
 	}
 	
 	/**
@@ -90,5 +128,18 @@ public class CompanyQuery {
 			   .setThemeUrl(theme.getUrl());
 		
 		return company;
+	}
+	
+	/**
+	 * 根据id查询企业<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 下午4:54:26
+	 * @param Long id 企业id
+	 * @return CompanyVO 企业基本信息
+	 */
+	public CompanyVO findById(Long id) throws Exception{
+		CompanyPO companyEntity = companyDao.findById(id);
+		return new CompanyVO().set(companyEntity);
 	}
 }

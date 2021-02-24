@@ -14,22 +14,23 @@
                     <div style="width:100%; height:100%; position:relative">
                         <el-scrollbar style="height:100%;">
                             <el-tree
-                                    v-loading="loading.roleGroup"
-                                    ref="roleGroupTree"
-                                    :props = "tree.props"
-                                    :data = "tree.data"
-                                    node-key="uuid"
-                                    :current-node-key="tree.current"
-                                    check-strictly
-                                    :expand-on-click-node="false"
-                                    default-expand-all
-                                    highlight-current
-                                    @current-change="currentTreeNodeChange">
+                                v-loading="loading.roleGroup"
+                                ref="roleGroupTree"
+                                :props = "tree.props"
+                                :data = "tree.data"
+                                node-key="uuid"
+                                :current-node-key="tree.current"
+                                check-strictly
+                                :expand-on-click-node="false"
+                                default-expand-all
+                                highlight-current
+                                @current-change="currentTreeNodeChange">
 
                                 <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px; position:relative; bottom:1px; padding-right:8px;" slot-scope="{node, data}">
                                     <span style="font-size:14px;">
                                          <span class="feather-icon-folder"></span>
                                          <span>{{data.name}}</span>
+                                         <span v-if="data.companyName"> - {{data.companyName}}</span>
                                     </span>
                                     <span>
                                         <el-button v-if="!data.autoGeneration" type="text" size="mini" style="padding:0;" @click.stop="handleEditSystemRoleGroup(node, data)">
@@ -73,11 +74,12 @@
                                             <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                                                 <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                             </el-tooltip>
-                                            <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindUser" placement="bottom-end">
-                                                <el-button type="text" icon="feather-icon-user" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoBindUser(scope)"></el-button>
+                                            <el-tooltip class="item" effect="dark" :content="i18n.tipHandleBindMenu" placement="bottom-end">
+                                                <el-button type="text" icon="icon-key" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="handleBindMenu(scope)"></el-button>
                                             </el-tooltip>
                                             <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
-                                                <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                                <el-button v-if="scope.row.autoGeneration" type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" disabled></el-button>
+                                                <el-button v-else type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                             </el-tooltip>
                                         </template>
                                     </el-table-column>
@@ -108,6 +110,21 @@
 
             <el-input v-model="dialog.createSystemRoleGroup.name" :placeholder="i18n.placeholderCreateSystemRoleGroupName"></el-input>
 
+            <el-button type="text" :icon="dialog.createSystemRoleGroup.companyShow?'el-icon-arrow-down':'el-icon-arrow-right'" @click="handleCompanyShowClick">创建企业角色组</el-button>
+
+            <el-table
+                ref="companyTable"
+                v-if="dialog.createSystemRoleGroup.companyShow"
+                :data="dialog.createSystemRoleGroup.companys"
+                highlight-current-row
+                @current-change="handleCompanyChange"
+                style="width:100%;">
+                <el-table-column
+                    prop="name"
+                    label="公司名称">
+                </el-table-column>
+            </el-table>
+
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.createSystemRoleGroup.visible = false">{{i18n.handleCreateSystemRoleGroupClose}}</el-button>
                 <el-button size="medium" type="primary" @click="handleCreateSystemRoleGroupSubmit" :loading="dialog.createSystemRoleGroup.loading">{{i18n.handleCreateSystemRoleGroupSubmit}}</el-button>
@@ -133,7 +150,7 @@
 
         <!-- 添加系统角色 -->
         <el-dialog
-                :title="i18n.dialogCreateSystemRoleTitle"
+                :title="tree.current.companyId?i18n.dialogCreateCompanySystemRoleTitle:i18n.dialogCreateSystemRoleTitle"
                 :visible.sync="dialog.createSystemRole.visible"
                 width="500px"
                 :before-close="handleCreateSystemRoleClose">
@@ -161,6 +178,42 @@
                 <el-button size="medium" type="primary" @click="handleEditSystemRoleSubmit" :loading="dialog.editSystemRole.loading">{{i18n.handleEditSystemRoleSubmit}}</el-button>
             </span>
 
+        </el-dialog>
+
+        <!-- 绑定菜单 -->
+        <el-dialog
+                :title="i18n.dialogBindMenuTitle"
+                :visible.sync="dialog.bindMenu.visible"
+                width="500px"
+                :before-close="handleBindMenuClose">
+
+            <div style="max-height:600px; overflow-y:auto;">
+
+                <el-tree
+                    v-if="dialog.bindMenu.visible"
+                    ref="menuTree"
+                    :props = "dialog.bindMenu.props"
+                    :data = "dialog.bindMenu.menus"
+                    show-checkbox
+                    node-key="id"
+                    :default-checked-keys="dialog.bindMenu.authorized"
+                    :expand-on-click-node="false"
+                    @check-change="handleMenuCheckChange"
+                    default-expand-all>
+
+                    <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="scope">
+                        <span style="font-size:14px;">
+                             <span :class="scope.data.icon"></span>
+                             <span>{{scope.data.title}}</span>
+                            <span v-if="scope.data.id == dialog.bindMenu.homePage" style="color:#F56C6C"> - 首页</span>
+                        </span>
+                        <span v-if="!scope.data.isGroup && scope.node.checked">
+                            <el-button class="set-home-page-button" icon="icon-home" type="text" @click="handleSetHomePage(scope)"></el-button>
+                        </span>
+                    </span>
+
+                </el-tree>
+            </div>
         </el-dialog>
 
     </template>

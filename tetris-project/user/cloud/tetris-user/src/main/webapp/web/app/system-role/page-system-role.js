@@ -59,6 +59,9 @@ define([
                     createSystemRoleGroup:{
                         visible:false,
                         name:'',
+                        companyShow:false,
+                        companys:[],
+                        companyId:'',
                         loading:false
                     },
                     editSystemRoleGroup:{
@@ -76,6 +79,19 @@ define([
                         visible:false,
                         id:'',
                         name:'',
+                        loading:false
+                    },
+                    bindMenu:{
+                        visible:false,
+                        menus:[],
+                        props:{
+                            label: 'title',
+                            children: 'sub',
+                            isLeaf: 'isLeaf'
+                        },
+                        authorized:[],
+                        homePage:'',
+                        role:'',
                         loading:false
                     }
                 }
@@ -116,13 +132,43 @@ define([
                     self.dialog.createSystemRoleGroup.visible = false;
                     self.dialog.createSystemRoleGroup.name = '';
                     self.dialog.createSystemRoleGroup.loading = false;
+                    self.handleCompanyClose();
+                },
+                handleCompanyShowClick:function(){
+                    var self = this;
+                    if(self.dialog.createSystemRoleGroup.companyShow){
+                        self.handleCompanyClose();
+                        return;
+                    }
+                    ajax.post('/company/list/all', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.createSystemRoleGroup.companys.push(data[i]);
+                            }
+                        }
+                        self.dialog.createSystemRoleGroup.companyShow = true;
+                    })
+                },
+                handleCompanyClose:function(){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.companys.splice(0, self.dialog.createSystemRoleGroup.companys.length);
+                    self.dialog.createSystemRoleGroup.companyId = '';
+                    self.dialog.createSystemRoleGroup.companyShow = false;
+                },
+                handleCompanyChange:function(currentRow){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.companyId = currentRow.id;
                 },
                 handleCreateSystemRoleGroupSubmit:function(){
                     var self = this;
                     self.dialog.createSystemRoleGroup.loading = true;
-                    ajax.post('/system/role/group/add', {
+                    var params = {
                         name:self.dialog.createSystemRoleGroup.name
-                    }, function(data, status){
+                    };
+                    if(self.dialog.createSystemRoleGroup.companyId){
+                        params.companyId = self.dialog.createSystemRoleGroup.companyId;
+                    }
+                    ajax.post('/system/role/group/add', params, function(data, status){
                         self.dialog.createSystemRoleGroup.loading = false;
                         if(status !== 200) return;
                         self.tree.data.splice(0, 0, data);
@@ -246,11 +292,16 @@ define([
                 },
                 handleCreateSystemRoleSubmit:function(){
                     var self = this;
-                    self.dialog.createSystemRole.loading = true;
-                    ajax.post('/system/role/add', {
+                    var params = {
                         groupId:self.tree.current.id,
-                        name:self.dialog.createSystemRole.name
-                    }, function(data, status){
+                        name:self.dialog.createSystemRole.name,
+                        createType:self.tree.current.companyId?'COMPANY_ADMIN':'SYSTEM_ADMIN'
+                    };
+                    if(self.tree.current.companyId){
+                        params.companyId = self.tree.current.companyId
+                    }
+                    self.dialog.createSystemRole.loading = true;
+                    ajax.post('/system/role/add', params, function(data, status){
                         self.dialog.createSystemRole.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
@@ -288,10 +339,111 @@ define([
                     self.dialog.editSystemRole.name = '';
                     self.dialog.editSystemRole.loading = false;
                 },
-                gotoBindUser:function(scope){
+                handleBindMenu:function(scope){
                     var self = this;
                     var row = scope.row;
-                    window.location.hash = '#/page-bind-user/' + row.id + '/' + row.name + '/system';
+                    var params = {roleId:row.id};
+                    if(self.tree.current.companyId){
+                        params.companyId = self.tree.current.companyId;
+                        params.handleCompanyQuery = true;
+                    }else{
+                        params.handleCompanyQuery = false;
+                    }
+                    ajax.post('/menu/feign/query/menus/by/role/id', params, function(data){
+                        var menus = data.menus;
+                        var authorized = data.authorized;
+                        if(menus && menus.length>0){
+                            for(var i=0; i<menus.length; i++){
+                                self.dialog.bindMenu.menus.push(menus[i]);
+                            }
+                        }
+                        if(authorized && authorized.length>0){
+                            for(var i=0; i<authorized.length; i++){
+                                self.dialog.bindMenu.authorized.push(authorized[i]);
+                            }
+                        }
+                        self.dialog.bindMenu.role = row;
+                        if(data.homePage){
+                            self.dialog.bindMenu.homePage = data.homePage;
+                        }else{
+                            self.dialog.bindMenu.homePage = '';
+                        }
+                        self.dialog.bindMenu.visible = true;
+                    });
+                },
+                handleSetHomePage:function(scope){
+                    var self = this;
+                    var data = scope.data;
+
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['是否切换当前首页?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/system/role/menu/permission/feign/set/home/page', {
+                                    roleId:self.dialog.bindMenu.role.id,
+                                    menuId:data.id
+                                }, function(response, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    self.dialog.bindMenu.homePage = data.id;
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
+                handleBindMenuClose:function(){
+                    var self = this;
+                    self.dialog.bindMenu.visible = false;
+                    self.dialog.bindMenu.menus.splice(0, self.dialog.bindMenu.menus.length);
+                    self.dialog.bindMenu.authorized.splice(0, self.dialog.bindMenu.authorized.length);
+                    self.dialog.bindMenu.role = '';
+                },
+                handleMenuCheckChange:function(data, checked){
+                    var self = this;
+                    if(data.isGroup) return;
+                   /* if(data.autoGeneration){
+                        self.$refs.menuTree.setChecked(data, !checked);
+                        return false;
+                    }*/
+                    if(checked){
+                        ajax.post('/system/role/menu/permission/feign/add', {
+                            roleId:self.dialog.bindMenu.role.id,
+                            menuId:data.id
+                        }, function(){
+                            self.$message({
+                                type:'success',
+                                message:'操作成功'
+                            });
+                        });
+                    }else{
+                        console.log(data);
+                        ajax.post('/system/role/menu/permission/feign/remove', {
+                            roleId:self.dialog.bindMenu.role.id,
+                            menuId:data.id
+                        }, function(){
+                            if(data.id === self.dialog.bindMenu.homePage) self.dialog.bindMenu.homePage = '';
+                            self.$message({
+                                type:'success',
+                                message:'操作成功'
+                            });
+                        });
+                    }
                 },
                 handleRowDelete:function(scope){
                     var self = this;

@@ -53,6 +53,11 @@ define([
                         rows:[],
                         current:''
                     },
+                    systemRole:{
+                        visible:false,
+                        rows:[],
+                        current:''
+                    },
                     createUser:{
                         visible:false,
                         nickname:'',
@@ -66,7 +71,9 @@ define([
                         company:{
                             create:1,
                             id:'',
-                            name:''
+                            name:'',
+                            systemRoleId:'',
+                            systemRoleName:''
                         },
                         loading:false
                     },
@@ -170,6 +177,58 @@ define([
                         self.dialog.createUser.company.name = '';
                     }
                 },
+                selectSystemRole:function(f){
+                    var self = this;
+                    if(self.dialog.systemRole.visible) return;
+                    var params = {createType:f};
+                    if(f === 'COMPANY_ADMIN'){
+                        if(!self.dialog.createUser.company.id){
+                            self.$message({
+                                type:'error',
+                                message:'请先选择企业'
+                            });
+                            return;
+                        }
+                        params.companyId = self.dialog.createUser.company.id;
+                    }
+                    ajax.post('/system/role/query/by/create/type', params, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.systemRole.rows.push(data[i]);
+                            }
+                        }
+                        self.dialog.systemRole.visible = true;
+                        self.$nextTick(function(){
+                            for(var i=0; i<self.dialog.systemRole.rows.length; i++){
+                                if(self.dialog.systemRole.rows[i].id == self.dialog.createUser.company.systemRoleId){
+                                    self.$refs.systemRoleTable.setCurrentRow(self.dialog.systemRole.rows[i]);
+                                    break;
+                                }
+                            }
+                        });
+                    });
+                },
+                systemRoleKey:function(row){
+                    return row.id;
+                },
+                systemRoleChange:function(current){
+                    var self = this;
+                    self.dialog.systemRole.current = current;
+                },
+                handleSelectSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.systemRole.visible = false;
+                    self.dialog.systemRole.rows.splice(0, self.dialog.systemRole.rows.length);
+                    self.dialog.systemRole.current = '';
+                },
+                handleSelectSystemRoleSelected:function(){
+                    var self = this;
+                    if(self.dialog.systemRole.current){
+                        self.dialog.createUser.company.systemRoleId = self.dialog.systemRole.current.id;
+                        self.dialog.createUser.company.systemRoleName = self.dialog.systemRole.current.name;
+                    }
+                    self.handleSelectSystemRoleClose();
+                },
                 handleCreateUserClose:function(){
                     var self = this;
                     self.dialog.createUser.nickname = '';
@@ -202,6 +261,9 @@ define([
                         params['companyName'] = self.dialog.createUser.company.name;
                     }else if(self.dialog.createUser.company.create == 0){
                         params['companyId'] = self.dialog.createUser.company.id;
+                    }
+                    if(self.dialog.createUser.company.systemRoleId){
+                        params['systemRoleId'] = self.dialog.createUser.company.systemRoleId;
                     }
                     ajax.post('/user/add', params, function(data, status){
                         self.dialog.createUser.loading = false;

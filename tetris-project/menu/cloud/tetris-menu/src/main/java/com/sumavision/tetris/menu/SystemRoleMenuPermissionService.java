@@ -134,4 +134,46 @@ public class SystemRoleMenuPermissionService {
 		return new SystemRoleMenuPermissionVO().set(permission, roles.get(0));
 	}
 	
+	/**
+	 * 系统角色绑定菜单<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午6:07:38
+	 * @param Long roleId 角色id
+	 * @param Long menuId 菜单id
+	 */
+	public void add(Long roleId, Long menuId) throws Exception{
+		bind(menuId, new ArrayListWrapper<SystemRoleVO>().add(new SystemRoleVO().setId(roleId.toString())).getList());
+	}
+	
+	/**
+	 * 系统角色解绑菜单<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午6:07:38
+	 * @param Long roleId 角色id
+	 * @param Long menuId 菜单id
+	 */
+	public void remove(Long roleId, Long menuId) throws Exception{
+		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findByMenuIdAndRoleIdAndAutoGeneration(menuId, roleId.toString(), false);
+		if(permission != null){
+			systemRoleMenuPermissionDao.delete(permission);
+		}
+	}
+	
+	/**
+	 * 设置首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午6:07:38
+	 * @param Long roleId 角色id
+	 * @param Long menuId 菜单id
+	 */
+	public void setHomePage(Long roleId, Long menuId) throws Exception{
+		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findByMenuIdAndRoleId(menuId, roleId.toString());
+		if(permission != null){
+			setHomePage(permission.getId());
+		}
+	}
+	
 }

@@ -64,13 +64,25 @@ define([
                 ajax.post('/system/role/feign/list/with/group/by/except/ids', {
                     roleIds:except? $.toJSON(except):null
                 }, function(data){
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.tree.data.push(data[i]);
-                        }
-                    }
-                    self.dialog.visible = true;
+                    self._open(data);
                 });
+            },
+            open:function(url, except){
+                var self = this;
+                ajax.post(url, {
+                    roleIds:except? $.toJSON(except):null
+                }, function(data){
+                    self._open(data);
+                });
+            },
+            _open:function(data){
+                var self = this;
+                if(data && data.length>0){
+                    for(var i=0; i<data.length; i++){
+                        self.tree.data.push(data[i]);
+                    }
+                }
+                self.dialog.visible = true;
             },
             setBuffer:function(data){
                 var self = this;

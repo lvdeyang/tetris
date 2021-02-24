@@ -11,6 +11,17 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface MenuDAO extends BaseDAO<MenuPO>{
 
 	/**
+	 * 查询菜单下的直接子菜单，带例外<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午4:14:56
+	 * @param Long parentId 父菜单id
+	 * @param Collection<Long> ids 例外菜单id
+	 * @return List<MenuPO> 子菜单列表
+	 */
+	public List<MenuPO> findByParentIdAndIdNotIn(Long parentId, Collection<Long> ids);
+	
+	/**
 	 * 获取用户有权限的菜单，并根据显示序号排序<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

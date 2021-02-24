@@ -57,15 +57,7 @@ public class MenuController {
 		
 		//TODO 判断访问权限
 		
-		List<MenuPO> totalMenus = menuDao.findAll();
-		
-		//重新排序
-		Collections.sort(totalMenus, menuComparator);
-		
-		List<MenuVO> rootMenus = menuQuery.generateRootMenus(totalMenus);
-		menuQuery.packMenuTree(rootMenus, totalMenus);
-		
-		return rootMenus;
+		return menuQuery.listTree();
 	}
 	
 	/**
@@ -119,7 +111,8 @@ public class MenuController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月17日 上午9:18:21
 	 * @param @PathVariable Long id 菜单id
-	 * @return List<MenuVO> 删除的所有菜单
+	 * @return deletedMenus List<MenuVO> 删除的所有菜单
+	 * @return parentMenuChanged boolean 父菜单是否变成叶子节点
 	 */
 	@JsonBody
 	@ResponseBody
@@ -132,9 +125,7 @@ public class MenuController {
 		
 		//TODO 权限校验
 		
-		List<MenuVO> menus = menuService.remove(id);
-		
-		return menus;
+		return menuService.remove(id);
 	}
 	
 	/**

@@ -34,6 +34,8 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.organization.CompanyUserPermissionDAO;
+import com.sumavision.tetris.organization.CompanyUserPermissionPO;
 import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
@@ -70,6 +72,9 @@ public class UserQuery {
 	
 	@Autowired
 	private UserTagsDAO userTagsDAO;
+	
+	@Autowired
+	private CompanyUserPermissionDAO companyUserPermissionDao;
 	
 	/**
 	 * 检查用户号码<br/>
@@ -122,6 +127,30 @@ public class UserQuery {
 			return new UserVO().set(user);
 		}
 		return null;
+	}
+	
+	/**
+	 * 查询用户分类<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 上午9:47:55
+	 * @param Long userId 用户id
+	 * @return String 用户类型
+	 */
+	public String queryUserClassify(Long userId) throws Exception{
+		UserPO userEntity = userDao.findById(userId);
+		if(!UserClassify.COMPANY.equals(userEntity.getClassify())) return userEntity.getClassify().toString();
+		List<CompanyUserPermissionPO> permissionEntities = companyUserPermissionDao.findByUserId(userId.toString());
+		Long companyId = null;
+		if(permissionEntities!=null && permissionEntities.size()>0){
+			companyId = permissionEntities.get(0).getCompanyId();
+		}
+		CompanyPO company = companyDao.findById(companyId);
+		if(company.getUserId().equals(userId.toString())){
+			return "COMPANY_ADMIN";
+		}else{
+			return "COMPANY_USER";
+		}
 	}
 	
 	/**
