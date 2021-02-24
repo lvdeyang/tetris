@@ -41,6 +41,9 @@ public class CompanyPO extends AbstractBasePO{
 	/** 申请人 */
 	private String userId;
 	
+	/** 系统角色授权 */
+	private Long systemRoleId;
+	
 	/** 皮肤id */
 	private Long themeId;
 	
@@ -84,6 +87,15 @@ public class CompanyPO extends AbstractBasePO{
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	@Column(name = "SYSTEM_ROLE_ID")
+	public Long getSystemRoleId() {
+		return systemRoleId;
+	}
+
+	public void setSystemRoleId(Long systemRoleId) {
+		this.systemRoleId = systemRoleId;
 	}
 
 	@Column(name = "THEME_ID")

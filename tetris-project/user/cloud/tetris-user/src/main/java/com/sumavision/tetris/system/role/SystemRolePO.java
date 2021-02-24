@@ -33,6 +33,9 @@ public class SystemRolePO extends AbstractBasePO{
 	/** 角色类型 */
 	private SystemRoleType type;
 	
+	/** 系统角色创建者类型 */
+	private SystemRoleCreateType createType;
+	
 	/** 业务角色隶属企业id */
 	private Long companyId;
 
@@ -71,6 +74,16 @@ public class SystemRolePO extends AbstractBasePO{
 
 	public void setType(SystemRoleType type) {
 		this.type = type;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CREATE_TYPE")
+	public SystemRoleCreateType getCreateType() {
+		return createType;
+	}
+
+	public void setCreateType(SystemRoleCreateType createType) {
+		this.createType = createType;
 	}
 
 	@Column(name = "COMPANY_ID")

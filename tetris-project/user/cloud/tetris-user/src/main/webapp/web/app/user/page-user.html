@@ -91,9 +91,7 @@
 
         <el-table ref="companyTable" :data="dialog.company.rows" :row-key="companyKey" highlight-current-row
           @current-change="companyChange" style="width:100%">
-          </el-table-column>
-          <el-table-column :label="i18n.tableCompanyColumnName" prop="name">
-          </el-table-column>
+          <el-table-column :label="i18n.tableCompanyColumnName" prop="name"/>
         </el-table>
 
         <div style="height:50px; width:100%; box-sizing:border-box;">
@@ -106,6 +104,26 @@
         <div slot="footer" class="dialog-footer">
           <el-button size="medium" @click="dialog.company.visible = false">{{i18n.cancelCompanySelected}}</el-button>
           <el-button size="medium" type="primary" @click="companySelected">{{i18n.handleCompanySelected}}</el-button>
+        </div>
+      </el-dialog>
+
+      <el-dialog :title="i18n.dialogSelectSystemRoleTitle" :visible.sync="dialog.systemRole.visible" width="600px"
+                 append-to-body :before-close="handleSelectSystemRoleClose">
+
+        <el-table
+            ref="systemRoleTable"
+            :data="dialog.systemRole.rows"
+            :current-row-key="dialog.createUser.company.systemRoleId"
+            :row-key="systemRoleKey"
+            highlight-current-row
+            @current-change="systemRoleChange"
+            style="width:100%">
+          <el-table-column :label="i18n.tableSelectSystemRoleColumnName" prop="name"/>
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button size="medium" @click="handleSelectSystemRoleClose">{{i18n.cancelSystemRoleSelected}}</el-button>
+          <el-button size="medium" type="primary" @click="handleSelectSystemRoleSelected">{{i18n.handleSystemRoleSelected}}</el-button>
         </div>
       </el-dialog>
 
@@ -151,6 +169,12 @@
             <el-input v-else v-model="dialog.createUser.company.name" readonly
               :placeholder="i18n.placeholderCreateUserCompanyName" @focus="selectCompany"></el-input>
           </el-form-item>
+          <el-form-item v-if="dialog.createUser.classify==='企业用户'" :label="i18n.labelSelectSystemRole">
+            <el-input readonly v-if="dialog.createUser.company.create==1" v-model="dialog.createUser.company.systemRoleName"
+                      :placeholder="i18n.placeholderSelectSystemRoleByAdmin" @focus="selectSystemRole('SYSTEM_ADMIN')"></el-input>
+            <el-input readonly v-else v-model="dialog.createUser.company.systemRoleName"
+                      :placeholder="i18n.placeholderSelectSystemRoleByCompany" @focus="selectSystemRole('COMPANY_ADMIN')"></el-input>
+          </el-form-item>
         </el-form>
       </div>
 
@@ -161,6 +185,8 @@
       </span>
 
     </el-dialog>
+
+
 
     <!-- 修改流程对话框 -->
     <el-dialog :title="i18n.dialogEditUserTitle" :visible.sync="dialog.editUser.visible" width="500px"

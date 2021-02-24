@@ -62,6 +62,7 @@ import com.sumavision.tetris.user.exception.UserColumnLengthException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
+import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
 /**
@@ -303,6 +304,7 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String companyName 公司名称
+	 * @param Long systemRoleId 系统角色id
 	 * @param String remark 备注
 	 * @param String loginIp 绑定ip登录
 	 * @param JSONString bindRoles 业务角色id列表
@@ -319,6 +321,7 @@ public class UserService{
             Integer level,
             String classify,
             String companyName,
+            Long systemRoleId,
             String remark,
             String loginIp,
             Boolean isLoginIp,
@@ -331,7 +334,7 @@ public class UserService{
 		SystemRoleVO adminRole = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
-			company = companyService.add(companyName, user);
+			company = companyService.add(companyName, user, systemRoleId);
 			
 			//处理公司管理员
 			adminRole = businessRoleService.add(company.getId(), "企业管理员", true);
@@ -339,7 +342,7 @@ public class UserService{
 			//用户授权
 			//1：授权默认的系统角色
 			//2：授权公司管理员业务角色
-			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).add(Long.valueOf(adminRole.getId())).getList());
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(systemRoleId).add(Long.valueOf(adminRole.getId())).getList());
 		}
 		
 		//发布用户注册事件
@@ -382,6 +385,7 @@ public class UserService{
 	 * @param String mail 邮箱
 	 * @param Integer level 用户级别
 	 * @param String companyId 公司id
+	 * @param Long systemRoleId 系统角色id
 	 * @param String remark 备注
      * @param String loginIp 绑定ip登录
      * @param JSONString bindRoles 绑定业务角色
@@ -398,6 +402,7 @@ public class UserService{
             Integer level,
             String classify,
             Long companyId,
+            Long systemRoleId,
             String remark,
             String loginIp,
             Boolean isLoginIp,
@@ -416,7 +421,7 @@ public class UserService{
 			//加入公司
 			companyUserPermissionService.add(company, user);
 			//绑定用户和系统角色
-			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(systemRoleId).getList());
 		}
 		
 		//发布用户注册事件
@@ -493,7 +498,12 @@ public class UserService{
 		
 		userQuery.checkPassword(password);
 		
-		UserPO user = userDao.findByUsername(username);
+		UserPO user = userDao.findByUserno(userno);
+		if(user != null){
+			throw new UsernoAlreadyExistInSystemException(new ArrayListWrapper<String>().add(userno).getList());
+		}
+		
+		user = userDao.findByUsername(username);
 		if(user != null){
 			throw new UsernameAlreadyExistException(username);
 		}

@@ -28,10 +28,28 @@ public class MenuVO {
 	/** 菜单图标微调 */
 	private String style;
 	
-	/** 是否是当前菜�? */
+	/** 是否是当前菜菜单 */
 	private boolean active;
 	
-	/** 子菜�? */
+	/** 是否是菜单组 */
+	private boolean isGroup;
+	
+	/** 是否是叶子节点 */
+	private boolean isLeaf;
+	
+	/** 父菜单id */
+	private Long parentId;
+	
+	/** 显示顺序 */
+	private int serial;
+	
+	/** 是否是自动生成的 */
+	private boolean autoGeneration;
+	
+	/** 与 autoGeneration 保持同步*/
+	private boolean disabled;
+	
+	/** 子菜菜单 */
 	private List<MenuVO> sub;
 	
 	public Long getId() {
@@ -103,6 +121,60 @@ public class MenuVO {
 
 	public MenuVO setActive(boolean active) {
 		this.active = active;
+		return this;
+	}
+
+	public boolean isGroup() {
+		return isGroup;
+	}
+
+	public MenuVO setGroup(boolean isGroup) {
+		this.isGroup = isGroup;
+		return this;
+	}
+
+	public boolean isLeaf() {
+		return isLeaf;
+	}
+
+	public MenuVO setLeaf(boolean isLeaf) {
+		this.isLeaf = isLeaf;
+		return this;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public MenuVO setParentId(Long parentId) {
+		this.parentId = parentId;
+		return this;
+	}
+
+	public int getSerial() {
+		return serial;
+	}
+
+	public MenuVO setSerial(int serial) {
+		this.serial = serial;
+		return this;
+	}
+
+	public boolean isAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public MenuVO setAutoGeneration(boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
+		return this;
+	}
+
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	public MenuVO setDisabled(boolean disabled) {
+		this.disabled = disabled;
 		return this;
 	}
 

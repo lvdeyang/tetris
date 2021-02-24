@@ -26,6 +26,7 @@ define([
         var roleId = p.id;
         var roleName = p.name;
         var type = p.type;
+        var createType = p.createType;
 
         var activeId = '';
         if(type === 'system'){
@@ -81,7 +82,11 @@ define([
                         exceptIds.push(rows[i].userId);
                     }
                     if(type === 'system'){
-                        self.$refs.userDialog.open('/user/list/with/except', exceptIds);
+                        if(createType === 'system-admin'){
+                            self.$refs.userDialog.open('/user/list/with/except', exceptIds);
+                        }else if(createType === 'company-admin'){
+                            self.$refs.userDialog.open('/user/list/company/user/with/except', exceptIds);
+                        }
                     }else if(type === 'business'){
                         self.$refs.userDialog.open('/user/list/company/user/with/except', exceptIds);
                     }
@@ -237,7 +242,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId + '/:id/:name/:type',
+        path:'/' + pageId + '/:id/:name/:type/:createType',
         component:{
             template:'<div id="' + pageId + '" class="page-wrapper"></div>'
         },

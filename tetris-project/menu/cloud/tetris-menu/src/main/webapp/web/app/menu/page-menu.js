@@ -156,9 +156,12 @@ define([
                 treeNodeDelete:function(node, data){
                     var self = this;
                     self.loading.menu = true;
-                    ajax.post('/menu/remove/' + data.id, null, function(menus, status){
+                    ajax.post('/menu/remove/' + data.id, null, function(resp, status){
                         self.loading.menu = false;
                         if(status !== 200) return;
+                        if(resp.parentMenuChanged){
+                            node.parent.data.isGroup = false;
+                        }
                         self.$refs.menuTree.remove(data);
                         self.currentNode(self.tree.data[0]);
                     }, null, ajax.NO_ERROR_CATCH_CODE);
