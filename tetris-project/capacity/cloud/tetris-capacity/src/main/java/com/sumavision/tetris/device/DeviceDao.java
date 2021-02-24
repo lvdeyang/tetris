@@ -32,6 +32,11 @@ public interface DeviceDao extends BaseDAO<DevicePO> {
 	@Query(value = "update DevicePO d set d.funUnitStatus = ?1 where d.deviceIp = ?2")
 	public Integer updateFunUnitStatusByIp(FunUnitStatus status, String ip);
 
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Modifying(clearAutomatically = true)
+	@Query(value = "update DevicePO d set d.funUnitStatus = ?1 where d.deviceIp = ?2 and d.devicePort=?3")
+	public Integer updateFunUnitStatusByIpAndPort(FunUnitStatus status, String ip,Integer port);
+
 	List<DevicePO> findByFunUnitStatus(FunUnitStatus funUnitStatus);
 
 

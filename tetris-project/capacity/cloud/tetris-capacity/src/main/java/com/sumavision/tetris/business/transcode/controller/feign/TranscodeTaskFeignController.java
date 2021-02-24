@@ -1,7 +1,9 @@
 package com.sumavision.tetris.business.transcode.controller.feign;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.annotation.OprLog;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.business.common.service.TaskModifyService;
@@ -152,7 +154,18 @@ public class TranscodeTaskFeignController {
 			String mode,
 			String capacityIp,
 			HttpServletRequest request) throws Exception{
-		transcodeTaskService.changeBackUp(inputId, index,mode, capacityIp);
+		String transformIp;
+		Integer transformPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(capacityIp)) {
+			JSONObject device=JSON.parseObject(capacityIp);
+			transformIp=device.getString("capacityIp");
+			transformPort=device.getInteger("capacityPort");
+		}else{
+			transformIp = capacityIp;
+		}
+		TransformModule transformModule = new TransformModule(transformIp,transformPort);
+
+		transcodeTaskService.changeBackUp(inputId, index,mode, transformModule);
 
 		return null;
 	}
@@ -331,7 +344,18 @@ public class TranscodeTaskFeignController {
 			String ip,
 			String alarmlist,
 			HttpServletRequest request) throws Exception{
-		transcodeTaskService.putAlarmList(ip, alarmlist);
+		String transformIp;
+		Integer transformPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(ip)) {
+			JSONObject device=JSON.parseObject(ip);
+			transformIp=device.getString("capacityIp");
+			transformPort=device.getInteger("capacityPort");
+		}else{
+			transformIp = ip;
+		}
+		TransformModule transformModule = new TransformModule(transformIp,transformPort);
+
+		transcodeTaskService.putAlarmList(transformModule, alarmlist);
 		return null;
 	}
 
@@ -348,7 +372,19 @@ public class TranscodeTaskFeignController {
 	@RequestMapping(value = "/remove/all")
 	public Object removeAll(
 			String ip) throws Exception{
-		taskService.removeAll(ip);
+		String transformIp;
+		Integer transformPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(ip)) {
+			JSONObject device=JSON.parseObject(ip);
+			transformIp=device.getString("capacityIp");
+			transformPort=device.getInteger("capacityPort");
+		}else{
+			transformIp = ip;
+		}
+		TransformModule transformModule = new TransformModule(transformIp,transformPort);
+
+
+		taskService.removeAll(transformModule);
 		return null;
 	}
 
@@ -395,8 +431,16 @@ public class TranscodeTaskFeignController {
 	public Object getPlatform(
 			String ip,
 			HttpServletRequest request) throws Exception{
-		Integer port = Constant.TRANSFORM_PORT;
-		String response = transcodeTaskService.getPlatform(ip,port);
+		String transformIp;
+		Integer transformPort= Constant.TRANSFORM_PORT;
+		if (JSON.isValidObject(ip)) {
+			JSONObject device=JSON.parseObject(ip);
+			transformIp=device.getString("capacityIp");
+			transformPort=device.getInteger("capacityPort");
+		}else{
+			transformIp = ip;
+		}
+		String response = transcodeTaskService.getPlatform(transformIp,transformPort);
 		return response;
 	}
 

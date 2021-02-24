@@ -46,6 +46,7 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public List<TaskInputPO> findByType(BusinessType type);
 
 	public List<TaskInputPO> findByTypeAndCapacityIp(BusinessType type, String capacityIp);
+	public List<TaskInputPO> findByTypeAndCapacityIpAndCapacityPort(BusinessType type, String capacityIp,Integer port);
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Modifying(clearAutomatically = true)

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
@@ -303,7 +304,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -316,7 +317,7 @@ public class TransformService {
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {
@@ -383,7 +384,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp,capacityPort);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -396,7 +397,7 @@ public class TransformService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {
@@ -502,10 +503,10 @@ public class TransformService {
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
 		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 		//创建输出
-		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest, output.getCapacityIp(),output.getCapacityPort());
+		CreateOutputsResponse outputResponse = capacityService.createOutputsWithMsgId(outputsRequest,new TransformModule(output.getCapacityIp(),output.getCapacityPort()));
 		
 		//创建输出返回处理 -- 回滚
-		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, output.getCapacityIp(), output.getCapacityPort());
+		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, new TransformModule(output.getCapacityIp(),output.getCapacityPort()));
 		
 		outputs.addAll(outputBOs);
 		
@@ -557,7 +558,7 @@ public class TransformService {
 				delete.getOutput_array().add(idRequest);
 			}
 
-			capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp(),taskPO.getCapacityPort());
+			capacityService.deleteOutputsWithMsgId(delete,new TransformModule(taskPO.getCapacityIp(),taskPO.getCapacityPort()));
 			
 			taskPO.setOutput(JSON.toJSONString(outputs));
 			taskOutputDao.save(taskPO);
@@ -589,7 +590,7 @@ public class TransformService {
 			delete.getOutput_array().add(idRequest);
 		}
 
-		capacityService.deleteOutputsWithMsgId(delete, taskPO.getCapacityIp(),taskPO.getCapacityPort());
+		capacityService.deleteOutputsWithMsgId(delete,new TransformModule(taskPO.getCapacityIp(),taskPO.getCapacityPort()));
 		
 		taskPO.setOutput(null);
 		taskOutputDao.save(taskPO);

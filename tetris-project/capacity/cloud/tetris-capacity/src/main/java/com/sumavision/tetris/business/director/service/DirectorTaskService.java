@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.director.service;
 
 import java.util.*;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.director.vo.*;
@@ -247,7 +248,7 @@ public class DirectorTaskService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 			
-			capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest,new TransformModule(output.getCapacityIp()));
 			
 		}
 		
@@ -376,7 +377,7 @@ public class DirectorTaskService {
 					delete.getOutput_array().add(idRequest);
 				}
 
-				capacityService.deleteOutputsWithMsgId(delete, capacityProps.getIp(),capacityProps.getPort());
+				capacityService.deleteOutputsWithMsgId(delete,new TransformModule());
 				
 				output.setUpdateTime(new Date());
 				output.setOutput(JSON.toJSONString(outputs));
@@ -1206,7 +1207,7 @@ public class DirectorTaskService {
 						request.getOutput_array().addAll(requestBO.getRequest().getOutput_array());
 					}
 				}
-				AllResponse allResponse = capacityService.createAllAddMsgId(request, ip, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(request,new TransformModule(ip));
 				DirectorRequestBO combine = new DirectorRequestBO();
 				combine.setCapacityIp(ip);
 				combine.setRequest(request);
@@ -1219,7 +1220,7 @@ public class DirectorTaskService {
 			
 			//回滚
 			for(DirectorRequestBO combine: combineRequests){
-				capacityService.deleteAllAddMsgId(combine.getRequest(), combine.getCapacityIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(combine.getRequest(),new TransformModule(combine.getCapacityIp()));
 			}
 			
 			throw e;
@@ -1315,7 +1316,7 @@ public class DirectorTaskService {
 				}
 			}
 		}
-		transcodeTaskService.changeBackUp(backBO.getId(),selectIndex.toString(),"manual",job.getCapacityIp());
+		transcodeTaskService.changeBackUp(backBO.getId(),selectIndex.toString(),"manual",new TransformModule(job.getCapacityIp()));
 		if (backBO.getBack_up_raw()!=null) {
 			backBO.getBack_up_raw().setSelect_index(selectIndex.toString());
 		}

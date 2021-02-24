@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import org.hibernate.exception.ConstraintViolationException;
@@ -165,8 +166,8 @@ public class BvcService {
 				allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
-				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest,new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -179,7 +180,7 @@ public class BvcService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, new TransformModule());
 				throw e;
 				
 			} catch (Exception e) {
@@ -238,7 +239,7 @@ public class BvcService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest,new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -251,7 +252,7 @@ public class BvcService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, new TransformModule());
 				throw e;
 				
 			} catch (Exception e) {
@@ -308,7 +309,7 @@ public class BvcService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+					capacityService.deleteAllAddMsgId(allRequest,new TransformModule());
 					
 					output.setOutput(null);
 					output.setTask(null);

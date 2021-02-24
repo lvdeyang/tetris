@@ -3,6 +3,7 @@ package com.sumavision.tetris.capacity.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -100,7 +101,7 @@ public class ResponseService {
 		
 		if(responses.size() > 0){
 			//删除成功的输入
-			deleteInputs(ids, capacityIp, capacityPort);
+			deleteInputs(ids,new TransformModule(capacityIp,capacityPort));
 			
 			ids.removeAll(ids);
 			
@@ -136,12 +137,12 @@ public class ResponseService {
 				responses.add(task_response);
 			}
 		}
-		
+		TransformModule transformModule = new TransformModule(capacityIp, capacityPort);
 		if(responses.size() > 0){
 			//删除任务
-			deleteTasks(ids, capacityIp);
+			deleteTasks(ids, transformModule);
 			//删除输入
-			deleteInputs(inputIds, capacityIp,capacityPort);
+			deleteInputs(inputIds,transformModule);
 			
 			ids.removeAll(ids);
 			inputIds.removeAll(inputIds);
@@ -162,7 +163,7 @@ public class ResponseService {
 	 * @param taskIds
 	 * @param inputIds
 	 */
-	public List<String> outputResponseProcess(CreateOutputsResponse outputsResponse, List<String> taskIds, List<String> inputIds, String capacityIp,Integer capacityPort) throws Exception{
+	public List<String> outputResponseProcess(CreateOutputsResponse outputsResponse, List<String> taskIds, List<String> inputIds, TransformModule transformModule) throws Exception{
 		
 		List<ResultResponse> output_response_array = outputsResponse.getOutput_array();
 		
@@ -181,17 +182,17 @@ public class ResponseService {
 		if(responses.size() > 0){
 			//删除输出
 			if(ids != null && ids.size() > 0){
-				deleteOutputs(ids, capacityIp,capacityPort);
+				deleteOutputs(ids, transformModule);
 				ids.removeAll(ids);
 			}
 			//删除任务
 			if(taskIds != null && taskIds.size() > 0){
-				deleteTasks(taskIds, capacityIp);
+				deleteTasks(taskIds, transformModule);
 				taskIds.removeAll(taskIds);
 			}
 			//删除输入
 			if(inputIds != null && inputIds.size() > 0){
-				deleteInputs(inputIds, capacityIp,capacityPort);
+				deleteInputs(inputIds, transformModule);
 				inputIds.removeAll(inputIds);
 			}
 
@@ -210,7 +211,7 @@ public class ResponseService {
 	 * <b>日期：</b>2019年11月20日 上午10:02:44
 	 * @param List<String> ids 需要删除的inputId
 	 */
-	public void deleteInputs(List<String> ids, String capacityIp,Integer capacityPort) throws Exception{
+	public void deleteInputs(List<String> ids, TransformModule transformModule) throws Exception{
 		
 		if(ids != null && ids.size() > 0){
 			DeleteInputsRequest delete = new DeleteInputsRequest().setInput_array(new ArrayList<IdRequest>());
@@ -219,7 +220,7 @@ public class ResponseService {
 				delete.getInput_array().add(request);
 			}
 			
-			capacityService.deleteInputsAddMsgId(delete, capacityIp,capacityPort);
+			capacityService.deleteInputsAddMsgId(delete, transformModule);
 		}
 
 	}
@@ -231,7 +232,7 @@ public class ResponseService {
 	 * <b>日期：</b>2019年11月20日 下午1:15:09
 	 * @param List<String> ids 需要删除的taskIds
 	 */
-	public void deleteTasks(List<String> ids, String capacityIp) throws Exception{
+	public void deleteTasks(List<String> ids, TransformModule transformModule) throws Exception{
 		
 		if(ids != null && ids.size() > 0){
 			DeleteTasksRequest delete = new DeleteTasksRequest().setTask_array(new ArrayList<IdRequest>());
@@ -240,7 +241,7 @@ public class ResponseService {
 				delete.getTask_array().add(request);
 			}
 			
-			capacityService.deleteTasksAddMsgId(delete, capacityIp);
+			capacityService.deleteTasksAddMsgId(delete, transformModule);
 		}
 
 	}
@@ -252,7 +253,7 @@ public class ResponseService {
 	 * <b>日期：</b>2019年11月20日 下午1:19:27
 	 * @param List<String> ids 需要删除的outputIds
 	 */
-	public void deleteOutputs(List<String> ids, String capacityIp,Integer capacityPort) throws Exception{
+	public void deleteOutputs(List<String> ids, TransformModule transformModule) throws Exception{
 		
 		if(ids != null && ids.size() > 0){
 			DeleteOutputsRequest delete = new DeleteOutputsRequest().setOutput_array(new ArrayList<IdRequest>());
@@ -261,7 +262,7 @@ public class ResponseService {
 				delete.getOutput_array().add(request);
 			}
 			
-			capacityService.deleteOutputsWithMsgId(delete, capacityIp, capacityPort);
+			capacityService.deleteOutputsWithMsgId(delete,transformModule);
 		}
 
 	}

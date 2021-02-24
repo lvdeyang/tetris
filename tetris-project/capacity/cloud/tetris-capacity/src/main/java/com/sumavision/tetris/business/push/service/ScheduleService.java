@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.alibaba.druid.wall.violation.ErrorCode;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.capacity.bo.request.*;
@@ -195,7 +196,7 @@ public class ScheduleService {
 			sendSchedule(capacityIp,capacityPort, schedule.getId(), null, needCreateInputs, schedules);
 		} catch (Exception e) {
 			
-			capacityService.deleteAllAddMsgId(request, capacityIp, capacityPort);
+			capacityService.deleteAllAddMsgId(request, new TransformModule(capacityIp,capacityPort));
 			throw e;
 		}
 		
@@ -853,13 +854,13 @@ public class ScheduleService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 			
-			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
+			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 			
 			responseService.allResponseProcess(allResponse);
 		
 		} catch (BaseException e){
 			
-			capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
+			capacityService.deleteAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 			throw e;
 			
 		}
@@ -908,7 +909,7 @@ public class ScheduleService {
         System.out.println(sdf.format(date));
 		System.out.println("change:" + JSON.toJSONString(request));
 		
-		ResultCodeResponse response = capacityService.putSchedule(capacityIp, capacityPort, inputId, request);
+		ResultCodeResponse response = capacityService.putSchedule(new TransformModule(capacityIp,capacityPort), inputId, request);
 		
 		if(!response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
 			throw new BaseException(StatusCode.ERROR, response.getResult_msg());
@@ -988,7 +989,8 @@ public class ScheduleService {
 				taskInputDao.saveAll(taskInputPOS);
 			}
 			deleteScheduleRequest.setDelete_inputs(inputIdRequests);
-			capacityService.clearSchedule(output.getCapacityIp(),capacityProps.getPort(),inputId,deleteScheduleRequest);
+			TransformModule transformModule=new TransformModule(output.getCapacityIp());
+			capacityService.clearSchedule(transformModule,inputId,deleteScheduleRequest);
 			taskOutputDao.save(output);
 		} catch (ObjectOptimisticLockingFailureException e) {
 
@@ -1231,7 +1233,7 @@ public class ScheduleService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(bo.getTasks()).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(bo.getOutputs()).getList());
 			
-			capacityService.deleteAllAddMsgId(allRequest, bo.getCapacityIp(), capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest, new TransformModule(bo.getCapacityIp()));
 		}
 		
 		taskOutputDao.deleteInBatch(outputs);

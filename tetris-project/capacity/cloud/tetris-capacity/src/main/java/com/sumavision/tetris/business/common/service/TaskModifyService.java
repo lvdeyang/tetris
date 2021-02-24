@@ -5,6 +5,7 @@ package com.sumavision.tetris.business.common.service;/**
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
@@ -211,7 +212,7 @@ public class TaskModifyService {
         request.put("queue_id", UUID.randomUUID().toString());
         request.put("queue_request",cmdQueue);
 
-        capacityService.sendCommandsByQueue(request,capacityIp,capacityPort);
+        capacityService.sendCommandsByQueue(request,new TransformModule(capacityIp,capacityPort));
 
         taskOutputPO.setInputList(JSONObject.toJSONString(inputIds));
         taskOutputDao.save(taskOutputPO);

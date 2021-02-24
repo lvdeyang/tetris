@@ -4,6 +4,7 @@ package com.sumavision.tetris.application;/**
 
 import com.sumavision.tetris.application.alarm.service.AlarmService;
 import com.sumavision.tetris.application.template.feign.TemplateTaskService;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.enumeration.BackType;
 import com.sumavision.tetris.business.common.enumeration.BackupStrategy;
@@ -250,7 +251,7 @@ public class InitApplication implements ApplicationRunner {
                     deviceDao.save(devicePO);
                     try {
                         //尝试设置告警地址
-                        alarmService.setAlarmUrl(devicePO.getDeviceIp(),devicePO.getDevicePort());
+                        alarmService.setAlarmUrl(new TransformModule(devicePO.getDeviceIp(),devicePO.getDevicePort()));
                     } catch (Exception e) {
                         LOGGER.error("告警地址设置失败",e);
                     }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.capacity.constant.Constant;
@@ -179,7 +180,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -192,7 +193,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {
@@ -253,7 +254,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityPort);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -266,7 +267,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityPort);
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {

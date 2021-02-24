@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.common.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
@@ -201,7 +202,7 @@ public class LockService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest,new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -214,7 +215,7 @@ public class LockService {
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule());
 
 			} catch (Exception e) {
 				
@@ -264,7 +265,7 @@ public class LockService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest,new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -277,7 +278,7 @@ public class LockService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule());
 
 			} catch (Exception e) {
 				
@@ -332,7 +333,7 @@ public class LockService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+					capacityService.deleteAllAddMsgId(allRequest, new TransformModule());
 					
 					output.setOutput(null);
 					output.setTask(null);

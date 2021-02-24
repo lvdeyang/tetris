@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.service.TaskService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,7 +185,7 @@ public class StreamPassbyService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -197,7 +198,7 @@ public class StreamPassbyService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule());
 				throw e;
 				
 			} catch (Exception e) {
@@ -256,7 +257,7 @@ public class StreamPassbyService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -269,7 +270,7 @@ public class StreamPassbyService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule());
 				throw e;
 				
 			} catch (Exception e) {
