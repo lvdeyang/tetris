@@ -103,7 +103,7 @@ define([
                 gotoBindBusinessRole:function(scope){
                     var slef = this;
                     var row = scope.row;
-                    window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business/company-user';
+                    window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/business';
                 },
                 load: function (currentPage) {
                     var self = this;
