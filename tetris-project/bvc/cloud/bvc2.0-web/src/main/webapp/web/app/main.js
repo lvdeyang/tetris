@@ -178,6 +178,7 @@ require.config({
     'page-liangwu-forword-outer': window.APPPATH + 'liangwu/forword-outer/page-liangwu-forword-outer',
     'page-between-domain-list': window.APPPATH + 'monitor/between-domain-list/page-between-domain-list',
     'page-guide-control': window.APPPATH + 'guide/control/page-guide-control',
+    'page-dispatch-control': window.APPPATH + 'dispatch/control/page-dispatch-control',
     'DiskPieChart': window.APPPATH + 'statistics/echarts/DiskPieChart',
     'HistogramChart': window.APPPATH + 'statistics/echarts/HistogramChart',
     'LineChart': window.APPPATH + 'statistics/echarts/LineChart',
