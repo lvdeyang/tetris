@@ -24,6 +24,10 @@ public class SystemRoleGroupVO {
 	
 	private boolean isGroup = true;
 	
+	private Long companyId;
+	
+	private String companyName;
+	
 	private List<SystemRoleVO> roles;
 
 	public Long getId() {
@@ -74,6 +78,11 @@ public class SystemRoleGroupVO {
 	public boolean getIsGroup() {
 		return isGroup;
 	}
+	
+	public SystemRoleGroupVO setGroup(boolean isGroup) {
+		this.isGroup = isGroup;
+		return this;
+	}
 
 	public List<SystemRoleVO> getRoles() {
 		return roles;
@@ -83,13 +92,32 @@ public class SystemRoleGroupVO {
 		this.roles = roles;
 		return this;
 	}
+	
+	public Long getCompanyId() {
+		return companyId;
+	}
+
+	public SystemRoleGroupVO setCompanyId(Long companyId) {
+		this.companyId = companyId;
+		return this;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public SystemRoleGroupVO setCompanyName(String companyName) {
+		this.companyName = companyName;
+		return this;
+	}
 
 	public SystemRoleGroupVO set(SystemRoleGroupPO entity){
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
-			.setAutoGeneration(entity.isAutoGeneration());
+			.setAutoGeneration(entity.isAutoGeneration())
+			.setCompanyId(entity.getCompanyId());
 		return this;
 	}
 	

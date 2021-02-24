@@ -50,6 +50,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 i18n:i18n,
+                classify:'',
                 username:username,
                 activeId:activeId,
                 returnUserHash:returnUserHash,
@@ -82,7 +83,19 @@ define([
                         exceptIds.push(rows[i].roleId);
                     }
                     if(type === 'system'){
-                        self.$refs.systemRoleDialog.open(exceptIds);
+                        var params = {
+                            exceptIds: $.toJSON(exceptIds),
+                            packGroup:true
+                        };
+                        if(self.classify === 'COMPANY_USER'){
+                            params.createType = 'COMPANY_ADMIN';
+                            params.targetUserId = userId;
+                        }else{
+                            params.createType = 'SYSTEM_ADMIN';
+                        }
+                        ajax.post('/system/role/query/by/create/type', params, function(data){
+                            self.$refs.systemRoleDialog._open(data);
+                        });
                     }else if(type === 'business'){
                         self.$refs.businessRoleDialog.open('/business/role/list/with/except/ids', exceptIds);
                     }
@@ -229,6 +242,13 @@ define([
             created:function(){
                 var self = this;
                 self.load(1);
+                if(type === 'system'){
+                    ajax.post('/user/query/user/classify', {
+                        userId:userId
+                    }, function(data){
+                        self.classify = data;
+                    });
+                }
             }
         });
 

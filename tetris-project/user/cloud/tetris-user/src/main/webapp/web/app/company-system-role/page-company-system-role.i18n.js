@@ -22,7 +22,6 @@ define(function(){
         handleEditSystemRoleGroupCancel:'取消',
         handleEditSystemRoleGroupSubmit:'确定',
         dialogCreateSystemRoleTitle:'新建系统角色',
-        dialogCreateCompanySystemRoleTitle:'新建企业系统角色',
         placeholderCreateSystemRoleName:'起个名吧！',
         handleCreateSystemRoleCancel:'取消',
         handleCreateSystemRoleSubmit:'确定',

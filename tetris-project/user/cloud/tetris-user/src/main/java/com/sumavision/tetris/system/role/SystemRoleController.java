@@ -1,7 +1,9 @@
 package com.sumavision.tetris.system.role;
 
 import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.system.role.exception.AutoGenerationRoleCannotDeleteException;
 import com.sumavision.tetris.system.role.exception.SystemRoleGroupNotExistException;
 import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
 import com.sumavision.tetris.user.OperationLogService;
@@ -82,12 +85,40 @@ public class SystemRoleController {
 	}
 	
 	/**
+	 * 分类查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:30:46
+	 * @param String createType 系统角色创建类型
+	 * @param Long companyId 企业id
+	 * @param Long targetUserId 目标用户id
+	 * @param String exceptIds 例外角色id
+	 * @param Boolean packGroup 是否按照分组组装
+	 * @return List<SystemRoleVO> 系统角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/by/create/type")
+	public Object queryByCreateType(
+			String createType, 
+			Long companyId,
+			Long targetUserId,
+			String exceptIds,
+			Boolean packGroup,
+			HttpServletRequest request) throws Exception{
+		
+		return systemRoleQuery.queryByCreateType(createType, companyId, targetUserId, exceptIds, packGroup);
+	}
+	
+	/**
 	 * 添加一个系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月23日 下午4:04:18
 	 * @param Long groupId 系统角色组id
 	 * @param String name 系统角色名
+	 * @param String createType 系统角色的创建类型 SYSTEM_ADMIN, COMPANY_ADMIN
+	 * @param Long companyId 企业id
 	 * @return SystemRoleVO 系统角色
 	 */
 	@JsonBody
@@ -96,6 +127,8 @@ public class SystemRoleController {
 	public Object add(
 			Long groupId,
 			String name,
+			String createType,
+			Long companyId,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -113,6 +146,19 @@ public class SystemRoleController {
 		role.setUpdateTime(new Date());
 		role.setSystemRoleGroupId(group.getId());
 		role.setType(SystemRoleType.SYSTEM);
+		
+		SystemRoleCreateType parsedCreateType = SystemRoleCreateType.valueOf(createType);
+		if(SystemRoleCreateType.SYSTEM_ADMIN.equals(parsedCreateType)){
+			role.setCreateType(SystemRoleCreateType.SYSTEM_ADMIN);
+		}else{
+			role.setCreateType(SystemRoleCreateType.COMPANY_ADMIN);
+			if(companyId != null){
+				role.setCompanyId(companyId);
+			}else{
+				role.setCompanyId(user.getGroupId()==null?null:Long.valueOf(user.getGroupId()));
+			}
+		}
+		
 		systemRoleDao.save(role);
 		
 		//添加角色日志
@@ -178,9 +224,13 @@ public class SystemRoleController {
 		
 		//TODO 权限校验
 		
-		SystemRolePO role = systemRoleDao.findById(id);
+		SystemRolePO role = systemRoleDao.findByIdAndType(id, SystemRoleType.SYSTEM);
 		
 		if(role != null){
+			if(role.isAutoGeneration()){
+				throw new AutoGenerationRoleCannotDeleteException();
+			}
+			
 			systemRoleService.delete(new ArrayListWrapper<SystemRolePO>().add(role).getList());
 			
 			//删除角色日志

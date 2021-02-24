@@ -44,7 +44,13 @@ define([
                     total:0
                 },
                 dialog:{
-
+                    editSystemRole:{
+                        visible:false,
+                        loading:false,
+                        company:'',
+                        rows:[],
+                        current:''
+                    }
                 }
             },
             computed:{
@@ -68,6 +74,53 @@ define([
                 handleCurrentChange:function(currentPage){
                     var self = this;
                     self.load(currentPage);
+                },
+                handleEditSystemRole:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/system/role/query/by/create/type', {
+                        createType:'SYSTEM_ADMIN'
+                    }, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.editSystemRole.rows.push(data[i]);
+                            }
+                        }
+                        self.dialog.editSystemRole.company = row;
+                        self.dialog.editSystemRole.visible = true;
+                        self.$nextTick(function(){
+                            for(var i=0; i<data.length; i++){
+                                if(data[i].id == row.systemRoleId){
+                                    self.$refs.systemRoleTable.setCurrentRow(data[i]);
+                                }
+                            }
+                        });
+                    });
+                },
+                handleSelectSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.editSystemRole.visible = false;
+                    self.dialog.editSystemRole.loading = false;
+                    self.dialog.editSystemRole.company = '';
+                    self.dialog.editSystemRole.rows.splice(0, self.dialog.editSystemRole.rows.length);
+                },
+                handleSelectSystemRoleSubmit:function(){
+                    var self = this;
+                    ajax.post('/company/edit/system/role', {
+                        companyId:self.dialog.editSystemRole.company.id,
+                        systemRoleId:self.dialog.editSystemRole.current.id
+                    }, function(){
+                        self.dialog.editSystemRole.company.systemRoleId = self.dialog.editSystemRole.current.id;
+                        self.dialog.editSystemRole.company.systemRoleName = self.dialog.editSystemRole.current.name;
+                        self.handleSelectSystemRoleClose();
+                    });
+                },
+                systemRoleKey:function(row){
+                    return row.id;
+                },
+                systemRoleChange:function(current){
+                    var self = this;
+                    self.dialog.editSystemRole.current = current;
                 },
                 gotoOrganization:function(scope){
                     var self = this;

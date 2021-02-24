@@ -53,6 +53,41 @@ public class CompanyController {
 	}
 	
 	/**
+	 * 查询全部的企业<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 下午2:22:09
+	 * @return List<CompanyVO> 企业列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/all")
+	public Object listAll(HttpServletRequest request) throws Exception{
+		
+		return companyQuery.listAll();
+	}
+	
+	/**
+	 * 企业修改功能授权<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 上午9:21:30
+	 * @param Long companyId 企业id
+	 * @param Long systemRoleId 系统角色id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit/system/role")
+	public Object editSystemRole(
+			Long companyId,
+			Long systemRoleId,
+			HttpServletRequest request) throws Exception{
+		
+		companyService.editSystemRole(companyId, systemRoleId);
+		return null;
+	}
+	
+	/**
 	 * 获取用户公司信息<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

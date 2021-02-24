@@ -42,6 +42,9 @@ public class MenuVO extends AbstractBaseVO<MenuVO, MenuPO>{
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 	
+	/** 与 autoGeneration 保持同步*/
+	private boolean disabled;
+	
 	/** 子菜单 */
 	private List<MenuVO> sub;
 	
@@ -132,6 +135,15 @@ public class MenuVO extends AbstractBaseVO<MenuVO, MenuPO>{
 
 	public MenuVO setAutoGeneration(boolean autoGeneration) {
 		this.autoGeneration = autoGeneration;
+		return this;
+	}
+
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	public MenuVO setDisabled(boolean disabled) {
+		this.disabled = disabled;
 		return this;
 	}
 

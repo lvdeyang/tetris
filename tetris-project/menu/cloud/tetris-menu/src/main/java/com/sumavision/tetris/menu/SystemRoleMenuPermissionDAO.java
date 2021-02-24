@@ -55,6 +55,17 @@ public interface SystemRoleMenuPermissionDAO extends BaseDAO<SystemRoleMenuPermi
 	public SystemRoleMenuPermissionPO findByMenuIdAndRoleIdAndAutoGeneration(Long menuId, String roleId, boolean autoGeneration);
 	
 	/**
+	 * 根据菜单id角色id获取权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午3:45:44
+	 * @param Long menuId 菜单id
+	 * @param Long roleId 角色id
+	 * @return SystemRoleMenuPermissionPO 权限
+	 */
+	public SystemRoleMenuPermissionPO findByMenuIdAndRoleId(Long menuId, String roleId);
+	
+	/**
 	 * 查询系统角色的授权情况带例外<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
