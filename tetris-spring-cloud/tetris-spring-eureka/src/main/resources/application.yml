@@ -5,7 +5,7 @@ eureka:
   dashboard: 
     path: /monitor
   instance:
-    hostname: 192.165.56.85
+    hostname: 192.165.56.71
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
@@ -15,10 +15,13 @@ eureka:
     fetchRegistry: false
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+    #eureka 高可用配置  
+    #registerWithEureka: true
+    #fetchRegistry: true
+    #serviceUrl:
+      #defaultZone: http://192.165.56.85:8081/eureka/
 
 spring:
-  main: 
-    allow-bean-definition-overriding: true
   application:
     name: tetris-spring-eureka
   datasource:
