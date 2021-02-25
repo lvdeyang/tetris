@@ -166,6 +166,8 @@ public class MediaSourceBO {
         this.protocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
         this.mode = refreshSourceVO.getSrtMode();
         this.latency = refreshSourceVO.getLatency();
+        this.key_len = refreshSourceVO.getKeyLen();
+        this.passphrase = refreshSourceVO.getPassphrase();
         if (refreshSourceVO.getLoopCount() != null) {
             this.loop_count = refreshSourceVO.getLoopCount();
         }
