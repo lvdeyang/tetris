@@ -215,6 +215,11 @@ public class OutputFactory {
         if (outputBO.getLocal_ip()==null){
             outputBO.setLocal_ip(missionBO.getDevice_ip());//没写出流网口IP的话，直接用控制口IP
         }
+        if (outputBO.getPassphrase() != null && !outputBO.getPassphrase().isEmpty()) {
+            if (outputBO.getPassphrase().length()<10 || outputBO.getPassphrase().length() > 64){
+                throw new BaseException(StatusCode.FORBIDDEN,"密码串长度应在[10,64]位之间");
+            }
+        }
 
         List<OutputProgramBO> outputProgramBOS =new ArrayList();
         if (taskOutput.containsKey("programs")){

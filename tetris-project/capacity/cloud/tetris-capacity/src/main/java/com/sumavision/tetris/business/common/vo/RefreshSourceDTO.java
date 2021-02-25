@@ -3,20 +3,32 @@ package com.sumavision.tetris.business.common.vo;/**
  */
 
 /**
- * @ClassName: RefreshSourceVO
- * @Description TODO
+ * @ClassName: RefreshSourceDTO
+ * @Description 能力服务传输的刷源参数
  * @Author: Poemafar
  * @Version：1.0
  * @Date 2021/2/1 13:58
  */
-public class RefreshSourceVO {
+public class RefreshSourceDTO {
 
+    /**
+     * 刷源设备
+     */
     private String deviceIp;
 
+    /**
+     * 源类型，必填
+     */
     private String type;
 
+    /**
+     * 源地址，必填
+     */
     private String url;
 
+    /**
+     * 刷源网口
+     */
     private String localIp;
 
     /**
@@ -40,7 +52,7 @@ public class RefreshSourceVO {
     private Integer latency;
 
     /**
-     * 文件循环次数，默认无限
+     * 文件循环次数
      */
     private Integer loopCount;
 
@@ -53,7 +65,7 @@ public class RefreshSourceVO {
         return deviceIp;
     }
 
-    public RefreshSourceVO setDeviceIp(String deviceIp) {
+    public RefreshSourceDTO setDeviceIp(String deviceIp) {
         this.deviceIp = deviceIp;
         return this;
     }
@@ -62,7 +74,7 @@ public class RefreshSourceVO {
         return type;
     }
 
-    public RefreshSourceVO setType(String type) {
+    public RefreshSourceDTO setType(String type) {
         this.type = type;
         return this;
     }
@@ -71,7 +83,7 @@ public class RefreshSourceVO {
         return url;
     }
 
-    public RefreshSourceVO setUrl(String url) {
+    public RefreshSourceDTO setUrl(String url) {
         this.url = url;
         return this;
     }
@@ -80,7 +92,7 @@ public class RefreshSourceVO {
         return localIp;
     }
 
-    public RefreshSourceVO setLocalIp(String localIp) {
+    public RefreshSourceDTO setLocalIp(String localIp) {
         this.localIp = localIp;
         return this;
     }
@@ -89,7 +101,7 @@ public class RefreshSourceVO {
         return srtMode;
     }
 
-    public RefreshSourceVO setSrtMode(String srtMode) {
+    public RefreshSourceDTO setSrtMode(String srtMode) {
         this.srtMode = srtMode;
         return this;
     }
@@ -98,7 +110,7 @@ public class RefreshSourceVO {
         return latency;
     }
 
-    public RefreshSourceVO setLatency(Integer latency) {
+    public RefreshSourceDTO setLatency(Integer latency) {
         this.latency = latency;
         return this;
     }
@@ -107,7 +119,7 @@ public class RefreshSourceVO {
         return loopCount;
     }
 
-    public RefreshSourceVO setLoopCount(Integer loopCount) {
+    public RefreshSourceDTO setLoopCount(Integer loopCount) {
         this.loopCount = loopCount;
         return this;
     }
@@ -116,7 +128,7 @@ public class RefreshSourceVO {
         return cardType;
     }
 
-    public RefreshSourceVO setCardType(String cardType) {
+    public RefreshSourceDTO setCardType(String cardType) {
         this.cardType = cardType;
         return this;
     }
@@ -125,7 +137,7 @@ public class RefreshSourceVO {
         return passphrase;
     }
 
-    public RefreshSourceVO setPassphrase(String passphrase) {
+    public RefreshSourceDTO setPassphrase(String passphrase) {
         this.passphrase = passphrase;
         return this;
     }
@@ -134,7 +146,7 @@ public class RefreshSourceVO {
         return keyLen;
     }
 
-    public RefreshSourceVO setKeyLen(String keyLen) {
+    public RefreshSourceDTO setKeyLen(String keyLen) {
         this.keyLen = keyLen;
         return this;
     }
