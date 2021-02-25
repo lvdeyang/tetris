@@ -4,7 +4,7 @@ package com.sumavision.tetris.business.common.bo;/**
 
 
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
-import com.sumavision.tetris.business.common.vo.RefreshSourceVO;
+import com.sumavision.tetris.business.common.vo.RefreshSourceDTO;
 import com.sumavision.tetris.commons.exception.BaseException;
 
 /**
@@ -160,19 +160,19 @@ public class MediaSourceBO {
 
     public MediaSourceBO(){}
 
-    public MediaSourceBO(RefreshSourceVO refreshSourceVO,String localIp) throws BaseException {
-        this.url = refreshSourceVO.getUrl();
+    public MediaSourceBO(RefreshSourceDTO refreshSourceDTO, String localIp) throws BaseException {
+        this.url = refreshSourceDTO.getUrl();
         this.localIp = localIp;
-        this.protocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
-        this.mode = refreshSourceVO.getSrtMode();
-        this.latency = refreshSourceVO.getLatency();
-        this.key_len = refreshSourceVO.getKeyLen();
-        this.passphrase = refreshSourceVO.getPassphrase();
-        if (refreshSourceVO.getLoopCount() != null) {
-            this.loop_count = refreshSourceVO.getLoopCount();
+        this.protocolType = ProtocolType.getProtocolType(refreshSourceDTO.getType());
+        this.mode = refreshSourceDTO.getSrtMode();
+        this.latency = refreshSourceDTO.getLatency();
+        this.key_len = refreshSourceDTO.getKeyLen();
+        this.passphrase = refreshSourceDTO.getPassphrase();
+        if (refreshSourceDTO.getLoopCount() != null) {
+            this.loop_count = refreshSourceDTO.getLoopCount();
         }
-        if (refreshSourceVO.getCardType() != null) {
-            this.card_type=refreshSourceVO.getCardType();
+        if (refreshSourceDTO.getCardType() != null) {
+            this.card_type= refreshSourceDTO.getCardType();
         }
     }
 
