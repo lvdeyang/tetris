@@ -4,8 +4,8 @@
     <div class="page-body-new">
         <el-container style="width:100%; height:100%">
             <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
-            <el-main style="padding:15px;">
-                <el-row :gutter="15" >
+            <el-main style="padding:10px;">
+                <el-row :gutter="10" >
                     <el-col :span="4">
                         <el-card class="box-card" shadow="never" style="height: 800px;">
                             <div slot="header" class="clearfix">
@@ -17,31 +17,40 @@
                             <!--源列表-->
                             <el-tree :data="sourceGroups" :props="sourceProps" @node-click="handleNodeClick"
                                      highlight-current
-                                     style="min-width: 20px;width:13%;">
+                                     style="min-width: 20px;width:14%;">
                                 <span class="custom-tree-node"  slot-scope="{node,data}">
                                     <template v-if="node.level===1">
                                         <el-row >
-                                            <el-col :span="16" style="margin-top: 10px;">{{data.name}}</el-col>
-                                            <el-col :span="8">
-                                                <el-tooltip class="item" effect="dark" content="详情" placement="bottom-end">
-                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-tickets" @click.stop="sourceDetailBtnClick(data.id)"></el-button>
+                                            <el-col :span="18" style="margin-top: 10px" >{{data.name}}</el-col>
+                                            <el-col :span="6">
+                                                <el-tooltip class="item" effect="dark" content="添加信源" placement="bottom-end">
+                                                    <el-button  type="text"  style="font-size:18px;" icon="el-icon-circle-plus-outline" @click.stop="sourceDetailBtnClick(data.id)"></el-button>
                                                 </el-tooltip>
-                                                <el-tooltip class="item" effect="dark" content="删除站点" placement="bottom-end">
-                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-delete" @click.stop="deleteSourceGroupBtnClick(data.id)"></el-button>
+                                                <el-tooltip style="margin-left:3px;" class="item" effect="dark" content="删除站点" placement="bottom-end">
+                                                    <el-button type="text"  style="font-size:18px;" icon="el-icon-remove-outline" @click.stop="deleteSourceGroupBtnClick(data.id)"></el-button>
                                                 </el-tooltip>
                                             </el-col>
                                         </el-row>
                                     </template>
                                     <template v-else>
                                         <el-row  >
-                                            <el-col :span="20" style="margin-top: 8px">
+                                            <el-col :span="18" style="margin-top: 8px">
                                                 <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}</div>
-                                                <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
+                                                <template v-if="data.url!==undefined && data.url.length>27">
+                                                    <el-tooltip class="item" effect="light" :content="data.url" placement="bottom">
+                                                        <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url.substring(0,27)}}...</div>
+                                                    </el-tooltip>
+                                                </template>
+                                                <template v-else>
+                                                      <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
+                                                </template>
+
                                             </el-col>
-                                            <el-col :span="4">
-                                                 <el-tooltip class="item" effect="dark" content="调度" placement="bottom-end">
-                                                     <el-button style="float: right;font-size:20px;" icon="el-icon-upload2" type="text" @click="transferSourceBtnClick(data)"></el-button>
+                                            <el-col :span="6">
+                                                <el-tooltip class="item" effect="dark" content="信源调度" placement="bottom-end">
+                                                     <el-button style="font-size:16px;" icon="el-icon-upload2" type="text" @click="transferSourceBtnClick(data)"></el-button>
                                                  </el-tooltip>
+                                                 <el-button style="font-size:16px;" icon="el-icon-delete" type="text" @click="deleteSourceBtnClick(data)"></el-button>
                                             </el-col>
                                         </el-row>
                                     </template>
@@ -85,7 +94,7 @@
                             <!--输出列表-->
                             <el-tree :data="outputGroups" :props="outputProps"
                                      highlight-current
-                                     style="min-width: 20px;width:13%;">
+                                     style="min-width: 20px;width:14%;">
                                 <span class="custom-tree-node"  slot-scope="{node,data}">
                                     <template v-if="node.level===1">
                                         <el-row >
@@ -95,16 +104,18 @@
                                                     <el-button  style="font-size:16px;" type="text" icon="el-icon-tickets" @click.stop="outputDetailBtnClick(data.id)"></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip class="item" effect="dark" content="删除站点" placement="bottom-end">
-                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-delete" @click.stop="deleteOutputGroupBtnClick(data.id)"></el-button>
+                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-remove-outline" @click.stop="deleteOutputGroupBtnClick(data.id)"></el-button>
                                                 </el-tooltip>
                                             </el-col>
                                         </el-row>
                                     </template>
                                     <template v-else>
-                                        <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}
-                                            <el-tag type="warning" size="mini">已占用</el-tag>
+                                        <div class="item" style="padding: 4px 0px 4px 0px">
+                                             <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}
+                                                <el-tag type="warning" size="mini">已占用</el-tag>
+                                             </div>
+                                             <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
                                         </div>
-                                        <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
                                     </template>
                                 </span>
                             </el-tree>
@@ -120,7 +131,7 @@
                :visible.sync="dialog.addDispatch.visible">
         <el-card class="box-card" shadow="never">
             <div slot="header" class="clearfix">
-                <span>将{{dialog.addDispatch.sourceName}}转发给</span>
+                <span>添加转发任务</span>
             </div>
             <el-form v-model="dialog.addDispatch" :inline="true" >
                 <el-form-item label="站点名称" >
@@ -160,6 +171,7 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
         </el-card>
         <span slot="footer" class="dialog-footer">
 	        <el-button size="medium" type="primary" @click="transferSourceDlgOk">确 定</el-button>
@@ -167,43 +179,15 @@
 	    </span>
     </el-dialog>
     <!--添加视频源-->
-    <el-dialog title="站点详情"
+    <el-dialog title="批量添加信源"
                :visible.sync="dialog.addSource.visible" >
-        <el-card class="box-card" shadow="never">
-            <div slot="header" class="clearfix">
-                <span>添加输入源</span>
-            </div>
-            <el-form v-model="dialog.addSource" :inline="true" >
-                <el-form-item label="源名称" prop="name">
-                    <el-input v-model="dialog.addSource.name"></el-input>
-                </el-form-item>
-                <el-form-item label="源地址">
-                    <el-input v-model="dialog.addSource.url" class="input-with-select">
-                        <el-select style="width:120px;" v-model="dialog.addSource.protocolType" placeholder="请选择源协议" slot="prepend">
-                            <el-option label="UDP-TS" value="TSUDP"></el-option>
-                            <el-option label="RTP-TS" value="TSRTP"></el-option>
-                            <el-option label="HTTP-TS" value="TSHTTP"></el-option>
-                            <el-option label="SRT-TS" value="TSSRT"></el-option>
-                            <el-option label="HTTP-FLV" value="HTTPFLV"></el-option>
-                            <el-option label="RTSP" value="RTSPRTP"></el-option>
-                            <el-option label="RTMP-FLV" value="RTMPFLV"></el-option>
-                            <el-option label="HLS" value="HLS"></el-option>
-                        </el-select>
-                    </el-input>
-                </el-form-item>
-                <el-form-item>
-                    <el-button icon="el-icon-plus" @click="addSourceBtnClick"></el-button>
-                </el-form-item>
-            </el-form>
-        </el-card>
-        <el-card class="box-card" style="margin-top: 20px" :body-style="{padding: '0px'}" shadow="never" >
-            <div slot="header" class="clearfix">
-                <span>站点信息</span>
-            </div>
-            <el-table border highlight-current-row :data="dialog.addSource.sources">
-                <el-table-column label="序号"  type="index"
-                                 width="100">
-                </el-table-column>
+        <el-card class="box-card"  :body-style="{padding: '0px'}" shadow="never" >
+            <el-table border
+                      highlight-current-row
+                      @selection-change="addSourceTableSelectChanged"
+                      :data="dialog.sources">
+                <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column label="序号"  type="index" width="100"></el-table-column>
                 <el-table-column label="名称" width="150">
                     <template slot-scope="scope"><span>{{scope.row.name}}</span></template>
                 </el-table-column>
@@ -213,19 +197,70 @@
                 <el-table-column label="地址">
                     <template slot-scope="scope"><span>{{scope.row.url}}</span></template>
                 </el-table-column>
-                <el-table-column label="操作" width="150">
-                    <template slot-scope="scope">
-                        <el-button size="mini" icon="el-icon-edit" @click="editSourceBtnClick(scope.$index, scope.row)"></el-button>
-                        <el-button size="mini" icon="el-icon-delete" @click="deleteSourceBtnClick(scope.$index, scope.row)"></el-button>
-                    </template>
-                </el-table-column>
             </el-table>
+            <div class="block">
+                <span>已选中：{{dialog.addSource.sources.length}}</span>
+                <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
+            </div>
         </el-card>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" type="primary" @click="addSourceDlgOk">添 加</el-button>
+            <el-button size="medium" @click="addSourceDlgClose">取 消</el-button>
+        </span>
+        <!--<el-card class="box-card" shadow="never">-->
+            <!--<div slot="header" class="clearfix">-->
+                <!--<span>添加输入源</span>-->
+            <!--</div>-->
+            <!---->
+            <!--&lt;!&ndash;<el-form v-model="dialog.addSource" :inline="true" >&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item label="源名称" prop="name">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-input v-model="dialog.addSource.name"></el-input>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item label="源地址">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-input v-model="dialog.addSource.url" class="input-with-select">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<el-select style="width:120px;" v-model="dialog.addSource.protocolType"  slot="prepend">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="UDP-TS" value="TSUDP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTP-TS" value="TSRTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HTTP-TS" value="TSHTTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="SRT-TS" value="TSSRT"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HTTP-FLV" value="HTTPFLV"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTSP" value="RTSPRTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTMP-FLV" value="RTMPFLV"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HLS" value="HLS"></el-option>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</el-select>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</el-input>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-button icon="el-icon-plus" @click="addSourceBtnClick"></el-button>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+            <!--&lt;!&ndash;</el-form>&ndash;&gt;-->
+        <!--</el-card>-->
+        <!--<el-card class="box-card" style="margin-top: 20px" :body-style="{padding: '0px'}" shadow="never" >-->
+            <!--<div slot="header" class="clearfix">-->
+                <!--<span>站点信息</span>-->
+            <!--</div>-->
+            <!--<el-table border highlight-current-row :data="dialog.addSource.sources">-->
+                <!--<el-table-column label="序号"  type="index"-->
+                                 <!--width="100">-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="名称" width="150">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.name}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="类型" width="100">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.protoType}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="地址">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.url}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="操作" width="150">-->
+                    <!--<template slot-scope="scope">-->
+                        <!--&lt;!&ndash;<el-button size="mini" icon="el-icon-edit" @click="editSourceBtnClick(scope.$index, scope.row)"></el-button>&ndash;&gt;-->
+                        <!--<el-button size="mini" icon="el-icon-delete" @click="deleteSourceBtnClick(scope.$index, scope.row)"></el-button>-->
+                    <!--</template>-->
+                <!--</el-table-column>-->
+            <!--</el-table>-->
+        <!--</el-card>-->
 
-        <!--<span slot="footer" class="dialog-footer">-->
-	        <!--<el-button size="medium" type="primary" @click="addSourceDlgOk">确 定</el-button>-->
-	        <!--<el-button size="medium" @click="addSourceDlgClose">取 消</el-button>-->
-	    <!--</span>-->
     </el-dialog>
     <!--添加输出-->
     <el-dialog title="站点详情"
@@ -281,6 +316,7 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
         </el-card>
 
         <!--<span slot="footer" class="dialog-footer">-->

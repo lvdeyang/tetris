@@ -40,7 +40,7 @@ define([
                             url:"udp://10.10.40.24:10089",
                         },{
                             name:"CCTV2",
-                            url:"udp://10.10.40.24:10089",
+                            url:"http://234.333.123.333:67890/live/stream/pub.m3u8",
                         }]
                     },{
                         id:2,
@@ -92,9 +92,7 @@ define([
                         },
                         addSource:{
                             visible:false,
-                            protocolType:'TSUDP',
-                            name:'',
-                            url:''
+                            sources:[] //准备添加的源
                         },
                         editSource:{
                             visible:false,
@@ -114,7 +112,7 @@ define([
                             name:'',
                             url:''
                         },
-                        sources:[],
+                        sources:[],//媒资来的源
                         outputs:[],
                         records:[]
                     }
@@ -129,7 +127,6 @@ define([
                 },
                 sourceDetailBtnClick(id){
                     this.dialog.addSource.visible=true
-                    this.dialog.addSource.sources=this.sourceGroups.filter(s=>s.id=id)[0].sources
                 },
                 outputDetailBtnClick(id){
                     this.dialog.addOutput.visible=true
@@ -145,11 +142,7 @@ define([
                     alert('添加转发任务')
                 },
                 addSourceBtnClick(){
-                    let source = {}
-                    source.name=this.dialog.addSource.name
-                    source.url=this.dialog.addSource.url
-                    source.protocolType=this.dialog.addSource.protocolType
-                    alert('添加源：'+source.name)
+                    alert('添加源')
                 },
                 addOutputBtnClick(){
                     let output = {}
@@ -164,7 +157,7 @@ define([
                   this.dialog.addDispatch.sourceName=data.name
                 },
                 addSourceDlgOk(){
-
+                    alert("添加源")
                 },
                 addSourceDlgClose(){
                     this.dialog.addSource.visible=false;
@@ -179,8 +172,8 @@ define([
                     this.dialog.editSource.url=row.url
                     this.dialog.editSource.visible=true
                 },
-                deleteSourceBtnClick(index,row){
-                  alert("删除源:"+row)
+                deleteSourceBtnClick(data){
+                  alert("删除源:"+data)
                 },
                 // 删除转发记录
                 deleteRecordBtnClick(index,row){
@@ -234,6 +227,10 @@ define([
                 },
                 addOutputGroupDlgCancel(){
                     this.dialog.addOutputGroup.visible=false;
+                },
+                addSourceTableSelectChanged(val){
+                    this.dialog.addSource.sources=val
+                    console.log("选中："+val)
                 }
             },
             created:function(){
