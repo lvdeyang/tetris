@@ -147,7 +147,14 @@ public class SrtTsBO {
 		this.connect_timeout = mediaSourceBO.getConnect_timeout();
 		this.recv_timeout = mediaSourceBO.getRecv_timeout();
 		this.latency = mediaSourceBO.getLatency();
-		this.key_len = mediaSourceBO.getKey_len();
+		//密钥长度
+		if (mediaSourceBO.getKey_len() != null && !mediaSourceBO.getKey_len().isEmpty()) {
+			if (mediaSourceBO.getKey_len().endsWith("bit")) {
+				this.key_len=mediaSourceBO.getKey_len();
+			}else{//不是以bit结尾就手动加个
+				this.key_len=mediaSourceBO.getKey_len()+"bit";
+			}
+		}
 		if (mediaSourceBO.getMaxbw() != null) {
 			this.maxbw = Integer.valueOf(mediaSourceBO.getMaxbw()) ;
 		}

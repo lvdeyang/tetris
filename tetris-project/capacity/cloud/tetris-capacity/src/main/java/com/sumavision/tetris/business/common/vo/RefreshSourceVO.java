@@ -19,8 +19,24 @@ public class RefreshSourceVO {
 
     private String localIp;
 
+    /**
+     * srt 模式
+     */
     private String srtMode;
 
+    /**
+     * 加密密码
+     */
+    private String passphrase;
+
+    /**
+     * 密钥长度
+     */
+    private String keyLen;
+
+    /**
+     * 接收延迟
+     */
     private Integer latency;
 
     /**
@@ -102,6 +118,24 @@ public class RefreshSourceVO {
 
     public RefreshSourceVO setCardType(String cardType) {
         this.cardType = cardType;
+        return this;
+    }
+
+    public String getPassphrase() {
+        return passphrase;
+    }
+
+    public RefreshSourceVO setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+        return this;
+    }
+
+    public String getKeyLen() {
+        return keyLen;
+    }
+
+    public RefreshSourceVO setKeyLen(String keyLen) {
+        this.keyLen = keyLen;
         return this;
     }
 }
