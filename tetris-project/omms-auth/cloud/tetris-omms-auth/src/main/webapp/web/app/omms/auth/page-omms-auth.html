@@ -235,6 +235,51 @@
                     <el-form-item label="接入合屏个数" v-if="dialog.setAuth.MixerJoiner.support==true">
                         <el-input-number style="width:300px" v-model="dialog.setAuth.MixerJoiner.screenNum" @change="handleChange" :min="0" :step="1" step-strictly="true"></el-input-number>
                     </el-form-item>
+
+                    <el-form-item label="xStream2050">
+                        <el-switch v-model="dialog.setAuth.xStream2050.support"></el-switch>
+                        <el-date-picker
+                                v-if="dialog.setAuth.xStream2050.support==true"
+                                v-model="dialog.setAuth.xStream2050.time"
+                                type="daterange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期"
+                                format="yyyy 年 MM 月 dd 日"
+                                value-format="timestamp"
+                                unlink-panels
+                                size="mini">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="选择进程" v-if="dialog.setAuth.xStream2050.support==true">
+                        <el-checkbox-group v-model="dialog.setAuth.xStream2050.proc_list">
+                            <el-checkbox label="MediaTransform"></el-checkbox>
+                            <el-checkbox label="miramserver"></el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+
+                    <el-form-item label="xStream2310">
+                        <el-switch v-model="dialog.setAuth.xStream2310.support"></el-switch>
+                        <el-date-picker
+                                v-if="dialog.setAuth.xStream2310.support==true"
+                                v-model="dialog.setAuth.xStream2310.time"
+                                type="daterange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期"
+                                format="yyyy 年 MM 月 dd 日"
+                                value-format="timestamp"
+                                unlink-panels
+                                size="mini">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="选择进程" v-if="dialog.setAuth.xStream2310.support==true">
+                        <el-checkbox-group v-model="dialog.setAuth.xStream2310.proc_list">
+                            <el-checkbox label="MediaTransform"></el-checkbox>
+                            <el-checkbox label="miramserver"></el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+
                      <!--<el-form-item label="接入能力个数" v-if="dialog.setAuth.JV210Joiner.support==true">-->
                          <!--<el-input style="width:300px" v-model="dialog.setAuth.JV210Joiner.serverNum"></el-input>-->
                      <!--</el-form-item>-->
