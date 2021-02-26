@@ -17,7 +17,14 @@ import java.util.UUID;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.FolderNotFoundException;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.mims.app.media.stream.video.program.*;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +78,8 @@ import it.sauronsoftware.jave.MultimediaInfo;
 @Transactional(rollbackFor = Exception.class)
 public class MediaVideoService {
 
+	private static final Logger LOG = LoggerFactory.getLogger(MediaVideoService.class);
+
 	@Autowired
 	private StoreQuery storeTool;
 	
@@ -118,7 +127,10 @@ public class MediaVideoService {
 	
 	@Autowired
 	private MediaFileEquipmentPermissionService mediaFileEquipmentPermissionService;
-	
+
+	@Autowired
+	private CapacityService capacityService;
+
 	/**
 	 * 视频媒资上传审核通过<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -959,4 +971,84 @@ public class MediaVideoService {
 			}
 		};
 	}
+
+	/**
+	 * @MethodName: refresh
+	 * @Description: 视频文件刷表
+	 * @param media 1
+	 * @Return: void
+	 * @Author: Poemafar
+	 * @Date: 2021/2/26 9:00
+	 **/
+	public void refresh(MediaVideoPO media)throws Exception{
+		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("ftp://")
+				.append(serverPropsQuery.queryProps().getFtpUsername())
+				.append(":"+serverPropsQuery.queryProps().getFtpPassword()+"@")
+				.append(serverPropsQuery.queryProps().getFtpIp())
+				.append(":")
+				.append(serverPropsQuery.queryProps().getFtpPort())
+				.append("/");
+		String url=stringBufferWrapper.append(media.getPreviewUrl()).toString();
+
+		RefreshSourceDTO refreshDTO = new RefreshSourceDTO();
+		if (media.getAddition()!=null && !media.getAddition().isEmpty()) {
+			refreshDTO = JSON.parseObject(media.getAddition(), RefreshSourceDTO.class);
+		}
+
+		refreshDTO.setType("file");
+		refreshDTO.setUrl(url);
+		if (refreshDTO.getDeviceIp()==null || refreshDTO.getDeviceIp().isEmpty()) {
+			refreshDTO.setDeviceIp(serverPropsQuery.queryProps().getAbilityIp());
+		}
+
+		LOG.info("[refresh-video-stream], send: {}",JSON.toJSONString(refreshDTO));
+		String result = null;
+		result = capacityService.refreshSource(JSON.toJSONString(refreshDTO));
+		LOG.info("[refresh-video-stream], ack: {}",result);
+		JSONObject resultObj = JSON.parseObject(result);
+		if (resultObj.containsKey("status")){
+			if (!resultObj.getInteger("status").equals(200)) {
+				throw new BaseException(StatusCode.ERROR,"刷源失败");
+			}
+		}
+		if (resultObj.containsKey("code")) {
+			if (resultObj.getInteger("code").intValue() != 0) {
+				throw new BaseException(StatusCode.ERROR,"刷源失败");
+			}
+		}
+
+		JSONArray programs = resultObj.getJSONObject("data").getJSONObject("input").getJSONArray("program_array");
+		List<MediaProgramPO> programPOs = new ArrayList();
+		for (int i = 0; i < programs.size(); i++) {
+			MediaProgramPO programPO = JSONObject.toJavaObject(programs.getJSONObject(i), MediaProgramPO.class);
+			if(programPO.getNum() == null){
+				continue;
+			}
+			if (programPO.getName()==null || programPO.getName().isEmpty()) {
+				programPO.setName(media.getName()+"-PROG"+i);
+			}
+			programPOs.add(programPO);
+		}
+		media.getProgramPOs().clear();
+		media.getProgramPOs().addAll(programPOs);
+		mediaVideoDao.save(media);
+	}
+
+	/**
+	 * @MethodName: getDetail
+	 * @Description: 获取视频节目信息
+	 * @param media 1
+	 * @Return: com.sumavision.tetris.mims.app.media.stream.video.program.ResultVO
+	 * @Author: Poemafar
+	 * @Date: 2021/2/26 9:24
+	 **/
+	public ResultVO getDetail(MediaVideoPO media){
+		List<MediaProgramVO> programVOS = new ArrayList<>();
+		for (int i = 0; i < media.getProgramPOs().size(); i++) {
+			MediaProgramPO programPO = media.getProgramPOs().get(i);
+			programVOS.add(new MediaProgramVO(programPO));
+		}
+		return new ResultVO(ResultCode.SUCCESS,programVOS);
+	}
+
 }

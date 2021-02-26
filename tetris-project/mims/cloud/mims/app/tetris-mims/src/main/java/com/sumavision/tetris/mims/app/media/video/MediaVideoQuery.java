@@ -7,6 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
+import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -533,4 +537,29 @@ public class MediaVideoQuery {
 		List<MediaVideoPO> entities = mediaVideoDao.findByPreviewUrlIn(previewUrls);
 		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(entities, MediaVideoVO.class);
 	}
+
+	/**
+	 * @MethodName: loadById
+	 * @Description: 导入媒资
+	 * @param id 1
+	 * @Return: com.sumavision.tetris.mims.app.media.video.MediaVideoPO
+	 * @Author: Poemafar
+	 * @Date: 2021/2/26 8:58
+	 **/
+	public MediaVideoPO loadById(Long id) throws Exception {
+		MediaVideoPO media = mediaVideoDao.findById(id);
+
+		if(media == null){
+			throw new MediaVideoNotExistException(id);
+		}
+
+		UserVO user = userQuery.current();
+
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+
+		return media;
+	}
+
 }

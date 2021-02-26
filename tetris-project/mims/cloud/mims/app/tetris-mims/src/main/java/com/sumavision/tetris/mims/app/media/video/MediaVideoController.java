@@ -12,6 +12,11 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
+import com.sumavision.tetris.mims.app.media.stream.video.program.ResultCode;
+import com.sumavision.tetris.mims.app.media.stream.video.program.ResultVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +52,8 @@ import it.sauronsoftware.jave.MultimediaInfo;
 @Controller
 @RequestMapping(value = "/media/video")
 public class MediaVideoController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MediaVideoController.class);
 
 	@Autowired
 	private FolderQuery folderQuery;
@@ -602,5 +609,43 @@ public class MediaVideoController {
 		
 		return result;
 	}
-	
+
+	/**
+	 * @MethodName: refreshStream
+	 * @Description: 刷源
+	 * @param id 1 视频流ID
+	 * @Return: java.lang.Object 节目信息
+	 * @Author: Poemafar
+	 * @Date: 2021/2/25 8:56
+	 **/
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/refresh/uri/{id}")
+	public Object refreshStream(@PathVariable Long id,HttpServletRequest request) throws Exception {
+		MediaVideoPO media = mediaVideoQuery.loadById(id);
+		try {
+			mediaVideoService.refresh(media);
+		} catch (Exception e) {
+			LOG.error("fail to refresh video source",e);
+			return new ResultVO(ResultCode.FAIL).setMessage(e.getMessage());
+		}
+		return new ResultVO(ResultCode.SUCCESS);
+	}
+
+	/**
+	 * @MethodName: refreshStream
+	 * @Description: 获取节目信息
+	 * @param id 1 视频ID
+	 * @Return: java.lang.Object 节目信息
+	 * @Author: Poemafar
+	 * @Date: 2021/2/25 8:56
+	 **/
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/uri/{id}")
+	public Object lookStreamDetail(@PathVariable Long id,HttpServletRequest request) throws Exception {
+		MediaVideoPO media = mediaVideoQuery.loadById(id);
+		return mediaVideoService.getDetail(media);
+	}
+
 }
