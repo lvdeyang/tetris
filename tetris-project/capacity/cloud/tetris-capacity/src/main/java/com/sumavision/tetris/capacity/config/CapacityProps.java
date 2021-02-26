@@ -21,7 +21,7 @@ public class CapacityProps {
 	private String zuulPort;
 
 	public String getIp() {
-		return ip;
+		return ip.trim();
 	}
 
 	public Integer getPort() {
@@ -29,7 +29,7 @@ public class CapacityProps {
 	}
 
 	public String getZuulIp() {
-		return zuulIp;
+		return zuulIp.trim();
 	}
 
 	public String getZuulPort() {
