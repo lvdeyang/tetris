@@ -413,13 +413,14 @@ public class UserController {
             String remark,
             String loginIp,
             Boolean resetPermissions,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            Long systemRoleId) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat, remark, loginIp, resetPermissions, bindRoles);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat, remark, loginIp, resetPermissions, bindRoles,systemRoleId);
 	}
 	
 	/**

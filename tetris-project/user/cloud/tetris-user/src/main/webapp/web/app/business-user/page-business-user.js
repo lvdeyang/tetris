@@ -60,6 +60,20 @@ define([
                     }
                 },
                 dialog: {
+                    edit: {
+                        companyRole: {
+                            visible: false,
+                            rows: [],
+                            current: ''
+                        }
+                    },
+                    add:{
+                        companyRole:{
+                            visible: false,
+                            rows: [],
+                            current: ''
+                        }
+                    },
                     createUser: {
                         visible: false,
                         nickname: '',
@@ -73,7 +87,9 @@ define([
                         classify: '企业用户',
                         company: {
                             id: '',
-                            name: ''
+                            name: '',
+                            companyRoleName:'',
+                            companyRoleId:''
                         },
                         loading: false
                     },
@@ -88,7 +104,9 @@ define([
                         oldPassword: '',
                         newPassword: '',
                         repeat: '',
-                        loading: false
+                        loading: false,
+                        companyRoleName:'',
+                        companyRoleId:''
                     },
                     import:{
                         requireType:['csv'],
@@ -218,6 +236,8 @@ define([
                     self.dialog.editUser.id = row.id;
                     self.dialog.editUser.nickname = row.nickname;
                     self.dialog.editUser.mobile = row.mobile;
+                    self.dialog.editUser.companyRoleName = row.companyRoleName;
+                    self.dialog.editUser.companyRoleId = row.companyRoleId;
                     self.dialog.editUser.mail = row.mail;
                     self.dialog.editUser.level = row.level?row.level:1;
                     self.dialog.editUser.visible = true;
@@ -227,6 +247,8 @@ define([
                     self.dialog.editUser.id = '';
                     self.dialog.editUser.nickname = '';
                     self.dialog.editUser.mobile = '';
+                    self.dialog.editUser.companyRoleName='';
+                    self.dialog.editUser.companyRoleId='';
                     self.dialog.editUser.mail = '';
                     self.dialog.editUser.level = 1;
                     self.dialog.editUser.editPassword = false;
@@ -246,7 +268,8 @@ define([
                         editPassword:self.dialog.editUser.editPassword,
                         oldPassword:self.dialog.editUser.oldPassword,
                         newPassword:self.dialog.editUser.newPassword,
-                        repeat:self.dialog.editUser.repeat
+                        repeat:self.dialog.editUser.repeat,
+                        systemRoleId:self.dialog.editUser.companyRoleId
                     }, function(data, status){
                         self.dialog.editUser.loading = false;
                         if(status !== 200) return;
@@ -256,8 +279,111 @@ define([
                                 break;
                             }
                         }
+                        self.load(1);
                         self.handleEditUserClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                selectSystemRole:function(f){
+                    var self = this;
+                    if(self.dialog.add.companyRole.visible) return;
+                    var params = {createType:f};
+                    if(f === 'COMPANY_ADMIN'){
+                        if(!self.dialog.createUser.company.id){
+                            self.$message({
+                                type:'error',
+                                message:'请先选择企业'
+                            });
+                            return;
+                        }
+                        params.companyId = self.dialog.createUser.company.id;
+                    }
+                    ajax.post('/system/role/query/by/create/type', params, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.add.companyRole.rows.push(data[i]);
+                            }
+                        }
+                        self.dialog.add.companyRole.visible = true;
+                        self.$nextTick(function(){
+                            for(var i=0; i<self.dialog.add.companyRole.rows.length; i++){
+                                if(self.dialog.add.companyRole.rows[i].id == self.dialog.createUser.company.companyRoleId){
+                                    self.$refs.systemRoleTable.setCurrentRow(self.dialog.add.companyRole.rows[i]);
+                                    break;
+                                }
+                            }
+                        });
+                    });
+                },
+                selectEditSystemRole:function(f){
+                    var self = this;
+                    if(self.dialog.edit.companyRole.visible) return;
+                    var params = {createType:f};
+                    if(f === 'COMPANY_ADMIN'){
+                        if(!self.dialog.createUser.company.id){
+                            self.$message({
+                                type:'error',
+                                message:'请先选择企业'
+                            });
+                            return;
+                        }
+                        params.companyId = self.dialog.createUser.company.id;
+                    }
+                    ajax.post('/system/role/query/by/create/type', params, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.edit.companyRole.rows.push(data[i]);
+                            }
+                        }
+                        self.dialog.edit.companyRole.visible = true;
+                        self.$nextTick(function(){
+                            for(var i=0; i<self.dialog.edit.companyRole.rows.length; i++){
+                                if(self.dialog.edit.companyRole.rows[i].id == self.dialog.editUser.companyRoleId){
+                                    self.$refs.systemEditRoleTable.setCurrentRow(self.dialog.edit.companyRole.rows[i]);
+                                    break;
+                                }
+                            }
+                        });
+                    });
+                },
+
+                handleEditSelectSystemRoleSelected:function(){
+                    var self = this;
+                    if(self.dialog.edit.companyRole.current){
+                        self.dialog.editUser.companyRoleId = self.dialog.edit.companyRole.current.id;
+                        self.dialog.editUser.companyRoleName = self.dialog.edit.companyRole.current.name;
+                    }
+                    self.handleEditSelectSystemRoleClose();
+                },
+                handleSelectSystemRoleSelected:function(){
+                    var self = this;
+                    if(self.dialog.add.companyRole.current){
+                        self.dialog.createUser.company.companyRoleId = self.dialog.add.companyRole.current.id;
+                        self.dialog.createUser.company.companyRoleName = self.dialog.add.companyRole.current.name;
+                    }
+                    self.handleSelectSystemRoleClose();
+                },
+                handleSelectSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.add.companyRole.visible = false;
+                    self.dialog.add.companyRole.rows.splice(0, self.dialog.add.companyRole.rows.length);
+                    self.dialog.add.companyRole.current = '';
+                },
+                handleEditSelectSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.edit.companyRole.visible = false;
+                    self.dialog.edit.companyRole.rows.splice(0, self.dialog.edit.companyRole.rows.length);
+                    self.dialog.edit.companyRole.current = '';
+                },
+                systemRoleKey:function(row){
+                    return row.id;
+                },
+                systemRoleChange:function(current){
+                    var self = this;
+                    self.dialog.add.companyRole.current = current;
+                },
+                systemEditRoleChange:function(current){
+                    var self = this;
+                    self.dialog.edit.companyRole.current = current;
                 },
                 handleRowDelete: function (scope) {
                     var self = this;
@@ -324,6 +450,9 @@ define([
                         classify:self.dialog.createUser.classify,
                         companyId:self.dialog.createUser.company.id
                     };
+
+                    params['systemRoleId'] = self.dialog.createUser.company.companyRoleId;
+                    params['companyId'] = self.dialog.createUser.company.id;
 
                     ajax.post('/user/add', params, function(data, status){
                         self.dialog.createUser.loading = false;
