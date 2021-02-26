@@ -2,8 +2,8 @@
  * Created by lvdeyang on 2018/12/24 0024.
  */
 define([
-    'text!' + window.APPPATH + 'page-company-system-role/page-company-system-role.html',
-    window.APPPATH + 'page-company-system-role/page-company-system-role.i18n',
+    'text!' + window.APPPATH + 'company-system-role/page-company-system-role.html',
+    window.APPPATH + 'company-system-role/page-company-system-role.i18n',
     'config',
     'restfull',
     'context',
@@ -11,7 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
-    'css!' + window.APPPATH + 'page-company-system-role/page-company-system-role.css'
+    'css!' + window.APPPATH + 'company-system-role/page-company-system-role.css'
 ], function(tpl, i18n, config, ajax, context, commons, Vue){
 
     var locale = context.getProp('locale');
@@ -59,6 +59,9 @@ define([
                     createSystemRoleGroup:{
                         visible:false,
                         name:'',
+                        companyShow:false,
+                        companys:[],
+                        companyId:'',
                         loading:false
                     },
                     editSystemRoleGroup:{
@@ -103,7 +106,7 @@ define([
                 loadGroups:function(){
                     var self = this;
                     self.loading.roleGroup = true;
-                    ajax.post('/system/role/group/list', null, function(data, status){
+                    ajax.post('/system/role/group/company/list', null, function(data, status){
                         self.loading.roleGroup = false;
                         if(status !== 200) return;
                         if(data && data.length>0){
@@ -129,13 +132,40 @@ define([
                     self.dialog.createSystemRoleGroup.visible = false;
                     self.dialog.createSystemRoleGroup.name = '';
                     self.dialog.createSystemRoleGroup.loading = false;
+                    self.handleCompanyClose();
+                },
+                handleCompanyShowClick:function(){
+                    var self = this;
+                    if(self.dialog.createSystemRoleGroup.companyShow){
+                        self.handleCompanyClose();
+                        return;
+                    }
+                    ajax.post('/company/list/all', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.createSystemRoleGroup.companys.push(data[i]);
+                            }
+                        }
+                        self.dialog.createSystemRoleGroup.companyShow = true;
+                    })
+                },
+                handleCompanyClose:function(){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.companys.splice(0, self.dialog.createSystemRoleGroup.companys.length);
+                    self.dialog.createSystemRoleGroup.companyId = '';
+                    self.dialog.createSystemRoleGroup.companyShow = false;
+                },
+                handleCompanyChange:function(currentRow){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.companyId = currentRow.id;
                 },
                 handleCreateSystemRoleGroupSubmit:function(){
                     var self = this;
                     self.dialog.createSystemRoleGroup.loading = true;
-                    ajax.post('/system/role/group/add', {
+                    var params = {
                         name:self.dialog.createSystemRoleGroup.name
-                    }, function(data, status){
+                    };
+                    ajax.post('/system/role/group/company/add', params, function(data, status){
                         self.dialog.createSystemRoleGroup.loading = false;
                         if(status !== 200) return;
                         self.tree.data.splice(0, 0, data);
@@ -220,7 +250,7 @@ define([
                     self.loadRoles(data.id, 1);
                 },
                 rowKey:function(row){
-                    return 'system-role-' + row.id;
+                    return 'business-role-' + row.id;
                 },
                 loadRoles:function(groupId, currentPage){
                     var self = this;
@@ -259,11 +289,16 @@ define([
                 },
                 handleCreateSystemRoleSubmit:function(){
                     var self = this;
-                    self.dialog.createSystemRole.loading = true;
-                    ajax.post('/system/role/add', {
+                    var params = {
                         groupId:self.tree.current.id,
-                        name:self.dialog.createSystemRole.name
-                    }, function(data, status){
+                        name:self.dialog.createSystemRole.name,
+                        createType:self.tree.current.companyId?'COMPANY_ADMIN':'SYSTEM_ADMIN'
+                    };
+                    if(self.tree.current.companyId){
+                        params.companyId = self.tree.current.companyId
+                    }
+                    self.dialog.createSystemRole.loading = true;
+                    ajax.post('/system/role/add', params, function(data, status){
                         self.dialog.createSystemRole.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
@@ -304,9 +339,17 @@ define([
                 handleBindMenu:function(scope){
                     var self = this;
                     var row = scope.row;
-                    ajax.post('/menu/feign/query/menus/by/role/id', {
-                        roleId:row.id
-                    }, function(data){
+                    var params = {roleId:row.id};
+
+                    params.companyId = self.tree.current.companyId;
+                    params.handleCompanyQuery = true;
+                    /*if(self.tree.current.companyId){
+                        params.companyId = self.tree.current.companyId;
+                        params.handleCompanyQuery = true;
+                    }else{
+                        params.handleCompanyQuery = false;
+                    }*/
+                    ajax.post('/menu/feign/query/menus/by/role/id', params, function(data){
                         var menus = data.menus;
                         var authorized = data.authorized;
                         if(menus && menus.length>0){
@@ -320,7 +363,11 @@ define([
                             }
                         }
                         self.dialog.bindMenu.role = row;
-                        if(data.homePage) self.dialog.bindMenu.homePage = data.homePage;
+                        if(data.homePage){
+                            self.dialog.bindMenu.homePage = data.homePage;
+                        }else{
+                            self.dialog.bindMenu.homePage = '';
+                        }
                         self.dialog.bindMenu.visible = true;
                     });
                 },
@@ -370,10 +417,10 @@ define([
                 handleMenuCheckChange:function(data, checked){
                     var self = this;
                     if(data.isGroup) return;
-                    if(data.autoGeneration){
+                   /* if(data.autoGeneration){
                         self.$refs.menuTree.setChecked(data, !checked);
                         return false;
-                    }
+                    }*/
                     if(checked){
                         ajax.post('/system/role/menu/permission/feign/add', {
                             roleId:self.dialog.bindMenu.role.id,

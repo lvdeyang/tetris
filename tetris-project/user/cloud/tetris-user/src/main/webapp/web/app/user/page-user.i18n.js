@@ -21,7 +21,7 @@ define(function(){
         columnOperation:'操作',
         tipHandleTokens:'登录状态',
         tipHandleRowEdit:'修改用户',
-        tipGotoBindSystemRole:'绑定角色',
+        tipGotoBindSystemRole:'功能授权',
         tipHandleRowDelete:'删除用户',
         dialogCreateUserTitle:'新建用户',
         dialogSelectCompanyTitle:'选择公司',

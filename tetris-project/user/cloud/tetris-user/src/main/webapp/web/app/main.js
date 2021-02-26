@@ -50,6 +50,7 @@ require.config({
     'page-user': window.APPPATH + 'user/page-user',
     'page-bind-system-role': window.APPPATH + 'bind-system-role/page-bind-system-role',
     'page-system-role': window.APPPATH + 'system-role/page-system-role',
+    'page-company-system-role': window.APPPATH + 'company-system-role/page-company-system-role',
     'page-system-theme': window.APPPATH + 'system-theme/page-system-theme',
     'page-system-storage': window.APPPATH + 'system-storage/page-system-storage',
     'page-bind-user': window.APPPATH + 'bind-user/page-bind-user',

@@ -77,7 +77,7 @@
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                                 	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" class="bt_list_handle" disabled></el-button>
-                                    <el-button v-else type="text" icon="el-icon-edit" class="bt_list_handle" @click="handleRowEdit(scope)"></el-button>
+                                    <el-button v-else type="text" icon="el-icon-edit" class="bt_list_handle" @click="handleRowEdit(scope)" :disabled="scope.row.isGroupCreator"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindBusinessRole" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-lock" class="bt_list_handle bt_list_center_handle" @click="gotoBindBusinessRole(scope)"></el-button>
@@ -114,6 +114,25 @@
                 width="500px"
                 :before-close="handleCreateUserClose">
 
+            <el-dialog :title="i18n.dialogSelectSystemRoleTitle" :visible.sync="dialog.add.companyRole.visible" width="600px"
+                       append-to-body :before-close="handleSelectSystemRoleClose">
+
+                <el-table
+                        ref="systemRoleTable"
+                        :data="dialog.add.companyRole.rows"
+                        :current-row-key="dialog.createUser.company.companyRoleId"
+                        :row-key="systemRoleKey"
+                        highlight-current-row
+                        @current-change="systemRoleChange"
+                        style="width:100%">
+                    <el-table-column :label="i18n.tableSelectSystemRoleColumnName" prop="name"/>
+                </el-table>
+                <div slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleSelectSystemRoleClose">{{i18n.cancelSystemRoleSelected}}</el-button>
+                    <el-button size="medium" type="primary" @click="handleSelectSystemRoleSelected">{{i18n.handleSystemRoleSelected}}</el-button>
+                </div>
+            </el-dialog>
+
             <div class="div_create">
                 <el-scrollbar style="height:100%;">
                     <el-form label-width="80px">
@@ -147,6 +166,10 @@
                         <el-form-item :label="i18n.labelCreateUserCompanyName">
                             <el-input v-model="dialog.createUser.company.name" disabled></el-input>
                         </el-form-item>
+                        <el-form-item :label="i18n.labelSelectSystemRole">
+                            <el-input readonly v-model="dialog.createUser.company.companyRoleName"
+                                      :placeholder="i18n.placeholderSelectCompanyRole" @focus="selectSystemRole('COMPANY_ADMIN')"></el-input>
+                        </el-form-item>
                     </el-form>
                 </el-scrollbar>
             </div>
@@ -165,6 +188,24 @@
                 width="500px"
                 :before-close="handleEditUserClose">
 
+            <el-dialog :title="i18n.dialogSelectSystemRoleTitle" :visible.sync="dialog.edit.companyRole.visible" width="600px"
+                       append-to-body :before-close="handleEditSelectSystemRoleClose">
+                <el-table
+                        ref="systemEditRoleTable"
+                        :data="dialog.edit.companyRole.rows"
+                        :current-row-key="dialog.editUser.companyRoleId"
+                        :row-key="systemRoleKey"
+                        highlight-current-row
+                        @current-change="systemEditRoleChange"
+                        style="width:100%">
+                    <el-table-column :label="i18n.tableSelectSystemRoleColumnName" prop="name"/>
+                </el-table>
+                <div slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleEditSelectSystemRoleClose">{{i18n.cancelSystemRoleSelected}}</el-button>
+                    <el-button size="medium" type="primary" @click="handleEditSelectSystemRoleSelected">{{i18n.handleSystemRoleSelected}}</el-button>
+                </div>
+            </el-dialog>
+
             <div>
                 <el-form label-width="80px">
                     <el-form-item :label="i18n.labelEditUserNickname">
@@ -177,8 +218,14 @@
                         <el-input v-model="dialog.editUser.mail"></el-input>
                     </el-form-item>
                     <el-form-item :label="i18n.labelEditUserLevel">
-                            <el-input-number v-model="dialog.editUser.level" :min="1" :max="1000" :label="i18n.labelEditUserLevelNumber"></el-input-number>
-                        </el-form-item>
+                        <el-input-number v-model="dialog.editUser.level" :min="1" :max="1000" :label="i18n.labelEditUserLevelNumber"></el-input-number>
+                    </el-form-item>
+
+                    <el-form-item :label="i18n.labelSelectSystemRole">
+                        <el-input readonly v-model="dialog.editUser.companyRoleName"
+                                  :placeholder="i18n.placeholderSelectCompanyRole" @focus="selectEditSystemRole('COMPANY_ADMIN')"></el-input>
+                    </el-form-item>
+
                     <div class="div_change_pw">
                         <el-button class="bt_change_pw" type="text" @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">
                             {{i18n.labelEditUserEditPassword}}

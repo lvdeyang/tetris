@@ -77,6 +77,39 @@ public class SystemRoleGroupController {
 		return view_roles;
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/company/list")
+	public Object listOfCompany(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		Long companyId = Long.valueOf(user.getGroupId());
+		
+		List<SystemRoleGroupPO> roles = systemRoleGroupDao.findAllOrderByUpdateTimeDesc();
+		List<SystemRoleGroupVO> view_roles = new ArrayList<SystemRoleGroupVO>();
+		if(roles!=null && roles.size()>0){
+			Set<Long> companyIds = new HashSetWrapper<Long>().add(-1l).getSet();
+			for(SystemRoleGroupPO role:roles){
+				if(role.getCompanyId()==companyId){
+					view_roles.add(new SystemRoleGroupVO().set(role));
+				}
+			}
+			/*List<CompanyPO> companyEntities = companyDao.findAllById(companyIds);
+			if(companyEntities!=null && companyEntities.size()>0){
+				for(CompanyPO companyEntity:companyEntities){
+					for(SystemRoleGroupVO view_role:view_roles){
+						if(companyEntity.getId().equals(view_role.getCompanyId())){
+							view_role.setCompanyName(companyEntity.getName());
+						}
+					}
+				}
+			}*/
+		}
+		return view_roles;
+	}
+	
 	/**
 	 * 添加一个系统角色组<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -97,6 +130,36 @@ public class SystemRoleGroupController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		
+		SystemRoleGroupPO group = new SystemRoleGroupPO();
+		group.setName(name);
+		if(companyId != null) group.setCompanyId(companyId);
+		group.setAutoGeneration(false);
+		group.setUpdateTime(new Date());
+		systemRoleGroupDao.save(group);
+		
+		SystemRoleGroupVO roleGroup = new SystemRoleGroupVO().set(group);
+		
+		if(companyId != null){
+			CompanyPO companyEntity = companyDao.findById(companyId);
+			roleGroup.setCompanyName(companyEntity.getName());
+		}
+		
+		return roleGroup;
+	}
+	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/company/add")
+	public Object addOfCompany(
+			String name,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		Long companyId = Long.valueOf(user.getGroupId());
 		
 		SystemRoleGroupPO group = new SystemRoleGroupPO();
 		group.setName(name);

@@ -727,9 +727,11 @@ public class UserService{
             String remark,
             String loginIp,
             Boolean resetPermissions,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            Long systemRoleId) throws Exception{
 		
 		UserPO user = userDao.findById(id);
+		
 		
 		if(user == null) throw new UserNotExistException(id);
 		
@@ -770,6 +772,12 @@ public class UserService{
 		user.setLoginIp(loginIp);;
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
+		
+		if(systemRoleId != null){
+			List<UserSystemRolePermissionPO> oldSystemPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.SYSTEM);
+			oldSystemPermissions.get(0).setRoleId(systemRoleId);
+			userSystemRolePermissionDao.save(oldSystemPermissions.get(0));
+		}
 		
 		UserVO result = new UserVO().set(user);
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
