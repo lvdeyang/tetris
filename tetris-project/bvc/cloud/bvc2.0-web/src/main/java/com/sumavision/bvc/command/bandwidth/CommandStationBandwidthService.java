@@ -80,7 +80,7 @@ public class CommandStationBandwidthService {
 	 */
 	public void alreadyExist(String stationName,String identity) throws BaseException{
 		
-		CommandStationBandwidthPO stattion= commandStationBandwidthDao.findByStationNameAndIdentity(stationName, identity);
+		CommandStationBandwidthPO stattion= commandStationBandwidthDao.findByStationNameOrIdentity(stationName, identity);
 		if(stattion != null){
 			throw new BaseException(StatusCode.FORBIDDEN, "站点名称或者站点标识符重复");
 		}
