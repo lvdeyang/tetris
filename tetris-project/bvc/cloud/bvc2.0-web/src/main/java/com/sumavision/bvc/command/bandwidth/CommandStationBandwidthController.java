@@ -76,7 +76,7 @@ public class CommandStationBandwidthController {
 		
 		CommandStationBandwidthPO station = commandStationBandwidthDao.findOne(id);
 		
-		Boolean bundle = bundleService.checkedRegion(station.getStationName());
+		Boolean bundle = bundleService.checkedRegion(station.getIdentity());
 		if(bundle){
 			throw new BaseException(StatusCode.FORBIDDEN, "当前站点下存在设备，无法删除");
 		}
@@ -116,7 +116,7 @@ public class CommandStationBandwidthController {
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
-		station.setIdentity(identity);
+//		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		
