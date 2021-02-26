@@ -1,5 +1,6 @@
 package com.sumavision.tetris.business.heartbeat.service;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +31,8 @@ public class HeartbeatService {
 	 * @param String heartbeatUrl 心跳地址
 	 */
 	public void setHeartbeatUrl(String ip, String heartbeatUrl) throws Exception{
-		
-		ResultCodeResponse response = capacityService.putHeartbeatUrl(ip, capacityProps.getPort(), heartbeatUrl);
+		TransformModule transformModule = new TransformModule(ip);
+		ResultCodeResponse response = capacityService.putHeartbeatUrl(transformModule, heartbeatUrl);
 		if(response.getResult_code().equals("1")){
 			throw new BaseException(StatusCode.ERROR, "url格式错误");
 		}

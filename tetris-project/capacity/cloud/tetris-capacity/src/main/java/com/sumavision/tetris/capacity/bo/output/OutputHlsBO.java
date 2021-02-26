@@ -30,6 +30,7 @@ public class OutputHlsBO {
 	/**
 	 * 废弃参数，新打包后删掉
 	 */
+	@Deprecated
 	private OutputStorageBO storage;
 
 	private List<OutputStorageBO> storage_array;

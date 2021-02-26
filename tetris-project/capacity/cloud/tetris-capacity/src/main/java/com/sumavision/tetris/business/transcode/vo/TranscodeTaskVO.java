@@ -5,6 +5,7 @@ import java.util.List;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
+import com.sumavision.tetris.capacity.constant.Constant;
 
 /**
  * 转码任务数据<br/>
@@ -15,13 +16,15 @@ import com.sumavision.tetris.capacity.bo.task.TaskBO;
 public class TranscodeTaskVO {
 
 	private String task_id;
-	
+
 	private String task_name;
 	
 	private String task_type;
 	
 	private String device_ip;
-	
+
+	private Integer device_port= Constant.TRANSFORM_PORT;
+
 	private List<InputBO> input_array;
 	
 	private List<TaskBO> task_array;
@@ -123,5 +126,13 @@ public class TranscodeTaskVO {
 		this.external_task_detail = external_task_detail;
 		return this;
 	}
-	
+
+	public Integer getDevice_port() {
+		return device_port;
+	}
+
+	public TranscodeTaskVO setDevice_port(Integer device_port) {
+		this.device_port = device_port;
+		return this;
+	}
 }

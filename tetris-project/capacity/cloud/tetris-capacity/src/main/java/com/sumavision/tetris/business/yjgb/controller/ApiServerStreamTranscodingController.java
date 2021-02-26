@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +37,15 @@ public class ApiServerStreamTranscodingController {
 	 * <b>日期：</b>2019年11月20日 下午3:55:01
 	 * @param String id 任务标识
 	 */
+	@OprLog(name="process")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(String messageId, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		LOGGER.info("[server-process]<delete-task> req, messageId: {}",messageId);
 		//能力对接
 		transformService.deleteStreamTask(user, messageId);
-		LOGGER.info("[server-process]<delete-task> resp, messageId: {}",messageId);
-		
+
 		return null;
 	}
 	
@@ -57,11 +57,11 @@ public class ApiServerStreamTranscodingController {
 	 * @param String id 任务标识
 	 * @param String outputParam 添加的输出
 	 */
+	@OprLog(name="process")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/output")
 	public Object addOutput(String id, String outputParam, HttpServletRequest request) throws Exception{
-		LOGGER.info("[server-process]<add-output> req, id: {}, param",id,outputParam);
 
 		UserVO user = userQuery.current();
 		
@@ -70,7 +70,6 @@ public class ApiServerStreamTranscodingController {
 		//添加输出
 		transformService.addStreamOutput(id, outputParams);
 
-		LOGGER.info("[server-process]<add-output> resp, id: {}",id);
 		return null;
 	}
 	
@@ -82,18 +81,16 @@ public class ApiServerStreamTranscodingController {
 	 * @param String id 任务标识
 	 * @param String outputParam 删除的输出
 	 */
+	@OprLog(name="process")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/output")
 	public Object deleteOutput(String id, String outputParam, HttpServletRequest request) throws Exception {
-		LOGGER.info("[server-process]<delete-output> req, id: {},param: {}",id,outputParam);
-		UserVO user = userQuery.current();
-		
+
 		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
 
 		//删除输出
 		transformService.deleteStreamOutput(id, outputParams);
-		LOGGER.info("[server-process]<delete-output> resp, id: {}",id);
 		return null;
 	}
 }

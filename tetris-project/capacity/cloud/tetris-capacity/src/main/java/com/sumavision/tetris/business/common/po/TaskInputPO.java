@@ -22,6 +22,8 @@ public class TaskInputPO extends AbstractBasePO{
 	
 	private String capacityIp;
 
+	private Integer capacityPort;
+
 	private String nodeId;
 	
 	private String input;
@@ -107,6 +109,15 @@ public class TaskInputPO extends AbstractBasePO{
 
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
+	}
+
+	public Integer getCapacityPort() {
+		return capacityPort;
+	}
+
+	public TaskInputPO setCapacityPort(Integer capacityPort) {
+		this.capacityPort = capacityPort;
+		return this;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.capacity.management;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,8 @@ public class CapacityManagementService {
 		capacity.setType(CapacityType.fromName(type));
 		
 		//查询授权信息并持久化,TODO:先做了封装和转码的audio,没做转码video
-		JSONObject authorizationJsonObject = capacityService.getAuthorizationAddMsgId(ip, capacity.getPort());
+		TransformModule transformModule = new TransformModule(ip);
+		JSONObject authorizationJsonObject = capacityService.getAuthorizationAddMsgId(transformModule);
 		String authorizationInfo = JSON.toJSONString(authorizationJsonObject);
 		
 		AuthorizationInfoBO authorizationInfoBO = JSONObject.parseObject(authorizationInfo, AuthorizationInfoBO.class);

@@ -7,6 +7,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.mims.app.media.stream.video.program.ResultCode;
+import com.sumavision.tetris.mims.app.media.stream.video.program.ResultVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +35,8 @@ import com.sumavision.tetris.user.UserVO;
 @Controller
 @RequestMapping(value = "/media/video/stream")
 public class MediaVideoStreamController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MediaVideoStreamController.class);
 
 	@Autowired
 	private FolderQuery folderQuery;
@@ -319,5 +325,42 @@ public class MediaVideoStreamController {
 	public Object getStreamType(HttpServletRequest request) throws Exception {
 		return MediaStreamType.queryAllType();
 	}
-	
+
+    /**
+     * @MethodName: refreshStream
+     * @Description: 刷源
+     * @param id 1 视频流ID
+     * @Return: java.lang.Object 节目信息
+     * @Author: Poemafar
+     * @Date: 2021/2/25 8:56
+     **/
+    @JsonBody
+    @ResponseBody
+    @RequestMapping(value = "/refresh/uri/{id}")
+    public Object refreshStream(@PathVariable Long id,HttpServletRequest request) throws Exception {
+        MediaVideoStreamPO media = mediaVideoStreamQuery.loadById(id);
+		try {
+			mediaVideoStreamService.refresh(media);
+		} catch (Exception e) {
+			LOG.error("fail to refresh source",e);
+			return new ResultVO(ResultCode.FAIL).setMessage(e.getMessage());
+		}
+		return new ResultVO(ResultCode.SUCCESS);
+	}
+
+	/**
+	 * @MethodName: refreshStream
+	 * @Description: 刷源
+	 * @param id 1 视频流ID
+	 * @Return: java.lang.Object 节目信息
+	 * @Author: Poemafar
+	 * @Date: 2021/2/25 8:56
+	 **/
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/uri/{id}")
+	public Object lookStreamDetail(@PathVariable Long id,HttpServletRequest request) throws Exception {
+		MediaVideoStreamPO media = mediaVideoStreamQuery.loadById(id);
+		return mediaVideoStreamService.getDetail(media);
+	}
 }

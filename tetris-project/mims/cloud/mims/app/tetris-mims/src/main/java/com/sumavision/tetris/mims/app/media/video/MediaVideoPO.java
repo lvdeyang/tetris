@@ -1,18 +1,15 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.ArrayList;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import java.util.List;
+import javax.persistence.*;
 
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.history.video.HistoryMediaVideoPO;
+import com.sumavision.tetris.mims.app.media.stream.video.program.MediaProgramPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
@@ -113,9 +110,11 @@ public class MediaVideoPO extends AbstractBasePO{
 	
 	/**是否同步*/
 	private Boolean synchro;
-	
-	
-	
+
+	/** 视频节目信息 */
+	private List<MediaProgramPO> programPOs = new ArrayList();
+
+
 	public Boolean getSynchro() {
 		return synchro;
 	}
@@ -360,6 +359,18 @@ public class MediaVideoPO extends AbstractBasePO{
 	public void setAddition(String addition) {
 		this.addition = addition;
 	}
+
+
+	@OneToMany(fetch= FetchType.EAGER , cascade=CascadeType.ALL,orphanRemoval = true)
+	@JoinColumn(name="videoId")
+	public List<MediaProgramPO> getProgramPOs() {
+		return programPOs;
+	}
+
+	public void setProgramPOs(List<MediaProgramPO> programPOs) {
+		this.programPOs = programPOs;
+	}
+
 
 	/**
 	 * 转换为历史数据<br/>

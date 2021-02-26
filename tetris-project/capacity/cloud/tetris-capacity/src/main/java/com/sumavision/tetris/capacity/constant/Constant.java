@@ -15,6 +15,8 @@ public class Constant {
 
     public static final Integer MIN_PORT = 1000;
 
+    public static final Integer TRANSFORM_PORT = 5656;
+
     private Constant() {
         throw new IllegalStateException("constant class");
     }

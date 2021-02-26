@@ -85,7 +85,7 @@ public class BackupService {
     public void syncTransformByAsync(DevicePO device){
         new Thread(()->{
             try {
-                syncService.syncTransform(device.getDeviceIp());
+                syncService.syncTransform(device.getDeviceIp(),device.getDevicePort());
             } catch (Exception e) {
                 //同步失败但主上的任务数据已经没了，此时会主备同输出，上报不同步？
                 if (FunUnitStatus.NORMAL.equals(device.getFunUnitStatus())) {

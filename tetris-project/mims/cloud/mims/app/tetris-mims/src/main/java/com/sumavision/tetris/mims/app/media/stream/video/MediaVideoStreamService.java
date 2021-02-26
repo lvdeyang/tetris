@@ -7,7 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.mims.app.media.stream.video.program.*;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +43,7 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 视频流流媒资操作（主增删改）<br/>
@@ -45,6 +54,8 @@ import com.sumavision.tetris.user.UserVO;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class MediaVideoStreamService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MediaVideoStreamService.class);
 
 	@Autowired
 	private MediaVideoStreamDAO mediaVideoStreamDao;
@@ -78,7 +89,13 @@ public class MediaVideoStreamService {
 	
 	@Autowired
 	private ProcessService processService;
-	
+
+	@Autowired
+	private CapacityService capacityService;
+
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
+
 	/**
 	 * 视频流媒资上传审核通过<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -603,4 +620,68 @@ public class MediaVideoStreamService {
 		UserVO user = userQuery.current();
 		return editTask(user, mediaId, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), streamType, null, null);
 	}
+
+	public void refresh(MediaVideoStreamPO media)throws Exception{
+		List<String> urls = mediaVideoStreamUrlRelationQuery.getAllUrlFromStreamId(media.getId());
+		if (CollectionUtils.isEmpty(urls)) {
+			throw new BaseException(StatusCode.FORBIDDEN,"未发现源地址");
+		}
+		RefreshSourceDTO refreshSourceDTO = new RefreshSourceDTO();
+
+		if (media.getAddition()!=null && !media.getAddition().isEmpty()) {
+			 refreshSourceDTO = JSON.parseObject(media.getAddition(), RefreshSourceDTO.class);
+		}
+		refreshSourceDTO.setUrl(urls.get(0));
+		refreshSourceDTO.setType(media.getStreamType());
+
+		LOG.info("[refresh-video-stream], send: {}",JSON.toJSONString(refreshSourceDTO));
+		String result = null;
+		result = capacityService.refreshSource(JSON.toJSONString(refreshSourceDTO));
+		LOG.info("[refresh-video-stream], ack: {}",result);
+		JSONObject resultObj = JSON.parseObject(result);
+		if (resultObj.containsKey("status")){
+			if (!resultObj.getInteger("status").equals(200)) {
+				throw new BaseException(StatusCode.ERROR,"刷源失败");
+			}
+		}
+		if (resultObj.containsKey("code")) {
+			if (resultObj.getInteger("code").intValue() != 0) {
+				throw new BaseException(StatusCode.ERROR,"刷源失败");
+			}
+		}
+
+		JSONArray programs = resultObj.getJSONObject("data").getJSONObject("input").getJSONArray("program_array");
+		List<MediaProgramPO> programPOs = new ArrayList();
+		for (int i = 0; i < programs.size(); i++) {
+			MediaProgramPO programPO = JSONObject.toJavaObject(programs.getJSONObject(i), MediaProgramPO.class);
+			if(programPO.getNum() == null){
+				continue;
+			}
+			if (programPO.getName()==null || programPO.getName().isEmpty()) {
+				programPO.setName(media.getName()+"-PROG"+i);
+			}
+			programPOs.add(programPO);
+		}
+		media.getProgramPOs().clear();
+		media.getProgramPOs().addAll(programPOs);
+		mediaVideoStreamDao.save(media);
+	}
+
+	/**
+	 * @MethodName: getDetail
+	 * @Description: 获取视频节目信息
+	 * @param media 1
+	 * @Return: com.sumavision.tetris.mims.app.media.stream.video.program.ResultVO
+	 * @Author: Poemafar
+	 * @Date: 2021/2/26 9:23
+	 **/
+	public ResultVO getDetail(MediaVideoStreamPO media){
+		List<MediaProgramVO> programVOS = new ArrayList<>();
+		for (int i = 0; i < media.getProgramPOs().size(); i++) {
+			MediaProgramPO programPO = media.getProgramPOs().get(i);
+			programVOS.add(new MediaProgramVO(programPO));
+		}
+		return new ResultVO(ResultCode.SUCCESS,programVOS);
+	}
+
 }

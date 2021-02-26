@@ -3,6 +3,7 @@ package com.sumavision.tetris.business.transcode.vo;/**
  */
 
 import com.sumavision.tetris.capacity.bo.input.InputBO;
+import com.sumavision.tetris.capacity.constant.Constant;
 
 import java.util.List;
 
@@ -31,6 +32,8 @@ public class InputPreviewVO {
      * 预览任务的设备
      */
     private String device_ip;
+
+    private Integer device_port= Constant.TRANSFORM_PORT;
 
     /**
      * 收流的设备,如果是null说明是任意设备都能收到流
@@ -99,6 +102,15 @@ public class InputPreviewVO {
 
     public InputPreviewVO setDelInputId(String delInputId) {
         this.delInputId = delInputId;
+        return this;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public InputPreviewVO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
         return this;
     }
 }

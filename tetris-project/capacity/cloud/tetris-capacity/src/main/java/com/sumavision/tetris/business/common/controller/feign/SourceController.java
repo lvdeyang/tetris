@@ -5,7 +5,7 @@ package com.sumavision.tetris.business.common.controller.feign;/**
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.annotation.OprLog;
 import com.sumavision.tetris.business.common.service.SourceService;
-import com.sumavision.tetris.business.common.vo.RefreshSourceVO;
+import com.sumavision.tetris.business.common.vo.RefreshSourceDTO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class SourceController {
     @JsonBody
     @RequestMapping(value = "/refresh")
     public Object refreshSource(String source)throws Exception{
-        RefreshSourceVO refreshSourceVO = JSONObject.parseObject(source,RefreshSourceVO.class);
-        return sourceService.refreshSource(refreshSourceVO);
+        RefreshSourceDTO refreshSourceDTO = JSONObject.parseObject(source, RefreshSourceDTO.class);
+        return sourceService.refreshSource(refreshSourceDTO);
     }
 
 

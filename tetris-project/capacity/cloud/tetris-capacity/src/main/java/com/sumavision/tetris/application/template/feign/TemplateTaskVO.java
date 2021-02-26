@@ -4,6 +4,7 @@ package com.sumavision.tetris.application.template.feign;/**
 
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
+import com.sumavision.tetris.capacity.constant.Constant;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class TemplateTaskVO {
 
     private String task_ip;               //业务必下的参数
 
-    private Integer task_port=5656;            //业务必下的参数
+    private Integer task_port = Constant.TRANSFORM_PORT;            //业务必下的参数
 
     private String template;             //业务必下的参数
 

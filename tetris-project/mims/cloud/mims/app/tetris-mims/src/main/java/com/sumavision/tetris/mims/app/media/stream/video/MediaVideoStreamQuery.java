@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -425,4 +427,29 @@ public class MediaVideoStreamQuery {
 		}
 		return returnList;
 	}
+
+	/**
+	 * @MethodName: loadById
+	 * @Description: 根据id视频流
+	 * @param id 1
+	 * @Return: com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO
+	 * @Author: Poemafar
+	 * @Date: 2021/2/25 9:35
+	 **/
+	public MediaVideoStreamPO loadById(Long id) throws Exception {
+		MediaVideoStreamPO media = mediaVideoStreamDao.findById(id);
+
+		if(media == null){
+			throw new MediaVideoStreamNotExistException(id);
+		}
+
+		UserVO user = userQuery.current();
+
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+
+		return media;
+	}
+
 }

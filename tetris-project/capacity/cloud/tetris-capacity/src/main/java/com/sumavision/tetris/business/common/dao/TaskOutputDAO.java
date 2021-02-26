@@ -29,8 +29,10 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 	public List<TaskOutputPO> findByInputId(Long id);
 	
 	public List<TaskOutputPO> findByCapacityIp(String capacityIp);
+	public List<TaskOutputPO> findByCapacityIpAndCapacityPort(String capacityIp,Integer capacityPort);
 	public Integer countDistinctByCapacityIpAndOutputNotNullAndTaskNotNull(String capacityIp);
 	public List<TaskOutputPO> findByCapacityIpAndSyncStatus(String capacityIp, Integer syncStatus);
+	public List<TaskOutputPO> findByCapacityIpAndCapacityPortAndSyncStatus(String capacityIp,Integer port, Integer syncStatus);
 
 	public List<TaskOutputPO> findByTaskUuidNotAndTaskUuidNotNullAndOutputNotNullAndTaskNotNull(String taskId);
 	public List<TaskOutputPO> findByTaskUuidNotNullAndOutputNotNullAndTaskNotNull();

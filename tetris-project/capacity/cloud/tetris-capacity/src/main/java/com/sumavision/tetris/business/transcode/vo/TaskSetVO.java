@@ -1,6 +1,7 @@
 package com.sumavision.tetris.business.transcode.vo;
 
 import com.sumavision.tetris.capacity.bo.request.*;
+import com.sumavision.tetris.capacity.constant.Constant;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ public class TaskSetVO implements Serializable {
     private Long task_link_id;
 
     private String device_ip;
+
+    private Integer device_port = Constant.TRANSFORM_PORT;
 
     private CreateInputsRequest create_input;
     private DeleteInputsRequest delete_input;
@@ -200,5 +203,14 @@ public class TaskSetVO implements Serializable {
 
     public void setModify_backup_mode(ArrayList<PutBackupModeRequest> modify_backup_mode) {
         this.modify_backup_mode = modify_backup_mode;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public TaskSetVO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
+        return this;
     }
 }

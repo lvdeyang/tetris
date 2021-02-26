@@ -1,17 +1,14 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.stream.video.program.MediaProgramPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
@@ -89,7 +86,10 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 	
 	/** 附加字段 */
 	private String addition;
-	
+
+	/** 视频流节目信息 */
+	private List<MediaProgramPO> programPOs = new ArrayList();
+
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -253,6 +253,16 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 
 	public void setAddition(String addition) {
 		this.addition = addition;
+	}
+
+	@OneToMany(fetch= FetchType.EAGER , cascade=CascadeType.ALL,orphanRemoval = true)
+	@JoinColumn(name="videoStreamId")
+	public List<MediaProgramPO> getProgramPOs() {
+		return programPOs;
+	}
+
+	public void setProgramPOs(List<MediaProgramPO> programPOs) {
+		this.programPOs = programPOs;
 	}
 
 	/**

@@ -44,6 +44,7 @@ define([
                 activeId:window.BASEPATH + 'index/media/video/' + window.TOKEN,
                 current:'',
                 breadCrumb:[],
+                refreshloading:false,
                 table:{
                     tooltip:false,
                     rows:[],
@@ -91,6 +92,11 @@ define([
                     upload:{
                         fileType:['video'],
                         multiple:false
+                    },
+                    lookVideo:{
+                        visible:false,
+                        source:{},
+                        programs:[]
                     }
                 },
                 prepareUploadFileInfo:null
@@ -760,6 +766,38 @@ define([
                         }
                     }
                     closeFunc();
+                },
+                handleRefresh:function(scope){
+                    let self=this;
+                    this.refreshloading=true;
+                    let row = scope.row;
+                    ajax.post('/media/video/refresh/uri/' + row.id, null, function(data){
+                        if(data.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:data.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                        self.refreshloading=false;
+                    });
+                },
+                handleDetailBtnClick(scope){
+                    let self=this
+                    this.dialog.lookVideo.visible=true;
+                    let row=scope.row;
+                    self.dialog.lookVideo.source=row;
+                    self.dialog.lookVideo.source.size=this.formatSize(row.size);
+                    ajax.post('/media/video/get/uri/' + row.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.dialog.lookVideo.programs=result.data
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                    });
+
+                },
+                handleLookVideoClose(){
+                    this.dialog.lookVideo.visible=false;
                 }
             },
             created:function(){

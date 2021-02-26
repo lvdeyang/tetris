@@ -184,6 +184,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/router/*")
 												   .add("/taskPreview/queryPreviewUrlList")
 												   .add("/tetris-sts/*")
+													.add("/api/server/sts/*")
 												   .add("/eb-insert-web/*")
 												   .add("/eb-monitor-web/*")
 												   .add("/eb-resource-web/*")

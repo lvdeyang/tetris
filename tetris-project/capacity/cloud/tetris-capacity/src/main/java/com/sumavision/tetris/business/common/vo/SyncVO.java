@@ -2,6 +2,8 @@ package com.sumavision.tetris.business.common.vo;/**
  * Created by Poemafar on 2020/11/26 9:52
  */
 
+import com.sumavision.tetris.capacity.constant.Constant;
+
 import java.util.List;
 
 /**
@@ -14,6 +16,8 @@ import java.util.List;
 public class SyncVO {
 
     private String deviceIp;
+
+    private Integer devicePort= Constant.TRANSFORM_PORT;
 
     private String businessType;
 
@@ -41,5 +45,14 @@ public class SyncVO {
 
     public void setBusinessType(String businessType) {
         this.businessType = businessType;
+    }
+
+    public Integer getDevicePort() {
+        return devicePort;
+    }
+
+    public SyncVO setDevicePort(Integer devicePort) {
+        this.devicePort = devicePort;
+        return this;
     }
 }

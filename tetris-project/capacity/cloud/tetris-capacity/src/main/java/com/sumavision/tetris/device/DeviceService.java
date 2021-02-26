@@ -3,6 +3,7 @@ package com.sumavision.tetris.device;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.alarm.service.AlarmService;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.Util.CommonUtil;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
@@ -170,7 +171,7 @@ public class DeviceService {
         }
         deviceDao.save(devicePO);
         try {
-            alarmService.setAlarmUrl(deviceIp);//离线的时候就会设置失败
+            alarmService.setAlarmUrl(new TransformModule(deviceIp,port));//离线的时候就会设置失败
         } catch (Exception e) {
             LOGGER.error("设置告警地址失败",e);
         }
@@ -221,7 +222,7 @@ public class DeviceService {
         }
         //设置告警地址
         try {
-            alarmService.setAlarmUrl(devicePO.getDeviceIp());
+            alarmService.setAlarmUrl(new TransformModule(devicePO.getDeviceIp(),devicePO.getDevicePort()));
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(StatusCode.ERROR,"告警地址设置失败");
@@ -387,7 +388,7 @@ public class DeviceService {
         BackType backType = BackType.valueOf(backTypeStr.toUpperCase(Locale.ENGLISH));
         if (!one.getBackType().equals(backType)&&backType.equals(BackType.BACK)){
             //删该设备上的所有任务
-            taskService.removeAll(one.getDeviceIp());
+            taskService.removeAll(new TransformModule(one.getDeviceIp(),one.getDevicePort()));
         }
         one.setDeviceGroupId(groupId);
         one.setName(name);
@@ -461,7 +462,7 @@ public class DeviceService {
 
     public void syncDevice(Long id) throws Exception {
         DevicePO device = getDeviceByIdWithNullCheck(id);
-        syncService.syncTransform(device.getDeviceIp());
+        syncService.syncTransform(device.getDeviceIp(),device.getDevicePort());
         deviceDao.updateFunUnitStatusById(FunUnitStatus.NORMAL,id);
     }
 

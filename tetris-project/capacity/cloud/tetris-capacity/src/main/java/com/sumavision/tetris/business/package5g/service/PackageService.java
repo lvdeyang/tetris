@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import org.hibernate.exception.ConstraintViolationException;
@@ -136,7 +137,7 @@ public class PackageService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, srcIp, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(srcIp));
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -149,7 +150,7 @@ public class PackageService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, srcIp, capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(srcIp));
 				throw e;
 				
 			} catch (Exception e) {
@@ -210,7 +211,7 @@ public class PackageService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, srcIp, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(srcIp));
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -223,7 +224,7 @@ public class PackageService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, srcIp, capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(srcIp));
 				throw e;
 				
 			} catch (Exception e) {

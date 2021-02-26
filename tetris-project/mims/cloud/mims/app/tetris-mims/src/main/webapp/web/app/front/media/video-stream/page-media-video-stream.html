@@ -8,7 +8,7 @@
     </template>
 
     <template>
-        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+        <el-card v-loading="refreshloading" class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
                 <el-button type="primary" size="small" @click="dialog.addVideoStream.visible = true" :disabled="!current.id"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加视频流</el-button>
                 <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
@@ -48,6 +48,16 @@
                                 <el-button v-if="scope.row.type==='FOLDER'" type="text" style="padding:0; color:inherit;"><a class="folder-link" :href="'#/page-media-video-stream/'+scope.row.id">{{scope.row.name}}</a></el-button>
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
+                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="刷源" placement="bottom">
+                                        <el-button size="small" type="text"  style="padding:0; position:absolute; top:1px; right:84px;" @click="handleRefresh(scope)">
+                                            <span class="el-icon-refresh" style="font-size:20px; position:relative; top:1px;"></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="详情" placement="bottom">
+                                        <el-button size="small" type="text"  style="padding:0; position:absolute; top:1px; right:57px;" @click="handleDetailBtnClick(scope)">
+                                            <span class="el-icon-tickets" style="font-size:20px; position:relative; top:1px;"></span>
+                                        </el-button>
+                                    </el-tooltip>
                                     <!--<el-tooltip v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="预览" placement="bottom">
                                         <el-button size="small" type="text" style="padding:0; position:absolute; top:2px; right:57px;" @click="handlePreview(scope)">
                                             <span class="icon-eye-open" style="font-size:18px; position:relative; top:1px;"></span>
@@ -307,6 +317,91 @@
                 <el-button size="medium" type="primary" :loading="dialog.editVideoStream.loading" @click="editMediaVideoStreamTask">确 定</el-button>
             </span>
 
+        </el-dialog>
+
+        <!--查看视频流媒资对话框-->
+        <el-dialog
+                title="视频流详情"
+                :visible="dialog.lookVideoStream.visible"
+                :before-close="handleLookVideoStreamClose"
+                width="900px"
+        >
+            <div style="padding: 10px 0px 10px 0px">
+                <span style="font-size:16px">媒资信息</span>
+            </div>
+            <el-form ref="form" label-width="80px" style="width:60%">
+                <el-form-item label="名称:">
+                    <el-input v-model="dialog.lookVideoStream.source.name" readonly></el-input>
+                </el-form-item>
+                <el-form-item label="流类型:">
+                    <el-input v-model="dialog.lookVideoStream.source.streamType" readonly></el-input>
+                </el-form-item>
+                <el-form-item label="流地址">
+                    <el-input v-model="dialog.lookVideoStream.source.previewUrl" readonly></el-input>
+                </el-form-item>
+
+            </el-form>
+            <div style="padding: 10px 0px 10px 0px">
+                <span style="font-size:16px">节目列表</span>
+            </div>
+            <template v-if="dialog.lookVideoStream.programs.length===0">
+                <div style="margin-left:40%;padding: 30px 0px 30px 0px;font-size:16px;">暂无数据（刷源后可展示节目信息）</div>
+            </template>
+            <template v-else>
+                <template v-for="(item,index) in dialog.lookVideoStream.programs">
+                    <el-card shadow="hover" >
+                        <div slot="header">节目{{index+1}}</div>
+                        <el-row style="margin-left: 15px;">
+                            <el-col :span="5">节目名：{{item.name}}</el-col>
+                            <el-col :span="4">节目号：{{item.num}}</el-col>
+                            <el-col :span="4">PMT PID：{{item.pmtPid}}</el-col>
+                            <el-col :span="4">PCR PID：{{item.pcrPid}}</el-col>
+                            <el-col :span="7">供应商：{{item.provider}}</el-col>
+                        </el-row>
+                        <div style="margin-top: 20px;">
+                            <div style="font-size:16px;padding-bottom: 10px;margin-bottom: 8px;border-bottom:1px solid #e2e2e2" >
+                                视频
+                                <el-tag v-if="!item.videos" type="error" size="mini">无</el-tag>
+                                <el-tag v-else type="success" size="mini">共{{item.videos.length}}个</el-tag>
+                            </div>
+                            <el-row style="margin-left: 15px;margin-top: 5px" v-for="video in item.videos">
+                                <el-col :span="3">PID: {{video.pid}}</el-col>
+                                <el-col :span="4">编码格式：{{video.type}}</el-col>
+                                <el-col :span="4">码率：{{video.bitrate}}bps</el-col>
+                                <el-col :span="4">分辨率：{{video.width}}x{{video.height}}</el-col>
+                                <el-col :span="4">帧率：{{video.fps}}</el-col>
+                                <el-col :span="4">宽高比：{{video.ratio}}</el-col>
+                            </el-row>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div style="font-size:16px;padding-bottom: 10px;margin-bottom: 8px;border-bottom:1px solid #e2e2e2" >
+                                音频
+                                <el-tag v-if="!item.audios" type="error" size="mini">无</el-tag>
+                                <el-tag v-else type="success" size="mini">共{{item.audios.length}}个</el-tag>
+                            </div>
+                            <el-row style="margin-left: 15px;margin-top: 5px" v-for="audio in item.audios">
+                                <el-col :span="3">PID: {{audio.pid}}</el-col>
+                                <el-col :span="4">编码格式：{{audio.type}}</el-col>
+                                <el-col :span="4">码率：{{audio.bitrate}}bps</el-col>
+                                <el-col :span="4">采样率：{{audio.sample_rate}}</el-col>
+                                <el-col :span="4">声道：{{audio.channel_layout}}</el-col>
+                                <el-col :span="3">位深：{{audio.bit_depth}}</el-col>
+                            </el-row>
+                        </div>
+                        <div style="margin-top: 20px">
+                            <div style="font-size:16px;padding-bottom: 10px;margin-bottom: 8px;border-bottom:1px solid #e2e2e2">
+                                字幕
+                                <el-tag v-if="!item.subtitles" type="error" size="mini">无</el-tag>
+                                <el-tag v-else type="success" size="mini">共{{item.subtitles.length}}个</el-tag>
+                            </div>
+                            <el-row style="margin-left: 15px;margin-top: 5px" v-for="sub in item.subtitles">
+                                <el-col :span="3">PID: {{sub.pid}}</el-col>
+                                <el-col :span="6">字幕格式：{{sub.type}}</el-col>
+                            </el-row>
+                        </div>
+                    </el-card>
+                </template>
+            </template>
         </el-dialog>
 
         <!-- 选择图片对话框 -->
