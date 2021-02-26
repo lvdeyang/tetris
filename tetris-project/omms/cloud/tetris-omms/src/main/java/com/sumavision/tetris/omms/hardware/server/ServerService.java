@@ -899,6 +899,7 @@ public class ServerService {
 				ftp.disconnect();
 				return success;
 			}
+			filename = "auth_run.txt";
 			String str = path + filename;
 			out = ftp.storeFileStream(new String(str.getBytes("utf-8"), "iso-8859-1"));
 			
