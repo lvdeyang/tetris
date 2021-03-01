@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.heartbeat.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,8 @@ public class HeartbeatFeignController {
 	 * <b>日期：</b>2020年1月14日 下午1:19:12
 	 * @param String capacityIp 能力ip
 	 * @param String heartbeatUrl 心跳地址
-	 */ 
+	 */
+	@OprLog
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set/heartbeatUrl")

@@ -15,6 +15,9 @@ public class DirectorTaskVO {
 	
 	/** 能力ip */
 	private String capacityIp;
+
+	/** 能力port */
+	private Integer capacityPort;
 	
 	/** 选中索引源 */
 	private String select_index;
@@ -75,5 +78,13 @@ public class DirectorTaskVO {
 	public void setDestinations(List<DestinationVO> destinations) {
 		this.destinations = destinations;
 	}
-	
+
+	public Integer getCapacityPort() {
+		return capacityPort;
+	}
+
+	public DirectorTaskVO setCapacityPort(Integer capacityPort) {
+		this.capacityPort = capacityPort;
+		return this;
+	}
 }

@@ -2,11 +2,13 @@ package com.sumavision.tetris.business.director.service;
 
 import java.util.*;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.director.vo.*;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.EncodeConstant.*;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import com.sumavision.tetris.sts.transformTemplate.jni.TransformJniLib;
@@ -111,6 +113,10 @@ public class DirectorTaskService {
 			
 			String taskId = director.getTaskId();
 			String capacityIp = director.getCapacityIp();
+			Integer capacityPort = Constant.TRANSFORM_PORT;
+			if (director.getCapacityPort() != null) {
+				capacityPort=director.getCapacityPort();
+			}
 			List<SourceVO> sources = director.getSources();
 			Collections.sort(sources, new SourceVO.IndexComparator());
 			
@@ -137,6 +143,8 @@ public class DirectorTaskService {
 			input.setTaskUuid(taskId);
 			input.setInput(JSON.toJSONString(backup));
 			input.setNodeId(backup.getId());
+			input.setCapacityIp(capacityIp);
+			input.setCapacityPort(capacityPort);
 			input.setType(BusinessType.DIRECTOR);
 			taskInputDao.save(input);
 			
@@ -148,7 +156,7 @@ public class DirectorTaskService {
 		
 			List<OutputBO> outputs = director2OutputBO(taskId, tasks, director.getDestinations(), capacityIp);
 		
-			DirectorRequestBO request = sendProtocal(taskId, capacityIp, JSONObject.toJSONString(allInputIds), needCreateInputs, tasks, outputs);
+			DirectorRequestBO request = sendProtocal(taskId, capacityIp,capacityPort, JSONObject.toJSONString(allInputIds), needCreateInputs, tasks, outputs);
 		
 			allRequest.add(request);
 		}
@@ -240,7 +248,7 @@ public class DirectorTaskService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(tasks).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 			
-			capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest,new TransformModule(output.getCapacityIp()));
 			
 		}
 		
@@ -369,7 +377,7 @@ public class DirectorTaskService {
 					delete.getOutput_array().add(idRequest);
 				}
 
-				capacityService.deleteOutputsWithMsgId(delete, capacityProps.getIp());
+				capacityService.deleteOutputsWithMsgId(delete,new TransformModule());
 				
 				output.setUpdateTime(new Date());
 				output.setOutput(JSON.toJSONString(outputs));
@@ -1124,6 +1132,7 @@ public class DirectorTaskService {
 	public DirectorRequestBO sendProtocal(
 			String taskUuid,
 			String capacityIp,
+			Integer capacityPort,
 			String inputIds,
 			List<InputBO> inputBOs,
 			List<TaskBO> taskBOs,
@@ -1140,6 +1149,7 @@ public class DirectorTaskService {
 			output.setTaskUuid(taskUuid);
 			output.setType(BusinessType.DIRECTOR);
 			output.setCapacityIp(capacityIp);
+			output.setCapacityPort(capacityPort);
 			output.setUpdateTime(new Date());
 			
 			taskOutputDao.save(output);
@@ -1151,6 +1161,7 @@ public class DirectorTaskService {
 			//AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 			
 			response.setCapacityIp(capacityIp);
+			response.setCapacityPort(capacityPort);
 			//response.setReponse(allResponse);
 			response.setRequest(allRequest);
 			
@@ -1196,7 +1207,7 @@ public class DirectorTaskService {
 						request.getOutput_array().addAll(requestBO.getRequest().getOutput_array());
 					}
 				}
-				AllResponse allResponse = capacityService.createAllAddMsgId(request, ip, capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(request,new TransformModule(ip));
 				DirectorRequestBO combine = new DirectorRequestBO();
 				combine.setCapacityIp(ip);
 				combine.setRequest(request);
@@ -1209,7 +1220,7 @@ public class DirectorTaskService {
 			
 			//回滚
 			for(DirectorRequestBO combine: combineRequests){
-				capacityService.deleteAllAddMsgId(combine.getRequest(), combine.getCapacityIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(combine.getRequest(),new TransformModule(combine.getCapacityIp()));
 			}
 			
 			throw e;
@@ -1221,12 +1232,15 @@ public class DirectorTaskService {
 	public void addTask(TranscodeTaskVO transcode)throws Exception{
 		String taskUuid = transcode.getTask_id();
 		String capacityIp = transcode.getDevice_ip();
-
+		Integer capacityPort = Constant.TRANSFORM_PORT;
+		if (transcode.getDevice_port() != null) {
+			capacityPort=transcode.getDevice_port();
+		}
 		List<InputBO> inputBOs = transcode.getInput_array();
 		List<TaskBO> taskBOs = transcode.getTask_array();
 		List<OutputBO> outputBOs = transcode.getOutput_array();
 
-		transcodeTaskService.save(taskUuid, capacityIp, inputBOs, taskBOs, outputBOs, BusinessType.DIRECTOR);
+		transcodeTaskService.save(taskUuid, capacityIp,capacityPort, inputBOs, taskBOs, outputBOs, BusinessType.DIRECTOR);
 	}
 
 	public void delTask(String taskId) throws Exception {
@@ -1237,10 +1251,15 @@ public class DirectorTaskService {
 	}
 
 	public String transferTask(TransferVO transferVO) throws Exception {
+		String capacityIp = transferVO.getDevice_ip();
+		Integer capacityPort = Constant.TRANSFORM_PORT;
+		if (transferVO.getDevice_port() != null) {
+			capacityPort=transferVO.getDevice_port();
+		}
 		ProtocolType inType = ProtocolType.getProtocolType(transferVO.getInType());
 		ProtocolType outType = ProtocolType.getProtocolType(transferVO.getOutType());
 		String srtMode = transferVO.getSrtMode();
-		return  taskService.transferStream(transferVO.getDevice_ip(),transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
+		return  taskService.transferStream(capacityIp,capacityPort,transferVO.getMission_id(),inType,transferVO.getInUrl(),srtMode,outType,transferVO.getOutUrl(),BusinessType.DIRECTOR);
 	}
 
 	public void switchTask(String jobId, String targetInputId) throws Exception {
@@ -1297,7 +1316,7 @@ public class DirectorTaskService {
 				}
 			}
 		}
-		transcodeTaskService.changeBackUp(backBO.getId(),selectIndex.toString(),"manual",job.getCapacityIp());
+		transcodeTaskService.changeBackUp(backBO.getId(),selectIndex.toString(),"manual",new TransformModule(job.getCapacityIp()));
 		if (backBO.getBack_up_raw()!=null) {
 			backBO.getBack_up_raw().setSelect_index(selectIndex.toString());
 		}

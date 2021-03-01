@@ -8,6 +8,12 @@ public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
 	/** 公司名称 */
 	private String name;
 	
+	/** 系统角色id */
+	private Long systemRoleId;
+	
+	/** 系统角色名称 */
+	private String systemRoleName;
+	
 	/** 公司首页地址 */
 	private String homeLink;
 	
@@ -44,6 +50,24 @@ public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
 		return this;
 	}
 	
+	public Long getSystemRoleId() {
+		return systemRoleId;
+	}
+
+	public CompanyVO setSystemRoleId(Long systemRoleId) {
+		this.systemRoleId = systemRoleId;
+		return this;
+	}
+
+	public String getSystemRoleName() {
+		return systemRoleName;
+	}
+
+	public CompanyVO setSystemRoleName(String systemRoleName) {
+		this.systemRoleName = systemRoleName;
+		return this;
+	}
+
 	public String getHomeLink() {
 		return homeLink;
 	}
@@ -131,6 +155,7 @@ public class CompanyVO extends AbstractBaseVO<CompanyVO, CompanyPO>{
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
+			.setSystemRoleId(entity.getSystemRoleId())
 			.setHomeLink(entity.getHomeLink()==null?"":entity.getHomeLink())
 			.setThemeId(entity.getThemeId())
 			.setLogo(entity.getLogo())

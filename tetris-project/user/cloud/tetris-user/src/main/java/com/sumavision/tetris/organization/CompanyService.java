@@ -4,13 +4,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.UserPO;
@@ -28,6 +31,9 @@ public class CompanyService {
 
 	@Autowired
 	private CompanyDAO companyDao;
+	
+	@Autowired
+	private UserSystemRolePermissionService userSystemRolePermissionService;
 	
 	@Autowired
 	private SystemThemeDAO systemThemeDao;
@@ -48,16 +54,33 @@ public class CompanyService {
 	 * <b>日期：</b>2019年1月24日 上午10:09:02
 	 * @param String companyName 公司名
 	 * @param UserPO user 创建用户
+	 * @param Long systemRoleId 系统角色id
 	 */
-	public CompanyVO add(String companyName, UserPO user) throws Exception{
+	public CompanyVO add(String companyName, UserPO user, Long systemRoleId) throws Exception{
 		CompanyPO company = new CompanyPO();
 		company.setName(companyName);
 		company.setUserId(user.getId().toString());
+		company.setSystemRoleId(systemRoleId);
 		company.setUpdateTime(new Date());
 		companyDao.save(company);
 		//加关联
 		companyUserPermissionService.add(company, user);
 		return new CompanyVO().set(company);
+	}
+	
+	/**
+	 * 企业修改功能授权<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 上午9:21:30
+	 * @param Long companyId 企业id
+	 * @param Long systemRoleId 系统角色id
+	 */
+	public void editSystemRole(Long companyId, Long systemRoleId) throws Exception{
+		CompanyPO companyEntity = companyDao.findById(companyId);
+		companyEntity.setSystemRoleId(systemRoleId);
+		companyDao.save(companyEntity);
+		userSystemRolePermissionService.bindSystemRole(Long.valueOf(companyEntity.getUserId()), new ArrayListWrapper<Long>().add(systemRoleId).getList());
 	}
 	
 	/**

@@ -3,12 +3,15 @@ package com.sumavision.tetris.menu;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.menu.exception.MenuNotExistException;
 
@@ -98,9 +101,10 @@ public class MenuService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月17日 上午9:16:19
 	 * @param Long id 菜单id
-	 * @return List<MenuVO> 删除的所有菜单
+	 * @return deletedMenus List<MenuVO> 删除的所有菜单
+	 * @return parentMenuChanged boolean 父菜单是否变成叶子节点
 	 */
-	public List<MenuVO> remove(Long id) throws Exception{
+	public Map<String, Object> remove(Long id) throws Exception{
 		
 		MenuPO menu = menuDao.findById(id);
 		if(menu == null){
@@ -125,7 +129,20 @@ public class MenuService {
 		List<SystemRoleMenuPermissionPO> permissions = systemRoleMenuPermissionDao.findByMenuIdIn(menuIds);
 		if(permissions!=null && permissions.size()>0) systemRoleMenuPermissionDao.deleteInBatch(permissions);
 		
-		return MenuVO.getConverter(MenuVO.class).convert(totalMenus, MenuVO.class);
+		Long parentMenuId = menu.getParentId();
+		boolean parentMenuChanged = false;
+		if(parentMenuId != null){
+			List<MenuPO> siblingMenus = menuDao.findByParentIdAndIdNotIn(parentMenuId, new ArrayListWrapper<Long>().add(menu.getId()).getList());
+			if(siblingMenus==null || siblingMenus.size()<=0){
+				MenuPO parentMenu = menuDao.findById(parentMenuId);
+				parentMenu.setIsGroup(false);
+				menuDao.save(parentMenu);
+				parentMenuChanged = true;
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("deletedMenus", MenuVO.getConverter(MenuVO.class).convert(totalMenus, MenuVO.class))
+												   .put("parentMenuChanged", parentMenuChanged)
+												   .getMap();
 	}
 	
 	/**

@@ -22,11 +22,18 @@
                                 prop="name">
                         </el-table-column>
                         <el-table-column
+                                :label="i18n.tableColumnSystemRole"
+                                prop="systemRoleName">
+                        </el-table-column>
+                        <el-table-column
                                 :label="i18n.tableColumnOperation"
                                 width="250">
                             <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipSystemRole" placement="bottom-end">
+                                    <el-button type="text" icon="icon-key" style="font-size:20px; padding:0; position:relative; top:1px; left:1px;" @click="handleEditSystemRole(scope)"></el-button>
+                                </el-tooltip>
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipGotoOrganization" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoOrganization(scope)"></el-button>
+                                    <el-button type="text" icon="el-icon-tickets" style="margin-left:20px; font-size:20px; padding:0; position:relative; top:1px; left:1px;" @click="gotoOrganization(scope)"></el-button>
                                 </el-tooltip>
                             </template>
                         </el-table-column>
@@ -51,5 +58,29 @@
         </el-card>
 
     </template>
+
+    <el-dialog
+        :title="i18n.dialogSelectSystemRoleTitle"
+        :visible.sync="dialog.editSystemRole.visible"
+        width="600px"
+        append-to-body
+        :before-close="handleSelectSystemRoleClose">
+
+        <el-table
+            ref="systemRoleTable"
+            :data="dialog.editSystemRole.rows"
+            :current-row-key="dialog.editSystemRole.company.id"
+            :row-key="systemRoleKey"
+            highlight-current-row
+            @current-change="systemRoleChange"
+            style="width:100%">
+            <el-table-column :label="i18n.tableSelectSystemRoleColumnName" prop="name"/>
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleSelectSystemRoleClose">{{i18n.cancelSystemRoleSelected}}</el-button>
+            <el-button size="medium" type="primary" @click="handleSelectSystemRoleSubmit">{{i18n.handleSystemRoleSelected}}</el-button>
+        </div>
+    </el-dialog>
 
 </mi-frame>

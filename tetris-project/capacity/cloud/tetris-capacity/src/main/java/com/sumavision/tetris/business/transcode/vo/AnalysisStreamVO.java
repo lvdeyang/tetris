@@ -16,6 +16,8 @@ import java.util.List;
 public class AnalysisStreamVO {
     private String deviceIp;
 
+    private Integer devicePort;
+
     private String msg_id;
 
     private String type;
@@ -62,5 +64,14 @@ public class AnalysisStreamVO {
 
     public void setDeviceIp(String deviceIp) {
         this.deviceIp = deviceIp;
+    }
+
+    public Integer getDevicePort() {
+        return devicePort;
+    }
+
+    public AnalysisStreamVO setDevicePort(Integer devicePort) {
+        this.devicePort = devicePort;
+        return this;
     }
 }

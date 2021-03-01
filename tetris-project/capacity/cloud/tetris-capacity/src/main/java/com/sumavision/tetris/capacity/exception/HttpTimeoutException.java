@@ -9,7 +9,7 @@ public class HttpTimeoutException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public HttpTimeoutException(String ip) {
-		super(StatusCode.ERROR, new StringBufferWrapper().append("转换模块请求超时，ip为：")
+		super(StatusCode.ERROR, new StringBufferWrapper().append("转换模块请求超时，地址为：")
 														 .append(ip)
 														 .toString());
 	}

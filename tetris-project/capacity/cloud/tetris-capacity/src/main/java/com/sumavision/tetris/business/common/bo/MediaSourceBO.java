@@ -4,7 +4,7 @@ package com.sumavision.tetris.business.common.bo;/**
 
 
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
-import com.sumavision.tetris.business.common.vo.RefreshSourceVO;
+import com.sumavision.tetris.business.common.vo.RefreshSourceDTO;
 import com.sumavision.tetris.commons.exception.BaseException;
 
 /**
@@ -38,6 +38,16 @@ public class MediaSourceBO {
     String passphrase;
 
     String key_len;
+
+    /**
+     * 文件循环次数
+     */
+    Integer loop_count=-1;
+
+    /**
+     * 卡类型
+     */
+    String card_type="blackmagic";
 
     public String getUrl() {
         return url;
@@ -130,13 +140,41 @@ public class MediaSourceBO {
         this.key_len = key_len;
     }
 
+    public Integer getLoop_count() {
+        return loop_count;
+    }
+
+    public MediaSourceBO setLoop_count(Integer loop_count) {
+        this.loop_count = loop_count;
+        return this;
+    }
+
+    public String getCard_type() {
+        return card_type;
+    }
+
+    public MediaSourceBO setCard_type(String card_type) {
+        this.card_type = card_type;
+        return this;
+    }
+
     public MediaSourceBO(){}
 
-    public MediaSourceBO(RefreshSourceVO refreshSourceVO,String localIp) throws BaseException {
-        this.url = refreshSourceVO.getUrl();
+    public MediaSourceBO(RefreshSourceDTO refreshSourceDTO, String localIp) throws BaseException {
+        this.url = refreshSourceDTO.getUrl();
         this.localIp = localIp;
-        this.protocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
-        this.mode = refreshSourceVO.getSrtMode();
-        this.latency = refreshSourceVO.getLatency();
+        this.protocolType = ProtocolType.getProtocolType(refreshSourceDTO.getType());
+        this.mode = refreshSourceDTO.getSrtMode();
+        this.latency = refreshSourceDTO.getLatency();
+        this.key_len = refreshSourceDTO.getKeyLen();
+        this.passphrase = refreshSourceDTO.getPassphrase();
+        if (refreshSourceDTO.getLoopCount() != null) {
+            this.loop_count = refreshSourceDTO.getLoopCount();
+        }
+        if (refreshSourceDTO.getCardType() != null) {
+            this.card_type= refreshSourceDTO.getCardType();
+        }
     }
+
+
 }

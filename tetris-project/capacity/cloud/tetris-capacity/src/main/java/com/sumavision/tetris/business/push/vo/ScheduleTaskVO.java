@@ -6,6 +6,8 @@ public class ScheduleTaskVO {
 
 	private String deviceIp;
 
+	private Integer devicePort;
+
 	private String mediaType;
 	
 	private ScheduleInputVO input;
@@ -43,5 +45,13 @@ public class ScheduleTaskVO {
 	public void setOutput(List<PushOutputVO> output) {
 		this.output = output;
 	}
-	
+
+	public Integer getDevicePort() {
+		return devicePort;
+	}
+
+	public ScheduleTaskVO setDevicePort(Integer devicePort) {
+		this.devicePort = devicePort;
+		return this;
+	}
 }

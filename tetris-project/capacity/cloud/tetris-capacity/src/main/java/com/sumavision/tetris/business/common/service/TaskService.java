@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.application.preview.PreviewDAO;
 import com.sumavision.tetris.application.preview.PreviewPO;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.Util.IdConstructor;
 import com.sumavision.tetris.business.common.Util.NodeUtil;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -81,7 +82,7 @@ public class TaskService {
      * @param outType
      * @param outUrl
      */
-    public String transferStream(String transModuleIp,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
+    public String transferStream(String transModuleIp,Integer transModulePort,String missionId, ProtocolType inType, String inUrl,String srtMode, ProtocolType outType, String outUrl,BusinessType busType) throws Exception {
 
         IdConstructor idCtor = new IdConstructor(missionId);
 
@@ -97,7 +98,7 @@ public class TaskService {
         //输出
         OutputBO outputBO = nodeUtil.getPassbyOutputInCommond(idCtor,outType,outUrl,transModuleIp);
         outputBOS.add(outputBO);
-        transcodeTaskService.save(idCtor.getJobId(), transModuleIp, inputBOS, taskBOS, outputBOS, busType);
+        transcodeTaskService.save(idCtor.getJobId(), transModuleIp,transModulePort, inputBOS, taskBOS, outputBOS, busType);
         JSONObject result = new JSONObject();
         result.put("missionId",idCtor.getJobId());
         return result.toJSONString();
@@ -182,11 +183,12 @@ public class TaskService {
                 allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
             }
 
+            TransformModule transformModule = new TransformModule(output.getCapacityIp());
             if (isForce) {
-                capacityService.deleteAllIgnoreTransError(allRequest,output.getCapacityIp(),capacityProps.getPort());
+                capacityService.deleteAllIgnoreTransError(allRequest,transformModule);
             }else{
                 try {
-                    AllResponse allResponse = capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
+                    AllResponse allResponse = capacityService.deleteAllAddMsgId(allRequest, transformModule);
                     //删成功就认为成功了，不进行删除ID的对比
                 } catch (Exception e) {
                     LOGGER.error("delete task fail"+taskUuid,e);
@@ -233,7 +235,7 @@ public class TaskService {
 
         GetEntiretiesResponse entirety= null;
         try {
-            entirety = capacityService.getEntireties(output.getCapacityIp());
+            entirety = capacityService.getEntireties(new TransformModule(output.getCapacityIp()));
         } catch (Exception e) {
             taskOutputDao.updateSyncStatusById(output.getId(),1);
             throw e;
@@ -438,7 +440,7 @@ public class TaskService {
      * @Author: Poemafar
      * @Date: 2020/12/4 9:44
      **/
-    public void addInputsAfterRepeat(String deviceIp, List<InputBO> inputBOS, BusinessType busType) throws Exception {
+    public void addInputsAfterRepeat(TransformModule transformModule, List<InputBO> inputBOS, BusinessType busType) throws Exception {
         List<InputBO> needSendInputArray = new ArrayList<>();
         for (int i = 0; i < inputBOS.size(); i++) {
             InputBO inputBO = inputBOS.get(i);
@@ -452,7 +454,8 @@ public class TaskService {
                 inputPO.setType(busType);
                 inputPO.setInput(JSON.toJSONString(inputBO));
                 inputPO.setNodeId(inputBO.getId());
-                inputPO.setCapacityIp(deviceIp);
+                inputPO.setCapacityIp(transformModule.getIp());
+                inputPO.setCapacityPort(transformModule.getPort());
                 taskInputDao.save(inputPO);
                 needSendInputArray.add(inputBO);
             } else if (inputPO.getCount().equals(0)) {
@@ -462,7 +465,8 @@ public class TaskService {
                 inputPO.setCreateTime(new Date());
                 inputPO.setUpdateTime(inputPO.getCreateTime());
                 inputPO.setCount(inputPO.getCount() + 1);
-                inputPO.setCapacityIp(deviceIp);
+                inputPO.setCapacityIp(transformModule.getIp());
+                inputPO.setCapacityPort(transformModule.getPort());
                 taskInputDao.save(inputPO);
                 needSendInputArray.add(inputBO);
             } else {
@@ -477,7 +481,7 @@ public class TaskService {
         CreateInputsRequest createInputsRequest = new CreateInputsRequest();
         createInputsRequest.setMsg_id(UUID.randomUUID().toString());
         createInputsRequest.setInput_array(needSendInputArray);
-        capacityService.createInputs(deviceIp, createInputsRequest);
+        capacityService.createInputs(createInputsRequest,transformModule);
     }
 
 
@@ -491,7 +495,7 @@ public class TaskService {
      * @Author: Poemafar
      * @Date: 2021/1/4 17:59
      **/
-    public InputWrapperBO addInputInDatabase(String deviceIp, InputBO inputBO, BusinessType busType) throws Exception {
+    public InputWrapperBO addInputInDatabase(String deviceIp,Integer devicePort, InputBO inputBO, BusinessType busType) throws Exception {
         Boolean beCreate = null;
         String uniq = generateUniq(inputBO);
         TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
@@ -504,6 +508,7 @@ public class TaskService {
             inputPO.setInput(JSON.toJSONString(inputBO));
             inputPO.setNodeId(inputBO.getId());
             inputPO.setCapacityIp(deviceIp);
+            inputPO.setCapacityPort(devicePort);
             beCreate=Boolean.TRUE;
             taskInputDao.save(inputPO);
         } else if (inputPO.getCount().equals(0)) {
@@ -514,6 +519,7 @@ public class TaskService {
             inputPO.setUpdateTime(inputPO.getCreateTime());
             inputPO.setCount(inputPO.getCount() + 1);
             inputPO.setCapacityIp(deviceIp);
+            inputPO.setCapacityPort(devicePort);
             beCreate=Boolean.TRUE;
             taskInputDao.save(inputPO);
         } else {
@@ -535,7 +541,7 @@ public class TaskService {
  * @Author: Poemafar
  * @Date: 2020/12/4 10:42
  **/
-    public void deleteInputsAfterCheckRepeat(String deviceIp, List<InputBO> inputBOS) throws Exception {
+    public void deleteInputsAfterCheckRepeat(TransformModule transformModule, List<InputBO> inputBOS) throws Exception {
         DeleteInputsRequest deleteInputsRequest = new DeleteInputsRequest();
         List<IdRequest> needDelInputs = new ArrayList<>();
         for (int i = 0; i < inputBOS.size(); i++) {
@@ -553,7 +559,7 @@ public class TaskService {
         }
         deleteInputsRequest.setMsg_id(UUID.randomUUID().toString());
         deleteInputsRequest.setInput_array(needDelInputs);
-        capacityService.deleteInputs(deviceIp,deleteInputsRequest);
+        capacityService.deleteInputs(deleteInputsRequest,transformModule);
     }
 
     public Boolean beUseForInputAtAnyTask(Long inputId){
@@ -658,9 +664,9 @@ public class TaskService {
      * <b>日期：</b>2020年6月5日 下午2:41:38
      * @param String ip 转换模块ip
      */
-    public void removeAll(String ip) throws Exception{
+    public void removeAll(TransformModule transformModule) throws Exception{
 
-        List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
+        List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIpAndCapacityPort(transformModule.getIp(),transformModule.getPort());
 
         if(outputs != null && outputs.size() > 0){
             Set<Long> inputIds = new HashSet<Long>();
@@ -699,7 +705,7 @@ public class TaskService {
         }
 
         //清空转换模块上面所有任务
-        capacityService.removeAll(ip);
+        capacityService.removeAll(transformModule);
     }
 
     public TaskInputPO addInputToDB(InputBO inputBO,BusinessType busType) throws Exception {

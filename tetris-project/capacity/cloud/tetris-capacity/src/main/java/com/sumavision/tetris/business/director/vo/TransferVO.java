@@ -13,6 +13,8 @@ public class TransferVO {
 
     public String device_ip;
 
+    public Integer device_port;
+
     public String mission_id;
 
     public String inType;
@@ -79,5 +81,14 @@ public class TransferVO {
 
     public void setSrtMode(String srtMode) {
         this.srtMode = srtMode;
+    }
+
+    public Integer getDevice_port() {
+        return device_port;
+    }
+
+    public TransferVO setDevice_port(Integer device_port) {
+        this.device_port = device_port;
+        return this;
     }
 }

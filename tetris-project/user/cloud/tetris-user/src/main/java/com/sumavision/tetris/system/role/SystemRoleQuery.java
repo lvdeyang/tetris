@@ -13,9 +13,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.organization.CompanyUserPermissionDAO;
+import com.sumavision.tetris.organization.CompanyUserPermissionPO;
+import com.sumavision.tetris.user.UserDAO;
+import com.sumavision.tetris.user.UserPO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 用户系统角色查询<br/>
@@ -34,6 +41,15 @@ public class SystemRoleQuery {
 	
 	@Autowired
 	private CompanyDAO companyDao;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private UserDAO userDao;
+	
+	@Autowired
+	private CompanyUserPermissionDAO companyUserPermissionDao;
 	
 	/**
 	 * 查询系统内置角色<br/>
@@ -88,6 +104,67 @@ public class SystemRoleQuery {
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", view_roles)
 												   .getMap();
+	}
+	
+	/**
+	 * 分类查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:30:46
+	 * @param String createType 系统角色创建类型
+	 * @param Long companyId 企业id
+	 * @param Long targetUserId 目标用户id
+	 * @param String exceptIds 例外角色id
+	 * @param Boolean packGroup 是否按照分组组装
+	 * @return packGroup为false或null 返回List<SystemRoleVO> 系统角色列表
+	 * @return packGroup为true 返回List<SystemRoleGroupVO> 系统角色列表
+	 * 
+	 */
+	public Object queryByCreateType(
+			String createType,
+			Long companyId,
+			Long targetUserId,
+			String exceptIds,
+			Boolean packGroup) throws Exception{
+		List<Long> parsedExceptIds = null;
+		if(exceptIds != null) parsedExceptIds = JSON.parseArray(exceptIds, Long.class);
+		SystemRoleCreateType type = SystemRoleCreateType.valueOf(createType);
+		List<SystemRolePO> systemRoleEntities = null;
+		if(type.equals(SystemRoleCreateType.SYSTEM_ADMIN)){
+			if(parsedExceptIds == null){
+				systemRoleEntities = systemRoleDao.findByTypeAndCreateType(SystemRoleType.SYSTEM, type);
+			}else{
+				systemRoleEntities = systemRoleDao.findByTypeAndCreateTypeAndIdNotIn(SystemRoleType.SYSTEM, type, parsedExceptIds);
+			}
+		}else if(type.equals(SystemRoleCreateType.COMPANY_ADMIN)){
+			if(companyId == null){
+				if(targetUserId != null){
+					List<CompanyUserPermissionPO> permissions = companyUserPermissionDao.findByUserId(targetUserId.toString());
+					companyId = permissions.get(0).getCompanyId();
+				}else{
+					UserVO user = userQuery.current();
+					companyId = Long.valueOf(user.getGroupId());
+				}
+			}
+			if(parsedExceptIds == null){
+				systemRoleEntities = systemRoleDao.findByTypeAndCreateTypeAndCompanyId(SystemRoleType.SYSTEM, type, companyId);
+			}else{
+				systemRoleEntities = systemRoleDao.findByTypeAndCreateTypeAndCompanyIdAndIdNotIn(SystemRoleType.SYSTEM, type, companyId, parsedExceptIds);
+			}
+		}
+		if(systemRoleEntities!=null && systemRoleEntities.size()>0){
+			if(packGroup==null || !packGroup.booleanValue()){
+				List<SystemRoleVO> systemRoles = new ArrayList<SystemRoleVO>();
+				for(SystemRolePO systemRoleEntity:systemRoleEntities){
+					systemRoles.add(new SystemRoleVO().set(systemRoleEntity));
+				}
+				return systemRoles;
+			}else{
+				return packageSystemRolesWithGroup(systemRoleEntities);
+			}
+			
+		}
+		return null;
 	}
 	
 	/**
@@ -152,7 +229,7 @@ public class SystemRoleQuery {
 	}
 	
 	/**
-	 * 分组打包系统橘色<br/>
+	 * 分组打包系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月17日 下午1:14:58

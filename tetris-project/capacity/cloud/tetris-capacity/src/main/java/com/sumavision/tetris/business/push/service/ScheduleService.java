@@ -4,9 +4,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.alibaba.druid.wall.violation.ErrorCode;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.exception.CommonException;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.capacity.bo.request.*;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.EncodeConstant;
 import com.sumavision.tetris.capacity.template.TemplateService;
 import org.slf4j.Logger;
@@ -117,7 +119,13 @@ public class ScheduleService {
 	public String addPushTask(ScheduleTaskVO task) throws Exception{
 		
 		String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-		
+
+		String capacityIp=task.getDeviceIp();
+		Integer capacityPort= Constant.TRANSFORM_PORT;
+		if (task.getDevicePort() != null) {
+			capacityPort=task.getDevicePort();
+		}
+
 		//生成排期源
 		InputBO schedule = push2ScheduleInputBO(uuid, task);
 		TaskInputPO input = new TaskInputPO();
@@ -129,6 +137,8 @@ public class ScheduleService {
 		input.setTaskUuid(uuid);
 		input.setInput(JSON.toJSONString(schedule));
 		input.setNodeId(schedule.getId());
+		input.setCapacityIp(capacityIp);
+		input.setCapacityPort(capacityPort);
 		input.setType(BusinessType.PUSH);
 		taskInputDao.save(input);
 		
@@ -172,7 +182,7 @@ public class ScheduleService {
 		}
 		
 		//发送排期input/task/output
-		AllRequest request = sendProtocal(uuid, task.getDeviceIp(), null, input.getId(), new ArrayListWrapper<InputBO>().add(schedule).getList(), tasks, outputs);
+		AllRequest request = sendProtocal(uuid, capacityIp,capacityPort, null, input.getId(), new ArrayListWrapper<InputBO>().add(schedule).getList(), tasks, outputs);
 		
 		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(uuid, BusinessType.PUSH);
 		output.setPrevId(preCheck.getInputId());
@@ -183,10 +193,10 @@ public class ScheduleService {
 		taskOutputDao.save(output);
 		
 		try {
-			sendSchedule(task.getDeviceIp(), schedule.getId(), null, needCreateInputs, schedules);
+			sendSchedule(capacityIp,capacityPort, schedule.getId(), null, needCreateInputs, schedules);
 		} catch (Exception e) {
 			
-			capacityService.deleteAllAddMsgId(request, task.getDeviceIp(), capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(request, new TransformModule(capacityIp,capacityPort));
 			throw e;
 		}
 		
@@ -817,6 +827,7 @@ public class ScheduleService {
 	public AllRequest sendProtocal(
 			String taskUuid,
 			String capacityIp,
+			Integer capacityPort,
 			Long inputId, 
 			Long scheduleId,
 			List<InputBO> inputBOs,
@@ -834,6 +845,7 @@ public class ScheduleService {
 			output.setTaskUuid(taskUuid);
 			output.setType(BusinessType.PUSH);
 			output.setCapacityIp(capacityIp);
+			output.setCapacityPort(capacityPort);
 			output.setUpdateTime(new Date());
 			
 			taskOutputDao.save(output);
@@ -842,13 +854,13 @@ public class ScheduleService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 			
-			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+			AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 			
 			responseService.allResponseProcess(allResponse);
 		
 		} catch (BaseException e){
 			
-			capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 			throw e;
 			
 		}
@@ -868,7 +880,8 @@ public class ScheduleService {
 	 * @param List<ScheduleProgramBO> schedules 需要添加的排期
 	 */
 	public void sendSchedule(
-			String deviceIp,
+			String capacityIp,
+			Integer capacityPort,
 			String inputId,
 			String deleteId,
 			List<InputBO> inputs,
@@ -896,7 +909,7 @@ public class ScheduleService {
         System.out.println(sdf.format(date));
 		System.out.println("change:" + JSON.toJSONString(request));
 		
-		ResultCodeResponse response = capacityService.putSchedule(deviceIp, capacityProps.getPort(), inputId, request);
+		ResultCodeResponse response = capacityService.putSchedule(new TransformModule(capacityIp,capacityPort), inputId, request);
 		
 		if(!response.getResult_code().equals(InputResponseEnum.SUCCESS.getCode())){
 			throw new BaseException(StatusCode.ERROR, response.getResult_msg());
@@ -976,7 +989,8 @@ public class ScheduleService {
 				taskInputDao.saveAll(taskInputPOS);
 			}
 			deleteScheduleRequest.setDelete_inputs(inputIdRequests);
-			capacityService.clearSchedule(output.getCapacityIp(),capacityProps.getPort(),inputId,deleteScheduleRequest);
+			TransformModule transformModule=new TransformModule(output.getCapacityIp());
+			capacityService.clearSchedule(transformModule,inputId,deleteScheduleRequest);
 			taskOutputDao.save(output);
 		} catch (ObjectOptimisticLockingFailureException e) {
 
@@ -1063,7 +1077,7 @@ public class ScheduleService {
 			needInputs.add(check.getInputBO());
 		}
 		
-		sendSchedule(output.getCapacityIp(), scheduleInputBO.getId(), deleteId, needInputs, new ArrayListWrapper<ScheduleProgramBO>().add(scheduleProgram).getList());
+		sendSchedule(output.getCapacityIp(),output.getCapacityPort(), scheduleInputBO.getId(), deleteId, needInputs, new ArrayListWrapper<ScheduleProgramBO>().add(scheduleProgram).getList());
 		
 		output.setPrevId(output.getNextId());
 		output.setNextId(check.getInputId());
@@ -1219,7 +1233,7 @@ public class ScheduleService {
 			allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(bo.getTasks()).getList());
 			allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(bo.getOutputs()).getList());
 			
-			capacityService.deleteAllAddMsgId(allRequest, bo.getCapacityIp(), capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(allRequest, new TransformModule(bo.getCapacityIp()));
 		}
 		
 		taskOutputDao.deleteInBatch(outputs);

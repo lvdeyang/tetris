@@ -3,11 +3,13 @@ package com.sumavision.tetris.business.common.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
 import com.sumavision.tetris.business.common.vo.SyncResponseVO;
 import com.sumavision.tetris.business.common.vo.SyncVO;
 import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.device.DeviceDao;
@@ -65,14 +67,15 @@ public class SyncService {
 	 * <b>日期：</b>2020年5月8日 上午11:48:12
 	 * @param String deviceIp 转换模块ip
 	 */
-	public synchronized void syncTransform(String deviceIp) throws Exception{
+	public synchronized void syncTransform(String deviceIp,Integer port) throws Exception{
 
-		LOG.info("[transform-sync] start, deviceIp :{}",deviceIp);
 		//直接清掉不同步的任务
-		deleteUnSyncTasksByDevice(deviceIp);
+		TransformModule transformModule = new TransformModule(deviceIp,port);
+		LOG.info("[transform-sync] start, socket address :{}",transformModule.getSocketAddress());
+		deleteUnSyncTasksByDevice(transformModule);
 
 		//获取转换模块上全部信息
-		GetEntiretiesResponse entirety= capacityService.getEntireties(deviceIp);
+		GetEntiretiesResponse entirety= capacityService.getEntireties(transformModule);
 		
 		List<InputBO> _inputs = entirety.getInput_array();
 		List<TaskBO> _tasks = entirety.getTask_array();
@@ -83,7 +86,7 @@ public class SyncService {
 		List<TaskBO> tasks = new ArrayList<TaskBO>();
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
 
-		List<TaskOutputPO> outputPOs = taskOutputDao.findByCapacityIp(deviceIp);
+		List<TaskOutputPO> outputPOs = taskOutputDao.findByCapacityIpAndCapacityPort(deviceIp,port);
 
 		if(outputPOs != null && outputPOs.size() > 0){
 			Set<Long> inputIds = new HashSet<Long>();
@@ -225,7 +228,7 @@ public class SyncService {
 			}
 		}
 		
-		LOG.info("sync send cmd, deviceIp :{}",deviceIp);
+		LOG.info("sync send cmd, socket address:{}",transformModule.getSocketAddress());
 		//新增
 		if(needAddInputs.size() > 0 || needAddTasks.size() > 0 || needAddOutputs.size() > 0){
 			AllRequest add = new AllRequest();
@@ -238,7 +241,7 @@ public class SyncService {
 			if(needAddOutputs.size() > 0){
 				add.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(needAddOutputs).getList());
 			}
-			capacityService.createAllAddMsgId(add, deviceIp, capacityProps.getPort());
+			capacityService.createAllAddMsgId(add,new TransformModule(deviceIp,port));
 		}
 		
 		//删除
@@ -253,10 +256,10 @@ public class SyncService {
 			if(needDeleteOutputs.size() > 0){
 				delete.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(needDeleteOutputs).getList());
 			}
-			capacityService.deleteAllAddMsgId(delete, deviceIp, capacityProps.getPort());
+			capacityService.deleteAllAddMsgId(delete, new TransformModule(deviceIp,port));
 		}
-		deviceDao.updateFunUnitStatusByIp(FunUnitStatus.NORMAL,deviceIp);
-		LOG.info("[transform-sync] complete, deviceIp :{}",deviceIp);
+		deviceDao.updateFunUnitStatusByIpAndPort(FunUnitStatus.NORMAL,deviceIp,port);
+		LOG.info("[transform-sync] complete, socket address :{}",transformModule.getSocketAddress());
 	}
 
 	/**
@@ -267,8 +270,8 @@ public class SyncService {
 	 * @Author: Poemafar
 	 * @Date: 2020/12/3 10:37
 	 **/
-	public void deleteUnSyncTasksByDevice(String deviceIp) throws Exception {
-		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIpAndSyncStatus(deviceIp, 1);
+	public void deleteUnSyncTasksByDevice(TransformModule transformModule) throws Exception {
+		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIpAndCapacityPortAndSyncStatus(transformModule.getIp(),transformModule.getPort(), 1);
 		if (outputs != null && !outputs.isEmpty()) {
 			for (int i = 0; i < outputs.size(); i++) {
 				TaskOutputPO output = outputs.get(i);
@@ -316,9 +319,13 @@ public class SyncService {
 		if (deviceIp==null || deviceIp.isEmpty()){
 			throw new BaseException(StatusCode.ERROR,"fail to sync, not found deviceIp");
 		}
+		Integer devicePort= Constant.TRANSFORM_PORT;
+		if (syncVO.getDevicePort() != null) {
+			devicePort=syncVO.getDevicePort();
+		}
 		BusinessType businessType = BusinessType.valueOf(syncVO.getBusinessType().toUpperCase(Locale.ENGLISH));
 
-		syncTransform(deviceIp);//先保证能力服务和转换的同步
+		syncTransform(deviceIp,devicePort);//先保证能力服务和转换的同步
 		List<String> jobIds = syncVO.getJobIds();
 		List<String> lessJobIds = new ArrayList<>();
 		List<String> moreJobIds = new ArrayList<>();
@@ -356,8 +363,9 @@ public class SyncService {
 		}
 	}
 
-	public void syncInputs(String deviceIp, List<TaskInputPO> inputs) throws Exception {
-		GetInputsResponse getInputsResponse = capacityService.getInputs(deviceIp);
+	public void syncInputs(String deviceIp,Integer port, List<TaskInputPO> inputs) throws Exception {
+		TransformModule transformModule = new TransformModule(deviceIp,port);
+		GetInputsResponse getInputsResponse = capacityService.getInputs(transformModule);
 		List tInputIds = getInputsResponse.getInput_array().stream().map(InputBO::getId).collect(Collectors.toList());
 		for (int i = 0; i < inputs.size(); i++) {
 			TaskInputPO inputPO = inputs.get(i);

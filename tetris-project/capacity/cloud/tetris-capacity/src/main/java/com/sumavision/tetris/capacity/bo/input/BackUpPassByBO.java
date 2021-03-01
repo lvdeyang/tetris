@@ -79,26 +79,28 @@ public class BackUpPassByBO {
 		}else{
 			this.mode = sourceObj.getString("mode");
 		}
-		if (!sourceObj.containsKey("select_index")) {
-			this.select_index = "0";
-		}else {
-            Integer selectIdx = sourceObj.getInteger("select_index")-1;
-            this.select_index = selectIdx.toString();
+		Integer selectIdx=0;
+		if (sourceObj.containsKey("select_index")) {
+			selectIdx = sourceObj.getInteger("select_index");
 		}
 		if (sourceObj.containsKey("trigger_list")) {
 			this.trigger_list = JSON.parseObject(sourceObj.getString("trigger_list"),TriggerListBO.class) ;
 		}
-		if (sourceObj.containsKey("program_array")) {
-			List<BackUpProgramBO> program_array = JSON.parseArray(sourceObj.getString("program_array"), BackUpProgramBO.class);
-			this.setProgram_array(program_array);
-		}else {
-			List<BackUpProgramBO> program_array = new ArrayList<>();
-			for (Integer index : missionBO.getInputMap().keySet()) {
-				InputBO inputBO = missionBO.getInputMap().get(index);
-				program_array.add(new BackUpProgramBO().setInput_id(inputBO.getId()));
-			}
-			this.setProgram_array(program_array);
+
+		List<BackUpProgramBO> program_array = new ArrayList<>();
+		for (InputBO inputBO : missionBO.getInputMap().values()) {
+			program_array.add(new BackUpProgramBO().setInput_id(inputBO.getId()));
 		}
+		this.setProgram_array(program_array);
+		int i=0;
+		for (Integer index : missionBO.getInputMap().keySet()) {
+			if (selectIdx.equals(index)) {
+				selectIdx=i;
+				break;
+			}
+			i++;
+		}
+		this.select_index=selectIdx.toString();
 
 
 

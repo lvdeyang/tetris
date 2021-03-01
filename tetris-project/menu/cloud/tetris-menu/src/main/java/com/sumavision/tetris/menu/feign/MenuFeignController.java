@@ -65,4 +65,28 @@ public class MenuFeignController {
 		return menuQuery.queryHomePage(roleId);
 	}
 	
+	/**
+	 * 系统功能授权菜单查询<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午5:05:41
+	 * @param Long roleId 系统角色id
+	 * @param Long companyId 企业id
+	 * @param Boolean handleCompanyQuery 是否查询企业菜单
+	 * @return menus List<MenuVO> 菜单树
+	 * @return authorized List<Long> 已授权的菜单id列表
+	 * @return homePage Long 首页菜单id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/menus/by/role/id")
+	public Object queryMenusByRoleId(
+			Long roleId,
+			Long companyId,
+			Boolean handleCompanyQuery,
+			HttpServletRequest request) throws Exception{
+		
+		return menuQuery.queryMenusByRoleId(roleId, companyId, handleCompanyQuery);
+	}
+	
 }

@@ -7,11 +7,13 @@ import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.application.alarm.AlarmCode;
 import com.sumavision.tetris.business.api.vo.AlarmVO;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
 import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.config.ServerProps;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.crypto.dsig.Transform;
 import java.util.*;
 
 @Service
@@ -84,7 +87,7 @@ public class AlarmService {
 	 * <b>日期：</b>2020年1月13日 下午2:50:30
 	 * @param String ip 能力ip
 	 */
-	public void setAlarmUrl(String ip) throws Exception{
+	public void setAlarmUrl(TransformModule transformModule) throws Exception{
 		
 		String eurake = serverProps.getDefaultZone().split("http://")[1].split(":")[0];
 		
@@ -93,16 +96,18 @@ public class AlarmService {
 												   .append(":")
 												   .append(8082)
 												   .append("/tetris-capacity/api/thirdpart/capacity/alarm/notify?bundle_ip=")
-												   .append(ip)
+												   .append(transformModule.getIp())
+													.append("&bundle_port=")
+													.append(transformModule.getPort())
 												   .toString();
-		ResultCodeResponse response = capacityService.putAlarmUrl(ip, capacityProps.getPort(), alarmUrl);
+		ResultCodeResponse response = capacityService.putAlarmUrl(transformModule, alarmUrl);
 		if(response.getResult_code().equals(1)){
 			throw new BaseException(StatusCode.ERROR, "url格式错误");
 		}
 	}
 
 	public String getAlarmUrl(String ip) throws Exception {
-		return capacityService.getAlarmUrl(ip,5656L);
+		return capacityService.getAlarmUrl(new TransformModule(ip));
 	}
 
 	
@@ -114,14 +119,14 @@ public class AlarmService {
 	 * @param String capacityIp 能力ip
 	 * @param AlarmVO alarm 告警参数
 	 */
-	public void alarmNotify(String capacityIp, AlarmVO alarm) throws Exception{
+	public void alarmNotify(String capacityIp,Integer capacityPort, AlarmVO alarm) throws Exception{
 		
 		String alarmCode = alarm.getCodec();
 		
 		try {
 			if("11070001".equals(alarmCode)){
 				LOGGER.info("transform online");
-				syncService.syncTransform(capacityIp);
+				syncService.syncTransform(capacityIp,capacityPort);
 			}
 		} catch (Exception e) {
 			LOGGER.error("sync fail",e);

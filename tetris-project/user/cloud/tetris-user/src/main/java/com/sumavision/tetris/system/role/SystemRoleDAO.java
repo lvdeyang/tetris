@@ -14,6 +14,65 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 
 	/**
+	 * 查询系统管理员创建的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:15:47
+	 * @param SystemRoleType type 类型
+	 * @param SystemRoleCreateType createType 创建类型
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	public List<SystemRolePO> findByTypeAndCreateType(SystemRoleType type, SystemRoleCreateType createType);
+	
+	/**
+	 * 查询系统管理员创建的系统角色带例外角色id<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:15:47
+	 * @param SystemRoleType type 类型
+	 * @param SystemRoleCreateType createType 创建类型
+	 * @param Collection<Long> exceptIds 例外角色id列表
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	public List<SystemRolePO> findByTypeAndCreateTypeAndIdNotIn(SystemRoleType type, SystemRoleCreateType createType, Collection<Long> exceptIds);
+	
+	/**
+	 * 查询企业管理员创建的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:15:47
+	 * @param SystemRoleType type 类型
+	 * @param SystemRoleCreateType createType 创建类型
+	 * @param Long companyId 企业id
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	public List<SystemRolePO> findByTypeAndCreateTypeAndCompanyId(SystemRoleType type, SystemRoleCreateType createType, Long companyId);
+	
+	/**
+	 * 查询企业管理员创建的系统角色带例外角色id<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月22日 下午5:15:47
+	 * @param SystemRoleType type 类型
+	 * @param SystemRoleCreateType createType 创建类型
+	 * @param Long companyId 企业id
+	 * @param Collection<Long> exceptIds 例外角色id列表
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	public List<SystemRolePO> findByTypeAndCreateTypeAndCompanyIdAndIdNotIn(SystemRoleType type, SystemRoleCreateType createType, Long companyId, Collection<Long> exceptIds);
+	
+	/**
+	 * 根据id和类型查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午2:13:23
+	 * @param Long id 角色id
+	 * @param SystemRoleType type 角色类型
+	 * @return SystemRolePO 系统角色
+	 */
+	public SystemRolePO findByIdAndType(Long id, SystemRoleType type);
+	
+	/**
 	 * 根据id查询角色数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

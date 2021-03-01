@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.common.Util;/**
  * Created by Poemafar on 2020/9/18 15:47
  */
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.bo.MediaSourceBO;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -70,7 +71,34 @@ public class NodeUtil {
         return null;
     }
 
+    public Boolean beBackupInput(InputBO inputBO){
+        return inputBO.getBack_up_raw()!=null || inputBO.getBack_up_es()!=null || inputBO.getBack_up_passby()!=null;
+    }
 
+    public Boolean beBackupInput(List<InputBO> inputBOS){
+        return inputBOS.stream().anyMatch(i->i.getBack_up_raw()!=null || i.getBack_up_es()!=null || i.getBack_up_passby()!=null);
+    }
+
+    /**
+     * @MethodName: adjustOrderForInputBOS
+     * @Description: 调整顺序，保证下任务的时候，输入节点如果有备份，备份放在最后
+     * @param inputBOS 1
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/2/4 11:57
+     **/
+    public void adjustOrderForInputBOS(List<InputBO> inputBOS){
+        List<InputBO> temp = new ArrayList<>();
+        Iterator<InputBO> iterator = inputBOS.iterator();
+        while(iterator.hasNext()){
+            InputBO inputBO =  iterator.next();
+            if (beBackupInput(inputBO)) {
+                temp.add(inputBO);
+                iterator.remove();
+            }
+        }
+        inputBOS.addAll(temp);
+    }
 
     public InputBO getPassbyInputInCommand(IdConstructor idCtor,ProtocolType type, String url,String srtMode, String localIp){
         InputBO inputBO = new InputBO();

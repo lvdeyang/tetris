@@ -2,6 +2,7 @@ package com.sumavision.tetris.business.api.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.capacity.constant.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +41,15 @@ public class ApiCapacityController {
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		
 		String remoteIp = request.getParameter("bundle_ip");
-		
+		String remotePort = request.getParameter("bundle_port");
+		Integer capacityPort = Constant.TRANSFORM_PORT;
+		if (remotePort==null || remotePort.isEmpty()) {
+			capacityPort=Integer.parseInt(remotePort);
+		}
+
 		AlarmVO alarm = JSONObject.parseObject(requestWrapper.getString("alarm"), AlarmVO.class);
 		
-		alarmService.alarmNotify(remoteIp, alarm);
+		alarmService.alarmNotify(remoteIp,capacityPort, alarm);
 		LOG.debug("Alarm<alarm> resp: {},{}", remoteIp, JSONObject.toJSONString(alarm));
 		return new HashMapWrapper<String, Object>().put("msg_id", requestWrapper.getString("msg_id")).getMap();
 	}

@@ -22,6 +22,9 @@ public class SystemRoleGroupPO extends AbstractBasePO{
 	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
+	
+	/** 企业id */
+	private Long companyId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -39,6 +42,15 @@ public class SystemRoleGroupPO extends AbstractBasePO{
 
 	public void setAutoGeneration(boolean autoGeneration) {
 		this.autoGeneration = autoGeneration;
+	}
+
+	@Column(name = "COMPANY_ID")
+	public Long getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(Long companyId) {
+		this.companyId = companyId;
 	}
 
 }

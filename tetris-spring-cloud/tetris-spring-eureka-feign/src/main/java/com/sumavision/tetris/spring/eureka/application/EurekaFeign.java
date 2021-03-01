@@ -113,6 +113,41 @@ public class EurekaFeign {
 		@Autowired
 		private ApplicationYml applicationYml;
 		
+		public static final int GET = 0;
+		
+		public static final int POST = 1;
+		
+		/**
+		 * eureka高可用GET调用<br/>
+		 * <b>作者:</b>lvdeyang<br/>
+		 * <b>版本：</b>1.0<br/>
+		 * <b>日期：</b>2021年2月25日 下午4:42:38
+		 * @param String[] urlsInYml 高可用eureka列表
+		 * @param String sufix 接口后缀
+		 * @param Map<String, Object> params 参数
+		 * @param String errorMsg 异常信息提示
+		 * @param int 0:doGet, 1:doPost
+		 * @return String eureka 返回
+		 */
+		private String haHttpRequest(String urlsInYml, String sufix, Map<String, Object> params, String errorMsg, int httpMethod) throws Exception{
+			Exception finalException = null;
+			String[] urls = urlsInYml.split(",");
+			for(int i=0; i<urls.length; i++){
+				try{
+					String response = null;
+					if(httpMethod == GET){
+						response = doGet(new StringBufferWrapper().append(urls[i]).append(sufix).toString(), params, errorMsg);
+					}else if(httpMethod == POST){
+						response = doPost(new StringBufferWrapper().append(urls[i]).append(sufix).toString(), params, errorMsg);
+					}
+					return response;
+				}catch(Exception e){
+					finalException = e;
+				}
+			}
+			throw finalException;
+		}
+		
 		/**
 		 * eureka监控首页<br/>
 		 * <b>作者:</b>lvdeyang<br/>
@@ -121,9 +156,7 @@ public class EurekaFeign {
 		 * @return html页面
 		 */
 		public String homePage() throws Exception{
-			return doGet(new StringBufferWrapper().append(applicationYml.getBaseUrl()).append("/monitor").toString(), 
-					null, 
-					"获取eureka首页失败");
+			return haHttpRequest(applicationYml.getBaseUrl(), "/monitor", null, "获取eureka首页失败", GET);
 		}
 		
 		/**
@@ -135,9 +168,7 @@ public class EurekaFeign {
 		 * @return eureka api 返回，xml格式
 		 */
 		public String findByAppId(String appId) throws Exception{
-			return doGet(new StringBufferWrapper().append(applicationYml.getEurekaUrl()).append("apps/").append(appId).toString(), 
-					null, 
-					"根据appId查询app实例列表失败");
+			return haHttpRequest(applicationYml.getEurekaUrl(), "apps/", null, "根据appId查询app实例列表失败", GET);
 		}
 		
 		/**
@@ -148,9 +179,7 @@ public class EurekaFeign {
 		 * @return eureka api  返回  .xml文件
 		 */
 		public String findAll() throws Exception{
-			return doGet(new StringBufferWrapper().append(applicationYml.getEurekaUrl()).append("apps/").toString(), 
-					null,
-					"获取app实例列表失败");
+			return haHttpRequest(applicationYml.getEurekaUrl(), "apps/", null, "获取app实例列表失败", GET);
 		}
 		
 	}

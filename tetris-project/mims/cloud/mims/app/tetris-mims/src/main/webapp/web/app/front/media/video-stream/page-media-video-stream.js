@@ -44,6 +44,7 @@ define([
                 activeId: window.BASEPATH + 'index/media/videoStream/' + window.TOKEN,
                 current: '',
                 breadCrumb: [],
+                refreshloading:false,
                 table: {
                     tooltip: false,
                     rows: [],
@@ -89,6 +90,11 @@ define([
                         thumbnail: '',
                         addition: {},
                         loading: false
+                    },
+                    lookVideoStream:{
+                        visible:false,
+                        source:{},
+                        programs:[]
                     }
                 },
                 prepareUploadFileInfo: null,
@@ -634,6 +640,37 @@ define([
                         }
                     }
                     closeFunc();
+                },
+                handleRefresh:function(scope){
+                    let self=this;
+                    this.refreshloading=true;
+                    let row = scope.row;
+                    ajax.post('/media/video/stream/refresh/uri/' + row.id, null, function(data){
+                        if(data.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:data.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                        self.refreshloading=false;
+                    });
+                },
+                handleDetailBtnClick(scope){
+                    let self=this
+                    this.dialog.lookVideoStream.visible=true;
+                    let row=scope.row;
+                    self.dialog.lookVideoStream.source=row;
+                    ajax.post('/media/video/stream/get/uri/' + row.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.dialog.lookVideoStream.programs=result.data
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                    });
+
+                },
+                handleLookVideoStreamClose(){
+                    this.dialog.lookVideoStream.visible=false;
                 }
             },
             created: function () {

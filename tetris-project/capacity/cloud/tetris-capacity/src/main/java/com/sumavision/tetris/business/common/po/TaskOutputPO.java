@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
+import com.sun.istack.NotNull;
 
 @Entity
 @Table(name = "TETRIS_CAPACITY_TASK_OUTPUT",uniqueConstraints = {@UniqueConstraint(columnNames={"taskUuid"})})
@@ -25,6 +26,8 @@ public class TaskOutputPO extends AbstractBasePO{
 	private String output;
 	
 	private String capacityIp;
+
+	private Integer capacityPort;
 	
 	private BusinessType type;
 	
@@ -143,12 +146,23 @@ public class TaskOutputPO extends AbstractBasePO{
 		this.type = type;
 	}
 
+	@Column(nullable = false)
 	public String getCapacityIp() {
 		return capacityIp;
 	}
 
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
+	}
+
+	@Column(nullable = false)
+	public Integer getCapacityPort() {
+		return capacityPort;
+	}
+
+	public TaskOutputPO setCapacityPort(Integer capacityPort) {
+		this.capacityPort = capacityPort;
+		return this;
 	}
 
 	public Long getCoverId() {

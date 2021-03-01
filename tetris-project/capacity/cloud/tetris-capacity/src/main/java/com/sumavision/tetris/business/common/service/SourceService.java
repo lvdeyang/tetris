@@ -12,13 +12,13 @@ import com.sumavision.tetris.business.common.Util.NodeUtil;
 import com.sumavision.tetris.business.common.bo.MediaSourceBO;
 import com.sumavision.tetris.business.common.enumeration.FunUnitStatus;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
-import com.sumavision.tetris.business.common.vo.RefreshSourceVO;
+import com.sumavision.tetris.business.common.vo.RefreshSourceDTO;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
+import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.commons.exception.BaseException;
-import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.device.DeviceDao;
 import com.sumavision.tetris.device.DevicePO;
 import com.sumavision.tetris.device.netcard.NetCardInfoDao;
@@ -52,18 +52,20 @@ public class SourceService {
     @Autowired
     NodeUtil nodeUtil;
 
-    public ResultVO refreshSource(RefreshSourceVO refreshSourceVO) throws Exception {
-        ResultVO resultVO = new ResultVO();
-        if (refreshSourceVO.getUrl() == null || refreshSourceVO.getType() == null) {
+    @Autowired
+    CapacityProps capacityProps;
+
+    public ResultVO refreshSource(RefreshSourceDTO refreshSourceDTO) throws Exception {
+        if (refreshSourceDTO.getUrl() == null || refreshSourceDTO.getType() == null) {
             return new ResultVO(ResultCode.ILLEGAL_PARAMS).setDetail("source url and type must not null");
         }
-        ProtocolType sourceProtocolType = ProtocolType.getProtocolType(refreshSourceVO.getType());
-        String deviceIp = refreshSourceVO.getDeviceIp();
+        ProtocolType sourceProtocolType = ProtocolType.getProtocolType(refreshSourceDTO.getType());
+        String deviceIp = refreshSourceDTO.getDeviceIp();
         if (deviceIp==null || deviceIp.isEmpty()){
-            deviceIp = getDeviceForRefreshSource(refreshSourceVO.getUrl(),sourceProtocolType,refreshSourceVO.getSrtMode());
+            deviceIp = getDeviceForRefreshSource(refreshSourceDTO.getUrl(),sourceProtocolType, refreshSourceDTO.getSrtMode());
         }
 
-        String localIp = refreshSourceVO.getLocalIp();
+        String localIp = refreshSourceDTO.getLocalIp();
         if (localIp == null || localIp.isEmpty()) {
             DevicePO device = deviceDao.findByDeviceIp(deviceIp);
             if (device!=null){
@@ -80,7 +82,7 @@ public class SourceService {
 
         InputBO inputBO = new InputBO();
         inputBO.setId(UUID.randomUUID().toString());
-        inputBO.setEncapsulateInfo(new MediaSourceBO(refreshSourceVO,localIp));
+        inputBO.setEncapsulateInfo(new MediaSourceBO(refreshSourceDTO,localIp));
 
         AnalysisInputVO analysisInputVO = new AnalysisInputVO();
         analysisInputVO.setDevice_ip(deviceIp);
@@ -124,7 +126,7 @@ public class SourceService {
             if (!CollectionUtils.isEmpty(devices)) {
                 deviceIp = devices.get(0).getDeviceIp();
             }else{
-                throw new BaseException(StatusCode.FORBIDDEN,"no device for refresh source");
+                deviceIp = capacityProps.getIp();
             }
         }
         return deviceIp;

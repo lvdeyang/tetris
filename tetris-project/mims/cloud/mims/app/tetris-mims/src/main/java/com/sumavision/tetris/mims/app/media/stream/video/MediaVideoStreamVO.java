@@ -7,7 +7,9 @@ import java.util.List;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.stream.video.program.MediaProgramVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import org.springframework.util.CollectionUtils;
 
 public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, MediaVideoStreamPO>{
 
@@ -52,6 +54,8 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	private String addition;
 	
 	private List<MediaVideoStreamVO> children;
+
+	private List<MediaProgramVO> programs;
 	
 	public List<String> getPreviewUrl() {
 		return previewUrl;
@@ -242,6 +246,15 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 
+	public List<MediaProgramVO> getPrograms() {
+		return programs;
+	}
+
+	public MediaVideoStreamVO setPrograms(List<MediaProgramVO> programs) {
+		this.programs = programs;
+		return this;
+	}
+
 	@Override
 	public MediaVideoStreamVO set(MediaVideoStreamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -266,6 +279,13 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));
 		if (entity.getPreviewUrl() != null) this.setPreviewUrl(new ArrayListWrapper<String>().add(entity.getPreviewUrl()).getList());
 		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaVideoStreamPO.SEPARATOR_IPS)));
+		if (!CollectionUtils.isEmpty(entity.getProgramPOs())) {
+			List<MediaProgramVO> mediaProgramVOS = new ArrayList<>();
+			entity.getProgramPOs().stream().forEach(p->{
+				mediaProgramVOS.add(new MediaProgramVO(p));
+			});
+			this.setPrograms(mediaProgramVOS);
+		}
 		return this;
 	}
 	

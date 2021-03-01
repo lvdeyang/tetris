@@ -97,6 +97,24 @@ public class UserController {
 	}
 	
 	/**
+	 * 查询用户分类<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月23日 上午9:47:55
+	 * @param Long userId 用户id
+	 * @return String 用户类型
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/classify")
+	public Object queryUserClassify(
+			Long userId,
+			HttpServletRequest request) throws Exception{
+		
+		return userQuery.queryUserClassify(userId);
+	}
+	
+	/**
 	 * 分页查询用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -291,6 +309,7 @@ public class UserController {
 	 * @param Integer level 用户级别
 	 * @param Long companyId 公司id
 	 * @param String companyName 公司名称
+	 * @param Long systemRoleId 系统角色id
 	 * @param String remark 备注
 	 * @param String loginIp 绑定ip
 	 * @param JSONString bindRoles 业务角色id列表
@@ -311,6 +330,7 @@ public class UserController {
             String classify,
             Long companyId,
             String companyName,
+            Long systemRoleId,
             String remark,
             String loginIp,
             Boolean isLoginIp,
@@ -325,9 +345,9 @@ public class UserController {
 			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify,remark,loginIp,isLoginIp, bindRoles, true,worknodeUid);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId, systemRoleId, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName, systemRoleId, remark, loginIp,isLoginIp, bindRoles,worknodeUid);
 			}
 		}
 		return null;
@@ -393,13 +413,14 @@ public class UserController {
             String remark,
             String loginIp,
             Boolean resetPermissions,
-            String bindRoles) throws Exception{
+            String bindRoles,
+            Long systemRoleId) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat, remark, loginIp, resetPermissions, bindRoles);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat, remark, loginIp, resetPermissions, bindRoles,systemRoleId);
 	}
 	
 	/**

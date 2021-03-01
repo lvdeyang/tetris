@@ -13,6 +13,7 @@ import com.sumavision.tetris.auth.token.TokenService;
 import com.sumavision.tetris.commons.context.SystemInitialization;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
+import com.sumavision.tetris.system.role.SystemRoleCreateType;
 import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRoleGroupDAO;
 import com.sumavision.tetris.system.role.SystemRoleGroupPO;
@@ -80,7 +81,7 @@ public class UserInitialization implements SystemInitialization{
 			if(internalRoleGroup == null){
 				internalRoleGroup = new SystemRoleGroupPO();
 				internalRoleGroup.setAutoGeneration(true);
-				internalRoleGroup.setName("系统运维");
+				internalRoleGroup.setName("内置角色");
 				internalRoleGroup.setUpdateTime(now);
 				systemRoleGroupDao.save(internalRoleGroup);
 			}
@@ -91,6 +92,7 @@ public class UserInitialization implements SystemInitialization{
 				internalRole.setName("管理员");
 				internalRole.setAutoGeneration(true);
 				internalRole.setType(SystemRoleType.SYSTEM);
+				internalRole.setCreateType(SystemRoleCreateType.SYSTEM_ADMIN);
 				internalRole.setUpdateTime(now);
 				systemRoleDao.save(internalRole);
 			}

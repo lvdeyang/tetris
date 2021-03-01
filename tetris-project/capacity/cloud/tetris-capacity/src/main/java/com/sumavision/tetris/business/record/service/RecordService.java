@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.business.common.TransformModule;
 import com.sumavision.tetris.business.common.service.TaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
+import com.sumavision.tetris.capacity.constant.Constant;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +132,11 @@ public class RecordService {
 			String uniq,
 			RecordVO record,
 			BusinessType businessType) throws Exception{
-
+		String capacityIp=record.getDeviceIp();
+		Integer capacityPort= Constant.TRANSFORM_PORT;
+		if (record.getDevicePort() != null) {
+			capacityPort=record.getDevicePort();
+		}
 		TaskInputPO input = taskInputDao.findByUniq(uniq);
 		
 		if(input == null){
@@ -154,6 +160,8 @@ public class RecordService {
 				input.setInput(JSON.toJSONString(inputBO));
 				input.setNodeId(inputBO.getId());
 				input.setType(businessType);
+				input.setCapacityIp(capacityIp);
+				input.setCapacityPort(capacityPort);
 				taskInputDao.save(input);
 				
 				TaskOutputPO output = new TaskOutputPO();
@@ -162,7 +170,8 @@ public class RecordService {
 				output.setTask(JSON.toJSONString(taskBOs));
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
-				output.setCapacityIp(record.getDeviceIp());
+				output.setCapacityIp(capacityIp);
+				output.setCapacityPort(capacityPort);
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -171,7 +180,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -184,7 +193,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {
@@ -230,7 +239,8 @@ public class RecordService {
 				output.setTask(JSON.toJSONString(taskBOs));
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
-				output.setCapacityIp(record.getDeviceIp());
+				output.setCapacityIp(capacityIp);
+				output.setCapacityPort(capacityPort);
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -244,7 +254,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, new TransformModule(capacityIp,capacityPort));
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -257,7 +267,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp,capacityPort));
 				throw e;
 				
 			} catch (Exception e) {

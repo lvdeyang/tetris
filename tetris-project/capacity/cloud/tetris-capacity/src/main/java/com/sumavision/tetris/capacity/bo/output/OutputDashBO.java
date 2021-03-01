@@ -24,8 +24,12 @@ public class OutputDashBO {
 	private Integer max_seg_duration;
 	
 	private List<OutputMediaGroupBO> media_group_array;
-	
+
+	//废弃参数，使用storage_array
+	@Deprecated
 	private OutputStorageBO storage;
+
+	private List<OutputStorageBO> storage_array;
 
 	public String getPlaylist_name() {
 		return playlist_name;
@@ -81,8 +85,18 @@ public class OutputDashBO {
 		return this;
 	}
 
+	public List<OutputStorageBO> getStorage_array() {
+		return storage_array;
+	}
+
+	public OutputDashBO setStorage_array(List<OutputStorageBO> storage_array) {
+		this.storage_array = storage_array;
+		return this;
+	}
+
 	public OutputDashBO() {
 	}
+
 
 
 }

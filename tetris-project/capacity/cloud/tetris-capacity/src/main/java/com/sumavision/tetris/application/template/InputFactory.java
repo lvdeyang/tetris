@@ -2,6 +2,7 @@ package com.sumavision.tetris.application.template;/**
  * Created by Poemafar on 2020/11/4 15:12
  */
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.MissionBO;
@@ -33,31 +34,12 @@ public class InputFactory{
         return null;
     }
 
-
-    public InputBO getBackupInputByTemplateInput(MissionBO missionBO, JSONObject backup) throws BaseException {
-        InputBO inputBO = new InputBO();
-        Integer idx = missionBO.getInputMap().size();
-        inputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.INPUT));
-        if (missionBO.getTaskType()== TaskType.PASSBY) {
-            inputBO.setBack_up_passby(new BackUpPassByBO(missionBO,backup));
-        }else if (missionBO.getTaskType()==TaskType.PACKAGE){
-            inputBO.setBack_up_es(new BackUpEsAndRawBO(missionBO,backup));
-        }else if (missionBO.getTaskType()==TaskType.TRANS){
-            inputBO.setBack_up_raw(new BackUpEsAndRawBO(missionBO,backup));
-        }else{
-            throw new BaseException(StatusCode.ERROR,"not support task type: " + missionBO.getTaskType());
-        }
-        setProgramArrayForInput(missionBO,inputBO,backup);
-
-        return inputBO;
-    }
-
     public InputBO getInputByTemplateInput(MissionBO missionBO, SourceVO tmplInputBO) throws BaseException {
-
         InputBO inputBO = new InputBO();
         Integer idx = missionBO.getInputMap().size();
         inputBO.setId(missionBO.getIdCtor().getId(idx, IdConstructor.IdType.INPUT));
         ProtocolType inputType = ProtocolType.getProtocolType(tmplInputBO.getType());
+        JSONObject inputObj = JSONObject.parseObject(JSON.toJSONString(tmplInputBO));
         switch (inputType) {
             case UDP_TS:
                 if (null == tmplInputBO.getLocal_ip()){
@@ -120,12 +102,21 @@ public class InputFactory{
                 inputBO.setSchedule(new InputScheduleBO(tmplInputBO));
                 break;
             case BACKUP://特殊输入，单独处理
+                if (missionBO.getTaskType()== TaskType.PASSBY) {
+                    inputBO.setBack_up_passby(new BackUpPassByBO(missionBO,inputObj));
+                }else if (missionBO.getTaskType()==TaskType.PACKAGE){
+                    inputBO.setBack_up_es(new BackUpEsAndRawBO(missionBO,inputObj));
+                }else if (missionBO.getTaskType()==TaskType.TRANS){
+                    inputBO.setBack_up_raw(new BackUpEsAndRawBO(missionBO,inputObj));
+                }else{
+                    throw new BaseException(StatusCode.ERROR,"not support task type: " + missionBO.getTaskType());
+                }
                 break;
- //todo 暂不考虑主备垫
             default:
                 throw new BaseException(StatusCode.ERROR,"not support input package type" + tmplInputBO.getType());
         }
-        setProgramArrayForInput(missionBO,inputBO,tmplInputBO);
+
+        setProgramArrayForInput(inputBO,inputObj);
 
         return inputBO;
 
@@ -134,60 +125,13 @@ public class InputFactory{
     /**
      * @MethodName: setProgramArrayForInput
      * @Description: 为INPUTBO 生成并设置 PROGRAM_ARRAY
-     * @param missionBO 1
-     * @param inputBO 2
-     * @param tmplInputBO 3
+     * @param inputBO 1
+     * @param inputObj 2
      * @Return: void
      * @Author: Poemafar
      * @Date: 2020/12/9 11:06
      **/
-    public void setProgramArrayForInput(MissionBO missionBO,InputBO inputBO,SourceVO tmplInputBO) throws BaseException {
-        List<ProgramBO> programBOList = new ArrayList<>();
-        if (tmplInputBO.getProgram_array()!=null){ //模板里有了节目组就不用拼接了
-              programBOList = JSONArray.parseArray(tmplInputBO.getProgram_array().toJSONString(),ProgramBO.class);
-            if (tmplInputBO.getMediaType()!=null && tmplInputBO.getMediaType().equals("audio")){
-                programBOList.get(0).setVideo_array(null);
-            }
-        }else{
-            if(tmplInputBO.getMediaType() == null || tmplInputBO.getMediaType().equals("video")){
-                ProgramBO program = new ProgramBO().setProgram_number(1)
-                        .setVideo_array(new ArrayList())
-                        .setAudio_array(new ArrayList())
-                        .setMedia_type_once_map(new JSONObject());
-
-                ProgramVideoBO video = new ProgramVideoBO().setPid(513)
-                        .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(513, "video");
-
-                ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
-                        .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(514, "audio");
-
-                program.getVideo_array().add(video);
-                program.getAudio_array().add(audio);
-
-                programBOList.add(program);
-            }else if(tmplInputBO.getMediaType().equals("audio")){
-
-                ProgramBO program = new ProgramBO().setProgram_number(1)
-                        .setAudio_array(new ArrayList())
-                        .setMedia_type_once_map(new JSONObject());
-
-                ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
-                        .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(514, "audio");
-
-                program.getAudio_array().add(audio);
-
-                programBOList.add(program);
-            }else{
-                throw new BaseException(StatusCode.ERROR,"not support input media type"+tmplInputBO.getMediaType());
-            }
-        }
-        inputBO.setProgram_array(programBOList);
-    }
-
-    public void setProgramArrayForInput(MissionBO missionBO,InputBO inputBO,JSONObject inputObj) throws BaseException {
+    public void setProgramArrayForInput(InputBO inputBO,JSONObject inputObj) throws BaseException {
         List<ProgramBO> programBOList = new ArrayList<>();
         if (inputObj.containsKey("program_array")){ //模板里有了节目组就不用拼接了
             programBOList = JSONArray.parseArray(inputObj.getString("program_array"),ProgramBO.class);
@@ -203,12 +147,8 @@ public class InputFactory{
 
                 ProgramVideoBO video = new ProgramVideoBO().setPid(513)
                         .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(513, "video");
-
                 ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
                         .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(514, "audio");
-
                 program.getVideo_array().add(video);
                 program.getAudio_array().add(audio);
 
@@ -221,8 +161,6 @@ public class InputFactory{
 
                 ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
                         .setDecode_mode("cpu");
-//                missionBO.getMediaTypeMap().put(514, "audio");
-
                 program.getAudio_array().add(audio);
 
                 programBOList.add(program);

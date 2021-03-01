@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.application.annotation.OprLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,12 @@ public class TransformFeignController {
 	 * @return 返回刷表信息
 	 * @throws Exception
 	 */
+	@OprLog(name="yjgb")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/analysis/input")
 	public Object analysis(String deviceIp, String url, HttpServletRequest request) throws Exception{
-		LOGGER.info("[yjgb]<analysis-input> syn from {}, ip: {}, url:{}",request.getRemoteAddr()+":"+request.getRemotePort(),deviceIp,url);
 		String result = transformService.analysisInput(deviceIp, url);
-		LOGGER.info("[yjgb]<analysis-input> ack, result: {}",result);
 		return result;
 	}
 
@@ -51,15 +51,14 @@ public class TransformFeignController {
 	 * @param String id 任务标识
 	 * @param String outputParam 添加输出信息
 	 */
+	@OprLog(name="yjgb")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/output")
 	public Object addOutput(String id, String outputParam, HttpServletRequest request) throws Exception{
-		LOGGER.info("[yjgb]<add-output> syn from {}, id: {}, param:{}",request.getRemoteAddr()+":"+request.getRemotePort(),id,outputParam);
 		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
 		//添加输出
 		transformService.addStreamOutput(id, outputParams);
-		LOGGER.info("[yjgb]<add-output> ack, id: {}",request.getRemoteAddr()+":"+request.getRemotePort(),id);
 		return null;
 	}
 	
@@ -71,15 +70,14 @@ public class TransformFeignController {
 	 * @param String id 任务标识
 	 * @param String outputParam 删除输出信息
 	 */
+	@OprLog(name="yjgb")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/output")
 	public Object deleteOutput(String id, String outputParam, HttpServletRequest request) throws Exception {
-		LOGGER.info("[yjgb]<delete-output> syn from {}, id: {}, param:{}",request.getRemoteAddr()+":"+request.getRemotePort(),id,outputParam);
 		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
 		//删除输出
 		transformService.deleteStreamOutput(id, outputParams);
-		LOGGER.info("[yjgb]<delete-output> ack, id: {}",id);
 		return null;
 	}
 	
@@ -90,15 +88,14 @@ public class TransformFeignController {
 	 * <b>日期：</b>2020年3月3日 下午5:55:44
 	 * @param String id 任务标识
 	 */
+	@OprLog(name="yjgb")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/all")
 	public Object deleteOutput(String id, HttpServletRequest request) throws Exception {
-		LOGGER.info("[yjgb]<delete-all> syn from {}, id: {}",request.getRemoteAddr()+":"+request.getRemotePort(),id);
 		//删除任务全部输出
 		System.out.println("删除任务全部输出" + id);
 		transformService.deleteAllOutput(id);
-		LOGGER.info("[yjgb]<delete-all> ack, id: {}",id);
 
 		return null;
 	}

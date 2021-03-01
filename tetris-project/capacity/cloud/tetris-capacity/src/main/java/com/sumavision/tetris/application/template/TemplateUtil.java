@@ -7,6 +7,7 @@ import com.sumavision.tetris.capacity.bo.input.ProgramBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -58,15 +59,15 @@ public class TemplateUtil {
         String type = "video";
         for (int i = 0; i < inputBO.getProgram_array().size(); i++) {
             ProgramBO programBO = inputBO.getProgram_array().get(i);
-            if(programBO.getVideo_array().stream().anyMatch(v -> v.getPid().equals(pid))){
+            if(!CollectionUtils.isEmpty(programBO.getVideo_array()) && programBO.getVideo_array().stream().anyMatch(v -> v.getPid().equals(pid))){
                 type = "video";
                 break;
             }
-            if(programBO.getAudio_array().stream().anyMatch(v -> v.getPid().equals(pid))){
+            if(!CollectionUtils.isEmpty(programBO.getAudio_array()) && programBO.getAudio_array().stream().anyMatch(v -> v.getPid().equals(pid))){
                 type = "audio";
                 break;
             }
-            if(programBO.getSubtitle_array().stream().anyMatch(v -> v.getPid().equals(pid))){
+            if(!CollectionUtils.isEmpty(programBO.getSubtitle_array()) && programBO.getSubtitle_array().stream().anyMatch(v -> v.getPid().equals(pid))){
                 type = "subtitle";
                 break;
             }

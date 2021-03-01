@@ -38,4 +38,20 @@ public interface MenuFeign {
 	@RequestMapping(value = "/menu/feign/query/home/page")
 	public JSONObject queryHomePage(@RequestParam("roleId") Long roleId) throws Exception;
 	
+	/**
+	 * 系统功能授权菜单查询<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月20日 下午5:05:41
+	 * @param Long roleId 系统角色id
+	 * @return menus List<MenuVO> 菜单树
+	 * @return authorized List<Long> 已授权的菜单id列表
+	 * @return homePage Long 首页菜单id
+	 */
+	@RequestMapping(value = "/menu/feign/query/menus/by/role/id")
+	public JSONObject queryMenusByRoleId(
+			@RequestParam("roleId") Long roleId,
+			@RequestParam("companyId") Long companyId,
+			@RequestParam("handleCompanyQuery") Boolean handleCompanyQuery) throws Exception;
+	
 }

@@ -1,6 +1,10 @@
 package com.sumavision.tetris.capacity.bo.output;
 
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.MissionBO;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.capacity.bo.task.EncodeBO;
+import com.sumavision.tetris.capacity.bo.task.TaskBO;
 
 /**
  * http_ts_passby输出参数<br/>
@@ -87,4 +91,21 @@ public class OutputHttpTsPassbyBO extends OutputBaseMediaBO<OutputHttpTsPassbyBO
 
 		this.local_ip = local_ip;
 	}
+
+	public OutputHttpTsPassbyBO(MissionBO missionBO, JSONObject outputObj){
+		String url = outputObj.getString("url");
+		this.ip=IpV4Util.getIpFromUrl(url);
+		this.port=IpV4Util.getPortFromUrl(url);
+		if (outputObj.containsKey("local_ip")){
+			this.local_ip=outputObj.getString("local_ip");
+		}else{
+			this.local_ip = missionBO.getDevice_ip();//没写出流网口IP的话，直接用控制口IP
+		}
+		this.name=IpV4Util.getPathFromUrl(url);
+		TaskBO taskBO = missionBO.getTask_array().get(0);
+		EncodeBO encodeBO = taskBO.getEncode_array().get(0);
+		BaseMediaBO baseMediaBO = new BaseMediaBO().setTask_id(taskBO.getId()).setEncode_id(encodeBO.getEncode_id());
+		this.media=baseMediaBO;
+	}
+
 }
