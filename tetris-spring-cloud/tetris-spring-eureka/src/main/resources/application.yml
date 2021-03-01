@@ -5,7 +5,7 @@ eureka:
   dashboard: 
     path: /monitor
   instance:
-    hostname: 192.165.56.71
+    hostname: 192.165.56.123
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
@@ -22,13 +22,15 @@ eureka:
       #defaultZone: http://192.165.56.85:8081/eureka/
 
 spring:
+  main: 
+    allow-bean-definition-overriding: true
   application:
     name: tetris-spring-eureka
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/eureka?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: root
-      password: sumavisionrd
+      password: root
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20

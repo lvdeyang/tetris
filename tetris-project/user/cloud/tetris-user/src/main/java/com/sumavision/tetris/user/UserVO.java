@@ -126,6 +126,30 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/**token多个，仅25*/
 	private String tokenIds;
 	
+	/**企业角色名*/
+	private String companyRoleName;
+	
+	/**企业角色Id*/
+	private Long companyRoleId;
+	
+	public String getCompanyRoleName() {
+		return companyRoleName;
+	}
+
+	public UserVO setCompanyRoleName(String companyRoleName) {
+		this.companyRoleName = companyRoleName;
+		return this;
+	}
+
+	public Long getCompanyRoleId() {
+		return companyRoleId;
+	}
+
+	public UserVO setCompanyRoleId(Long companyRoleId) {
+		this.companyRoleId = companyRoleId;
+		return this;
+	}
+	
 	public String getTokenIds() {
 		return tokenIds;
 	}
@@ -500,6 +524,5 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		String logoBase64 = Base64.getEncoder().encodeToString(logoBytes);
 		System.out.println(new StringBufferWrapper().append("data:image/png;base64,").append(logoBase64).toString());*/
 		//System.out.println("/log".substring(1,"/log".length()));
-	}
-	
+	}	
 }
