@@ -8,11 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.alibaba.fastjson.JSONArray;
-import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.mims.app.media.stream.video.program.*;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.capacity.server.CapacityService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,9 @@ public class MediaVideoStreamService {
 
 	@Autowired
 	private MimsServerPropsQuery serverPropsQuery;
+
+	@Autowired
+	private BundleFeignService bundleFeignService;
 
 	/**
 	 * 视频流媒资上传审核通过<br/>
@@ -664,7 +668,61 @@ public class MediaVideoStreamService {
 		}
 		media.getProgramPOs().clear();
 		media.getProgramPOs().addAll(programPOs);
+
+		//注入资源 虚拟设备
+		putMediaInResourceServiceAsVirtualDevice(media,urls.get(0));
 		mediaVideoStreamDao.save(media);
+	}
+
+	/**
+	 * @MethodName: putMediaInResourceServiceAsVirtualDevice
+	 * @Description: 向资源服务注入虚拟设备
+	 * @param media 1 媒资
+	 * @param url 2 信源地址
+	 * @Return: void
+	 * @Author: Poemafar
+	 * @Date: 2021/3/1 17:14
+	 **/
+	public void putMediaInResourceServiceAsVirtualDevice(MediaVideoStreamPO media,String url)throws Exception{
+		JSONObject bundleJson = new JSONObject();
+		bundleJson.put("bundleName",media.getName());
+		bundleJson.put("bundleId",media.getUuid());
+		bundleJson.put("url",url);
+		bundleJson.put("type",media.getStreamType());
+		JSONArray programsJson = new JSONArray();
+		for (int i = 0; i < media.getProgramPOs().size(); i++) {
+			MediaProgramPO programPO = media.getProgramPOs().get(i);
+			JSONObject progJson = new JSONObject();
+			progJson.put("num",programPO.getNum());
+			progJson.put("name",programPO.getName());
+			JSONArray videosJson = JSON.parseArray(programPO.getVideoJson());
+			if (videosJson!=null) {
+				for (int j = 0; j < videosJson.size(); j++) {
+					JSONObject vidJson = videosJson.getJSONObject(j);
+					vidJson.put("codec",vidJson.getString("type"));
+					vidJson.put("resolution",vidJson.getInteger("width")+"*"+vidJson.getInteger("height"));
+				}
+				progJson.put("videos",videosJson);
+			}
+			JSONArray audiosJson = JSON.parseArray(programPO.getAudioJson());
+			if (audiosJson!=null) {
+				for (int k = 0; k < audiosJson.size(); k++) {
+					JSONObject audJson = audiosJson.getJSONObject(k);
+					audJson.put("codec",audJson.getString("type"));
+					audJson.put("sampleRate",audJson.getString("sample_rate") );
+				}
+				progJson.put("audios",audiosJson);
+			}
+			programsJson.add(progJson);
+		}
+		try {
+			LOG.info("[put-virtual-stream], send: {}",JSON.toJSONString(bundleJson));
+			bundleFeignService.inputAll(bundleJson);
+			LOG.info("[put-virtual-stream], ack.");
+		} catch (Exception e) {
+			LOG.info("注入失败",e);
+			throw new BaseException(StatusCode.ERROR,"资源注入虚拟设备失败");
+		}
 	}
 
 	/**
