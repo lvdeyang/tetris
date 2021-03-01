@@ -593,10 +593,6 @@ public class OutlandService extends ControllerBase{
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
-		//外域连接成功日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
-				
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();

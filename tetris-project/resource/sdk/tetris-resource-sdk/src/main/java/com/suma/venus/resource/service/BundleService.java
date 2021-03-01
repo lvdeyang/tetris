@@ -34,6 +34,7 @@ import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
+import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
@@ -933,5 +934,31 @@ public class BundleService extends CommonService<BundlePO> {
 	
 	public static String encode(String message) throws Exception{
 		return DigestUtils.md5DigestAsHex(message.getBytes());
+	}
+
+	/**
+	 * 检查当前站点下是否存在设备
+	 * @param region
+	 * @return true 存在    false 不存在
+	 * @throws Exception
+	 */
+	public Boolean checkedRegion(String region) throws Exception{
+		List<BundlePO> bundlePOs = bundleDao.findAll();
+		if (bundlePOs != null && bundlePOs.size()>0) {
+			List<String> bundleIds = new ArrayList<String>();
+			for (BundlePO bundlePO : bundlePOs) {
+				bundleIds.add(bundlePO.getBundleId());
+			}
+			List<ExtraInfoPO> extraInfoPOs = extraInfoDao.findByBundleIdIn(bundleIds);
+			if (extraInfoPOs != null && extraInfoPOs.size()>0) {
+				for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
+					JSONObject jsonObject = JSONObject.parseObject(extraInfoPO.getValue());
+					if (jsonObject.getString("region").equals(region)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

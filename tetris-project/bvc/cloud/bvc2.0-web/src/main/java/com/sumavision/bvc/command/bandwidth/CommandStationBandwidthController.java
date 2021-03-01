@@ -7,7 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.suma.venus.resource.service.BundleService;
 import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -20,6 +22,11 @@ public class CommandStationBandwidthController {
 	
 	@Autowired
 	private CommandStationBandwidthService commandStationBandwidthService;
+	
+	@Autowired
+	private BundleService bundleService;
+	
+	
 	/**
 	 * 添加站点<br/>
 	 * <b>作者:</b>lx<br/>
@@ -65,7 +72,14 @@ public class CommandStationBandwidthController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value="/delete")
-	public Object delete(Long id){
+	public Object delete(Long id)throws Exception{
+		
+		CommandStationBandwidthPO station = commandStationBandwidthDao.findOne(id);
+		
+		Boolean bundle = bundleService.checkedRegion(station.getIdentity());
+		if(bundle){
+			throw new BaseException(StatusCode.FORBIDDEN, "当前站点下存在设备，无法删除");
+		}
 		
 		commandStationBandwidthDao.delete(id);
 		
@@ -102,7 +116,7 @@ public class CommandStationBandwidthController {
 		station.setStationName(stationName);
 		station.setSingleWidth(singleWidth);
 		station.setTotalWidth(totalWidth);
-		station.setIdentity(identity);
+//		station.setIdentity(identity);
 		
 		commandStationBandwidthDao.save(station);
 		
