@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -1560,6 +1561,7 @@ public class CapacityService {
      * <b>版本：</b>1.0<br/>
      * <b>日期：</b>2019年12月5日 下午2:39:50
      */
+    @Deprecated
     public JSONObject getAuthorizationAddMsgId(TransformModule transformModule) throws Exception {
 
         String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
@@ -1573,6 +1575,7 @@ public class CapacityService {
      * <b>版本：</b>1.0<br/>
      * <b>日期：</b>2019年12月5日 下午2:27:54
      */
+    @Deprecated
     private JSONObject getAuthorization(String msg_id, TransformModule transformModule) throws Exception {
 
         String url = new StringBufferWrapper().append(transformModule.getSocketAddress())
@@ -1586,6 +1589,32 @@ public class CapacityService {
         return res;
     }
 
+    /**
+     * 获取授权<br/>
+     * <b>作者:</b>wjw<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2019年12月5日 下午2:39:50
+     */
+    public JSONObject getLicenseAddMsgId(TransformModule transformModule) throws Exception {
+
+        String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+
+        return getLicense(msg_id, transformModule);
+    }
+
+
+
+    private JSONObject getLicense(String msg_id, TransformModule transformModule) throws HttpTimeoutException {
+        String url = new StringBufferWrapper().append(transformModule.getSocketAddress())
+                .append(UrlConstant.URL_VERSION).append("/")
+                .append(UrlConstant.URL_LICENSE)
+                .append("?msg_id=")
+                .append(msg_id)
+                .toString();
+        JSONObject res = HttpUtil.httpGet(url);
+        if (res == null) throw new HttpTimeoutException(transformModule.getSocketAddress());
+        return res;
+    }
 
     public void changeBackup(TransformModule transformModule, PutBackupModeRequest backup) throws Exception {
         ResultCodeResponse result = changeBackUp(backup.getInputId(), backup.getSelect_index(), backup.getMode(), transformModule);

@@ -376,5 +376,16 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.deleteOutputForTask(task),String.class);
 	}
 
+	/**
+	 * @MethodName: getLicense
+	 * @Description: 获取转换模块授权
+	 * @param transform 1
+	 * @Return: java.lang.String
+	 * @Author: Poemafar
+	 * @Date: 2021/3/1 15:57
+	 **/
+	public String getLicense(String transform) throws Exception {
+		return JsonBodyResponseParser.parseObject(capacityFeign.getLicense(transform),String.class);
+	}
 
 }
