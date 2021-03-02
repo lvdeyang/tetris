@@ -231,11 +231,33 @@ define([
                 addSourceTableSelectChanged(val){
                     this.dialog.addSource.sources=val
                     console.log("选中："+val)
+                },
+                getSourceGroups(){
+                    let self=this
+                    ajax.get('/tetris/dispatch/control/sourceGroups', null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                    })
+                },
+                getOutputGroups(){
+                    let self=this
+                    ajax.get('/tetris/dispatch/control/outputGroups', null, function(data){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+
+                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                        }
+                    })
                 }
             },
             created:function(){
                 let self = this;
-
+                this.getSourceGroups();
+                this.getOutputGroups();
             }
 
         });
