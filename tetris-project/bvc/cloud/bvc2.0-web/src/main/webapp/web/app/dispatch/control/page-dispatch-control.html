@@ -101,7 +101,7 @@
                                             <el-col :span="16" style="margin-top: 10px;">{{data.name}}</el-col>
                                             <el-col :span="8">
                                                 <el-tooltip class="item" effect="dark" content="详情" placement="bottom-end">
-                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-tickets" @click.stop="outputDetailBtnClick(data.id)"></el-button>
+                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-tickets" @click.stop="outputDetailBtnClick(data)"></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip class="item" effect="dark" content="删除站点" placement="bottom-end">
                                                     <el-button  style="font-size:16px;" type="text" icon="el-icon-remove-outline" @click.stop="deleteOutputGroupBtnClick(data.id)"></el-button>
@@ -112,7 +112,7 @@
                                     <template v-else>
                                         <div class="item" style="padding: 4px 0px 4px 0px">
                                              <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}
-                                                <el-tag type="warning" size="mini">已占用</el-tag>
+                                                <el-tag type="warning" size="mini" v-if="data.beLock">已占用</el-tag>
                                              </div>
                                              <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
                                         </div>
@@ -153,7 +153,7 @@
             <div slot="header" class="clearfix">
                 <span>转发记录</span>
             </div>
-            <el-table border highlight-current-row :data="dialog.records">
+            <el-table size="mini" border highlight-current-row :data="pageTasks">
                 <el-table-column label="序号"  type="index" width="100">
                 </el-table-column>
                 <el-table-column label="站点名称" width="150">
@@ -171,7 +171,14 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper"
+                           layout="total,sizes,prev,pager,next,jumper"
+                           @current-change="handleTaskCurrentChange"
+                           @size-change="handleTaskSizeChange"
+                           :total="dialog.addDispatch.pagination.total"
+                           :current-page="dialog.addDispatch.pagination.curPage"
+                           :page-size="dialog.addDispatch.pagination.pageSize"
+                           :page-sizes="[5,10,20]"></el-pagination>
         </el-card>
         <span slot="footer" class="dialog-footer">
 	        <el-button size="medium" type="primary" @click="transferSourceDlgOk">确 定</el-button>
@@ -185,14 +192,14 @@
             <el-table border
                       highlight-current-row
                       @selection-change="addSourceTableSelectChanged"
-                      :data="dialog.sources">
+                      :data="pageVirtualSource">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column label="序号"  type="index" width="100"></el-table-column>
                 <el-table-column label="名称" width="150">
-                    <template slot-scope="scope"><span>{{scope.row.name}}</span></template>
+                    <template slot-scope="scope"><span>{{scope.row.bundleName}}</span></template>
                 </el-table-column>
                 <el-table-column label="类型" width="100">
-                    <template slot-scope="scope"><span>{{scope.row.protoType}}</span></template>
+                    <template slot-scope="scope"><span>{{scope.row.type}}</span></template>
                 </el-table-column>
                 <el-table-column label="地址">
                     <template slot-scope="scope"><span>{{scope.row.url}}</span></template>
@@ -200,7 +207,15 @@
             </el-table>
             <div class="block">
                 <span>已选中：{{dialog.addSource.sources.length}}</span>
-                <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
+                <el-pagination style="float:right"
+                               layout="total,sizes,prev,pager,next,jumper"
+                               @current-change="handleVirtualSourceCurrentChange"
+                               @size-change="handleVirtualSourceSizeChange"
+                               :total="dialog.addSource.pagination.total"
+                               :current-page="dialog.addSource.pagination.curPage"
+                               :page-size="dialog.addSource.pagination.pageSize"
+                               :page-sizes="[5,10,20]"
+                ></el-pagination>
             </div>
         </el-card>
         <span slot="footer" class="dialog-footer">
@@ -296,7 +311,7 @@
             <div slot="header" class="clearfix">
                 <span>站点信息</span>
             </div>
-            <el-table border highlight-current-row :data="dialog.addOutput.outputs">
+            <el-table size="mini" border highlight-current-row :data="pageOutputs">
                 <el-table-column label="序号"  type="index"
                                  width="100">
                 </el-table-column>
@@ -304,7 +319,7 @@
                     <template slot-scope="scope"><span>{{scope.row.name}}</span></template>
                 </el-table-column>
                 <el-table-column label="类型" width="100">
-                    <template slot-scope="scope"><span>{{scope.row.protoType}}</span></template>
+                    <template slot-scope="scope"><span>{{scope.row.type}}</span></template>
                 </el-table-column>
                 <el-table-column label="地址">
                     <template slot-scope="scope"><span>{{scope.row.url}}</span></template>
@@ -316,7 +331,13 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper" :page-sizes="[10,20,50]"></el-pagination>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper"
+                           @current-change="handleOutputCurrentChange"
+                           @size-change="handleOutputSizeChange"
+                           :total="dialog.addOutput.pagination.total"
+                           :current-page="dialog.addOutput.pagination.curPage"
+                           :page-size="dialog.addOutput.pagination.pageSize"
+                           :page-sizes="[5,10,20]"></el-pagination>
         </el-card>
 
         <!--<span slot="footer" class="dialog-footer">-->
@@ -359,7 +380,7 @@
             </el-form-item>
             <el-form-item label="地址">
                 <el-input v-model="dialog.editOutput.url" class="input-with-select">
-                    <el-select style="width:120px;" v-model="dialog.editOutput.protocolType"  slot="prepend">
+                    <el-select style="width:120px;" v-model="dialog.editOutput.type"  slot="prepend">
                         <el-option label="UDP-TS" value="TSUDP"></el-option>
                         <el-option label="RTP-TS" value="TSRTP"></el-option>
                         <el-option label="HTTP-TS" value="TSHTTP"></el-option>

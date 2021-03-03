@@ -74,13 +74,19 @@ define([
                             name:"通道2",
                         }]
                     }],
+                    records:[],//全量关于某个输入的任务数据
                     dialog:{
                         addDispatch:{
                             visible:false,
                             sourceId:null,
                             sourceName:null,
                             outputGroupId:null,
-                            outputId:null
+                            outputId:null,
+                            pagination:{
+                                total:0,
+                                curPage:1,
+                                pageSize:10
+                            }
                         },
                         addSourceGroup:{
                             visible:false,
@@ -92,7 +98,14 @@ define([
                         },
                         addSource:{
                             visible:false,
-                            sources:[] //准备添加的源
+                            groupId:null,
+                            sources:[], //准备添加的源
+                            virtualSources:[],
+                            pagination:{
+                                total:0,
+                                curPage:1,
+                                pageSize:10
+                            }
                         },
                         editSource:{
                             visible:false,
@@ -104,60 +117,112 @@ define([
                             visible:false,
                             protocolType:'TSUDP',
                             name:'',
-                            url:''
+                            url:'',
+                            groupId:null,
+                            pagination:{
+                                total:0,
+                                curPage:1,
+                                pageSize:10
+                            }
                         },
                         editOutput:{
                             visible:false,
-                            protocolType:'',
+                            id:'',
+                            type:'',
                             name:'',
                             url:''
                         },
-                        sources:[],//媒资来的源
-                        outputs:[],
-                        records:[]
-                    }
-                }
-            },
-            computed:{
+                    },
 
+                }
             },
             methods:{
                 handleNodeClick(data) {
                     console.log(data);
                 },
                 sourceDetailBtnClick(id){
+                    let self=this
                     this.dialog.addSource.visible=true
+                    this.dialog.addSource.groupId=id
+                    ajax.get('/tetris/dispatch/control/virtualSources', null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.dialog.addSource.pagination.total = result.data.length
+                            self.dialog.addSource.virtualSources = result.data
+                        }
+                    })
                 },
-                outputDetailBtnClick(id){
+                outputDetailBtnClick(group){
                     this.dialog.addOutput.visible=true
-                    this.dialog.addOutput.outputs=this.outputGroups.filter(s=>s.id=id)[0].outputs
+                    this.dialog.addOutput.groupId=group.id
                 },
                 deleteSourceGroupBtnClick(id){
                     alert('删除信源站点：'+id)
                 },
                 deleteOutputGroupBtnClick(id){
-                    alert('删除输出站点：'+id)
+                    let self = this
+                    ajax.post('/tetris/dispatch/control/outputGroups/delete/'+id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getOutputGroups();
+                        }
+                    })
                 },
                 addDispatchBtnClick(){
-                    alert('添加转发任务')
+                    let self=this
+                    let task = {}
+                    task.sourceId=this.dialog.addDispatch.sourceId
+                    task.outputId=this.dialog.addDispatch.outputId
+                    ajax.post('/tetris/dispatch/control/tasks', task, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getTasks(task.sourceId);
+                        }
+                    })
                 },
                 addSourceBtnClick(){
-                    alert('添加源')
+                   alert("添加源")
                 },
                 addOutputBtnClick(){
+                    let self=this;
                     let output = {}
                     output.name=this.dialog.addOutput.name
                     output.url=this.dialog.addOutput.url
                     output.protocolType=this.dialog.addOutput.protocolType
-                    alert('添加输出：'+output.name)
+                    output.groupId=this.dialog.addOutput.groupId
+                    ajax.post('/tetris/dispatch/control/outputs', output, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getOutputGroups();
+                        }
+                    })
                 },
                 transferSourceBtnClick(data){
                   this.dialog.addDispatch.visible=true;
                   this.dialog.addDispatch.sourceId=data.id
                   this.dialog.addDispatch.sourceName=data.name
                 },
-                addSourceDlgOk(){
-                    alert("添加源")
+                addSourceDlgOk(){ //添加源
+                    let self =this
+                    let source = {}
+                    source.groupId = this.dialog.addSource.groupId
+                    source.bundleIds = this.dialog.addSource.sources.map(s=>s.bundleId).join(",")
+                    debugger
+                    ajax.post('/tetris/dispatch/control/sources', source, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                        }
+                    })
                 },
                 addSourceDlgClose(){
                     this.dialog.addSource.visible=false;
@@ -182,12 +247,21 @@ define([
                 editOutputBtnClick(index,row){
                     this.dialog.editOutput.id=row.id
                     this.dialog.editOutput.name=row.name
-                    this.dialog.editOutput.protocolType=row.protocolType
+                    this.dialog.editOutput.type=row.type
                     this.dialog.editOutput.url=row.url
                     this.dialog.editOutput.visible=true
                 },
                 deleteOutputBtnClick(index,row){
-                    alert("删除输出:"+row)
+                    let self= this
+                    ajax.post('/tetris/dispatch/control/outputs/delete/'+row.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getOutputGroups();
+
+                        }
+                    })
                 },
                 transferSourceDlgClose(){
                     this.dialog.addDispatch.visible=false;
@@ -199,7 +273,20 @@ define([
                     this.dialog.editSource.visible=false;
                 },
                 editOutputDlgOk(){
-                    alert('修改输出')
+                    let self=this
+                    let output={}
+                    output.url=this.dialog.editOutput.url
+                    output.name=this.dialog.editOutput.name
+                    output.protocolType=this.dialog.editOutput.type
+                    ajax.post('/tetris/dispatch/control/outputs/modify/'+this.dialog.editOutput.id, output, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getOutputGroups();
+                            self.editOutputDlgClose();
+                        }
+                    })
                 },
                 editOutputDlgClose(){
                     this.dialog.editOutput.visible=false;
@@ -209,9 +296,18 @@ define([
                     this.dialog.addSourceGroup.visible=true
                 },
                 addSourceGroupDlgOk(){
+                    let self = this
                     let sourceGroup={}
                     sourceGroup.name=this.dialog.addSourceGroup.name
-                    alert("添加站点："+sourceGroup.name)
+                    ajax.post('/tetris/dispatch/control/sourceGroups', sourceGroup, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getSourceGroups();
+                            self.addSourceGroupDlgCancel();
+                        }
+                    })
                 },
                 addSourceGroupDlgCancel(){
                     this.dialog.addSourceGroup.visible=false;
@@ -221,16 +317,37 @@ define([
                     this.dialog.addOutputGroup.visible=true
                 },
                 addOutputGroupDlgOk(){
+                    let self=this
                     let outputGroup={}
                     outputGroup.name=this.dialog.addOutputGroup.name
-                    alert("添加站点："+outputGroup.name)
+                    ajax.post('/tetris/dispatch/control/outputGroups', outputGroup, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getOutputGroups();
+                            self.addOutputGroupDlgCancel();
+                        }
+                    })
                 },
                 addOutputGroupDlgCancel(){
                     this.dialog.addOutputGroup.visible=false;
                 },
                 addSourceTableSelectChanged(val){
-                    this.dialog.addSource.sources=val
                     console.log("选中："+val)
+                    this.dialog.addSource.sources=val
+                },
+                getTasks(sourceId){
+                    let self=this
+                    let task={}
+                    task.sourceId=sourceId
+                    ajax.get('/tetris/dispatch/control/tasks', task, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.records=result.data
+                        }
+                    })
                 },
                 getSourceGroups(){
                     let self=this
@@ -238,20 +355,69 @@ define([
                         if(result.code!==0){
                             self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
                         }else{
-                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                            self.sourceGroups=result.data
                         }
                     })
                 },
                 getOutputGroups(){
                     let self=this
-                    ajax.get('/tetris/dispatch/control/outputGroups', null, function(data){
+                    ajax.get('/tetris/dispatch/control/outputGroups', null, function(result){
                         if(result.code!==0){
                             self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
                         }else{
-
-                            self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                            self.outputGroups=result.data
                         }
                     })
+                },
+                handleVirtualSourceCurrentChange(val){
+                    console.log("cur virtual source page:" + val)
+                    this.dialog.addSource.pagination.curPage = val
+                },
+                handleVirtualSourceSizeChange(val){
+                    this.dialog.addSource.pagination.pageSize = val
+                },
+                handleTaskCurrentChange(val){
+                    console.log("cur task page:" + val)
+                    this.dialog.addDispatch.pagination.curPage = val
+                },
+                handleTaskSizeChange(val){
+                    this.dialog.addDispatch.pagination.pageSize = val
+                },
+                handleOutputCurrentChange(val){
+                    console.log("cur output page:" + val)
+                    this.dialog.addOutput.pagination.curPage = val
+                },
+                handleOutputSizeChange(val){
+                    this.dialog.addOutput.pagination.pageSize = val
+                }
+            },
+            computed:{
+                pageVirtualSource:function(){
+                    if (this.dialog.addSource.virtualSources) {
+                        let pageSize=this.dialog.addSource.pagination.pageSize
+                        let page = this.dialog.addSource.pagination.curPage
+                        let pageSources =  this.dialog.addSource.virtualSources.slice(pageSize*(page-1),pageSize*page)
+                        return pageSources;
+                    }
+                },
+                pageTasks:function () { //转发记录表数据
+                    if (this.records) {
+                        this.dialog.addDispatch.pagination.total = this.records.length
+                        let pageSize=this.dialog.addDispatch.pagination.pageSize
+                        let page = this.dialog.addDispatch.pagination.curPage
+                        let pageTasks =  this.records.slice(pageSize*(page-1),pageSize*page)
+                        return pageTasks;
+                    }
+                },
+                pageOutputs:function () { //输出通道表数据
+                    if (this.dialog.addOutput.groupId != null) {
+                        let outputs = this.outputGroups.filter(g=>g.id===this.dialog.addOutput.groupId)[0].outputs
+                        this.dialog.addOutput.pagination.total = outputs.length
+                        let pageSize=this.dialog.addOutput.pagination.pageSize
+                        let page = this.dialog.addOutput.pagination.curPage
+                        let pageOuts = outputs.slice(pageSize*(page-1),pageSize*page)
+                        return pageOuts;
+                    }
                 }
             },
             created:function(){
