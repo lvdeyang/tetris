@@ -19,11 +19,11 @@ public class InputBO extends InputBaseBO<InputBO>{
     public void setEncapsulateInfo(MediaSourceBO mediaSourceBO){
         switch (mediaSourceBO.getProtocolType()) {
             case UDP_TS:
-                CommonTsBO udpBO = new CommonTsBO(mediaSourceBO.getUrl(),mediaSourceBO.getLocalIp());
+                CommonTsBO udpBO = new CommonTsBO(mediaSourceBO);
                 this.setUdp_ts(udpBO);
                 break;
             case RTP_TS:
-                CommonTsBO rtpBO = new CommonTsBO(mediaSourceBO.getUrl(),mediaSourceBO.getLocalIp());
+                CommonTsBO rtpBO = new CommonTsBO(mediaSourceBO);
                 this.setRtp_ts(rtpBO);
                 break;
             case HTTP_TS:

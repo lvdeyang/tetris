@@ -3,9 +3,17 @@ package com.sumavision.tetris.business.common.bo;/**
  */
 
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.enumeration.IgmpV3Mode;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 import com.sumavision.tetris.business.common.vo.RefreshSourceDTO;
+import com.sumavision.tetris.capacity.bo.input.Igmpv3BO;
 import com.sumavision.tetris.commons.exception.BaseException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @ClassName: MediaSourceBO
@@ -48,6 +56,8 @@ public class MediaSourceBO {
      * 卡类型
      */
     String card_type="blackmagic";
+
+    Igmpv3BO igmpv3;
 
     public String getUrl() {
         return url;
@@ -158,6 +168,15 @@ public class MediaSourceBO {
         return this;
     }
 
+    public Igmpv3BO getIgmpv3() {
+        return igmpv3;
+    }
+
+    public MediaSourceBO setIgmpv3(Igmpv3BO igmpv3) {
+        this.igmpv3 = igmpv3;
+        return this;
+    }
+
     public MediaSourceBO(){}
 
     public MediaSourceBO(RefreshSourceDTO refreshSourceDTO, String localIp) throws BaseException {
@@ -173,6 +192,20 @@ public class MediaSourceBO {
         }
         if (refreshSourceDTO.getCardType() != null) {
             this.card_type= refreshSourceDTO.getCardType();
+        }
+        if (Boolean.TRUE.equals(refreshSourceDTO.getBeIgmpv3())) {
+            Igmpv3BO igmpv3BO = new Igmpv3BO();
+            IgmpV3Mode mode = IgmpV3Mode.getIgmpV3Mode(refreshSourceDTO.getIgmpv3Mode());
+            igmpv3BO.setMode(mode.name().toLowerCase(Locale.ENGLISH));
+            JSONArray ipArray = new JSONArray();
+            for (int i = 0; i < refreshSourceDTO.getIgmpv3IpList().size(); i++) {
+                String ip = refreshSourceDTO.getIgmpv3IpList().get(i);
+                JSONObject ipObj = new JSONObject();
+                ipObj.put("ip",ip);
+                ipArray.add(ipObj);
+            }
+            igmpv3BO.setIp_array(ipArray);
+            this.igmpv3=igmpv3BO;
         }
     }
 
