@@ -140,15 +140,14 @@ define([
                 handleNodeClick(data) {
                     console.log(data);
                 },
-                sourceDetailBtnClick(id){
+                sourceDetailBtnClick(data){
                     let self=this
                     this.dialog.addSource.visible=true
-                    this.dialog.addSource.groupId=id
+                    this.dialog.addSource.groupId=data.id
                     ajax.get('/tetris/dispatch/control/virtualSources', null, function(result){
                         if(result.code!==0){
                             self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
                         }else{
-                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
                             self.dialog.addSource.pagination.total = result.data.length
                             self.dialog.addSource.virtualSources = result.data
                         }
@@ -158,8 +157,16 @@ define([
                     this.dialog.addOutput.visible=true
                     this.dialog.addOutput.groupId=group.id
                 },
-                deleteSourceGroupBtnClick(id){
-                    alert('删除信源站点：'+id)
+                deleteSourceGroupBtnClick(data){
+                    let self = this
+                    ajax.post('/tetris/dispatch/control/sourceGroups/delete/'+data.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getSourceGroups();
+                        }
+                    })
                 },
                 deleteOutputGroupBtnClick(id){
                     let self = this
@@ -185,9 +192,6 @@ define([
                             self.getTasks(task.sourceId);
                         }
                     })
-                },
-                addSourceBtnClick(){
-                   alert("添加源")
                 },
                 addOutputBtnClick(){
                     let self=this;
@@ -215,12 +219,17 @@ define([
                     let source = {}
                     source.groupId = this.dialog.addSource.groupId
                     source.bundleIds = this.dialog.addSource.sources.map(s=>s.bundleId).join(",")
-                    debugger
+                    if(source.bundleIds===null || source.bundleIds==='' || typeof source.bundleIds==='undefined'){
+                        alert("未选中数据，无法添加信源")
+                        return;
+                    }
                     ajax.post('/tetris/dispatch/control/sources', source, function(result){
                         if(result.code!==0){
                             self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
                         }else{
                             self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getSourceGroups()
+                            self.addSourceDlgClose()
                         }
                     })
                 },
@@ -238,7 +247,15 @@ define([
                     this.dialog.editSource.visible=true
                 },
                 deleteSourceBtnClick(data){
-                  alert("删除源:"+data)
+                    let self = this
+                    ajax.post('/tetris/dispatch/control/sources/delete/'+data.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getSourceGroups();
+                        }
+                    })
                 },
                 // 删除转发记录
                 deleteRecordBtnClick(index,row){

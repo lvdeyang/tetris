@@ -24,10 +24,10 @@
                                             <el-col :span="18" style="margin-top: 10px" >{{data.name}}</el-col>
                                             <el-col :span="6">
                                                 <el-tooltip class="item" effect="dark" content="添加信源" placement="bottom-end">
-                                                    <el-button  type="text"  style="font-size:18px;" icon="el-icon-circle-plus-outline" @click.stop="sourceDetailBtnClick(data.id)"></el-button>
+                                                    <el-button  type="text"  style="font-size:18px;" icon="el-icon-circle-plus-outline" @click.stop="sourceDetailBtnClick(data)"></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip style="margin-left:3px;" class="item" effect="dark" content="删除站点" placement="bottom-end">
-                                                    <el-button type="text"  style="font-size:18px;" icon="el-icon-remove-outline" @click.stop="deleteSourceGroupBtnClick(data.id)"></el-button>
+                                                    <el-button type="text"  style="font-size:18px;" icon="el-icon-remove-outline" @click.stop="deleteSourceGroupBtnClick(data)"></el-button>
                                                 </el-tooltip>
                                             </el-col>
                                         </el-row>
