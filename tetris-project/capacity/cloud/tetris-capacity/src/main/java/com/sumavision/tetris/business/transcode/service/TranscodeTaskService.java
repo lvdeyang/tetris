@@ -832,17 +832,20 @@ public class TranscodeTaskService {
 
 			// 版本不对，version校验
 			LOG.warn("save校验version版本不对");
-			Thread.sleep(300);
+			taskService.clearNoUseInputs();
+			Thread.sleep(500);
 			save(taskUuid, capacityIp,capacityPort, inputBOs, taskBOs, outputBOs, businessType);
 
 		} catch (DataIntegrityViolationException e){
 			LOG.warn("唯一性约束，校验输入已存在");
-			Thread.sleep(300);
+			taskService.clearNoUseInputs();
+			Thread.sleep(500);
 			save(taskUuid, capacityIp,capacityPort, inputBOs, taskBOs, outputBOs, businessType);
 		} catch (ConstraintViolationException e) {
 			//数据已存在（ip，port校验）
 			LOG.warn("校验输入已存在");
-			Thread.sleep(300);
+			taskService.clearNoUseInputs();
+			Thread.sleep(500);
 			save(taskUuid, capacityIp,capacityPort, inputBOs, taskBOs, outputBOs, businessType);
 		} catch (BaseException e){
 			capacityService.deleteAllAddMsgId(allRequest,new TransformModule(capacityIp));

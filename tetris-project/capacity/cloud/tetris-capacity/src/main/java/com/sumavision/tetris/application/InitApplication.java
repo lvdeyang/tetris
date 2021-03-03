@@ -133,13 +133,13 @@ public class InitApplication implements ApplicationRunner {
             @Override
             public void run() {
                 try {
-                    //1小时清除
+                    //10分钟清除
                     List<TaskInputPO> inputs = taskInputDao.findByCount(0);
                     if(inputs != null && inputs.size() > 0){
                         Date date = new Date();
                         List<TaskInputPO> needRemoveInputs = new ArrayList<TaskInputPO>();
                         for(TaskInputPO input: inputs){
-                            if((date.getTime() - input.getUpdateTime().getTime()) > 1000 * 60 * 60){
+                            if((date.getTime() - input.getUpdateTime().getTime()) > 1000 * 60 * 10){
                                 needRemoveInputs.add(input);
                             }
                         }
