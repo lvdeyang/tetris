@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.enumeration.ProtocolType;
 
 import java.security.PrivateKey;
+import java.util.List;
 
 /**
  * @ClassName: SourceVO
@@ -84,7 +85,24 @@ public class SourceVO {
 
     //------input program结构----
     private JSONArray program_array;
+
     private String output_program;
+
+    //-------------------------igmpv3相关------------------
+    /**
+     * IGMPV3开关
+     */
+    private Boolean beIgmpv3;
+
+    /**
+     * IGMPV3模式，取值include,exclude
+     */
+    private String igmpv3Mode;
+
+    /**
+     * 控制IP列表 [ip1,ip2]
+     */
+    private List<String> igmpv3IpList;
 
     public String getType() {
         return type;
@@ -333,6 +351,33 @@ public class SourceVO {
 
     public SourceVO setTrigger_list(String trigger_list) {
         this.trigger_list = trigger_list;
+        return this;
+    }
+
+    public Boolean getBeIgmpv3() {
+        return beIgmpv3;
+    }
+
+    public SourceVO setBeIgmpv3(Boolean beIgmpv3) {
+        this.beIgmpv3 = beIgmpv3;
+        return this;
+    }
+
+    public String getIgmpv3Mode() {
+        return igmpv3Mode;
+    }
+
+    public SourceVO setIgmpv3Mode(String igmpv3Mode) {
+        this.igmpv3Mode = igmpv3Mode;
+        return this;
+    }
+
+    public List<String> getIgmpv3IpList() {
+        return igmpv3IpList;
+    }
+
+    public SourceVO setIgmpv3IpList(List<String> igmpv3IpList) {
+        this.igmpv3IpList = igmpv3IpList;
         return this;
     }
 }
