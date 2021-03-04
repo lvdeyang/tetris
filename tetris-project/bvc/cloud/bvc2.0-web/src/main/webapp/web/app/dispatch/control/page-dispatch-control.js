@@ -65,15 +65,8 @@ define([
                             name:"通道2",
                             url:"udp://10.10.40.24:10089",
                         }]
-                    },{
-                        id:2,
-                        name:"上海",
-                        outputs:[{
-                            name:"通道1",
-                        },{
-                            name:"通道2",
-                        }]
                     }],
+                    changedAvailableOutputs:[],//记录输出站点选择切换后的通道数据
                     records:[],//全量关于某个输入的任务数据
                     dialog:{
                         addDispatch:{
@@ -179,7 +172,7 @@ define([
                         }
                     })
                 },
-                addDispatchBtnClick(){
+                addDispatchBtnClick(){ //添加转发任务
                     let self=this
                     let task = {}
                     task.sourceId=this.dialog.addDispatch.sourceId
@@ -190,6 +183,7 @@ define([
                         }else{
                             self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
                             self.getTasks(task.sourceId);
+                            self.getOutputGroups();
                         }
                     })
                 },
@@ -213,6 +207,7 @@ define([
                   this.dialog.addDispatch.visible=true;
                   this.dialog.addDispatch.sourceId=data.id
                   this.dialog.addDispatch.sourceName=data.name
+                  this.getTasks(data.id);
                 },
                 addSourceDlgOk(){ //添加源
                     let self =this
@@ -236,9 +231,6 @@ define([
                 addSourceDlgClose(){
                     this.dialog.addSource.visible=false;
                 },
-                transferSourceDlgOk(){
-
-                },
                 editSourceBtnClick(index,row){
                     this.dialog.editSource.id=row.id
                     this.dialog.editSource.name=row.name
@@ -259,7 +251,16 @@ define([
                 },
                 // 删除转发记录
                 deleteRecordBtnClick(index,row){
-                    alert("删除任务:"+row)
+                    debugger
+                    let self= this
+                    ajax.post('/tetris/dispatch/control/tasks/delete/'+row.id, null, function(result){
+                        if(result.code!==0){
+                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                        }else{
+                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                            self.getTasks(self.dialog.addDispatch.sourceId);
+                        }
+                    })
                 },
                 editOutputBtnClick(index,row){
                     this.dialog.editOutput.id=row.id
@@ -282,6 +283,9 @@ define([
                 },
                 transferSourceDlgClose(){
                     this.dialog.addDispatch.visible=false;
+                },
+                outputDetailDlgClose(){
+                    this.dialog.addOutput.visible=false;
                 },
                 editSourceDlgOk(){
                     alert('修改源')
@@ -406,6 +410,10 @@ define([
                 },
                 handleOutputSizeChange(val){
                     this.dialog.addOutput.pagination.pageSize = val
+                },
+                outputGroupChanged(val){
+                    this.dialog.addDispatch.outputId=null
+                    this.changedAvailableOutputs = this.outputGroups.filter(o=>o.id===val)[0].outputs
                 }
             },
             computed:{

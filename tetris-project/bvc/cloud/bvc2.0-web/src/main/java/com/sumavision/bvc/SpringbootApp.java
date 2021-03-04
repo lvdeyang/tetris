@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Import(SpringContext.class)
 @ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
@@ -25,6 +26,7 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @EnableCaching
 @EnableFeignClients(basePackages={"com.sumavision.bvc", "com.suma.venus.resource", "com.sumavision.tetris"})
 @EnableEurekaClient
+@EnableJpaAuditing
 @SpringBootApplication
 public class SpringbootApp extends SpringBootServletInitializer {
 
