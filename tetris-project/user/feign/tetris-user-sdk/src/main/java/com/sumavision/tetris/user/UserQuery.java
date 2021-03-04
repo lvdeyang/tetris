@@ -18,12 +18,17 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
+import com.sumavision.tetris.system.role.SystemRoleQuery;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 @Component
 public class UserQuery {
 	
 	@Autowired
 	private UserFeign userFeign;
+	
+	@Autowired
+	private SystemRoleQuery systemRoleQuery;
 
 	/**
 	 * 用户登录校验<br/>
@@ -484,6 +489,11 @@ public class UserQuery {
 	
 	public List<UserVO> findByRoleIdIn(List<Long> roleIds) throws Exception{
 		return JsonBodyResponseParser.parseArray(userFeign.findByRoleIdIn(roleIds), UserVO.class);
+	}
+	
+	public List<SystemRoleVO> queryRolesByUser(Long userId) throws Exception{
+		
+		return systemRoleQuery.queryRolesByUser(userId);
 	}
 	
 	/** 测试数据 */

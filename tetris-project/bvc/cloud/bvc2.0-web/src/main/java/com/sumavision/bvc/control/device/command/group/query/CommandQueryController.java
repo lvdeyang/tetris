@@ -826,8 +826,23 @@ public class CommandQueryController {
 			}
 		}
 		
+		//本域域名
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
+		SerNodePO localSerNode = serNodeEntities.get(0);
+		
 		//查询有权限的设备
 		List<BundlePO> queryAllBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
+		if(queryAllBundles == null || queryAllBundles.size() <= 0){
+			
+			List<FolderBO> roots = findRoots(folders);
+			for(FolderBO root: roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root)
+						   .setChildren(new ArrayList<TreeNodeVO>());
+				_root.setName(localSerNode.getNodeName()+"(本域)");
+				_roots.add(_root);
+			}
+			return _roots;
+		} 
 		List<BundlePO> queryBundles = queryAllBundles.stream().filter(bundle -> {
 			return SOURCE_TYPE.SYSTEM.equals(bundle.getSourceType());
 		}).collect(Collectors.toList());
@@ -921,9 +936,6 @@ public class CommandQueryController {
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
-		
-		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
-		SerNodePO localSerNode = serNodeEntities.get(0);
 		
 		//处理：返回设备集合  
 		if(Boolean.TRUE.equals(returnBundleList)){

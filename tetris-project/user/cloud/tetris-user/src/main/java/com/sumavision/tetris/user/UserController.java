@@ -500,8 +500,8 @@ public class UserController {
 		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
 				   //TODO serverIp.properties
-				   //.append(serverProps.getIp())
-				   .append(serverProps.getIpFromProperties())
+				   .append(serverProps.getIp())
+				   //.append(serverProps.getIpFromProperties())
 				   .append(":")
 				   .append(serverProps.getPort())
 				   .append("/")
