@@ -68,17 +68,17 @@ public class BundlePO extends CommonPO<BundlePO> {
 	private Integer operateIndex = 0;
 
 	private Integer operateCount = 0;
-	
+
 	/************************* 以下几个字段只对ipc设备有效 ********************************/
 	/** 坐标-经度 */
 	private String longitude;
 
 	/** 坐标-纬度 */
 	private String latitude;
-	
+
 	/** 流地址 */
 	private String streamUrl;
-	
+
 	/************************* 以下几个字段只对大喇叭设备有效 ********************************/
 	/** speaker标识 */
 	private String identify;
@@ -107,43 +107,44 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	private String equipNode;
 
-	/** 外域名称*/
+	/** 外域名称 */
 	private String equipFactInfo;
 
 	/**
 	 * TODO
 	 */
 	private String extraBindId = null;
-	
+
 	/** 设备所属用户id */
 	private Long userId;
-	
+
 	/** 是否开启组播编码 */
 	private Boolean multicastEncode;
-	
+
 	/** 组播编码地址 */
 	private String multicastEncodeAddr;
-	
+
 	/** 是否开启组播解码 */
 	private Boolean multicastDecode;
-	
+
 	/** 组播源ip */
 	private String multicastSourceIp;
-	
-	/**地点*/
+
+	/** 地点 */
 	private String location;
-	
-	/**是否转码*/
+
+	/** 是否转码 */
 	private Boolean transcod;
-	
+
 	private CoderType coderType;
-	
-	public enum CoderType{
-		DEFAULT,
-		ENCODER,
-		DECODER
+
+	/** 现在在接收这个设备心跳状态的服务ip，暂时只用于转换设备 */
+	private String heartBeatDetectorServer;
+
+	public enum CoderType {
+		DEFAULT, ENCODER, DECODER
 	}
-	
+
 	@Column(name = "coderType")
 	public CoderType getCoderType() {
 		return coderType;
@@ -553,6 +554,14 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setMulticastDecode(Boolean multicastDecode) {
 		this.multicastDecode = multicastDecode;
+	}
+
+	public String getHeartBeatDetectorServer() {
+		return heartBeatDetectorServer;
+	}
+
+	public void setHeartBeatDetectorServer(String heartBeatDetectorServer) {
+		this.heartBeatDetectorServer = heartBeatDetectorServer;
 	}
 
 	@Override

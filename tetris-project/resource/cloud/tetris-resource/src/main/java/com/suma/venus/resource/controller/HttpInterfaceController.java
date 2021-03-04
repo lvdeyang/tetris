@@ -1835,11 +1835,11 @@ public class HttpInterfaceController {
 	@RequestMapping(method = RequestMethod.GET, value = "/thirdpart/bundleHeartBeat")
 	@ResponseBody
 	public void receiveBundleHeartBeat(@RequestParam(value = "bundle_ip") String bundle_ip) {
-		LOGGER.info("receive bundle heartBeat, bundle_ip=" + bundle_ip);
+		LOGGER.debug("receive bundle heartBeat, bundle_ip=" + bundle_ip);
 
 		String regexString = ".*(\\d{3}(\\.\\d{1,3}){3}).*";
 		String IPString = bundle_ip.replaceAll(regexString, "$1");
-		LOGGER.info("receive bundle heartBeat, IPString=" + IPString);
+		LOGGER.debug("receive bundle heartBeat, IPString=" + IPString);
 
 		bundleHeartBeatService.addBundleStatus(IPString, System.currentTimeMillis());
 	}
