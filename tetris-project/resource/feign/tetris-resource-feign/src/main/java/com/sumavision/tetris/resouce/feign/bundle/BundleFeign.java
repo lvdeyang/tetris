@@ -1,6 +1,9 @@
 package com.sumavision.tetris.resouce.feign.bundle;
 
+import java.util.Map;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,4 +57,7 @@ public interface BundleFeign {
 			@RequestParam(value = "latitude") String latitude, @RequestParam(value = "raidus") Long raidus)
 			throws Exception;
 
+	@RequestMapping(value = "/feign/bundle/input/add", method = RequestMethod.POST)
+	public String inputAdd(@RequestBody JSONObject bundleJson)throws Exception;
+	
 }
