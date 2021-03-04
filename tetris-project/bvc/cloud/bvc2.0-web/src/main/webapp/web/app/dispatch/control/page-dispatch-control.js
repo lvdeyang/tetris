@@ -251,7 +251,6 @@ define([
                 },
                 // 删除转发记录
                 deleteRecordBtnClick(index,row){
-                    debugger
                     let self= this
                     ajax.post('/tetris/dispatch/control/tasks/delete/'+row.id, null, function(result){
                         if(result.code!==0){
@@ -259,6 +258,7 @@ define([
                         }else{
                             self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
                             self.getTasks(self.dialog.addDispatch.sourceId);
+                            self.getOutputGroups();
                         }
                     })
                 },

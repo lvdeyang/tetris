@@ -129,13 +129,18 @@
     </div>
     <!--信源转发-->
     <el-dialog title="调度"
+               center
                :visible.sync="dialog.addDispatch.visible">
         <el-card class="box-card" shadow="never">
             <div slot="header" class="clearfix">
-                <span>添加调度任务</span>
+                <span >将</span>
+                <span style="font-size:16px;font-family:'Arial Negreta', 'Arial Normal', 'Arial';font-weight:700;">
+                            {{dialog.addDispatch.sourceName}}
+                        </span>
+                <span>转发到</span>
             </div>
             <el-form v-model="dialog.addDispatch" :inline="true" >
-                <el-form-item label="站点名称" >
+                <el-form-item label="输出站点" >
                     <el-select style="width:160px;" v-model="dialog.addDispatch.outputGroupId" @change="outputGroupChanged">
                         <el-option v-for="group in outputGroups" :key="group.id" :label="group.name" :value="group.id"></el-option>
                     </el-select>
@@ -157,10 +162,10 @@
             <el-table size="mini" border highlight-current-row :data="pageTasks">
                 <el-table-column label="序号"  type="index" width="100">
                 </el-table-column>
-                <el-table-column label="站点名称" width="150">
+                <el-table-column label="输出站点" width="150">
                     <template slot-scope="scope"><span>{{scope.row.outputGroupName}}</span></template>
                 </el-table-column>
-                <el-table-column label="通道名称" width="100">
+                <el-table-column label="输出通道" width="100">
                     <template slot-scope="scope"><span>{{scope.row.outputName}}</span></template>
                 </el-table-column>
                 <el-table-column label="通道地址">
@@ -181,9 +186,9 @@
                            :page-size="dialog.addDispatch.pagination.pageSize"
                            :page-sizes="[5,10,20]"></el-pagination>
         </el-card>
-        <span slot="footer" class="dialog-footer">
-	        <el-button size="medium" @click="transferSourceDlgClose">关闭</el-button>
-	    </span>
+        <!--<span slot="footer"  class="dialog-footer">-->
+	        <!--<el-button size="medium" @click="transferSourceDlgClose">关闭</el-button>-->
+	    <!--</span>-->
     </el-dialog>
     <!--添加视频源-->
     <el-dialog title="批量添加信源"
@@ -279,6 +284,7 @@
     </el-dialog>
     <!--添加输出-->
     <el-dialog title="站点详情"
+               center
                :visible.sync="dialog.addOutput.visible" >
         <el-card class="box-card" shadow="never">
             <div slot="header" class="clearfix">
@@ -339,10 +345,9 @@
                            :page-size="dialog.addOutput.pagination.pageSize"
                            :page-sizes="[5,10,20]"></el-pagination>
         </el-card>
-        <span slot="footer" class="dialog-footer">
-	        <el-button size="medium" @click="outputDetailDlgClose">关闭</el-button>
-	    </span>
-
+        <!--<span slot="footer" class="dialog-footer">-->
+	        <!--<el-button size="medium" @click="outputDetailDlgClose">关闭</el-button>-->
+	    <!--</span>-->
     </el-dialog>
     <!--修改视频源-->
     <el-dialog title="修改"  width="30%" :visible.sync="dialog.editSource.visible" >
