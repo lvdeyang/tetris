@@ -142,9 +142,9 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 		case "video":
 			List<MediaVideoVO> mediaVideoVOs = mediaVideoQuery.loadAll(folderId);
 			for (MediaVideoVO mediaVideoVO : mediaVideoVOs) {
-				if ("VIDEO".equals(mediaVideoVO.getType())&& (mediaVideoVO.getSynchro()!=null&&(mediaVideoVO.getSynchro().booleanValue()))) {
-					permissionBOs.add(new MediaFileEquipmentPermissionBO().setFromVideoVO(mediaVideoVO));
-				}
+				//if ("VIDEO".equals(mediaVideoVO.getType())&& (mediaVideoVO.getSynchro()!=null&&(mediaVideoVO.getSynchro().booleanValue()))) {
+					permissionBOs.add(new MediaFileEquipmentPermissionBO().setFromVideoVO(mediaVideoVO).setFolderId(folderId));
+				//}
 				
 			}
 			break;
