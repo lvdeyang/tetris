@@ -31,7 +31,7 @@ public class RecordCapacityService {
 		DevicePO devicePO;
 
 		try {
-			devicePO = deviceDAO.findOne(recordTimerBO.getDeviceId());
+			devicePO = deviceDAO.findById(recordTimerBO.getDeviceId());
 
 			if (devicePO == null) {
 				return;

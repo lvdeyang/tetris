@@ -8,7 +8,7 @@ spring:
     name: tetris-alarm
   cloud:
     client:
-      ipAddress: 10.10.40.24
+      ipAddress: 10.10.40.27
     inetutils:
       preferred-networks: 10.10.40.27
   main:

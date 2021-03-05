@@ -45,6 +45,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findByFolderId(Long folderId);
 
 	public List<BundlePO> findByDeviceIp(String deviceIp);
+	
+	public List<BundlePO> findByDeviceIpAndDeviceModel(String deviceIp, String deviceModel);
 
 	public List<BundlePO> findByDeviceIpAndDevicePortAndDeviceModel(String deviceIp, Integer devicePort,
 			String deviceModel);

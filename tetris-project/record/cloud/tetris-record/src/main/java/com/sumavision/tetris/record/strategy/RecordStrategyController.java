@@ -87,7 +87,7 @@ public class RecordStrategyController {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		Pageable pageable = new PageRequest(pageIndex, pageSize, Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.Direction.DESC, "id");
 		try {
 			Page<RecordStrategyPO> recordStrategyPOPage = recordStrategyDAO.findAll(pageable);
 			data.put("errMsg", "");
@@ -123,7 +123,7 @@ public class RecordStrategyController {
 		return data;
 
 	}
-	
+
 	@ResponseBody
 	@RequestMapping(value = "/queryStrategyDetail")
 	public Object queryStrategyDetail() {
@@ -143,7 +143,6 @@ public class RecordStrategyController {
 		return data;
 
 	}
-
 
 	@RequestMapping("/queryStrategyItems")
 	@ResponseBody
@@ -302,7 +301,7 @@ public class RecordStrategyController {
 					}
 				}
 
-				stgPo = recordStrategyDAO.findOne(stgId);
+				stgPo = recordStrategyDAO.findById(stgId);
 				stgPoBackUp = stgPo;
 				if (typeStr.equals(EStrategyType.CYCLE_SCHEDULE.toString())) {
 					stgPo.setStartDate(startDate);
@@ -351,7 +350,7 @@ public class RecordStrategyController {
 						String[] strings = delStgItemId.split(",");
 						for (int i = 0; i < strings.length; i++) {
 							if (!strings[i].isEmpty()) {
-								recordStrategyItemDAO.delete(Long.parseLong(strings[i]));
+								recordStrategyItemDAO.deleteById(Long.parseLong(strings[i]));
 							}
 						}
 					}
@@ -363,7 +362,7 @@ public class RecordStrategyController {
 
 		} catch (Exception e1) {
 			if (null == stgId) {// 新增出异常，删除策略
-				recordStrategyDAO.delete(stgPo.getId());
+				recordStrategyDAO.deleteById(stgPo.getId());
 				recordStrategyItemDAO.deleteByRecordStrategyId(stgPo.getId());
 			} else {
 				recordStrategyDAO.save(stgPoBackUp);
@@ -391,7 +390,7 @@ public class RecordStrategyController {
 		Map<String, Object> data = new HashMap<String, Object>();
 		// TODO check running status
 		try {
-			RecordStrategyPO stgPO = recordStrategyDAO.findOne(recordStrategyId);
+			RecordStrategyPO stgPO = recordStrategyDAO.findById(recordStrategyId);
 
 			// 停止录制
 			recordStragegyService.stopStrategyRecord(stgPO);
@@ -454,7 +453,7 @@ public class RecordStrategyController {
 			if (recordStgItemPOS != null && !recordStgItemPOS.isEmpty()) {
 				return;
 			}
-			stgItemPO = recordStrategyItemDAO.findOne(id);
+			stgItemPO = recordStrategyItemDAO.findById(id);
 			stgItemPO.setStartTime(startTime);
 			stgItemPO.setStopTime(stopTime);
 			recordStrategyItemDAO.save(stgItemPO);
@@ -491,7 +490,7 @@ public class RecordStrategyController {
 
 		Map<String, Object> data = new HashMap<>();
 		try {
-			RecordStrategyPO recordStrategyPO = recordStrategyDAO.findOne(recordStrategyId);
+			RecordStrategyPO recordStrategyPO = recordStrategyDAO.findById(recordStrategyId);
 			recordStragegyService.startManualRecord(recordStrategyPO);
 
 			// TODO 操作日志
@@ -514,7 +513,7 @@ public class RecordStrategyController {
 	public Map<String, Object> stopRecord(@RequestParam(value = "recordStrategyId") Long recordStrategyId) {
 		Map<String, Object> data = new HashMap<>();
 		try {
-			RecordStrategyPO recordStrategyPO = recordStrategyDAO.findOne(recordStrategyId);
+			RecordStrategyPO recordStrategyPO = recordStrategyDAO.findById(recordStrategyId);
 			recordStragegyService.stopRecordOfManualStg(recordStrategyPO);
 
 			recordStrategyPO.setStatus(EStrategyStatus.STOP);

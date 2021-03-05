@@ -56,7 +56,7 @@ public class StorageController {
 			if (storageVO.getId() == null || storageVO.getId() == 0) {
 				storagePO = StorageVO.fromVO2PO(storageVO);
 			} else {
-				storagePO = storageDAO.findOne(storageVO.getId());
+				storagePO = storageDAO.findById(storageVO.getId());
 				BeanUtils.copyProperties(storageVO, storagePO, "id", "isMounted");
 			}
 
@@ -78,7 +78,7 @@ public class StorageController {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		Pageable pageable = new PageRequest(pageIndex, pageSize, Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.Direction.DESC, "id");
 		try {
 			Page<StoragePO> storagePOPage = storageDAO.findAll(pageable);
 			data.put("errMsg", "");

@@ -117,7 +117,7 @@ public class DeviceController {
 		Map<String, Object> data = new HashMap<String, Object>();
 		try {
 
-			deviceDAO.delete(id);
+			deviceDAO.deleteById(id);
 			data.put("errMsg", "");
 
 		} catch (Exception e) {

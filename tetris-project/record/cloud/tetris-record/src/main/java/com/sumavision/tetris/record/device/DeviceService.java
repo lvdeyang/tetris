@@ -35,7 +35,7 @@ public class DeviceService {
     RecordStrategyDAO recordStrategyDAO;
 
     public void sync(Long id) throws BaseException {
-        DevicePO devicePO = deviceDAO.findOne(id);
+        DevicePO devicePO = deviceDAO.findById(id);
         if (devicePO==null){
             throw new BaseException(StatusCode.FORBIDDEN,"device not found,id:"+id);
         }
