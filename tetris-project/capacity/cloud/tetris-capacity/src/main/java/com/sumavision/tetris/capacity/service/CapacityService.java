@@ -9,6 +9,7 @@ import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
+import com.sumavision.tetris.capacity.constant.Constant;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
 import com.sumavision.tetris.capacity.enumeration.OutputResponseEnum;
@@ -1749,7 +1750,7 @@ public class CapacityService {
         JSONObject put = new JSONObject();
         put.put("msg_id", msg_id);
         put.put("heartbeat_url", heartbeatUrl);
-        put.put("span_second", 10);
+        put.put("span_second", Constant.HEARTBEAT_SPAN_SECOND);
 
         LOG.info("[set-heartbeat-url] request, url: {}, body: {}", url, put);
         JSONObject res = HttpUtil.httpPut(url, put);

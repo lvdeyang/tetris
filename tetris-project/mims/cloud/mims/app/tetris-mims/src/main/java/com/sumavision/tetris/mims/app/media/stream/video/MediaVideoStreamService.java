@@ -685,6 +685,8 @@ public class MediaVideoStreamService {
 	 **/
 	public void putMediaInResourceServiceAsVirtualDevice(MediaVideoStreamPO media,String url)throws Exception{
 		JSONObject bundleJson = new JSONObject();
+		bundleJson.put("BundleName",media.getName());
+		bundleJson.put("BundleId",media.getUuid());
 		bundleJson.put("bundleName",media.getName());
 		bundleJson.put("bundleId",media.getUuid());
 		bundleJson.put("url",url);
@@ -715,9 +717,10 @@ public class MediaVideoStreamService {
 			}
 			programsJson.add(progJson);
 		}
+		bundleJson.put("programs",programsJson);
 		try {
 			LOG.info("[put-virtual-stream], send: {}",JSON.toJSONString(bundleJson));
-			bundleFeignService.inputAll(bundleJson);
+			bundleFeignService.inputAdd(bundleJson);
 			LOG.info("[put-virtual-stream], ack.");
 		} catch (Exception e) {
 			LOG.info("注入失败",e);
