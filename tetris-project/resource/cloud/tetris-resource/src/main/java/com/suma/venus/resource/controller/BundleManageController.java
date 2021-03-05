@@ -288,13 +288,13 @@ public class BundleManageController extends ControllerBase {
 					data.put(ERRMSG, "图像设备数量已超过上限！");
 					return data;
 				}
-			}else {
-				if(bundle210.longValue() >= 1024L){
-					data.put(ERRMSG, "图像设备数量已超过上限！");
-					return data;
-				}
 			}
-				
+//			else {
+//				if(bundle210.longValue() >= 1024L){
+//					data.put(ERRMSG, "图像设备数量已超过上限！");
+//					return data;
+//				}
+//			}
 				
 			if (null != bundlePO.getUsername() && !bundlePO.getUsername().isEmpty()) {
 				if (null != bundleService.findByUsername(bundlePO.getUsername())) {

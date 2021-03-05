@@ -1,6 +1,9 @@
 package com.sumavision.tetris.bvc.business.location;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -24,7 +30,16 @@ public class LocationOfScreenWallController {
 	private UserUtils userUtils;
 	
 	@Autowired
+	private QueryUtil queryUtil;
+	
+	@Autowired
 	private LocationOfScreenWallService locationOfScreenWallService;
+	
+	@Autowired
+	private LocationOfScreenWallDAO locationOfScreenWallDao;
+	
+	@Autowired
+	private BundleDao bundleDao;
 	
 	/**
 	 * 屏幕墙的编解码信息<br/>
@@ -40,7 +55,33 @@ public class LocationOfScreenWallController {
 	public Object allScreenInformation(
 			Long locationTemplateLayoutId) throws Exception{
 		
-		return locationOfScreenWallService.allScreenInformation(locationTemplateLayoutId);
+		List<LocationOfScreenWallPO> locations = locationOfScreenWallService.allScreenInformation(locationTemplateLayoutId);
+		
+		Set<String> bundleIds = locations.stream().map(LocationOfScreenWallPO::getDecoderBundleId).collect(Collectors.toSet());
+		bundleIds.addAll(locations.stream().map(LocationOfScreenWallPO::getEncoderBundleId).collect(Collectors.toSet()));
+		bundleIds.remove("");
+		bundleIds.remove(null);
+		List<BundlePO> bundles = bundleDao.findByBundleIdIn(bundleIds);
+		
+		List<LocationOfScreenWallVO> vos = new ArrayList<LocationOfScreenWallVO>();
+		for(LocationOfScreenWallPO location : locations){
+			LocationOfScreenWallVO vo = new LocationOfScreenWallVO().set(location);
+			BundlePO encoderBundle = queryUtil.queryBundlePOByBundleId(bundles, location.getEncoderBundleId());
+			if(encoderBundle != null){
+				vo.setEncoderBundleName(encoderBundle.getBundleName());
+				location.setEncoderBundleName(encoderBundle.getBundleName());
+			}
+			BundlePO decoderBundle = queryUtil.queryBundlePOByBundleId(bundles, location.getDecoderBundleId());
+			if(decoderBundle != null){
+				vo.setDecoderBundleName(decoderBundle.getBundleName());
+				location.setDecoderBundleName(decoderBundle.getBundleName());
+			}
+			vos.add(vo);
+		}
+		
+		locationOfScreenWallDao.save(locations);
+				
+		return locations;
 	}
 	
 	/**

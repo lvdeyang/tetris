@@ -1135,14 +1135,36 @@ define([
                     self.dialog.setOutput.data.audioCodec = self.dialog.setOutput.audioCodec;
                     self.dialog.setOutput.data.resolution = self.dialog.setOutput.resolution;
 
-                    if(self.dialog.setOutput.data.codeRate>self.dialog.setOutput.data.rate){
+
+                    if(!self.dialog.setOutput.data.codeRate||!self.dialog.setOutput.data.rate){
                         this.$message({
-                            message: '输出码率应大于编码码率',
+                            message: '请设置码率',
                             type: 'warning'
                         });
                         self.dialog.setOutput.loading = false;
                         return;
                     }
+
+                    if(self.dialog.setOutput.data.codeRate>self.dialog.setOutput.data.rate){
+                        this.$message({
+                            message: '输出码率不能小于编码码率',
+                            type: 'warning'
+                        });
+                        self.dialog.setOutput.loading = false;
+                        return;
+                    }
+
+
+                    if(!self.dialog.setOutput.data.rateCtrl){
+                        this.$message({
+                            message: '请设置码率控制',
+                            type: 'warning'
+                        });
+                        self.dialog.setOutput.loading = false;
+                        return;
+                    }
+
+
 
                     self.handleSetOutputClose();
                 },

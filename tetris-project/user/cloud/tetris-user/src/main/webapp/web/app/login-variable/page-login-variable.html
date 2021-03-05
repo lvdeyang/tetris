@@ -72,7 +72,7 @@
                     :before-close="handleAddVariableClose"
                     :close-on-click-modal="false">
 
-                <el-form label-width="80px" :rules="rules">
+                <el-form label-width="80px">
                 <el-form-item label="变量类型" prop="typeInput">
                     <el-input v-model="dialog.add.variableType" @click.native="handleChangeType"></el-input>
                 </el-form-item>

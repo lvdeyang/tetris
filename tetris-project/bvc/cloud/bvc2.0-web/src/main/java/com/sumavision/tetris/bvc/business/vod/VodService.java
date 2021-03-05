@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -609,7 +610,6 @@ public class VodService {
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
 		if(serial!=null && serial != -1) group.setLocationIndex(serial);
-		if(serial == -1 ) group.setAllowNewPage(false);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
@@ -663,6 +663,7 @@ public class VodService {
 		//呼叫被点播的编码
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		
 		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		if(businessReturnService.getSegmentedExecute()){
 			businessReturnService.add(logic, null, null);
@@ -680,6 +681,94 @@ public class VodService {
 		}
 		
 		operationLogService.send(user.getName(), "点播设备", user.getName()+"点播设备："+ encoderBundleEntity.getBundleName());
+	}
+	
+	/** 重构点播设备 */
+	@Transactional(rollbackFor = Exception.class)
+	public void foreignDeviceStart(UserBO user, String bundleName, String bundleId,Integer serial, String multiAddr, String multiSrcIp, Boolean isMulticast) throws Exception{
+		
+		TerminalPO deviceTerminal = terminalDao.findByType(TerminalType.JV210);
+		TerminalPO userTerminal = terminalDao.findByType(TerminalType.QT_ZK);
+		
+		GroupPO group = new GroupPO();
+		group.setOriginType(OriginType.OUTER);
+		group.setUserId(user.getId());
+		group.setUserName(user.getName());
+		group.setUserCode(user.getUserNo());
+		group.setName(user.getName() + "点播" + bundleName + "设备");
+		group.setCreatetime(new Date());
+		group.setStartTime(group.getCreatetime());
+		group.setBusinessType(BusinessType.VOD);
+		if(serial!=null && serial != -1) group.setLocationIndex(serial);
+		group.setMultiAddr(multiAddr);
+		group.setMultiSrcIp(multiSrcIp);
+		group.setIsMulticast(isMulticast);
+		groupDao.save(group);
+		
+		VodPO vod = new VodPO();
+		vod.setUserId(user.getId());
+		vod.setUserName(user.getName());
+		vod.setVodType(com.sumavision.tetris.bvc.business.vod.VodType.USER);
+		vod.setSrcName(bundleName);
+		vod.setDstType(DstType.DEVICE);
+		vod.setGroupId(group.getId());
+		vodDao.save(vod);
+		
+		//点播用户作为成员
+		GroupMemberPO userMemberPO = new GroupMemberPO();
+		userMemberPO.setName(user.getName());
+		userMemberPO.setCode(user.getUserNo());
+		userMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
+		userMemberPO.setOriginId(user.getId().toString());
+		userMemberPO.setTerminalId(userTerminal.getId());
+		userMemberPO.setFolderId(user.getFolderId());
+		userMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
+		userMemberPO.setGroupId(group.getId());
+		groupMemberDao.save(userMemberPO);
+		
+		//被点播设备作为成员
+		GroupMemberPO vodUserMemberPO = new GroupMemberPO();
+		vodUserMemberPO.setName(bundleName);
+		vodUserMemberPO.setGroupMemberType(GroupMemberType.MEMBER_DEVICE);
+		vodUserMemberPO.setOriginId(bundleId);
+		vodUserMemberPO.setTerminalId(deviceTerminal.getId());//???
+		vodUserMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
+		vodUserMemberPO.setGroupId(group.getId());
+		vodUserMemberPO.setOriginType(OriginType.OUTER);
+		groupMemberDao.save(vodUserMemberPO);
+		
+		vod.setSrcMemberId(vodUserMemberPO.getId());
+		vod.setDstMemberId(userMemberPO.getId());
+		vodDao.save(vod);
+		
+		//把成员授权给角色
+		RolePO userRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_DST);
+		GroupMemberRolePermissionPO userRolePermission = new GroupMemberRolePermissionPO(userRole.getId(), userMemberPO.getId());
+		groupMemberRolePermissionDao.save(userRolePermission);
+		RolePO srcRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_SRC);
+		GroupMemberRolePermissionPO srcRolePermission = new GroupMemberRolePermissionPO(srcRole.getId(), vodUserMemberPO.getId());
+		groupMemberRolePermissionDao.save(srcRolePermission);
+		
+		//呼叫被点播的编码
+		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logic = groupService.openForeignEncoder(group,sourceBOs, codec, -1L);
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.add(logic, null, null);
+		}else{
+			executeBusiness.execute(logic, group.getName() + "，打开编码");
+		}
+		
+		//执行议程
+		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_DEVICE);
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
+		
+		//命令合并下发
+		if(businessReturnService.getSegmentedExecute()){
+			businessReturnService.execute();
+		}
+		
+		operationLogService.send(user.getName(), "点播设备", user.getName()+"点播设备："+ bundleName);
 	}
 	
 	/**
@@ -718,7 +807,17 @@ public class VodService {
 			List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-			LogicBO logic = groupService.closeEncoder(group,sourceBOs, codec, -1L);
+			
+			List<SourceBO> foreignSourceBOs = sourceBOs.stream().filter(source->{
+				return OriginType.OUTER.equals(source.getOriginType());
+			}).collect(Collectors.toList());
+			
+			List<SourceBO> innerSourceBOs = new ArrayList<SourceBO>(sourceBOs);
+			innerSourceBOs.removeAll(foreignSourceBOs);
+			
+			LogicBO logic = groupService.closeEncoder(group, innerSourceBOs, codec, -1L);
+			LogicBO foreignlogic = groupService.closeForeignEncoder(group,foreignSourceBOs, codec, -1L);
+			logic.merge(foreignlogic);
 			if(businessReturnService.getSegmentedExecute()){
 				businessReturnService.add(logic, null, null);
 			}else{
@@ -751,6 +850,73 @@ public class VodService {
 		}
 		
 	}
+	
+//	/**
+//	 * 停止点播外域设备<br/>
+//	 * <b>作者:</b>lx<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2021年2月2日 下午6:40:12
+//	 * @param UserBO user 用户
+//	 * @param Long businessId 业务id
+//	 */
+//	@Transactional(rollbackFor = Exception.class)
+//	public void foreignDeviceStop(UserBO user, Long groupId) throws Exception{
+//		
+//		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
+//			
+//			GroupPO group = groupDao.findOne(groupId);
+//			if(group == null){
+//				log.warn("停止点播设备，任务不存在，id: " + groupId);
+//				return;
+//			}
+//			
+//			//查出PO
+//			VodPO vod = vodDao.findByGroupId(group.getId());
+//			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+//			List<Long> memberIds = businessCommonService.obtainMemberIds(members);
+//			List<GroupMemberRolePermissionPO> permissions = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
+//			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
+//			List<RunningAgendaPO> runningAgendas = runningAgendaDao.findByGroupId(groupId);
+//			
+//			//挂断编码解码，删除分页
+//			Long srcMemberId = vod.getSrcMemberId();
+//			GroupMemberPO srcMember = tetrisBvcQueryUtil.queryMemberById(members, srcMemberId);
+//			List<SourceBO> sourceBOs = agendaExecuteService.obtainForeignSource(new ArrayListWrapper<GroupMemberPO>().add(srcMember).getList(), groupId.toString(), BusinessInfoType.PLAY_VOD);
+//			//TODO:挂断videoAudioMap里边的通道
+//			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+//			LogicBO logic = groupService.closeForeignEncoder(group,sourceBOs, codec, -1L);
+//			if(businessReturnService.getSegmentedExecute()){
+//				businessReturnService.add(logic, null, null);
+//			}else{
+//				executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+//			}
+//			
+////			
+//			
+//			//找到分页任务，停止。也可以通过“停止议程”来实现
+//			Long dstMemberId = vod.getDstMemberId();
+//			GroupMemberPO dstMember = tetrisBvcQueryUtil.queryMemberById(members, dstMemberId);
+//			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(dstMember.getOriginId(), dstMember.getTerminalId(), GroupMemberType.MEMBER_USER);
+//			List<PageTaskPO> removeTasks = pageTaskDao.findByBusinessId(groupId.toString());
+//			pageTaskService.addAndRemoveTasks(pageInfo, null, removeTasks);//TODO 命令合并下发 （已完成）
+//			
+//			//命令合并下发
+//			if(businessReturnService.getSegmentedExecute()){
+//				businessReturnService.execute();
+//			}
+//			
+//			operationLogService.send(user.getName(), "关闭点播", user.getName()+"停止点播："+ vod.getSrcName());
+//			
+//			//删除这些PO
+//			groupDao.delete(group);
+//			vodDao.delete(vod);
+//			groupMemberDao.deleteInBatch(members);
+//			groupMemberRolePermissionDao.deleteInBatch(permissions);
+//			commonForwardDao.deleteInBatch(forwards);
+//			runningAgendaDao.deleteInBatch(runningAgendas);
+//		}
+//		
+//	}
 
 	/**
 	 * 用户看自己的编码器<br/>
