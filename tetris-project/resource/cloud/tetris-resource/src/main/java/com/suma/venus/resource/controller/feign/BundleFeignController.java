@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.netflix.discovery.converters.Auto;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -29,6 +31,7 @@ import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
+import com.suma.venus.resource.service.CloudVirtualService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.vo.BundleFeignVO;
 import com.sumavision.tetris.capacity.server.CapacityService;
@@ -60,6 +63,9 @@ public class BundleFeignController {
 
 	@Autowired
 	private ScreenSchemeDao screenSchemeDao;
+	
+	@Autowired
+	private CloudVirtualService cloudVirtualService;
 
 	@Value("${realIP}")
 	private String clientIP;
@@ -339,4 +345,13 @@ public class BundleFeignController {
 		return responseObj;
 	}
 
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/input/add")
+	public Object inputAdd(JSONObject bundleJson)throws Exception{
+		
+		cloudVirtualService.inputAdd(bundleJson);
+		return null;
+	}
 }

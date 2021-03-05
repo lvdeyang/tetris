@@ -1,4 +1,4 @@
-                                                                       package com.sumavision.tetris.api.g01.web;
+package com.sumavision.tetris.api.g01.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

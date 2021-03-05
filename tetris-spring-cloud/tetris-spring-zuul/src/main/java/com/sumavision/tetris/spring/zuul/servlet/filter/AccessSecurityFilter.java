@@ -79,6 +79,7 @@ public class AccessSecurityFilter implements Filter{
 				!requestUri.startsWith("/tetris-capacity") &&
 				!requestUri.startsWith("/tetris-bvc-business") &&
 				!requestUri.startsWith("/tetris-zoom") &&
+				!requestUri.startsWith("/tar") &&
 				!requestUri.startsWith("/eb-insert-web") &&
 				!requestUri.startsWith("/eb-monitor-web") &&
 				!requestUri.startsWith("/eb-statistics-web") &&

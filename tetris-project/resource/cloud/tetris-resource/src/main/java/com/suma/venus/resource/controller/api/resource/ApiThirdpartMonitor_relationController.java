@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.controller.ControllerBase;
 import com.suma.venus.resource.service.ApiThirdpartMonitor_relationService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -227,5 +228,19 @@ public class ApiThirdpartMonitor_relationController extends ControllerBase{
 		
 		System.out.println("-------------------------修改设备信息-------------------------------");
 		return apiThirdpartMonitor_relationService.deviceInformationChange(wrapper);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value ="/on/foreign/resource/receive" )
+	public Object onForeignResourceReceive(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper wrapper = new JSONHttpServletRequestWrapper(request);
+		String userId = wrapper.getString("userId");
+		JSONObject message = wrapper.getJSONObject("message");
+		System.out.println(message.toJSONString());
+		
+		return apiThirdpartMonitor_relationService.onForeignResourceReceive(userId,message);
+		
 	}
 }

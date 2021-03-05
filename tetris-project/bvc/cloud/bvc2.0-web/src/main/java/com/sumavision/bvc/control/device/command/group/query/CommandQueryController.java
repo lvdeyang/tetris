@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,18 +9,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.management.relation.Relation;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.omg.stub.java.rmi._Remote_Stub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.TreeNode;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
@@ -44,9 +43,10 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
-import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -71,11 +71,13 @@ import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.time.CommandFightTimeServiceImpl;
-import com.sumavision.bvc.device.group.bo.AapAlarmBO;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
+import com.sumavision.bvc.device.group.bo.LogicBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
@@ -114,6 +116,9 @@ import com.sumavision.tetris.system.role.SystemRoleVO;
 @RequestMapping(value = "/command/query")
 public class CommandQueryController {
 
+	@Autowired
+	private ExecuteBusinessProxy executeBusiness;
+	
 	@Autowired
 	private ServerProps serverProps;
 
@@ -194,6 +199,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -555,7 +563,7 @@ public class CommandQueryController {
 		//获取userId
 		long userId = userUtils.getUserIdFromSession(request);
 		
-		List<String> privileges=JSONArray.parseArray(privilegesStr,String.class);
+		List<String> privileges = JSONArray.parseArray(privilegesStr,String.class);
 		
 		List<FolderBO> folders = new ArrayList<FolderBO>();
 		List<BundleBO> bundles = new ArrayList<BundleBO>();
@@ -650,8 +658,14 @@ public class CommandQueryController {
 			return folderMap.get(folderId);
 		}).collect(Collectors.toList());
 		
-		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
-		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		Comparator<Object> comparator = Collator.getInstance(Locale.CHINA);
+		
+		 Collections.sort(folders, (item1, item2) -> {
+            return comparator.compare(item1.getName(), item2.getName());
+        });
+		
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
@@ -765,7 +779,283 @@ public class CommandQueryController {
 			}
 		}
 		return _roots;
+		//tttest
+	}
+	
+	/**
+	 * 查询组织机构下所有的设备<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月25日
+	 * @param @PathVariable int type 通道类型，0编码，1解码，2视频编码，3音频编码，4视频解码，5音频解码
+	 * @param @PathVariable int type 节点类型类型，0编码，1解码，2视频编码，3音频编码，4视频解码，5音频解码
+	 * @param @PathVariable boolean withChannel 是否要查询通道
+	 * @param @PathVariable boolean filterMode 过滤器模式 0全部，1在线，2离线
+	 * @param privilegesStr 数组类型的权限{@Code BUSINESS_OPR_TYPE的value}
+	 * @param satisfyAll true需要满足privilegesStr全部权限，false只需满足一个即可。为null的时候按默认查询
+	 * @param returnBundleList true返回设备集合，false返回设备树
+	 * @return TreeNodeVO 设备通道树节点
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/inner/bundle/{type}/{withChannel}/{filterMode}")
+	public Object findInstitutionTreeInnerBundle(
+			@PathVariable int type,
+			@PathVariable boolean withChannel,
+			@PathVariable int filterMode,
+			String privilegesStr,
+			Boolean satisfyAll,
+			Boolean returnBundleList,
+			HttpServletRequest request) throws Exception{
 		
+		//获取userId
+		long userId = userUtils.getUserIdFromSession(request);
+		
+		List<String> privileges = JSONArray.parseArray(privilegesStr,String.class);
+		
+		List<FolderBO> folders = new ArrayList<FolderBO>();
+		List<BundleBO> bundles = new ArrayList<BundleBO>();
+		List<ChannelBO> channels = new ArrayList<ChannelBO>();	
+		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
+		
+		//查询所有非点播的文件夹
+		List<FolderPO> totalFolders = resourceService.queryAllFolders();
+		for(FolderPO folder:totalFolders){
+			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())){
+				folders.add(new FolderBO().set(folder));
+			}
+		}
+		
+		//本域域名
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
+		SerNodePO localSerNode = serNodeEntities.get(0);
+		
+		//查询有权限的设备
+		List<BundlePO> queryAllBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
+		if(queryAllBundles == null || queryAllBundles.size() <= 0){
+			
+			List<FolderBO> roots = findRoots(folders);
+			for(FolderBO root: roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root)
+						   .setChildren(new ArrayList<TreeNodeVO>());
+				_root.setName(localSerNode.getNodeName()+"(本域)");
+				_roots.add(_root);
+			}
+			return _roots;
+		} 
+		List<BundlePO> queryBundles = queryAllBundles.stream().filter(bundle -> {
+			return SOURCE_TYPE.SYSTEM.equals(bundle.getSourceType());
+		}).collect(Collectors.toList());
+		System.out.println("本域的设备有：" + queryBundles);
+		if(queryBundles==null || queryBundles.size()<=0) return _roots;
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundlePO bundleBody:queryBundles){
+			//过滤在线离线
+			if(filterMode == 0
+					|| filterMode == 1 && bundleBody.getOnlineStatus().equals(ONLINE_STATUS.ONLINE)
+					|| filterMode == 2 && bundleBody.getOnlineStatus().equals(ONLINE_STATUS.OFFLINE)){
+				
+				if(!"jv230".equals(bundleBody.getDeviceModel()) && bundleBody.getFolderId() != null){
+					BundleBO bundle = new BundleBO().setId(bundleBody.getBundleId())										
+							.setName(bundleBody.getBundleName())
+							.setFolderId(bundleBody.getFolderId())
+							.setBundleId(bundleBody.getBundleId())
+							.setModel(bundleBody.getDeviceModel())
+							.setNodeUid(bundleBody.getAccessNodeUid())
+							.setOnlineStatus(bundleBody.getOnlineStatus().toString())
+							.setLockStatus(bundleBody.getLockStatus())
+							.setType(bundleBody.getBundleType())
+							.setEquipFactInfo(bundleBody.getEquipFactInfo())
+							.setRealType(SOURCE_TYPE.EXTERNAL.equals(bundleBody.getSourceType())?BundleBO.BundleRealType.XT.toString():BundleBO.BundleRealType.BVC.toString());
+	
+					bundles.add(bundle);
+					
+					bundleIds.add(bundleBody.getBundleId());
+				}
+			}
+		}
+		
+		//根据bundleIds从资源层查询channels
+		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, type);
+		if(queryChannels != null){
+			for(ChannelSchemeDTO channel:queryChannels){
+				ChannelBO channelBO = new ChannelBO().setChannelId(channel.getChannelId())
+													 //起别名
+												     .setName(ChannelType.transChannelName(channel.getChannelId()))
+													 .setBundleId(channel.getBundleId())
+													 .setChannelName(channel.getChannelName())
+													 .setChannelType(channel.getBaseType());
+	
+				channels.add(channelBO);
+			}
+		}
+		
+		//过滤无通道设备
+		Set<String> filteredBundleIds = new HashSet<String>();
+		for(ChannelBO channel:channels){
+			filteredBundleIds.add(channel.getBundleId());
+		}
+		List<BundleBO> filteredBundles = new ArrayList<BundleBO>();
+		for(BundleBO bundle:bundles){
+			if(filteredBundleIds.contains(bundle.getBundleId())){
+				filteredBundles.add(bundle);
+			}
+		}
+		
+		//没有文件的文件夹不显示
+		/*1.通过设备集合拿到文件夹id
+		 * 2.通过文件夹id找文件夹路径，分离出父文件夹id
+		 * 3找到所有不为空文件夹给folders
+		 * */
+		Set<Long> folderIds=new HashSet<Long>();//所有文件夹id
+		Map<Long,FolderBO> folderMap=folders.stream().collect(Collectors.toMap(FolderBO::getId, Function.identity()));
+		filteredBundles.stream().map(BundleBO::getFolderId).collect(Collectors.toSet()).stream().map(folderId->{
+			Optional<FolderBO> folderBo=Optional.ofNullable(folderMap).map(folderMAP->{return folderMAP.get(folderId);});
+			if(folderBo.isPresent()){//空值校验
+				folderIds.add(folderId);
+				String parentPath=folderBo.get().getParentPath();
+				if(parentPath!=null && !"".equals(parentPath)){
+					folderIds.addAll(Arrays.asList(parentPath.replaceFirst("/", "").split("/")).stream().map(Long::valueOf).collect(Collectors.toList()));
+				} 
+			}
+			return  folderId;
+		}).collect(Collectors.toSet());
+		
+		folders =folderIds.stream().map(folderId->{
+			return folderMap.get(folderId);
+		}).collect(Collectors.toList());
+		
+		Comparator<Object> comparator = Collator.getInstance(Locale.CHINA);
+		
+		 Collections.sort(folders, (item1, item2) -> {
+           return comparator.compare(item1.getName(), item2.getName());
+        });
+		
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		
+		//找所有的根
+		List<FolderBO> roots = findRoots(folders);
+		
+		//处理：返回设备集合  
+		if(Boolean.TRUE.equals(returnBundleList)){
+			
+			JSONObject info =new JSONObject();
+			List<ExtraInfoPO> allExtraInfos = extraInfoService.findByBundleIdIn(bundleIds);
+			
+			for(FolderBO root:roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root).setBundleList(new ArrayList<TreeNodeVO>());
+				filteredBundles.stream().forEach(bundle->{
+					List<ExtraInfoPO> extraInfos = extraInfoService.queryExtraInfoBundleId(allExtraInfos, bundle.getBundleId());
+					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle, extraInfos);
+					_root.getBundleList().add(bundleNode);
+					
+				});
+				
+				if(_root.getBundleList().size()>0){
+					_roots.add(_root);
+				}
+				
+			}
+			
+			return _roots;
+		}
+		
+		//组件文件夹
+		for(FolderBO root:roots){
+			TreeNodeVO _root = new TreeNodeVO().set(root)
+											   .setChildren(new ArrayList<TreeNodeVO>());
+			_root.setName(localSerNode.getNodeName()+"(本域)");
+			_roots.add(_root);
+			if(withChannel){
+				recursionFolder(_root, folders, filteredBundles, channels, null, null);
+			}else{
+				recursionFolder(_root, folders, filteredBundles, null, null, null);
+			}
+		}
+		
+		//将同一个文件夹下的设备按照名称排序
+		orderBundleByName(_roots);
+		return _roots;
+	}
+	
+	/**
+	 * <br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月25日
+	 * @param returnBundleList true返回设备集合，false返回设备树
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/foreign")
+	public Object findInstitutionTreeForeign(
+			HttpServletRequest request) throws Exception{
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
+		JSONArray JSONarray = new JSONArray();
+		
+		for(SerNodePO serNode : serNodeEntities){
+			if(ConnectionStatus.ON.equals(serNode.getStatus())){
+				JSONObject json = new JSONObject();
+				json.put("name", serNode.getNodeName());
+				json.put("status", "online");
+				JSONarray.add(json);
+			}else if(ConnectionStatus.OFF.equals(serNode.getStatus())){
+				JSONObject json = new JSONObject();
+				json.put("name", serNode.getNodeName());
+				json.put("status", "online");
+				JSONarray.add(json);
+			}
+		}
+		
+		System.out.println("外域的设备： "+JSONarray);
+		return JSONarray;
+	}
+	
+	/**
+	 * 获取外域、目录、设备<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月2日 下午6:29:41
+	 * @param folderPath 目录路径
+	 * @param serNodeNamePath 域路径
+	 * @param childType 请求类型
+	 * @param uuid 目录唯一标识符
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/foreign/bundle")
+	public Object findInstitutionTreeForeignBundle(
+			String folderPath,
+			String serNodeNamePath,
+			String childType,
+			String uuid,
+			HttpServletRequest request) throws Exception{
+		
+		//获取userId
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		if(uuid == null){
+			uuid = UUID.randomUUID().toString().replace("-", "");
+		}
+		
+		Map<String,String> passByContent = new HashMap<String, String>();
+		passByContent.put("folderPath", folderPath);
+		passByContent.put("serNodeNamePath", serNodeNamePath);
+		passByContent.put("childType", childType.toString());
+		passByContent.put("uuid", uuid);
+		passByContent.put("userId", userId.toString());
+		passByContent.put("cmd", "search_foreign");
+		
+		String localLayerId = resourceRemoteService.queryLocalLayerId();
+		PassByBO passBy = new PassByBO();
+		passBy.setPass_by_content(passByContent);
+		passBy.setLayer_id(localLayerId);
+		
+		LogicBO logic = new LogicBO();
+		logic.setPass_by(new ArrayListWrapper<PassByBO>().add(passBy).getList());
+		executeBusiness.execute(logic, "请求外域信息");
+		return null;
 	}
 	
 	private TreeNodeVO findFirstDeviceNode(TreeNodeVO node) throws Exception{

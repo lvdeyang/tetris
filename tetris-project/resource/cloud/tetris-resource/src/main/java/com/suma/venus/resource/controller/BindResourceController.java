@@ -204,6 +204,7 @@ public class BindResourceController extends ControllerBase {
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			Map<String, Object> data = makeAjaxData();
+			e.printStackTrace();
 			data.put(ERRMSG, "查询错误");
 			return data;
 		}
@@ -365,6 +366,8 @@ public class BindResourceController extends ControllerBase {
 			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
 			for(BundlePO bundlePO:bundlePOs){
 				if(bundlePO.getSourceType().equals(SOURCE_TYPE.EXTERNAL)){
+					externalBundle.add(bundlePO.getBundleId());
+				}else if (null == bundlePO.getCoderType() || "".equals(bundlePO.getCoderType())) {
 					externalBundle.add(bundlePO.getBundleId());
 				}else if (null != coderType && !"".equals(coderType) && !bundlePO.getCoderType().toString().equalsIgnoreCase(coderType)) {
 					externalBundle.add(bundlePO.getBundleId());
