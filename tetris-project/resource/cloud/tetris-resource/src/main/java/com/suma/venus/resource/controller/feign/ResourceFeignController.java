@@ -1,6 +1,5 @@
 package com.suma.venus.resource.controller.feign;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.bo.AccessCapacityBO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.InitVerification;

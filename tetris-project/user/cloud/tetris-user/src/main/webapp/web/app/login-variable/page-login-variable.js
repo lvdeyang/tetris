@@ -341,14 +341,6 @@ define([
                 self.load();
                 self.queryVariableType()
             },
-            //rules:{
-            //    typeInput:[
-            //        { required: true, message: '请选择变量类型', trigger: 'blur' },
-            //    ],
-            //    textInput:[
-            //        { required: true, message: '请选择变量类型', trigger: 'blur' }
-            //    ],
-            //},
         });
 
     };

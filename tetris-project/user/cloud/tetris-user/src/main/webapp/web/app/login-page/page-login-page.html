@@ -17,6 +17,17 @@
                                 <span class="icon-plus" style="margin-right:5px;"></span>
                                 添加页面
                             </el-button>
+
+                            <el-button size="small" type="warning" @click="">
+                                <span class="icon-set" style="margin-right:5px;"></span>
+                                变量管理
+                            </el-button>
+
+                            <el-button size="small" type="success" @click="">
+                                <span class="icon-set" style="margin-right:5px;"></span>
+                                类型管理
+                            </el-button>
+
                         </div>
 
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
@@ -25,8 +36,7 @@
                                     highlight-current-row
                                     @current-change="getPageVariableList"
                                     tooltip-effect="dark"
-                                    style="width: 100%"
-                                    @selection-change="">
+                                    style="width: 100%">
                                 <el-table-column type="selection" width="55"></el-table-column>
                                 <el-table-column label="登陆页面名称" width="250" prop="name"></el-table-column>
 
@@ -62,31 +72,38 @@
                     </div>
                 </div>
 
-                <el-card class="box-card" shadow="never" style="float: right;width:40%; height:760px;" v-loading="loading"
+                <el-card class="box-card" shadow="hover" style="float: right;width:40%; height:760px;" v-loading="loading"
                          :element-loading-text=loadingText>
                     <span>变量选择</span>
-                    <el-tree
+                        <el-tree
                             v-loading="variableResource.tree.loading"
                             :props="variableResource.tree.props"
                             :data="variableResource.tree.data"
                             :check-strictly="true"
-                            node-key="id"
+                            node-key="variableId"
                             ref="variableTree"
-                            :check-strictly=false
-                            show-checkbox
-                            @check="getVariableTreeCheckedChange"
                             :expand-on-click-node="false"
                             default-expand-all
                             highlight-current
                             style="padding: 20px;max-height: 400px;overflow-y:auto">
                                     <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
                                           slot-scope="{node, data}">
-                                        <span style="font-size:14px;">
-                                             <span>{{data.name}}</span>
+                                        <span v-if="data.variableKey">{{data.name}}</span>
+                                        <span v-else>
+                                            <el-radio v-if="node.parent.data.type=='IMG'" v-model="loginPage.currentPageVariable[node.parent.data.variableKey]" :label="data.id">
+                                                <el-popover
+                                                        placement="top-start"
+                                                        width="200"
+                                                        trigger="hover">
+                                                    <img :src="data.value" style="width: 200px;"/>
+                                                    <img :src="data.value" style="height: 24px; vertical-align: middle;" slot="reference"/>
+                                                </el-popover>
+                                            </el-radio>
+                                            <el-radio v-if="node.parent.data.type=='TEXT'"v-model="loginPage.currentPageVariable[node.parent.data.variableKey]" :label="data.id">{{data.value}}</el-radio>
                                         </span>
                                     </span>
-                    </el-tree>
-                    <el-button  style="position:absolute; bottom: 50px;right: 50px;" size="medium" type="primary" @click=""
+                        </el-tree>
+                    <el-button  style="position:absolute; bottom: 50px;right: 50px;" size="medium" type="primary" @click="handleEditVariableCommit()"
                                :loading="variableResource.loading">确 定
                     </el-button>
 

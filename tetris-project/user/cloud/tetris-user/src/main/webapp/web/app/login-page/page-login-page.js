@@ -31,17 +31,12 @@ define([
                 groups:context.getProp('groups'),
                 loading:false,
                 loginPage: {
-                   /* page: {
-                        currentPage: 1,
-                        sizes: [10, 15, 20, 50],
-                        size: 10,
-                        total: 0
-                    },*/
+                    rowData:'',
                     data: [],
-                    multipleSelection: []
+                    currentPageVariable:{}
                 },
                 variableTreeResource:{
-                    data:[2,5]
+                    data:[]
                 },
                 editVariableTreeResource:{
                     data:[]
@@ -55,40 +50,10 @@ define([
                     loading: false,
                     tree: {
                         props: {
-                            label: "name",
-                            children: "children"
+                            label: "value",
+                            children: "variable"
                         },
-                        data: [{
-                            //id: 1,
-                            name: '背景图片',
-                            children: [{
-                                id: 2,
-                                name: '背景图1'
-                            }, {
-                                id: 3,
-                                name: '背景图2'
-                            }]
-                        }, {
-                            //id: 4,
-                            name: 'logo图片',
-                            children: [{
-                                id: 5,
-                                name: 'logo图1'
-                            }, {
-                                id: 6,
-                                name: 'logo图2'
-                            }]
-                        }, {
-                            //id: 7,
-                            name: '标题',
-                            children: [{
-                                id: 8,
-                                name: '标题1'
-                            }, {
-                                id: 9,
-                                name: '标题2'
-                            }]
-                        }],
+                        data: [],
                         loading: false
                     },
                     chooseNode: []
@@ -114,62 +79,86 @@ define([
                 }
             },
             methods:{
-                //显示变量配置表
-                getPageVariableList:function(currentRow, oldRow){
+                //显示变量表
+                getVariableList:function(){
                     var self = this;
-                    this.rowData = currentRow;
-                    var questData={
-                        id:this.rowData.id
-                    };
-                   /* ajax.post('', questData, function (data, status) {
+                    ajax.post('/variable/variable/ByType', null, function (data, status) {
                         if (status != 200) return;
                         if (data && data.length > 0) {
                             for (var i = 0; i < data.length; i++) {
+                                Vue.set(self.loginPage.currentPageVariable,data[i].variableKey,'');
                                 self.variableResource.tree.data.push(data[i]);
                             }
                         }
-                    }, null, ajax.NO_ERROR_CATCH_CODE);*/
-                    self.setVariableTreeCheckedChange();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-
-                getVariableTreeCheckedChange:function(){
+                //显示已配置变量
+                getPageVariableList:function(currentRow, oldRow){
                     var self = this;
-                    console.log(this.$refs.variableTree.getCheckedKeys());
-                    this.variableTreeResource.data=this.$refs.variableTree.getCheckedKeys();
+                    this.loginPage.rowData = currentRow;
+                    currentId=this.loginPage.rowData.id;
                     var questData={
-                        list:this.variableTreeResource.data
-                    }
-                    /*ajax.post('/pageVariable/get', questData, function (data, status) {
+                        loginPageId: currentId
+                    };
+                    ajax.post('/pageVariable/get', questData, function (data, status) {
                         if (status != 200) return;
+                            if (data && data.length > 0) {
+                                for (var i = 0; i < data.length; i++){
+                                    Vue.set(self.loginPage.currentPageVariable,data[i].variableKey,data[i].variable[0].id);
+                                }
+                            }else{
+                                //Object.keys(self.loginPage.currentPageVariable).map(key => self.loginPage.currentPageVariable[key] = '')
+                                for(var v in self.loginPage.currentPageVariable){
+                                    self.loginPage.currentPageVariable[v]='';
+                                }
 
-                    }, null, ajax.NO_ERROR_CATCH_CODE);*/
+                            }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                    self.loginPage.rowData.id=currentId;
                 },
-                setVariableTreeCheckedChange:function(){
+                //提交变量配置
+                handleEditVariableCommit:function(){
                     var self = this;
-                    this.$refs.variableTree.setCheckedKeys([this.variableTreeResource.data]);
+                    if(!self.loginPage.rowData.id){
+                        this.$message({
+                            message: '请先选择一个登陆页面',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    for(var v in self.loginPage.currentPageVariable){
+                        if(self.loginPage.currentPageVariable[v]==''){
+                            this.$message({
+                                message: '请完善变量配置',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+
+                    }
+                    var arr =JSON.stringify(this.loginPage.currentPageVariable);
+                    console.log(arr);
+                    var questData={
+                        loginPageId: self.loginPage.rowData.id,
+                        variableIds:arr
+                    };
+                    ajax.post('/pageVariable/set', questData, function (data, status) {
+                     if (status != 200) return;
+                        self.$message({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                //显示已配置好的页面数据
+
+                //显示登陆页面数据
                 getPageList: function () {
                     var self = this;
                     self.loading = true;
-                    /*var requestData = {
-                        currentPage: self.loginPage.page.currentPage,
-                        pageSize: self.loginPage.page.size
-                    };*/
                     ajax.post('/login/page/list', null,function (data, status) {
                         self.loading = false;
                         if (status != 200) return;
                         self.loginPage.data = data;
-                        /*data.forEach(function(item){
-                            if(item.isCurrent){
-                                useStatus=true;
-                                self.loginPage.data.push[useStatus];
-                                item.isCurrent='使用中'
-                            }else{
-                                self.loginPage.data.push[useStatus];
-                                item.isCurrent='未使用'}
-                            })*/
-                        //self.loginPage.page.total = data.total;
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 /*toggleSelection: function (rows) {
@@ -190,6 +179,9 @@ define([
                 handleAddPageClose:function(){
                     var self = this;
                     self.dialog.addPage.visible=false;
+                    self.dialog.addPage.name='';
+                    self.dialog.addPage.remark='';
+                    self.dialog.addPage.tpl=''
                 },
 
                 handleAddPageCommit:function(){
@@ -203,10 +195,6 @@ define([
                     ajax.post('/login/page/add', newData, function (data, status) {
                         self.dialog.addPage.loading = false;
                         if (status != 200) return;
-                        /*if (self.channel.data.length < self.channel.page.size) {
-                            self.channel.data.push(data);
-                        }*/
-                        //self.channel.page.total += 1;
                         self.handleAddPageClose();
                         self.getPageList();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
@@ -260,20 +248,11 @@ define([
                 handleEditLoginPageClose:function(){
                     var self = this;
                     self.dialog.editPage.visible=false;
+                    self.dialog.editPage.name='';
+                    self.dialog.editPage.tpl='';
+                    self.dialog.editPage.isCurrent='';
+                    self.dialog.editPage.remark=''
                  },
-
-                //好像没用
-                /*editVariable:function(scope){
-                    var self = this;
-                    self.editVariable.data = scope.row;
-                    self.editVariable.visible=true
-                },
-
-                handleEditVariableClose:function(){
-                    var self = this;
-                    self.editVariable.data = "";
-                    self.editVariable.visible = false;
-                },*/
 
                 //删除按钮，删除一条页面数据
                 rowDelete: function (scope) {
@@ -323,7 +302,15 @@ define([
             },
             created:function(){
                 var self = this;
+                /*ajax.post('/variable/variable/ByType',null,function(data,status){
+                    if(data&&data.length>0){
+                        for(var i=0;i<data.length;i++){
+                            Vue.set(self.loginPage.currentPageVariable,data[i].variableKey,'');
+                        }
+                    }
+                });*/
                 self.getPageList();
+                self.getVariableList();
             }
         });
 

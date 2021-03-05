@@ -41,7 +41,7 @@ public class BundleHeartBeatMonitorThread implements Runnable {
 
 		ConcurrentHashMap<String, Long> bunldeStatusMap = bundleHeartBeatService.getBunldeStatusMap();
 
-		LOGGER.debug("check heartBeat in, map=" + JSONObject.toJSONString(bunldeStatusMap));
+		// LOGGER.debug("check heartBeat in, map=" + JSONObject.toJSONString(bunldeStatusMap));
 
 		Iterator<Map.Entry<String, Long>> it = bunldeStatusMap.entrySet().iterator();
 		while (it.hasNext()) {

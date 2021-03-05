@@ -135,7 +135,19 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	/** 是否转码 */
 	private Boolean transcod;
-
+	
+	/**输入源地址*/
+	private String url;
+	
+	/**码率控制方式*/
+	private String rateCtrl;
+	
+	/**输入/输出的封装类型*/
+	private String type;
+	
+	/**系统码率*/
+	private String bitrate;
+	
 	private CoderType coderType;
 
 	/** 现在在接收这个设备心跳状态的服务ip，暂时只用于转换设备 */
@@ -143,6 +155,38 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public enum CoderType {
 		DEFAULT, ENCODER, DECODER
+	}
+	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	public String getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(String bitrate) {
+		this.bitrate = bitrate;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	@Column(name = "coderType")
