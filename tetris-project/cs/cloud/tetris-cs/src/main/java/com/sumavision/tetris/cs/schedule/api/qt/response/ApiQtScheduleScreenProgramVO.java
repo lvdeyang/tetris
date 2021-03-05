@@ -44,6 +44,9 @@ public class ApiQtScheduleScreenProgramVO {
 	
 	/** 源uuid */
 	private String mediaUuid;
+	
+	/** 轮播次数 */
+	private String rotation;
 
 	public Integer getIndex() {
 		return index;
@@ -162,6 +165,15 @@ public class ApiQtScheduleScreenProgramVO {
 		return this;
 	}
 	
+	public String getRotation() {
+		return rotation;
+	}
+
+	public ApiQtScheduleScreenProgramVO setRotation(String rotation) {
+		this.rotation = rotation;
+		return this;
+	}
+	
 	public ApiQtScheduleScreenProgramVO setFromScreenVO(ScreenVO screenVO) {
 		String screenDuration = screenVO.getDuration();
 		String encryptionUrl = screenVO.getEncryptionUrl();
@@ -181,6 +193,7 @@ public class ApiQtScheduleScreenProgramVO {
 				.setHotWeight(screenVO.getHotWeight())
 				.setIfEncrypted(encryptionUrl != null && !encryptionUrl.isEmpty())
 				.setEncryptionUrl(encryptionUrl)
-				.setMediaUuid(screenVO.getMimsUuid());
+				.setMediaUuid(screenVO.getMimsUuid())
+				.setRotation(screenVO.getRotation());
 	}
 }

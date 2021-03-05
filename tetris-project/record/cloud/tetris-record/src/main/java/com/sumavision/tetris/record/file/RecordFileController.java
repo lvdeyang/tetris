@@ -41,7 +41,9 @@ public class RecordFileController {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		Pageable pageable = new PageRequest(pageIndex, pageSize, Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.Direction.DESC, "id");
+		
+		
 		try {
 			Page<RecordFilePO> recordFilePOPage = recordFileService.queryRecordFileByMultiParamsPage(recordStrategyId,
 					pageable);
@@ -78,14 +80,14 @@ public class RecordFileController {
 
 		// TODO
 		try {
-			RecordFilePO recordFilePO = recordFileDAO.findOne(id);
+			RecordFilePO recordFilePO = recordFileDAO.findById(id);
 
 			if (recordFilePO == null) {
 				data.put("errMsg", "内部错误");
 				return data;
 			}
 
-			StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+			StoragePO storagePO = storageDAO.findById(recordFilePO.getStorageId());
 			if (storagePO == null) {
 				data.put("errMsg", "内部错误");
 				return data;
@@ -121,7 +123,7 @@ public class RecordFileController {
 		Map<String, Object> data = new HashMap<String, Object>();
 
 		try {
-			RecordFilePO recordFilePO = recordFileDAO.findOne(id);
+			RecordFilePO recordFilePO = recordFileDAO.findById(id);
 
 			if (recordFilePO == null) {
 				data.put("errMsg", "内部错误");

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -86,4 +87,8 @@ public class BundleFeignService {
 				BundleVO.class);
 	}
 
+	
+	public JSONObject inputAdd(JSONObject bundleJson)throws Exception{
+		return JSON.parseObject(bundleFeign.inputAdd(bundleJson), JSONObject.class);
+	}
 }

@@ -41,7 +41,7 @@ public class ParseStrategyService {
 		if (null == recordStrategyPOs || recordStrategyPOs.isEmpty()) {
 			return;
 		}
-		SourcePO sourcePO = sourceDao.findOne(inputId);
+		SourcePO sourcePO = sourceDao.findById(inputId);
 
 		for (RecordStrategyPO recordStrategyPO : recordStrategyPOs) {
 			// if (recordStrategyPO.getType() == EStrategyType.CONTINUOUS) {

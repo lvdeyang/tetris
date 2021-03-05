@@ -68,17 +68,17 @@ public class BundlePO extends CommonPO<BundlePO> {
 	private Integer operateIndex = 0;
 
 	private Integer operateCount = 0;
-	
+
 	/************************* 以下几个字段只对ipc设备有效 ********************************/
 	/** 坐标-经度 */
 	private String longitude;
 
 	/** 坐标-纬度 */
 	private String latitude;
-	
+
 	/** 流地址 */
 	private String streamUrl;
-	
+
 	/************************* 以下几个字段只对大喇叭设备有效 ********************************/
 	/** speaker标识 */
 	private String identify;
@@ -107,43 +107,88 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	private String equipNode;
 
-	/** 外域名称*/
+	/** 外域名称 */
 	private String equipFactInfo;
 
 	/**
 	 * TODO
 	 */
 	private String extraBindId = null;
-	
+
 	/** 设备所属用户id */
 	private Long userId;
-	
+
 	/** 是否开启组播编码 */
 	private Boolean multicastEncode;
-	
+
 	/** 组播编码地址 */
 	private String multicastEncodeAddr;
-	
+
 	/** 是否开启组播解码 */
 	private Boolean multicastDecode;
-	
+
 	/** 组播源ip */
 	private String multicastSourceIp;
-	
-	/**地点*/
+
+	/** 地点 */
 	private String location;
-	
-	/**是否转码*/
+
+	/** 是否转码 */
 	private Boolean transcod;
 	
-	private CoderType coderType;
+	/**输入源地址*/
+	private String url;
 	
-	public enum CoderType{
-		DEFAULT,
-		ENCODER,
-		DECODER
+	/**码率控制方式*/
+	private String rateCtrl;
+	
+	/**输入/输出的封装类型*/
+	private String type;
+	
+	/**系统码率*/
+	private String bitrate;
+	
+	private CoderType coderType;
+
+	/** 现在在接收这个设备心跳状态的服务ip，暂时只用于转换设备 */
+	private String heartBeatDetectorServer;
+
+	public enum CoderType {
+		DEFAULT, ENCODER, DECODER
 	}
 	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getRateCtrl() {
+		return rateCtrl;
+	}
+
+	public void setRateCtrl(String rateCtrl) {
+		this.rateCtrl = rateCtrl;
+	}
+
+	public String getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(String bitrate) {
+		this.bitrate = bitrate;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
 	@Column(name = "coderType")
 	public CoderType getCoderType() {
 		return coderType;
@@ -553,6 +598,14 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setMulticastDecode(Boolean multicastDecode) {
 		this.multicastDecode = multicastDecode;
+	}
+
+	public String getHeartBeatDetectorServer() {
+		return heartBeatDetectorServer;
+	}
+
+	public void setHeartBeatDetectorServer(String heartBeatDetectorServer) {
+		this.heartBeatDetectorServer = heartBeatDetectorServer;
 	}
 
 	@Override

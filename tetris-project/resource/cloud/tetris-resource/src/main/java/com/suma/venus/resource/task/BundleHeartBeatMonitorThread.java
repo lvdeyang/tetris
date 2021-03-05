@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 
 public class BundleHeartBeatMonitorThread implements Runnable {
@@ -40,20 +41,27 @@ public class BundleHeartBeatMonitorThread implements Runnable {
 
 		ConcurrentHashMap<String, Long> bunldeStatusMap = bundleHeartBeatService.getBunldeStatusMap();
 
-		LOGGER.info("check heartBeat in, map=" + JSONObject.toJSONString(bunldeStatusMap));
+		// LOGGER.debug("check heartBeat in, map=" + JSONObject.toJSONString(bunldeStatusMap));
 
 		Iterator<Map.Entry<String, Long>> it = bunldeStatusMap.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, Long> e = it.next();
 			if ((System.currentTimeMillis() - bunldeStatusMap.get(e.getKey())) > timeout) {
 
-				try {
-					LOGGER.info("send offline alarm, ip=" + e.getKey());
-					alarmFeignClientService.triggerAlarm("11011000", e.getKey(), e.getKey(), null, false,
-							Calendar.getInstance().getTime());
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (bundleHeartBeatService.checkIsLocalHeartBeatDetectorServer(e.getKey())) {
+					// 修改，适应热备
+					try {
+
+						// 设备离线，更新数据库status
+						bundleHeartBeatService.changeOnlineStatus(e.getKey(), ONLINE_STATUS.OFFLINE);
+						LOGGER.info("send offline alarm, ip=" + e.getKey());
+						alarmFeignClientService.triggerAlarm("11011000", e.getKey(), e.getKey(), null, false,
+								Calendar.getInstance().getTime());
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 				}
 
 				bundleHeartBeatService.removeBundleStatus(e.getKey());

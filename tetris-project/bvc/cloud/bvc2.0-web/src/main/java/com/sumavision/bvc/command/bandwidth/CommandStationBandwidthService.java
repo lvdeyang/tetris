@@ -11,6 +11,8 @@ import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.sumavision.tetris.bvc.business.OriginType;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,6 +67,23 @@ public class CommandStationBandwidthService {
 		}
 		if(deleteStations.size() > 0) log.info("根据级联服务节点删除了" + deleteStations.size() + "个站点");
 		
+	}
+	
+	
+	/**
+	 * CommandStationBandwidthPO中字段只有重复（目前是stationName、identity）<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年1月29日 下午4:56:05
+	 * @return
+	 * @throws BaseException 
+	 */
+	public void alreadyExist(String stationName,String identity) throws BaseException{
+		
+		CommandStationBandwidthPO stattion= commandStationBandwidthDao.findByStationNameOrIdentity(stationName, identity);
+		if(stattion != null){
+			throw new BaseException(StatusCode.FORBIDDEN, "站点名称或者站点标识符重复");
+		}
 	}
 	
 }

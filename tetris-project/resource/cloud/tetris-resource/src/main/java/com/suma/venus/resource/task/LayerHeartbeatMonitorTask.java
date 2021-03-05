@@ -55,13 +55,13 @@ public class LayerHeartbeatMonitorTask {
 			}
 			
 			//当层节点离线时，层节点下的设备也离线
-			/*if(needOfflineNodeIds != null && needOfflineNodeIds.size() > 0){
+			if(needOfflineNodeIds != null && needOfflineNodeIds.size() > 0){
 				List<BundlePO> needOfflineBundles = bundleDao.findByAccessNodeUidIn(needOfflineNodeIds);
 				for(BundlePO bundle: needOfflineBundles){
 					bundle.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 				}
-				bundleDao.save(needOfflineBundles);
-			}*/
+				bundleDao.saveAll(needOfflineBundles);
+			}
 		} catch (Exception e) {
 			LOGGER.error("LayerHeartbeatMonitor Task Error : ", e);
 		}

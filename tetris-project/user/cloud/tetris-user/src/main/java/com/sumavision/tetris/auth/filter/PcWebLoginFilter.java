@@ -77,7 +77,8 @@ public class PcWebLoginFilter implements Filter{
 		
 		String requestUri = request.getRequestURI();
 		if("/".equals(requestUri)){
-			response.sendRedirect("/web/app/login/login.html");
+			//response.sendRedirect("/web/app/login/login.html");
+			response.sendRedirect("/getLoginPage/get");
 			return;
 		}
 		if(!shouldFilter(requestUri)){
@@ -181,6 +182,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/router/*")
 													.add("/taskPreview/queryPreviewUrlList")
 													.add("/tetris-sts/*")
+													.add("/getLoginPage/get")
 												   .getList();
 	}
 	

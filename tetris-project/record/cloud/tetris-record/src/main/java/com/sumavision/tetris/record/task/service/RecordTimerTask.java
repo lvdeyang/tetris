@@ -145,7 +145,7 @@ public class RecordTimerTask extends TimerTask {
 	private void setNextTimerTask(RecordTimerBO recordTimerBO) {
 		LOGGER.info("setNextTimerTask nextTime in");
 
-		RecordStrategyPO recordStrategyPO = recordStrategyDAO.findOne(recordTimerBO.getRecordStrategyId());
+		RecordStrategyPO recordStrategyPO = recordStrategyDAO.findById(recordTimerBO.getRecordStrategyId());
 
 		if (recordStrategyPO == null) {
 			return;
