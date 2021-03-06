@@ -209,6 +209,10 @@ public class AuthService {
 		CDNJoiner.put("name", "CDNJoiner");
 		Map<String, Object> MixerJoiner = contentJson.getJSONObject("MixerJoiner");
 		MixerJoiner.put("name", "MixerJoiner");
+		Map<String, Object> xStream2050 = contentJson.getJSONObject("xStream2050");
+		xStream2050.put("name", "xStream2050");
+		Map<String, Object> xStream2310 = contentJson.getJSONObject("xStream2310");
+		xStream2310.put("name", "xStream2310");
 		
 		jArray.add(bvc_business);
 		jArray.add(sts);
@@ -216,8 +220,12 @@ public class AuthService {
 		jArray.add(JV210Joiner);
 		jArray.add(CDNJoiner);
 		jArray.add(MixerJoiner);
+		jArray.add(xStream2050);
+		jArray.add(xStream2310);
+		System.out.println(jArray);
 		thelast.put("deviceId", entity.getDeviceId());
 		thelast.put("process", jArray);
+		System.out.println(thelast);
 		JSONObject json = new JSONObject(thelast);
 		try {
 			
@@ -248,6 +256,7 @@ public class AuthService {
 	        formparams.add(new BasicNameValuePair("type", "run"));
 	        formparams.add(new BasicNameValuePair("sn", entity.getDeviceId()));
 	        formparams.add(new BasicNameValuePair("data", json.toString()));
+	        System.out.println("---------------------------------------------------------------------------"+json.toString());
 	        
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams, "utf-8"));
 	        

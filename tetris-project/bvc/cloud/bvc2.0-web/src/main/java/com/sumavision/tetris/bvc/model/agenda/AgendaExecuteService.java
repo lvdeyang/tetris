@@ -301,198 +301,81 @@ public class AgendaExecuteService {
 		return obtainSource(sourceMembers, businessId, businessInfoType, null);
 	}
 	
-//	/**
-//	 * 从成员获取音视频源<br/>
-//	 * <p>详细描述</p>
-//	 * <b>作者:</b>zsy<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2020年7月22日 下午4:19:57
-//	 * @param sourceMembers
-//	 * @param businessId 用于写入SourceBO
-//	 * @param businessInfoType 用于写入SourceBO
-//	 * @param agendaForwardType 用于写入SourceBO
-//	 * @return List<SourceBO>
-//	 * @throws Exception 
-//	 */
-//	public List<SourceBO> obtainForeignSource(
-//			List<GroupMemberPO> sourceMembers,
-//			String businessId,
-//			BusinessInfoType businessInfoType) throws Exception{
-//		return obtainForeignSource(sourceMembers, businessId, businessInfoType, null);
-//	}
-//	
-//	public List<SourceBO> obtainForeignSource(
-//			List<GroupMemberPO> sourceMembers,
-//			String businessId,
-//			BusinessInfoType businessInfoType,
-//				AgendaForwardType agendaForwardType) throws Exception{
-//		
-//		//先把用户查出来
-//		List<Long> userIds = new ArrayList<Long>();
-//		for(GroupMemberPO member : sourceMembers){
-//			GroupMemberType groupMemberType = member.getGroupMemberType();
-//			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
-//				userIds.add(Long.parseLong(member.getOriginId()));
-//			}
-//		}
-//		String userIdListStr = StringUtils.join(userIds.toArray(), ",");
-//		List<UserBO> allUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
-//		if(allUserBos == null) allUserBos = new ArrayList<UserBO>();
-//		List<FolderUserMap> userMaps = folderUserMapDao.findByUserIdIn(userIds);
-//		
-//		//确认源（可能多个）
-//		List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
-//		//	List<ChannelSchemeDTO> srcChannels = new ArrayList<ChannelSchemeDTO>();
-//		//	Map<ChannelSchemeDTO, ChannelSchemeDTO> videoAudioMap = new HashMap<ChannelSchemeDTO, ChannelSchemeDTO>();
-//		for(GroupMemberPO member : sourceMembers){
-//			if(!member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
-//				continue;
-//			}
-//			//按当前登录的设备 terminalId 找
-//			String originId = member.getOriginId();
-//			Long terminalId = member.getTerminalId();
-//			GroupMemberType groupMemberType = member.getGroupMemberType();
-//			OriginType originType = member.getOriginType();
-//			List<String> bundleIds = new ArrayList<String>();
-//			
-//			if(groupMemberType.equals(GroupMemberType.MEMBER_USER)){
-//				
-//				if(originType.equals(OriginType.OUTER)){
-//					//级联用户，bundleId用成员的uuid
-//					SourceBO sourceBO = ldapUserMemberToSource(member, businessId, businessInfoType, agendaForwardType);
-//					sourceBOs.add(sourceBO);
-//					continue;
-//				}else{					
-//					List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(originId, terminalId);
-//					//从terminalBundleId找到终端设备，确认类型，找到这里的编码器id
-//					for(TerminalBundleUserPermissionPO p : ps){
-//						Long terminalBundleId = p.getTerminalBundleId();
-//						TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
-//						TerminalBundleType type = terminalBundlePO.getType();
-//						if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
-//							String bundleId = p.getBundleId();
-//							bundleIds.add(bundleId);
-//						}
-//					}
-//				}
-//				
-//			}
-//			else if(groupMemberType.equals(GroupMemberType.MEMBER_HALL)){
-//				
-//				Long hallId = Long.parseLong(member.getOriginId());
-//				List<TerminalBundleConferenceHallPermissionPO> hps = terminalBundleConferenceHallPermissionDao.findByConferenceHallId(hallId);
-//				for(TerminalBundleConferenceHallPermissionPO hp : hps){
-//					
-//					Long terminalBundleId = hp.getTerminalBundleId();
-//					TerminalBundlePO terminalBundlePO = terminalBundleDao.findOne(terminalBundleId);//后续优化成for外头批量查询
-//					TerminalBundleType type = terminalBundlePO.getType();
-//					if(TerminalBundleType.ENCODER.equals(type) || TerminalBundleType.ENCODER_DECODER.equals(type)){
-//						String bundleId = hp.getBundleId();
-//						bundleIds.add(bundleId);
-//					}
-//				}
-//				
-//			}
-//			else if(groupMemberType.equals(GroupMemberType.MEMBER_DEVICE)){
-//				
-//				if(originType.equals(OriginType.OUTER)){
-//					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
-//					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
-//					//造数据，videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
-//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
-//							.setBundleId(originId)
-//							.setChannelId(videoChannelId)
-//							.setBaseType("outer_no_base_type")
-//							.setChannelName("outer_no_video_channel_name");
-//					ChannelSchemeDTO audioEncodeChannel = new ChannelSchemeDTO()
-//							.setBundleId(originId)
-//							.setChannelId(audioChannelId)
-//							.setBaseType("outer_no_base_type")
-//							.setChannelName("outer_no_video_channel_name");
-//					SourceBO sourceBO = new SourceBO()
-//							.setOriginType(OriginType.OUTER)
-//							.setGroupMemberType(member.getGroupMemberType())
-//							.setMemberUuid(member.getUuid())
-//							.setBusinessId(businessId)
-//							.setBusinessInfoType(businessInfoType)
-//							.setAgendaForwardType(agendaForwardType)//音/视频，如果没有音频，这里是否应该写成“视频”？
-//							.setSrcVideoId(member.getOriginId())
-//							.setSrcVideoMemberId(member.getId())
-//							.setSrcVideoName(member.getName())
-//							.setSrcVideoCode(member.getCode())
-//							.setVideoSourceChannel(videoEncodeChannel)
-//							.setAudioSourceChannel(audioEncodeChannel)
-//							.setSrcAudioId(member.getOriginId())
-//							.setSrcAudioMemberId(member.getId())
-//							.setSrcAudioName(member.getName())
-//							.setSrcAudioCode(member.getCode())
-//							.setBundleId(originId);
-//					sourceBOs.add(sourceBO);
-//				}else{
-//					bundleIds.add(originId);
-//				}
-//				
-//			}
-//			//查出bundle
-////			List<BundlePO> srcBundlePOs = resourceBundleDao.findByBundleIds(bundleIds);
-//			
-//			//查出视频编码通道
-//			List<ChannelSchemeDTO> videoEncodeChannels = resourceChannelDao.findByBundleIdsAndChannelType(bundleIds, ResourceChannelDAO.ENCODE_VIDEO);
-//			if(videoEncodeChannels == null) videoEncodeChannels = new ArrayList<ChannelSchemeDTO>();
-//			
-//			//查出音频编码通道
-//			List<ChannelSchemeDTO> audioEncodeChannels = resourceChannelDao.findByBundleIdsAndChannelType(bundleIds, ResourceChannelDAO.ENCODE_AUDIO);
-//			if(audioEncodeChannels == null) audioEncodeChannels = new ArrayList<ChannelSchemeDTO>();
-//			
-//		//		//查出编码1通道
-//		//		List<ChannelSchemeDTO> videoEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.VIDEOENCODE1.getChannelId());
-//		//		if(videoEncode1Channels == null) videoEncode1Channels = new ArrayList<ChannelSchemeDTO>();
-//		//		
-//		//		List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
-//		//		if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
-//						
-//			//级联设备，bundleId用设备的bundleId
-//			for(String bundleId : bundleIds){
-//				if(originType.equals(OriginType.OUTER)){
-//					String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
-//					String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
-//					//造数据，videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
-//					ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
-//							.setBundleId(bundleId)
-//							.setChannelId(videoChannelId)
-//							.setBaseType("outer_no_base_type")
-//							.setChannelName("outer_no_video_channel_name");
-//					ChannelSchemeDTO audioEncodeChannel = new ChannelSchemeDTO()
-//							.setBundleId(bundleId)
-//							.setChannelId(audioChannelId)
-//							.setBaseType("outer_no_base_type")
-//							.setChannelName("outer_no_video_channel_name");
-//					SourceBO sourceBO = new SourceBO()
-//							.setOriginType(OriginType.OUTER)
-//							.setGroupMemberType(member.getGroupMemberType())
-//							.setMemberUuid(member.getUuid())
-//							.setBusinessId(businessId)
-//							.setBusinessInfoType(businessInfoType)
-//							.setAgendaForwardType(agendaForwardType)//音/视频，如果没有音频，这里是否应该写成“视频”？
-//							.setSrcVideoId(member.getOriginId())
-//							.setSrcVideoMemberId(member.getId())
-//							.setSrcVideoName(member.getName())
-//							.setSrcVideoCode(member.getCode())
-//							.setVideoSourceChannel(videoEncodeChannel)
-//							.setAudioSourceChannel(audioEncodeChannel)
-//							.setSrcAudioId(member.getOriginId())
-//							.setSrcAudioMemberId(member.getId())
-//							.setSrcAudioName(member.getName())
-//							.setSrcAudioCode(member.getCode())
-//							.setBundleId(bundleId);
-//					sourceBOs.add(sourceBO);
-//				}
-//			}
-//			
-//		}
-//		return sourceBOs;
-//		
-//	}
+	/**
+	 * 从成员获取音视频源<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月22日 下午4:19:57
+	 * @param sourceMembers
+	 * @param businessId 用于写入SourceBO
+	 * @param businessInfoType 用于写入SourceBO
+	 * @param agendaForwardType 用于写入SourceBO
+	 * @return List<SourceBO>
+	 * @throws Exception 
+	 */
+	public List<SourceBO> obtainForeignSource(
+			List<GroupMemberPO> sourceMembers,
+			String businessId,
+			BusinessInfoType businessInfoType) throws Exception{
+		return obtainForeignSource(sourceMembers, businessId, businessInfoType, null);
+	}
+	
+	public List<SourceBO> obtainForeignSource(
+			List<GroupMemberPO> sourceMembers,
+			String businessId,
+			BusinessInfoType businessInfoType,
+			AgendaForwardType agendaForwardType) throws Exception{
+		
+		
+		//确认源（可能多个）
+		List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
+		for(GroupMemberPO member : sourceMembers){
+			
+			if(!member.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
+				continue;
+			}
+			
+			//按当前登录的设备 terminalId 找
+			String originId = member.getOriginId();
+			
+			String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+			String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+			//造数据，videoEncodeChannel,audioEncodeChannel: bundleId channelId baseType channelName
+			ChannelSchemeDTO videoEncodeChannel = new ChannelSchemeDTO()
+					.setBundleId(originId)
+					.setChannelId(videoChannelId)
+					.setBaseType("outer_no_base_type")
+					.setChannelName("outer_no_video_channel_name");
+			ChannelSchemeDTO audioEncodeChannel = new ChannelSchemeDTO()
+					.setBundleId(originId)
+					.setChannelId(audioChannelId)
+					.setBaseType("outer_no_base_type")
+					.setChannelName("outer_no_video_channel_name");
+			SourceBO sourceBO = new SourceBO()
+					.setOriginType(OriginType.OUTER)
+					.setGroupMemberType(member.getGroupMemberType())
+					.setMemberUuid(member.getUuid())
+					.setBusinessId(businessId)
+					.setBusinessInfoType(businessInfoType)
+					.setAgendaForwardType(agendaForwardType)//音/视频，如果没有音频，这里是否应该写成“视频”？
+					.setSrcVideoId(member.getOriginId())
+					.setSrcVideoMemberId(member.getId())
+					.setSrcVideoName(member.getName())
+					.setSrcVideoCode(member.getCode())
+					.setVideoSourceChannel(videoEncodeChannel)
+					.setAudioSourceChannel(audioEncodeChannel)
+					.setSrcAudioId(member.getOriginId())
+					.setSrcAudioMemberId(member.getId())
+					.setSrcAudioName(member.getName())
+					.setSrcAudioCode(member.getCode())
+					.setBundleId(originId);
+			sourceBOs.add(sourceBO);
+			
+		}
+		return sourceBOs;
+		
+	}
 	
 	public List<SourceBO> obtainSource(
 			List<GroupMemberPO> sourceMembers,
@@ -1082,7 +965,8 @@ public class AgendaExecuteService {
 			if(!dstMember.getGroupMemberStatus().equals(GroupMemberStatus.CONNECT)){
 				continue;
 			}
-			
+			Long groupId = dstMember.getGroupId();
+			GroupPO group = groupDao.findOne(groupId);
 //			//先过滤掉自己
 //			List<SourceBO> thisMemberSourceBOs = new ArrayList<SourceBO>();
 //			for(SourceBO sourceBO : sourceBOs){
@@ -1118,15 +1002,17 @@ public class AgendaExecuteService {
 							forward.setSrcId(sourceBO.getSrcVideoId());
 							forward.setSrcName(sourceBO.getSrcVideoName());
 							forward.setSrcMemberId(sourceBO.getSrcVideoMemberId());
-//							forward.setSrcCode(bundlePO.getUsername());
-//							forward.setSrcBundleName(bundlePO.getBundleName());
-//							forward.setSrcBundleType(bundlePO.getBundleType());
 							forward.setSrcBundleId(sourceBO.getBundleId());
 							localLayerId = resourceRemoteService.queryLocalLayerId();
 							forward.setSrcLayerId(localLayerId);
 							forward.setSrcChannelId(video.getChannelId());
 							forward.setSrcBaseType(video.getBaseType());
 							forward.setSrcChannelName(video.getChannelName());
+							if(group.getIsMulticast() != null && group.getIsMulticast() ){
+								forward.setVideoTransmissionMode(TransmissionMode.MULTICAST);
+								forward.setVideoMultiAddr(group.getMultiAddr());
+								forward.setVideoMultiSrcAddr(group.getMultiSrcIp());
+							}
 						}else{
 							ChannelSchemeDTO video = sourceBO.getVideoSourceChannel();
 //							BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
@@ -1152,7 +1038,6 @@ public class AgendaExecuteService {
 								forward.setVideoMultiAddr(addr);
 								forward.setVideoMultiSrcAddr(bundlePO.getMulticastSourceIp());
 							}
-
 						}
 					}
 				}
@@ -1167,19 +1052,21 @@ public class AgendaExecuteService {
 						if(outerGroup){
 							ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
 							if(audio != null){
-//								BundlePO audioBundlePO = bundleDao.findByBundleId(audio.getBundleId());
-//								BundlePO audioBundlePO = sourceBO.getAudioBundle();
 								forward.setSrcAudioId(sourceBO.getSrcAudioId());
 								forward.setSrcAudioName(sourceBO.getSrcAudioName());
 								forward.setSrcAudioMemberId(sourceBO.getSrcAudioMemberId());
-//								forward.setSrcAudioCode(audioBundlePO.getUsername());
-//								forward.setSrcAudioBundleName(audioBundlePO.getBundleName());
-//								forward.setSrcAudioBundleType(audioBundlePO.getBundleType());
 								forward.setSrcAudioBundleId(sourceBO.getBundleId());
+								localLayerId = resourceRemoteService.queryLocalLayerId();
 								forward.setSrcAudioLayerId(localLayerId);
 								forward.setSrcAudioChannelId(audio.getChannelId());
 								forward.setSrcAudioBaseType(audio.getBaseType());
 								forward.setSrcAudioChannelName(audio.getChannelName());
+								if(group.getIsMulticast() != null && group.getIsMulticast() ){
+									String addr = multicastService.addrAddPort(group.getMultiAddr(), 2);
+									forward.setAudioTransmissionMode(TransmissionMode.MULTICAST);
+									forward.setAudioMultiAddr(addr);
+									forward.setAudioMultiSrcAddr(group.getMultiSrcIp());
+								}
 							}
 						}else{
 							ChannelSchemeDTO audio = sourceBO.getAudioSourceChannel();
@@ -1286,8 +1173,10 @@ public class AgendaExecuteService {
 				List<GroupMemberPO> sourceMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, sourceRole.getId());
 								
 				//这里直接获取了音视频，没有根据议程下的转发来获取。后续完善：查询该视频转发是否有对应的音频，如果没有则不生成音频源
+//				if(OriginType.OUTER.equals(group.getOriginType())){
+//					sourceBOs = obtainForeignSource(sourceMembers, businessId, businessInfoType)
+//				}
 				sourceBOs = obtainSource(sourceMembers, groupId.toString(), businessInfoType, type);
-				
 				break;
 				
 			case ROLE_CHANNEL:

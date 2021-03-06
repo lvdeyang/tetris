@@ -295,7 +295,7 @@ public class AgendaServiceImpl {
 		JSONObject small = JSON.parseObject(smallScreen);
 		if(small != null && small.size() > 0){
 			DeviceGroupConfigVideoSmallSrcPO smallSrc = new DeviceGroupConfigVideoSmallSrcPO();
-			JSONObject smallParam = small.getJSONObject("param"); 
+			JSONObject smallParam = JSON.parseObject(small.getString("param")); 
 			
 			if(smallParam.containsKey("roleId")){
 				smallSrc.setType(ForwardSrcType.ROLE);

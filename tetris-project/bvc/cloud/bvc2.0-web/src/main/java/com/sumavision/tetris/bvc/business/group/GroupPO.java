@@ -76,6 +76,39 @@ public class GroupPO extends AbstractBasePO{
 	
 	/** false表明"如果这个业务需要打开更多分页，则报错"*/
 	private Boolean allowNewPage;
+	
+	/** 组播编码地址 */
+	private String multiAddr;
+	
+	/** 组播源ip */
+	private String multiSrcIp;
+	
+	/** 是否是组播*/
+	private Boolean isMulticast;
+
+	public String getMultiAddr() {
+		return multiAddr;
+	}
+
+	public void setMultiAddr(String multiAddr) {
+		this.multiAddr = multiAddr;
+	}
+
+	public String getMultiSrcIp() {
+		return multiSrcIp;
+	}
+
+	public void setMultiSrcIp(String multiSrcIp) {
+		this.multiSrcIp = multiSrcIp;
+	}
+
+	public Boolean getIsMulticast() {
+		return isMulticast;
+	}
+
+	public void setIsMulticast(Boolean isMulticast) {
+		this.isMulticast = isMulticast;
+	}
 
 	@Column(name = "ALLOW_NEW_PAGE")
 	public Boolean getAllowNewPage() {

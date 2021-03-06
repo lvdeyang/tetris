@@ -62,6 +62,7 @@ import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.websocket.core.load.banlance.WebsocketServerFeignQuery;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -130,6 +131,10 @@ public class OutlandService extends ControllerBase{
 	
 	@Autowired
 	private ExtraInfoService extraInfoService;
+	
+	@Autowired
+	private WebsocketServerFeignQuery websocketServerFeignQuery;
+	
 	/**
 	 * 查询本域信息<br/>
 	 * <b>作者:</b>lqxuhv<br/>
@@ -423,9 +428,9 @@ public class OutlandService extends ControllerBase{
 		List<SerNodeVO> serNodeVOs = new ArrayList<SerNodeVO>();
 		serNodeVOs.add(serNodeVO);
 		
-		//外域连接断开日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
+//		//外域连接断开日志
+//		UserVO userVO = userQuery.current();
+//		operationLogService.send(userVO.getUsername(), "外域连接断开", "外域 " + serNodePO.getNodeName() + " 连接断开" , EOprlogType.EXTERNAL_DISCONNECT);
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -588,10 +593,6 @@ public class OutlandService extends ControllerBase{
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
-		//外域连接成功日志
-		UserVO userVO = userQuery.current();
-		operationLogService.send(userVO.getUsername(), "外域连接成功", "外域 " + serNodePO.getNodeName() + " 连接成功" , EOprlogType.EXTERNAL_CONNECT);
-				
 		try {
 			//发送消息
 			PassByBO passByBO = new PassByBO();
@@ -668,23 +669,23 @@ public class OutlandService extends ControllerBase{
 				channelSchemeDao.delete(channelSchemePOs);
 			}
 			//删除目录
-//			if(folderIds !=null&&folderIds.size()>0){
-//				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
-//				if (folderPOs != null && folderPOs.size() > 0) {
-//					for (FolderPO folderPO : folderPOs) {
-//						if (folderPO.getParentPath() != null && !"".equals(folderPO.getParentPath())) {
-//							String[] pathId = folderPO.getParentPath().split("/");
-//							if (pathId.length > 1) {
-//								for (int i = 1; i < pathId.length; i++) {
-//									folderIds.add(Long.valueOf(pathId[i]));
-//								}
-//							}
-//						}
-//					}
-//					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
-//					folderDao.delete(folder2all);
-//				}
-//			}
+			if(folderIds !=null&&folderIds.size()>0){
+				List<FolderPO> folderPOs = folderDao.findByIdIn(folderIds);
+				if (folderPOs != null && folderPOs.size() > 0) {
+					for (FolderPO folderPO : folderPOs) {
+						if (folderPO.getParentPath() != null && !"".equals(folderPO.getParentPath())) {
+							String[] pathId = folderPO.getParentPath().split("/");
+							if (pathId.length > 1) {
+								for (int i = 1; i < pathId.length; i++) {
+									folderIds.add(Long.valueOf(pathId[i]));
+								}
+							}
+						}
+					}
+					List<FolderPO> folder2all = folderDao.findByIdIn(folderIds);
+					folderDao.delete(folder2all);
+				}
+			}
 			List<FolderPO> folderPOs = folderDao.findByFolderFactInfo(name);
 			if (folderPOs != null && folderPOs.size() >0 ) {
 				folderDao.delete(folderPOs);
@@ -1133,20 +1134,16 @@ public class OutlandService extends ControllerBase{
 		
 		return bundleIdsFilter;
 	}
-	public static void  main(String[] args){
-		String string = "123456789,";
-		String str = string.substring(0, string.length()-2);
-		String testString = "/2";
-		List<Long> folderIds = new ArrayList<Long>();
-		String[] pathId = testString.split("/");
-		if (pathId.length > 1) {
-			for (int i = 1; i < pathId.length; i++) {
-				folderIds.add(Long.valueOf(pathId[i]));
-			}
-		}
-		for (Long string2 : folderIds) {
-			System.out.println(string2);
-		}
-//		System.out.println(str);
- 	}
+
+	/**
+	 * 获取ws地址<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月3日 下午2:46:13
+	 * @return String ws地址
+	 */
+	public String websocketAddr() throws Exception {
+		String addr = websocketServerFeignQuery.addr();
+		return addr;
+	}
 }

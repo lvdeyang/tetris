@@ -664,15 +664,7 @@ public class VodService {
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		
-		List<SourceBO> foreignSourceBOs = sourceBOs.stream().filter(source->{
-			return OriginType.OUTER.equals(source.getOriginType());
-		}).collect(Collectors.toList());
-		
-		List<SourceBO> innerSourceBOs = new ArrayList<SourceBO>(sourceBOs);
-		innerSourceBOs.removeAll(foreignSourceBOs);
-		
-		LogicBO logic = groupService.openEncoder(group,innerSourceBOs, codec, -1L);
-		LogicBO foreignLogic = groupService.openEncoder(group,innerSourceBOs, codec, -1L);
+		LogicBO logic = groupService.openEncoder(group,sourceBOs, codec, -1L);
 		if(businessReturnService.getSegmentedExecute()){
 			businessReturnService.add(logic, null, null);
 		}else{
@@ -693,7 +685,7 @@ public class VodService {
 	
 	/** 重构点播设备 */
 	@Transactional(rollbackFor = Exception.class)
-	public void foreignDeviceStart(UserBO user, String bundleName, String bundleId,Integer serial) throws Exception{
+	public void foreignDeviceStart(UserBO user, String bundleName, String bundleId,Integer serial, String multiAddr, String multiSrcIp, Boolean isMulticast) throws Exception{
 		
 		TerminalPO deviceTerminal = terminalDao.findByType(TerminalType.JV210);
 		TerminalPO userTerminal = terminalDao.findByType(TerminalType.QT_ZK);
@@ -708,6 +700,9 @@ public class VodService {
 		group.setStartTime(group.getCreatetime());
 		group.setBusinessType(BusinessType.VOD);
 		if(serial!=null && serial != -1) group.setLocationIndex(serial);
+		group.setMultiAddr(multiAddr);
+		group.setMultiSrcIp(multiSrcIp);
+		group.setIsMulticast(isMulticast);
 		groupDao.save(group);
 		
 		VodPO vod = new VodPO();
@@ -813,7 +808,16 @@ public class VodService {
 			//TODO:挂断videoAudioMap里边的通道
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
-			LogicBO logic = groupService.closeForeignEncoder(group,sourceBOs, codec, -1L);
+			List<SourceBO> foreignSourceBOs = sourceBOs.stream().filter(source->{
+				return OriginType.OUTER.equals(source.getOriginType());
+			}).collect(Collectors.toList());
+			
+			List<SourceBO> innerSourceBOs = new ArrayList<SourceBO>(sourceBOs);
+			innerSourceBOs.removeAll(foreignSourceBOs);
+			
+			LogicBO logic = groupService.closeEncoder(group, innerSourceBOs, codec, -1L);
+			LogicBO foreignlogic = groupService.closeForeignEncoder(group,foreignSourceBOs, codec, -1L);
+			logic.merge(foreignlogic);
 			if(businessReturnService.getSegmentedExecute()){
 				businessReturnService.add(logic, null, null);
 			}else{

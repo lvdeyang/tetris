@@ -16,5 +16,5 @@ public interface CommandStationBandwidthDAO extends MetBaseDAO<CommandStationBan
 	 * @param identity 标识符
 	 * @return CommandStationBandwidthPO
 	 */
-	public CommandStationBandwidthPO findByStationNameAndIdentity(String stationName, String identity);
+	public CommandStationBandwidthPO findByStationNameOrIdentity(String stationName, String identity);
 }

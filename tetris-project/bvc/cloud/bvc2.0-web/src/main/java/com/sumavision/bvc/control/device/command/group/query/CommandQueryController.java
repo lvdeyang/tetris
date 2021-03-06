@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,9 +9,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,7 @@ import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -195,6 +199,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -651,8 +658,14 @@ public class CommandQueryController {
 			return folderMap.get(folderId);
 		}).collect(Collectors.toList());
 		
-		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
-		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		Comparator<Object> comparator = Collator.getInstance(Locale.CHINA);
+		
+		 Collections.sort(folders, (item1, item2) -> {
+            return comparator.compare(item1.getName(), item2.getName());
+        });
+		
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
@@ -766,7 +779,7 @@ public class CommandQueryController {
 			}
 		}
 		return _roots;
-		
+		//tttest
 	}
 	
 	/**
@@ -813,8 +826,27 @@ public class CommandQueryController {
 			}
 		}
 		
+		//本域域名
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
+		SerNodePO localSerNode = serNodeEntities.get(0);
+		
 		//查询有权限的设备
-		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
+		List<BundlePO> queryAllBundles = resourceQueryUtil.queryUseableBundles(userId,privileges,satisfyAll);
+		if(queryAllBundles == null || queryAllBundles.size() <= 0){
+			
+			List<FolderBO> roots = findRoots(folders);
+			for(FolderBO root: roots){
+				TreeNodeVO _root = new TreeNodeVO().set(root)
+						   .setChildren(new ArrayList<TreeNodeVO>());
+				_root.setName(localSerNode.getNodeName()+"(本域)");
+				_roots.add(_root);
+			}
+			return _roots;
+		} 
+		List<BundlePO> queryBundles = queryAllBundles.stream().filter(bundle -> {
+			return SOURCE_TYPE.SYSTEM.equals(bundle.getSourceType());
+		}).collect(Collectors.toList());
+		System.out.println("本域的设备有：" + queryBundles);
 		if(queryBundles==null || queryBundles.size()<=0) return _roots;
 		List<String> bundleIds = new ArrayList<String>();
 		for(BundlePO bundleBody:queryBundles){
@@ -893,8 +925,14 @@ public class CommandQueryController {
 			return folderMap.get(folderId);
 		}).collect(Collectors.toList());
 		
-		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
-		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
+		Comparator<Object> comparator = Collator.getInstance(Locale.CHINA);
+		
+		 Collections.sort(folders, (item1, item2) -> {
+           return comparator.compare(item1.getName(), item2.getName());
+        });
+		
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getId));
+//		Collections.sort(folders, Comparator.comparing(FolderBO::getFolderIndex));
 		
 		//找所有的根
 		List<FolderBO> roots = findRoots(folders);
@@ -927,6 +965,7 @@ public class CommandQueryController {
 		for(FolderBO root:roots){
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
+			_root.setName(localSerNode.getNodeName()+"(本域)");
 			_roots.add(_root);
 			if(withChannel){
 				recursionFolder(_root, folders, filteredBundles, channels, null, null);
@@ -938,6 +977,39 @@ public class CommandQueryController {
 		//将同一个文件夹下的设备按照名称排序
 		orderBundleByName(_roots);
 		return _roots;
+	}
+	
+	/**
+	 * <br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月25日
+	 * @param returnBundleList true返回设备集合，false返回设备树
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/foreign")
+	public Object findInstitutionTreeForeign(
+			HttpServletRequest request) throws Exception{
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
+		JSONArray JSONarray = new JSONArray();
+		
+		for(SerNodePO serNode : serNodeEntities){
+			if(ConnectionStatus.ON.equals(serNode.getStatus())){
+				JSONObject json = new JSONObject();
+				json.put("name", serNode.getNodeName());
+				json.put("status", "online");
+				JSONarray.add(json);
+			}else if(ConnectionStatus.OFF.equals(serNode.getStatus())){
+				JSONObject json = new JSONObject();
+				json.put("name", serNode.getNodeName());
+				json.put("status", "online");
+				JSONarray.add(json);
+			}
+		}
+		
+		System.out.println("外域的设备： "+JSONarray);
+		return JSONarray;
 	}
 	
 	/**
@@ -963,16 +1035,22 @@ public class CommandQueryController {
 		//获取userId
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		if(uuid == null){
+			uuid = UUID.randomUUID().toString().replace("-", "");
+		}
+		
 		Map<String,String> passByContent = new HashMap<String, String>();
 		passByContent.put("folderPath", folderPath);
 		passByContent.put("serNodeNamePath", serNodeNamePath);
 		passByContent.put("childType", childType.toString());
 		passByContent.put("uuid", uuid);
 		passByContent.put("userId", userId.toString());
+		passByContent.put("cmd", "search_foreign");
 		
+		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		PassByBO passBy = new PassByBO();
-		passBy.setType("search_foreign");
 		passBy.setPass_by_content(passByContent);
+		passBy.setLayer_id(localLayerId);
 		
 		LogicBO logic = new LogicBO();
 		logic.setPass_by(new ArrayListWrapper<PassByBO>().add(passBy).getList());

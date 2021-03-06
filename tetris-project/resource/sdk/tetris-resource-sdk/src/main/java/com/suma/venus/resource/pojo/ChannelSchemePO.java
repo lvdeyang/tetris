@@ -30,6 +30,63 @@ public class ChannelSchemePO extends CommonPO<ChannelSchemePO>{
 	/**操作计数*/
 	private Integer operateIndex = 0;
 	
+	/**-----------云导播---------------*/
+	
+	/**编码格式*/
+	private String codec;
+	
+	/**分辨率*/
+	private String resolution;
+	
+	/**帧率*/
+	private String fps;
+	
+	/**码率*/
+	private String bitrate;
+	
+	/**采样率*/
+	private String samplateRate;
+	
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
+	}
+
+	public String getResolution() {
+		return resolution;
+	}
+
+	public void setResolution(String resolution) {
+		this.resolution = resolution;
+	}
+
+	public String getFps() {
+		return fps;
+	}
+
+	public void setFps(String fps) {
+		this.fps = fps;
+	}
+
+	public String getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(String bitrate) {
+		this.bitrate = bitrate;
+	}
+
+	public String getSamplateRate() {
+		return samplateRate;
+	}
+
+	public void setSamplateRate(String samplateRate) {
+		this.samplateRate = samplateRate;
+	}
+
 	public enum LockStatus{
 		BUSY,
 		IDLE

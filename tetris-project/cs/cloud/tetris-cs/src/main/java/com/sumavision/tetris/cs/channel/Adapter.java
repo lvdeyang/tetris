@@ -381,4 +381,16 @@ public class Adapter {
 		}
 		return json;
 	}
+	
+	/**
+	 * 讀取聲紋比對地址<br/>
+	 * <b>作者:</b>lqxuhv<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年2月4日 下午4:07:03
+	 * @return
+	 */
+	public String readVoiceIp() throws Exception{
+		return readProfile("voiceIp.json");
+	}
+	
 }

@@ -9,6 +9,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
+
 /**
  * 类型概述<br/>
  * <b>作者:</b>zhouaining<br/>
@@ -45,17 +47,20 @@ public class PageVariableQuery {
 		
 		for(PageVariablePO pageVariablePO:pageVariablePOs){
 			List<VariableVO> variableVOs = new ArrayList<VariableVO>();
-		
-			Long variableId=Long.parseLong(pageVariablePO.getVariableId());
+			Long variableId = null;
+			if(pageVariablePO.getVariableId()!= null&& !"".equals(pageVariablePO.getVariableId())){
+				variableId=Long.parseLong(pageVariablePO.getVariableId());
+			}
 			//获取变量对应的variableTypeId
 			VariablePO variablePO = variableDAO.findOne(variableId);
+			String value = variablePO.getValue();
 			String variableTypeId = variablePO.getVariableTypeId();
 			//根据variableTypeId取得variableKey
 			VariableTypePO variableTypePO = variableTypeDAO.findOne(Long.parseLong(variableTypeId));
 			String variableKey = variableTypePO.getVariableKey();	
 			
 			//返回需要信息，变量的Id和变量对应的variableKey
-			variableVOs.add(new VariableVO().setId(variableId));
+			variableVOs.add(new VariableVO().setId(variableId).setValue(value));
 			VariableTypeVO variableTypeVO = new VariableTypeVO();
 			variableTypeVO.setVariable(variableVOs);
 			variableTypeVO.setVariableKey(variableKey);
