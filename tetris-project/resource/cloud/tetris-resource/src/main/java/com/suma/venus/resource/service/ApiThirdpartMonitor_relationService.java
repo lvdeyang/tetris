@@ -52,6 +52,7 @@ import com.sumavision.bvc.device.monitor.live.device.UserBundleBO;
 import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
@@ -111,6 +112,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 查本域以及外域信息<br/>
@@ -1143,9 +1147,13 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	public Object onForeignResourceReceive(String userId, JSONObject message) {
 		try {
 			message.put("businessType", "foreignUpdate");
+			List<Long> ids = new ArrayList<Long>();
+			ids.add(Long.valueOf(userId));
+			List<UserVO> userVOs = userQuery.findByIdIn(ids);
+			System.out.println(JSON.toJSONString(userVOs));
 			websocketMessageService.push(userId, null, message, null, null);
 		} catch (Exception e) {
-			System.out.println( "消息推送失败" + message);
+			System.out.println( "消息推送失败" +"userId" +userId + message);
 			e.printStackTrace();
 		}
 		
