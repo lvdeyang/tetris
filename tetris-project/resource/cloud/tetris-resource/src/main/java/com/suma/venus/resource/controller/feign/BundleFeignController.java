@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.discovery.converters.Auto;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -349,7 +349,7 @@ public class BundleFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/input/add")
-	public Object inputAdd(JSONObject bundleJson)throws Exception{
+	public Object inputAdd(@RequestBody JSONObject bundleJson)throws Exception{
 		
 		return cloudVirtualService.inputAdd(bundleJson);
 	}
