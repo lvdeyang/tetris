@@ -79,7 +79,7 @@ public class ApiG01WebUserController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, null, null, false, "", "", "", "", "", false, null);
+		return userService.edit(id, nickname, mobile, mail, null, null, false, "", "", "", "", "", false, null, null);
 	}
 	
 	/**
