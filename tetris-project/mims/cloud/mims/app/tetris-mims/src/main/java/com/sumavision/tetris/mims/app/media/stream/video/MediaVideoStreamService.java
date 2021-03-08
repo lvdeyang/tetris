@@ -669,64 +669,9 @@ public class MediaVideoStreamService {
 		media.getProgramPOs().clear();
 		media.getProgramPOs().addAll(programPOs);
 
-		//注入资源 虚拟设备
-		putMediaInResourceServiceAsVirtualDevice(media,urls.get(0));
 		mediaVideoStreamDao.save(media);
 	}
 
-	/**
-	 * @MethodName: putMediaInResourceServiceAsVirtualDevice
-	 * @Description: 向资源服务注入虚拟设备
-	 * @param media 1 媒资
-	 * @param url 2 信源地址
-	 * @Return: void
-	 * @Author: Poemafar
-	 * @Date: 2021/3/1 17:14
-	 **/
-	public void putMediaInResourceServiceAsVirtualDevice(MediaVideoStreamPO media,String url)throws Exception{
-		JSONObject bundleJson = new JSONObject();
-		bundleJson.put("BundleName",media.getName());
-		bundleJson.put("BundleId",media.getUuid());
-		bundleJson.put("bundleName",media.getName());
-		bundleJson.put("bundleId",media.getUuid());
-		bundleJson.put("url",url);
-		bundleJson.put("type",media.getStreamType());
-		JSONArray programsJson = new JSONArray();
-		for (int i = 0; i < media.getProgramPOs().size(); i++) {
-			MediaProgramPO programPO = media.getProgramPOs().get(i);
-			JSONObject progJson = new JSONObject();
-			progJson.put("num",programPO.getNum());
-			progJson.put("name",programPO.getName());
-			JSONArray videosJson = JSON.parseArray(programPO.getVideoJson());
-			if (videosJson!=null) {
-				for (int j = 0; j < videosJson.size(); j++) {
-					JSONObject vidJson = videosJson.getJSONObject(j);
-					vidJson.put("codec",vidJson.getString("type"));
-					vidJson.put("resolution",vidJson.getInteger("width")+"*"+vidJson.getInteger("height"));
-				}
-				progJson.put("videos",videosJson);
-			}
-			JSONArray audiosJson = JSON.parseArray(programPO.getAudioJson());
-			if (audiosJson!=null) {
-				for (int k = 0; k < audiosJson.size(); k++) {
-					JSONObject audJson = audiosJson.getJSONObject(k);
-					audJson.put("codec",audJson.getString("type"));
-					audJson.put("sampleRate",audJson.getString("sample_rate") );
-				}
-				progJson.put("audios",audiosJson);
-			}
-			programsJson.add(progJson);
-		}
-		bundleJson.put("programs",programsJson);
-		try {
-			LOG.info("[put-virtual-stream], send: {}",JSON.toJSONString(bundleJson));
-			bundleFeignService.inputAdd(bundleJson);
-			LOG.info("[put-virtual-stream], ack.");
-		} catch (Exception e) {
-			LOG.info("注入失败",e);
-			throw new BaseException(StatusCode.ERROR,"资源注入虚拟设备失败");
-		}
-	}
 
 	/**
 	 * @MethodName: getDetail
@@ -744,5 +689,64 @@ public class MediaVideoStreamService {
 		}
 		return new ResultVO(ResultCode.SUCCESS,programVOS);
 	}
+
+	/**
+	 * @MethodName: injectStreamToResource
+	 * @Description: 向资源服务注入虚拟设备
+	 * @param media 1
+	 * @Return: com.sumavision.tetris.mims.app.media.stream.video.program.ResultVO
+	 * @Author: Poemafar
+	 * @Date: 2021/3/5 15:46
+	 **/
+	public void injectStreamToResource(MediaVideoStreamPO media) throws BaseException {
+		List<String> urls = mediaVideoStreamUrlRelationQuery.getAllUrlFromStreamId(media.getId());
+		if (CollectionUtils.isEmpty(media.getProgramPOs())) {
+			throw new BaseException(StatusCode.FORBIDDEN,"未刷源不能注入");
+		}
+		JSONObject bundleJson = new JSONObject();
+		bundleJson.put("BundleName", media.getName());
+		bundleJson.put("BundleId", media.getUuid());
+		bundleJson.put("bundleName", media.getName());
+		bundleJson.put("bundleId", media.getUuid());
+		bundleJson.put("url", urls.get(0));
+		bundleJson.put("type", media.getStreamType());
+		JSONArray programsJson = new JSONArray();
+		for (int i = 0; i < media.getProgramPOs().size(); i++) {
+			MediaProgramPO programPO = media.getProgramPOs().get(i);
+			JSONObject progJson = new JSONObject();
+			progJson.put("num", programPO.getNum());
+			progJson.put("name", programPO.getName());
+			JSONArray videosJson = JSON.parseArray(programPO.getVideoJson());
+			if (videosJson != null) {
+				for (int j = 0; j < videosJson.size(); j++) {
+					JSONObject vidJson = videosJson.getJSONObject(j);
+					vidJson.put("codec", vidJson.getString("type"));
+					vidJson.put("resolution", vidJson.getInteger("width") + "*" + vidJson.getInteger("height"));
+				}
+				progJson.put("videos", videosJson);
+			}
+			JSONArray audiosJson = JSON.parseArray(programPO.getAudioJson());
+			if (audiosJson != null) {
+				for (int k = 0; k < audiosJson.size(); k++) {
+					JSONObject audJson = audiosJson.getJSONObject(k);
+					audJson.put("codec", audJson.getString("type"));
+					audJson.put("sampleRate", audJson.getString("sample_rate"));
+				}
+				progJson.put("audios", audiosJson);
+			}
+			programsJson.add(progJson);
+		}
+		bundleJson.put("programs", programsJson);
+		try {
+			LOG.info("[put-virtual-stream], send: {}", JSON.toJSONString(bundleJson));
+			bundleFeignService.inputAdd(bundleJson);
+			LOG.info("[put-virtual-stream], ack.");
+		} catch (Exception e) {
+			LOG.info("注入失败", e);
+			throw new BaseException(StatusCode.ERROR, "资源注入虚拟设备失败");
+		}
+
+	}
+
 
 }
