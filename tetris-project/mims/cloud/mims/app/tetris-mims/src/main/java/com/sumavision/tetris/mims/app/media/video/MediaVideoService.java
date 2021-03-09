@@ -22,6 +22,7 @@ import com.sumavision.tetris.capacity.server.CapacityService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.mims.app.media.stream.video.program.*;
+import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ import com.sumavision.tetris.user.UserVO;
 
 import it.sauronsoftware.jave.Encoder;
 import it.sauronsoftware.jave.MultimediaInfo;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 图片媒资操作（主增删改）<br/>
@@ -130,6 +132,9 @@ public class MediaVideoService {
 
 	@Autowired
 	private CapacityService capacityService;
+
+	@Autowired
+	private BundleFeignService bundleFeignService;
 
 	/**
 	 * 视频媒资上传审核通过<br/>
@@ -1049,6 +1054,72 @@ public class MediaVideoService {
 			programVOS.add(new MediaProgramVO(programPO));
 		}
 		return new ResultVO(ResultCode.SUCCESS,programVOS);
+	}
+
+	/**
+	 * @MethodName: injectVideoToResource
+	 * @Description: 注入视频到资源
+	 * @param media 1
+	 * @Return: void
+	 * @Author: Poemafar
+	 * @Date: 2021/3/5 16:04
+	 **/
+	public void injectVideoToResource(MediaVideoPO media) throws Exception {
+		if (CollectionUtils.isEmpty(media.getProgramPOs())) {
+			throw new BaseException(StatusCode.FORBIDDEN,"未刷源不能注入");
+		}
+		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("ftp://")
+				.append(serverPropsQuery.queryProps().getFtpUsername())
+				.append(":"+serverPropsQuery.queryProps().getFtpPassword()+"@")
+				.append(serverPropsQuery.queryProps().getFtpIp())
+				.append(":")
+				.append(serverPropsQuery.queryProps().getFtpPort())
+				.append("/");
+		String url=stringBufferWrapper.append(media.getPreviewUrl()).toString();
+
+		JSONObject bundleJson = new JSONObject();
+		bundleJson.put("BundleName", media.getName());
+		bundleJson.put("BundleId", media.getUuid());
+		bundleJson.put("bundleName", media.getName());
+		bundleJson.put("bundleId", media.getUuid());
+		bundleJson.put("url", url);
+		bundleJson.put("type", "file");
+		JSONArray programsJson = new JSONArray();
+		for (int i = 0; i < media.getProgramPOs().size(); i++) {
+			MediaProgramPO programPO = media.getProgramPOs().get(i);
+			JSONObject progJson = new JSONObject();
+			progJson.put("num", programPO.getNum());
+			progJson.put("name", programPO.getName());
+			JSONArray videosJson = JSON.parseArray(programPO.getVideoJson());
+			if (videosJson != null) {
+				for (int j = 0; j < videosJson.size(); j++) {
+					JSONObject vidJson = videosJson.getJSONObject(j);
+					vidJson.put("codec", vidJson.getString("type"));
+					vidJson.put("resolution", vidJson.getInteger("width") + "*" + vidJson.getInteger("height"));
+				}
+				progJson.put("videos", videosJson);
+			}
+			JSONArray audiosJson = JSON.parseArray(programPO.getAudioJson());
+			if (audiosJson != null) {
+				for (int k = 0; k < audiosJson.size(); k++) {
+					JSONObject audJson = audiosJson.getJSONObject(k);
+					audJson.put("codec", audJson.getString("type"));
+					audJson.put("sampleRate", audJson.getString("sample_rate"));
+				}
+				progJson.put("audios", audiosJson);
+			}
+			programsJson.add(progJson);
+		}
+		bundleJson.put("programs", programsJson);
+		try {
+			LOG.info("[put-virtual-video], send: {}", JSON.toJSONString(bundleJson));
+			bundleFeignService.inputAdd(bundleJson);
+			LOG.info("[put-virtual-video], ack.");
+		} catch (Exception e) {
+			LOG.info("注入失败", e);
+			throw new BaseException(StatusCode.ERROR, "资源注入虚拟设备失败");
+		}
+
 	}
 
 }

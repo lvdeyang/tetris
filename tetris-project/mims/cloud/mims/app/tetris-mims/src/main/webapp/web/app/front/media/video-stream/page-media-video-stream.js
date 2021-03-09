@@ -329,6 +329,14 @@ define([
                             self.$refs.copyMediaVideoStreamDialog.open('/folder/permission/media/tree/videoStream');
                             self.$refs.copyMediaVideoStreamDialog.setBuffer(row);
                         }
+                    } else if (command === '4') {
+                        ajax.post('/media/video/stream/inject/' + row.id, null, function(result){
+                            if(result.code!==0){
+                                self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                            }else{
+                                self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                            }
+                        });
                     }
                 },
                 //重命名素材库文件夹

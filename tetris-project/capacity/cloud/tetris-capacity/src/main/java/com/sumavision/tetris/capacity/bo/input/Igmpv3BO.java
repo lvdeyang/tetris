@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONArray;
+
 import java.util.List;
 
 /**
@@ -14,7 +16,7 @@ public class Igmpv3BO {
 	private String mode;
 	
 	/** 控制ip列表  */
-	private List<String> ip_array;
+	private JSONArray ip_array;
 
 	public String getMode() {
 		return mode;
@@ -25,13 +27,12 @@ public class Igmpv3BO {
 		return this;
 	}
 
-	public List<String> getIp_array() {
+	public JSONArray getIp_array() {
 		return ip_array;
 	}
 
-	public Igmpv3BO setIp_array(List<String> ip_array) {
+	public Igmpv3BO setIp_array(JSONArray ip_array) {
 		this.ip_array = ip_array;
 		return this;
 	}
-	
 }
