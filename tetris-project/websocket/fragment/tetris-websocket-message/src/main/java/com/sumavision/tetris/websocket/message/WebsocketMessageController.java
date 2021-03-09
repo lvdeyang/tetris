@@ -50,7 +50,7 @@ public class WebsocketMessageController {
 	public Object push(
 			String targetId,
 			String businessId,
-			String content,
+			@RequestBody String content,
 			String fromId,
 			String fromName,
 			HttpServletRequest request) throws Exception{
