@@ -3,6 +3,7 @@ package com.sumavision.signal.bvc.mq;/**
  */
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.message.bo.VenusMessageHead;
 import com.suma.venus.message.mq.ResponseBO;
@@ -10,6 +11,8 @@ import com.suma.venus.message.util.RegisterStatus;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.signal.bvc.capacity.TransformModuleService;
 import com.sumavision.signal.bvc.capacity.bo.source.MediaSourceBO;
+import com.sumavision.signal.bvc.capacity.vo.OutputVO;
+import com.sumavision.signal.bvc.capacity.vo.SourceVO;
 import com.sumavision.signal.bvc.common.enumeration.CommonConstants.*;
 import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
@@ -159,54 +162,102 @@ public class MessageHandler {
     private void processOpenBundleMsg(ResponseBO responseBo) throws Exception{
 
         String openBundleRequestString = responseBo.getMessage().getMessage_body().getString("open_bundle_request");
-//        String openBundleRequestString = "{\n" +
-//                "\t\t\"bundle\": {\n" +
-//                "\t\t\t\"bundle_id\": \"115ff998d61644e28fd0f395874dd86e\",\n" +
-//                "\t\t\t\"bundle_type\": \"VenusTerminal\",\n" +
-//                "\t\t\t\"device_model\": \"5G\",\n" +
-//                "\t\t\t\"channels\": [{\n" +
-//                "\t\t\t\t\"channel_id\": \"VenusVideoIn_1\",\n" +
-//                "\t\t\t\t\"channel_param\": {\n" +
-//                "\t\t\t\t\t\"base_type\": \"VenusVideoIn\",\n" +
-//                "\t\t\t\t\t\"base_param\": {\n" +
-//                "\t\t\t\t\t\t\"codec\": \"h264\",\n" +
-//                "\t\t\t\t\t\t\"fps\": \"25.0\",\n" +
-//                "\t\t\t\t\t\t\"bitrate\": 1000000,\n" +
-//                "\t\t\t\t\t\t\"resolution\": \"1920x1080\",\n" +
-//                "\t\t\t\t\t\t\"input_interface\":\"COLOR_BAR\",\n" +
-//                "\t\t\t\t\t\t\"output_interface\":\"CTRL\"\n" +
-//                "\t\t\t\t\t}\n" +
-//                "\t\t\t\t},\n" +
-//                "\t\t\t\t\"channel_status\": \"Open\"\n" +
-//                "\t\t\t}, {\n" +
-//                "\t\t\t\t\"channel_id\": \"VenusAudioIn_1\",\n" +
-//                "\t\t\t\t\"channel_param\": {\n" +
-//                "\t\t\t\t\t\"base_type\": \"VenusAudioIn\",\n" +
-//                "\t\t\t\t\t\"base_param\": {\n" +
-//                "\t\t\t\t\t\t\"codec\": \"aac\",\n" +
-//                "\t\t\t\t\t\t\"sample_rate\": 48000,\n" +
-//                "\t\t\t\t\t\t\"bitrate\": 64000\n" +
-//                "\t\t\t\t\t}\n" +
-//                "\t\t\t\t},\n" +
-//                "\t\t\t\t\"channel_status\": \"Open\"\n" +
-//                "\t\t\t}],\n" +
-//                "\t\t\t\"operate_index\": 230\n" +
-//                "\t\t}\n" +
-//                "\t}";
+
         JSONObject openBundleRequest = JSON.parseObject(openBundleRequestString);
         BundleBO bundle = openBundleRequest.getObject("bundle", BundleBO.class);
         String bundleType = bundle.getBundle_type();
-        String deviceModel = bundle.getDevice_model();
+
 
         String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
-        processOpenBundle5GMsg(bundle);
-//        if(deviceModel != null){
-//            if(deviceModel.equals("5G")){
-//                processOpenBundle5GMsg(bundle);
-//            }
-//        }else{
-//
-//        }
+
+        switch (bundleType){
+            case "VenusTerminal":
+                processOpenBundleVenusTerminalMsg(bundle, layerId);
+                break;
+            case "VenusVirtual":
+                processOpenBundleVenusVirtualMsg(bundle);
+                break;
+            case "VenusProxy":
+                break;
+            default:
+                break;
+        }
+
+
+
+    }
+
+    private void processOpenBundleVenusTerminalMsg(BundleBO bundle, String layerId) throws Exception{
+
+        String bundleId = bundle.getBundle_id();
+
+        if(layerId.equals(NodeType.NETWORK.getId())){
+
+            networkService.processOpenBundleVenusTerminalMsg(bundle);
+
+        }else{
+
+            TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
+
+            if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
+
+            if(bind.getDeviceModel().equals("jv210")){
+
+            }else if(bind.getDeviceModel().equals("jv220")){
+
+            }else if (bind.getDeviceModel().equals("5G")){
+                processOpenBundle5GMsg(bundle);
+            }
+
+        }
+    }
+
+    private void processOpenBundleVenusVirtualMsg(BundleBO bundle) throws Exception{
+
+        String deviceModel = bundle.getDevice_model();
+        switch (deviceModel) {
+            case "virtualOut":
+                processOpenBundleVirtualOutMsg(bundle);
+            default:
+                break;
+        }
+    }
+
+    private void processOpenBundleVirtualOutMsg(BundleBO bundleBO){
+        BundlePO srcBundle = resourceBundleDao.findByBundleId(bundleBO.getSource().getBundle_id());
+        BundlePO tgtBundle = resourceBundleDao.findByBundleId(bundleBO.getBundle_id());
+
+        String passby = bundleBO.getPass_by_str();
+        PassbyBO passbyBO = JSON.parseObject(passby, PassbyBO.class);
+        String type = passbyBO.getType();
+        if (type.equals("dispatch")){
+            JSONObject taskInfo = new JSONObject();
+            taskInfo.put("task_id",bundleBO.getTaskId());
+            taskInfo.put("task_ip","10.10.40.183");
+            taskInfo.put("template","DISPATCH_COMMON");
+
+            JSONArray sources = new JSONArray();
+            SourceVO source = JSON.parseObject(JSON.toJSONString(srcBundle),SourceVO.class);
+            sources.add(source);
+
+            JSONArray outputs = new JSONArray();
+            OutputVO output = JSON.parseObject(JSON.toJSONString(tgtBundle), OutputVO.class);
+            outputs.add(output);
+
+            taskInfo.put("map_sources",sources);
+            taskInfo.put("map_outputs",outputs);
+            try {
+                capacityService.addTaskByTemplate(taskInfo.toJSONString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+
+
+
     }
 
     /**处理colse_bundle信息

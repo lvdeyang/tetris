@@ -5,6 +5,8 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 public class BundleBO {
+
+	private String taskId;
 	
 	private String bundle_id;
 	
@@ -15,6 +17,8 @@ public class BundleBO {
 	private List<ChannelBO> channels;
 	
 	private List<ScreenBO> screens;
+
+	private SourceBO source;
 	
 	private String pass_by_str;
 
@@ -64,5 +68,23 @@ public class BundleBO {
 
 	public void setPass_by_str(String pass_by_str) {
 		this.pass_by_str = pass_by_str;
+	}
+
+	public SourceBO getSource() {
+		return source;
+	}
+
+	public BundleBO setSource(SourceBO source) {
+		this.source = source;
+		return this;
+	}
+
+	public String getTaskId() {
+		return taskId;
+	}
+
+	public BundleBO setTaskId(String taskId) {
+		this.taskId = taskId;
+		return this;
 	}
 }
