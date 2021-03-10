@@ -87,7 +87,15 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency> -->
-
+		
+		 <!-- 安全扫描，覆盖29版本 -->
+		 <dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>30.1-jre</version>
+		</dependency>
+		
+		
     </dependencies>
 
     <dependencyManagement>

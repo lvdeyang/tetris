@@ -45,7 +45,7 @@ public class HttpAlarmNotifyRetryHandler implements Runnable {
 	@Override
 	public void run() {
 
-		LOGGER.info("HttpAlarmNotifyRetryHandler, start");
+		LOGGER.debug("HttpAlarmNotifyRetryHandler, start");
 
 		sendList = new LinkedList<AlarmRetryNotifyVO>(retryNotifyList);
 		retryNotifyList = new LinkedList<AlarmRetryNotifyVO>();
@@ -71,7 +71,7 @@ public class HttpAlarmNotifyRetryHandler implements Runnable {
 					AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
 
 				} else {
-					LOGGER.info("sendList is empty, sleep");
+					LOGGER.debug("sendList is empty, sleep");
 					Thread.sleep(5 * 1000);
 					break;
 				}

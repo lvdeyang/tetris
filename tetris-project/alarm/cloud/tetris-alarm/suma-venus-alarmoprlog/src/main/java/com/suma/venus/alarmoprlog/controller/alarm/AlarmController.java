@@ -91,7 +91,10 @@ public class AlarmController {
 
 		try {
 			alarmParamBO.setType("alarm");
-			LOGGER.info("receive alarmParamBO=" + JSONObject.toJSONString(alarmParamBO) + ", add to queue");
+			LOGGER.info("----------receive tigger alarm, alarmCode==" + alarmParamBO.getAlarmCode() + ", service=="
+					+ alarmParamBO.getSourceService() + ", sourceServiceIP==" + alarmParamBO.getSourceServiceIP()
+					+ ", alarmObj==" + alarmParamBO.getAlarmObj() + ", creatTime==" + alarmParamBO.getCreateTime()
+					+ ", add to queue");
 			HandleReceiveAlarmThread.push(alarmParamBO);
 
 			data.put("errMsg", "");

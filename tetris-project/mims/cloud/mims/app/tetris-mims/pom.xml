@@ -82,10 +82,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
+        
+        <!-- 
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
         </dependency>
+		 -->
 
 		<!-- apache httpasyncclient -->
 		<dependency>
@@ -128,9 +131,15 @@
 		</dependency>
 
 		<!-- eureka依赖 -->
-		<dependency>
+        <dependency>
 		    <groupId>org.springframework.cloud</groupId>
 		    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>com.google.guava</groupId>
+      				<artifactId>guava</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		
 		<!-- 获取媒资时长 -->
@@ -151,6 +160,16 @@
 		    <artifactId>commons-net</artifactId>
 		    <version>3.6</version>
 		</dependency>
+		
+		<!-- 安全扫描，覆盖29版本 -->
+		 <dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>30.1-jre</version>
+		</dependency>
+		
+		
+		
 		<!-- <dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.11</artifactId>
