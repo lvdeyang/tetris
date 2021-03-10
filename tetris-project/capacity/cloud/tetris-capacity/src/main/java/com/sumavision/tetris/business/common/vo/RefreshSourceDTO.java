@@ -2,6 +2,11 @@ package com.sumavision.tetris.business.common.vo;/**
  * Created by Poemafar on 2021/2/1 13:58
  */
 
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.capacity.bo.input.Igmpv3BO;
+
+import java.util.List;
+
 /**
  * @ClassName: RefreshSourceDTO
  * @Description 能力服务传输的刷源参数
@@ -59,7 +64,22 @@ public class RefreshSourceDTO {
     /**
      * SDI卡类型
      */
-    String cardType;
+    private String cardType;
+
+    /**
+     * IGMPV3开关
+     */
+    private Boolean beIgmpv3;
+
+    /**
+     * IGMPV3模式，取值include,exclude
+     */
+    private String igmpv3Mode;
+
+    /**
+     * 控制IP列表 [ip1,ip2]
+     */
+    private List<String> igmpv3IpList;
 
     public String getDeviceIp() {
         return deviceIp;
@@ -148,6 +168,33 @@ public class RefreshSourceDTO {
 
     public RefreshSourceDTO setKeyLen(String keyLen) {
         this.keyLen = keyLen;
+        return this;
+    }
+
+    public Boolean getBeIgmpv3() {
+        return beIgmpv3;
+    }
+
+    public RefreshSourceDTO setBeIgmpv3(Boolean beIgmpv3) {
+        this.beIgmpv3 = beIgmpv3;
+        return this;
+    }
+
+    public String getIgmpv3Mode() {
+        return igmpv3Mode;
+    }
+
+    public RefreshSourceDTO setIgmpv3Mode(String igmpv3Mode) {
+        this.igmpv3Mode = igmpv3Mode;
+        return this;
+    }
+
+    public List<String> getIgmpv3IpList() {
+        return igmpv3IpList;
+    }
+
+    public RefreshSourceDTO setIgmpv3IpList(List<String> igmpv3IpList) {
+        this.igmpv3IpList = igmpv3IpList;
         return this;
     }
 }

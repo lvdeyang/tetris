@@ -230,6 +230,10 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin </artifactId>
+				<configuration>
+					<fork>false</fork>
+					<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+				</configuration>
 			</plugin>
 			
 			<plugin>

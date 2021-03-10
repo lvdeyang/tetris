@@ -648,4 +648,27 @@ public class MediaVideoController {
 		return mediaVideoService.getDetail(media);
 	}
 
+	/**
+	 * @MethodName: injectVideo
+	 * @Description: 注入视频到资源服务
+	 * @param id 1
+	 * @param request 2
+	 * @Return: java.lang.Object
+	 * @Author: Poemafar
+	 * @Date: 2021/3/5 16:01
+	 **/
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/inject/{id}")
+	public Object injectVideo(@PathVariable Long id,HttpServletRequest request) throws Exception {
+		MediaVideoPO media = mediaVideoQuery.loadById(id);
+		try {
+			mediaVideoService.injectVideoToResource(media);
+		} catch (Exception e) {
+			LOG.error("fail to inject source",e);
+			return new ResultVO(ResultCode.FAIL).setMessage(e.getMessage());
+		}
+		return new ResultVO(ResultCode.SUCCESS);
+	}
+
 }

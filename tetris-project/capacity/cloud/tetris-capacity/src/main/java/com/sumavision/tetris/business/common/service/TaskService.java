@@ -760,6 +760,22 @@ public class TaskService {
         }
         previewDao.deleteById(previewPO.getId());
     }
+
+    /**
+     * @MethodName: clearNoUserInput
+     * @Description: 清理下无用输入
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/3/3 17:13
+     **/
+    public void clearNoUseInputs(){
+        LOGGER.info("start to clear no use inputs");
+        List<TaskInputPO> inputs = taskInputDao.findByCount(0);
+        if(inputs != null && inputs.size() > 0){
+            taskInputDao.deleteInBatch(inputs);
+        }
+        LOGGER.info("complete to clear no use inputs");
+    }
 }
 
 

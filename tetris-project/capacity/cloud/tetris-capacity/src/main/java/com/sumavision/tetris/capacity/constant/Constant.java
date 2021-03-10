@@ -17,6 +17,11 @@ public class Constant {
 
     public static final Integer TRANSFORM_PORT = 5656;
 
+    /**
+     * 心跳间隔时长
+     */
+    public static final Integer HEARTBEAT_SPAN_SECOND = 5;
+
     private Constant() {
         throw new IllegalStateException("constant class");
     }

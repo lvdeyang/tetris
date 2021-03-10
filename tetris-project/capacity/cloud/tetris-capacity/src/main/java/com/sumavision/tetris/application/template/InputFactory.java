@@ -45,13 +45,13 @@ public class InputFactory{
                 if (null == tmplInputBO.getLocal_ip()){
                     tmplInputBO.setLocal_ip(missionBO.getDevice_ip());
                 }
-                inputBO.setUdp_ts(new CommonTsBO(tmplInputBO.getUrl(),tmplInputBO.getLocal_ip()));
+                inputBO.setUdp_ts(new CommonTsBO(tmplInputBO));
                 break;
             case RTP_TS:
                 if (null == tmplInputBO.getLocal_ip()){
                     tmplInputBO.setLocal_ip(missionBO.getDevice_ip());
                 }
-                inputBO.setRtp_ts(new CommonTsBO(tmplInputBO.getUrl(),tmplInputBO.getLocal_ip()));
+                inputBO.setRtp_ts(new CommonTsBO(tmplInputBO));
                 break;
             case HTTP_TS:
                 inputBO.setHttp_ts(new SourceUrlBO(tmplInputBO.getUrl(),inputType.name().toLowerCase()));

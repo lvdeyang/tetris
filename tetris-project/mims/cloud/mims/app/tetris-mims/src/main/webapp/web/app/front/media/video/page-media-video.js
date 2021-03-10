@@ -350,6 +350,14 @@ define([
                             self.$refs.copyMediaVideoDialog.open('/folder/permission/media/tree/video');
                             self.$refs.copyMediaVideoDialog.setBuffer(row);
                         }
+                    }else if(command === '4'){
+                        ajax.post('/media/video/inject/' + row.id, null, function(result){
+                            if(result.code!==0){
+                                self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                            }else{
+                                self.$notify.success({position: 'bottom-right',title:'操作成功'})
+                            }
+                        });
                     }
                 },
                 //重命名素材库文件夹

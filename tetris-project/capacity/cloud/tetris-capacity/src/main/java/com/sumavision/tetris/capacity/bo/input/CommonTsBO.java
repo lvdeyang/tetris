@@ -1,6 +1,14 @@
 package com.sumavision.tetris.capacity.bo.input;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.application.template.SourceVO;
 import com.sumavision.tetris.business.common.Util.IpV4Util;
+import com.sumavision.tetris.business.common.bo.MediaSourceBO;
+import com.sumavision.tetris.business.common.enumeration.IgmpV3Mode;
+import com.sumavision.tetris.commons.exception.BaseException;
+
+import java.util.Locale;
 
 /**
  * 通用协议参数 udp/rtp<br/>
@@ -62,13 +70,38 @@ public class CommonTsBO {
 
 	}
 
-	public CommonTsBO(String url,String localIp){
-		this.source_ip = IpV4Util.getIpFromUrl(url);
-		this.source_port = IpV4Util.getPortFromUrl(url);
+	public CommonTsBO(MediaSourceBO sourceBO){
+		this.source_ip = IpV4Util.getIpFromUrl(sourceBO.getUrl());
+		this.source_port = IpV4Util.getPortFromUrl(sourceBO.getUrl());
 		if (!IpV4Util.isMulticast(this.source_ip)) {
 			this.local_ip = source_ip;
 		}else {
-			this.local_ip = localIp;
+			this.local_ip = sourceBO.getLocalIp();
+		}
+		this.igmpv3=sourceBO.getIgmpv3();
+	}
+
+	public CommonTsBO(SourceVO sourceVO) throws BaseException {
+		this.source_ip = IpV4Util.getIpFromUrl(sourceVO.getUrl());
+		this.source_port = IpV4Util.getPortFromUrl(sourceVO.getUrl());
+		if (!IpV4Util.isMulticast(this.source_ip)) {
+			this.local_ip = source_ip;
+		}else {
+			this.local_ip = sourceVO.getLocal_ip();
+		}
+		if (Boolean.TRUE.equals(sourceVO.getBeIgmpv3())) {
+			Igmpv3BO igmpv3BO = new Igmpv3BO();
+			IgmpV3Mode mode = IgmpV3Mode.getIgmpV3Mode(sourceVO.getIgmpv3Mode());
+			igmpv3BO.setMode(mode.name().toLowerCase(Locale.ENGLISH));
+			JSONArray ipArray = new JSONArray();
+			for (int i = 0; i < sourceVO.getIgmpv3IpList().size(); i++) {
+				String ip = sourceVO.getIgmpv3IpList().get(i);
+				JSONObject ipObj = new JSONObject();
+				ipObj.put("ip",ip);
+				ipArray.add(ipObj);
+			}
+			igmpv3BO.setIp_array(ipArray);
+			this.igmpv3=igmpv3BO;
 		}
 	}
 }

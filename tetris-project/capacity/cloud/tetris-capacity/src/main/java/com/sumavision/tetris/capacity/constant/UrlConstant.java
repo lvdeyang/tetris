@@ -64,6 +64,8 @@ public final class UrlConstant {
 	
 	/** 授权 */
 	public static final String URL_AUTHORIZATION = "authorization";
+
+	public static final String URL_LICENSE = "license";
 	
 	/** 告警 */
 	public static final String URL_ALARM = "alarmurl";

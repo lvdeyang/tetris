@@ -453,5 +453,8 @@ public interface CapacityFeign{
 	@RequestMapping(value = "/feign/source/refresh")
 	public JSONObject refreshSource(@RequestParam("source") String source) throws Exception;
 
+	@RequestMapping(value = "/feign/transform/license/get")
+	public JSONObject getLicense(@RequestParam("transform")String transform)throws  Exception;
+
 
 }
