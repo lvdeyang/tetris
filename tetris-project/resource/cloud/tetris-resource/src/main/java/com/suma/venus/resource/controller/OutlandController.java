@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
@@ -256,10 +255,12 @@ public class OutlandController extends ControllerBase{
 	 * <b>作者:</b>lqxuhv<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2021年2月3日 下午3:42:12
-	 * @param folderPath 目录路径
-	 * @param serNodeNamePath 外域路径
-	 * @param childType 类型
-	 * @param uuid 
+	 * @param String folderPath 目录路径
+	 * @param String serNodeNamePath 外域路径
+	 * @param String permissionType 管理页面查询：权限类型
+	 * @param Long roleId 管理页面查询：角色id
+	 * @param String childType 类型
+	 * @param String uuid 页面的一个唯一标识 
 	 */
 	@JsonBody
 	@ResponseBody
@@ -267,9 +268,11 @@ public class OutlandController extends ControllerBase{
 	public Object queryForeignInformation(
 			String folderPath,
 			String serNodeNamePath,
+			String permissionType,
+			Long roleId,
 			String childType,
 			String uuid)throws Exception{
 		
-		return queryForeignInformation.stopLiveDevice(folderPath, serNodeNamePath, childType, uuid);
+		return queryForeignInformation.stopLiveDevice(folderPath, serNodeNamePath, permissionType, roleId, childType, uuid);
 	} 
 }

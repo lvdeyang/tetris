@@ -28,20 +28,21 @@ import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.SerNodeRolePermissionDAO;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
+import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
-import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
 import com.suma.venus.resource.pojo.SerNodeRolePermissionPO;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
+import com.suma.venus.resource.query.OutlandPermissionQuery;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
 import com.suma.venus.resource.vo.ExtraInfoVO;
@@ -53,10 +54,7 @@ import com.sumavision.tetris.alarm.bo.OprlogParamBO.EOprlogType;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
-import com.sumavision.tetris.websocket.message.WebsocketMessageType;
-import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -115,6 +113,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private OutlandPermissionQuery outlandPermissionQuery;
 	
 	/**
 	 * 查本域以及外域信息<br/>
@@ -1146,11 +1147,26 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 	 */
 	public Object onForeignResourceReceive(String userId, JSONObject message) {
 		try {
+			String type = message.getString("type");
+			String permissionType = message.getString("permissionType");
+			//String roleId = message.getString("roleId");
+			if(permissionType!=null && !"".equals(permissionType)){
+				if("FOLDER".equals(type)){
+					//向管理页面推送文件夹信息
+					message = outlandPermissionQuery.packFolderPermissions(message);
+				}else if("BUNDLE".equals(type)){
+					//向管理页面推送设备信息
+					message = outlandPermissionQuery.packDevicePermissions(message);
+				}
+			}else{
+				if("BUNDLE".equals(type)){
+					//向客户端推送设备信息
+					message = outlandPermissionQuery.packDevicePrivilege(userId, message);
+				}
+			}
 			message.put("businessType", "foreignUpdate");
-			List<Long> ids = new ArrayList<Long>();
-			ids.add(Long.valueOf(userId));
-			List<UserVO> userVOs = userQuery.findByIdIn(ids);
-			System.out.println(JSON.toJSONString(userVOs));
+			System.out.println("外域的外域查询数据添加权限信息.....");
+			System.out.println(message.toJSONString());
 			websocketMessageService.push(userId, null, message, null, null);
 		} catch (Exception e) {
 			System.out.println( "消息推送失败" +"userId" +userId + message);

@@ -82,4 +82,15 @@ public interface BusinessRoleFeign {
 	 */
 	@RequestMapping(value = "/business/role/feign/find/private/role/by/user/ids")
 	public JSONObject findPrivateRoleByUserIds(@RequestParam("userIds") String userIds) throws Exception;
+	
+	/**
+	 * 查询用户的业务角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月10日 上午9:51:25
+	 * @param Long userId 用户id
+	 * @return List<SystemRoleVO> 业务角色列表
+	 */
+	@RequestMapping(value = "/business/role/feign/find/business/role/by/user/id")
+	public JSONObject findBusinessRoleByUserId(@RequestParam("userId") Long userId) throws Exception;
 }
