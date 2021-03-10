@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
@@ -980,7 +981,7 @@ public class CommandQueryController {
 	}
 	
 	/**
-	 * <br/>
+	 * 查询组织机构下所有的设备<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年9月25日
@@ -1020,6 +1021,8 @@ public class CommandQueryController {
 	 * @param folderPath 目录路径
 	 * @param serNodeNamePath 域路径
 	 * @param childType 请求类型
+	 * @param permissionType 权限字段
+	 * @param roleId 绑定的角色
 	 * @param uuid 目录唯一标识符
 	 */
 	@JsonBody
@@ -1029,6 +1032,8 @@ public class CommandQueryController {
 			String folderPath,
 			String serNodeNamePath,
 			String childType,
+			String permissionType,
+			Long roleId,
 			String uuid,
 			HttpServletRequest request) throws Exception{
 		
@@ -1046,6 +1051,8 @@ public class CommandQueryController {
 		passByContent.put("uuid", uuid);
 		passByContent.put("userId", userId.toString());
 		passByContent.put("cmd", "search_foreign");
+		passByContent.put("permissionType", permissionType);
+		passByContent.put("roleId", roleId.toString());
 		
 		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		PassByBO passBy = new PassByBO();
