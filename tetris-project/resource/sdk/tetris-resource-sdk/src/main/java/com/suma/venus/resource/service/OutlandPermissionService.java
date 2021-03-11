@@ -79,6 +79,7 @@ public class OutlandPermissionService {
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void addFolderPermission(
 			String serNodeNamePath,
 			String folderPath,
@@ -138,6 +139,7 @@ public class OutlandPermissionService {
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void removeDevicePermission(
 			String serNodeNamePath,
 			String folderPath,
@@ -205,6 +207,7 @@ public class OutlandPermissionService {
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void removeFolderPermission(
 			String serNodeNamePath,
 			String folderPath,

@@ -1,6 +1,7 @@
 package com.suma.venus.resource.pojo;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Lob;
@@ -11,6 +12,7 @@ import javax.persistence.Lob;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2021年3月8日 下午3:49:55
  */
+@Entity
 public class OutlandPermissionCheckPO extends CommonPO<OutlandPermissionCheckPO>{
 
 	/** 外域名称路径 */
