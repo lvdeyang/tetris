@@ -197,6 +197,10 @@ public class MessageHandler {
 
         }else{
 
+            if (bundle.getDevice_model().equals("5G")){
+                processOpenBundle5GMsg(bundle);
+            }
+
             TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
 
             if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
@@ -205,8 +209,6 @@ public class MessageHandler {
 
             }else if(bind.getDeviceModel().equals("jv220")){
 
-            }else if (bind.getDeviceModel().equals("5G")){
-                processOpenBundle5GMsg(bundle);
             }
 
         }
@@ -224,7 +226,8 @@ public class MessageHandler {
     }
 
     private void processOpenBundleVirtualOutMsg(BundleBO bundleBO){
-        BundlePO srcBundle = resourceBundleDao.findByBundleId(bundleBO.getSource().getBundle_id());
+        SourceBO sourceBO = bundleBO.getChannels().get(0).getChannel_param().getBase_param().getSource();
+        BundlePO srcBundle = resourceBundleDao.findByBundleId(sourceBO.getBundle_id());
         BundlePO tgtBundle = resourceBundleDao.findByBundleId(bundleBO.getBundle_id());
 
         String passby = bundleBO.getPass_by_str();
@@ -232,7 +235,7 @@ public class MessageHandler {
         String type = passbyBO.getType();
         if (type.equals("dispatch")){
             JSONObject taskInfo = new JSONObject();
-            taskInfo.put("task_id",bundleBO.getTaskId());
+            taskInfo.put("task_id",tgtBundle.getBundleId());
             taskInfo.put("task_ip","10.10.40.183");
             taskInfo.put("template","DISPATCH_COMMON");
 
@@ -260,6 +263,30 @@ public class MessageHandler {
 
     }
 
+    /**
+     * @MethodName: processCloseBundleVirtualOutMsg
+     * @Description: 处理 close bundle 虚拟输出
+     * @param bundleBO 1
+     * @Return: void
+     * @Author: Poemafar
+     * @Date: 2021/3/10 19:33
+     **/
+    private void processCloseBundleVirtualOutMsg(BundleBO bundleBO){
+
+        String passby = bundleBO.getPass_by_str();
+        PassbyBO passbyBO = JSON.parseObject(passby, PassbyBO.class);
+        String type = passbyBO.getType();
+        if (type.equals("dispatch")){
+            try {
+//            capacityService.deleteTranscode(); 删调度任务
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     /**处理colse_bundle信息
      * @throws Exception */
     private void processCloseBundleMsg(ResponseBO responseBo) throws Exception{
@@ -273,7 +300,18 @@ public class MessageHandler {
 
         String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
 
-        processCloseBundle5GMsg(bundle);
+        switch (bundleType){
+            case "VenusTerminal":
+                processCloseBundleVenusTerminalMsg(bundle, layerId);
+                break;
+            case "VenusVirtual":
+                processCloseBundleVenusVirtualMsg(bundle);
+                break;
+            case "VenusProxy":
+                break;
+            default:
+                break;
+        }
     }
 
     /**处理pass_by信息信息
@@ -299,6 +337,153 @@ public class MessageHandler {
     }
 
 
+    public void processCloseBundleVenusTerminalMsg(BundleBO bundle, String layerId) throws Exception {
+
+
+        String bundleId = bundle.getBundle_id();
+
+        if(layerId.equals(NodeType.NETWORK.getId())){
+
+            networkService.processOpenBundleVenusTerminalMsg(bundle);
+
+        }else{
+
+            if (bundle.getDevice_model().equals("5G")){
+                processCloseBundle5GMsg(bundle);
+            }
+
+            TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
+
+            if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
+
+            if(bind.getDeviceModel().equals("jv210")){
+
+                processCloseBundleJv210Msg(bundle, bind);
+
+            }else if(bind.getDeviceModel().equals("jv220")){
+
+                processCloseBundleJv220Msg(bundle, bind);
+
+            }
+        }
+
+    }
+
+    /**处理close_bundle信息的jv210类型信息
+     * @throws Exception */
+    private void processCloseBundleJv210Msg(BundleBO bundle, TerminalBindRepeaterPO bind) throws Exception{
+
+        String[][] TerminalEncodeParam = JSON.parseObject(JSON.toJSONString(TerminalParam.TerminalEncodeParam), String[][].class);
+        String[][] TerminalDecodeParam = JSON.parseObject(JSON.toJSONString(TerminalParam.TerminalDecodeParam), String[][].class);
+
+        String bundleId = bundle.getBundle_id();
+
+        List<PortMappingPO> mappings = portMappingDao.findByDstTypeAndDstBundleId(DstType.TERMINAL, bundleId);
+
+        List<Long> ids = new ArrayList<Long>();
+        for(PortMappingPO mapping: mappings){
+            ids.add(mapping.getId());
+        }
+
+        List<TaskPO> tasks = taskDao.findByMappingIdInAndStatus(ids, TaskStatus.zero.getStatus());
+
+        //编码设置请求
+        String encodeRes = HttpClient.get("http://" + bind.getBundleIp() + TerminalParam.GET_JV210_ENCODEPARAM_SUFFIX);
+        String[][] encodeParam = TerminalParam.html2Data(encodeRes, TerminalEncodeParam);
+
+        //通话设置请求
+        String decodeRes = HttpClient.get("http://" + bind.getBundleIp() + TerminalParam.GET_JV210_DECODEPARAM_SUFFIX);
+        String[][] decodeParam = TerminalParam.html2Data(decodeRes, TerminalDecodeParam);
+
+        encodeParam[0][0] = "0";
+        encodeParam[1][0] = "0";
+        encodeParam[4][0] = "0";
+        decodeParam[0][0] = "0";
+        decodeParam[1][0] = "0";
+        decodeParam[2][0] = "0";
+        decodeParam[3][0] = "0";
+
+        List<BasicNameValuePair> encodeBody = new ArrayList<BasicNameValuePair>();
+        BasicNameValuePair encodePair = new BasicNameValuePair("setString", TerminalParam.array2Data(encodeParam));
+        encodeBody.add(encodePair);
+        HttpAsyncClient.getInstance().formPost("http://" + bind.getBundleIp() + TerminalParam.POST_JV210_ENCODEPARAM_SUFFIX, null, encodeBody, null);
+
+        List<BasicNameValuePair> decodeBody = new ArrayList<BasicNameValuePair>();
+        BasicNameValuePair decodePair = new BasicNameValuePair("setString", TerminalParam.array2Data(decodeParam));
+        decodeBody.add(decodePair);
+        HttpAsyncClient.getInstance().formPost("http://" + bind.getBundleIp() + TerminalParam.POST_JV210_DECODEPARAM_SUFFIX, null, decodeBody, null);
+
+        for(TaskPO task: tasks){
+            taskExecuteService.taskSwitch(task, bind.getAccessAddress(), 60000l);
+        }
+    }
+
+
+    /**处理close_bundle信息的jv210类型信息
+     * @throws Exception */
+    private void processCloseBundleJv220Msg(BundleBO bundle, TerminalBindRepeaterPO bind) throws Exception{
+
+        String bundleId = bundle.getBundle_id();
+
+        List<PortMappingPO> mappings = portMappingDao.findByDstTypeAndDstBundleId(DstType.TERMINAL, bundleId);
+
+        List<Long> ids = new ArrayList<Long>();
+        for(PortMappingPO mapping: mappings){
+            ids.add(mapping.getId());
+        }
+
+        List<TaskPO> tasks = taskDao.findByMappingIdInAndStatus(ids, TaskStatus.zero.getStatus());
+
+        //关闭解码开关
+        for(Long i = 0l;i < 2l;i++){
+            JSONObject decodeParam = new JSONObject();
+            JSONObject ctrl = new JSONObject();
+            ctrl.put("ctrl", 0l);
+            decodeParam.put("udp_recv", ctrl);
+
+            HttpAsyncClient.getInstance().httpAsyncPost("http://" + bind.getBundleIp() + TerminalParam.JV220_URL_SUFFIX, jv220Param.receiveSet(i, decodeParam).toJSONString(), null, null);
+
+        }
+
+        //关闭编码开关
+        JSONObject mutimediaParam = new JSONObject();
+        JSONObject v_send_0 = new JSONObject();
+        v_send_0.put("ctrl", 0l);
+        mutimediaParam.put("v_send_0", v_send_0);
+
+        JSONObject v_send_1 = new JSONObject();
+        v_send_1.put("ctrl", 0l);
+        mutimediaParam.put("v_send_1", v_send_1);
+
+        JSONObject a_send = new JSONObject();
+        a_send.put("ctrl", 0l);
+        mutimediaParam.put("a_send", a_send);
+
+        //画面设为单画面本地
+        JSONObject v_disp_0 = new JSONObject();
+        v_disp_0.put("mode", 0l);
+        v_disp_0.put("win_0_ch", Jv220Param.VIDEOENCODE1.getProtocal());
+        mutimediaParam.put("v_disp_0", v_disp_0);
+
+        System.out.println(mutimediaParam.toJSONString());
+        HttpAsyncClient.getInstance().httpAsyncPost("http://" + bind.getBundleIp() + TerminalParam.JV220_URL_SUFFIX, jv220Param.multimediaSet(mutimediaParam).toJSONString(), null, null);
+
+        //任务切换
+        for(TaskPO task: tasks){
+            taskExecuteService.taskSwitch(task, bind.getAccessAddress(), 60000l);
+        }
+    }
+
+
+    private void processCloseBundleVenusVirtualMsg(BundleBO bundle) throws Exception{
+        String deviceModel = bundle.getDevice_model();
+        switch (deviceModel) {
+            case "virtualOut":
+                processCloseBundleVirtualOutMsg(bundle);
+            default:
+                break;
+        }
+    }
 
 
 
