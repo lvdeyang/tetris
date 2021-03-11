@@ -258,12 +258,13 @@ public class CloudVirtualService {
 	 * @param audios 音频通道
 	 * @return
 	 */
-	public Object outputModify(String bundleName,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
+	public Object outputModify(String bundleName,String type,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setBundleName(bundleName);
 		bundlePO.setUrl(url);
 		bundlePO.setRateCtrl(rateCtrl);
 		bundlePO.setBitrate(bitrate);
+		bundlePO.setType(type);
 		bundleDao.save(bundlePO);
 		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleId(bundleId);
 		JSONArray videosArray = JSONArray.parseArray(videos);
@@ -454,18 +455,19 @@ public class CloudVirtualService {
 	 * <b>日期：</b>2021年3月4日 上午10:44:05
 	 * @return data 虚拟输出设备信息
 	 */
-	public List<Map<String, Object>> outputQuery() throws Exception {
+	public List<Map<String, Object>> outputQuery(String bundleId) throws Exception {
 		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 		UserVO userVO = userQuery.current();
-		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
-		List<PrivilegePO> privilegePOs = privilegeDAO.findByRoleId(Long.valueOf(systemRoleVO.getId()));
+		//SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
+		//List<PrivilegePO> privilegePOs = privilegeDAO.findByRoleId(Long.valueOf(systemRoleVO.getId()));
 		List<String> bundleIds = new ArrayList<String>();
-		if (privilegePOs != null && privilegePOs.size()>0) {
-			for (PrivilegePO privilegePO : privilegePOs) {
-				if (privilegePO.getResourceIndentity().endsWith("-r")) {
-					bundleIds.add(privilegePO.getResourceIndentity().substring(0,privilegePO.getResourceIndentity().length() - 2));
-				}
-			}
+		bundleIds.add(bundleId);
+		//if (privilegePOs != null && privilegePOs.size()>0) {
+			//for (PrivilegePO privilegePO : privilegePOs) {
+			//	if (privilegePO.getResourceIndentity().endsWith("-r")) {
+			//		bundleIds.add(privilegePO.getResourceIndentity().substring(0,privilegePO.getResourceIndentity().length() - 2));
+			//	}
+			//}
 			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
 			List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundleIds);
 			if (bundlePOs != null && bundlePOs.size() > 0) {
@@ -492,7 +494,7 @@ public class CloudVirtualService {
 					data.add(bundle);
 				}
 			}
-		}
+		//}
 		return data;
 	}
 }
