@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -23,6 +24,7 @@ import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 
+@Component
 public class OutlandPermissionQuery {
 
 	@Autowired
