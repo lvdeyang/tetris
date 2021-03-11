@@ -33,9 +33,9 @@ public class CloudVirtualController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/output/add")
-	public Object outputAdd(String bundleName, String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
+	public Object outputAdd(String bundleName,String type, String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
 		
-		return cloudVirtualService.outputAdd(bundleName,url,rateCtrl,bitrate,videos,audios);
+		return cloudVirtualService.outputAdd(bundleName,type,url,rateCtrl,bitrate,videos,audios);
 	}
 	
 	/**
