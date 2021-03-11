@@ -266,7 +266,7 @@ public class CloudVirtualService {
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setType(type);
 		bundleDao.save(bundlePO);
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleId(bundleId);
+		/*List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleId(bundleId);
 		JSONArray videosArray = JSONArray.parseArray(videos);
 		JSONArray audiosArray = JSONArray.parseArray(audios);
 		List<ChannelSchemePO> newChannelSchemePOs = new ArrayList<ChannelSchemePO>();
@@ -297,7 +297,7 @@ public class CloudVirtualService {
 				newChannelSchemePOs.add(channelSchemePO);
 			}
 		}
-		updateChannel(channelSchemePOs,newChannelSchemePOs);
+		updateChannel(channelSchemePOs,newChannelSchemePOs);*/
 		
 		return null;
 	}
