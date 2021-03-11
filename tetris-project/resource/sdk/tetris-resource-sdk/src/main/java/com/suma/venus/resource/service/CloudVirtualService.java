@@ -65,12 +65,14 @@ public class CloudVirtualService {
 	 * @param audios 音频通道
 	 * @return
 	 */
-	public Object outputAdd(String bundleName, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
+	public Long outputAdd(String bundleName,String type, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 
 		BundlePO bundlePO = new BundlePO();
 		bundlePO.setBundleName(bundleName);
 		bundlePO.setBundleId(BundlePO.createBundleId());
 		bundlePO.setRateCtrl(rateCtrl);
+        bundlePO.setStreamUrl(url);
+        bundlePO.setType(type);
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setDeviceModel("virtualOut");
 		bundleDao.save(bundlePO);
@@ -83,7 +85,7 @@ public class CloudVirtualService {
 		bo.setRoleId(Long.valueOf(systemRoleVO.getId()));
 		bo.setResourceCodes(resource);
 		userQueryService.bindRolePrivilege(bo);
-		return null;
+		return bundlePO.getId();
 	}
 
 	/**
