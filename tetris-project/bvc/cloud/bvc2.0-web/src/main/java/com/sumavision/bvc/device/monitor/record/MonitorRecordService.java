@@ -1302,8 +1302,8 @@ public class MonitorRecordService {
 				 .setAlarm(new AlarmBO().setCap_alarm(new AapAlarmBO().setSize_mb(task.getAlarm_size_mb())))
 				 .setStore_mode(task.getMode().getCode());
 		if(MonitorRecordMode.SCHEDULING.equals(task.getMode())){
-			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattenWithoutSecind))
-														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattenWithoutSecind)));
+			recordSet.setDatetime(new RecordDateTimeBO().setStart(DateUtil.format(task.getStartTime(), DateUtil.dateTimePattern))
+														.setEnd(DateUtil.format(task.getEndTime(), DateUtil.dateTimePattern)));
 		}
 		//额外添加结束
 		

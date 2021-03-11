@@ -103,4 +103,16 @@ public class BusinessRoleQuery {
 		return JsonBodyResponseParser.parseArray(businessRoleFeign.findPrivateRoleByUserIds(JSON.toJSONString(userIds)), SystemRoleVO.class);
 	}
 	
+	/**
+	 * 查询用户的业务角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月10日 上午9:51:25
+	 * @param Long userId 用户id
+	 * @return List<SystemRoleVO> 业务角色列表
+	 */
+	public List<SystemRoleVO> findBusinessRoleByUserId(Long userId) throws Exception{
+		return JsonBodyResponseParser.parseArray(businessRoleFeign.findBusinessRoleByUserId(userId), SystemRoleVO.class);
+	}
+	
 }
