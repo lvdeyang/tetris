@@ -271,15 +271,25 @@ define([
                 },
                 deleteOutputBtnClick(index,row){
                     let self= this
-                    ajax.post('/tetris/dispatch/control/outputs/delete/'+row.id, null, function(result){
-                        if(result.code!==0){
-                            self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
-                        }else{
-                            self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
-                            self.getOutputGroups();
+                    let tipTitle = "此操作将删除输出，是否继续?"
+                    if(row.beLock){
+                        tipTitle = "此操作将删除输出及其关联的任务, 是否继续?"
+                    }
+                    this.$confirm(tipTitle, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        ajax.post('/tetris/dispatch/control/outputs/delete/'+row.id, null, function(result){
+                            if(result.code!==0){
+                                self.$notify.error({position: 'bottom-right',title:'操作失败',message:result.message})
+                            }else{
+                                self.$notify.success({position: 'bottom-right',title:'操作成功',message:result.message})
+                                self.getOutputGroups();
 
-                        }
-                    })
+                            }
+                        })
+                    });
                 },
                 transferSourceDlgClose(){
                     this.dialog.addDispatch.visible=false;
@@ -413,7 +423,7 @@ define([
                 },
                 outputGroupChanged(val){
                     this.dialog.addDispatch.outputId=null
-                    this.changedAvailableOutputs = this.outputGroups.filter(o=>o.id===val)[0].outputs
+                    this.changedAvailableOutputs = this.outputGroups.filter(o=>o.id===val&&o.beLock)[0].outputs
                 }
             },
             computed:{
