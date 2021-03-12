@@ -34,6 +34,7 @@ define([
         new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
+                wait:false,
                 b:'',
                 test: {
                     visible: false
@@ -451,6 +452,48 @@ define([
             computed: {},
             watch: {},
             methods: {
+
+                handleChange:function(file, fileList) {
+
+                 },
+
+                handleUploadCommit:function(file){
+                    var self = this;
+                    $.ajax({
+                        type:"POST",
+                        url:"/cs/schedule/import",
+                        success: function(data) {
+                            console.log("成功");
+                        },
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader("content-type", "multipart/form-data");
+                        }
+                    })
+                   /* ajax.post('/cs/schedule/import', null, function (data, status) {
+
+                        if (status == 200) {
+                            self.$message({
+                                message: '同步成功',
+                                type: 'success'
+                            });
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE)*/
+                },
+
+                handleSyncTask:function(){
+                    var self = this;
+                    self.wait=true;
+                    ajax.post('/cs/channel/sync', null, function (data, status) {
+                        if (status == 200) {
+                            self.wait=false;
+                            self.$message({
+                                message: '同步成功',
+                                type: 'success'
+                            });
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+
                 selectMuneResource:function(b){
                     var self = this;
                     console.log(b);
@@ -1821,6 +1864,10 @@ define([
                     self.test.visible = true;
                     self.$refs.programScreen.open('/cs/channel/template', self.dialog.editSchedules.data, scope.row);
                 },
+                /*editCalendar: function () {
+                    var self = this;
+                    self.$refs.calendarProgram.open('/cs/channel/template');
+                },*/
 
                 //area dialog event
                 manageBroadcastArea: function (scope) {
