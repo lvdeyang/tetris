@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
+import com.suma.venus.resource.bo.AudioChannelBO;
+import com.suma.venus.resource.bo.ProgramsBO;
+import com.suma.venus.resource.bo.VideoChannelBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
@@ -97,9 +101,18 @@ public class CloudVirtualService {
 	 * @param bundleJson 虚拟输入设备信息
 	 */
 	public Object inputAdd(JSONObject bundleJson) throws Exception {
-		BundlePO bundlePO = new BundlePO();
-		bundlePO.setBundleId(bundleJson.getString("BundleId"));
-		bundlePO.setBundleName(bundleJson.getString("BundleName"));
+		
+		BundlePO bundlePO = bundleDao.findByBundleId(bundleJson.getString("bundleId"));
+		if(bundlePO == null){
+			bundlePO = new BundlePO();
+		}else{
+			channelSchemeDao.deleteByBundleId(bundlePO.getBundleId());
+			extraInfoDao.deleteByBundleId(bundlePO.getBundleId());
+		}
+		bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+		bundlePO.setBundleType("VenusTerminal");
+		bundlePO.setBundleId(bundleJson.getString("bundleId"));
+		bundlePO.setBundleName(bundleJson.getString("bundleName"));
 		bundlePO.setUrl(bundleJson.getString("url"));
 		bundlePO.setType(bundleJson.getString("type"));
 		bundlePO.setDeviceModel("virtualIn");
@@ -139,11 +152,40 @@ public class CloudVirtualService {
 					audioChannelSchemePOs.addAll(getAudioChannelSchemePO(bundlePO.getBundleId(), audioChannelTemplate,audios));
 					videoChannelSchemePOs.addAll(getVideoChannelSchemePO(bundlePO.getBundleId(), videoChannelTemplate,videos));
 				}
-				Map<String, Object> pro = new HashMap<String, Object>();
-				pro.put("num", num);
-				pro.put("name", name);
-				pro.put("videos", videoChannelSchemePOs);
-				pro.put("audios", audioChannelSchemePOs);
+//				Map<String, Object> pro = new HashMap<String, Object>();
+//				pro.put("num", num);
+//				pro.put("name", name);
+//				pro.put("videos", JSONObject.toJSON(videoChannelSchemePOs));
+//				pro.put("audios", JSONObject.toJSON(audioChannelSchemePOs));
+				
+				List<VideoChannelBO> vidoeChannels = new ArrayList<VideoChannelBO>(); 
+				List<AudioChannelBO> audioChannels = new ArrayList<AudioChannelBO>(); 
+				for(ChannelSchemePO videoScheme : videoChannelSchemePOs){
+					VideoChannelBO video = new VideoChannelBO();
+					video.setBaseType("VenusVidioIn");
+					video.setChannelId(videoScheme.getChannelId());
+					video.setCodec(videoScheme.getCodec());
+					video.setResolution(videoScheme.getResolution());
+					video.setBitrate(videoScheme.getBitrate());
+					video.setFps(videoScheme.getFps());
+					vidoeChannels.add(video);
+				}
+				
+				for(ChannelSchemePO audioScheme : audioChannelSchemePOs){
+					AudioChannelBO audio = new AudioChannelBO();
+					audio.setBaseType("VenusAudioIn");
+					audio.setChannelId(audioScheme.getChannelId());
+					audio.setCodec(audioScheme.getCodec());
+					audio.setSamplateRate(audioScheme.getSamplateRate());
+					audio.setBitrate(audioScheme.getBitrate());
+					audioChannels.add(audio);
+				}
+				
+				ProgramsBO value = new ProgramsBO();
+				value.setNum(num);
+				value.setName(name);
+				value.setVideos(vidoeChannels);
+				value.setAudios(audioChannels);
 				
 				channelSchemePOs.addAll(videoChannelSchemePOs);
 				channelSchemePOs.addAll(audioChannelSchemePOs);
@@ -151,7 +193,7 @@ public class CloudVirtualService {
 				ExtraInfoPO extraInfoPO = new ExtraInfoPO();
 				extraInfoPO.setBundleId(bundlePO.getBundleId());
 				extraInfoPO.setName("program");
-				extraInfoPO.setValue(pro.toString());
+				extraInfoPO.setValue(JSONObject.toJSONString(value));
 				extraInfoPOs.add(extraInfoPO);
 			}
 			channelSchemeDao.save(channelSchemePOs);
@@ -415,7 +457,7 @@ public class CloudVirtualService {
 					if (extraInfoPOs != null && extraInfoPOs.size() >0) {
 						for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
 							if (bundlePO.getBundleId().equals(extraInfoPO.getBundleId())) {
-								bund.put("programs", extraInfoPO.getValue());
+								bund.put("programs", JSONObject.parse(extraInfoPO.getValue()));
 							}
 						}
 					}

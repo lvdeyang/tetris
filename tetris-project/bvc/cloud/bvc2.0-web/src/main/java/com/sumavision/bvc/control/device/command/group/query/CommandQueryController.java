@@ -1051,8 +1051,8 @@ public class CommandQueryController {
 		passByContent.put("uuid", uuid);
 		passByContent.put("userId", userId.toString());
 		passByContent.put("cmd", "search_foreign");
-		passByContent.put("permissionType", permissionType);
-		passByContent.put("roleId", roleId.toString());
+		passByContent.put("permissionType", permissionType==null?"":permissionType);
+		passByContent.put("roleId", roleId==null?"":roleId.toString());
 		
 		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		PassByBO passBy = new PassByBO();
