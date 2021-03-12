@@ -180,7 +180,7 @@ public class CommandUserServiceImpl {
 		}
 		
 		//生成一个16分屏的方案。可以考虑在此生成所有的分屏方案
-		CommandGroupUserLayoutShemePO layoutScheme = generateUserLayoutScheme(userInfo, PlayerSplitLayout.SPLIT_16);
+		CommandGroupUserLayoutShemePO layoutScheme = generateUserLayoutScheme(userInfo, PlayerSplitLayout.SPLIT_4);
 		layoutScheme.setIsUsing(true);
 		layoutScheme.setType(SchemeType.DEFAULT);
 		
