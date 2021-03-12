@@ -122,4 +122,15 @@ public interface OutlandPermissionCheckDao extends CommonDao<OutlandPermissionCh
 			SourceType sourceType,
 			Collection<Long> roleIds);
 	
+	/**
+	 * 查询角色的全部授权<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月12日 上午10:23:25
+	 * @param PermissionType permissionType 权限类型
+	 * @param Long roleId 角色id
+	 * @return List<OutlandPermissionCheckPO> 授权勾选
+	 */
+	public List<OutlandPermissionCheckPO> findByPermissionTypeAndRoleId(PermissionType permissionType, Long roleId);
+	
 }

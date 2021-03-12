@@ -78,10 +78,12 @@ public class OutlandPermissionQuery {
 		JSONObject permissions = new JSONObject();
 		message.put("permissions", permissions);
 		
-		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		//List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findByPermissionTypeAndRoleId(PermissionType.valueOf(permissionType), lRoleId);
 		permissions.put("check", OutlandPermissionCheckVO.getConverter(OutlandPermissionCheckVO.class).convert(outlandPermissionCheckEntities, OutlandPermissionCheckVO.class));
 		
-		List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		//List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findByPermissionTypeAndRoleId(PermissionType.valueOf(permissionType), lRoleId);
 		permissions.put("except", OutlandPermissionExceptVO.getConverter(OutlandPermissionExceptVO.class).convert(outlandPermissionExceptEntities, OutlandPermissionExceptVO.class));
 		
 		return message;
@@ -130,10 +132,12 @@ public class OutlandPermissionQuery {
 		JSONObject permissions = new JSONObject();
 		message.put("permissions", permissions);
 		
-		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		//List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findByPermissionTypeAndRoleId(PermissionType.valueOf(permissionType), lRoleId);
 		permissions.put("check", OutlandPermissionCheckVO.getConverter(OutlandPermissionCheckVO.class).convert(outlandPermissionCheckEntities, OutlandPermissionCheckVO.class));
 		
-		List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		//List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findBySerNodeNamePathAndPermissionTypeAndRoleId(serNodeNamePath, PermissionType.valueOf(permissionType), lRoleId);
+		List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findByPermissionTypeAndRoleId(PermissionType.valueOf(permissionType), lRoleId);
 		permissions.put("except", OutlandPermissionExceptVO.getConverter(OutlandPermissionExceptVO.class).convert(outlandPermissionExceptEntities, OutlandPermissionExceptVO.class));
 		
 		return message;
@@ -288,14 +292,16 @@ public class OutlandPermissionQuery {
 		int exceptLength = 0;
 		if(outlandFolderPermissionCheckEntities!=null && outlandFolderPermissionCheckEntities.size()>0){
 			for(OutlandPermissionCheckPO outlandFolderPermissionCheckEntity:outlandFolderPermissionCheckEntities){
-				if(outlandFolderPermissionCheckEntity.getFolderPath().length() > checkLength){
+				if(outlandFolderPermissionCheckEntity.getPermissionType().equals(permissionType) && 
+						outlandFolderPermissionCheckEntity.getFolderPath().length() > checkLength){
 					checkLength = outlandFolderPermissionCheckEntity.getFolderPath().length();
 				}
 			}
 		}
 		if(outlandFolderPermissionExceptEntities!=null && outlandFolderPermissionExceptEntities.size()>0){
 			for(OutlandPermissionExceptPO outlandFolderPermissionExceptEntity:outlandFolderPermissionExceptEntities){
-				if(outlandFolderPermissionExceptEntity.getFolderPath().length() > exceptLength){
+				if(outlandFolderPermissionExceptEntity.getPermissionType().equals(permissionType) && 
+						outlandFolderPermissionExceptEntity.getFolderPath().length() > exceptLength){
 					exceptLength = outlandFolderPermissionExceptEntity.getFolderPath().length();
 				}
 			}
