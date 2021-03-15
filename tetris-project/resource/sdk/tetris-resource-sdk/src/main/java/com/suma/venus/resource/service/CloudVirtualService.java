@@ -113,7 +113,6 @@ public class CloudVirtualService {
 			channelSchemeDao.deleteByBundleId(bundlePO.getBundleId());
 			extraInfoDao.deleteByBundleId(bundlePO.getBundleId());
 		}
-		UserVO userVO = userQuery.current();
 		bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
 		bundlePO.setBundleType("VenusTerminal");
 		bundlePO.setBundleId(bundleJson.getString("bundleId"));
@@ -123,9 +122,17 @@ public class CloudVirtualService {
 		bundlePO.setDeviceModel("virtualIn");
 		bundlePO.setCoderType(CoderType.DEFAULT);
 		JSONArray programs = bundleJson.getJSONArray("programs");
-		bundleDao.save(bundlePO);
-		createAudioAndVideoChannelIn(bundlePO,programs);
+		//配置权限
+		UserVO userVO = userQuery.current();
+		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
+		List<String> resource = new ArrayList<String>();
+		resource.add(bundlePO.getBundleId() + "-r");
+		RoleAndResourceIdBO bo = new RoleAndResourceIdBO();
+		bo.setRoleId(Long.valueOf(systemRoleVO.getId()));
+		bo.setResourceCodes(resource);
+		userQueryService.bindRolePrivilege(bo);
 		
+		createAudioAndVideoChannelIn(bundlePO,programs);
 		bundleDao.save(bundlePO);
 		
 		return null;
