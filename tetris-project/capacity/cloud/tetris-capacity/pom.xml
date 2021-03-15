@@ -115,10 +115,17 @@
 		</dependency>
 		
 		<!-- eureka依赖 -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>com.google.guava</groupId>
+      				<artifactId>guava</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -128,6 +135,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		
+		<!-- 安全扫描，覆盖29版本 -->
+		 <dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>30.1-jre</version>
 		</dependency>
 
     </dependencies>

@@ -1,6 +1,9 @@
 package com.sumavision.tetris.spring.zuul.auth.filter.thirdpart;
 
+
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
@@ -48,16 +51,29 @@ public class ApiThirdpartLoginFilter extends ZuulFilter{
 			Md5Encoder md5Encoder = SpringContext.getBean(Md5Encoder.class);
 			
 			String zuulCertify = md5Encoder.encode(message);
+			
 			if(!zuulCertify.equals(certify)){
 				System.out.println("certify的md5校验不通过");
 				ctx.setResponseStatusCode(403);
 				ctx.setSendZuulResponse(false);
+				return null;
 			}
 			
 		}catch(Exception e){
 			e.printStackTrace();
 			ctx.setResponseStatusCode(403);
 			ctx.setSendZuulResponse(false);
+		}
+		
+		
+		//TODO
+		//添加 key
+		String requestUri = request.getRequestURI();
+		requestUri =  ctx.getRequest().getRequestURI().replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
+
+		System.out.println(requestUri);
+		if(requestUri.contains("/api/thirdpart/bundleHeartBeat")) {
+			ctx.set(FilterConstants.LOAD_BALANCER_KEY, "resource-heartbeat-" + ctx.getRequest().getRemoteAddr());
 		}
 		
 		return null;

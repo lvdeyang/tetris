@@ -69,12 +69,12 @@ public class BundleHeartBeatService {
 		}
 	}
 
-	public boolean changeOnlineStatus(String bundle_ip, ONLINE_STATUS status) {
+	public synchronized boolean changeOnlineStatus(String bundle_ip, ONLINE_STATUS status) {
 
 		List<BundlePO> bundlePOs = bundleDao.findByDeviceIp(bundle_ip);
 
 		if (CollectionUtils.isEmpty(bundlePOs)) {
-			LOGGER.info("changeOnlineStatus, cannot find bundlePO, return");
+			LOGGER.info("changeOnlineStatus(), cannot find bundlePO, return");
 			return false;
 		}
 
@@ -88,10 +88,13 @@ public class BundleHeartBeatService {
 
 		bundleDao.save(bundlePO);
 
+		LOGGER.info("changeOnlineStatus() save, bundle_ip=" + bundle_ip + ", status=" + status.toString());
+
 		return true;
 
 	}
 
+	
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
 
 		if (bundle_ip == null || "".equals(bundle_ip))
