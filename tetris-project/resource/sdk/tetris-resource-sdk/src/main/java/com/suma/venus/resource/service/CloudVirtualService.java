@@ -85,6 +85,7 @@ public class CloudVirtualService {
 		bundlePO.setCoderType(CoderType.DEFAULT);
 		bundleDao.save(bundlePO);
 		createAudioAndVideoChannelOut(bundlePO,videos,audios);
+		
 		UserVO userVO = userQuery.current();
 		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
 		List<String> resource = new ArrayList<String>();
@@ -538,9 +539,9 @@ public class CloudVirtualService {
 					List<ChannelSchemePO> audios = new ArrayList<ChannelSchemePO>();
 					if (channelSchemePOs != null&& channelSchemePOs.size() > 0) {
 						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("video")) {
+							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusVideoOut")) {
 								videos.add(channelSchemePO);
-							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("audio")) {
+							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusAudioOut")) {
 								audios.add(channelSchemePO);
 							}
 						}
