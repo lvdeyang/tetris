@@ -312,4 +312,87 @@ public class OutlandPermissionQuery {
 		return false;
 	}
 	
+	/**
+	 * 向客户端推送文件夹信息，过滤掉不需要显示的文件夹<br/>
+	 * <p>
+	 *   1.本目录以及子母录以及目录下的设备有勾选（所有权限），目录需要显示<br/>
+	 *   2.目录以及父目录勾选表length>目录以及父目录里外表length，目录需要显示    
+	 * </p>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月8日 下午4:48:19
+	 * @param String userId 用户id
+	 * @param JSONObject message 同 packFolderPermissions参数
+	 */
+	public JSONObject packFolderPrivilege(String userId, JSONObject message) throws Exception{
+		List<SystemRoleVO> roles = businessRoleQuery.findBusinessRoleByUserId(Long.valueOf(userId));
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		if(roleIds.size() <= 0){
+			//当前用户没有权限，将目录清空
+			message.put("institutions", new JSONArray());
+			return message;
+		}
+		
+		String serNodeNamePath = message.getString("serNodeNamePath");
+		
+		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findBySerNodeNamePathAndRoleIdIn(serNodeNamePath, roleIds);
+		List<OutlandPermissionExceptPO> outlandPermissionExceptEntities = outlandPermissionExceptDao.findBySerNodeNamePathAndRoleIdIn(serNodeNamePath, roleIds);
+		
+		JSONArray institutions = message.getJSONArray("institutions");
+		JSONArray filterInstitutions = new JSONArray();
+		if(institutions!=null && institutions.size()>0){
+			for(int i=0; i<institutions.size(); i++){
+				JSONObject institution = institutions.getJSONObject(i);
+				String folderPath = institution.getString("path");
+				boolean hasPrivilege = false;
+				//本目录以及子母录以及目录下的设备有勾选（所有权限），目录需要显示
+				if(outlandPermissionCheckEntities!=null && outlandPermissionCheckEntities.size()>0){
+					for(OutlandPermissionCheckPO outlandPermissionCheckEntity:outlandPermissionCheckEntities){
+						if(outlandPermissionCheckEntity.getFolderPath().startsWith(folderPath)){
+							hasPrivilege = true;
+							break;
+						}
+					}
+				}
+				//目录以及父目录勾选表length>目录以及父目录里外表length，目录需要显示  
+				if(!hasPrivilege){
+					List<String> folderPaths = outlandPermissionService.generateFolderPaths(Arrays.asList(folderPath.split("/")));
+					int checkLength = 0;
+					int exceptLength = 0;
+					if(outlandPermissionCheckEntities!=null && outlandPermissionCheckEntities.size()>0){
+						for(OutlandPermissionCheckPO outlandPermissionCheckEntity:outlandPermissionCheckEntities){
+							if(outlandPermissionCheckEntity.getSourceType().equals(SourceType.FOLDER) && 
+									folderPaths.contains(outlandPermissionCheckEntity.getFolderPath()) && 
+									outlandPermissionCheckEntity.getFolderPath().length() > checkLength){
+								checkLength = outlandPermissionCheckEntity.getFolderPath().length();
+							}
+						}
+					}
+					if(outlandPermissionExceptEntities!=null && outlandPermissionExceptEntities.size()>0){
+						for(OutlandPermissionExceptPO outlandPermissionExceptEntity:outlandPermissionExceptEntities){
+							if(outlandPermissionExceptEntity.getSourceType().equals(SourceType.FOLDER) &&
+									folderPaths.contains(outlandPermissionExceptEntity.getFolderPath()) &&
+									outlandPermissionExceptEntity.getFolderPath().length() > exceptLength){
+								exceptLength = outlandPermissionExceptEntity.getFolderPath().length();
+							}
+						}
+					}
+					if(checkLength > exceptLength){
+						hasPrivilege = true;
+					}
+				}
+				if(hasPrivilege){
+					filterInstitutions.add(institution);
+				}
+			}
+			message.put("institutions", filterInstitutions);
+		}
+		return message;
+	}
+	
 }
