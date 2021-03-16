@@ -122,4 +122,26 @@ public interface OutlandPermissionExceptDao extends CommonDao<OutlandPermissionE
 			SourceType sourceType,
 			Collection<Long> roleIds);
 	
+	/**
+	 * 查询角色的全部授权例外<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月12日 上午10:27:17
+	 * @param PermissionType permissionType 授权类型
+	 * @param Long roleId 角色id
+	 * @return List<OutlandPermissionExceptPO> 授权例外列表
+	 */
+	public List<OutlandPermissionExceptPO> findByPermissionTypeAndRoleId(PermissionType permissionType, Long roleId);
+	
+	/**
+	 * 查询用户在域下的所有授权例外<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月14日 上午9:06:02
+	 * @param String serNodeNamePath 域路径
+	 * @param Collection<Long> roleIds 用户角色列表
+	 * @return List<OutlandPermissionCheckPO> 授权例外列表
+	 */
+	public List<OutlandPermissionExceptPO> findBySerNodeNamePathAndRoleIdIn(String serNodeNamePath, Collection<Long> roleIds);
+	
 }

@@ -1162,6 +1162,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				if("BUNDLE".equals(type)){
 					//向客户端推送设备信息
 					message = outlandPermissionQuery.packDevicePrivilege(userId, message);
+				}else if("FOLDER".equals(type)){
+					//向客户端推送文件夹信息
+					message = outlandPermissionQuery.packFolderPrivilege(userId, message);
 				}
 			}
 			message.put("businessType", "foreignUpdate");
