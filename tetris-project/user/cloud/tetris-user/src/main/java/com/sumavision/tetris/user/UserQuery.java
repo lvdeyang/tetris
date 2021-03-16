@@ -96,7 +96,13 @@ public class UserQuery {
 	
 	/**
 	 * 检验密码复杂度<br/>
-	 * <p>包含数字，字母，长度8~20位</p>
+	 * <p>
+	 * 	1.bvc校验规则：
+	 * 		-包含数字，字母，长度8~20位<br/>
+	 * 	2.华为云校验规则
+	 * 		-密码控制只能输入字母、数字、特殊符号(~!@#$%^&*()_+[]{}|\;:'",./<>?)
+	 *	  	-长度 6-16 位，必须包括字母、数字、特殊符号中的2种
+	 * </p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月24日 下午12:00:45
@@ -104,12 +110,31 @@ public class UserQuery {
 	 * @return boolean 检验结果
 	 */
 	public boolean checkPassword(String password) throws Exception{
-		String check = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z_]{8,20}$";
+		//bvc校验规则
+		/*String check = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z_]{8,20}$";
 		Pattern regex = Pattern.compile(check);
 		Matcher matcher = regex.matcher(password);
 		if(!matcher.matches()){
 			throw new PasswordComplexityException("密码要包含数字，字母，长度8~20位");
+		}*/
+		//华为云校验规则
+		
+		//判断密码是否包含数字：包含返回1，不包含返回0
+		int i = password.matches(".*\\d+.*") ? 1 : 0;
+
+		//判断密码是否包含字母：包含返回1，不包含返回0
+		int j = password.matches(".*[a-zA-Z]+.*") ? 1 : 0;
+
+		//判断密码是否包含特殊符号(~!@#$%^&*()_+|<>,.?/:;'[]{}\)：包含返回1，不包含返回0
+		int k = password.matches(".*[~!@#$%^&*()_+=|<>,.?/:;'\\[\\]{}\"]+.*") ? 1 : 0;
+
+		//判断密码长度是否在6-16位
+		int l = password.length();
+		
+		if(i + j + k<2 || l<6 || l>16) {
+			throw new PasswordComplexityException("密码要包含数字，字母，特殊符号至少2种，长度6~16位");
 		}
+		
 		return true;
 	}
 	
