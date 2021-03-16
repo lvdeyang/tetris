@@ -18,6 +18,8 @@ public interface AbilityInfoSendDAO extends BaseDAO<AbilityInfoSendPO>{
 	
 	public List<AbilityInfoSendPO> findByChannelIdAndAbilityIp(Long channelId, String abilityIp);
 	
+	public List<AbilityInfoSendPO> findByTaskId(String taskId);
+	
 	@Modifying
 	@Query(value = "DELETE FROM TETRIS_CS_SEND_ABILITY_INFO WHERE channel_id = ?1", nativeQuery = true)
 	public void deleteByChannelId(Long channelId);
