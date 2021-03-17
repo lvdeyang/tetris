@@ -16,4 +16,6 @@ public interface CsResourceDAO extends BaseDAO<CsResourcePO>{
 	public List<CsResourcePO> findResourceByChannelIdAndMimsUuid(Long channelId,String mimsUuid);
 	
 	public List<CsResourcePO> findByParentId(Long menuId);
+	
+	public List<CsResourcePO> findByNameAndChannelId(String name,Long channelId);
 }
