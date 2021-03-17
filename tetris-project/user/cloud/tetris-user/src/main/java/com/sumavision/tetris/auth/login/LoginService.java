@@ -287,23 +287,10 @@ public class LoginService {
 		UserVO user = userQuery.current();
 		TokenPO token = tokenDao.findByToken(user.getToken());
 		
-		boolean result = false;
-		if(token != null){
-			try{
-				result = tokenQuery.checkToken(token);
-			}catch(TokenTimeoutException e){
-				result = false;
-			}
-		}
-		if(!result && token!=null){
-			token.newToken();
-			token.setStatus(UserStatus.ONLINE);
-		}else if(!result && token == null){
-			token = new TokenPO();
-			token.setUserId(user.getId());
-			token.newToken();
-			token.setStatus(UserStatus.ONLINE);
-		}
+		token.setToken(null);
+		token.setLastModifyTime(null);
+		token.setStatus(UserStatus.OFFLINE);
+		tokenDao.save(token);
 		try{
 			Date day=new Date();    
 			SimpleDateFormat offLineDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
