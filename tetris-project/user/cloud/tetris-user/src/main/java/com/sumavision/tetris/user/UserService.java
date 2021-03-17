@@ -42,6 +42,7 @@ import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionVO;
 import com.sumavision.tetris.user.event.TouristCreateEvent;
 import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
@@ -417,11 +418,12 @@ public class UserService{
 		
 		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify, remark, loginIp,isLoginIp, bindRoles);
 		
+		List<UserSystemRolePermissionVO> systemRoles = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
 			companyUserPermissionService.add(company, user);
 			//绑定用户和系统角色
-			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(systemRoleId).getList());
+			systemRoles = userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(systemRoleId).getList());
 		}
 		
 		//发布用户注册事件
@@ -432,6 +434,10 @@ public class UserService{
 		bossService.addUser(user.getId());
 		
 		UserVO result = new UserVO().set(user);
+		if(systemRoles!=null && systemRoles.size()>0){
+			result.setCompanyRoleId(systemRoles.get(0).getId())
+				  .setCompanyRoleName(systemRoles.get(0).getRoleName());
+		}
 		List<SystemRoleVO> roles = new ArrayList<SystemRoleVO>();
 		if(bindRoles!=null && !"".equals(bindRoles)){
 			List<Long> roleIds = JSON.parseArray(bindRoles, Long.class);
@@ -775,8 +781,17 @@ public class UserService{
 		
 		if(systemRoleId != null){
 			List<UserSystemRolePermissionPO> oldSystemPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(user.getId(), SystemRoleType.SYSTEM);
-			oldSystemPermissions.get(0).setRoleId(systemRoleId);
-			userSystemRolePermissionDao.save(oldSystemPermissions.get(0));
+			if(oldSystemPermissions!=null && oldSystemPermissions.size()>0){
+				oldSystemPermissions.get(0).setRoleId(systemRoleId);
+				userSystemRolePermissionDao.save(oldSystemPermissions.get(0));
+			}else{
+				UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+				permission.setUserId(user.getId());
+				permission.setRoleId(systemRoleId);
+				permission.setRoleType(SystemRoleType.SYSTEM);
+				permission.setAutoGeneration(false);
+				userSystemRolePermissionDao.save(permission);
+			}
 		}
 		
 		UserVO result = new UserVO().set(user);
