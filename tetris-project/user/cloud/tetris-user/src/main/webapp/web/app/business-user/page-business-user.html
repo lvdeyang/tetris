@@ -151,6 +151,10 @@
                         <el-form-item :label="i18n.labelCreateUserRepeat">
                             <el-input type="password" v-model="dialog.createUser.repeat" :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
                         </el-form-item>
+                        <el-form-item :label="i18n.labelSelectSystemRole">
+                            <el-input readonly v-model="dialog.createUser.company.companyRoleName"
+                                      :placeholder="i18n.placeholderSelectCompanyRole" @focus="selectSystemRole('COMPANY_ADMIN')"></el-input>
+                        </el-form-item>
                         <el-form-item :label="i18n.labelCreateUserMobile">
                             <el-input v-model="dialog.createUser.mobile"></el-input>
                         </el-form-item>
@@ -166,11 +170,6 @@
                         <el-form-item :label="i18n.labelCreateUserCompanyName">
                             <el-input v-model="dialog.createUser.company.name" disabled></el-input>
                         </el-form-item>
-                        <el-form-item :label="i18n.labelSelectSystemRole">
-                            <el-input readonly v-model="dialog.createUser.company.companyRoleName"
-                                      :placeholder="i18n.placeholderSelectCompanyRole" @focus="selectSystemRole('COMPANY_ADMIN')"></el-input>
-                        </el-form-item>
-                    </el-form>
                 </el-scrollbar>
             </div>
 
