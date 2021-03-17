@@ -146,7 +146,7 @@ public class SystemRoleQuery {
 					companyId = Long.valueOf(user.getGroupId());
 				}
 			}
-			if(parsedExceptIds == null){
+			if(parsedExceptIds==null || parsedExceptIds.size()<=0){
 				systemRoleEntities = systemRoleDao.findByTypeAndCreateTypeAndCompanyId(SystemRoleType.SYSTEM, type, companyId);
 			}else{
 				systemRoleEntities = systemRoleDao.findByTypeAndCreateTypeAndCompanyIdAndIdNotIn(SystemRoleType.SYSTEM, type, companyId, parsedExceptIds);

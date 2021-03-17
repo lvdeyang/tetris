@@ -467,12 +467,13 @@ public class UserQuery {
 				}
 				
 				List<UserSystemRolePermissionPO> userSystemRolePermissionPO = userSystemRolePermissionDao.findByUserIdAndRoleType(row.getId(), SystemRoleType.SYSTEM);
-				Long roleId = userSystemRolePermissionPO.get(0).getRoleId();
-				SystemRolePO systemRolePO = systemRoleDao.findByIdAndType(roleId,SystemRoleType.SYSTEM);
-				row.setCompanyRoleId(systemRolePO.getId());
-				row.setCompanyRoleName(systemRolePO.getName());
+				if(userSystemRolePermissionPO!=null && userSystemRolePermissionPO.size()>0){
+					Long roleId = userSystemRolePermissionPO.get(0).getRoleId();
+					SystemRolePO systemRolePO = systemRoleDao.findByIdAndType(roleId,SystemRoleType.SYSTEM);
+					row.setCompanyRoleId(systemRolePO.getId());
+					row.setCompanyRoleName(systemRolePO.getName());
+				}
 				row.setIsGroupCreator(isAdmin);
-				
 			}
 			List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdInAndRoleTypeAndAutoGeneration(userIds, SystemRoleType.BUSINESS, false);
 			if(permissions!=null && permissions.size()>0){
