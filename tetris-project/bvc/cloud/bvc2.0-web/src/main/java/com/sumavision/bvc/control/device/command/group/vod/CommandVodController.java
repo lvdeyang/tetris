@@ -2,6 +2,7 @@ package com.sumavision.bvc.control.device.command.group.vod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,7 +19,12 @@ import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.vod.VodService;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.page.PageTaskDAO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -39,20 +45,30 @@ public class CommandVodController {
 
 	@Autowired
 	private UserUtils userUtils;
+	
+	@Autowired
+	private TerminalBundleUserPermissionDAO terminalBundleUserPermissionDao;
 
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 
 	@Autowired
 	private VodService vodService;
 	
 	@Autowired 
 	private BusinessReturnService businessReturnService;
+	
+	@Autowired 
+	private PageTaskDAO pageTaskDao;
 
 	/**
 	 * 通用方法，指定播放器，播放各种类型的资源<br/>
 	 * <p>
-	 * 通常用于从资源树中拖拽到播放器进行点播
+	 * serial是null的时候会从前往后找一个空闲播放器，找不到就替换最后一个。
+	 * 通常用于从资源树中拖拽（或者双击）到播放器进行点播
 	 * </p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -71,17 +87,41 @@ public class CommandVodController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start/from/player")
-	public Object startFromPlayer(String type, String id, int serial, HttpServletRequest request) throws Exception {
+	public Object startFromPlayer(String type, String id, Integer serial, HttpServletRequest request) throws Exception {
 
 		// throw new BaseException(StatusCode.FORBIDDEN, "请从通讯录发起");
 
 		Long userId = userUtils.getUserIdFromSession(request);
 
 		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			
 			UserBO user = userUtils.queryUserById(userId);
 			UserBO admin = new UserBO();
 			admin.setId(-1L);
-			CommandGroupUserPlayerPO player = null;
+			
+			List<String> dstIds = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(userId.toString(), terminalDao.findByType(TerminalType.QT_ZK).getId())
+					 .stream().map(permisssion-> permisssion.getId().toString()).collect(Collectors.toList());
+			//当前屏幕的所有播放器
+			List<PageTaskPO> taskList = pageTaskDao.findByDstIdIn(dstIds).stream()
+				   .filter(index->{return null==index?false:true;})
+				   .collect(Collectors.toList());
+			
+			//双击情况下找到serial
+			if(serial == null){
+				serial = vodService.findSerial(taskList);
+			}
+			
+			//原有的位置如果被占用，先给关闭
+			PageTaskPO task = null;
+			for(PageTaskPO pageTask : taskList){
+				if(pageTask.getLocationIndex().equals(serial)){
+					task = pageTask;
+				}
+			}
+			if(task != null){
+				vodService.deviceStop(user, Long.valueOf(task.getBusinessId()));
+			}
+			
 			if ("file".equals(type)) {
 				throw new BaseException(StatusCode.FORBIDDEN, "暂不支持");
 			} else if ("user".equals(type)) {
@@ -596,6 +636,31 @@ public class CommandVodController {
 
 		synchronized (new StringBuffer().append(lockUserPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
+			UserBO admin = new UserBO();
+			admin.setId(-1L);
+			
+			List<String> dstIds = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(id.toString(), terminalDao.findByType(TerminalType.QT_ZK).getId())
+					 .stream().map(permisssion-> permisssion.getId().toString()).collect(Collectors.toList());
+			//当前屏幕的所有播放器
+			List<PageTaskPO> taskList = pageTaskDao.findByDstIdIn(dstIds).stream()
+				   .filter(index->{return null==index?false:true;})
+				   .collect(Collectors.toList());
+			
+			//双击情况下找到serial
+			if(serial == null){
+				serial = vodService.findSerial(taskList);
+			}
+			
+			//原有的位置如果被占用，先给关闭
+			PageTaskPO task = null;
+			for(PageTaskPO pageTask : taskList){
+				if(pageTask.getLocationIndex().equals(serial)){
+					task = pageTask;
+				}
+			}
+			if(task != null){
+				vodService.deviceStop(user, Long.valueOf(task.getBusinessId()));
+			}
 			
 			businessReturnService.init(Boolean.TRUE);
 			vodService.foreignDeviceStart(user, bundleName,bundleId, serial, multiAddr, multiSrcIp, isMulticast);
@@ -678,8 +743,6 @@ public class CommandVodController {
 				Long id = userUtils.getUserIdFromSession(request);
 				UserBO user = userUtils.queryUserById(id);
 
-				// UserBO admin =
-				// resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 				UserBO admin = new UserBO();
 				admin.setId(-1L);
 
@@ -689,14 +752,6 @@ public class CommandVodController {
 				return new HashMapWrapper<String, Object>().put("serial", 111)// player.getLocationIndex())
 						.getMap();
 
-				// CommandGroupUserPlayerPO player =
-				// commandVodService.deviceStop(user, businessId, admin);
-				//
-				//// vodService.userStop(businessId);
-				//
-				// return new HashMapWrapper<String, Object>().put("serial",
-				// player.getLocationIndex())
-				// .getMap();
 			}
 		}
 	}
