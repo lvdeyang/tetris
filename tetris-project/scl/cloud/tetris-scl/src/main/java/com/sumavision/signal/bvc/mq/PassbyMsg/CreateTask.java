@@ -302,7 +302,7 @@ public class CreateTask extends AbstractPassbyMsg  {
         BackUpPassByBO backUpPassByBO = new BackUpPassByBO();
 //trigger_list不生成
         backUpPassByBO.setMode("manual");
-        backUpPassByBO.setTrigger_list(new TriggerListBO().setMeida_lost(false).setPlp_high(false).setCutoff(false));
+        backUpPassByBO.setTrigger_list(new TriggerListBO().setMedia_lost(false).setPlp_high(false).setCutoff(false));
         backUpPassByBO.setSelect_index("0");
 
         List<BackUpProgramBO> programPOS = new ArrayList<>();

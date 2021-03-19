@@ -1247,11 +1247,12 @@ public class TranscodeTaskService {
 							break;
 						}
 					}
-					throw new BaseException(StatusCode.FORBIDDEN,"任务输入异常");
 				}
 			}
 
-			if(taskInput != null){
+			if (taskInput == null) {
+				throw new BaseException(StatusCode.FORBIDDEN,"cannot found cover target input");
+			}else{
 
 				String coverUuid = new StringBufferWrapper().append(COVER)
 						.append("-")

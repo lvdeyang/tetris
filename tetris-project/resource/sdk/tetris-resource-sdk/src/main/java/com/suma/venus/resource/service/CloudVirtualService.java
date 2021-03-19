@@ -120,6 +120,9 @@ public class CloudVirtualService {
 		bundlePO.setBundleName(bundleJson.getString("bundleName"));
 		bundlePO.setUrl(bundleJson.getString("url"));
 		bundlePO.setType(bundleJson.getString("type"));
+		if (bundleJson.containsKey("mode")) {
+			bundlePO.setMode(bundleJson.getString("mode"));
+		}
 		bundlePO.setDeviceModel("virtualIn");
 		bundlePO.setCoderType(CoderType.DEFAULT);
 		JSONArray programs = bundleJson.getJSONArray("programs");
