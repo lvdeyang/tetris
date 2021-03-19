@@ -330,7 +330,7 @@ public class CloudVirtualService {
 	public Object outputModify(String bundleName,String type,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setBundleName(bundleName);
-		bundlePO.setUrl(url);
+		bundlePO.setStreamUrl(url);
 		bundlePO.setRateCtrl(rateCtrl);
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setType(type);
