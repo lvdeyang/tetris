@@ -5,6 +5,8 @@ package com.suma.venus.resource.bo;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
+
 /**
  * @author Administrator
  *
@@ -15,9 +17,9 @@ public class ProgramsBO {
 	
 	private String name;
 	
-	private List<VideoChannelBO> videos;
+	private JSONArray videos;
 	
-	private List<AudioChannelBO> audios;
+	private JSONArray audios;
 
 	/**
 	 * @return the num
@@ -50,30 +52,29 @@ public class ProgramsBO {
 	/**
 	 * @return the videos
 	 */
-	public List<VideoChannelBO> getVideos() {
+	public JSONArray getVideos() {
 		return videos;
 	}
 
 	/**
 	 * @param videos the videos to set
 	 */
-	public void setVideos(List<VideoChannelBO> videos) {
+	public void setVideos(JSONArray videos) {
 		this.videos = videos;
 	}
 
 	/**
 	 * @return the audios
 	 */
-	public List<AudioChannelBO> getAudios() {
+	public JSONArray getAudios() {
 		return audios;
 	}
 
 	/**
 	 * @param audios the audios to set
 	 */
-	public void setAudios(List<AudioChannelBO> audios) {
+	public void setAudios(JSONArray audios) {
 		this.audios = audios;
 	}
-	
 	
 }

@@ -1232,8 +1232,9 @@ public class UserService{
 		
 		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
 		if(token != null){
-			token.setLastModifyTime(null);
-			token.setToken(null);
+			//25项目websocket网络波动反复重连，这时不能清除token
+			//token.setLastModifyTime(null);
+			//token.setToken(null);
 			token.setStatus(UserStatus.OFFLINE);
 			tokenDao.save(token);
 		}

@@ -1008,15 +1008,27 @@
                         <span class="icon-plus" style="margin-right:5px; "></span>
                         添加
                     </el-button>
-
                     <el-upload
-                            action=""
+                            action="/cs/schedule/import"
                             :on-change="handleChange"
                             :show-file-list="false"
+                            :headers="myHeaders"
                             :before-upload="handleUploadCommit"
+                            style="display:inline-block"
+                            :data="dialog.editSchedules.importData"
+                            :on-success="handleUploadSuccess"
                             >
-                        <el-button size="small" type="primary" style="margin-right:5px; ">点击上传</el-button>
+                        <el-button size="small" type="primary" >上传节目单</el-button>
                     </el-upload>
+                    <a id="page-schedule-export"></a>
+                    <el-button size="small" type="primary" @click="handleExportCommit()">
+                        <span class="icon-set" style="margin-right:5px;"></span>
+                        导出节目单
+                    </el-button>
+                   <!-- <el-button size="small" type="primary" @click="handleExportCommit()">
+                        <span class="icon-set" style="margin-right:5px;"></span>
+                        导出节目单
+                    </el-button>-->
 
                     <el-button v-if="false" size="small" type="primary" @click="handleDefaultSchedule()">
                         <span class="icon-plus" style="margin-right:5px;"></span>

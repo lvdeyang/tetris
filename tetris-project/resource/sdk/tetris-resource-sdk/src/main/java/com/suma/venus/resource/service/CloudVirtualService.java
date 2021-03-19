@@ -85,6 +85,7 @@ public class CloudVirtualService {
 		bundlePO.setCoderType(CoderType.DEFAULT);
 		bundleDao.save(bundlePO);
 		createAudioAndVideoChannelOut(bundlePO,videos,audios);
+		
 		UserVO userVO = userQuery.current();
 		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
 		List<String> resource = new ArrayList<String>();
@@ -185,6 +186,18 @@ public class CloudVirtualService {
 					vidoeChannels.add(video);
 				}
 				
+				for(int j = 0 ; j < videoChannelSchemePOs.size() ; j++){
+					JSONObject videoObject = videos.getJSONObject(j);
+					videoObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					videoObject.put("baseType", "VenusVidioIn");
+				}
+				
+				for(int j = 0 ; j < audioChannelSchemePOs.size() ; j++){
+					JSONObject audioObject = audios.getJSONObject(j);
+					audioObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					audioObject.put("baseType", "VenusVidioIn");
+				}
+				
 				for(ChannelSchemePO audioScheme : audioChannelSchemePOs){
 					AudioChannelBO audio = new AudioChannelBO();
 					audio.setBaseType("VenusAudioIn");
@@ -198,8 +211,8 @@ public class CloudVirtualService {
 				ProgramsBO value = new ProgramsBO();
 				value.setNum(num);
 				value.setName(name);
-				value.setVideos(vidoeChannels);
-				value.setAudios(audioChannels);
+				value.setVideos(videos);
+				value.setAudios(audios);
 				values.add(value);
 				
 				channelSchemePOs.addAll(videoChannelSchemePOs);
@@ -317,7 +330,7 @@ public class CloudVirtualService {
 	public Object outputModify(String bundleName,String type,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setBundleName(bundleName);
-		bundlePO.setUrl(url);
+		bundlePO.setStreamUrl(url);
 		bundlePO.setRateCtrl(rateCtrl);
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setType(type);
@@ -538,9 +551,9 @@ public class CloudVirtualService {
 					List<ChannelSchemePO> audios = new ArrayList<ChannelSchemePO>();
 					if (channelSchemePOs != null&& channelSchemePOs.size() > 0) {
 						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("video")) {
+							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusVideoOut")) {
 								videos.add(channelSchemePO);
-							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("audio")) {
+							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusAudioOut")) {
 								audios.add(channelSchemePO);
 							}
 						}
