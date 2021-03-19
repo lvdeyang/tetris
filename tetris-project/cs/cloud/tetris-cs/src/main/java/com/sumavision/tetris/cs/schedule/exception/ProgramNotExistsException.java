@@ -13,7 +13,7 @@ public class ProgramNotExistsException extends BaseException{
 	private static final Logger LOG = LoggerFactory.getLogger(ProgramNotExistsException.class);
 	
 	public ProgramNotExistsException(String name) {
-		super(StatusCode.NOTFOUND, "节目不存在或未添加资源");
+		super(StatusCode.NOTFOUND, "节目不存在或未添加资源"+name);
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("节目:")
 				.append(name)
