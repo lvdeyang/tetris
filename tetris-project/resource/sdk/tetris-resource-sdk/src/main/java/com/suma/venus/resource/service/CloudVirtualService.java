@@ -186,6 +186,18 @@ public class CloudVirtualService {
 					vidoeChannels.add(video);
 				}
 				
+				for(int j = 0 ; j < videoChannelSchemePOs.size() ; j++){
+					JSONObject videoObject = videos.getJSONObject(j);
+					videoObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					videoObject.put("baseType", "VenusVidioIn");
+				}
+				
+				for(int j = 0 ; j < audioChannelSchemePOs.size() ; j++){
+					JSONObject audioObject = audios.getJSONObject(j);
+					audioObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					audioObject.put("baseType", "VenusVidioIn");
+				}
+				
 				for(ChannelSchemePO audioScheme : audioChannelSchemePOs){
 					AudioChannelBO audio = new AudioChannelBO();
 					audio.setBaseType("VenusAudioIn");
@@ -199,8 +211,8 @@ public class CloudVirtualService {
 				ProgramsBO value = new ProgramsBO();
 				value.setNum(num);
 				value.setName(name);
-				value.setVideos(vidoeChannels);
-				value.setAudios(audioChannels);
+				value.setVideos(videos);
+				value.setAudios(audios);
 				values.add(value);
 				
 				channelSchemePOs.addAll(videoChannelSchemePOs);
@@ -318,7 +330,7 @@ public class CloudVirtualService {
 	public Object outputModify(String bundleName,String type,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setBundleName(bundleName);
-		bundlePO.setUrl(url);
+		bundlePO.setStreamUrl(url);
 		bundlePO.setRateCtrl(rateCtrl);
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setType(type);
