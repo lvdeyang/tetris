@@ -14,6 +14,7 @@ import com.suma.venus.resource.pojo.OutlandPermissionCheckPO;
 import com.suma.venus.resource.pojo.OutlandPermissionExceptPO;
 import com.suma.venus.resource.pojo.PermissionType;
 import com.suma.venus.resource.pojo.SourceType;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Service
@@ -37,6 +38,7 @@ public class OutlandPermissionService {
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
 	 * @param String deviceId 设备id
+	 * @param String name 文件夹/设备名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -45,6 +47,7 @@ public class OutlandPermissionService {
 			String serNodeNamePath,
 			String folderPath,
 			String deviceId,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
@@ -53,6 +56,7 @@ public class OutlandPermissionService {
 		permissionCheck.setSerNodeNamePath(serNodeNamePath);
 		permissionCheck.setFolderPath(folderPath);
 		permissionCheck.setDeviceId(deviceId);
+		permissionCheck.setName(name);
 		permissionCheck.setPermissionType(PermissionType.valueOf(permissionType));
 		permissionCheck.setSourceType(SourceType.DEVICE);
 		permissionCheck.setRoleId(roleId);
@@ -76,6 +80,7 @@ public class OutlandPermissionService {
 	 * <b>日期：</b>2021年3月8日 下午4:27:54
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
+	 * @param String name 目录名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -83,6 +88,7 @@ public class OutlandPermissionService {
 	public void addFolderPermission(
 			String serNodeNamePath,
 			String folderPath,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
@@ -118,6 +124,7 @@ public class OutlandPermissionService {
 		OutlandPermissionCheckPO permissionCheckEntity = new OutlandPermissionCheckPO();
 		permissionCheckEntity.setSerNodeNamePath(serNodeNamePath);
 		permissionCheckEntity.setFolderPath(folderPath);
+		permissionCheckEntity.setName(name);
 		permissionCheckEntity.setPermissionType(PermissionType.valueOf(permissionType));
 		permissionCheckEntity.setSourceType(SourceType.FOLDER);
 		permissionCheckEntity.setRoleId(roleId);
@@ -136,6 +143,7 @@ public class OutlandPermissionService {
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
 	 * @param String deviceId 设备id
+	 * @param String name 设备名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -144,6 +152,7 @@ public class OutlandPermissionService {
 			String serNodeNamePath,
 			String folderPath,
 			String deviceId,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
@@ -182,6 +191,7 @@ public class OutlandPermissionService {
 			outlandPermissionExceptEntity.setSerNodeNamePath(serNodeNamePath);
 			outlandPermissionExceptEntity.setFolderPath(folderPath);
 			outlandPermissionExceptEntity.setDeviceId(deviceId);
+			outlandPermissionExceptEntity.setName(name);
 			outlandPermissionExceptEntity.setPermissionType(PermissionType.valueOf(permissionType));
 			outlandPermissionExceptEntity.setSourceType(SourceType.DEVICE);
 			outlandPermissionExceptEntity.setRoleId(roleId);
@@ -204,6 +214,7 @@ public class OutlandPermissionService {
 	 * <b>日期：</b>2021年3月8日 下午4:34:34
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
+	 * @param String name 目录名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -211,6 +222,7 @@ public class OutlandPermissionService {
 	public void removeFolderPermission(
 			String serNodeNamePath,
 			String folderPath,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
@@ -271,6 +283,7 @@ public class OutlandPermissionService {
 			OutlandPermissionExceptPO outlandPermissionExceptEntity = new OutlandPermissionExceptPO();
 			outlandPermissionExceptEntity.setSerNodeNamePath(serNodeNamePath);
 			outlandPermissionExceptEntity.setFolderPath(folderPath);
+			outlandPermissionExceptEntity.setName(name);
 			outlandPermissionExceptEntity.setPermissionType(PermissionType.valueOf(permissionType));
 			outlandPermissionExceptEntity.setSourceType(SourceType.FOLDER);
 			outlandPermissionExceptEntity.setRoleId(roleId);
@@ -313,11 +326,14 @@ public class OutlandPermissionService {
 	 * @return List<String> 所有父目录路径列表   如上例返回[/a,/a/b,/a/b/c]
 	 */
 	public List<String> generateFolderPaths(List<String> folderIds) throws Exception{
+		if(!"".equals(folderIds.get(0))){
+			folderIds = new ArrayListWrapper<String>().add("").addAll(folderIds).getList();
+		}
 		List<String> parentFolderPaths = new ArrayList<String>();
 		int folderPathNum = folderIds.size() - 1;
 		for(int i=1; i<folderPathNum+1; i++){
 			StringBufferWrapper path = new StringBufferWrapper();
-			for(int j=1; j<i+1; j++){
+			for(int j=1; j<=i; j++){
 				path.append("/").append(folderIds.get(j));
 			}
 			parentFolderPaths.add(path.toString());
