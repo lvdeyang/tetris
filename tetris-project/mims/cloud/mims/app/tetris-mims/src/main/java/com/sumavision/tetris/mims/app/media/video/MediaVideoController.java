@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -30,6 +32,9 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.tag.TagService;
+import com.sumavision.tetris.mims.app.media.tag.TagsExcelModel;
+import com.sumavision.tetris.mims.app.media.tag.exception.UserHasNoGroupException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatchException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
@@ -65,6 +70,9 @@ public class MediaVideoController {
 	
 	@Autowired
 	private MediaVideoDAO mediaVideoDao;
+	
+	@Autowired
+	private TagService tagService;
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -601,6 +609,28 @@ public class MediaVideoController {
 																		 .getMap();
 		
 		return result;
+	}
+	
+	/**
+	 * 批量绑定视频媒资标签<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月17日 下午3:35:31
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/import")
+	public Object importVideoTags(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		
+		UserVO user = userQuery.current();
+		if (user.getGroupId() == null) throw new UserHasNoGroupException(user.getNickname());
+		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request);
+		//读取excel
+		List<TagsExcelModel> list = EasyExcel.read(multipartRequest.getInputStream("file"),TagsExcelModel.class,null).sheet(0).doReadSync();
+		
+		tagService.handleVideoImport(user,list);
+		return "";
+		
 	}
 	
 }
