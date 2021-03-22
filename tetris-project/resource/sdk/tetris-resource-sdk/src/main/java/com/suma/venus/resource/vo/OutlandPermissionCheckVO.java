@@ -11,6 +11,8 @@ public class OutlandPermissionCheckVO extends AbstractBaseVO<OutlandPermissionCh
 	
 	private String deviceId;
 	
+	private String name;
+	
 	private String permissionType;
 	
 	private String permissionTypeName;
@@ -45,6 +47,15 @@ public class OutlandPermissionCheckVO extends AbstractBaseVO<OutlandPermissionCh
 
 	public OutlandPermissionCheckVO setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+		return this;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public OutlandPermissionCheckVO setName(String name) {
+		this.name = name;
 		return this;
 	}
 
@@ -99,6 +110,7 @@ public class OutlandPermissionCheckVO extends AbstractBaseVO<OutlandPermissionCh
 			.setSerNodeNamePath(entity.getSerNodeNamePath())
 			.setFolderPath(entity.getFolderPath())
 			.setDeviceId(entity.getDeviceId())
+			.setName(entity.getName())
 			.setPermissionType(entity.getPermissionType().toString())
 			.setPermissionTypeName(entity.getPermissionType().getName())
 			.setSourceType(entity.getSourceType().toString())

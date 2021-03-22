@@ -24,6 +24,9 @@ public class OutlandPermissionCheckPO extends CommonPO<OutlandPermissionCheckPO>
 	/** 设备id */
 	private String deviceId;
 	
+	/** 文件夹/设备名称 */
+	private String name;
+	
 	/** 权限类型 */
 	private PermissionType permissionType;
 	
@@ -59,6 +62,14 @@ public class OutlandPermissionCheckPO extends CommonPO<OutlandPermissionCheckPO>
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Enumerated(value = EnumType.STRING)

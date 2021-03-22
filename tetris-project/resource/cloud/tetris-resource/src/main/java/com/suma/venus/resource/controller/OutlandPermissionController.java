@@ -33,6 +33,7 @@ public class OutlandPermissionController {
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
 	 * @param String deviceId 设备id
+	 * @param String name 设备名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -43,10 +44,11 @@ public class OutlandPermissionController {
 			String serNodeNamePath,
 			String folderPath,
 			String deviceId,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
-		outlandPermissionService.addDevicePermission(serNodeNamePath, folderPath, deviceId, permissionType, roleId);
+		outlandPermissionService.addDevicePermission(serNodeNamePath, folderPath, deviceId, name, permissionType, roleId);
 		return null;
 	}
 	
@@ -63,6 +65,7 @@ public class OutlandPermissionController {
 	 * <b>日期：</b>2021年3月8日 下午4:27:54
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
+	 * @param String name 目录名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -72,10 +75,11 @@ public class OutlandPermissionController {
 	public Object addFolderPermission(
 			String serNodeNamePath,
 			String folderPath,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
-		outlandPermissionService.addFolderPermission(serNodeNamePath, folderPath, permissionType, roleId);
+		outlandPermissionService.addFolderPermission(serNodeNamePath, folderPath, name, permissionType, roleId);
 		return null;
 	}
 	
@@ -91,6 +95,7 @@ public class OutlandPermissionController {
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
 	 * @param String deviceId 设备id
+	 * @param String name 设备名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -101,10 +106,11 @@ public class OutlandPermissionController {
 			String serNodeNamePath,
 			String folderPath,
 			String deviceId,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
-		outlandPermissionService.removeDevicePermission(serNodeNamePath, folderPath, deviceId, permissionType, roleId);
+		outlandPermissionService.removeDevicePermission(serNodeNamePath, folderPath, deviceId, name, permissionType, roleId);
 		return null;
 	}
 	
@@ -122,6 +128,7 @@ public class OutlandPermissionController {
 	 * <b>日期：</b>2021年3月8日 下午4:34:34
 	 * @param String serNodeNamePath 域路径
 	 * @param String folderPath 目录路径
+	 * @param String name 目录名称
 	 * @param String permissionType 权限类型
 	 * @param Long roleId 角色id
 	 */
@@ -131,10 +138,11 @@ public class OutlandPermissionController {
 	public Object removeFolderPermission(
 			String serNodeNamePath,
 			String folderPath,
+			String name,
 			String permissionType,
 			Long roleId) throws Exception{
 		
-		outlandPermissionService.removeFolderPermission(serNodeNamePath, folderPath, permissionType, roleId);
+		outlandPermissionService.removeFolderPermission(serNodeNamePath, folderPath, name, permissionType, roleId);
 		return null;
 	}
 	
