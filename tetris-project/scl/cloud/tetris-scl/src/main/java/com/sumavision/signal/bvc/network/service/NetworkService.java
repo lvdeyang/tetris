@@ -1,42 +1,15 @@
 package com.sumavision.signal.bvc.network.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
-import com.mysql.fabric.Response;
 import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
 import com.sumavision.signal.bvc.entity.enumeration.ChannelType;
-import com.sumavision.signal.bvc.entity.enumeration.DstType;
 import com.sumavision.signal.bvc.entity.enumeration.Jv210Param;
-import com.sumavision.signal.bvc.entity.enumeration.TaskStatus;
-import com.sumavision.signal.bvc.entity.po.PortMappingPO;
-import com.sumavision.signal.bvc.entity.po.TaskPO;
-import com.sumavision.signal.bvc.entity.po.TerminalBindRepeaterPO;
 import com.sumavision.signal.bvc.http.HttpAsyncClient;
 import com.sumavision.signal.bvc.http.HttpClient;
 import com.sumavision.signal.bvc.mq.ProcessReceivedMsg;
-import com.sumavision.signal.bvc.mq.bo.BaseParamBO;
-import com.sumavision.signal.bvc.mq.bo.BundleBO;
-import com.sumavision.signal.bvc.mq.bo.ChannelBO;
-import com.sumavision.signal.bvc.mq.bo.PassbyBO;
-import com.sumavision.signal.bvc.mq.bo.RectBO;
-import com.sumavision.signal.bvc.mq.bo.ScreenBO;
-import com.sumavision.signal.bvc.mq.bo.SourceBO;
-import com.sumavision.signal.bvc.network.bo.CreateInputResponseBO;
-import com.sumavision.signal.bvc.network.bo.CreateOutputResponseBO;
-import com.sumavision.signal.bvc.network.bo.CutSwitchResponseBO;
-import com.sumavision.signal.bvc.network.bo.InputChannelBO;
-import com.sumavision.signal.bvc.network.bo.NetBundleBO;
-import com.sumavision.signal.bvc.network.bo.SwitchRequestBO;
-import com.sumavision.signal.bvc.network.bo.SwitchResponseBO;
+import com.sumavision.signal.bvc.mq.bo.*;
+import com.sumavision.signal.bvc.network.bo.*;
 import com.sumavision.signal.bvc.network.dao.NetworkInputDAO;
 import com.sumavision.signal.bvc.network.dao.NetworkMapDAO;
 import com.sumavision.signal.bvc.network.dao.NetworkOutputDAO;
@@ -47,6 +20,12 @@ import com.sumavision.signal.bvc.resource.util.ResourceQueryUtil;
 import com.sumavision.signal.bvc.terminal.TerminalParam;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class NetworkService {
