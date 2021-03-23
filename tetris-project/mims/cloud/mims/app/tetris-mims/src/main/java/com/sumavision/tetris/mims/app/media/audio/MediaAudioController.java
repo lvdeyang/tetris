@@ -5,23 +5,31 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.boss.MediaType;
 import com.sumavision.tetris.mims.app.boss.QdBossService;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -31,6 +39,7 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioCannotMatchException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorBeginOffsetException;
@@ -41,7 +50,11 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErro
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeDAO;
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
 import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
+import com.sumavision.tetris.mims.app.media.tag.TagService;
+import com.sumavision.tetris.mims.app.media.tag.TagsExcelModel;
+import com.sumavision.tetris.mims.app.media.tag.exception.UserHasNoGroupException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -79,6 +92,12 @@ public class MediaAudioController {
 	
 	@Autowired
 	QdBossService bossService;
+
+	@Autowired
+	private TagService tagService;
+	
+	@Autowired
+	private Path projectPath;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -818,5 +837,141 @@ public class MediaAudioController {
 		return audioVOs;
 	}
 	
+	/**
+	 * 批量绑定音频媒资标签<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月17日 下午3:35:31
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/import")
+	public Object importAudioTags(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		
+		UserVO user = userQuery.current();
+		if (user.getGroupId() == null) throw new UserHasNoGroupException(user.getNickname());
+		
+		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request);
+		//读取excel
+		List<TagsExcelModel> list = EasyExcel.read(multipartRequest.getInputStream("file"),TagsExcelModel.class,null).sheet(0).doReadSync();
+		
+		tagService.handleAudioImport(user,list);
+		return "";
+		
+	}
+	
+	
+	/**
+	 * 关联音频媒资<br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月19日 下午4:07:43
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/batch/upload/{folderId}")
+	public Object batchUploadAudio(@PathVariable Long folderId,HttpServletRequest request,String path) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		FTPClient ftp = new FTPClient();
+		
+		int reply;
+		//连接FTP服务器
+		ftp.connect("192.165.58.123", 21);
+		ftp.login("test", "123");//登录
+		ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+		ftp.enterLocalPassiveMode();
+		ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+		ftp.setControlEncoding("utf-8");
+		ftp.setBufferSize(1024*1024*10);
+		
+		reply = ftp.getReplyCode();
+		if (!FTPReply.isPositiveCompletion(reply)) {
+			ftp.disconnect();
+		}
+		
+		//获取媒资所在路径
+		//String fullPath = "/upload/tmp/sumavision";
+		String fullPath = path;
+		String webappPath = projectPath.webappPath();
+		
+		if(ftp.changeWorkingDirectory(fullPath)){
+			System.out.println("切换目录成功");
+		}
+		//String pwd = ftp.printWorkingDirectory();
+		
+		FTPFile[] media = ftp.listFiles();
+		media[0].getType();
+		//遍历媒资
+		for(int i=0;i<media.length;i++){
+			System.out.println(media[i].getName());
+			MediaAudioPO entity = new MediaAudioPO();
+			entity.setName(media[i].getName());
+			entity.setFileName(media[i].getName());
+			entity.setSize(media[i].getSize());
+			entity.setMimetype("");
+			entity.setPreviewUrl(new StringBufferWrapper()
+					.append(fullPath)
+					.append("/")
+					.append(media[i].getName())
+					.toString());
+			entity.setUploadTmpPath(new StringBufferWrapper()
+					.append(webappPath)
+					.append("ROOT/")
+					.append(fullPath)
+					.append("/")
+					.append(media[i].getName())
+					.toString());
+			entity.setUploadStatus(UploadStatus.COMPLETE);
+			entity.setStoreType(StoreType.LOCAL);
+			entity.setDownloadCount(0l);
+			entity.setFolderId(folderId);
+			entity.setAuthorId(user.getUuid());
+			entity.setAuthorName(user.getNickname());
+			entity.setUpdateTime(new Date());
+			
+			mediaAudioDao.save(entity);
+		}
+		ftp.disconnect();
+		return "";
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/path")
+	public Object getPath(String path) throws Exception{
+		FTPClient ftp = new FTPClient();
+		
+		int reply;
+		ftp.connect("192.165.58.123", 21);
+		ftp.login("test", "123");//登录
+		ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+		ftp.enterLocalPassiveMode();
+		ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+		ftp.setControlEncoding("utf-8");
+		ftp.setBufferSize(1024*1024*10);
+		
+		reply = ftp.getReplyCode();
+		if (!FTPReply.isPositiveCompletion(reply)) {
+			ftp.disconnect();
+		}
+		
+		// 获取当前工作目录
+		String pwd = ftp.printWorkingDirectory();
+		//获取目录下文件夹
+		List<String> directoryList = new ArrayList<>();
+		FTPFile[] ftpFile = ftp.listDirectories();
+		for(int i=0;i<ftpFile.length;i++){
+			System.out.println(ftpFile[i].getName());
+			directoryList.add(ftpFile[i].getName());
+		}
+		
+		
+		return "";
+	}
+	
+
+
 	
 }

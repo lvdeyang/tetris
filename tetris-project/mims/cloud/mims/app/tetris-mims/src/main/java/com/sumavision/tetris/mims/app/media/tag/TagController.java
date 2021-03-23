@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.tag;
 
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,4 +77,5 @@ public class TagController {
 		
 		return tagQuery.getTagTree(user);
 	}
+
 }

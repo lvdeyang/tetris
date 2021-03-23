@@ -167,6 +167,8 @@ public class CommandSplitController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		synchronized (new StringBuffer().append(lockUserPrefix).append(userId).toString().intern()) {
+			
+			businessReturnService.init(false);
 			commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
 			
 			return null;

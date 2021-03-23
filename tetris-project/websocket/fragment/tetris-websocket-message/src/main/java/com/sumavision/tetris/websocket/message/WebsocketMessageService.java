@@ -205,7 +205,7 @@ public class WebsocketMessageService {
 				try{
 					SessionQueue queue = SessionQueue.getInstance();
 					Session session = queue.get(userId);
-					if(session != null){
+					if(session!=null && session.isOpen()){
 						session.getBasicRemote().sendText(message);
 						messageEntity.setConsumed(true);
 						websocketMessageDao.save(messageEntity);

@@ -1,6 +1,8 @@
 package com.sumavision.tetris.cs.schedule;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -11,11 +13,23 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.api.ApiServerScheduleCastVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
+import com.sumavision.tetris.cs.menu.CsResourceDAO;
+import com.sumavision.tetris.cs.menu.CsResourcePO;
+import com.sumavision.tetris.cs.menu.CsResourceQuery;
+import com.sumavision.tetris.cs.program.ProgramDAO;
+import com.sumavision.tetris.cs.program.ProgramPO;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenDAO;
+import com.sumavision.tetris.cs.program.ScreenPO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
+import com.sumavision.tetris.cs.schedule.exception.ProgramNotExistsException;
+import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
@@ -51,6 +65,15 @@ public class ScheduleService {
 	
 	@Autowired
 	private BroadTerminalBroadInfoDAO broadTerminalBroadInfoDao;
+	
+	@Autowired
+	private CsResourceDAO csSourceDao;
+	
+	@Autowired
+	private ScreenDAO screenDao;
+
+	@Autowired
+	private ProgramDAO programDao;
 	
 	/**
 	 * 添加排期<br/>
@@ -401,5 +424,105 @@ public class ScheduleService {
 		}
 		
 		return scheduleVOs;
+	}
+	
+	
+	public void importSchedule(List<ScheduleExcelModel> scheduleList,Long channelId) throws Exception{
+		
+		List<ScheduleExcelModel> scheduleListCopy = new ArrayList<ScheduleExcelModel>();
+		scheduleListCopy.addAll(scheduleList);
+		//遍历解析后的节目单
+		for (ScheduleExcelModel schedule : scheduleList) {
+			//解析节目单获取的排期开始时间
+			if(schedule.getScheduleDate()!=null){
+				//分割日期时间字符串获取日期
+				String broadDate = schedule.getScheduleDate();
+				String broadDates[] = broadDate.split(" ");
+				//新建排期,获取排期id
+				SchedulePO schedulePO = addToPO(channelId, broadDate,"","");
+				Long scheduleId = schedulePO.getId();
+				List<ScreenPO> screenPOList = new ArrayList<ScreenPO>();
+				//遍历节目单，添加节目
+				int count = 1;
+				for (int i = 1;i<scheduleListCopy.size();i++){
+					Long programId = 0l;
+					//遍历属于当前排期的节目
+					if(scheduleListCopy.get(i).getScheduleDate()==null){
+						//新建program
+						ProgramPO program =  programDao.findByScheduleId(scheduleId);
+						if (program == null) {
+							program = new ProgramPO();
+							program.setUpdateTime(new Date());
+							program.setScheduleId(scheduleId);
+						}
+						program.setScreenNum(1l);
+						program.setScreenId(1l);
+						program.setOrient("horizontal");
+						programDao.save(program);
+						programId = program.getId();
+						//获取节目名
+						String programName = scheduleListCopy.get(i).getProgramName();
+						//拼接日期获得完整开始结束时间
+						Date startTime=null;
+						Date endTime=null;
+						if(scheduleListCopy.get(i).getpStartTime()!=null||scheduleListCopy.get(i).getpEndTime()!=null){
+							String fullStartTime = broadDates[0]+" "+scheduleListCopy.get(i).getpStartTime();
+							String fullendTime = broadDates[0]+" "+scheduleListCopy.get(i).getpEndTime();
+							
+							SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							startTime = time.parse(fullStartTime);
+							endTime = time.parse(fullendTime);
+						}
+						//根据节目名和频道id查询媒资目录，获取节目信息
+						List<CsResourcePO> resourcePOs = csSourceDao.findByNameAndChannelId(programName, channelId);
+						if(resourcePOs.size()==0){
+							//节目不存在抛异常
+							throw new ProgramNotExistsException(programName);
+						}else{
+							ScreenPO screenPO = new ScreenPO();
+							screenPO.setName(programName);
+							screenPO.setUpdateTime(new Date());
+							screenPO.setScreenIndex((long)count);
+							screenPO.setSerialNum(1l);
+							screenPO.setDuration(resourcePOs.get(0).getDuration());
+							screenPO.setMimsUuid(resourcePOs.get(0).getMimsUuid());
+							screenPO.setPreviewUrl(resourcePOs.get(0).getPreviewUrl());
+							screenPO.setSize(resourcePOs.get(0).getSize());
+							screenPO.setProgramId(programId);
+							screenPO.setType(resourcePOs.get(0).getType());
+							screenPO.setMimetype(resourcePOs.get(0).getMimetype());
+							screenPO.setIsRequired(false);
+							screenPO.setStartTime(startTime);
+							screenPO.setEndTime(endTime);
+							if("VIDEO".equals(screenPO.getType())){
+								screenPO.setContentType("视频资源");
+							}else if("AUDIO".equals(screenPO.getType())){
+								screenPO.setContentType("音频资源");
+							}
+							screenPOList.add(screenPO);
+							count++;
+						}
+						if(i+1==scheduleListCopy.size()){
+							//最后一个排期
+							if(screenPOList.size()>0){
+								screenDao.saveAll(screenPOList);
+								screenPOList.clear();
+								break;
+							}
+						}
+					}else{
+						if(screenPOList.size()>0){
+							//保存当前排期下的节目单
+							screenDao.saveAll(screenPOList);
+							screenPOList.clear();
+							break;
+						}
+					}
+				}
+				for(int j = 0;j<count;j++){
+					scheduleListCopy.remove(0);
+				}
+			}
+		}	
 	}
 }

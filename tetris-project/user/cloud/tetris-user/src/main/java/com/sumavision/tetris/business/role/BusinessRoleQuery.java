@@ -221,4 +221,23 @@ public class BusinessRoleQuery {
 		return null;
 	}
 	
+	/**
+	 * 查询用户的业务角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月10日 上午9:48:20
+	 * @param Long userId 用户id
+	 * @return List<SystemRoleVO> 业务角色列表
+	 */
+	public List<SystemRoleVO> findBusinessRoleByUserId(Long userId) throws Exception{
+		List<SystemRolePO> businessRoleEntities = systemRoleDao.findByUserIdAndType(userId, SystemRoleType.BUSINESS.toString());
+		List<SystemRoleVO> businessRoles = new ArrayList<SystemRoleVO>();
+		if(businessRoleEntities!=null && businessRoleEntities.size()>0){
+			for(SystemRolePO entity:businessRoleEntities){
+				businessRoles.add(new SystemRoleVO().set(entity));
+			}
+		}
+		return businessRoles;
+	}
+	
 }

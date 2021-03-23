@@ -1,0 +1,429 @@
+<div id="page-dispatch-control-wrapper" class="page-wrapper">
+
+    <bvc-headerbar :sysusername="user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:10px;">
+                <el-row :gutter="10" >
+                    <el-col :span="4">
+                        <el-card class="box-card" shadow="never" style="height: 800px;">
+                            <div slot="header" class="clearfix">
+                                <span>信源</span>
+                                <div class="action-buttons" style="float: right;">
+                                    <el-button  type="text" @click="addSourceGroupBtnClick">添加站点</el-button>
+                                </div>
+                            </div>
+                            <!--源列表-->
+                            <el-tree :data="sourceGroups" :props="sourceProps" @node-click="handleNodeClick"
+                                     highlight-current
+                                     default-expand-all
+                                     style="min-width: 20px;width:14%;">
+                                <span class="custom-tree-node"  slot-scope="{node,data}">
+                                    <template v-if="node.level===1">
+                                        <el-row >
+                                            <el-col :span="18" style="margin-top: 10px" >{{data.name}}</el-col>
+                                            <el-col :span="6">
+                                                <el-tooltip class="item" effect="dark" content="添加信源" placement="bottom-end">
+                                                    <el-button  type="text"  style="font-size:18px;" icon="el-icon-circle-plus-outline" @click.stop="sourceDetailBtnClick(data)"></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip style="margin-left:3px;" class="item" effect="dark" content="删除站点" placement="bottom-end">
+                                                    <el-button type="text"  style="font-size:18px;" icon="el-icon-remove-outline" @click.stop="deleteSourceGroupBtnClick(data)"></el-button>
+                                                </el-tooltip>
+                                            </el-col>
+                                        </el-row>
+                                    </template>
+                                    <template v-else>
+                                        <el-row  >
+                                            <el-col :span="18" style="margin-top: 8px">
+                                                <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}</div>
+                                                <template v-if="data.url!==undefined && data.url.length>27">
+                                                    <el-tooltip class="item" effect="light" :content="data.url" placement="bottom">
+                                                        <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url.substring(0,27)}}...</div>
+                                                    </el-tooltip>
+                                                </template>
+                                                <template v-else>
+                                                      <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
+                                                </template>
+
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-tooltip class="item" effect="dark" content="信源调度" placement="bottom-end">
+                                                     <el-button style="font-size:16px;" icon="el-icon-upload2" type="text" @click="transferSourceBtnClick(data)"></el-button>
+                                                 </el-tooltip>
+                                                 <el-button style="font-size:16px;" icon="el-icon-delete" type="text" @click="deleteSourceBtnClick(data)"></el-button>
+                                            </el-col>
+                                        </el-row>
+                                    </template>
+                                </span>
+                            </el-tree>
+
+                        </el-card>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-card class="box-card" shadow="never">
+                            <div slot="header" class="clearfix" style="margin-bottom: 10px;">
+                                <span>预览</span>
+                                <div style="float:right;">
+                                    <el-button  icon="el-icon-view" round>开始预览</el-button>
+                                    <el-button  round>新建导播任务</el-button>
+                                    <el-button  round>进入导播台</el-button>
+                                </div>
+                            </div>
+                            <div class="preview-video">
+                                <el-row :gutter="10">
+                                    <el-col :span="8" v-for="o in 9" :key="o" class="text item" :offset="0" style="margin-bottom:20px">
+                                        <el-card :body-style="{padding: '0px',height:'240px'}" align="middle" shadow="never" style="background-color: rgba(215, 215, 215, 1)" >
+                                            <el-button type="text" icon="el-icon-plus" style="margin-top: 20%;height: 50%;font-size:40px;color:#A1A1A1"></el-button>
+                                            <div class="bottom clearfix">
+
+                                            </div>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                        </el-card>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-card class="box-card" shadow="never" style="height: 800px;">
+                            <div slot="header" class="clearfix">
+                                <span>输出</span>
+                                <div class="action-buttons" style="float: right;">
+                                    <el-button  type="text" @click="addOutputGroupBtnClick">添加站点</el-button>
+                                </div>
+                            </div>
+                            <!--输出列表-->
+                            <el-tree :data="outputGroups" :props="outputProps"
+                                     highlight-current
+                                     style="min-width: 20px;width:14%;">
+                                <span class="custom-tree-node"  slot-scope="{node,data}">
+                                    <template v-if="node.level===1">
+                                        <el-row >
+                                            <el-col :span="16" style="margin-top: 10px;">{{data.name}}</el-col>
+                                            <el-col :span="8">
+                                                <el-tooltip class="item" effect="dark" content="详情" placement="bottom-end">
+                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-tickets" @click.stop="outputDetailBtnClick(data)"></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip class="item" effect="dark" content="删除站点" placement="bottom-end">
+                                                    <el-button  style="font-size:16px;" type="text" icon="el-icon-remove-outline" @click.stop="deleteOutputGroupBtnClick(data.id)"></el-button>
+                                                </el-tooltip>
+                                            </el-col>
+                                        </el-row>
+                                    </template>
+                                    <template v-else>
+                                        <div class="item" style="padding: 4px 0px 4px 0px">
+                                             <div style="font-size: 16px;font-family: 'Arial Normal', Arial; font-weight: 700;">{{data.name}}
+                                                <el-tag type="warning" size="mini" v-if="data.beLock">已占用</el-tag>
+                                             </div>
+                                             <div style="font-size: 10px;font-family:'Arial Normal', Arial; font-weight: 400;">{{data.url}}</div>
+                                        </div>
+                                    </template>
+                                </span>
+                            </el-tree>
+                        </el-card>
+                    </el-col>
+                </el-row>
+
+            </el-main>
+        </el-container>
+    </div>
+    <!--信源转发-->
+    <el-dialog title="调度"
+               center
+               :visible.sync="dialog.addDispatch.visible">
+        <el-card class="box-card" shadow="never">
+            <div slot="header" class="clearfix">
+                <span >将</span>
+                <span style="font-size:16px;font-family:'Arial Negreta', 'Arial Normal', 'Arial';font-weight:700;">
+                            {{dialog.addDispatch.sourceName}}
+                        </span>
+                <span>转发到</span>
+            </div>
+            <el-form v-model="dialog.addDispatch" :inline="true" >
+                <el-form-item label="输出站点" >
+                    <el-select style="width:160px;" v-model="dialog.addDispatch.outputGroupId" @change="outputGroupChanged">
+                        <el-option v-for="group in outputGroups" :key="group.id" :label="group.name" :value="group.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="通道信息">
+                    <el-select style="width:160px;" v-model="dialog.addDispatch.outputId" >
+                        <el-option v-for="item in changedAvailableOutputs" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button icon="el-icon-plus" @click="addDispatchBtnClick"></el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+        <el-card class="box-card" style="margin-top: 20px" :body-style="{padding: '0px'}" shadow="never" >
+            <div slot="header" class="clearfix">
+                <span>调度记录</span>
+            </div>
+            <el-table size="mini" border highlight-current-row :data="pageTasks">
+                <el-table-column label="序号"  type="index" width="100">
+                </el-table-column>
+                <el-table-column label="输出站点" width="150">
+                    <template slot-scope="scope"><span>{{scope.row.outputGroupName}}</span></template>
+                </el-table-column>
+                <el-table-column label="输出通道" width="100">
+                    <template slot-scope="scope"><span>{{scope.row.outputName}}</span></template>
+                </el-table-column>
+                <el-table-column label="通道地址">
+                    <template slot-scope="scope"><span>{{scope.row.outputUrl}}</span></template>
+                </el-table-column>
+                <el-table-column label="操作" width="150">
+                    <template slot-scope="scope">
+                        <el-button size="mini" icon="el-icon-delete" @click="deleteRecordBtnClick(scope.$index, scope.row)"></el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper"
+                           layout="total,sizes,prev,pager,next,jumper"
+                           @current-change="handleTaskCurrentChange"
+                           @size-change="handleTaskSizeChange"
+                           :total="dialog.addDispatch.pagination.total"
+                           :current-page="dialog.addDispatch.pagination.curPage"
+                           :page-size="dialog.addDispatch.pagination.pageSize"
+                           :page-sizes="[5,10,20]"></el-pagination>
+        </el-card>
+        <!--<span slot="footer"  class="dialog-footer">-->
+	        <!--<el-button size="medium" @click="transferSourceDlgClose">关闭</el-button>-->
+	    <!--</span>-->
+    </el-dialog>
+    <!--添加视频源-->
+    <el-dialog title="批量添加信源"
+               :visible.sync="dialog.addSource.visible" >
+        <el-card class="box-card"  :body-style="{padding: '0px'}" shadow="never" >
+            <el-table border
+                      highlight-current-row
+                      @selection-change="addSourceTableSelectChanged"
+                      :data="pageVirtualSource">
+                <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column label="序号"  type="index" width="100"></el-table-column>
+                <el-table-column label="名称" width="150">
+                    <template slot-scope="scope"><span>{{scope.row.bundleName}}</span></template>
+                </el-table-column>
+                <el-table-column label="类型" width="100">
+                    <template slot-scope="scope"><span>{{scope.row.type}}</span></template>
+                </el-table-column>
+                <el-table-column label="地址">
+                    <template slot-scope="scope"><span>{{scope.row.url}}</span></template>
+                </el-table-column>
+            </el-table>
+            <div class="block">
+                <span>已选中：{{dialog.addSource.sources.length}}</span>
+                <el-pagination style="float:right"
+                               layout="total,sizes,prev,pager,next,jumper"
+                               @current-change="handleVirtualSourceCurrentChange"
+                               @size-change="handleVirtualSourceSizeChange"
+                               :total="dialog.addSource.pagination.total"
+                               :current-page="dialog.addSource.pagination.curPage"
+                               :page-size="dialog.addSource.pagination.pageSize"
+                               :page-sizes="[5,10,20]"
+                ></el-pagination>
+            </div>
+        </el-card>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" type="primary" @click="addSourceDlgOk">添 加</el-button>
+            <el-button size="medium" @click="addSourceDlgClose">取 消</el-button>
+        </span>
+        <!--<el-card class="box-card" shadow="never">-->
+            <!--<div slot="header" class="clearfix">-->
+                <!--<span>添加输入源</span>-->
+            <!--</div>-->
+            <!---->
+            <!--&lt;!&ndash;<el-form v-model="dialog.addSource" :inline="true" >&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item label="源名称" prop="name">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-input v-model="dialog.addSource.name"></el-input>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item label="源地址">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-input v-model="dialog.addSource.url" class="input-with-select">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<el-select style="width:120px;" v-model="dialog.addSource.protocolType"  slot="prepend">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="UDP-TS" value="TSUDP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTP-TS" value="TSRTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HTTP-TS" value="TSHTTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="SRT-TS" value="TSSRT"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HTTP-FLV" value="HTTPFLV"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTSP" value="RTSPRTP"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="RTMP-FLV" value="RTMPFLV"></el-option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<el-option label="HLS" value="HLS"></el-option>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</el-select>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</el-input>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+                <!--&lt;!&ndash;<el-form-item>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-button icon="el-icon-plus" @click="addSourceBtnClick"></el-button>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-form-item>&ndash;&gt;-->
+            <!--&lt;!&ndash;</el-form>&ndash;&gt;-->
+        <!--</el-card>-->
+        <!--<el-card class="box-card" style="margin-top: 20px" :body-style="{padding: '0px'}" shadow="never" >-->
+            <!--<div slot="header" class="clearfix">-->
+                <!--<span>站点信息</span>-->
+            <!--</div>-->
+            <!--<el-table border highlight-current-row :data="dialog.addSource.sources">-->
+                <!--<el-table-column label="序号"  type="index"-->
+                                 <!--width="100">-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="名称" width="150">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.name}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="类型" width="100">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.protoType}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="地址">-->
+                    <!--<template slot-scope="scope"><span>{{scope.row.url}}</span></template>-->
+                <!--</el-table-column>-->
+                <!--<el-table-column label="操作" width="150">-->
+                    <!--<template slot-scope="scope">-->
+                        <!--&lt;!&ndash;<el-button size="mini" icon="el-icon-edit" @click="editSourceBtnClick(scope.$index, scope.row)"></el-button>&ndash;&gt;-->
+                        <!--<el-button size="mini" icon="el-icon-delete" @click="deleteSourceBtnClick(scope.$index, scope.row)"></el-button>-->
+                    <!--</template>-->
+                <!--</el-table-column>-->
+            <!--</el-table>-->
+        <!--</el-card>-->
+
+    </el-dialog>
+    <!--添加输出-->
+    <el-dialog title="站点详情"
+               center
+               :visible.sync="dialog.addOutput.visible" >
+        <el-card class="box-card" shadow="never">
+            <div slot="header" class="clearfix">
+                <span>添加通道</span>
+            </div>
+            <el-form v-model="dialog.addOutput" :inline="true" >
+                <el-form-item label="名称" prop="name">
+                    <el-input v-model="dialog.addOutput.name"></el-input>
+                </el-form-item>
+                <el-form-item label="地址">
+                    <el-input v-model="dialog.addOutput.url" class="input-with-select">
+                        <el-select style="width:120px;" v-model="dialog.addOutput.protocolType" placeholder="请选择源协议" slot="prepend">
+                            <el-option label="UDP-TS" value="TSUDP"></el-option>
+                            <el-option label="RTP-TS" value="TSRTP"></el-option>
+                            <el-option label="HTTP-TS" value="TSHTTP"></el-option>
+                            <el-option label="SRT-TS" value="TSSRT"></el-option>
+                            <el-option label="HTTP-FLV" value="HTTPFLV"></el-option>
+                            <el-option label="RTSP" value="RTSPRTP"></el-option>
+                            <el-option label="RTMP-FLV" value="RTMPFLV"></el-option>
+                            <el-option label="HLS" value="HLS"></el-option>
+                        </el-select>
+                    </el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button icon="el-icon-plus" @click="addOutputBtnClick"></el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+        <el-card class="box-card" style="margin-top: 20px" :body-style="{padding: '0px'}" shadow="never" >
+            <div slot="header" class="clearfix">
+                <span>站点信息</span>
+            </div>
+            <el-table size="mini" border highlight-current-row :data="pageOutputs">
+                <el-table-column label="序号"  type="index"
+                                 width="100">
+                </el-table-column>
+                <el-table-column label="通道名称" width="150">
+                    <template slot-scope="scope"><span>{{scope.row.name}}</span></template>
+                </el-table-column>
+                <el-table-column label="类型" width="100">
+                    <template slot-scope="scope"><span>{{scope.row.type}}</span></template>
+                </el-table-column>
+                <el-table-column label="地址">
+                    <template slot-scope="scope"><span>{{scope.row.url}}</span></template>
+                </el-table-column>
+                <el-table-column label="操作" width="150">
+                    <template slot-scope="scope">
+                        <el-button size="mini" icon="el-icon-edit" @click="editOutputBtnClick(scope.$index, scope.row)"></el-button>
+                        <el-button size="mini" icon="el-icon-delete" @click="deleteOutputBtnClick(scope.$index, scope.row)"></el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination style="float:right" layout="total,sizes,prev,pager,next,jumper"
+                           @current-change="handleOutputCurrentChange"
+                           @size-change="handleOutputSizeChange"
+                           :total="dialog.addOutput.pagination.total"
+                           :current-page="dialog.addOutput.pagination.curPage"
+                           :page-size="dialog.addOutput.pagination.pageSize"
+                           :page-sizes="[5,10,20]"></el-pagination>
+        </el-card>
+        <!--<span slot="footer" class="dialog-footer">-->
+	        <!--<el-button size="medium" @click="outputDetailDlgClose">关闭</el-button>-->
+	    <!--</span>-->
+    </el-dialog>
+    <!--修改视频源-->
+    <el-dialog title="修改"  width="30%" :visible.sync="dialog.editSource.visible" >
+        <el-form v-model="dialog.editSource">
+            <el-form-item label="源名称" prop="name">
+                <el-input v-model="dialog.editSource.name"></el-input>
+            </el-form-item>
+            <el-form-item label="源地址">
+                <el-input v-model="dialog.editSource.url" class="input-with-select">
+                    <el-select style="width:120px;" v-model="dialog.editSource.protocolType"  slot="prepend">
+                        <el-option label="UDP-TS" value="TSUDP"></el-option>
+                        <el-option label="RTP-TS" value="TSRTP"></el-option>
+                        <el-option label="HTTP-TS" value="TSHTTP"></el-option>
+                        <el-option label="SRT-TS" value="TSSRT"></el-option>
+                        <el-option label="HTTP-FLV" value="HTTPFLV"></el-option>
+                        <el-option label="RTSP" value="RTSPRTP"></el-option>
+                        <el-option label="RTMP-FLV" value="RTMPFLV"></el-option>
+                        <el-option label="HLS" value="HLS"></el-option>
+                    </el-select>
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" type="primary" @click="editSourceDlgOk">确 定</el-button>
+	        <el-button size="medium" @click="editSourceDlgClose">取 消</el-button>
+	    </span>
+    </el-dialog>
+
+    <!--修改输出-->
+    <el-dialog title="修改"  width="30%" :visible.sync="dialog.editOutput.visible" >
+        <el-form v-model="dialog.editOutput">
+            <el-form-item label="通道名称" prop="name">
+                <el-input v-model="dialog.editOutput.name"></el-input>
+            </el-form-item>
+            <el-form-item label="地址">
+                <el-input v-model="dialog.editOutput.url" class="input-with-select">
+                    <el-select style="width:120px;" v-model="dialog.editOutput.type"  slot="prepend">
+                        <el-option label="UDP-TS" value="TSUDP"></el-option>
+                        <el-option label="RTP-TS" value="TSRTP"></el-option>
+                        <el-option label="HTTP-TS" value="TSHTTP"></el-option>
+                        <el-option label="SRT-TS" value="TSSRT"></el-option>
+                        <el-option label="HTTP-FLV" value="HTTPFLV"></el-option>
+                        <el-option label="RTSP" value="RTSPRTP"></el-option>
+                        <el-option label="RTMP-FLV" value="RTMPFLV"></el-option>
+                        <el-option label="HLS" value="HLS"></el-option>
+                    </el-select>
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" type="primary" @click="editOutputDlgOk">确 定</el-button>
+	        <el-button size="medium" @click="editOutputDlgClose">取 消</el-button>
+	    </span>
+    </el-dialog>
+    <!--添加信源分组-->
+    <el-dialog title="新建站点" width="30%" :visible.sync="dialog.addSourceGroup.visible" >
+        <el-form :model="dialog.addSourceGroup" label-width="80px">
+            <el-form-item label="站点名称">
+                <el-input v-model="dialog.addSourceGroup.name"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" type="primary" @click="addSourceGroupDlgOk">确 定</el-button>
+	        <el-button size="medium" @click="addSourceGroupDlgCancel">取 消</el-button>
+	    </span>
+    </el-dialog>
+    <!--添加输出分组-->
+    <el-dialog title="新建站点" width="30%" :visible.sync="dialog.addOutputGroup.visible" >
+        <el-form :model="dialog.addOutputGroup" label-width="80px">
+            <el-form-item label="站点名称">
+                <el-input v-model="dialog.addOutputGroup.name"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" type="primary" @click="addOutputGroupDlgOk">确 定</el-button>
+	        <el-button size="medium" @click="addOutputGroupDlgCancel">取 消</el-button>
+	    </span>
+    </el-dialog>
+</div>

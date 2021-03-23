@@ -147,6 +147,9 @@ public class BundlePO extends CommonPO<BundlePO> {
 	
 	/**系统码率*/
 	private String bitrate;
+
+	/**srt mode*/
+	private String mode;
 	
 	private CoderType coderType;
 
@@ -187,6 +190,15 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public BundlePO setMode(String mode) {
+		this.mode = mode;
+		return this;
 	}
 
 	@Column(name = "coderType")

@@ -111,6 +111,7 @@ public class JSONHttpServletRequestWrapper extends HttpServletRequestWrapper{
 
 	@Override
 	public String toString() {
+		if(this.params == null) return "";
 		return this.params.toJSONString();
 	}
 	
