@@ -4,6 +4,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +17,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 //import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.capacity.server.CapacityService;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.cs.bak.AbilityInfoSendDAO;
+import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
 import com.sumavision.tetris.cs.template.ChannelTemplatePO;
 import com.sumavision.tetris.cs.template.ChannelTemplateService;
 import com.sumavision.tetris.cs.template.ChannelTemplateVo;
@@ -43,6 +50,15 @@ public class ChannelController {
 	@Autowired
 	private UserQuery userQuery;
 	
+	@Autowired
+	private CapacityService capacityService;
+	
+	@Autowired
+	private AbilityInfoSendDAO abilityInfoSendDAO;
+	
+	@Autowired
+	private BroadAbilityService broadAbilityService;
+	
 	//@Autowired
 	//private AlarmFeignClientService alarmFeignClientService;
 	
@@ -60,6 +76,8 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
+		//初始化时设置转换告警地址
+		capacityService.setAlarmUrl("192.165.56.17");
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
 	/**
@@ -534,5 +552,60 @@ public class ChannelController {
 		return DateUtil.now();
 	}
 	
+	/**
+	 * 同步任务单 <br/>
+	 * <b>作者:</b>zhouaining<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月11日 上午9:50:20
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/sync")
+	public Object syncTask() throws Exception {
+		
+		syncVO syncVo = new syncVO();
+		syncVo.setDeviceIp("192.165.56.17");
+		syncVo.setBusinesstype("PUSH");
+		//获取所有已下发的任务
+		List<AbilityInfoSendPO> abilityInfoSendPOs = abilityInfoSendDAO.findAll();
+		List<String> taskList = new ArrayList<String>();
+		//获取taskId列表
+		for (AbilityInfoSendPO abilityInfoSendPO : abilityInfoSendPOs) {
+			taskList.add(abilityInfoSendPO.getTaskId());
+		}
+		syncVo.setJobIds(taskList);
+		String syncVoString = JSONObject.toJSONString(syncVo);
+		//同步节目单
+		String taskIds = capacityService.sync(syncVoString);
+		//解析获取需要重下的lessJobids集合
+		JSONObject taskJSONObject = JSON.parseObject(taskIds);
+		String taskIdList = taskJSONObject.getString("lessJobIds");
+		
+		//测试
+		//String taskIds = JSONObject.toJSONString(taskList);
+		
+		List restartTaskList = JSONArray.parseArray(taskIdList);
+		List<Long> channelList = new ArrayList<Long>();
+		if(restartTaskList.size()>0){
+			for(int i = 0;i<restartTaskList.size();i++){
+				//同步后返回值不为空,获取缺失任务的频道id
+				List<AbilityInfoSendPO> missAbilityInfoSendPOs = abilityInfoSendDAO.findByTaskId((String)restartTaskList.get(i));
+				//获取缺失的频道id
+				if (!missAbilityInfoSendPOs.isEmpty()) {
+					Long channelId = missAbilityInfoSendPOs.get(0).getChannelId();
+					channelList.add(channelId);
+				}
+			}
+		}
+		//未停止成功的能力端删除
+		//未下发成功的重新播发
+		for (Long channelId : channelList) {
+			//先停再重发
+			channelService.stopBroadcast(channelId);
+			broadAbilityService.startAbilityBroadcast(channelId);
+		}
+		
+		return "";
+	}
 
 }

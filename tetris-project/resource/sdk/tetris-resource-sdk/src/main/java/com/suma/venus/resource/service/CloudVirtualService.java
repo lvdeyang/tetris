@@ -12,12 +12,17 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
+import com.suma.venus.resource.bo.AudioChannelBO;
+import com.suma.venus.resource.bo.ProgramsBO;
+import com.suma.venus.resource.bo.VideoChannelBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.CoderType;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
@@ -51,6 +56,7 @@ public class CloudVirtualService {
 	@Autowired
 	private PrivilegeDAO privilegeDAO;
 	
+
 	/**
 	 * 添加虚拟设备-输出<br/>
 	 * <b>作者:</b>614<br/>
@@ -62,17 +68,24 @@ public class CloudVirtualService {
 	 * @param bitrate 系统码率
 	 * @param videos 视频通道
 	 * @param audios 音频通道
+	 * @return
 	 */
-	public void outputAdd(String bundleName, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
+	public String outputAdd(String bundleName,String type, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 
 		BundlePO bundlePO = new BundlePO();
 		bundlePO.setBundleName(bundleName);
+		bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+		bundlePO.setBundleType("VenusTerminal");
 		bundlePO.setBundleId(BundlePO.createBundleId());
 		bundlePO.setRateCtrl(rateCtrl);
+        bundlePO.setStreamUrl(url);
+        bundlePO.setType(type);
 		bundlePO.setBitrate(bitrate);
 		bundlePO.setDeviceModel("virtualOut");
+		bundlePO.setCoderType(CoderType.DEFAULT);
 		bundleDao.save(bundlePO);
 		createAudioAndVideoChannelOut(bundlePO,videos,audios);
+		
 		UserVO userVO = userQuery.current();
 		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
 		List<String> resource = new ArrayList<String>();
@@ -81,6 +94,7 @@ public class CloudVirtualService {
 		bo.setRoleId(Long.valueOf(systemRoleVO.getId()));
 		bo.setResourceCodes(resource);
 		userQueryService.bindRolePrivilege(bo);
+		return bundlePO.getBundleId();
 	}
 
 	/**
@@ -91,19 +105,41 @@ public class CloudVirtualService {
 	 * <b>日期：</b>2021年3月4日 上午10:13:22
 	 * @param bundleJson 虚拟输入设备信息
 	 */
-	public void inputAdd(JSONObject bundleJson) throws Exception {
-		BundlePO bundlePO = new BundlePO();
-		bundlePO.setBundleId(bundleJson.getString("BundleId"));
-		bundlePO.setBundleName(bundleJson.getString("BundleName"));
+	public Object inputAdd(JSONObject bundleJson) throws Exception {
+		
+		BundlePO bundlePO = bundleDao.findByBundleId(bundleJson.getString("bundleId"));
+		if(bundlePO == null){
+			bundlePO = new BundlePO();
+		}else{
+			channelSchemeDao.deleteByBundleId(bundlePO.getBundleId());
+			extraInfoDao.deleteByBundleId(bundlePO.getBundleId());
+		}
+		bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+		bundlePO.setBundleType("VenusTerminal");
+		bundlePO.setBundleId(bundleJson.getString("bundleId"));
+		bundlePO.setBundleName(bundleJson.getString("bundleName"));
 		bundlePO.setUrl(bundleJson.getString("url"));
 		bundlePO.setType(bundleJson.getString("type"));
+		if (bundleJson.containsKey("mode")) {
+			bundlePO.setMode(bundleJson.getString("mode"));
+		}
 		bundlePO.setDeviceModel("virtualIn");
+		bundlePO.setCoderType(CoderType.DEFAULT);
 		JSONArray programs = bundleJson.getJSONArray("programs");
-		bundleDao.save(bundlePO);
+		//配置权限
+		UserVO userVO = userQuery.current();
+		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
+		List<String> resource = new ArrayList<String>();
+		resource.add(bundlePO.getBundleId() + "-r");
+		RoleAndResourceIdBO bo = new RoleAndResourceIdBO();
+		bo.setRoleId(Long.valueOf(systemRoleVO.getId()));
+		bo.setResourceCodes(resource);
+		userQueryService.bindRolePrivilege(bo);
+		
 		createAudioAndVideoChannelIn(bundlePO,programs);
-		
 		bundleDao.save(bundlePO);
 		
+		return null;
 	}
 
 	/**
@@ -120,7 +156,8 @@ public class CloudVirtualService {
 		ChannelTemplatePO videoChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName(bundlePO.getDeviceModel(), "VenusVideoIn");
 		List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 		if(programs != null && programs.size()>0){
-			List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
+//			List<ExtraInfoPO> extraInfoPOs = new ArrayList<ExtraInfoPO>();
+			List<ProgramsBO> values = new ArrayList<ProgramsBO>();
 			for (int i = 0; i < programs.size(); i++) {
 				List<ChannelSchemePO> audioChannelSchemePOs = new ArrayList<ChannelSchemePO>();
 				List<ChannelSchemePO> videoChannelSchemePOs = new ArrayList<ChannelSchemePO>();
@@ -133,23 +170,64 @@ public class CloudVirtualService {
 					audioChannelSchemePOs.addAll(getAudioChannelSchemePO(bundlePO.getBundleId(), audioChannelTemplate,audios));
 					videoChannelSchemePOs.addAll(getVideoChannelSchemePO(bundlePO.getBundleId(), videoChannelTemplate,videos));
 				}
-				Map<String, Object> pro = new HashMap<String, Object>();
-				pro.put("num", num);
-				pro.put("name", name);
-				pro.put("videos", videoChannelSchemePOs);
-				pro.put("audios", audioChannelSchemePOs);
+//				Map<String, Object> pro = new HashMap<String, Object>();
+//				pro.put("num", num);
+//				pro.put("name", name);
+//				pro.put("videos", JSONObject.toJSON(videoChannelSchemePOs));
+//				pro.put("audios", JSONObject.toJSON(audioChannelSchemePOs));
+				
+				List<VideoChannelBO> vidoeChannels = new ArrayList<VideoChannelBO>(); 
+				List<AudioChannelBO> audioChannels = new ArrayList<AudioChannelBO>(); 
+				for(ChannelSchemePO videoScheme : videoChannelSchemePOs){
+					VideoChannelBO video = new VideoChannelBO();
+					video.setBaseType("VenusVidioIn");
+					video.setChannelId(videoScheme.getChannelId());
+					video.setCodec(videoScheme.getCodec());
+					video.setResolution(videoScheme.getResolution());
+					video.setBitrate(videoScheme.getBitrate());
+					video.setFps(videoScheme.getFps());
+					vidoeChannels.add(video);
+				}
+				
+				for(int j = 0 ; j < videoChannelSchemePOs.size() ; j++){
+					JSONObject videoObject = videos.getJSONObject(j);
+					videoObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					videoObject.put("baseType", "VenusVidioIn");
+				}
+				
+				for(int j = 0 ; j < audioChannelSchemePOs.size() ; j++){
+					JSONObject audioObject = audios.getJSONObject(j);
+					audioObject.put("channelId", videoChannelSchemePOs.get(j).getChannelId());
+					audioObject.put("baseType", "VenusVidioIn");
+				}
+				
+				for(ChannelSchemePO audioScheme : audioChannelSchemePOs){
+					AudioChannelBO audio = new AudioChannelBO();
+					audio.setBaseType("VenusAudioIn");
+					audio.setChannelId(audioScheme.getChannelId());
+					audio.setCodec(audioScheme.getCodec());
+					audio.setSamplateRate(audioScheme.getSamplateRate());
+					audio.setBitrate(audioScheme.getBitrate());
+					audioChannels.add(audio);
+				}
+				
+				ProgramsBO value = new ProgramsBO();
+				value.setNum(num);
+				value.setName(name);
+				value.setVideos(videos);
+				value.setAudios(audios);
+				values.add(value);
 				
 				channelSchemePOs.addAll(videoChannelSchemePOs);
 				channelSchemePOs.addAll(audioChannelSchemePOs);
-				
-				ExtraInfoPO extraInfoPO = new ExtraInfoPO();
-				extraInfoPO.setBundleId(bundlePO.getBundleId());
-				extraInfoPO.setName("program");
-				extraInfoPO.setValue(pro.toString());
-				extraInfoPOs.add(extraInfoPO);
 			}
+			ExtraInfoPO extraInfoPO = new ExtraInfoPO();
+			extraInfoPO.setBundleId(bundlePO.getBundleId());
+			extraInfoPO.setName("program");
+			extraInfoPO.setValue(JSONObject.toJSONString(values));
+			
 			channelSchemeDao.saveAll(channelSchemePOs);
-			extraInfoDao.saveAll(extraInfoPOs);
+			extraInfoDao.save(extraInfoPO);
 		}
 		
 		return channelSchemePOs;
@@ -250,15 +328,17 @@ public class CloudVirtualService {
 	 * @param bitrate 系统码率
 	 * @param videos 视频通道
 	 * @param audios 音频通道
+	 * @return
 	 */
-	public void outputModify(String bundleName,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
+	public Object outputModify(String bundleName,String type,String bundleId, String url, String rateCtrl, String bitrate, String videos, String audios) throws Exception {
 		BundlePO bundlePO = bundleDao.findByBundleId(bundleId);
 		bundlePO.setBundleName(bundleName);
-		bundlePO.setUrl(url);
+		bundlePO.setStreamUrl(url);
 		bundlePO.setRateCtrl(rateCtrl);
 		bundlePO.setBitrate(bitrate);
+		bundlePO.setType(type);
 		bundleDao.save(bundlePO);
-		List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleId(bundleId);
+		/*List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleId(bundleId);
 		JSONArray videosArray = JSONArray.parseArray(videos);
 		JSONArray audiosArray = JSONArray.parseArray(audios);
 		List<ChannelSchemePO> newChannelSchemePOs = new ArrayList<ChannelSchemePO>();
@@ -289,8 +369,9 @@ public class CloudVirtualService {
 				newChannelSchemePOs.add(channelSchemePO);
 			}
 		}
-		updateChannel(channelSchemePOs,newChannelSchemePOs);
+		updateChannel(channelSchemePOs,newChannelSchemePOs);*/
 		
+		return null;
 	}
 	
 	
@@ -322,7 +403,7 @@ public class CloudVirtualService {
 		if (old != null && old.size() >0) {
 			channelSchemeDao.saveAll(old);
 			old.removeAll(change);
-			channelSchemeDao.saveAll(old);
+			channelSchemeDao.deleteInBatch(old);
 		}
 	}
 
@@ -406,7 +487,7 @@ public class CloudVirtualService {
 					if (extraInfoPOs != null && extraInfoPOs.size() >0) {
 						for (ExtraInfoPO extraInfoPO : extraInfoPOs) {
 							if (bundlePO.getBundleId().equals(extraInfoPO.getBundleId())) {
-								bund.put("programs", extraInfoPO.getValue());
+								bund.put("programs", JSONObject.parse(extraInfoPO.getValue()));
 							}
 						}
 					}
@@ -425,7 +506,7 @@ public class CloudVirtualService {
 	 * <b>日期：</b>2021年3月4日 上午10:40:20
 	 * @param bundleIds 设备id列表
 	 */
-	public List<Map<String, Object>> inputBundleId(String bundleIds) throws Exception {
+	public Object inputBundleId(String bundleIds) throws Exception {
 		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 		if (bundleIds != null && !bundleIds.equals("")) {
 			List<String> bundle = new ArrayList<String>();
@@ -446,18 +527,19 @@ public class CloudVirtualService {
 	 * <b>日期：</b>2021年3月4日 上午10:44:05
 	 * @return data 虚拟输出设备信息
 	 */
-	public List<Map<String, Object>> outputQuery() throws Exception {
+	public List<Map<String, Object>> outputQuery(String bundleId) throws Exception {
 		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 		UserVO userVO = userQuery.current();
-		SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
-		List<PrivilegePO> privilegePOs = privilegeDAO.findByRoleId(Long.valueOf(systemRoleVO.getId()));
+		//SystemRoleVO systemRoleVO = userQueryService.queryPrivateRoleId(userVO.getId());
+		//List<PrivilegePO> privilegePOs = privilegeDAO.findByRoleId(Long.valueOf(systemRoleVO.getId()));
 		List<String> bundleIds = new ArrayList<String>();
-		if (privilegePOs != null && privilegePOs.size()>0) {
-			for (PrivilegePO privilegePO : privilegePOs) {
-				if (privilegePO.getResourceIndentity().endsWith("-r")) {
-					bundleIds.add(privilegePO.getResourceIndentity().substring(0,privilegePO.getResourceIndentity().length() - 2));
-				}
-			}
+		bundleIds.add(bundleId);
+		//if (privilegePOs != null && privilegePOs.size()>0) {
+			//for (PrivilegePO privilegePO : privilegePOs) {
+			//	if (privilegePO.getResourceIndentity().endsWith("-r")) {
+			//		bundleIds.add(privilegePO.getResourceIndentity().substring(0,privilegePO.getResourceIndentity().length() - 2));
+			//	}
+			//}
 			List<BundlePO> bundlePOs = bundleDao.findByBundleIdIn(bundleIds);
 			List<ChannelSchemePO> channelSchemePOs = channelSchemeDao.findByBundleIdIn(bundleIds);
 			if (bundlePOs != null && bundlePOs.size() > 0) {
@@ -472,9 +554,9 @@ public class CloudVirtualService {
 					List<ChannelSchemePO> audios = new ArrayList<ChannelSchemePO>();
 					if (channelSchemePOs != null&& channelSchemePOs.size() > 0) {
 						for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
-							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("video")) {
+							if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusVideoOut")) {
 								videos.add(channelSchemePO);
-							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("audio")) {
+							}else if (bundlePO.getBundleId().equals(channelSchemePO.getBundleId()) && channelSchemePO.getChannelName().contains("VenusAudioOut")) {
 								audios.add(channelSchemePO);
 							}
 						}
@@ -484,7 +566,7 @@ public class CloudVirtualService {
 					data.add(bundle);
 				}
 			}
-		}
+		//}
 		return data;
 	}
 }

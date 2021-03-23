@@ -18,6 +18,8 @@ public interface QueryForeignInformation {
 	public JSONObject stopLiveDevice(
 			@RequestParam(value = "folderPath") String folderPath,
 			@RequestParam(value = "serNodeNamePath") String serNodeNamePath,
+			@RequestParam(value = "permissionType") String permissionType,
+			@RequestParam(value = "roleId") Long roleId,
 			@RequestParam(value = "childType") String childType,
 			@RequestParam(value = "uuid") String uuid) throws Exception;
 }

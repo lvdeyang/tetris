@@ -45,7 +45,9 @@ public class ServerWebsocket {
     	String clientIp = (String) session.getUserProperties().get(CustomProperties.CLIENT_IP.toString());
     	UserVO user = userQuery.findByToken(token);
     	if(user == null){
-    		session.close();
+    		if(session!=null && session.isOpen()){
+    			session.close();
+    		}
     		throw new IllegalTokenException(token, clientIp);
     	}
     	//这个地方很奇怪，反射能调到，直接调不到
@@ -63,7 +65,9 @@ public class ServerWebsocket {
     public void onClose(Session session) throws Exception{
     	initBean();
 		String userId = sessionMetadataService.remove(session);
-		eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
+		if(userId != null){
+			eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
+		}
     }
 	
     @OnError

@@ -31,8 +31,10 @@ import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermis
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -89,6 +91,9 @@ public class CommandSplitServiceImpl {
 	
 	@Autowired
 	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageTaskService pageTaskService;
 	
 	/**
 	 * 切换分屏方案<br/>
@@ -288,7 +293,9 @@ public class CommandSplitServiceImpl {
 			List<PageTaskPO> taskList = pageTaskDao.findByDstIdIn(dstIds).stream()
 												   .filter(index->{return null==index?false:true;})
 												   .collect(Collectors.toList());
-			PageTaskPO task = null;
+			
+			PageInfoPO pageInfo = null;
+ 			PageTaskPO task = null;
 			PageTaskPO targetTask = null;
 			
 			for(PageTaskPO pageTask:taskList){
@@ -304,8 +311,12 @@ public class CommandSplitServiceImpl {
 			}else if(task == null || targetTask == null){
 				if(task == null){
 					targetTask.setLocationIndex(oldIndex);
+					int taskIndex = targetTask.getTaskIndex()+(oldIndex - newIndex);
+					targetTask.setTaskIndex(taskIndex);
 				}else{
 					task.setLocationIndex(newIndex);
+					int taskIndex = task.getTaskIndex()+(newIndex - oldIndex);
+					task.setTaskIndex(taskIndex);
 				}
 			}else{
 				int taskIndex = task.getTaskIndex();
@@ -313,20 +324,25 @@ public class CommandSplitServiceImpl {
 				task.setTaskIndex(targetTask.getTaskIndex());
 				targetTask.setLocationIndex(oldIndex);
 				targetTask.setTaskIndex(taskIndex);
-				pageTaskDao.save(new ArrayListWrapper<PageTaskPO>().add(task).add(targetTask).getList());
-				return;
 			}
 			
-			//重新排序taskIndex
-			int minIndex= taskList.stream().map(PageTaskPO::getTaskIndex).min(Long::compare).get();
-			Collections.sort(taskList, Comparator.comparing(PageTaskPO::getLocationIndex));
-			for(PageTaskPO pageTask:taskList){
-				pageTask.setTaskIndex(minIndex);
-				minIndex++;
-			}
+//			//重新排序taskIndex
+//			int minIndex= taskList.stream().map(PageTaskPO::getTaskIndex).min(Long::compare).get();
+//			Collections.sort(taskList, Comparator.comparing(PageTaskPO::getLocationIndex));
+//			for(PageTaskPO pageTask:taskList){
+//				pageTask.setTaskIndex(minIndex);
+//				minIndex++;
+//			}
 			
 			pageTaskDao.save(taskList);
 			
+			if(task != null){
+				pageInfo = task.getPageInfo();
+			}else{
+				pageInfo = targetTask.getPageInfo();
+			}
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			pageTaskService.notifyUser(userInfo, pageInfo, true);
 			/*
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 			CommandGroupUserPlayerPO oldPlayer = null;

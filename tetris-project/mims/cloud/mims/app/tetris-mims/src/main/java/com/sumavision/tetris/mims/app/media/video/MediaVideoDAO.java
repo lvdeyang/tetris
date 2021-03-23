@@ -135,4 +135,8 @@ public interface MediaVideoDAO extends BaseDAO<MediaVideoPO>{
 	 */
 	public List<MediaVideoPO> findByPreviewUrlIn(Collection<String> previewUrls);
 	
+	public List<MediaVideoPO> findByName(String name);
+	
+	public List<MediaVideoPO> findByFileName(String fileName);
+	
 }

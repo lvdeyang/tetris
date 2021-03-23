@@ -187,4 +187,8 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 * @return List<MediaAudioPO> 音频列表
 	 */
 	public List<MediaAudioPO> findByAuthorIdIn(List<String> authorIds);
+
+	public List<MediaAudioPO> findByName(String audioName);
+	
+	public List<MediaAudioPO> findByFileName(String fileName);
 }

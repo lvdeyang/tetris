@@ -383,6 +383,9 @@ public class BroadAbilityService {
 		
 //		Boolean broad = false;
 		Boolean broad = true;
+		//标记第一个排期
+		Boolean firstBroad = true;
+		Long firstPreviewId = 0l;
 		//遍历排期单
 		for (int i = 0; i < scheduleVOs.size(); i++) {
 			final ScheduleVO scheduleVO = scheduleVOs.get(i);
@@ -583,6 +586,8 @@ public class BroadAbilityService {
 			//遍历每个分屏任务
 			for (BroadAbilityBroadRequestVO requestVO : broadRequestVOs) {
 				List<BroadAbilityBroadRequestInputPrevVO> inputVOs = requestVO.getMap_sources();
+				//标记第一个排期单的追加节目
+				Boolean programOfFirstSchedule = false;
 				//获取源媒体类型
 				String mediaType;
 				mediaType = requestVO.getMediaType();
@@ -600,6 +605,7 @@ public class BroadAbilityService {
 				Long total = 0l;
 				//下一个切换节目线程等待时间
 				Long nextDelayTime = DateUtil.getLongDate() > broadDateLong ? 0l : broadDateLong - DateUtil.getLongDate();
+				Long delayTimes = nextDelayTime - 10000;
 				//当前排期单开始时间早于当前时间
 				Long passed = nextDelayTime == 0 ? DateUtil.getLongDate() - broadDateLong : 0;
 				//切换源预留时间
@@ -619,7 +625,7 @@ public class BroadAbilityService {
 						duration = stream.getDuration();
 					}
 					if (duration != null && duration != 0) {
-						if (first) {
+						if (first&&firstBroad) {
 							if (passed > 0 && duration <= passed) {
 								passed = passed - duration;
 							} else {
@@ -650,7 +656,7 @@ public class BroadAbilityService {
 						} else {
 							//第二个节目
 							Long newForwardDealTime = duration > 10000 ? 10000 : (duration / 2);
-							if (firstIndex + 1 == j) {
+							if (firstIndex + 1 == j&&firstBroad) {
 								if (stream != null) {
 									//stream.setStartTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total), DateUtil.dateTimePattern));
 									//stream.setEndTime(DateUtil.format(DateUtil.getDateByMillisecond(broadDateLong + total + duration), DateUtil.dateTimePattern));
@@ -669,6 +675,9 @@ public class BroadAbilityService {
 								requestVO.getMap_sources().add(new BroadAbilityBroadRequestInputPrevVO().setIndex(3).setType("schedule").setMediaType(mediaType).setPre(1).setNext(2));
 								
 								requestAddTask(channelId, 0l, JSONObject.toJSONString(requestVO), previewId, abilityIp);
+								firstBroad=false;
+								programOfFirstSchedule=true;
+								firstPreviewId = previewId;
 								nextDelayTime = nextDelayTime + firstDuration + duration - newForwardDealTime;
 							} else {
 								if (stream != null) {
@@ -684,7 +693,15 @@ public class BroadAbilityService {
 								BroadAbilityBroadRequestExchangeVO exchangeVO = new BroadAbilityBroadRequestExchangeVO()
 										.setMediaType(mediaType)
 										.setProgram(inputPrevVO);
-								requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
+								//判断是否是第一个排期单的追加节目
+								if(programOfFirstSchedule){
+									requestExchangeTask(channelId, nextDelayTime, exchangeVO, previewId);
+								}else{
+									//不是第一个排期单的节目全部追加
+									requestExchangeTask(channelId, delayTimes, exchangeVO, firstPreviewId);
+									delayTimes = delayTimes + duration;
+								}
+								
 								nextDelayTime = nextDelayTime + duration + forwardDealTime - newForwardDealTime;
 							}
 							total += duration;
@@ -701,6 +718,9 @@ public class BroadAbilityService {
 					if(j == inputVOs.size() - 1 &&requestVO.getMap_sources().size()==1){
 						requestVO.getMap_sources().add(new BroadAbilityBroadRequestInputPrevVO().setIndex(3).setMediaType(mediaType).setType("schedule").setPre(1));
 						requestAddTask(channelId, 0l, JSONObject.toJSONString(requestVO), previewId, abilityIp);
+						firstBroad=false;
+						programOfFirstSchedule=true;
+						firstPreviewId = previewId;
 					}
 				}
 			}
@@ -949,12 +969,17 @@ public class BroadAbilityService {
 					String taskId = taskJSONObject.getString("taskId");
 					
 					//保存任务信息
-					AbilityInfoSendPO abilityInfoSendPO = new AbilityInfoSendPO();
-					abilityInfoSendPO.setTaskId(taskId);
-					abilityInfoSendPO.setPreviewId(previewId);
-					abilityInfoSendPO.setChannelId(channelId);
-					abilityInfoSendPO.setAbilityIp(abilityIp);
-					abilityInfoSendDAO.save(abilityInfoSendPO);
+					
+					List<AbilityInfoSendPO> abilityInfoSendPOs = abilityInfoSendDAO.findByChannelId(channelId);
+					if(abilityInfoSendPOs.isEmpty()){
+						AbilityInfoSendPO abilityInfoSendPO = new AbilityInfoSendPO();
+						abilityInfoSendPO.setTaskId(taskId);
+						abilityInfoSendPO.setPreviewId(previewId);
+						abilityInfoSendPO.setChannelId(channelId);
+						abilityInfoSendPO.setAbilityIp(abilityIp);
+						abilityInfoSendDAO.save(abilityInfoSendPO);
+					}
+					
 	//					List<BroadAbilityBroadRequestOutputVO> broadRequestOutputVOs = broadAbilityBroadRequestVO.getOutput();
 	//					for (BroadAbilityBroadRequestOutputVO outputVO : broadRequestOutputVOs) {
 	//						AbilityInfoSendPO abilityInfoSendPO = new AbilityInfoSendPO();

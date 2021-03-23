@@ -74,7 +74,9 @@ public class ResourceDataSourceConfig {
     //配置事务
     @Bean(name = "resourceTransactionManager")
     public PlatformTransactionManager resourceTransactionManager(EntityManagerFactoryBuilder builder) {
-        return new JpaTransactionManager(entityManagerFactoryResource(builder).getObject());
+    	JpaTransactionManager transactionManager = new JpaTransactionManager(entityManagerFactoryResource(builder).getObject());
+    	transactionManager.setGlobalRollbackOnParticipationFailure(false);
+        return transactionManager;
     }
     
     //获取jpa配置信息

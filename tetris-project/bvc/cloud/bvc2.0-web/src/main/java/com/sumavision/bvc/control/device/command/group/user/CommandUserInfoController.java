@@ -142,7 +142,7 @@ public class CommandUserInfoController {
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalIdAndGroupMemberType(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
 			if(null == pageInfo){
 				pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId(), GroupMemberType.MEMBER_USER);
-				pageInfo.setPageSize(16);
+				pageInfo.setPageSize(4);
 				pageInfoDao.save(pageInfo);
 			}
 			

@@ -344,7 +344,10 @@ public class SyncService {
 		for (int i = 0; i < capJobPOs.size(); i++) {
 			TaskOutputPO taskOutputPO = capJobPOs.get(i);
 			if (!jobIds.contains(taskOutputPO.getTaskUuid())) {
-                taskService.deleteTranscodeTask(taskOutputPO.getTaskUuid());
+				TaskOutputPO output = taskService.delete(taskOutputPO.getTaskUuid(), businessType);
+				if(output != null){
+					taskOutputDao.delete(output);
+				}
 				moreJobIds.add(taskOutputPO.getTaskUuid());
 			}
 		}

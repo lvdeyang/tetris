@@ -29,7 +29,6 @@ import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
-import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -58,7 +57,6 @@ import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
-import com.sumavision.tetris.bvc.business.bo.BusinessReturnBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.common.BusinessReturnService;
@@ -97,7 +95,6 @@ import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
-import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -658,8 +655,6 @@ public class VodService {
 		GroupMemberRolePermissionPO srcRolePermission = new GroupMemberRolePermissionPO(srcRole.getId(), vodUserMemberPO.getId());
 		groupMemberRolePermissionDao.save(srcRolePermission);
 		
-		//TODO:建立转发PO?
-		
 		//呼叫被点播的编码
 		List<SourceBO> sourceBOs = agendaExecuteService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(vodUserMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
@@ -672,8 +667,8 @@ public class VodService {
 		}
 		
 		//执行议程
-		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_DEVICE);//TODO
-		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//TODO 命令合并（已完成）
+		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_DEVICE);
+		agendaExecuteService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
 		
 		//命令合并下发
 		if(businessReturnService.getSegmentedExecute()){
@@ -823,8 +818,6 @@ public class VodService {
 			}else{
 				executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
 			}
-			
-//			
 			
 			//找到分页任务，停止。也可以通过“停止议程”来实现
 			Long dstMemberId = vod.getDstMemberId();
@@ -1331,5 +1324,37 @@ public class VodService {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 获取当前屏幕上的第一个空闲位置，没有空闲位置选择最后一个<br/>
+	 * <b>作者:</b>lx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月18日 下午2:59:57
+	 * @param taskList
+	 * @return
+	 */
+	public int findSerial(List<PageTaskPO> taskList){
+		if(taskList.size() == 0){
+			return 1;
+		}
+		
+		PageInfoPO pageInfo = taskList.get(0).getPageInfo();
+		int maxSerial = pageInfo.getPageSize()-1;
+		List<Integer> usedSerialList = taskList.stream().map(PageTaskPO::getLocationIndex).sorted().collect(Collectors.toList());
+		if(usedSerialList.get(0) != 0){
+			return 0;
+		}
+		for(int i = 1 ; i < usedSerialList.size() ; i++){
+			if(!((usedSerialList.get(i) - 1) == usedSerialList.get(i-1))){
+				return usedSerialList.get(i-1);
+			}
+		}
+		if(usedSerialList.get(usedSerialList.size()-1) < maxSerial){
+			return usedSerialList.get(usedSerialList.size()-1)+1;
+		}else{
+			return maxSerial;
+		}
+	
 	}
 }

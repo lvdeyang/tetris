@@ -34,6 +34,10 @@ define([
         new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
+                myHeaders: {
+                    'tetris-001':window.localStorage.getItem(config.ajax.header_auth_token)
+                },
+                wait:false,
                 b:'',
                 test: {
                     visible: false
@@ -267,6 +271,9 @@ define([
                         }
                     },
                     editSchedules: {
+                        importData:{
+                            channelId:''
+                        },
                         visible: false,
                         data: {},
                         table: {
@@ -451,6 +458,82 @@ define([
             computed: {},
             watch: {},
             methods: {
+
+                handleChange:function(file, fileList) {
+                    var self = this;
+                    const fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
+                    const whiteList = ["xls", "xlsx"];
+
+                    if (whiteList.indexOf(fileSuffix) === -1) {
+
+                        self.$message({
+                            message: '上传文件只能是xls或xlsx格式',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                },
+
+                handleUploadCommit:function(file){
+                    var self = this;
+                    self.dialog.editSchedules.importData.channelId=self.dialog.editSchedules.data.id;
+                },
+                handleUploadSuccess:function(response, file, fileList){
+                    var self = this;
+                    if (response.status == 200) {
+                        self.$message({
+                            type: 'success',
+                            message: '导入成功'
+                        });
+                        self.dialog.editSchedules.visible=false;
+                        self.getChannelList();
+                    }else{
+                        self.$message({
+                            message: response.message,
+                            type: 'warning'
+                        });
+                    }
+
+                },
+                handleExportCommit:function(){
+                    var self = this;
+                    ajax.download('/cs/schedule/export/'+self.dialog.editSchedules.data.id, null, function (data) {
+                        var $a = $('#page-schedule-export');
+                        $a[0].download = self.dialog.editSchedules.data.name+'节目单.xls';
+                        $a[0].href = window.URL.createObjectURL(data);
+                        $a[0].click();
+                        self.$message({
+                            type: 'success',
+                            message: '导出成功'
+                        });
+                    });
+
+
+                    /*window.open("/cs/schedule/export")
+                    ajax.post('/cs/schedule/export', null, function (data, status) {
+
+                     if (status == 200) {
+                     self.$message({
+                     message: '导出成功',
+                     type: 'success'
+                     });
+                     }
+                     }, null, ajax.NO_ERROR_CATCH_CODE)*/
+                },
+                handleSyncTask:function(){
+                    var self = this;
+                    self.wait=true;
+                    ajax.post('/cs/channel/sync', null, function (data, status) {
+                        if (status == 200) {
+                            self.wait=false;
+                            self.$message({
+                                message: '同步成功',
+                                type: 'success'
+                            });
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+
                 selectMuneResource:function(b){
                     var self = this;
                     console.log(b);
@@ -1821,6 +1904,10 @@ define([
                     self.test.visible = true;
                     self.$refs.programScreen.open('/cs/channel/template', self.dialog.editSchedules.data, scope.row);
                 },
+                /*editCalendar: function () {
+                    var self = this;
+                    self.$refs.calendarProgram.open('/cs/channel/template');
+                },*/
 
                 //area dialog event
                 manageBroadcastArea: function (scope) {

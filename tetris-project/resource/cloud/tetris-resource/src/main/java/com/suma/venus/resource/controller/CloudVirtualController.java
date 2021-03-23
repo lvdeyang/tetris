@@ -33,10 +33,9 @@ public class CloudVirtualController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/output/add")
-	public Object outputAdd(String bundleName, String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
+	public Object outputAdd(String bundleName,String type, String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
 		
-		cloudVirtualService.outputAdd(bundleName,url,rateCtrl,bitrate,videos,audios);
-		return null;
+		return cloudVirtualService.outputAdd(bundleName,type,url,rateCtrl,bitrate,videos,audios);
 	}
 	
 	/**
@@ -56,10 +55,9 @@ public class CloudVirtualController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/output/modify")
-	public Object outputModify(String bundleName, String bundleId, String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
+	public Object outputModify(String bundleName, String bundleId, String type,String url , String rateCtrl, String bitrate, String videos, String audios)throws Exception{
 		
-		cloudVirtualService.outputModify(bundleName, bundleId, url, rateCtrl, bitrate, videos, audios);
-		return null;
+		return cloudVirtualService.outputModify(bundleName,type, bundleId, url, rateCtrl, bitrate, videos, audios);
 	}
 	
 	/**
@@ -120,9 +118,9 @@ public class CloudVirtualController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/output/query")
-	public Object outputQuery()throws Exception{
+	public Object outputQuery(String bundleId)throws Exception{
 		
-		return cloudVirtualService.outputQuery();
+		return cloudVirtualService.outputQuery(bundleId);
 	}
 	
 }

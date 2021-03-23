@@ -32,7 +32,7 @@ public interface WebsocketMessageFeign {
 	public JSONObject push(
 			@RequestParam("targetId") String targetId,
 			@RequestParam("businessId") String businessId,
-			@RequestParam("content") String content,
+			@RequestBody String content,
 			@RequestParam("fromId") String fromId,
 			@RequestParam("fromName") String fromName);
 	
