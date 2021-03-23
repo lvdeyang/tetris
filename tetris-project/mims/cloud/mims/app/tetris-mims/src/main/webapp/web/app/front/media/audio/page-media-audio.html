@@ -12,6 +12,21 @@
             <div style="margin-bottom:10px;">
                 <el-button type="primary" size="small" @click="dialog.addAudio.visible = true" :disabled="!current.id"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
                 <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
+                <el-button type="primary" size="small" @click="dialog.batchUpload.visible = true" :disabled="!current.id">
+                    <span class="icon-set" style="position:relative; right:1px;">
+                    </span>&nbsp;关联媒资</el-button>
+                <el-upload
+                        action="/media/audio/import"
+                        ref="upload"
+                        :on-change="handleChange"
+                        :show-file-list="true"
+                        :headers="myHeaders"
+                        style="display:inline-block"
+                        :on-success="handleUploadSuccess"
+                        :limit="1"
+                        >
+                    <el-button size="small" type="primary"  style="margin-left: 10px;">上传标签</el-button>
+                </el-upload>
                 <!--<el-button-group style="margin-left:10px;">
                     <el-button size="small">下载</el-button>
                     <el-button size="small">删除</el-button>
@@ -196,6 +211,32 @@
 
         <!-- 文本文件转换 -->
         <mi-upload-dialog ref="exchangeDialog" @file-selected="exchangeFileSelected" :require-type="dialog.exchange.fileType" :multiple="dialog.exchange.multiple"></mi-upload-dialog>
+
+        <!-- 关联媒资对话框 -->
+        <el-dialog
+                title="关联媒资"
+                :visible.sync="dialog.batchUpload.visible"
+                width="500px"
+                :before-close="handleBatchUploadAudioClose">
+            <div style="height: 400px">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            :props="props"
+                            :load="loadNode"
+                            lazy
+                            show-checkbox>
+                    </el-tree>
+
+                </el-scrollbar>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.batchUpload.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.batchUpload.loading" @click="batchUpload()">确 定</el-button>
+            </span>
+
+        </el-dialog>
+
 
         <!-- 添加音频媒资对话框 -->
         <el-dialog

@@ -39,6 +39,14 @@ define([
         new Vue({
             el:'#' + pageId + '-wrapper',
             data:{
+                props: {
+                    label: 'name',
+                    children: [],
+                    isLeaf: 'leaf'
+                },
+                myHeaders: {
+                    'tetris-001':window.localStorage.getItem(config.ajax.header_auth_token)
+                },
                 menus:context.getProp('menus'),
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
@@ -101,11 +109,72 @@ define([
                     exchange:{
                         fileType:['txt'],
                         multiple:false
+                    },
+                    batchUpload:{
+                        visible:false,
+                        loading:false
                     }
                 },
                 prepareUploadFileInfo:null
             },
             methods:{
+
+                loadNode:function(node, resolve) {
+                    if (node.level === 0) {
+                        return resolve([{ name: '/' }]);
+                    }
+                    if (node.level > 1) return resolve([]);
+
+
+                },
+
+
+                batchUpload:function(){
+                    var self = this;
+                    ajax.post('/media/audio/batch/upload/'+ self.current.id, null, function(data){
+
+                    });
+                },
+
+                handleChange:function(file, fileList) {
+                    var self = this;
+                    const fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
+                    const whiteList = ["xls", "xlsx"];
+
+                    if (whiteList.indexOf(fileSuffix) === -1) {
+
+                        self.$message({
+                            message: '上传文件只能是xls或xlsx格式',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                },
+
+                handleUploadSuccess:function(response, file, fileList){
+                    var self = this;
+                    if (response.status == 200) {
+                        self.$message({
+                            type: 'success',
+                            message: '导入成功'
+                        });
+                        self.created();
+                    }else{
+                        self.$message({
+                            message: response.message,
+                            type: 'warning'
+                        });
+                    }
+
+                },
+
+                handleBatchUploadAudioClose:function(){
+                    var self = this;
+
+                    self.dialog.batchUpload.visible = false;
+                    self.dialog.batchUpload.loading = false;
+                },
+
                 //鼠标移入
                 mouseEnter:function(row, column, cell, event){
                     var self = this;

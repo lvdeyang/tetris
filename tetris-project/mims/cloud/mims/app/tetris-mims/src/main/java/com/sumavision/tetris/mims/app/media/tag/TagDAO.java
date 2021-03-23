@@ -59,4 +59,6 @@ public interface TagDAO extends BaseDAO<TagPO>{
 			+ "AND permission.group_id = ?2 "
 			+ "AND tag.name = ?3", nativeQuery = true)
 	public TagPO findByNameAndId(Long id, String groupId, String name);
+	
+	public TagPO findByName(String name);
 }
