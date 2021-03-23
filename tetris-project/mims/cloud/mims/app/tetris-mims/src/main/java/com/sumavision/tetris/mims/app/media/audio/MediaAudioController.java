@@ -11,9 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.netflix.discovery.converters.Auto;
+import com.sumavision.tetris.mims.app.bo.FtpUtil;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -98,7 +103,9 @@ public class MediaAudioController {
 	
 	@Autowired
 	private Path projectPath;
-	
+
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
 	/**
 	 * 加载文件夹下的音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -870,105 +877,75 @@ public class MediaAudioController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/batch/upload/{folderId}")
-	public Object batchUploadAudio(@PathVariable Long folderId,HttpServletRequest request,String path) throws Exception{
-		
-		UserVO user = userQuery.current();
-		
-		FTPClient ftp = new FTPClient();
-		
-		int reply;
-		//连接FTP服务器
-		ftp.connect("192.165.58.123", 21);
-		ftp.login("test", "123");//登录
-		ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
-		ftp.enterLocalPassiveMode();
-		ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
-		ftp.setControlEncoding("utf-8");
-		ftp.setBufferSize(1024*1024*10);
-		
-		reply = ftp.getReplyCode();
-		if (!FTPReply.isPositiveCompletion(reply)) {
-			ftp.disconnect();
+	public Object batchUploadAudio(@PathVariable Long folderId,HttpServletRequest request,String path){
+		List<MediaAudioPO> ret=new ArrayList<>();
+        try{
+
+			UserVO user = userQuery.current();
+			String webappPath = projectPath.webappPath();
+			ServerProps serverProps=serverPropsQuery.queryProps();
+			int port=21;
+			if(serverProps.getFtpPort()!=null&&!serverProps.getFtpPort().isEmpty()){
+				port=Integer.parseInt(serverProps.getFtpPort());
+			}
+			List<FTPFile> medias=new FtpUtil(serverProps.getFtpIp(),port,
+					serverProps.getFtpUsername(),serverProps.getFtpPassword()).getFiles(path);
+			//遍历媒资
+			for (FTPFile media:medias) {
+				System.out.println(media.getName());
+				MediaAudioPO entity = new MediaAudioPO();
+				entity.setName(media.getName());
+				entity.setFileName(media.getName());
+				entity.setSize(media.getSize());
+
+				entity.setPreviewUrl(new StringBufferWrapper()
+						.append(path)
+						.append(media.getName())
+						.toString());
+				entity.setUploadTmpPath(new StringBufferWrapper()
+						.append(webappPath)
+						.append(path)
+						.append(media.getName())
+						.toString());
+				File file=new File(entity.getUploadTmpPath());
+				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+				entity.setDuration(multimediaInfo.getDuration());
+				entity.setMimetype(new MimetypesFileTypeMap().getContentType(file));
+				entity.setUploadStatus(UploadStatus.COMPLETE);
+				entity.setStoreType(StoreType.LOCAL);
+				entity.setDownloadCount(0l);
+				entity.setFolderId(folderId);
+				entity.setAuthorId(user.getUuid());
+				entity.setAuthorName(user.getNickname());
+				entity.setUpdateTime(new Date());
+
+				mediaAudioDao.save(entity);
+				ret.add(entity);
+			}
+
+		}catch (Exception e){
+
 		}
-		
-		//获取媒资所在路径
-		//String fullPath = "/upload/tmp/sumavision";
-		String fullPath = path;
-		String webappPath = projectPath.webappPath();
-		
-		if(ftp.changeWorkingDirectory(fullPath)){
-			System.out.println("切换目录成功");
-		}
-		//String pwd = ftp.printWorkingDirectory();
-		
-		FTPFile[] media = ftp.listFiles();
-		media[0].getType();
-		//遍历媒资
-		for(int i=0;i<media.length;i++){
-			System.out.println(media[i].getName());
-			MediaAudioPO entity = new MediaAudioPO();
-			entity.setName(media[i].getName());
-			entity.setFileName(media[i].getName());
-			entity.setSize(media[i].getSize());
-			entity.setMimetype("");
-			entity.setPreviewUrl(new StringBufferWrapper()
-					.append(fullPath)
-					.append("/")
-					.append(media[i].getName())
-					.toString());
-			entity.setUploadTmpPath(new StringBufferWrapper()
-					.append(webappPath)
-					.append("ROOT/")
-					.append(fullPath)
-					.append("/")
-					.append(media[i].getName())
-					.toString());
-			entity.setUploadStatus(UploadStatus.COMPLETE);
-			entity.setStoreType(StoreType.LOCAL);
-			entity.setDownloadCount(0l);
-			entity.setFolderId(folderId);
-			entity.setAuthorId(user.getUuid());
-			entity.setAuthorName(user.getNickname());
-			entity.setUpdateTime(new Date());
-			
-			mediaAudioDao.save(entity);
-		}
-		ftp.disconnect();
-		return "";
+		return ret;
 	}
 	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/get/path")
-	public Object getPath(String path) throws Exception{
-		FTPClient ftp = new FTPClient();
-		
-		int reply;
-		ftp.connect("192.165.58.123", 21);
-		ftp.login("test", "123");//登录
-		ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
-		ftp.enterLocalPassiveMode();
-		ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
-		ftp.setControlEncoding("utf-8");
-		ftp.setBufferSize(1024*1024*10);
-		
-		reply = ftp.getReplyCode();
-		if (!FTPReply.isPositiveCompletion(reply)) {
-			ftp.disconnect();
+	public Object getPath(String path) {
+
+		try{
+			ServerProps serverProps=serverPropsQuery.queryProps();
+			int port=21;
+			if(serverProps.getFtpPort()!=null&&!serverProps.getFtpPort().isEmpty()){
+				port=Integer.parseInt(serverProps.getFtpPort());
+			}
+			return new FtpUtil(serverProps.getFtpIp(),port,
+					serverProps.getFtpUsername(),serverProps.getFtpPassword()).getPaths(path);
+		}catch (Exception e){
+
 		}
-		
-		// 获取当前工作目录
-		String pwd = ftp.printWorkingDirectory();
-		//获取目录下文件夹
-		List<String> directoryList = new ArrayList<>();
-		FTPFile[] ftpFile = ftp.listDirectories();
-		for(int i=0;i<ftpFile.length;i++){
-			System.out.println(ftpFile[i].getName());
-			directoryList.add(ftpFile[i].getName());
-		}
-		
-		
-		return "";
+		return new ArrayList<String>();
 	}
 	
 

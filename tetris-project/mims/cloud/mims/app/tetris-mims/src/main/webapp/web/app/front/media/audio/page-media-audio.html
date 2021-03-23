@@ -224,7 +224,9 @@
                             :props="props"
                             :load="loadNode"
                             lazy
-                            show-checkbox>
+                            highlight-current
+                            @node-click="selPathNode"
+                            :expand-on-click-node="false">
                     </el-tree>
 
                 </el-scrollbar>
