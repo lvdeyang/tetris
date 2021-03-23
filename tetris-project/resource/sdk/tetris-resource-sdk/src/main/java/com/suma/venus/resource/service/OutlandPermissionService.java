@@ -326,7 +326,7 @@ public class OutlandPermissionService {
 	 * @return List<String> 所有父目录路径列表   如上例返回[/a,/a/b,/a/b/c]
 	 */
 	public List<String> generateFolderPaths(List<String> folderIds) throws Exception{
-		if(!"".equals(folderIds.get(0))){
+		if(folderIds.size()>0 && !"".equals(folderIds.get(0))){
 			folderIds = new ArrayListWrapper<String>().add("").addAll(folderIds).getList();
 		}
 		List<String> parentFolderPaths = new ArrayList<String>();
