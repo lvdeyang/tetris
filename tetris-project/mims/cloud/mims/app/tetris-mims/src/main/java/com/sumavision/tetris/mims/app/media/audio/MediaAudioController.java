@@ -878,7 +878,7 @@ public class MediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/batch/upload/{folderId}")
 	public Object batchUploadAudio(@PathVariable Long folderId,HttpServletRequest request,String path){
-		List<MediaAudioPO> ret=new ArrayList<>();
+		List<MediaAudioVO> ret=new ArrayList<>();
         try{
 
 			UserVO user = userQuery.current();
@@ -920,7 +920,7 @@ public class MediaAudioController {
 				entity.setUpdateTime(new Date());
 
 				mediaAudioDao.save(entity);
-				ret.add(entity);
+				ret.add(new MediaAudioVO().set(entity));
 			}
 
 		}catch (Exception e){
