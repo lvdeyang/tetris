@@ -31,15 +31,18 @@ public class LoginController {
 	 * <b>日期：</b>2019年3月5日 下午5:13:08
 	 * @param String username 用户名
 	 * @param String password 密码
+	 * @param String p 为过华为云扫描，页面传过来的密码
 	 * @param String verifyCode 验证码
 	 */
 	@RequestMapping(value = "/do/password/login")
 	public void doPasswordLogin(
 			String username,
 			String password,
+			String p,
 			String verifyCode,
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
+		if(password == null) password = p;
 		String token = loginService.doPasswordLogin(username, password, request.getRemoteHost(), TERMINAL_TYPE, verifyCode);
 		String redirectUrl = loginQuery.queryRedirectUrl(token);
 		response.sendRedirect(redirectUrl);

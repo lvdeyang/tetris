@@ -98,6 +98,9 @@ public class WelcomeController {
 		//用户信息
 		UserVO user = userQuery.current();
 		
+		//清除敏感信息
+		user.setIp(null);
+		
 		//TODO 权限校验
 		
 		//根目录
