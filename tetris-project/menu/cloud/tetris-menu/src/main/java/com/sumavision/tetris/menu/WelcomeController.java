@@ -68,6 +68,9 @@ public class WelcomeController {
 		//用户信息
 		UserVO user = userQuery.current();
 		
+		//消除敏感信息
+		user.setIp(null);
+		
 		appInfo.put("user", user);
 		
 		//菜单信息
