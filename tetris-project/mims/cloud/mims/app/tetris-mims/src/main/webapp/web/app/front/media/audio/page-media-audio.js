@@ -44,6 +44,9 @@ define([
                     children: [],
                     isLeaf: 'leaf'
                 },
+                currentTreeNode:{
+
+                },
                 myHeaders: {
                     'tetris-001':window.localStorage.getItem(config.ajax.header_auth_token)
                 },
@@ -121,17 +124,43 @@ define([
 
                 loadNode:function(node, resolve) {
                     if (node.level === 0) {
-                        return resolve([{ name: '/' }]);
+                        return resolve([{ name: '/' ,path:'/'}]);
                     }
-                    if (node.level > 1) return resolve([]);
+                    if (node.level > 0) {
+
+                        ajax.post('/media/audio/get/path', {
+                            path:node.data.path
+                        }, function(data){
+                            var retList=[];
+                            for(var i=0;i<data.length;i++){
+                                retList.push({
+                                    name:data[i],
+                                    path:(node.data.path+data[i]+'/')
+                                });
+                            }
+                            return resolve(retList);
+                        });
+                    }
 
 
                 },
-
-
+                selPathNode:function(obj,node){
+                    var self=this;
+                    self.currentTreeNode=node.data;
+                },
                 batchUpload:function(){
                     var self = this;
-                    ajax.post('/media/audio/batch/upload/'+ self.current.id, null, function(data){
+                    ajax.post('/media/audio/batch/upload/'+ self.current.id,
+                        {
+                            path:self.currentTreeNode.path
+                        },
+                        function(data){
+                            for(var i=0;i<data.length;i++){
+                                self.table.rows.push(data[i]);
+                            }
+
+                            self.dialog.batchUpload.visible = false
+
 
                     });
                 },

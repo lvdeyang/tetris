@@ -381,9 +381,14 @@ public class MediaAudioQuery {
 		Map<String, TagVO> tagMaps=new HashMap<String, TagVO>();
 		
 		for (TagVO tagVO : tagVOs) {
-			for (TagVO subTagVO : tagVO.getSubColumns()) {
-				tagMaps.put(subTagVO.getName(), subTagVO);
+            if(tagVO.getSubColumns()!=null&&tagVO.getSubColumns().size()>0){
+				for (TagVO subTagVO : tagVO.getSubColumns()) {
+					tagMaps.put(subTagVO.getName(), subTagVO);
+				}
+			}else{
+				tagMaps.put(tagVO.getName(), tagVO);
 			}
+
 		}
 		//总推荐个数，暂时写死，后续增加到系统配置页面
 		int count=5;

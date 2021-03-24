@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
@@ -301,7 +304,48 @@ public class FtpUtil {
         }
         return flag; 
     }
-    
+
+    public List<String> getPaths(String path){
+        List<String> directoryList = new ArrayList<>();
+        try{
+            initFtpClient();
+            //切换FTP目录
+            ftpClient.changeWorkingDirectory(path);
+            FTPFile[] ftpFile = ftpClient.listDirectories();
+            for(int i=0;i<ftpFile.length;i++){
+                System.out.println(ftpFile[i].getName());
+                directoryList.add(ftpFile[i].getName());
+            }
+            ftpClient.logout();
+
+        }catch (Exception e){
+
+        }finally {
+            return directoryList;
+        }
+    }
+
+    public List<FTPFile> getFiles(String path){
+        List<FTPFile> fileList = new ArrayList<>();
+        try{
+            initFtpClient();
+            //切换FTP目录
+            ftpClient.changeWorkingDirectory(path);
+            FTPFile[] ftpFile = ftpClient.listFiles();
+            for(int i=0;i<ftpFile.length;i++){
+                System.out.println(ftpFile[i].getName());
+                fileList.add(ftpFile[i]);
+            }
+            ftpClient.logout();
+
+        }catch (Exception e){
+
+        }finally {
+            return fileList;
+        }
+    }
+
+
     public static void main(String[] args) {
         //FtpUtil ftp =new FtpUtil(); 
         //ftp.uploadFile("ftpFile/data", "123.docx", "E://123.docx");
