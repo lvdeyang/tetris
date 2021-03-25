@@ -86,63 +86,31 @@
         <img style="float:left; margin-top:80px; width:600px; transform:rotate(-3deg);" src="images/login-img.png"/>
         <div style="width:337px; float:right; margin-top:130px;">
             <div style="box-shadow:0 0 6px rgba(0,0,0,.08); background-color:#fff; position:relative;">
-                <div style="padding:10px; position:absolute; right:0; top:0;">
-                    <!-- <div style="position:relative;">
-                        <img src="images/wxLogin01.png"/>
-                        <div style="position:absolute; top:0; right:70px;">
-                            <div style="position:relative; border:1px solid #dddfe3; border-radius:2px; padding-left:10px; padding-right:10px;">
-	                                <span style="color:#738299; font-size:12px; position:relative; bottom:2px; white-space:nowrap;">
-	                                    <span class="brands-icon-wechat" style="position:absolute; font-size:16px; top:1px;"></span>
-	                                    <span style="padding-left:20px;">微信扫码登录</span>
-	                                </span>
-                                <div style="position:absolute; right:-8px; top:4px; width:0; height:0; border-width:4px; border-style:solid dashed dashed; border-color:transparent transparent #dddfe3 transparent; transform: rotate(90deg);"></div>
-                                <div style="position:absolute; right:-7px; top:4px; width:0; height:0; border-width:4px; border-style:solid dashed dashed; border-color:transparent transparent #fff transparent; transform: rotate(90deg);"></div>
-                            </div>
-                        </div>
-                    </div> -->
-                </div>
+                <div style="padding:10px; position:absolute; right:0; top:0;"></div>
                 <div style="padding:42px 32px 23px 32px;">
                     <div style="height:45px; border-bottom:1px solid #eef1f4;">
-                        <div @click="tabClick('password')" :style="passwordModeTabStyle()">密码登录</div>
-                        <!-- <div @click="tabClick('phone')" :style="phoneModeTabStyle()">短信码登录</div> -->
+                        <div>密码登录</div>
                     </div>
-                    <form @submit.navite="doPasswordLogin" v-if="mode==='password'" style="margin-top:20px;" action="/do/password/login" method="POST">
-                        <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号">
-                            <span slot="prefix" class="feather-icon-user" style="font-size:20px; position:relative; top:9px;"></span>
-                        </el-input>
-                        <el-input type="password" v-model="passwordInput" class="border-radius-2px" placeholder="密码" style="margin-top:20px;">
-                            <span slot="prefix" class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></span>
-                        </el-input>
-                        <input name="p" type="hidden" v-model="passwordEncode"></input>
+                    <form style="margin-top:20px;" action="/do/password/login" method="POST">
+
+                        <div class="el-input el-input&#45;&#45;prefix">
+                            <input name="username" type="text" autocomplete="off" placeholder="账号/邮箱/手机号" class="el-input__inner border-radius-2px" />
+                            <span class="el-input__prefix"><i class="el-input__icon el-icon-search" style="font-size:20px; position:relative;"></i></span>
+                        </div>
+
+                        <div class="el-input el-input&#45;&#45;prefix" style="margin-top:20px;">
+                            <input id="password" type="password" autocomplete="off" placeholder="密码" class="el-input__inner border-radius-2px" />
+                            <span class="el-input__prefix"><i class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></i></span>
+                        </div>
+
+                        <input id="p" name="p" type="hidden" v-model="passwordEncode"/>
                         <div style="margin-top:20px;">
-                            <!-- <el-button type="text" style="padding:0; float:right;">忘记密码？</el-button> -->
                             <hr style="border:0; clear:both; padding:0; margin:0;"/>
                         </div>
-                        <!--<el-button type="primary" style="margin-top:20px; width:100%; border-radius:2px;">登录</el-button>-->
                         <button type="submit" class="el-button el-button--primary" style="margin-top:20px; width:100%; border-radius:2px;">登录</button>
-                    </form>
-                    <form @submit.navite="doPhoneLogin" v-if="mode==='phone'" style="margin-top:20px;">
-                        <el-input name="mobile" class="border-radius-2px" placeholder="手机号码">
-                            <span slot="prefix" class="feather-icon-smartphone" style="font-size:20px; position:relative; top:9px;"></span>
-                        </el-input>
-                        <el-input name="phoneVerifyCode" class="border-radius-2px" placeholder="验证码" style="margin-top:20px; width:156px; float:left;">
-                            <span slot="prefix" class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></span>
-                        </el-input>
-                        <el-button style="border-radius:2px; float:right; width:110px; margin-top:20px;" disabled>获取短信码</el-button>
-                        <hr style="border:0; clear:both; padding:0; margin:0;"/>
-                        <el-button type="primary" style="margin-top:20px; width:100%; border-radius:2px;">登录</el-button>
                     </form>
                 </div>
                 <div style="height:61px; background-color:#fafbfc; border-top:solid 1px #f4f6f7; padding:10px 32px;">
-                    <!-- <el-button type="text">
-                        <span>其他账号登录</span>
-	                        <span style="position:relative;">
-	                            <span style="position:absolute; left:10px; top:-2px; display:inline-block; width:20px; height:20px; line-height:20px; border-radius:100%; background:#409EFF;">
-	                                <span class="brands-icon-tencentqq icon-color-white"></span>
-	                            </span>
-	                        </span>
-                    </el-button> -->
-                    <!-- <el-button type="text" style="float:right;">立即注册</el-button> -->
                 </div>
             </div>
             <div style="margin-top:20px; font-size:12px; text-align:center;">Copyright © 2019-2030 北京市数码视讯科技股份有限公司</div>
@@ -152,75 +120,7 @@
 </body>
 <script type="text/javascript" src="../../lib/frame/jQuery/jquery-2.2.3.min.js"></script>
 <script type="text/javascript" src="../../lib/frame/jQuery/jquery.json.js"></script>
-<script type="text/javascript" src="../../lib/frame/vue/vue-2.5.16.js"></script>
+<script type="text/javascript" src="../../lib/frame/vue/vue-2.6.0.min.js"></script>
 <script type="text/javascript" src="../../lib/ui/element-ui/element-ui-2.4.3.min.js"></script>
-<script type="text/javascript">
-    $(function(){
-        new Vue({
-            el: '#page-login-wrapper',
-            data: {
-                mode:'password', //password|phone|wechat|qq
-                passwordInput:'',
-                passwordEncode:''
-            },
-            computed:{
-
-            },
-            watch:{
-				passwordInput:function(){
-					var self = this;
-					self.passwordEncode = self.encodePassword(self.passwordInput);
-				}
-            },
-            methods:{
-            	encodePassword:function(text){
-            		for(var i=0; i<5; i++){
-            			text = window.btoa(text);
-            		}
-            		return text;
-            	},
-                passwordModeTabStyle:function(){
-                    var self = this;
-                    if(self.mode === 'password'){
-                        return 'border-bottom:2px solid #2f82ff; display:inline; float:left; padding-left:2px; padding-right:2px; line-height:44px; font-size:16px; color:#1b2f4d;';
-                    }else{
-                        return 'display:inline; float:left; padding-left:2px; padding-right:2px; line-height:44px; font-size:16px; color:#afbcd3;';
-                    }
-                },
-                phoneModeTabStyle:function(){
-                    var self = this;
-                    if(self.mode === 'phone'){
-                        return 'border-bottom:2px solid #2f82ff; display:inline; float:left; padding-left:2px; padding-right:2px; line-height:44px; margin-left:25px; font-size:16px; color:#1b2f4d;';
-                    }else{
-                        return 'display:inline; float:left; padding-left:2px; padding-right:2px; line-height:44px; margin-left:25px; font-size:16px; color:#afbcd3;';
-                    }
-                },
-                tabClick:function(mode){
-                    var self = this;
-                    self.mode = mode;
-                },
-                doPasswordLogin:function(e){
-                    console.log(e.target);
-                },
-                doPhoneLogin:function(e){
-
-                }
-            },
-            created:function(){
-                var self = this;
-                var hash = window.location.hash;
-                if(hash){
-                    hash = hash.replace('#', '');
-                    hash = decodeURIComponent(decodeURIComponent(hash));
-                    hash = hash.split('&&');
-                    var message = hash[1];
-                    self.$message({
-                        type:'error',
-                        message:message
-                    });
-                }
-            }
-        });
-    });
-</script>
+<script type="text/javascript" src="./login.js"></script>
 </html>
