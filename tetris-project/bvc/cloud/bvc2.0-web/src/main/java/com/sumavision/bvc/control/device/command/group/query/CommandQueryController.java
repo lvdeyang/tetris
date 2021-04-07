@@ -999,11 +999,13 @@ public class CommandQueryController {
 			if(ConnectionStatus.ON.equals(serNode.getStatus())){
 				JSONObject json = new JSONObject();
 				json.put("name", serNode.getNodeName());
+				json.put("fakeName", serNode.getFakeName());
 				json.put("status", "online");
 				JSONarray.add(json);
 			}else if(ConnectionStatus.OFF.equals(serNode.getStatus())){
 				JSONObject json = new JSONObject();
 				json.put("name", serNode.getNodeName());
+				json.put("fakeName", serNode.getFakeName());
 				json.put("status", "online");
 				JSONarray.add(json);
 			}

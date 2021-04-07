@@ -158,20 +158,23 @@ public class OutlandService extends ControllerBase{
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年11月4日 下午1:15:58
 	 * @param name 名称
+	 * @param fakeName 
 	 * @param password 口令
 	 * @return SerNodeVO 本域节点信息
 	 */
-	public SerNodeVO inland(String name)throws Exception{
+	public SerNodeVO inland(String name, String fakeName)throws Exception{
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		
 		if(serNodePO == null){
 			SerNodePO newserNodePO = new SerNodePO();
 			newserNodePO.setNodeName(name);
+			newserNodePO.setFakeName(fakeName);
 			newserNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serNodePO = newserNodePO;
 		}
 		String oldName = serNodePO.getNodeName();
 		serNodePO.setNodeName(name);
+		serNodePO.setFakeName(fakeName);
 		serNodeDao.save(serNodePO);
 		SerNodeVO serNodeVO = SerNodeVO.transFromPO(serNodePO);
 		
@@ -267,13 +270,15 @@ public class OutlandService extends ControllerBase{
 	 * @param name 外域名称
 	 * @param password 外域口令
 	 * @param roleIds 外域绑定的角色id
+	 * @param fakeName 
 	 * @return data(成功时返回外域信息，失败时返回错误信息)
 	 */
-	public Map<String, Object> addOutland(String name,String password,String roleIds,String ip,String port, String extraInfoVOList)throws Exception{
+	public Map<String, Object> addOutland(String name,String password,String roleIds,String ip,String port, String extraInfoVOList, String fakeName)throws Exception{
 		Map<String, Object> data= new HashMap<String, Object>();
 		try {
 			SerNodePO serNodePO = new SerNodePO();
 			serNodePO.setNodeName(name);
+			serNodePO.setFakeName(fakeName);
 			serNodePO.setPassword(password);
 			serNodePO.setIp(ip);
 			serNodePO.setPort(port);
@@ -330,6 +335,7 @@ public class OutlandService extends ControllerBase{
 				List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
 				foreign.add(new HashMap<String, Object>());
 				foreign.get(0).put("name", name);
+				foreign.get(0).put("fakeName", fakeName);
 				foreign.get(0).put("password", password);
 				foreign.get(0).put("ip", ip);
 				foreign.get(0).put("port", port);
@@ -465,15 +471,17 @@ public class OutlandService extends ControllerBase{
 	 * @param id 外域id
 	 * @param name 外域新名称
 	 * @param password 外域口令
+	 * @param fakeName 
 	 * @return serNodeVO 外域信息
 	 */
-	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
+	public Map<String, Object> outlandChange(Long id,String name,String password,String roleIds, String ip, String port, String extraInfoVOList, String fakeName)throws Exception{
 		Map<String, Object> map = new HashMap<String, Object>();
 		SerNodePO serNodePO = serNodeDao.findOne(id);
 		String oldname  = serNodePO.getNodeName();
 		List<SerNodePO> localSerNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
 		serNodePO.setPassword(password);
 		serNodePO.setNodeName(name);
+		serNodePO.setFakeName(fakeName);
 		serNodePO.setIp(ip);
 		serNodePO.setPort(port);
 //		serNodePO.setOperate(ConnectionStatus.OFF);
@@ -553,6 +561,7 @@ public class OutlandService extends ControllerBase{
 			List<Map<String, Object>> foreign = new ArrayList<Map<String, Object>>();
 			foreign.add(new HashMap<String, Object>());
 			foreign.get(0).put("oldName", oldname);
+			foreign.get(0).put("fakeName", fakeName);
 			foreign.get(0).put("newName", name);
 			foreign.get(0).put("password", password);
 			foreign.get(0).put("operate", serNodePO.getOperate());
@@ -1146,4 +1155,5 @@ public class OutlandService extends ControllerBase{
 		String addr = websocketServerFeignQuery.addr();
 		return addr;
 	}
+
 }

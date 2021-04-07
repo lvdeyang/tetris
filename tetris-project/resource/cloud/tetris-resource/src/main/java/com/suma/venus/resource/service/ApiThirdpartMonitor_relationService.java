@@ -139,6 +139,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 		SerNodePO serNodePO = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		Map<String, Object> local = new HashMap<String, Object>();
 		local.put("name", serNodePO.getNodeName());
+		local.put("fakeName", serNodePO.getFakeName());
 		List<Map<String, Object>> foreign = new ArrayList<Map<String,Object>>();
 		List<SerNodePO> serNodePOs = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 		List<Long> serNodeIds = new ArrayList<Long>();
@@ -160,6 +161,7 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}
 				Map<String, Object> fo = new HashMap<String, Object>();
 				fo.put("name", serNodePO2.getNodeName());
+				fo.put("fakeName", serNodePO2.getFakeName());
 				fo.put("password", serNodePO2.getPassword());
 				fo.put("ip", serNodePO2.getIp());
 				fo.put("port", serNodePO2.getPort());
