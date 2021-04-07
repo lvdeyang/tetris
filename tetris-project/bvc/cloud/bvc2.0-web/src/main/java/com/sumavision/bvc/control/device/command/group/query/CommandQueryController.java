@@ -36,6 +36,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.dao.OutlandPermissionCheckDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
@@ -43,6 +44,7 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.OutlandPermissionCheckPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.SerNodePO.ConnectionStatus;
@@ -84,6 +86,7 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
@@ -112,6 +115,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/command/query")
@@ -203,6 +208,15 @@ public class CommandQueryController {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private OutlandPermissionCheckDao outlandPermissionCheckDao;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private BusinessRoleQuery businessRoleQuery;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -992,10 +1006,35 @@ public class CommandQueryController {
 	@RequestMapping(value = "/find/institution/tree/foreign")
 	public Object findInstitutionTreeForeign(
 			HttpServletRequest request) throws Exception{
-		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 		JSONArray JSONarray = new JSONArray();
 		
+		UserVO user = userQuery.current();
+		List<SystemRoleVO> roles = businessRoleQuery.findBusinessRoleByUserId(user.getId());
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		if(roleIds.size() <= 0){
+			return JSONarray;
+		}
+		
+		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findByRoleIdIn(roleIds);
+		if(outlandPermissionCheckEntities==null || outlandPermissionCheckEntities.size()<=0){
+			return JSONarray;
+		}
+		
+		List<SerNodePO> serNodeEntities = serNodeDao.findBySourceType(SOURCE_TYPE.EXTERNAL);
 		for(SerNodePO serNode : serNodeEntities){
+			boolean finded = false;
+			for(OutlandPermissionCheckPO outlandPermissionCheckEntity:outlandPermissionCheckEntities){
+				if(outlandPermissionCheckEntity.getSerNodeNamePath().startsWith(new StringBufferWrapper().append("/").append(serNode.getNodeName()).toString())){
+					finded = true;
+					break;
+				}
+			}
+			if(!finded) continue;
 			if(ConnectionStatus.ON.equals(serNode.getStatus())){
 				JSONObject json = new JSONObject();
 				json.put("name", serNode.getNodeName());
