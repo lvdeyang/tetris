@@ -1165,6 +1165,9 @@ public class ApiThirdpartMonitor_relationService extends ControllerBase{
 				}else if("FOLDER".equals(type)){
 					//向客户端推送文件夹信息
 					message = outlandPermissionQuery.packFolderPrivilege(userId, message);
+				}else if("ORIGIN".equals(type)){
+					//向客户端推送外域信息
+					message = outlandPermissionQuery.packOriginPrivilege(userId, message);
 				}
 			}
 			message.put("businessType", "foreignUpdate");

@@ -395,4 +395,66 @@ public class OutlandPermissionQuery {
 		return message;
 	}
 	
+	/**
+	 * 向客户端推送外域信息时过滤无资源的外域节点<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年4月7日 上午11:08:48
+	 * @param String userId 用户id
+	 * @param JSONObject message 
+	 * {
+	 *	   businessType: "foreignUpdate",
+	 *	   type: "ORIGIN",
+	 *	   uuid: "7d08e5f033c24d6f87c6d2288f63ea00",
+	 *	   serNodeNamePath: "/本机61",
+	 *	   folderPath: "/",
+	 *	   serNode: [{ 
+	 *	       domainPath: "/本机61/4113",
+	 *	       name: "4113",
+	 *	       path: "/",
+	 *	       status: "offline",
+	 *	       type: "ORIGIN",
+	 *	   }],
+	 *	   permissionType: "",
+	 *	   roleId: ""
+	 * }
+	 * @return JSONObject message 格式与参数相同，过滤serNode字段
+	 */
+	public JSONObject packOriginPrivilege(String userId, JSONObject message) throws Exception{
+		List<SystemRoleVO> roles = businessRoleQuery.findBusinessRoleByUserId(Long.valueOf(userId));
+		Set<Long> roleIds = new HashSet<Long>();
+		if(roles!=null && roles.size()>0){
+			for(SystemRoleVO role:roles){
+				roleIds.add(Long.valueOf(role.getId()));
+			}
+		}
+		if(roleIds.size() <= 0){
+			//当前用户没有权限，将外域清空
+			message.put("serNode", new JSONArray());
+			return message;
+		}
+		JSONArray serNodes = message.getJSONArray("serNode");
+		if(serNodes==null || serNodes.size()<=0){
+			return message;
+		}
+		JSONArray filteredSerNodes = new JSONArray();
+		List<OutlandPermissionCheckPO> outlandPermissionCheckEntities = outlandPermissionCheckDao.findByRoleIdIn(roleIds);
+		if(outlandPermissionCheckEntities==null || outlandPermissionCheckEntities.size()<=0){
+			message.put("serNode", new JSONArray());
+			return message;
+		}
+		for(int i=0; i<serNodes.size(); i++){
+			JSONObject serNode = serNodes.getJSONObject(i);
+			String serNodeNamePath = serNode.getString("domainPath");
+			for(OutlandPermissionCheckPO outlandPermissionCheckEntity:outlandPermissionCheckEntities){
+				if(outlandPermissionCheckEntity.getSerNodeNamePath().startsWith(serNodeNamePath)){
+					filteredSerNodes.add(serNode);
+					break;
+				}
+			}
+		}
+		message.put("serNode", filteredSerNodes);
+		return message;
+	}
+	
 }
