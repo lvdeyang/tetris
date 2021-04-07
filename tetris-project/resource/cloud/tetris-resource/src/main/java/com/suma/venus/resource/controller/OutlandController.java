@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -56,8 +57,8 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/inland")
-	public Object inland(String name)throws Exception{
-		return outlandService.inland(name);
+	public Object inland(String name,String fakeName)throws Exception{
+		return outlandService.inland(name, fakeName);
 	}
 	
 	/**
@@ -90,9 +91,9 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/outland")
-	public Object addOutland(String name, String password, String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
+	public Object addOutland(String name, String password, String roleIds, String ip, String port, String extraInfoVOList, String fakeName)throws Exception{
 		
-		return outlandService.addOutland(name, password, roleIds, ip, port, extraInfoVOList);
+		return outlandService.addOutland(name, password, roleIds, ip, port, extraInfoVOList, fakeName);
 	}
 
 	/**
@@ -143,8 +144,8 @@ public class OutlandController extends ControllerBase{
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/outland/change")
-	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port, String extraInfoVOList)throws Exception{
-		Map<String, Object> data =  outlandService.outlandChange(serNodeId, name, password, roleIds, ip, port, extraInfoVOList);
+	public Object outlandChange(Long serNodeId,String name,String password,String roleIds, String ip, String port, String extraInfoVOList,String fakeName)throws Exception{
+		Map<String, Object> data =  outlandService.outlandChange(serNodeId, name, password, roleIds, ip, port, extraInfoVOList,fakeName);
 		
 		PassByBO passByBO = (PassByBO) data.get("passby");
 		tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());

@@ -50,6 +50,17 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 	/**外域端口*/
 	private String port;
 	
+	/**显示名称*/
+	private String fakeName;
+	
+	public String getFakeName() {
+		return fakeName;
+	}
+
+	public void setFakeName(String fakeName) {
+		this.fakeName = fakeName;
+	}
+
 	public String getIp() {
 		return ip;
 	}
