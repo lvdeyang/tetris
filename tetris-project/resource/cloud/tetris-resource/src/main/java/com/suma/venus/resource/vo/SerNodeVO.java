@@ -55,6 +55,17 @@ public class SerNodeVO {
 	/**扩展字段**/
 	private JSONObject param;
 	
+	/**显示名称*/
+	private String fakeName;
+	
+	public String getFakeName() {
+		return fakeName;
+	}
+
+	public void setFakeName(String fakeName) {
+		this.fakeName = fakeName;
+	}
+
 	public JSONObject getParam() {
 		return param;
 	}
