@@ -144,4 +144,14 @@ public interface OutlandPermissionCheckDao extends CommonDao<OutlandPermissionCh
 	 */
 	public List<OutlandPermissionCheckPO> findBySerNodeNamePathAndRoleIdIn(String serNodeNamePath, Collection<Long> roleIds);
 	
+	/**
+	 * 查询用户所有授权勾选<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年4月7日 上午11:18:19
+	 * @param Collection<Long> roleIds 用户角色列表
+	 * @return List<OutlandPermissionCheckPO> 授权勾选列表
+	 */
+	public List<OutlandPermissionCheckPO> findByRoleIdIn(Collection<Long> roleIds);
+	
 }
