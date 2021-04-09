@@ -29,6 +29,7 @@ public class UserBO {
 
 	private boolean logined = false;
 
+	//用户号码
 	private String userNo;
 
 	// 所属分组ID
