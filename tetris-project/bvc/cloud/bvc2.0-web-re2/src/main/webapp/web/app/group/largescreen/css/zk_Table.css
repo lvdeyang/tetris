@@ -1,0 +1,336 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+}
+html,body {
+	width: 100%;
+	height: 100%;
+}
+.zk_Table {
+	width: 100%;
+	height: 100%;
+	background-color: rgba(20, 107, 135, 1);
+	border: 1px solid rgba(12, 59, 74, 0.5);
+}
+.zk_Table{
+	min-width: 700px;
+}
+.zk_Table .caption {
+	width: 100%;
+	height: 50px;
+    line-height: 50px;
+	padding-left:10px;
+	padding-right:10px;
+}
+.zk_Table .headContainer{
+	background: -webkit-gradient(linear, 0 50%, 0 100%, from(rgba(20, 107, 135, 1)),to(rgba(13, 62, 78, 1)));
+	background: -webkit-linear-gradient(rgba(20, 107, 135, 1),rgba(13, 62, 78, 1));
+	background: -o-linear-gradient(rgba(20, 107, 135, 1),rgba(13, 62, 78, 1));
+	background: -moz-linear-gradient(rgba(20, 107, 135, 1),rgba(13, 62, 78, 1));
+	background: -ms-linear-gradient(top, rgba(20, 107, 135, 1),rgba(13, 62, 78, 1));
+	background: linear-gradient(rgba(20, 107, 135, 1), rgba(13, 62, 78, 1));
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#146B87',endColorstr='#0D3E4E', GradientType=0);
+	height:50px;
+	border-top: 1px solid rgba(86, 200, 243, 0.4);
+	border-bottom: 1px solid rgba(86, 200, 243, 0.4);
+	border-right: 1px solid rgba(86, 200, 243, 0.4);
+	white-space: nowrap;
+    overflow: hidden;
+}
+.zk_Table .head {
+	height: 50px;
+	float:left;
+	white-space: nowrap;
+    overflow: hidden;
+}
+.zk_Table .head div {
+	float:left;
+	height: 50px;
+	line-height: 50px;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 1);
+	text-align: center;
+	font-size: 18px;
+	width: 245px;
+	display: inline-block;
+	transition: border 0.2s ease-in;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zk_Table .head div.headerCheckBox[col=checkBox]{
+	cursor:pointer;
+	transition:background 0.2s ease-in;
+	background:url("../../images/base/table/checkBox.png") center center no-repeat;
+}
+.zk_Table .head div.headerCheckBox[col=checkBox].active{
+	background:url("../../images/base/table/checkBoxChecked.png") center center no-repeat,url("../../images/base/table/checkBox.png") center center no-repeat;
+}
+.zk_Table .head div[col=checkBox],.zk_Table .head div[col=summary]{
+	width:50px;
+	border-right: 1px solid rgba(86, 200, 243, 0.2);
+}
+.zk_Table .head .head_spider {
+	width: 5px;
+	height: 50px;
+	border-right: 1px solid rgba(86, 200, 243, 0.2);
+}
+.zk_Table .head .head_spider:hover {
+	cursor: w-resize;
+}
+.zk_Table .data {
+	width: 100%;
+	height: 100%;
+}
+.zk_Table .height {
+	width: 100%;
+	height: 15%;
+}
+.zk_Table .bodyContainer{
+	width:100%;
+	float:left;
+}
+.zk_Table .body {
+	width: 100%;
+	 height: 270px;
+	float:left;
+}
+.zk_Table .body .dataRow {
+	width: 100%;
+	height: 50px;
+	white-space: nowrap;
+    overflow: hidden;
+}
+.zk_Table .body .dataRow:hover>div,.zk_Table .body .dataRow:hover>div[col=checkBox],.zk_Table .body .dataRow:hover>div.active[col=checkBox]{
+	background-color: rgba(0, 0, 0, 0.3);
+}
+.zk_Table .body .dataRow div {
+	float:left;
+	height: 50px;
+	line-height: 50px;
+	font-size: 18px;
+	color: rgba(209, 231, 183, 1);
+	font-weight: 400;
+	text-align: center;
+	width: 250px;
+	display: inline-block;
+	border-right: 1px solid rgba(86, 200, 243, 0.2);
+	border-bottom: 1px solid rgba(86, 200, 243, 0.2);
+	transition: border 0.2s ease-in, background-color 0.2s ease-in;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zk_Table .body .dataRow div[col=checkBox],.zk_Table .body .dataRow div[col=summary]{
+	width:50px;
+	border-right: 1px solid rgba(86, 200, 243, 0.2);
+}
+.zk_Table .body .dataRow div[col=checkBox]{
+	cursor:pointer;
+	transition:background 0.2s ease-in;
+	background:url("../../images/base/table/checkBox.png") center center no-repeat;
+}
+.zk_Table .body .dataRow div[col=checkBox].active{
+	background:url("../../images/base/table/checkBoxChecked.png") center center no-repeat,url("../../images/base/table/checkBox.png") center center no-repeat;
+}
+.zk_Table .body .dataRow div[col=checkBox].active:hover{
+	background-color: rgba(0, 0, 0, 0.3);
+}
+.zk_Table .body .dataRow div[col=summary]{
+	padding:0.8%;
+	transition:background-color 0.2s ease-in;
+	cursor:pointer;
+}
+.zk_Table .body .dataRow div[col=summary]:hover>span{
+	border-bottom:3px solid rgba(255,255,255, 1);
+}
+.zk_Table .body .dataRow div[col=summary]>span{
+	display:block;
+	border-bottom:3px solid #ffe484;
+	margin-bottom:15%;
+	transition:border-color 0.2s ease-in;
+}
+.zk_Table .head div[data_status=hide],.zk_Table .head .head_spider[data_status=hide],.zk_Table .body .dataRow div[data_status=hide]{
+	display: none;
+	width: 0;
+	height: 0;
+}
+.zk_Table .firstCol {
+	border-left: 1px solid rgba(86, 200, 243, 0.2);
+}
+.zk_Table .foot {
+	width: 100%;
+	height: 60px;
+	line-height:60px;
+	padding-left:10px;
+	padding-right:10px;
+	background:url("../../images/base/table/footerBg.png") repeat-x;
+	overflow: hidden;
+}
+.zk_Table .foot .footerSpider{
+	height:30px;
+	display: inline-block;
+	float: left;
+	margin: 15px 0px;
+	margin-right:15px;
+	border-right: 1px solid rgba(4,50,65,0.5);
+	box-shadow: 1px 1px 1px rgba(218,239,246,0.3);
+}
+.zk_Table .foot nav{
+	height:60px;
+	line-height: 60px;
+	display: inline-block;
+	float:right;
+}
+.zk_Table .foot nav>ul{
+	margin: 13px 0px;
+}
+.zk_Table .foot nav>ul>li{
+	cursor: pointer;
+}
+.zk_Table .foot nav>ul>li.active{
+	display:inline;
+}
+.zk_Table .foot .totalNum,.zk_Table .foot .count{
+	padding: 6px 12px;
+	line-height: 1.42857143;
+	text-decoration: none;
+	color: #337ab7;
+	background-color: #ffffff;
+	border: 1px solid #dddddd;
+}
+.zk_Table .foot .count{
+	border:0px;
+	padding: 6px 0px;
+	font-size:14px;
+}
+.zk_Table .foot .totalNum{
+	border-radius: 4px;
+	float: left;
+	margin: 13px 0px;
+	margin-right:15px;
+	font-size:14px;
+}
+.zk_Table .foot select.form-control{
+	display: inline-block;
+	width:75px;
+	float:left;
+	margin:13px 0px;
+	color: #337ab7;
+	margin-right:15px;
+}
+.zk_Table .foot select.form-control>option{
+	color: #337ab7;
+}
+.zk_Table .foot button.btn.btn-default{
+	float:left;
+	margin:13px 0px;
+	color: #337ab7;
+	margin-right:15px;
+}
+.zk_Table .optMenu{
+	height:50px;
+	line-height: 50px;
+	overflow: hidden;
+	width:50%;
+	float:left;
+	text-align: left;
+	display: none;
+	padding-left:10px;
+}
+.zk_Table .optMenu input.form-control{
+	display: inline-block;
+	width:40%;
+	float:left;
+	margin:8px 0px;
+	color: #337ab7;
+	margin-right:15px;
+}
+.zk_Table .optMenu select.form-control{
+	display: inline-block;
+	width:auto;
+	float:left;
+	margin:8px 0px;
+	color: #337ab7;
+	margin-right:10px;
+}
+.zk_Table .jumpMenu{
+	height:50px;
+	line-height: 50px;
+	overflow: hidden;
+	width:50%;
+	float:right;
+	text-align: right;
+	display: none;
+	padding-right:10px;
+}
+.zk_Table .jumpMenu div.jumpInputIcon{
+	display: inline-block;
+	width:34px;
+	height:34px;
+	float: right;
+	margin:8px 0px;
+	color: #337ab7;
+	padding: 6px 12px;
+	line-height: 1.42857143;
+	text-decoration: none;
+	background-color: #ffffff;
+	border: 1px solid #dddddd;
+	border-right:0px;
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+.zk_Table .jumpMenu button.jumpBtn{
+	float: right;
+	margin:8px 0px;
+	line-height: 1.42857143;
+	height:34px;
+	padding: 6px 12px;
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	border-left: 0px;
+	color: #337ab7;
+}
+.zk_Table .jumpMenu input.form-control{
+	display: inline-block;
+	width:100px;
+	float:right;
+	margin:8px 0px;
+	color: #337ab7;
+	border-radius: 0px;
+	color: #337ab7;
+}
+.mCSB_scrollTools.mCSB_scrollTools_horizontal{
+	border-top:rgba(12, 59, 74, 1);
+}
+/* 详情里面加按钮 */
+.zk_Table .body .dataRow div[col=summary], .zk_Table .head div[col=summary]{
+	/* 这个样式可以在外面覆盖 */
+	width:200px;
+}
+.zk_Table .body .dataRow div[col=summary]{
+	padding:0;
+}
+.zk_Table .body .dataRow div[col=summary] button{
+	color: rgba(104,255,244,1);
+	margin-left:10px;
+	margin-right:10px;
+	transition:color 0.2s ease-in;
+	text-shadow:1px 1px 1px rgba(0, 0, 0, 1);
+	cursor:pointer;
+	font-size:16px;
+	padding:0px;
+	width:25px;
+	height:25px;
+}
+.zk_Table .body .dataRow div[col=summary] button:focus,
+.zk_Table .body .dataRow div[col=summary] button:active:focus {
+	outline: none;
+}
+.zk_Table .body .dataRow div[col=summary] button:active{
+	text-shadow: none;
+	position:relative;
+	left:1px;
+	top:2px;
+}

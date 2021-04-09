@@ -1,0 +1,3 @@
+/* reset */
+.bvc2-monitor-vod *{box-sizing:border-box!important;}
+.bvc2-monitor-vod .el-scrollbar__wrap{overflow-x: hidden;}

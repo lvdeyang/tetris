@@ -1,0 +1,31 @@
+<div id="bvc2-auto-layout-polling-list-dialog-wrapper">
+
+    <el-dialog
+            title="轮询列表"
+            :visible.sync="dialogVisible"
+            width="792px"
+            :before-close="handleClose">
+        <div>
+            <el-transfer
+                style="text-align:left; display:inline-block;"
+                v-model="selected"
+                filterable
+                :render-content="renderFunc"
+                :format="{
+                noChecked: '${total}',
+                hasChecked: '${checked}/${total}'
+              }"
+                :titles="['编码通道', '选中项']"
+                :button-texts="['删除', '选中']"
+                :data="data"
+                target-order="push"
+                :filter-method="filterMethod">
+            </el-transfer>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="handleCancelClick">取 消</el-button>
+            <el-button type="primary" @click="handleOkClick">确 定</el-button>
+        </span>
+    </el-dialog>
+
+</div>

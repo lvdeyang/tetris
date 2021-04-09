@@ -1,0 +1,20 @@
+<el-dialog 
+		class="bvc2-dialog-publish-authority"
+		width="693px"
+    	style="line-height: 0; text-align: center"
+		title="发布RTMP"
+		:visible.sync="dialogFormVisible">
+
+  	<el-form :model="form" id="formInfo" >
+    	<el-form-item label="RTMP地址" :label-width="formLabelWidth">
+      	<el-input v-model="form.name" name="name" placeholder="rtmp://192.165.56.14:1935/live/xxx" auto-complete="off" style="margin-left:-75px; width:470px"></el-input>
+    	</el-form-item>
+  	</el-form>
+
+  	<div slot="footer" class="dialog-footer">
+    	<el-button @click="dialogFormVisible  = false">取 消</el-button>
+    	<el-button type="primary" style="width:70px;" @click="saveAuthority" :loading="style.saveAuthority.isLoading">{{style.saveAuthority.text}}</el-button>
+   
+  	</div>
+  
+</el-dialog>

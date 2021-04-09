@@ -1,0 +1,14 @@
+.dialog-quick-group .bvc2-tree-header{width:100%; height:45px; position:relative;}
+
+.dialog-quick-group .bvc2-tree-list{width:100%; height:100%; position:relative;}
+.dialog-quick-group .bvc2-tree-list-search{height:28px; line-height:normal;}
+.dialog-quick-group .bvc2-tree-list-search input{border-radius:14px}
+.dialog-quick-group .bvc2-tree-list-data{width:100%; height:445px; overflow:auto;}
+.dialog-quick-group .bvc2-tree-node-custom{font-size:14px;}
+
+.dialog-quick-group .el-dialog{width:20%;}
+.dialog-quick-group .el-dialog__header{text-align:center; }
+.dialog-quick-group .el-dialog__body{padding:10px;}
+.dialog-quick-group .el-dialog__footer{padding-top:0;}
+
+.dialog-quick-group .bvc2-tree-list-chairman{height:28px; line-height:normal; margin-left: 10px; margin-top: 10px; font-weight: bold; color:#409EFF;}

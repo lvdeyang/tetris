@@ -1,0 +1,139 @@
+<div class="bvc2-monitor-subtitle" style="width:100%; height:100%; padding-left:10px; padding-right:10px; box-sizing:border-box; background-color:#fff;">
+    <div style="width:100%; height:100%; position:relative;">
+        <div style="width:100%; height:52px; padding-top:10px;">
+            <el-button size="small" @click="handleAddSubtitle" type="primary">添加字幕</el-button>
+            <!--<el-button size="small" type="danger">删除字幕</el-button>-->
+        </div>
+        <div style="position:absolute; left:0; top:52px;right:0; bottom:52px;">
+            <div style="width:100%; height:100%;">
+                <el-table
+                        :data="table.data"
+                        height="100%"
+                        stripe
+                        style="width: 100%">
+                    <!--<el-table-column
+                            type="selection"
+                            width="55">
+                    </el-table-column>-->
+                    <el-table-column
+                            fixed
+                            prop="name"
+                            label="名称">
+                    </el-table-column>
+                    <el-table-column
+                            prop="font"
+                            label="字体">
+                    </el-table-column>
+                    <el-table-column
+                            prop="height"
+                            label="字号">
+                    </el-table-column>
+                    <el-table-column
+                            label="颜色">
+                        <template slot-scope="scope">
+                            <span :style="'float:left; display:inline-block; width:20px; height:20px; background-color:#' + scope.row.color + '; margin-right:10px; position:relative; top:1px;'"></span>
+                            <span style="float:left;">#{{scope.row.color}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="content"
+                            label="内容">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="200">
+                        <template slot-scope="scope">
+                            <el-button type="text" icon="el-icon-edit" style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowEdit(scope)"></el-button>
+                            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+        <div style="height:52px; width:100%; position:absolute; right:0; bottom:0; padding-right:10px; padding-top:10px;">
+            <el-pagination
+                    style="float:right;"
+                    background
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="table.page.currentPage"
+                    :page-sizes="[20, 50, 100, 500, 1000]"
+                    :page-size="table.page.pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="table.page.total">
+            </el-pagination>
+        </div>
+    </div>
+
+    <template>
+
+        <el-dialog
+                title="添加字幕"
+                :visible.sync="dialog.addSubtitle.visible"
+                width="500px"
+                :before-close="handleAddSubtitleClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="字幕名称">
+                    <el-input v-model="dialog.addSubtitle.name"></el-input>
+                </el-form-item>
+                <el-form-item label="字体">
+                    <el-select v-model="dialog.addSubtitle.font" placeholder="请选择字体" style="width:100%;">
+                        <el-option :key="'a-'+font" v-for="font in fonts" :label="font" :value="font"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="字号">
+                    <el-input-number size="medium" :min="1" :max="9" v-model="dialog.addSubtitle.height"></el-input-number>
+                </el-form-item>
+                <el-form-item label="字体颜色">
+                    <el-color-picker v-model="dialog.addSubtitle.color"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="字幕内容">
+                    <el-input rows="3" type="textarea" v-model="dialog.addSubtitle.content"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="handleAddSubtitleClose">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleAddSubtitleCommit" :loading="dialog.addSubtitle.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                title="修改字幕"
+                :visible.sync="dialog.editSubtitle.visible"
+                width="500px"
+                :before-close="handleEditSubtitleClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="字幕名称">
+                    <el-input v-model="dialog.editSubtitle.name"></el-input>
+                </el-form-item>
+                <el-form-item label="字体">
+                    <el-select v-model="dialog.editSubtitle.font" placeholder="请选择字体" style="width:100%;">
+                        <el-option :key="'e-'+font" v-for="font in fonts" :label="font" :value="font"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="字号">
+                    <el-input-number size="medium" :min="1" :max="9" v-model="dialog.editSubtitle.height"></el-input-number>
+                </el-form-item>
+                <el-form-item label="字体颜色">
+                    <el-color-picker v-model="dialog.editSubtitle.color"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="字幕内容">
+                    <el-input rows="3" type="textarea" v-model="dialog.editSubtitle.content"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="handleEditSubtitleClose">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleEditSubtitleCommit" :loading="dialog.editSubtitle.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+
+</div>

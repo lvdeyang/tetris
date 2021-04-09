@@ -1,0 +1,104 @@
+/* reset */
+.bvc2-monitor-ptzctrl * {
+    box-sizing: border-box !important;
+}
+
+.bvc2-monitor-ptzctrl {
+    overflow: hidden;
+}
+
+.el-tag.active {
+    background-color: #66b1ff;
+    color: #fff;
+}
+
+.el-tag {
+    cursor: pointer;
+}
+
+.el-tag {
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+button.define {
+    background-color: #000;
+    border: 1px solid #000;
+    color: #00c9ff;
+}
+
+.define:active {
+    color: #409EFF;
+    outline: 0;
+}
+
+.define:hover {
+    color: #409EFF;
+    border-color: #000;
+    background-color: #000;
+}
+
+.define:focus {
+    color: #409EFF;
+    border-color: #000;
+    background-color: #000;
+}
+
+.el-button--normal {
+    color: #00c9ff;
+    background-color: #000000;
+    border-color: #00a3f7;
+}
+
+.el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.el-button.el-button--normal:focus, .el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.addClick {
+    background-color: #3bb3e0;
+    padding: 10px;
+    position: relative;
+    text-decoration: none;
+    color: #fff;
+    border: solid 1px #186f8f;
+    background-image: linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -webkit-gradient(
+            linear,
+            left bottom,
+            left top,
+            color-stop(0, rgb(44, 160, 202)),
+            color-stop(1, rgb(62, 184, 229))
+    );
+    -webkit-box-shadow: inset 0 1px 0 #7fd2f1, 0 1px 0 #fff;
+    -moz-box-shadow: inset 0 1px 0 #7fd2f1, 0 1px 0 #fff;
+    box-shadow: inset 0 1px 0 #7fd2f1, 0 1px 0 #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.addClick:hover {
+    color: #fff;
+}
+.addClick:focus{
+    color: #fff;
+}
+.el-tag{
+    background-color: rgb(46, 36, 36);
+    color: #00c9ff;
+}
+.el-tag.active {
+    background-color: #6b0000;
+}

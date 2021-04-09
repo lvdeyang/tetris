@@ -1,0 +1,281 @@
+/* reset */
+.bvc2-monitor-ptzctrl {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: #0f2a4d;
+    border: 1px solid #123e80;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.win-header {
+    height: 40px;
+    background-color: #3668a9;
+    border-radius: 4px 4px 0 0;
+}
+
+.win-header .win-header-title {
+    float: left;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+}
+
+.win-header .win-header-close {
+    float: right;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.el-button.directBtn {
+    position: absolute;
+    top: 4px;
+    left: 44px;
+    width: 48%;
+    height: 79%;
+    background: transparent;
+    border: none;
+}
+
+.el-button.horizBtn {
+    position: absolute;
+    top: 47px;
+    left: 5px;
+    width: 81%;
+    height: 46%;
+    background: transparent;
+    border: none;
+}
+
+.up {
+    position: absolute;
+    top: 0;
+    left: 11px;
+    width: 175px;
+    height: 60px;
+    background: url('../../../../../images/zk-leader/default_up.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.upActive {
+    position: absolute;
+    top: 0;
+    left: 11px;
+    width: 175px;
+    height: 60px;
+    background: url('../../../../../images/zk-leader/active_up.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.left {
+    position: absolute;
+    left: 0;
+    top: 13px;
+    width: 60px;
+    height: 175px;
+    background: url('../../../../../images/zk-leader/default_left.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.leftActive {
+    position: absolute;
+    left: 0;
+    top: 13px;
+    width: 60px;
+    height: 175px;
+    background: url('../../../../../images/zk-leader/active_left.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.right {
+    position: absolute;
+    top: 11px;
+    right: 1px;
+    width: 60px;
+    height: 175px;
+    background: url('../../../../../images/zk-leader/default_right.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.rightActive {
+    position: absolute;
+    top: 11px;
+    right: 1px;
+    width: 60px;
+    height: 175px;
+    background: url('../../../../../images/zk-leader/active_right.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.down {
+    width: 175px;
+    height: 60px;
+    position: absolute;
+    left: 13px;
+    bottom: 0;
+    background: url('../../../../../images/zk-leader/default_down.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.downActive {
+    width: 175px;
+    height: 60px;
+    position: absolute;
+    left: 13px;
+    bottom: 0;
+    background: url('../../../../../images/zk-leader/active_down.png') no-repeat center;
+    background-size: 100% 100%;
+}
+
+.long {
+    width: 200px;
+    height: 35px;
+    line-height: 35px;
+    background-color: #0b2d5a;
+    border: 1px solid #123e80;
+    border-radius: 5px;
+}
+
+.symbol {
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    border-radius: 5px;
+    background-color: #00e9ff;
+    vertical-align: middle;
+    margin-right: 20px;;
+}
+
+.el-tag.active {
+    background-color: #66b1ff;
+    color: #fff;
+}
+
+.el-tag {
+    cursor: pointer;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+button.define {
+    background-color: #043554e3;
+    border: 1px solid #043554e3;
+    color: #84adc2;
+    font-size: 18px;
+}
+
+.el-button--normal {
+    color: #00c9ff;
+    background-color: #000000;
+    border-color: #00a3f7;
+}
+
+.el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.el-button.el-button--normal:focus, .el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.addClick {
+    margin-left: 240px;
+    background-color: #2562f7;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px
+}
+
+.addClick:hover {
+    color: #fff;
+    box-shadow: none;
+    border: solid 1px #186f8f;
+}
+
+.addClick:focus {
+    color: #fff;
+}
+
+.el-tag {
+    background-color: #0b2d5a;
+    color: #fff;
+}
+
+.el-tag.active {
+    background-color: #6b0000;
+}
+
+.el-input--mini .el-input__inner {
+    width: 140px;
+    height: 40px;
+    background-color: #0b2d5a;
+    border: 1px solid #123e80;
+    color: #fff;
+    font-size: 18px;
+}
+
+.close {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+/*弹出的框*/
+.el-dialog {
+    background: #0F2A4D;
+}
+
+.el-dialog__title {
+    color: #fff;
+}
+
+.el-input__inner {
+    color: #6b9fd0;
+    background-color: #0B2D5A;
+    border: 1px solid #123e80;
+}
+
+.el-button--default {
+    padding: 8px 20px;
+    background-color: #204A6B;
+    border: none;
+    border-radius: 33px;
+    color: #fff;
+}
+
+.el-button--text:focus, .el-button--text:hover {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+}
+.el-button--default:focus,.el-button--default:hover{
+    background-color: #204A6B;
+    border: none;
+    color: #fff;
+}
+
+.el-button--primary {
+    padding: 8px 20px;
+    background-color: #2562F7;
+    border: none;
+    border-radius: 33px;
+    color: #fff;
+}
+
+.el-button--primary:focus, .el-button--primary:hover {
+    background-color: #2562F7;
+    border: none;
+}

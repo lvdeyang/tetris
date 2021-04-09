@@ -1,0 +1,22 @@
+/* reset */
+.bvc2-monitor-forword-bandwidth * {
+  box-sizing: border-box !important;
+}
+
+.bvc2-monitor-forword-bandwidth .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+
+
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.clear {
+  zoom: 1;
+}

@@ -1,0 +1,19 @@
+<div class="bvc2-preview-layout">
+    <div class="bvc2-preview-layout-tool-bar">
+        <div class="bvc2-preview-layout-tool-bar-wrapper">
+            <span class="tool-bar-item">
+                <el-select size="small" v-model="layout.row" @change="rowChange">
+                    <el-option
+                            v-for="rowOption in options.rowOptions"
+                            :key="rowOption.value"
+                            :label="rowOption.label"
+                            :value="rowOption.value"/>
+                </el-select>
+            </span>
+            <span class="tool-bar-title">预览</span>
+        </div>
+    </div>
+    <div class="bvc2-preview-layout-wrapper">
+        <div class="bvc2-preview-layout-container"></div>
+    </div>
+</div>

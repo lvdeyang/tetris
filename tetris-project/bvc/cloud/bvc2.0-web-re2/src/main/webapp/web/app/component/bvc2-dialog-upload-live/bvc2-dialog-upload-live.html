@@ -1,0 +1,25 @@
+<el-dialog 
+	class="bvc2-dialog-upload-live"
+	width="693px"
+    style="line-height: 0; text-align: center"
+	title="发布直播"
+	:visible.sync="dialogFormVisible">
+
+  <el-form :model="form" id="formInfo">
+    <el-form-item label="会议名称" :label-width="formLabelWidth">
+      <el-input v-model="form.name" name="name" auto-complete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="会议描述" :label-width="formLabelWidth">
+      <el-input v-model="form.description" name="description" auto-complete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisible  = false">取 消</el-button>
+    <!-- <el-button type="primary" @click="dialogFormVisible  = false">发 布</el-button>  -->
+   
+    <el-button type="primary" style="width:70px;" @click="uploadSubmit":loading="style.uploadSubmit.isLoading">{{style.uploadSubmit.text}}</el-button>
+   
+  </div>
+  
+</el-dialog>

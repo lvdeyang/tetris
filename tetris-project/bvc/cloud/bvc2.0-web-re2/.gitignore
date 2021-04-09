@@ -1,0 +1,14 @@
+/target/
+/bin/
+/.apt_generated/
+/.settings/
+.classpath
+.factorypath
+.project
+/.idea/
+/src/main/webapp/web/.idea/
+lombok-1.16.10.jar
+/src/main/webapp/WEB-INF/.idea/
+/logs/
+/LOG_HOME_IS_UNDEFINED/
+/backups/

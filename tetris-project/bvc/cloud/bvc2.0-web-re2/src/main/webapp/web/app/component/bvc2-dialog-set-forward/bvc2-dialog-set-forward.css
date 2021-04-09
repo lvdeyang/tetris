@@ -1,0 +1,5 @@
+.bvc2-dialog-set-forward .el-transfer-panel__body {height: 346px;}
+.bvc2-dialog-set-forward .el-input__inner { background-color: #fff; border-color: #dcdfe6; border-radius: 16px; color: #606266; border: 1px solid #dcdfe6 !important;}
+.bvc2-dialog-set-forward .el-dialog__header { padding: 0;}
+.bvc2-dialog-set-forward .el-dialog__body {padding: 20px 20px 0 20px; text-align: left}
+.bvc2-dialog-set-forward .el-dialog__body .el-radio-group .el-radio-button .el-radio-button__inner{font-size: 16px}

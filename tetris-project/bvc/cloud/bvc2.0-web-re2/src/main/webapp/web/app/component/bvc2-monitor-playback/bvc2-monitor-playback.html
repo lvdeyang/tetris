@@ -1,0 +1,207 @@
+<div class="bvc2-monitor-playback" style="width:100%; height:100%; padding:10px; box-sizing:border-box;">
+    <div style="width:100%; height:100%; position:relative;">
+        <div style="width:300px; height:100%; border:1px solid #ebeef5; background-color:#fff;">
+            <div class="monitor92-l02" style="width:100%; height:100%; position:relative; border:1px solid transparent;">
+                <div class="monitor92-m01 monitor92-f03 monitor92-h4" style="line-height:40px; text-align:center; border-bottom:1px solid #ebeef5;">
+                    设备列表
+                </div>
+                <div style="position:absolute; left:0; top:41px; right:0; bottom:0;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                :data="tree.data"
+                                :props="tree.props">
+                        <span class="custom-tree-node" slot-scope="{node, data}">
+                            <el-radio v-if="data.type==='BUNDLE' || data.type==='USER'" v-model="tree.currentDevice" :label="data.param" @change="currentDeviceChange(data)">
+                                <span :class="data.icon" :style="data.style"></span>
+                                <span>{{node.label}}</span>
+                            </el-radio>
+                            <span v-else>
+                                <span :class="data.icon"></span>
+                                <span>{{node.label}}</span>
+                            </span>
+                        </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+        </div>
+        <div style="position:absolute; left:310px; top:0; right:390px; bottom:0;">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="position:absolute; left:0; top:0; right:0; bottom:100px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="width:100%; height:100%;" id="player-container">
+                            <!-- 播放器插件 -->
+                        </div>
+                    </div>
+                </div>
+                <div style="width:100%; height:100px; position:absolute; left:0; bottom:0; padding:5px;">
+                    <div class="monitor92-l02" style="width:100%; height:100%; border:1px solid #ebeef5; background-color:#fff; padding:9px;">
+                        <div class="bvc2-layout-buttons">
+                            <div v-for="button in buttons" :class="button.active?'bvc2-layout-button active':'bvc2-layout-button'" :data-id="button.id" @click="layoutChange(button)">
+                                <div class="bvc2-layout-button-icon"></div>
+                                <div class="bvc2-layout-button-text">{{button.name}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div style="width:380px; height:100%; position:absolute; top:0; right:0; border:1px solid #ebeef5; background-color:#fff;">
+            <div class="monitor92-l02" style="width:100%; height:100%; position:relative; border:1px solid transparent;">
+                <!-- border-bottom:1px solid #ebeef5;-->
+                <div class="monitor92-m01 monitor92-f03 monitor92-h4" style="line-height:40px; text-align:center;">
+                    文件列表
+                </div>
+                <div>
+                    <el-date-picker
+                        v-model="timeRange"
+                        style="width:100%; border-radius:0; border-left:0; border-right:0;"
+                        type="datetimerange"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期">
+                    </el-date-picker>
+                </div>
+                <div v-if="tree.currentDevice" style="position:absolute; left:0; top:81px; right:0; bottom:60px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                :data="table.data"
+                                style="border:0!important;">
+                            <el-table-column>
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.playable" style="cursor:move;" draggable="true" @dragstart="handleFileDragStart(scope, $event)">
+                                        文件：{{scope.row.fileName}}
+                                        <br/>
+                                        时间：{{scope.row.startTime}} - {{scope.row.endTime}}
+                                    </span>
+                                    <span v-else style="cursor:not-allowed;">
+                                        文件：{{scope.row.fileName}}
+                                        <br/>
+                                        时间：{{scope.row.startTime}} - {{scope.row.endTime}}
+                                    </span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column width="120">
+                                <template slot-scope="scope">
+                                    <el-tooltip v-if="scope.row.playable" class="item" effect="dark" content="调阅上屏" placement="bottom">
+                                        <el-button type="text" style="padding:0; font-size:17px;" @click="handleSelectDevice(scope)"><span class="icon-desktop"></span></el-button>
+                                    </el-tooltip>
+                                    <el-button v-else type="text" style="padding:0; font-size:17px;" disabled><span class="icon-desktop"></span></el-button>
+                                    <el-tooltip class="item" effect="dark" content="下载文件" placement="bottom">
+                                        <el-button type="text" style="padding:0; font-size:20px;" @click="handleDownloadFile(scope)"><span class="icon-download"></span></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip class="item" effect="dark" content="删除文件" placement="bottom">
+                                        <el-button v-if="scope.row.removeable" type="text" style="padding:0; font-size:20px;" @click="handleRemoveFile(scope)"><span class="icon-trash"></span></el-button>
+                                        <el-button v-else type="text" style="padding:0; font-size:20px;" disabled><span class="icon-trash"></span></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+
+                </div>
+                <div v-if="tree.currentDevice" style="width:100%; height:60px; position:absolute; left:0; bottom:0; border-top:1px solid #ebeef5; padding-top:12px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            layout="prev, pager, next"
+                            :pager-count="table.page.pageCount"
+                            :current-page="table.page.currentPage"
+                            :page-size="table.page.pageSize"
+                            :total="table.page.total"
+                            @current-change="handleCurrentChange">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template>
+
+        <el-dialog
+                title="选择上屏设备"
+                :visible.sync="dialog.selectDevice.visible"
+                width="420px"
+                :before-close="handleSelectDeviceClose">
+
+            <bvc2-dialog-single-osd ref="bvc2DialogSingleOsd" @selected-osd="onSelectedOsd"></bvc2-dialog-single-osd>
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; top:-30px; bottom:-30px; left:-20px; right:-20px; padding-left:10px; padding-right:10px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="width:100%; position:absolute; left:0; top:0; bottom:40px;">
+                            <div style="width:100%; height:100%; position:relative; box-sizing:border-box; border:1px solid #ebebeb;">
+                                <el-scrollbar style="height:100%;">
+                                    <el-tree
+                                            :data="dialog.selectDevice.tree.data"
+                                            :props="dialog.selectDevice.tree.props">
+                                        <span class="custom-tree-node" slot-scope="{node, data}">
+                                            <el-radio v-if="(!data.children || data.children.length<=0) && data.id.indexOf('Video')>=0" v-model="dialog.selectDevice.tree.currentVideo" :label="data.param">
+                                                <span :class="data.icon" :style="data.style"></span>
+                                                <span>{{node.label}}</span>
+                                            </el-radio>
+                                            <el-radio v-else-if="(!data.children || data.children.length<=0) && data.id.indexOf('Audio')>=0" v-model="dialog.selectDevice.tree.currentAudio" :label="data.param">
+                                                <span :class="data.icon" :style="data.style"></span>
+                                                <span>{{node.label}}</span>
+                                            </el-radio>
+                                            <span v-else>
+                                                <span :class="data.icon" :style="data.style"></span>
+                                                <span>{{node.label}}</span>
+                                            </span>
+                                        </span>
+                                    </el-tree>
+                                </el-scrollbar>
+                            </div>
+                        </div>
+                        <div style="width:100%; height:40px; position:absolute; left:0; bottom:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <el-tooltip popper-class="bvc2-monitor-playback-tooltip" v-if="dialog.selectDevice.osdName" class="item" effect="dark" :content="'当前字幕：'+dialog.selectDevice.osdName" placement="bottom">
+                                <el-button type="text" @click="handleSelectOsd">选择字幕</el-button>
+                            </el-tooltip>
+                            <el-button v-else type="text" @click="handleSelectOsd">选择字幕</el-button>
+                            {{dialog.selectDevice.osdName}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectDeviceClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectDeviceCommit" :loading="dialog.selectDevice.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="下载文件"
+                :visible.sync="dialog.downloadFile.visible"
+                width="600px"
+                :before-close="handleDownloadFileClose">
+
+            <div style="text-align:center; margin-bottom:22px;">当前文件：{{dialog.downloadFile.file.fileName}}</div>
+
+            <el-form label-width="80px">
+                <el-form-item label="文件名称">
+                    <el-input v-model="dialog.downloadFile.name"></el-input>
+                </el-form-item>
+                <el-form-item label="开始时间">
+                    <el-slider
+                            v-model="dialog.downloadFile.startTime"
+                            :max="dialog.downloadFile.endTime"
+                            show-input>
+                    </el-slider>
+                </el-form-item>
+                <el-form-item label="结束时间">
+                    <el-slider
+                            v-model="dialog.downloadFile.endTime"
+                            :max="dialog.downloadFile.duration"
+                            show-input>
+                    </el-slider>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleDownloadFileClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleDownloadFileCommit">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+</div>

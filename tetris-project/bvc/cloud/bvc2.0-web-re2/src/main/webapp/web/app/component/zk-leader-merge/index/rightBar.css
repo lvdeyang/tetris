@@ -1,0 +1,592 @@
+html, body {
+    background-color: transparent;
+}
+
+#app {
+    overflow: hidden;
+}
+
+ul, li, div {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.right-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 370px;
+    height: 100%;;
+    overflow: hidden;
+}
+
+/* 右侧tab和菜单 start */
+.tabBar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 370px;
+}
+
+/*顶部切换标题*/
+.switch {
+    position: absolute;
+    right: 0;
+    width: 324px;
+    height: 50px;
+    border-radius: 12px 12px 0 0;
+    background: #52cffb21;
+    z-index: 1;
+}
+
+.switch li {
+    display: inline-block;
+    width: 32%;
+    font-size: 18px;
+    font-weight: bold;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #000;
+    background: #204a6b;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+
+/*顶部标题具有高亮的样式*/
+.highLight {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: 90px;
+    height: 4px;
+    border-radius: 3px;
+    background-color: #00e9ff;
+    box-shadow: 0 2px 10px #51dff4;
+    display: block;
+}
+
+li.focusLight {
+    color: #00e9ff;
+    background: none;
+}
+
+/*左侧的导航选项标题*/
+.el-tabs__nav {
+    top: 50px;
+}
+
+/*给这5个标题加滚动条*/
+.el-tabs__nav-scroll {
+    overflow: auto;
+}
+
+/*给滚动条修改默认样式*/
+.el-tabs__nav-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+/*tab右侧自动加载的滚动条的整体容器，默认是灰色*/
+.el-tabs__nav-wrap::after {
+    background-color: #204a6b;
+}
+
+/* 禁止横向滚动条 */
+.secondMenu .el-scrollbar__wrap,
+.thirdMenu .el-scrollbar__wrap,
+.commandTable .el-scrollbar__wrap {
+    overflow-x: hidden;
+}
+
+.el-tabs--left .el-tabs__header.is-left {
+    margin-right: 0;
+}
+
+.firstMenu {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 45px;
+    width: 324px;
+    padding: 20px 0;
+    background-color: #1e52778c;
+}
+
+.el-tabs__content {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    bottom: 50px;
+    background: #52cffb21;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.el-tabs__item {
+    margin: 2px 0;
+    padding: 0;
+    width: 50px;
+    height: 120px;
+    background-color: #204a6b;
+    border-radius: 10px 0 0 10px;
+}
+
+.fontPic {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+/*禁止图片拖拽*/
+img {
+    -webkit-user-drag: none;
+}
+
+.is-left .is-active {
+    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
+}
+
+/* 树形组件开始 */
+.el-tree {
+    width: 320px;
+    background-color: transparent;
+}
+
+/* 菜单最外层级 */
+.el-tree-node {
+    margin: 1px 0 0;
+}
+
+/* 树形组件的标题文字,自定义 span*/
+.headline {
+    width: 100%;
+    color: #cfdae6;
+    font-family: "Microsoft YaHei";
+    font-size: 20px;
+    height: 30px;
+    line-height: 30px;
+    background-color: #2d4e6899;
+}
+
+.headFont {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 148px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*录像回放的长度不一样*/
+.sheadFont {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 235px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*指挥工作台的属性的用户名*/
+.headFonts {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 98px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*复选框的样式*/
+.el-checkbox__inner {
+    margin-left: -3px;
+    border: 1px solid #7590A3;
+    background-color: transparent;
+}
+
+/*名称和复选框之间的距离*/
+.el-checkbox__label {
+    margin-left: -3px;
+}
+
+.el-tree-node__content {
+    padding-left: 0;
+    height: 40px;
+    border-bottom: 1px solid #0a1432;
+    border-radius: 0 10px 0 0;
+}
+
+.is-expanded .el-tree-node__children .el-tree-node__content {
+    background: transparent;
+}
+
+.el-tree-node__content:hover {
+    background-color: #173D5C;
+}
+
+/* 点击的那个层级，颜色较暗，能看出来按下的效果 */
+.el-tree-node:focus > .el-tree-node__content {
+    background-color: #133549;
+    box-shadow: 0 0 54px #6a65a2 inset;
+}
+
+/* 展开层级结构，的每一级的样式 */
+.el-tree-node:focus > .el-tree-node__children .el-tree-node__content {
+    background-color: transparent;
+}
+
+/*展开的层级的背景色*/
+.is-expanded .el-tree-node__children {
+    background-color: transparent;
+}
+
+/*折叠的按钮*/
+.el-radio-button__inner {
+    padding: 12px 17px;
+    background-color: #204a6b;
+    border: 0;
+    border-radius: 10px 0 0 10px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+}
+
+.el-radio-button:first-child .el-radio-button__inner {
+    border: 0;
+}
+
+.el-radio-button__inner:hover {
+    color: #fff;
+}
+
+/* 控制点击后的图标和内容的显示 end */
+
+/* 底部图标 */
+.footer {
+    position: absolute;
+    left: 50px;
+    bottom: 0;
+    width: 320px;
+    z-index: 4;
+    min-height: 80px;
+    background-color: #173d5c;
+    border-radius: 0 0 12px 12px;
+}
+
+.customIcon {
+    position: relative;
+    float: left;
+    margin: 10px;
+    width: 60px;
+    height: 60px;
+    line-height: 72px;
+    text-align: center;
+    border-radius: 12px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+}
+
+/*禁用的按钮都不显示*/
+.disable {
+    background: gray;
+    display: none;
+}
+
+.customIcon i {
+    font-size: 36px;
+    color: #fff;
+}
+
+.context-menu {
+    position: fixed;
+    top: 100px;
+    right: 0;
+    background-color: #163D5C;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px 0 rgba(95, 91, 91, 0.38);
+    font-size: 16px;
+    color: #C7D2DD;
+    z-index: 12;
+}
+
+.context-menu .header {
+    padding: 5px 60px;
+    max-width: 150px;
+    font-weight: 700;
+    border-bottom: 1px solid #e4e7ed;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.menu .menuIcon {
+    margin-right: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ECFF;
+}
+
+.context-menu .menu {
+    padding: 6px 10px;
+    border-bottom: 1px solid #464646;
+    cursor: pointer;
+}
+
+.context-menu .menu:not(.disable):hover {
+    background-color: #409eff;
+    color: #fff;
+}
+
+.context-menu .menu.disable {
+    cursor: not-allowed;
+    color: #c0c4cc;
+}
+
+/*第二部分 指挥工作台*/
+.secondMenu {
+    position: absolute;
+    top: 51px;
+    bottom: 50px;
+    left: 0;
+    width: 370px;
+    background-color: #52cffb21;
+    border-radius: 0 0 12px 12px;
+}
+
+.status {
+    display: inline-block;
+    width: 97px;
+    line-height: 30px;
+    border-radius: 15px;
+    color: #e36264;
+    text-align: center;
+    font-weight: bold;
+}
+
+.status i {
+    margin-right: 8px;
+}
+
+.status.start {
+    color: #00ff14;
+}
+
+.status.pause {
+    color: #ffc800;
+}
+
+.status.remind {
+    color: #00fff3;
+}
+
+.status.stop {
+    color: #e36264;
+}
+
+/*下拉框样式修改*/
+.el-input__inner {
+    background-color: #1e67a09e;
+    border: none;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*箭头的样式*/
+.el-select .el-input .el-select__caret {
+    margin-right: 10px;
+    font-size: 28px;
+    color: #00e8fe;
+    font-weight: bold;
+}
+
+/*下拉列表展开的面板*/
+div.el-select-dropdown {
+    background-color: #204a6b;
+    border: none;
+    max-width: 243px;
+}
+
+.el-select-group__title {
+    font-size: 18px;
+    color: #fff;
+}
+
+/*加出下拉菜单的横向滚动条*/
+.el-select-dropdown__item {
+    width: 600px;
+    height: 40px;
+    font-size: 18px;
+    color: #409EFF;
+    /*去掉省略号*/
+    text-overflow: inherit;
+}
+
+/*选中的样式的字体颜色*/
+.el-select-dropdown__item.selected {
+    color: #00e9ff;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+    background-color: #204a6b;
+}
+
+.btnContainer {
+    position: absolute;
+    padding: 2px;
+    width: 313px;
+    bottom: 0;
+    left: 0;
+    background-color: #173d5c;
+    border-radius: 0 0 12px 12px;
+    z-index: 4;
+}
+
+.thirdMenu .btnContainer {
+    height: 70px;
+}
+
+.option-button {
+    position: relative;
+    float: left;
+    margin: 5px 9px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+    border-radius: 12px;
+}
+
+.option-button.disable {
+    display: none;
+}
+
+.option-button img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/*指挥工作台的树的横向滚动条*/
+.el-scrollbar__bar.is-horizontal {
+    display: none;
+}
+
+/*popover弹出框的样式*/
+.el-popover {
+    background: #3d475a;
+    border: 1px solid #076792;
+    color: #ffffff;
+}
+
+.el-dialog {
+    background: -webkit-linear-gradient(left top, #2a697a, #0D4C6B, #113E65);
+}
+
+/*第三部分菜单*/
+.thirdMenu {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 45px;
+    width: 325px;
+    background-color: #1e52778c;
+}
+
+.thirdMenu .el-input__inner {
+    background-color: #5b6265b8;
+    border: none;
+}
+
+.meetList {
+    position: absolute;
+    margin-top: 5px;
+    bottom: 75px;
+    top: 50px;
+}
+
+.meetList .title {
+    color: #c0a16b;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.meetList ul {
+    min-height: 100px;
+}
+
+.meetList li {
+    margin: 2px 0;
+    padding: 0 5px;
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    background-color: #052f54;
+    font-size: 14px;
+}
+
+.meetList .content {
+    display: inline-block;
+    width: 130px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+    vertical-align: middle;
+}
+
+.attendance {
+    position: absolute;
+    top: 51px;
+    left: 45px;
+    bottom: 50px;
+    width: 317px;
+    background: #00000030;
+}
+
+/*悬浮发言按钮*/
+.suspend {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+}
+
+.recordTitle{
+    margin: 0;
+    height: 30px;
+    line-height: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #34a7ff;
+    background-color: #0808088c;
+    text-align: center;
+}
+
+.searchCondition{
+    margin-top: 10px;
+    height: 200px;
+    border: 1px solid red;
+}
+
+
+
+
+

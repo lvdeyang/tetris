@@ -1,0 +1,10 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>authstop</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<accepauthid>${mid}</accepauthid>
+	<cmdedid>${topid}</cmdedid>
+</notify>

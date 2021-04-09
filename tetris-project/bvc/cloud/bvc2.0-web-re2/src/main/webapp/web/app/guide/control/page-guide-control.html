@@ -1,0 +1,520 @@
+<div id="page-guide-control-wrapper" class="page-wrapper">
+  
+    <bvc-headerbar :sysusername="user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+    <!--<div class="page-body">-->
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+				<el-button type="warning" size="small" @click="addTab" style="position: absolute; z-index:10; right:19px; top:19px;">
+					新建导播任务
+				</el-button>
+                <el-tabs  type="border-card" closable @tab-remove="removeTab" v-model="editableTabsValue" @tab-click="handleClick">
+				  <el-tab-pane v-for="(guide,index) in guides.list"
+							   :key="guide.id"
+							   :label="guide.taskName"
+							   :name="guide.id+''">
+
+				    <div style="width:49%;height:300px;float:left">
+						<div style="float:left;">直播时长: 01:13:14</div>
+						<div style="float:left;margin-left:40px;">创建时间: 2020-09-01 01:13:14</div>
+					    <div style="width:100%;margin-top:40px;">
+					        <div style="width:49%;float:left;height:200px;background:black;"></div>
+					        <div style="margin-left:1%;width:49%;float:left;height:200px;background:black;"></div>
+					        <div style="width:49%;float:left;height:30px;background:#339999;color:#FFF;text-align:center;line-height:30px;">PVW</div>
+					        <div style="margin-left:1%;width:49%;float:left;height:30px;background:#cc0033;color:#FFF;text-align:center;line-height:30px;">PGM</div>
+					    </div>
+					
+					</div>
+				    <div style="width:49%;height:300px;float:left;margin-left:1%">
+							<div style="width:100%">
+						        <el-button style="float:right" @click="startGuide" type="primary" round size="mini">开始直播</el-button>
+								<el-button style="float:right;margin-right:10px;" @click="stopGuide" type="primary" round size="mini">停止直播</el-button>
+						        <!--<el-button type="primary" round size="mini">配置视频源</el-button>-->
+						        <el-button style="float:right" @click="handleSetOut()" type="primary" round size="mini">输出设置</el-button>
+					        </div>
+				        <div style="width:560px;float:left;">
+					        
+					        <div style="width:620px;background:#f2f2f2;padding-left:15px; padding-top:10px; padding-bottom:10px; margin-top:10px;">
+								<div style="width:620px;">
+									<div style="color:#339999;font-weight:bold;text-align:center;padding-bottom:10px;">PVM</div>
+									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPvm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getPvmBackcolor(source)">{{source.index}}</el-button>
+								</div>
+								<div style="width:620px;margin-top:10px;">
+									<div style="color:#cc0033;font-weight:bold;text-align:center;padding-bottom:10px;">PGM</div>
+									<el-button v-for = "source in sources.list" :key = "source.id" @click="handleSelPgm(source.id)" type="primary"  size="mini" class="tab_btn" :style="getBackcolor(source)">{{source.index}}</el-button>
+								</div>
+								<div style="width:620px;margin-top:10px;">
+									<div v-for = "source in sources.list" :key="source.id" style="width:41px; display:inline-block; margin-right:8.5px; font-size:12px; text-align:center; background-color:#fff; line-height:28px; height:28px;float:left; white-space:nowrap;">{{source.sourceName}}</div>
+									<div style="clear:both;"></div>
+								</div>
+								<div style="width:620px; margin-top:10px;">
+									<el-button @click="handleSetSource(1)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(2)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(3)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(4)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(5)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(6)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(7)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(8)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(9)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(10)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(11)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<el-button @click="handleSetSource(12)" type="primary"  size="mini" class="source_btn"><i class="el-icon-edit"></i></el-button>
+									<div style="clear:both;"></div>
+								</div>
+							</div>
+				       </div>
+				       <div style="width:200px;float:right;">
+				       		<div>
+					       		<el-button type="primary"  size="mini" style="margin-top:75px;background:#FFF;font-size:18px;color:black;width:50px;height:50px;border:0px;margin-left:50px;">
+					       			<i class="feather-icon-lock"></i>
+					       		</el-button>
+				       		</div>
+				       		<div>
+					       		<el-button @click="switchSource()" type="primary"  size="mini" style="margin-top:30px;font-size:18px;width:70px;height:70px;margin-left:50px;">
+					       			CUT
+					       		</el-button>
+				       		</div>
+				       	    
+				       </div>
+				      
+				      
+				        
+				    </div>
+				    <div style="width:49%;height:400px;float:left">
+					    <el-card class="box-card" style="height:390px;background:#f2f2f2">
+						  <div slot="header" class="clearfix">
+							<span>台标字幕</span>
+							<el-button style="float:right" @click="startGuide" type="primary" round size="mini">添加台标</el-button>
+							<el-button style="float:right;margin-right:5px" @click="stopGuide" type="primary" round size="mini">添加字幕</el-button>
+						  </div>
+						 
+							<div style="width:100%;margin-top:20px;">
+						
+								<div style="width:120px;height:80px;background:#666666;float:left;"></div>
+								<div style="width:120px;height:80px;background:#666666;float:left;margin-left:10px;"></div>
+								<div style="width:120px;height:80px;background:#666666;float:left;margin-left:10px;"></div>
+								<div style="width:120px;height:80px;background:#666666;float:left;margin-left:10px;"></div>
+							
+							</div>
+							<div style="width:100%;float:left;">
+							
+								<div style="width:120px;height:10px;float:left;-webkit-transform:scale(0.7);">台标1</div>
+								<div style="width:120px;height:10px;float:left;margin-left:10px;-webkit-transform:scale(0.7);">台标2</div>
+								<div style="width:120px;height:10px;float:left;margin-left:10px;-webkit-transform:scale(0.7);">字幕1</div>
+								<div style="width:120px;height:10px;float:left;margin-left:10px;-webkit-transform:scale(0.7);">字幕2</div>
+							
+							</div>
+						</el-card>
+					
+					
+					</div>
+				    <div style="width:42%;height:400px;float:left;margin-left:1%">
+					    <el-card class="box-card" style="height:390px;background:#f2f2f2">
+						  <div slot="header" class="clearfix">
+							<span>音频控制</span>
+							
+						  </div>
+						  <table class="audioTable">
+							   <tr>
+								   <td>1</td>
+								   <td>2</td>
+								   <td>3</td>
+								   <td>4</td>
+								   <td>5</td>
+								   <td>6</td>
+								   <td>7</td>
+								   <td>8</td>
+								   <td>9</td>
+								   <td>10</td>
+								   <td>11</td>
+								   <td>12</td>
+							   </tr>
+							   <tr>
+								   <td><template>
+									   <div class="block">
+										   <el-slider
+												   vertical
+												   :value="5"
+												   height="200px">
+										   </el-slider>
+									   </div>
+
+								   </template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+									<td><template>
+									  <div class="block">
+										<el-slider
+										  vertical
+										  :value="5"
+										  height="200px">
+										</el-slider>
+									  </div>
+
+									</template></td>
+							   </tr>
+							
+							</table>
+						</el-card>
+					</div>
+				  </el-tab-pane>
+				</el-tabs>
+            </el-main>
+        </el-container>
+    </div>
+    <el-dialog
+	        title="设置输入源"
+	        :visible.sync="dialog.setSource.visible"
+	        width="500px"
+	        :before-close="handleSetSourceClose">
+	    <el-form :mode="dialog.setSource" ref="setSource" :rules="dialog.rules" label-width="100px">
+	        <el-form-item label="源类型">
+	            <el-select style="width:360px;"
+	                    v-model="dialog.setSource.sourceType"
+	                    placeholder="请选择源类型">
+	                <el-option
+	                        v-for="(item, index) in dialog.setSource.typeOptions"
+							:key = "index"
+	                        :value="item" :label="item">
+	                </el-option>
+	            </el-select>
+	        </el-form-item>
+			<el-form-item v-if = "dialog.setSource.sourceType === '直播流'" label="源地址">
+				<el-input v-model="dialog.setSource.source"></el-input>
+			</el-form-item>
+			<el-form-item v-if = "dialog.setSource.sourceType === '5G背包'" label = "选择源设备">
+				<el-button @click="handleDeviceSelect()" type="primary" size="small">选择原设备</el-button>
+			</el-form-item>
+
+	        <el-form-item v-if="dialog.setSource.sourceType ==='5G背包'" label="设备名">
+				{{ dialog.setSource.bundleName }}
+	        </el-form-item>
+
+			<el-form-item label="源协议">
+				<el-select v-model="dialog.setSource.sourceProtocol" placeholder="请选择源协议">
+					<el-option label="udp_ts" value="udp_ts"></el-option>
+					<el-option label="srt" value="srt"></el-option>
+				</el-select>
+			</el-form-item>
+
+			<el-form-item label="源名称" prop="sourceName">
+				<el-input v-model="dialog.setSource.sourceName"></el-input>
+			</el-form-item>
+
+			<el-form-item label="设置预监输出">
+				<el-radio v-model="dialog.setSource.isPreviewOut" :label="true">是</el-radio>
+				<el-radio v-model="dialog.setSource.isPreviewOut" :label="false">否</el-radio>
+			</el-form-item>
+
+
+	        <el-form-item label="预监输出" v-if="dialog.setSource.isPreviewOut===true">
+	            <el-input v-model="dialog.setSource.previewOut"></el-input>
+	        </el-form-item>
+	    </el-form>
+
+	    <span slot="footer" class="dialog-footer">
+	        <el-button size="medium" @click="handleSetSourceClose">取 消</el-button>
+	        <el-button size="medium" type="primary" @click="handleSetSourceCommit()"
+	                   :loading="dialog.setSource.loading">确 定
+	        </el-button>
+	    </span>
+	</el-dialog>
+	
+	<el-dialog
+	        title="设置输出"
+	        :visible.sync="dialog.setOut.visible"
+	        width="1350px"
+	        :before-close="handleSetOutClose">
+		<el-button type="warning" size="small" @click="addTab2" style="position: absolute; z-index:10; right:30px; top:88px;">
+			新建输出组
+		</el-button>
+		<el-tabs  type="border-card" closable @tab-remove="removeTab2" v-model="editableTabsValue2" @tab-click="handleClick2">
+			<el-tab-pane v-for="(outputGroup, index) in outputGroups.list"
+						 :key="outputGroup.id"
+						 :label="outputGroup.name"
+						 :name="outputGroup.id+''">
+				<div style="height:400px;">
+					<el-scrollbar style="height:100%">
+
+					<h4>切换方式</h4>
+					<el-select v-model="outputGroup.switchingModeName" placeholder="请选择切换方式">
+						<el-option label="转码" value="转码"></el-option>
+						<el-option label="按帧切换" value="按帧切换"></el-option>
+						<el-option label="直接切换" value="直接切换"></el-option>
+					</el-select>
+
+					<h4>转码模板</h4>
+					<el-input v-model="outputGroup.transcodingTemplate" style="width: 217px" v-if="outputGroup.switchingModeName === '转码'"></el-input>
+					<!--<h4>视频编码参数</h4>
+					<el-form :inline="true" ref="form" :model="dialog.setOut.video" label-width="100px" class="demo-form-inline" size="mini" v-if="outputGroup.switchingModeName==='转码'">
+						<el-form-item label="编码对象" >
+							<el-select v-model="dialog.setOut.video.codingObject" placeholder="请选择编码对象" style="width:178px">
+								<el-option label="h264" value="h264"></el-option>
+								<el-option label="h265" value="h265"></el-option>
+								<el-option label="mpeg2" value="mpeg2"></el-option>
+								<el-option label="avs+" value="avs+"></el-option>
+								<el-option label="passby" value="passby"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="帧率">
+							<el-input v-model="dialog.setOut.video.fps"></el-input>
+						</el-form-item>
+
+						<el-form-item label="码率">
+							<el-input v-model="dialog.setOut.video.bitrate"></el-input>
+						</el-form-item>
+
+						<el-form-item label="分辨率">
+							<el-select v-model="dialog.setOut.video.resolution" placeholder="请选择分辨率" style="width:178px">
+								<el-option label="3840*2160" value="3840*2160"></el-option>
+								<el-option label="1920*1080" value="1920*1080"></el-option>
+								<el-option label="1280*720" value="1280*720"></el-option>
+								<el-option label="720*576" value="720*576"></el-option>
+								<el-option label="640*480" value="640*480"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="宽高比" >
+							<el-select v-model="dialog.setOut.video.ratio" placeholder="请选择宽高比" style="width:178px">
+								<el-option label="16:10" value="16:10"></el-option>
+								<el-option label="16:9" value="16:9"></el-option>
+								<el-option label="5:4" value="5:4"></el-option>
+								<el-option label="4:3" value="4:3"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="码率控制方式" >
+							<el-select v-model="dialog.setOut.video.rcMode" placeholder="请选择码率控制方式" style="width:178px">
+								<el-option label="vbr" value="vbr"></el-option>
+								<el-option label="cbr" value="cbr"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="最大码率">
+							<el-input v-model="dialog.setOut.video.maxBitrate"></el-input>
+						</el-form-item>
+
+					</el-form>
+					<h4>音频编码参数</h4>
+					<el-form :inline="true" ref="form" :model="dialog.setOut.audio" label-width="100px" class="demo-form-inline" size="mini" v-if="outputGroup.switchingModeName==='转码'">
+						<el-form-item label="编码格式" >
+							<el-select v-model="dialog.setOut.audio.codingFormat" placeholder="请选择编码格式" style="width:178px">
+								<el-option label="aac" value="aac"></el-option>
+								<el-option label="mp2" value="mp2"></el-option>
+								<el-option label="mp3" value="mp3"></el-option>
+								<el-option label="dolby" value="dolby"></el-option>
+								<el-option label="passby" value="passby"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="声道布局" >
+							<el-select v-model="dialog.setOut.audio.channelLayout" placeholder="请选择声道布局" style="width:178px">
+								<el-option label="mono" value="mono"></el-option>
+								<el-option label="stereo" value="stereo"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="码率">
+							<el-input v-model="dialog.setOut.audio.bitrate"></el-input>
+						</el-form-item>
+
+						<el-form-item label="采样率">
+							<el-input v-model="dialog.setOut.audio.sampleRate"></el-input>
+						</el-form-item>
+
+						<el-form-item label="编码类型" >
+							<el-select v-model="dialog.setOut.audio.codingType" placeholder="请选择编码类型" style="width:178px">
+								<el-option label="mpeg4-aac-lc" value="mpeg4-aac-lc"></el-option>
+								<el-option label="mpeg4-he-aac-lc" value="mpeg4-he-aac-lc"></el-option>
+								<el-option label="mpeg4-he-aac-v2-lc" value="mpeg4-he-aac-v2-lc"></el-option>
+								<el-option label="ac3" value="ac3"></el-option>
+								<el-option label="eac3" value="eac3"></el-option>
+							</el-select>
+						</el-form-item>
+
+					</el-form>-->
+
+					<h4>输出参数</h4>
+
+					<el-button type="warning" size="mini" style="position: relative; z-index:10; left:1070px; bottom:11px;" @click="newOut">
+						新建输出
+					</el-button>
+					<el-button type="warning" size="mini" style="position: relative; z-index:10; left:1070px; bottom:11px;" @click="deleteOut">
+						删除输出
+					</el-button>
+					<el-form v-for="item in output.out" :inline="true" label-width="100px" class="demo-form-inline" size="mini" :key="item.id" style="margin-bottom: 10px">
+
+						<el-checkbox v-model="item.isCheck" name="type" style="margin-left: 20px; margin-top: 2px;"></el-checkbox>
+						<el-form-item label="输出类型">
+							<el-select v-model="item.outType" placeholder="请选择输出类型" style="width:178px">
+								<el-option label="预监任务" value="MONITOR"></el-option>
+								<el-option label="切换任务" value="SWITCH"></el-option>
+							</el-select>
+						</el-form-item>
+						
+						<el-form-item label="输出协议">
+							<el-select v-model="item.outputProtocolName" placeholder="请选择输出协议" style="width:178px">
+								<el-option label="udp_ts" value="udp_ts"></el-option>
+								<el-option label="rtp_ts" value="rtp_ts"></el-option>
+								<el-option label="rtmp" value="rtmp"></el-option>
+								<el-option label="srt" value="srt"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="输出地址">
+							<el-input v-model="item.outputAddress" placeholder="输出协议://IP:端口"></el-input>
+						</el-form-item>
+
+						<el-form-item label="码率控制方式">
+							<el-select v-model="item.rateCtrlName" placeholder="请选择码率控制方式" style="width:178px">
+								<el-option label="vbr" value="vbr"></el-option>
+								<el-option label="cbr" value="cbr"></el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item label="系统码率">
+							<el-input v-model="item.bitrate"></el-input>
+						</el-form-item>
+					</el-form>
+					</el-scrollbar>
+				</div>
+			</el-tab-pane>
+		</el-tabs>
+
+		<span slot="footer" class="dialog-footer">
+			<el-button size="medium" @click="handleSetOutClose">取 消</el-button>
+			<el-button size="medium" type="primary" @click="handleSetOutCommit"
+					   :loading="dialog.setOut.loading">确 定
+			</el-button>
+		</span>
+
+
+
+	</el-dialog>
+
+	
+	<el-dialog
+	        title="选择设备"
+	        :visible.sync="dialog.setDevice.visible"
+	        width="500px"
+	        :before-close="handleSetDeviceClose">
+	    
+		<el-table :data="dialog.setDevice.deviceData" border style="width: 100%">
+			<!--<el-table-column fixed prop="bundleId" label="设备号码" width="150">
+			</el-table-column>-->
+			<el-table-column fixed prop = "bundleName" label="设备名称" >
+			</el-table-column>
+			<el-table-column fixed="right" label="操作" width="220px">
+			  <template slot-scope="scope">
+				<!--<el-button @click="handleSetDeviceClick()" type="text" size="small">选择</el-button>-->
+				  <el-button @click="handleSetDeviceClick(scope.row)" type="text" size="small">选择</el-button>
+			  </template>
+			</el-table-column>
+		  </el-table>
+
+
+	</el-dialog>
+</div>
+
+

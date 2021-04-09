@@ -1,0 +1,5 @@
+.set-small-screen{width:100%; height:350px; position:relative;}
+.set-small-screen .small-screen-members{position:absolute; left:0; top:0; bottom:0; width:300px; border:1px solid #ebeef5; overflow: auto}
+.set-small-screen .small-screen-source{position:absolute; left:310px; top:0; right:0; bottom:0; overflow-y:auto; line-height: 59px}
+.set-small-screen .small-screen-source .el-card__header{padding:0; line-height:2.5em; text-align:center; font-weight:700; position:relative;}
+.set-small-screen .small-screen-source .el-card__body{text-align:center; padding:0 10px;}

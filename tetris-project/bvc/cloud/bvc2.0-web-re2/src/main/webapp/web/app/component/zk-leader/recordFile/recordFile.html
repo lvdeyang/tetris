@@ -1,0 +1,124 @@
+<div class="recordFile">
+    <div class="win-header">
+        <span class="win-header-title">录制文件</span>
+        <span class="win-header-close" @click="close"><span class="el-icon-close"></span></span>
+    </div>
+    <div class="win-body">
+        <div style="width:100%; height:100%; position:relative;">
+            <div class="left">
+                <div style="height: 100%">
+                    <span style="color: #00fdff">请先选择设备或用户</span>
+                    <div class="btn-select-ok" @click="confirm">确定选择</div>
+                    <el-scrollbar style="height:100%">
+                        <el-tree :data="record.data" :props="props" node-key="id">
+                            <span style="display:inline-block; width:100%;" slot-scope="{node,data}">
+                                <el-radio v-if="data.type==='USER' || data.type==='BUNDLE'" v-model="record.select"
+                                          :label="data">
+                                    <span :class="data.icon"
+                                          :style="data.style+' position:relative; top:1px;'"></span>
+                                    <span style="position:relative; top:1px;">{{data.name}}</span>
+                                </el-radio>
+                                <span v-else>
+                                    <span :class="data.icon" :style="data.style"></span>
+                                    <span style="font-size:14px;">{{data.name}}</span>
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+
+            </div>
+            <div class="right">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div>
+                        <el-date-picker
+                                v-model="date"
+                                size="small"
+                                type="datetimerange"
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期">
+                        </el-date-picker>
+                        <div class="btn-filter" @click="filtrate">确定选择</div>
+                    </div>
+                    <div style="position:absolute; top:42px; left:0; right:0; bottom:0;">
+                        <div>
+                            <div style="position:absolute; top:0; left:0; right:0; bottom:50px;">
+                                <el-scrollbar style="height: 100%">
+                                    <el-table
+                                            class="table"
+                                            :data="files"
+                                            style="width:100%">
+                                        <el-table-column label="选择" width="50" center>
+                                            　　　　　　
+                                            <template slot-scope="scope">
+                                                　　　　　　　　
+                                                <el-radio class="radio" v-model="fileSelect"
+                                                          :label="scope.row"></el-radio>
+                                                　　　　　　
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="fileName"
+                                                label="文件名">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="previewUrl"
+                                                label="预览地址">
+                                            <template></template>
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="startTime"
+                                                label="开始时间">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="endTime"
+                                                label="结束时间">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="nickname"
+                                                label="录制人">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="操作"
+                                                width="150">
+                                            <template slot-scope="scope">
+                                                <el-tooltip class="item" effect="dark" content="删除文件"
+                                                            placement="bottom">
+                                                    <el-button v-if="scope.row.removeable" type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"
+                                                               @click="deleteFile(scope.row.id)">
+                                                        <span class="icon-trash"></span></el-button>
+                                                    <el-button v-else type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" disabled>
+                                                        <span class="icon-trash"></span></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip class="item" effect="dark" content="下载文件"
+                                                            placement="bottom">
+                                                    <el-button type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"
+                                                               @click="downLoadFile(scope.row)">
+                                                        <span class="icon-arrow-down"></span></el-button>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-scrollbar>
+                            </div>
+                            <div style="height:50px; position:absolute; left:0; right:0; bottom:0; padding-top:9px; box-sizing:border-box;">
+                                <el-pagination background @current-change="currentChange" :current-page="currentPage"
+                                               :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                               :total="total">
+                                </el-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn">
+                <div class="btn-handle-record" @click="confirmSubmit">确定播放</div>
+            </div>
+        </div>
+    </div>
+
+</div>

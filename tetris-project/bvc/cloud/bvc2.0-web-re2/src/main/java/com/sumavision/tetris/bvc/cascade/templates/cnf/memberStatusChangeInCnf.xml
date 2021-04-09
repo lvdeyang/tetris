@@ -1,0 +1,16 @@
+<!-- 会议成员状态 -->
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>mstatus</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<op>00000000001</op>
+	<mlist>
+		<minfo>
+			<mid>00000000002</mid>
+			<!-- 状态，1表示正在业务、2表示暂时离开 -->
+			<mstatus>2</mstatus>
+		</minfo>
+	</mlist>
+</notify>

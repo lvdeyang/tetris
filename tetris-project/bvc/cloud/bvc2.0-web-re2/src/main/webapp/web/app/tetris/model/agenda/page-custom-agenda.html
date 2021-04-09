@@ -1,0 +1,1088 @@
+<mi-frame id="page-custom-agenda-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">{{groupName}}</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-group">{{groupName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>会议控制</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <div style="width:100%; height:100%; position:relative;">
+            <div class="left border-light-gray">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="height:50px; box-sizing:border-box; padding:9px 10px; position:relative;">
+                        <el-tooltip effect="dark" content="添加成员" placement="bottom">
+                            <el-button class="tab-action-button" @click="handleAddMember"><span class="feather-icon-user-plus" style="font-size:20px; position:relative; top:2px; left:1px;"></span></el-button>
+                        </el-tooltip>
+                        <el-tooltip effect="dark" content="删除成员" placement="bottom">
+                            <el-button class="tab-action-button" style="margin-left:4px;" @click="handleRemoveMember"><span class="feather-icon-user-minus" style="font-size:20px; position:relative; top:2px; left:1px;"></span></el-button>
+                        </el-tooltip>
+                        <div style="position:absolute; left:88px; top:9px; right:10px; bottom:9px;">
+                            <el-input
+                                    class="search"
+                                    placeholder="请输入内容"
+                                    v-model="filterMemberAndRole">
+                                <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                            </el-input>
+                        </div>
+                    </div>
+                    <div style="position:absolute; left:10px; top:50px; bottom:0; right:10px;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <div style="position:absolute; left:0; top:0; right:0; bottom:305px; border-bottom:1px solid #d3dce6;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-tree
+                                                ref="memberTree"
+                                                :data="members.data"
+                                                :props="members.props"
+                                                show-checkbox
+                                                draggable
+                                                :allow-drag="allowDrag"
+                                                :allow-drop="allowDrop"
+                                                default-expand-all
+                                                @node-drag-start="handleDragStart"
+                                                :filter-node-method="filterNodeByName">
+                                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                                <span v-if="scope.data.type==='FOLDER' && !scope.node.expanded" class="icon-folder-close"></span>
+                                                <span v-if="scope.data.type==='FOLDER' && scope.node.expanded" class="icon-folder-open"></span>
+                                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                                <span v-if="scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0" class="icon-exchange" style="position:relative; bottom:1px;"></span>
+                                                <span v-if="scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0" class="icon-exchange" style="position:relative; bottom:1px;"></span>
+                                                <span>{{getMemberName(scope)}}</span>
+                                                <el-tooltip v-if="scope.data.param.indexOf('MEMBER_USER')>=0 || scope.data.param.indexOf('MEMBER_HALL')>=0" effect="dark" content="指定发言" placement="right">
+                                                    <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:2px; right:10px; font-size:16px;" @click.stop="handleSpeakerSet(scope)"><span class="icon-microphone"></span></el-button>
+                                                </el-tooltip>
+                                            </span>
+                                        </el-tree>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                            <div style="position:absolute; bottom:0; height:300px; width:100%;">
+                                <el-scrollbar style="height:100%;">
+                                    <el-tree
+                                            ref="roleTree"
+                                            :data="roles.data"
+                                            :props="roles.props"
+                                            default-expand-all
+                                            draggable
+                                            :allow-drag="allowDrag"
+                                            :allow-drop="allowDrop"
+                                            @node-drag-start="handleDragStart"
+                                            :filter-node-method="filterNodeByName">
+                                        <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                            <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='COMBINE_VIDEO_VIRTUAL_SOURCE_FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                            <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='COMBINE_VIDEO_VIRTUAL_SOURCE_FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                            <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE'" class="icon-exchange" style="position:relative;"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE'" class="icon-exchange" style="position:relative;"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='COMBINE_VIDEO_VIRTUAL_SOURCE'" class="icon-film" style="position:relative;"></span>
+                                            <span>{{scope.data.name}}</span>
+                                            <el-tooltip v-if="scope.data.type==='ONE_TO_ONE_FOLDER'" effect="dark" content="添加发言人角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="addSpeakerRole(scope)"><span class="icon-plus"></span></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip v-if="scope.data.type==='ONE_TO_MANY_FOLDER'" effect="dark" content="添加观众角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="addAudienceRole(scope)"><span class="icon-plus"></span></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip v-if="scope.data.type==='ROLE' && !scope.data.internalRoleType" effect="dark" content="删除角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="removeRole(scope)"><span class="icon-trash"></span></el-button>
+                                            </el-tooltip>
+                                             <el-tooltip v-if="scope.data.type==='ROLE' && scope.data.roleUserMappingType==='ONE_TO_ONE' && !scope.data.internalRoleType" effect="dark" content="配置角色" placement="right">
+                                                 <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:15px;" @click.stop="handleEditSpeakerChannel(scope)"><span class="icon-cog"></span></el-button>
+                                             </el-tooltip>
+                                        </span>
+                                    </el-tree>
+                                    <!--合屏虚拟源放在下边-->
+                                    <el-tree
+                                            ref="virtualSourceTree"
+                                            :data="virtualSource.data"
+                                            :props="virtualSource.props"
+                                            default-expand-all
+                                            draggable
+                                            :allow-drag="allowDrag"
+                                            :allow-drop="allowDrop"
+                                            @node-drag-start="handleDragStart"
+                                            :filter-node-method="filterNodeByName">
+                                        <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                            <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='COMBINE_VIDEO_VIRTUAL_SOURCE_FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                            <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='COMBINE_VIDEO_VIRTUAL_SOURCE_FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                            <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE'" class="icon-exchange" style="position:relative;"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE'" class="icon-exchange" style="position:relative;"></span>
+                                            <span v-if="scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='COMBINE_VIDEO_VIRTUAL_SOURCE'" class="icon-film" style="position:relative;"></span>
+                                            <span>{{scope.data.name}}</span>
+                                            <el-tooltip v-if="scope.data.type==='ONE_TO_ONE_FOLDER'" effect="dark" content="添加发言人角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="addSpeakerRole(scope)"><span class="icon-plus"></span></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip v-if="scope.data.type==='ONE_TO_MANY_FOLDER'" effect="dark" content="添加观众角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="addAudienceRole(scope)"><span class="icon-plus"></span></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip v-if="scope.data.type==='ROLE' && !scope.data.internalRoleType" effect="dark" content="删除角色" placement="right">
+                                                <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:10px;" @click.stop="removeRole(scope)"><span class="icon-trash"></span></el-button>
+                                            </el-tooltip>
+                                             <el-tooltip v-if="scope.data.type==='ROLE' && scope.data.roleUserMappingType==='ONE_TO_ONE' && !scope.data.internalRoleType" effect="dark" content="配置角色" placement="right">
+                                                 <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:3px; right:15px;" @click.stop="handleEditSpeakerChannel(scope)"><span class="icon-cog"></span></el-button>
+                                             </el-tooltip>
+                                        </span>
+                                    </el-tree>
+
+                                </el-scrollbar>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="middle">
+                <div style="width:100%; height:100%;">
+                    <div class="top">
+                        <div class="buttons border-light-gray">
+                            <div style="width:100%; height:100%; position:relative;">
+                                <div style="position:absolute; left:0; top:0; right:270px; bottom:0; box-sizing:border-box; border-right:1px solid #d3dce6;">
+                                    <div v-if="agenda.current" style="width:100%; height:100%; position:relative;">
+                                        <div style="position:absolute; left:0; top:0; right:105px; bottom:0;">
+                                            <div style="width:100%; height:100%; position:relative; box-sizing:border-box; padding:5px 15px;">
+                                                <el-tabs v-model="forward.currentId" type="card" style="position:relative; top:4px;" @tab-remove="handleForwardRemove">
+                                                    <el-tab-pane v-for="(f, i) in forward.rows" :key="i" closable :label="f.name" :name="f.id"></el-tab-pane>
+                                                </el-tabs>
+                                            </div>
+                                        </div>
+                                        <div style="height:100%; float:right; padding:9px 15px; box-sizing:border-box;">
+                                            <el-tooltip effect="dark" content="添加转发" placement="bottom">
+                                                <el-button class="tab-action-button" @click.stop="handleAddForward"><span class="feather-icon-plus" style="font-size:20px; position:relative; top:2px; left:1px;"></span></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip effect="dark" content="修改名称" placement="bottom">
+                                                <el-button class="tab-action-button" @click.stop="handleEditForward"><span class="el-icon-edit" style="position:relative; top:1px;"></span></el-button>
+                                            </el-tooltip>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="height:100%; box-sizing:border-box; float:right; padding:6px 15px;">
+                                    <!-- TODO -->
+                                    <el-tooltip effect="dark" content="开始" placement="bottom">
+                                        <el-button class="group-action-button" :type="(group&&group.status!=='stop')?'success':'primary'" circle :loading="options.startGroup.loading" @click="startGroup"><span v-if="!options.startGroup.loading" class="icon-play" style="font-size:18px; position:relative; left:2px; top:1px;"></span></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="停止" placement="bottom">
+                                        <el-button class="group-action-button" :type="(group&&group.status!=='stop')?'danger':'primary'" circle :loading="options.stopGroup.loading" @click="stopGroup"><span v-if="!options.stopGroup.loading" class="icon-stop" style="font-size:15px;"></span></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="修改角色" placement="bottom">
+                                        <el-button class="group-action-button" type="primary" circle @click="handleEditRole"><span class="icon-group" style="font-size:15px;"></span></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="录制" placement="bottom">
+                                        <el-button class="group-action-button" :type="(group&&group.isRecord.toString()=='true')?'success':'primary'"  circle @click="startRecord"><span class="icon-facetime-video" style="font-size:17px;"></span></el-button>
+                                    </el-tooltip>
+                                    <el-dropdown style="margin-left:10px;" trigger="click" @command="handleDropdownCommand">
+                                        <el-tooltip effect="dark" content="更多" placement="bottom">
+                                            <el-button class="group-action-button" type="primary" circle><span class="icon-list-ul" style="font-size:17px;"></span></el-button>
+                                        </el-tooltip>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <!--<el-dropdown-item><span class="icon-plus" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; left:1px;" loading="true"></span>添加成员</el-dropdown-item>
+                                            <el-dropdown-item><span class="icon-minus" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; left:1px;"></span>删除成员</el-dropdown-item>-->
+                                            <el-dropdown-item command="editParam"><span class="feather-icon-settings" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:2px; top:1px;"></span>参数设置</el-dropdown-item>
+                                            <el-dropdown-item command="publishStream"><span class="icon-cloud-upload" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:2px; top:1px;"></span>发布直播</el-dropdown-item>
+                                            <el-dropdown-item><a @click="gotoCustomVirtualSource"><span class="icon-film" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>合屏虚拟源</a></el-dropdown-item>
+                                            <!-- <el-dropdown-item><span class="icon-key" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>设置看会权限</el-dropdown-item>
+                                            <el-dropdown-item><span class="icon-cloud-upload" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>发布直播</el-dropdown-item>
+                                            <el-dropdown-item><span class="icon-table" style="display:inline-block; width:15px; height:14px; margin-right:6px;"></span>转发查询</el-dropdown-item>
+                                            <el-dropdown-item><span class="icon-play-circle" style="display:inline-block; width:15px; height:14px; margin-right:6px;"></span>会议记录</el-dropdown-item> -->
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layout">
+                            <div style="width:100%; height:100%; position:relative; background-color:#fff; box-sizing:border-box;" class="border-light-gray">
+                                <!-- TODO -->
+                                <div id="forward-layout-position-container" style="position:absolute; left:0; top:0; right:40px; bottom:0; z-index:1;">
+                                    <div v-if="forward.current && forward.current.layout && forward.current.layout.positions && forward.current.layout.positions.length>0" style="width:100%; height:100%; position:relative;">
+                                        <div v-for="(position, i) in forward.current.layout.positions"
+                                             :key="i"
+                                             :style="forwardLayoutPosition(position)"
+                                             class="position"
+                                             @dragover="allowDrop($event, position)"
+                                             @drop="handleDrop($event, position)"
+                                             v-loading="position.ui.loading">
+                                            <div style="width:100%; height:100%; position:relative;">
+                                                <el-tooltip v-if="position.ui.isLoop && position.type==='REMOTE'" effect="dark" content="下一画面" placement="bottom">
+                                                    <el-button
+                                                            type="text"
+                                                            style="position:absolute; right:59px; top:4px; padding:0;"
+                                                            @click="switchToNext(position, '切换到下一画面？')">
+                                                        <span class="icon-fast-forward" style="font-size:22px;"></span>
+                                                    </el-button>
+                                                </el-tooltip>
+                                                <el-tooltip effect="dark" content="设置轮询" placement="bottom">
+                                                    <el-button
+                                                            v-if="position.type==='REMOTE'"
+                                                            type="text"
+                                                            style="position:absolute; right:32px; top:5px; padding:0;"
+                                                            @click="handleSetLoop(position)">
+                                                        <span class="el-icon-edit" style="font-size:18px;"></span>
+                                                    </el-button>
+                                                </el-tooltip>
+                                                <el-tooltip v-if="!position.ui.isLoop && position.type==='REMOTE'" effect="dark" content="删除源" placement="bottom">
+                                                    <el-button
+                                                            type="text"
+                                                            style="position:absolute; right:5px; top:5px; font-size:18px; padding:0;"
+                                                            @click="removeSource(position, '是否清除转发源?')">
+                                                        <span class="el-icon-delete"></span>
+                                                    </el-button>
+                                                </el-tooltip>
+                                                <el-tooltip v-if="position.ui.isLoop && position.type==='REMOTE'" effect="dark" content="取消轮询" placement="bottom">
+                                                    <el-button
+                                                            type="text"
+                                                            style="position:absolute; right:5px; top:4px; padding:0;"
+                                                            @click="removeSource(position, '取消轮询会清除配置，是否继续？')">
+                                                        <span class="el-icon-close" style="font-size:22px;"></span>
+                                                    </el-button>
+                                                </el-tooltip>
+                                                <span v-if="position.ui.isLoop && position.type==='REMOTE'" style="position:absolute; left:5px; top:5px; font-size:16px; color:#606266;">轮询时间: {{position.ui.loopTime}} 秒</span>
+                                                <div style="width:100%; height:100%; display:table;">
+                                                    <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle; font-size:16px; color:#606266;">{{position.ui.content}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <el-tooltip v-if="forward.current" effect="dark" :content="'当前虚拟源：'+(layout.current?layout.current.name:'未设置')" placement="left">
+                                    <el-button style="width:40px; height:100%; position:absolute; right:0; top:0; border:0; border-radius:0; border-left:1px solid #d3dce6; font-size:20px;" @click="layout.visible=!layout.visible"><span style="position:relative; right:3px;" class="icon-caret-left"></span></el-button>
+                                </el-tooltip>
+                                <div v-if="layout.visible" style="position:absolute; left:0; top:0; right:0; bottom:0; z-index:2; background-color:#fff;">
+                                    <div style="width:100%; height:100%; position:relative;">
+                                        <el-tooltip effect="dark" content="收起" placement="right">
+                                            <el-button  style="width:40px; height:100%; border:0; border-radius:0; border-right:1px solid #d3dce6; font-size:20px;" icon="icon-caret-right" @click="layout.visible=!layout.visible"></el-button>
+                                        </el-tooltip>
+                                        <div style="position:absolute; left:40px; top:0; right:0; bottom:0;">
+                                            <div style="width:100%; height:100%; position:relative;">
+                                                <div style="width:100%; height:51px; border-bottom:1px solid #e4e7ed; padding:10px; box-sizing:border-box;">
+                                                    <div style="width:300px;">
+                                                        <el-input
+                                                                class="search"
+                                                                placeholder="根据名称过滤">
+                                                            <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                                                        </el-input>
+                                                    </div>
+                                                </div>
+                                                <div style="position:absolute; left:0; top:51px; right:0; bottom:0;">
+                                                    <div style="width:100%; height:100%; position:relative; box-sizing:border-box; padding:10px;">
+                                                        <el-scrollbar style="height:100%;">
+                                                            <div :class="'layout-button' + (l===layout.current?' active':'')" v-for="(l,i) in layout.filter" :key="i" @click="handleSelectLayout(l)">
+                                                                <div>
+                                                                    <div v-for="(position,i) in l.positions" :key="i" :style="positionStyle(position, 100, 100)" class="position"></div>
+                                                                </div>
+                                                                <div>{{l.name}}</div>
+                                                            </div>
+                                                        </el-scrollbar>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bottom">
+                        <div class="destinations border-light-gray" style="padding:10px;">
+                            <div style="width:100%; height:100%; position:relative;" v-if="forward.current">
+                                <div style="height:28px;">
+                                    <el-button size="mini" icon="el-icon-plus" @click="handleAddDestination">添加目的</el-button>
+                                </div>
+                                <div style="position:absolute; left:0; top:38px; right:0; bottom:0;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-tag
+                                                :key="i"
+                                                v-for="(destination, i) in forward.current.destinations"
+                                                closable
+                                                size="medium"
+                                                style="margin-bottom:5px; margin-right:5px;"
+                                                :disable-transitions="false"
+                                                @close="handleDestinationsDelete(destination)">
+                                            {{destination.destinationName}}
+                                        </el-tag>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings">
+                            <div style="width:100%; height:100%; background-color:#fff; box-sizing:border-box; padding:10px; position:relative;" class="border-light-gray">
+                                <template v-if="forward.current && !agenda.current.globalCustomAudio">
+                                    <div style="height:28px;">
+                                        <el-radio-group style="position:relative; top:2px;" v-model="forward.current.audioType">
+                                            <el-radio  v-for="(audioType, i) in audioTypes" :key="i" :label="audioType.key" @change="handleAudioTypeChange">{{audioType.value}}</el-radio>
+                                        </el-radio-group>
+                                        <el-popover
+                                                v-if="forward.current.audioType==='CUSTOM'"
+                                                placement="top"
+                                                width="200"
+                                                trigger="hover">
+                                            <el-slider v-model="forward.current.volume" @change="handleForwardVolumeChange"></el-slider>
+                                            <el-button slot="reference" size="mini" style="margin-left:10px; float:right; width:28px; height:28px; font-size:16px; padding:0; text-align:center;">
+                                                <span style="position:relative; left:2px; top:1px;" class="feather-icon-volume-x" v-if="forward.current.volume==0"></span>
+                                                <span style="position:relative; left:2px; top:1px;" class="feather-icon-volume" v-if="forward.current.volume>0 && forward.current.volume<30"></span>
+                                                <span style="position:relative; left:2px; top:1px;" class="feather-icon-volume-1" v-if="forward.current.volume>=30 && forward.current.volume<60"></span>
+                                                <span style="position:relative; left:2px; top:1px;" class="feather-icon-volume-2" v-if="forward.current.volume>=60"></span>
+                                            </el-button>
+                                        </el-popover>
+                                        <el-button v-if="forward.current.audioType==='CUSTOM'" size="mini" icon="el-icon-plus" style="float:right;" @click="handleAddCustomAudio('FORWARD')">添加音频</el-button>
+                                    </div>
+                                    <div style="position:absolute; left:10px; top:48px; right:10px; bottom:10px;">
+                                        <el-scrollbar style="height:100%;" v-if="forward.current.audioType==='CUSTOM'">
+                                            <el-tag
+                                                    :key="i"
+                                                    v-for="(customAudio, i) in forward.current.audios"
+                                                    closable
+                                                    size="medium"
+                                                    style="margin-bottom:5px; margin-right:5px;"
+                                                    :disable-transitions="false"
+                                                    @close="handleForwardCustomAudioDelete(customAudio)">
+                                                {{customAudio.sourceName}}
+                                            </el-tag>
+                                        </el-scrollbar>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="right border-light-gray">
+                <div style="width:100%; height:100%; box-sizing:border-box; border-bottom:1px solid #d3dce6; position:relative;">
+                    <div style="height:50px; box-sizing:border-box; padding:9px 10px; position:relative;">
+                        <el-tooltip effect="dark" content="添加议程" placement="bottom">
+                            <el-button class="tab-action-button" @click="handleCreateAgenda"><span class="feather-icon-plus" style="font-size:20px; position:relative; top:2px; left:1px;"></span></el-button>
+                        </el-tooltip>
+                        <div style="position:absolute; left:50px; top:9px; right:10px; bottom:9px;">
+                            <el-input
+                                    class="search"
+                                    placeholder="请输入内容"
+                                    v-model="agenda.filterName">
+                                <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                            </el-input>
+                        </div>
+                    </div>
+                    <div style="position:absolute; left:0; top:50px; bottom:0; right:0;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <el-scrollbar style="height:100%;">
+                                <el-table
+                                        ref="agendaTable"
+                                        highlight-current-row
+                                        :data="agenda.filter"
+                                        style="width: 100%"
+                                        @current-change="currentAgendaChange">
+                                    <el-table-column
+                                            prop="name"
+                                            label="名称">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="isRun"
+                                            width="40">
+                                        <template slot-scope="scope">
+                                            <span :style="(scope.row.isRun?'background-color:#67C23A;':'background-color:#F56C6C;') + ' padding:9px; border-radius:100%; display:inline-block; position:relative; top:2px;'"></span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="操作"
+                                            width="150">
+                                        <template slot-scope="scope">
+                                            <el-tooltip class="item" effect="dark" content="修改议程" placement="bottom-end">
+                                                <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click.stop="handleEditAgenda(scope)"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip class="item" effect="dark" content="音频设置" placement="bottom-end">
+                                                <el-button type="text" icon="icon-headphones" style="font-size:20px; padding:0;" @click.stop="handleAgendaAudioSettings(scope)"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip class="item" effect="dark" content="执行议程" placement="bottom-end">
+                                                <el-button type="text" icon="icon-play" style="font-size:18px; padding:0; margin-left:10px;" @click.stop="handleAgendaRun(scope)"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip class="item" effect="dark" content="删除议程" placement="bottom-end">
+                                                <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:10px;" @click.stop="handleRemoveAgenda(scope)"></el-button>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-scrollbar>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新建议程 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建议程"
+                :visible.sync="dialog.createAgenda.visible"
+                width="500px"
+                :before-close="handleCreateAgendaClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.createAgenda.name"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input type="textarea" v-model="dialog.createAgenda.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateAgendaClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateAgendaSubmit" :loading="dialog.createAgenda.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改议程 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改议程"
+                :visible.sync="dialog.editAgenda.visible"
+                width="500px"
+                :before-close="handleEditAgendaClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editAgenda.name"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input type="textarea" v-model="dialog.editAgenda.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAgendaClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAgendaSubmit" :loading="dialog.editAgenda.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 议程音频 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="议程音频设置"
+                width="400px"
+                :visible.sync="dialog.agendaAudioSettings.visible"
+                @close="handleAgendaAudioSettingsClose">
+
+            <div style="margin-bottom:10px;">
+                <el-radio-group v-model="dialog.agendaAudioSettings.row.audioPriority">
+                    <el-radio v-for="(audioPriority, i) in audioPriorities" :key="i" :label="audioPriority.key" @change="handleAgendaAudioPriorityChange">{{audioPriority.value}}</el-radio>
+                </el-radio-group>
+            </div>
+            <div style="height:38px; margin-bottom:10px;">
+                <el-checkbox style="margin-top:9px;" v-model="dialog.agendaAudioSettings.row.globalCustomAudio" @change="globalCustomAudioChange">开启全局音频</el-checkbox>
+                <div style="width:150px; float:right;" v-if="dialog.agendaAudioSettings.row.globalCustomAudio">
+                    <el-slider v-model="dialog.agendaAudioSettings.row.volume" @change="handleAgendaVolumeChange"></el-slider>
+                </div>
+            </div>
+            <div style="margin-bottom:10px;" v-if="dialog.agendaAudioSettings.row.globalCustomAudio">
+                <el-button size="mini" @click="handleAddCustomAudio('AGENDA')" icon="el-icon-plus">添加音频</el-button>
+            </div>
+            <div style="margin-bottom:10px; max-height:200px; border:1px solid #d3dce6; overflow-y:auto;" v-if="dialog.agendaAudioSettings.row.globalCustomAudio">
+                <div style="line-height:28px; padding:0 10px; box-sizing:border-box;" v-for="(audio,i) in dialog.agendaAudioSettings.row.customAudios" :key="i">
+                    <span>{{audio.sourceName}}</span>
+                    <el-tooltip effect="dark" content="删除音频通道" placement="right">
+                        <el-button type="text" style="padding:0; position:relative; top:4px; font-size:18px; float:right;" icon="el-icon-delete" @click="handleAgendaCustomAudioDelete(audio)"></el-button>
+                    </el-tooltip>
+                </div>
+            </div>
+
+        </el-dialog>
+
+        <!-- 添加发言人角色 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加发言人"
+                :visible.sync="dialog.addSpeakerRole.visible"
+                width="500px"
+                :before-close="handleAddSpeakerRoleClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.addSpeakerRole.name"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddSpeakerRoleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddSpeakerRoleSubmit" :loading="dialog.addSpeakerRole.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加观众角色 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加观众"
+                :visible.sync="dialog.addAudienceRole.visible"
+                width="500px"
+                :before-close="handleAddAudienceRoleClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.addAudienceRole.name"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAudienceRoleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAudienceRoleSubmit" :loading="dialog.addAudienceRole.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加转发 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加转发"
+                :visible.sync="dialog.addForward.visible"
+                width="500px"
+                :before-close="handleAddForwardClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.addForward.name"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddForwardClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddForwardSubmit" :loading="dialog.addForward.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改转发 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改转发"
+                :visible.sync="dialog.editForward.visible"
+                width="500px"
+                :before-close="handleEditForwardClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editForward.name"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditForwardClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditForwardSubmit" :loading="dialog.editForward.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加转发音频 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="添加音频"
+                width="800px"
+                :visible.sync="dialog.addCustomAudio.visible"
+                id="add-role-select-role"
+                @close="handleAddCustomAudioClose">
+
+            <div style="margin-bottom:10px;">
+                <el-input
+                        class="search"
+                        size="small"
+                        placeholder="按名称模糊查询"
+                        v-model="dialog.addCustomAudio.filterName">
+                    <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                </el-input>
+            </div>
+
+            <div style="height:400px;">
+                <div style="width:50%; float:left; height:100%; box-sizing:border-box; border:1px solid #d3dce6;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.addCustomAudio.visible"
+                                default-expand-all
+                                ref="addCustomAudioMemberTree"
+                                :props="dialog.addCustomAudio.props"
+                                node-key="id"
+                                show-checkbox
+                                :data="dialog.addCustomAudio.members"
+                                :filter-node-method="filterNode">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE') || (scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE') || (scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span>{{scope.data.name}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="width:50%; float:left; height:100%; box-sizing:border-box; border:1px solid #d3dce6; border-left:0;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.addCustomAudio.visible"
+                                default-expand-all
+                                ref="addCustomAudioRoleTree"
+                                :props="dialog.addCustomAudio.props"
+                                node-key="id"
+                                show-checkbox
+                                :data="dialog.addCustomAudio.roles"
+                                :filter-node-method="filterNode">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE') || (scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE') || (scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span>{{scope.data.name}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddCustomAudioClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddCustomAudioSubmit" :loading="dialog.addCustomAudio.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加转发目的 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="添加转发目的"
+                width="800px"
+                :visible.sync="dialog.addDestination.visible"
+                id="add-role-select-role"
+                @close="handleAddDestinationClose">
+            <div style="margin-bottom:10px;">
+                <el-input
+                        class="search"
+                        size="small"
+                        placeholder="按名称模糊查询"
+                        v-model="dialog.addDestination.filterName">
+                    <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                </el-input>
+            </div>
+            <div style="height:400px;">
+                <div style="width:50%; float:left; height:100%; box-sizing:border-box; border:1px solid #d3dce6;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.addDestination.visible"
+                                default-expand-all
+                                ref="addDestinationMemberTree"
+                                :props="dialog.addDestination.props"
+                                node-key="id"
+                                show-checkbox
+                                :data="dialog.addDestination.members"
+                                :filter-node-method="filterNode">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE') || (scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE') || (scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span>{{scope.data.name}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="width:50%; float:left; height:100%; box-sizing:border-box; border:1px solid #d3dce6; border-left:0;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.addDestination.visible"
+                                default-expand-all
+                                ref="addDestinationRoleTree"
+                                :props="dialog.addDestination.props"
+                                node-key="id"
+                                show-checkbox
+                                :data="dialog.addDestination.roles"
+                                :filter-node-method="filterNode">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE') || (scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE') || (scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                <span>{{scope.data.name}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddDestinationClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddDestinationSubmit" :loading="dialog.addDestination.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 设置轮询 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                width="800px"
+                :visible.sync="dialog.setLoop.visible"
+                id="add-role-select-role"
+                @close="handleSetLoopClose">
+            <div slot="title">
+                <span style="position:relative; top:2px;">设置轮询</span>
+                <span> - </span>
+                <span style="display:inline-block; width:60px;"><el-input v-model="dialog.setLoop.loopTime" size="mini"></el-input></span>
+                <span style="position:relative; top:2px;">秒</span>
+            </div>
+            <div style="width:100%; height:400px; box-sizing:border-box; position:relative;">
+                <div style="width:50px; height:100%; box-sizing:border-box; position:absolute; left:50%; top:0; margin-left:-25px; z-index:2;">
+                    <div style="width:100%; height:100%; display:table;">
+                        <div style="width:100%; height:100%; display:table-cell; text-align:center; vertical-align:middle;">
+                            <el-button style="margin-bottom:20px;" type="primary" circle @click="handleSetLoopSelect"><span class="feather-icon-arrow-right"></span></el-button>
+                            <el-button style="margin:0;" type="danger" circle @click="handleSetLoopUnSelect"><span class="feather-icon-arrow-left"></span></el-button>
+                        </div>
+                    </div>
+                </div>
+                <div style="width:50%; height:100%; float:left; box-sizing:border-box; padding:0 25px 0 0;">
+                    <div style="width:100%; height:100%; border:1px solid #d3dce6; box-sizing:border-box; padding:10px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    v-if="dialog.setLoop.visible"
+                                    default-expand-all
+                                    ref="setLoopTree"
+                                    :props="dialog.setLoop.members.props"
+                                    node-key="id"
+                                    show-checkbox
+                                    :data="dialog.setLoop.members.data"
+                                    :filter-node-method="filterNode">
+                                <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                    <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                    <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                    <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                    <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                    <span v-if="scope.data.type==='ROLE'" class="icon-user"></span>
+                                    <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='AUDIO_ENCODE') || (scope.data.param && scope.data.param.indexOf('VIDEO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                    <span v-if="(scope.data.type==='ROLE_CHANNEL' && scope.data.channelType==='VIDEO_ENCODE') || (scope.data.param && scope.data.param.indexOf('AUDIO_ENCODE')>=0)" class="icon-exchange" style="position:relative;"></span>
+                                    <span>{{scope.data.name}}</span>
+                                </span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                </div>
+                <div style="width:50%; height:100%; float:left; box-sizing:border-box; padding:0 0 0 25px;">
+                    <div style="width:100%; height:100%; border:1px solid #d3dce6; box-sizing:border-box; padding:10px;">
+                        <el-scrollbar style="height:100%;">
+                            <div v-for="(item,i) in dialog.setLoop.selected" :key="i">
+                                <el-checkbox v-model="item.checked">
+                                    <span v-if="item.parent.param && item.parent.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                    <span v-if="item.parent.param && item.parent.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                    <span v-if="item.parent.type==='ROLE'" class="icon-user"></span>
+                                    {{item.parent.name}} - {{item.node.name}}
+                                    <el-tooltip class="item" effect="dark" content="切换至该画面" placement="bottom-end">
+                                        <el-button type="text" icon="icon-fast-forward" style="font-size:15px; padding:0;" @click.stop="pollingSwitchToIndex(item,i)"></el-button>
+                                    </el-tooltip>
+                                </el-checkbox>
+                            </div>
+                        </el-scrollbar>
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSetLoopClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSetLoopSubmit" :loading="dialog.setLoop.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改角色 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="修改角色"
+                width="842px"
+                :visible.sync="dialog.editRole.visible"
+                id="add-role-select-role"
+                @close="handleEditRoleClose">
+            <div style="width:100%; height:450px; box-sizing:border-box; position:relative; border:1px solid #d3dce6;">
+                <div style="width:400px; height:100%; float:left; box-sizing:border-box; padding:10px; border-right:1px solid #d3dce6;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.editRole.visible"
+                                default-expand-all
+                                ref="editRoleTree"
+                                :props="dialog.editRole.members.props"
+                                node-key="id"
+                                :data="dialog.editRole.members.data"
+                                :filter-node-method="filterNode">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span v-if="(scope.data.type==='ONE_TO_ONE_FOLDER' || scope.data.type==='ONE_TO_MANY_FOLDER' || scope.data.type==='FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_HALL')>=0" class="graph-node-icon-7"></span>
+                                <span v-if="scope.data.param && scope.data.param.indexOf('MEMBER_USER')>=0" class="icon-user"></span>
+                                <span>{{getMemberName(scope)}}</span>
+                                <el-tooltip v-if="scope.data.param.indexOf('MEMBER_USER')>=0 || scope.data.param.indexOf('MEMBER_HALL')>=0" effect="dark" content="修改角色" placement="right">
+                                    <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:1px; right:10px; font-size:16px;" @click.stop="handleEditRoleSubmit(scope.data)"><span class="icon-link"></span></el-button>
+                                </el-tooltip>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="width:400px; height:100%; position:relative; float:left; box-sizing:border-box; padding:10px;">
+                    <div style="width:100%; height:40px;" id="page-custom-agenda-wrapper-edit-role">
+                        <el-tabs v-model="dialog.editRole.roles.currentId" type="card">
+                            <el-tab-pane v-for="(r, i) in dialog.editRole.roles.data" :key="i" :label="r.name" :name="r.id+''"></el-tab-pane>
+                        </el-tabs>
+                    </div>
+                    <div style="position:absolute; left:0; top:50px; right:0; bottom:0; box-sizing:border-box; border-top:1px solid #d3dce6;">
+                        <div style="width:100%; height:100%; box-sizing:border-box; padding:8px 10px;">
+                            <el-scrollbar style="height:100%;">
+                                <div v-for="(roleMember,i) in dialog.editRole.roleMembers" :key="i" style="margin-bottom:4px; padding:2px 0;" class="role-members">
+                                    <span v-if="roleMember.groupMemberType==='MEMBER_HALL'" class="graph-node-icon-7" style="margin-right:4px;"></span>
+                                    <span v-if="roleMember.groupMemberType==='MEMBER_USER'" class="icon-user" style="margin-right:4px;"></span>
+                                    <span>{{roleMember.name}}</span>
+                                    <el-tooltip effect="dark" content="设为观众" placement="right">
+                                        <el-button type="text" style="margin:0; padding:0; float:right; position:relative; top:1px; right:10px; font-size:16px;" @click.stop="handleEditRoleRemove(roleMember)" icon="el-icon-delete"></el-button>
+                                    </el-tooltip>
+                                </div>
+                            </el-scrollbar>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+
+        </el-dialog>
+
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="!dialog.speakerSet.loading"
+                width="200px"
+                id="speaker-set-dialog"
+                :visible.sync="dialog.speakerSet.visible"
+                @close="handleSpeakerSetClose">
+            <div style="width:100%; height:auto;" v-if="roles.data[0] && roles.data[0].children" v-loading="dialog.speakerSet.loading" element-loading-background="rgba(0, 0, 0, 0.6)">
+                <div class="speaker-item" v-for="(speakerRole,i) in roles.data[0].children" :key="i" @click="handleSpeakerSetSubmit(speakerRole)">{{speakerRole.name}}</div>
+            </div>
+        </el-dialog>
+
+        <!-- 添加成员 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="添加成员"
+                width="450px"
+                :visible.sync="dialog.addMember.visible"
+                @close="handleAddMemberClose">
+            <el-input size="small" v-model="dialog.addMember.filterName" style="position:relative; bottom:10px;"></el-input>
+            <div style="max-height:400px; overflow-y:auto;">
+                <el-tree
+                        v-if="dialog.addMember.visible"
+                        default-expand-all
+                        ref="addMemberTree"
+                        :props="dialog.addMember.props"
+                        node-key="id"
+                        show-checkbox
+                        :data="dialog.addMember.userAndHalls"
+                        :filter-node-method="filterNodeByName">
+                    <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                        <span style="position:relative; top:1px;" v-if="(scope.data.type==='FOLDER' || scope.data.type==='CONTACTS_FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                        <span style="position:relative; top:1px;" v-if="(scope.data.type==='FOLDER' || scope.data.type==='CONTACTS_FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                        <span style="position:relative; top:1px;" v-if="scope.data.type==='CONFERENCE_HALL'" class="graph-node-icon-7"></span>
+                        <span style="position:relative; top:1px;" v-if="scope.data.type==='USER'" class="icon-user"></span>
+                        <span style="position:relative; top:1px;">{{scope.node.label}}</span>
+                    </span>
+                </el-tree>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddMemberClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddMemberSubmit" :loading="dialog.addMember.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 配置角色 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="配置角色"
+                width="536px"
+                :visible.sync="dialog.editSpeakerChannel.visible"
+                @close="handleEditSpeakerChannelClose">
+            <div style="margin-bottom:10px;">
+                <el-button size="small" :loading="dialog.editSpeakerChannel.loadings[0]" @click="handleAddSpeakerChannelSubmit('VIDEO_ENCODE')">添加视频编码通道</el-button>
+                <el-button size="small" :loading="dialog.editSpeakerChannel.loadings[1]" @click="handleAddSpeakerChannelSubmit('AUDIO_ENCODE')">添加音频编码通道</el-button>
+                <el-select size="small" style="position:relative; top:1px; left:8px;" v-model="dialog.editSpeakerChannel.terminal.currentId" placeholder="请选择">
+                    <el-option
+                            v-for="(item,i) in dialog.editSpeakerChannel.terminal.data"
+                            :key="i"
+                            :label="item.terminalName"
+                            :value="item.terminalId">
+                    </el-option>
+                </el-select>
+            </div>
+            <div style="width:100%; max-height:400px; overflow-y:auto; border-top:1px solid #d3dce6;" v-if="dialog.editSpeakerChannel.role.data">
+                <div
+                        v-for="(channel,i) in dialog.editSpeakerChannel.role.data.children"
+                        :key="i"
+                        style="line-height:33px; border-bottom:1px solid #d3dce6; border-left:1px solid #d3dce6; border-right:1px solid #d3dce6; padding:0 10px;">
+                    {{channel.name}}
+                    &nbsp;-&nbsp;
+                    {{getTerminalChannelPermissionName(channel)}}
+                    <span style="float:right; line-height:normal;">
+                        <el-tooltip effect="dark" content="修改通道名称" placement="bottom">
+                            <el-button type="text" style="padding:6px 0 0 0; font-size:18px;" icon="el-icon-edit" @click="handleEditSpeakerChannelName(channel)"></el-button>
+                        </el-tooltip>
+                        <el-tooltip effect="dark" content="关联终端通道" placement="bottom">
+                            <el-button type="text" style="padding:6px 0 0 0; font-size:17px;" icon="feather-icon-link" @click="handleEditSpeakerChannelPermission(channel)"></el-button>
+                        </el-tooltip>
+                        <el-tooltip effect="dark" content="删除角色通道" placement="bottom">
+                            <el-button type="text" style="padding:6px 0 0 0; font-size:18px;" icon="el-icon-delete" @click="removeSpeakerChannel(channel)"></el-button>
+                        </el-tooltip>
+                    </span>
+                </div>
+            </div>
+        </el-dialog>
+
+        <!-- 修改角色通道名称 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="修改角色通道名称"
+                width="450px"
+                :visible.sync="dialog.editSpeakerChannelName.visible"
+                @close="handleEditSpeakerChannelNameClose">
+
+            <el-input size="small" v-model="dialog.editSpeakerChannelName.name"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditSpeakerChannelNameClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditSpeakerChannelNameSubmit" :loading="dialog.editSpeakerChannelName.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 角色通道关联终端通道 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="关联终端通道"
+                width="450px"
+                :visible.sync="dialog.editSpeakerChannelPermission.visible"
+                @close="handleEditSpeakerChannelPermissionClose">
+
+            <div style="max-height:300px; overflow-y:auto;">
+                <el-radio-group v-model="dialog.editSpeakerChannelPermission.currentTerminalChannelId">
+                    <div v-for="(terminalChannel,i) in dialog.editSpeakerChannelPermission.terminalChannels" :key="i" style="margin-bottom:10px;">
+                        <el-radio :label="terminalChannel.id">{{terminalChannel.name}}</el-radio>
+                    </div>
+                </el-radio-group>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditSpeakerChannelPermissionClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditSpeakerChannelPermissionSubmit" :loading="dialog.editSpeakerChannelPermission.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 参数设置 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="参数设置"
+                width="1055px"
+                :visible.sync="dialog.editParam.visible"
+                @close="handleEditParamClose">
+
+            <div style="max-height:500px; overflow-y:auto;">
+                <el-form :inline="true" label-width="100px">
+
+                    <el-form-item label="端口复用">
+                        <el-switch
+                                v-model="dialog.editParam.portReuse"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949">
+                        </el-switch>
+                    </el-form-item>
+                </el-form>
+
+                <div v-for="(adaption,i) in dialog.editParam.adaptions" :key="i" style="box-sizing:border-box; border:1px solid #d3dce6; position:relative; padding:10px; margin-bottom:20px;">
+                    <span style="background-color:#fff; position:absolute; left:10px; top:-10px; padding-left:10px; padding-right:10px;">{{adaption.adaptionName}}</span>
+                    <el-form :inline="true" label-width="100px" style="float:left;">
+                        <el-form-item label="视频编码格式">
+                            <el-select size="small" v-model="adaption.videoFormat">
+                                <el-option label="h265" value="h265"></el-option>
+                                <el-option label="h264" value="h264"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+
+                    <el-form :inline="true" label-width="100px" style="float:left;">
+                        <el-form-item label="视频码率" style="height:41px;">
+                            <el-input-number size="small" v-model="adaption.videoRate" style="width:215px;" :min="0" :step="100"></el-input-number>
+                        </el-form-item>
+                    </el-form>
+                    <el-form :inline="true" label-width="102px" style="float:left;">
+                        <el-form-item label="视频分辨率" style="height:41px;">
+                            <el-select size="small" v-model="adaption.videoResolution">
+                                <el-option label="1920x1200" value="1920x1200"></el-option>
+                                <el-option label="1920x1080" value="1920x1080"></el-option>
+                                <el-option label="1280x720" value="1280x720"></el-option>
+                                <el-option label="704x576" value="704x576"></el-option>
+                                <el-option label="352x288" value="352x288"></el-option>
+                                <el-option label="176x144" value="176x144"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                    <el-form :inline="true" label-width="102px" style="float:left;">
+                        <el-form-item label="帧率" style="height:41px;">
+                            <el-input-number size="small" v-model="adaption.frameRate" style="width:215px;" :min="0" :step="5"></el-input-number>
+                        </el-form-item>
+                    </el-form><br>
+                    <el-form :inline="true" label-width="100px" style="float:left;">
+                        <el-form-item label="音频编码格式">
+                            <el-select size="small" v-model="adaption.audioFormat">
+                                <el-option label="pcmu" value="pcmu"></el-option>
+                                <el-option label="pcma" value="pcma"></el-option>
+                                <el-option label="aac" value="aac"></el-option>
+                                <el-option label="g729" value="g729"></el-option>
+                                <el-option label="mp2" value="mp2"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                    <el-form :inline="true" label-width="102px" style="float:left;">
+                        <el-form-item label="音频码率" style="height:41px;">
+                            <el-input-number size="small" v-model="adaption.audioRate" style="width:215px;" :min="0" :step="100"></el-input-number>
+                        </el-form-item>
+                    </el-form>
+                    <div style="clear:both;"></div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditParamClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditParamSubmit" :loading="dialog.editParam.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 发布RTMP -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="发布RTMP"
+                width="693px"
+                :visible.sync="dialog.publishStream.visible"
+                @close="handlePublishStreamClose">
+
+            <div style="max-height:500px; overflow-y:auto;">
+                <el-form :inline="true" label-width="100px">
+
+                    <!--<el-form :model="form" id="formInfo" >-->
+                    <el-form-item label="RTMP地址">
+                        <!--<el-form-item label="RTMP地址" :label-width="formLabelWidth">-->
+                        <el-input v-model="dialog.publishStream.rtmpUrl" name="name" placeholder="rtmp://192.165.56.14:1935/live/xxx" auto-complete="off" style="margin-left:0px; width:470px"></el-input>
+                    </el-form-item>
+                    <!--</el-form>-->
+
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handlePublishStreamClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handlePublishStreamSubmit" :loading="dialog.publishStream.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

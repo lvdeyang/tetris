@@ -1,0 +1,31 @@
+<el-dialog
+        append-to-body
+        :close-on-click-modal="false"
+        :title="title"
+        :visible.sync="visible"
+        width="500px"
+        :before-close="handleClose">
+
+    <el-table
+            :title="title"
+            ref="channeTable"
+            :data="table.rows"
+            height="300"
+            border
+            highlight-current-row
+            @current-change="currentChange"
+            style="width:100%">
+        <el-table-column
+            v-for="(column, i) in columns"
+            :key="i"
+            :prop="column.prop"
+            :label="column.label">
+        </el-table-column>
+    </el-table>
+
+    <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleClose">取消</el-button>
+        <el-button size="medium" type="primary" @click="handleSubmit">确定</el-button>
+    </span>
+
+</el-dialog>

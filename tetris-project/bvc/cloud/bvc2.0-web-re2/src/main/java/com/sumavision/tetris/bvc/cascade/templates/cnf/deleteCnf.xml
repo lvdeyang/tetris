@@ -1,0 +1,7 @@
+<control>
+	<commandname>group</commandname>
+	<operation>destroy</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+</control>

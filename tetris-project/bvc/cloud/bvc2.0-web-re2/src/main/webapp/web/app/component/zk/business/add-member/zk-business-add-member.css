@@ -1,0 +1,5 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-business-add-member,
+.zk-business-add-member *{box-sizing:border-box!important;}
+.zk-business-add-member .el-scrollbar__wrap{overflow-x: hidden;}

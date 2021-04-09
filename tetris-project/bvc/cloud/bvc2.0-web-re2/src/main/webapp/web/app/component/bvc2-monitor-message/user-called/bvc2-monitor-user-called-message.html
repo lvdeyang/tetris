@@ -1,0 +1,16 @@
+<div  v-if="visible" class="bvc2-monitor-user-called-message">
+
+    <iframe style="width:300px; height:300px; position:fixed; bottom:20px; right:20px; z-index:200000; background-color:#000;" frameborder="no" border="0" allowtransparency="true"></iframe>
+    <div style="width:300px; height:300px; position:fixed; bottom:20px; right:20px; z-index:200001; box-shadow:0 2px 12px 0 rgba(0,0,0,.5); background-color:#222126;">
+        <div style="width:100%; height:100%; position:relative;">
+            <div style="color:#fff; width:100%; text-align:center; font-size:20px; position:absolute; top:50px;">
+                {{message}}
+            </div>
+            <div style="width:100%; position:absolute; left:0; bottom:50px; text-align:center;">
+                <el-button type="success" style="border-radius:100%; width:50px; height:50px; padding:0; text-align:center; line-height:50px; font-size:24px;" icon="el-icon-phone-outline" @click="accept" :loading="loading"></el-button>
+                <el-button type="danger" style="border-radius:100%; width:50px; height:50px; padding:0; text-align:center; line-height:50px; font-size:24px; margin-left:80px;" icon="el-icon-phone" @click="refuse" :loading="loading"></el-button>
+            </div>
+        </div>
+    </div>
+
+</div>

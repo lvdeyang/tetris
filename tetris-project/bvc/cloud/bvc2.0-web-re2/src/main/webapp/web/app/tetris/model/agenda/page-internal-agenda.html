@@ -1,0 +1,275 @@
+<mi-frame id="page-internal-agenda-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">内置议程</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>内置议程</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建议程</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除议程</el-button>
+
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="备注"
+                                prop="remark">
+                        </el-table-column>
+                        <el-table-column
+                                label="业务类型"
+                                prop="businessInfoTypeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="绑定角色">
+                            <template slot-scope="scope">
+                                <div :key="i"
+                                    v-for="(role, i) in scope.row.roles">
+                                    <el-tag
+                                        closable
+                                        :disable-transitions="false"
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        @close="handleRoleDelete(role, scope)">
+                                        {{role.name}}
+                                    </el-tag>
+                                </div>
+                                <el-button size="mini" @click="handleAddRole(scope)" icon="icon-plus">&nbsp;&nbsp;关联角色</el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音频优先级"
+                                align="left"
+                                width="150">
+                            <template slot-scope="scope">
+                                <div v-for="(audioPriority, i) in audioPriorities">
+                                    <el-radio :key="i" v-model="scope.row.audioPriority" :label="audioPriority.key" @change="handleAudioPriorityChange($event, scope)">{{audioPriority.value}}</el-radio>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="议程音频"
+                                prop="globalCustomAudio">
+                            <template slot-scope="scope">
+                                <el-switch
+                                    style="position:relative; bottom:2px;"
+                                    v-model="scope.row.globalCustomAudio"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949"
+                                    active-text="开启"
+                                    inactive-text="关闭"
+                                    @change="globalCustomAudioChange($event, scope)">
+                                </el-switch>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音频模式"
+                                align="left"
+                                width="150">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.globalCustomAudio">
+                                    <div v-for="(audioType, i) in audioTypes" :key="i">
+                                        <el-radio v-model="scope.row.audioType" :label="audioType.key" @change="handleAudioTypeChange($event, scope)">{{audioType.value}}</el-radio>
+                                    </div>
+                                </div>
+                                <div v-else>-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音量"
+                                prop="globalCustomAudio">
+                            <template slot-scope="scope">
+                                <el-slider style="width:100px;" v-if="scope.row.globalCustomAudio && scope.row.audioType==='CUSTOM'" @change="handleAgendaVolumeChange($event, scope)" v-model="scope.row.volume"></el-slider>
+                                <div v-else>-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音频列表">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.globalCustomAudio && scope.row.audioType==='CUSTOM'"
+                                    :key="i"
+                                    v-for="(customAudio, i) in scope.row.customAudios">
+                                    <el-tag
+                                        closable
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        :disable-transitions="false"
+                                        @close="handleCustomAudioDelete(customAudio, scope)">
+                                        {{customAudio.sourceName}}
+                                    </el-tag>
+                                </div>
+                                <el-button  v-if="scope.row.globalCustomAudio && scope.row.audioType==='CUSTOM'" size="mini" @click="handleAddCustomAudio(scope)" icon="icon-plus">&nbsp;&nbsp;添加音频</el-button>
+                                <div v-else>-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改议程" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="设置转发" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-tickets" style="font-size:18px; padding:0; margin-left:20px;" @click="handleEditForward(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除议程" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.currentPage"
+                        :page-sizes="table.pageSizes"
+                        :page-size="table.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.total">
+                </el-pagination>
+            </div>
+
+        </el-card>
+
+        <!-- 新建议程 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建议程"
+                :visible.sync="dialog.createAgenda.visible"
+                width="500px"
+                :before-close="handleCreateAgendaClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.createAgenda.name"></el-input>
+                </el-form-item>
+                <el-form-item label="业务类型">
+                    <el-select v-model="dialog.createAgenda.businessInfoTypeName" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in businessInfoTypes"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input type="textarea" v-model="dialog.createAgenda.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateAgendaClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateAgendaSubmit" :loading="dialog.createAgenda.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改议程 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改议程"
+                :visible.sync="dialog.editAgenda.visible"
+                width="500px"
+                :before-close="handleEditAgendaClose">
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editAgenda.name"></el-input>
+                </el-form-item>
+                <el-form-item label="业务类型">
+                    <el-select v-model="dialog.editAgenda.businessInfoTypeName" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in businessInfoTypes"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input type="textarea" v-model="dialog.editAgenda.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAgendaClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAgendaSubmit" :loading="dialog.editAgenda.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 关联角色 -->
+        <el-dialog
+            append-to-body
+            :close-on-click-modal="false"
+            title="关联角色"
+            width="400px"
+            :visible.sync="dialog.addRole.visible"
+            id="add-role-select-role"
+            @close="handleAddRoleClose">
+
+            <div style="max-height:400px;">
+                <el-tree
+                        v-if="dialog.addRole.visible"
+                        ref="addRoleTree"
+                        :props="dialog.addRole.props"
+                        node-key="id"
+                        show-checkbox
+                        :data="dialog.addRole.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddRoleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddRoleSubmit" :loading="dialog.addRole.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加音频 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="添加音频"
+                width="400px"
+                :visible.sync="dialog.addCustomAudio.visible"
+                id="add-role-select-role"
+                @close="handleAddCustomAudioClose">
+
+            <div style="max-height:400px; overflow-y:auto;">
+                <el-tree
+                    default-expand-all
+                    v-if="dialog.addCustomAudio.visible"
+                    ref="addCustomAudioTree"
+                    :props="dialog.addCustomAudio.props"
+                    node-key="id"
+                    show-checkbox
+                    :data="dialog.addCustomAudio.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddCustomAudioClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddCustomAudioSubmit" :loading="dialog.addCustomAudio.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

@@ -1,0 +1,77 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>maddfull</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<grouptype>${groupType}</grouptype>
+	<subject>${subject}</subject>
+	<stime>${stime}</stime>
+	<bizinfo>
+		<biztype>cmd</biztype>
+		<bizname>${bizname}</bizname>
+		<creatorid>${creatorid}</creatorid>
+		<topid>${topid}</topid>
+		<mlist>
+			<#if mAddList??>
+				<#list mAddList as m>
+					<minfo>
+						<mid>${m.mid}</mid>
+						<mname>${m.mname}</mname>
+						<mtype>${m.mtype}</mtype>
+						<mstatus>${m.mstatus}</mstatus>
+						<#if m.pid??>
+							<pid>${m.pid}</pid>
+						</#if>
+					</minfo>
+				</#list>	
+			</#if>
+		</mlist>
+	</bizinfo>
+	<cmdstatus>
+		<status>${status}</status>
+		<#if authitem??>
+			<authitem>
+				<op>${authitem.op}</op>
+				<accepauthid>${authitem.accepauthid}</accepauthid>
+				<cmdedid>${authitem.cmdedid}</cmdedid>
+			</authitem>
+		</#if>
+		<#if replaceitem??>
+			<replaceitem>
+				<op>${replaceitem.op}</op>
+				<targid>${replaceitem.targid}</targid>
+			</replaceitem>
+		</#if>
+		<secretlist>
+			<#if secretlist??>
+				<#list secretlist as item>
+					<secretitem>
+						<upid>${item.upid}</upid>
+						<downid>${item.downid}</downid>
+					</secretitem>
+				</#list>
+			</#if>
+		</secretlist>
+		<croplist>
+			<#if croplist??>
+				<#list croplist as crop>
+					<cropitem>
+						<mid>${crop}</mid>
+					</cropitem>
+				</#list>
+			</#if>
+		</croplist>
+		<croslist>
+			<#if croslist??>
+				<#list croslist as cros>
+					<crossitem>
+						<upid>${cros.upid}</upid>
+						<downid>${cros.downid}</downid>
+					</crossitem>
+				</#list>
+			</#if>
+		</croslist>
+	</cmdstatus>
+</notify>

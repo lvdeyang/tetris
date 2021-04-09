@@ -1,0 +1,9 @@
+<request>
+	<commandname>bizcnf</commandname>
+	<operation>spkreq</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mid>${mid}</mid>
+</request>

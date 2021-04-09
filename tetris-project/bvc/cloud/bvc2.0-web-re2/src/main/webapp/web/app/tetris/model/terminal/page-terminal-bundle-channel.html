@@ -1,0 +1,117 @@
+<mi-frame id="page-terminal-bundle-channel-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">通道列表</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-terminal">{{terminalName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a :href="'#/page-terminal-bundle/' + terminalId + '/' + terminalName">{{terminalBundleName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>通道列表</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加通道</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除通道</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="通道id"
+                                prop="channelId">
+                        </el-table-column>
+                        <el-table-column
+                                label="类型"
+                                prop="type">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改通道" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除通道" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 添加通道对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加通道"
+                :visible.sync="dialog.addChannel.visible"
+                width="500px"
+                :before-close="handleAddChannelClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="通道id">
+                    <el-input v-model="dialog.addChannel.channelId" placeholder="请输入通道id"></el-input>
+                </el-form-item>
+                <el-form-item label="通道类型">
+                    <el-select v-model="dialog.addChannel.type" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in types"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddChannelSubmit" :loading="dialog.addChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改通道对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改通道"
+                :visible.sync="dialog.editChannel.visible"
+                width="500px"
+                :before-close="handleEditChannelClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="通道id">
+                    <el-input v-model="dialog.editChannel.channelId" placeholder="请输入通道id"></el-input>
+                </el-form-item>
+                <el-form-item label="通道类型">
+                    <el-select v-model="dialog.editChannel.type" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="item in types"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditChannelSubmit" :loading="dialog.editChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

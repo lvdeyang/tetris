@@ -1,0 +1,67 @@
+<div class="zk-message" style="width:100%; height:100%;">
+    <div style="position:absolute; left:0; top:0; height:40px; width:100%; z-index:0; background-color:#37404F;"></div>
+    <div style="z-index:1; height:100%; background-color:#37404F; position:relative; width:490px; float:right; box-shadow:2px 0 10px #000;">
+        <div style="line-height:50px; font-size:16px; color:#fff; font-weight:700; padding-left:10px;">通知中心</div>
+        <div style="position:absolute; right:10px; top:30px; z-index:2;">
+            <!--<el-button-group>
+                <el-button :class="'filter-button '+isFilterButtonActive(0)" type="info" plain style="padding:3px;" @click="filterButtonClick($event, 0)">
+                    <img :src="baseUrl+'images/zk/tmp/20/Receptionist.png'" />
+                </el-button>
+                <el-button :class="'filter-button '+isFilterButtonActive(1)" type="info" plain style="padding:3px;" @click="filterButtonClick($event, 1)">
+                    <img :src="baseUrl+'images/zk/tmp/20/Doctor.png'" />
+                </el-button>
+                <el-button :class="'filter-button '+isFilterButtonActive(2)" type="info" plain style="padding:3px;" @click="filterButtonClick($event, 2)">
+                    <img :src="baseUrl+'images/zk/tmp/20/Retiree.png'" />
+                </el-button>
+                <el-button :class="'filter-button '+isFilterButtonActive(3)" type="info" plain style="padding:3px;" @click="filterButtonClick($event, 3)">
+                    <img :src="baseUrl+'images/zk/tmp/20/User.png'" />
+                </el-button>
+            </el-button-group>-->
+        </div>
+        <div style="position:absolute; left:0; top:40px; right:0; bottom:0; padding:20px 10px 10px 10px;">
+            <div style="width:100%; height:100%; position:relative;">
+                <el-scrollbar style="height:100%;">
+                    <div style="width:100%; background-color:rgba(255,255,255,.1); padding:10px; border-radius:4px; margin-bottom:20px;" v-for="command in commands">
+                        <!--<div style="width:50px; height:50px; border:1px solid #37404F; border-radius:100%; padding:6px; box-shadow:0 0 5px rgba(0,0,0,.5); background-color:#37404F; float:left;">
+                            <img style="width:36px;" :src="baseUrl+'images/zk/tmp/Receptionist.png'"/>
+                        </div>-->
+                        <div style="width:410px; float:left; padding-left:10px; padding-right:10px;">
+                            <div v-if="command.message.businessType === 'callUser'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                视频通话
+                            </div>
+                            <div v-else-if="command.message.businessType === 'voiceIntercom'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                语音对讲
+                            </div>
+                            <div v-else-if="command.message.businessType === 'cooperationGrant'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                协同指挥
+                            </div>
+                            <div v-else-if="command.message.businessType === 'commandStart'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                指挥提醒
+                            </div>
+                            <div v-else-if="command.message.businessType === 'commandForwardDevice'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                设备转发
+                            </div>
+                            <div v-else-if="command.message.businessType === 'commandForwardFile'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                文件转发
+                            </div>
+                            <div v-else-if="command.message.businessType === 'commandMessageReceive'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                指挥消息
+                            </div>
+                            <div v-else-if="command.message.businessType === 'secretStart'" style="color:#fff; font-size:16px; font-weight:700; margin-bottom:5px;">
+                                专向提醒
+                            </div>
+                            <div style="color:#fff; font-size:14px;">
+                                {{command.message.businessInfo}}
+                            </div>
+                        </div>
+                        <div style="text-align:right; clear:both;">
+                            <el-button type="text" class="text-button" style="padding:0;" @click="ignore(command)">忽略</el-button>
+                            <el-button type="text" class="text-button" style="padding:0;" @click="refuse(command)">拒绝</el-button>
+                            <el-button type="text" class="text-button" style="padding:0; margin-left:10px;" @click="accept(command)">同意</el-button>
+                        </div>
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</div>

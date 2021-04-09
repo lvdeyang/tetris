@@ -1,0 +1,151 @@
+<div class="bvc2-tab-buttons">
+    <el-tooltip class="item" effect="dark" content="开始会议" placement="bottom">
+        <el-button class="bvc2-tab-button" :type="group.status==='START'?'success':'primary'" :style="style.startSession.isLoading?'padding-left:5px':''"  @click="startSession" :loading="style.startSession.isLoading">
+            <span :class="style.startSession.icon" style="position:relative; left:2px;" :style="startSessionDisplay"></span>
+        </el-button>
+    </el-tooltip>
+    <el-tooltip class="item" effect="dark" content="停止会议" placement="bottom">
+        <el-button class="bvc2-tab-button" :type="group.status==='START'?'danger':'primary'" :style="style.stopSession.isLoading?'padding-left:5px':''" @click="stopSession" :loading="style.stopSession.isLoading">
+            <span :class="style.stopSession.icon" :style="stopSessionDisplay"></span>
+        </el-button>
+    </el-tooltip>
+
+    <el-tooltip  v-if="group.type==='会议室'" class="item" effect="dark" content="音频控制" placement="bottom">
+        <el-button class="bvc2-tab-button" type="primary" :style="style.setVolume.isLoading?'padding-left:5px':''" @click="setVolume" :loading="style.setVolume.isLoading">
+            <span :class="style.setVolume.icon" style="position:relative; left:1px;" :style="setVolumeDisplay"></span>
+        </el-button>
+    </el-tooltip>
+
+    <el-tooltip v-if="group.type==='会议室'" class="item" effect="dark" :content="recordTip" placement="bottom">
+        <el-button class="bvc2-tab-button" :type="recordStatus" :style="style.sessionRecord.isLoading?'padding-left:5px':''" @click="sessionRecord" :loading="style.sessionRecord.isLoading">
+            <span :class="style.sessionRecord.icon" style="position:relative; left:1px;" :style="sessionRecordDisplay"></span>
+        </el-button>
+    </el-tooltip>
+
+    <el-tooltip v-if="group.type==='会议室'" class="item" effect="dark" content="修改发言人" placement="bottom">
+        <el-button class="bvc2-tab-button" type="primary" @click="updateSpokesman">
+            <span class="icon-bullhorn" style="position:relative; left:1px;"></span>
+        </el-button>
+    </el-tooltip>
+
+    <el-dropdown v-if="group.type==='会议室'" style="margin-left:10px;" trigger="click" @command="menuButtonClick">
+        <el-tooltip class="item" effect="dark" content="更多功能" placement="bottom">
+            <el-button class="bvc2-tab-button" type="primary" :style="style.sessionRecord.isLoading?'padding-left:5px':''" >
+                <span class="icon-align-justify" style="position:relative; left:1px;"></span>
+            </el-button>
+        </el-tooltip>
+        <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="editRole"><span class="icon-group" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>修改角色</el-dropdown-item>
+            <el-dropdown-item command="addMember"><span class="icon-plus" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; left:1px;" loading="true"></span>添加成员</el-dropdown-item>
+            <el-dropdown-item command="removeMember"><span class="icon-minus" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; left:1px;"></span>删除成员</el-dropdown-item>
+            <el-dropdown-item command="setWatchAuthorization"><span class="icon-key" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>设置看会权限</el-dropdown-item>
+            <el-dropdown-item command="publish"><span class="icon-cloud-upload" style="display:inline-block; width:15px; height:14px; margin-right:6px; position:relative; right:1px;"></span>发布直播</el-dropdown-item>
+            <el-dropdown-item command="queryForward"><span class="icon-table" style="display:inline-block; width:15px; height:14px; margin-right:6px;"></span>转发查询</el-dropdown-item>
+            <el-dropdown-item command="virtualSource"><span class="icon-film" style="display:inline-block; width:15px; height:14px; margin-right:6px;"></span>虚拟源</el-dropdown-item>
+            <el-dropdown-item command="queryRecordPlayList"><span class="icon-play-circle" style="display:inline-block; width:15px; height:14px; margin-right:6px;"></span>会议记录</el-dropdown-item>
+        </el-dropdown-menu>
+    </el-dropdown>
+
+    <el-tooltip v-if="group.type==='监控室'" class="item" effect="dark" content="监控录制" placement="bottom">
+        <el-button class="bvc2-tab-button" type="primary"  @click="monitorRecord">
+            <span :class="style.sessionRecord.icon" style="position:relative; left:1px;"></span>
+        </el-button>
+    </el-tooltip>
+
+    <div class="bvc2-dialog-set-audio">
+        <bvc2-dialog-set-audio
+                ref="setAudio"
+                :members="members"
+                :values="values"
+                :group="group"
+                ></bvc2-dialog-set-audio>
+    </div>
+     <div class="bvc2-dialog-publish-authority">
+    	<bvc2-dialog-publish-authority
+    			ref="selectRecord"
+    			:members="members"
+    			:value="values"
+    			:group="group"
+    			></bvc2-dialog-publish-authority>
+    </div>
+
+    <el-dialog title="修改发言人" class="dialog-update-spokesman" :visible.sync="dialog.updateSpokesman.visible">
+        <bvc2-update-spokesman
+                ref="updateSpokesman"
+                :group="group"
+                @refresh-spokesman-member="refreshSpokesmanMember">
+        </bvc2-update-spokesman>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialog.updateSpokesman.visible = false">关闭</el-button>
+        </span>
+    </el-dialog>
+
+    <el-dialog title="修改角色" class="dialog-update-roles" :visible.sync="dialog.updateRoles.visible">
+        <bvc2-update-roles
+                ref="updateRole"
+                :group="group">
+        </bvc2-update-roles>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialog.updateRoles.visible = false">关闭</el-button>
+        </span>
+    </el-dialog>
+
+    <el-dialog title="添加成员" class="dialog-add-members" :visible.sync="dialog.addMembers.visible">
+        <div class="add-members" style="height:550px;">
+            <div class="add-members-search">
+                <el-input placeholder="输入关键字过滤"  size="mini" clearable v-model="addmembersFilterText">
+                    <span slot="prefix" class="el-input__icon el-icon-search"></span>
+                </el-input>
+            </div>
+            <div class="group-members" v-loading="addmembers.treeLoading">
+                <el-tree
+                        ref="$addMembers"
+                        :data="addmembers.members"
+                        node-key="key"
+                        show-checkbox
+                        :filter-node-method="addmembersFilterNode"
+                        :props="addmembers.defaultProps"
+                        :render-content="addMembersRenderContent"
+                        @node-expand="nodeExpand">
+                </el-tree>
+            </div>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="saveMembers" :loading="style.saveMembers.isLoading">添 加</el-button>
+            <el-button @click="dialog.addMembers.visible = false">关闭</el-button>
+        </span>
+    </el-dialog>
+
+    <el-dialog title="删除成员" class="dialog-remove-members" :visible.sync="dialog.removeMembers.visible">
+        <div class="remove-members" style="height:550px;">
+            <div class="remove-members-search">
+                <el-input placeholder="输入关键字过滤"  size="mini" clearable v-model="removemembersFilterText">
+                    <span slot="prefix" class="el-input__icon el-icon-search"></span>
+                </el-input>
+            </div>
+            <div class="group-members" v-loading="removemembers.treeLoading">
+                <el-tree
+                        ref="$removeMembers"
+                        :data="removemembers.members"
+                        node-key="key"
+                        show-checkbox
+                        :filter-node-method="removemembersFilterNode"
+                        :props="removemembers.defaultProps"
+                        :render-content="removeMembersRenderContent"
+						@node-expand="nodeExpand">
+                </el-tree>
+            </div>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="deleteMembers" :loading="style.deleteMembers.isLoading">删 除</el-button>
+            <el-button @click="dialog.removeMembers.visible = false">关闭</el-button>
+        </span>
+    </el-dialog>
+
+    <bvc2-dialog-authorization-list
+            ref="$setWatchAuthorization"
+            :group="group"
+            :query="authorization.query"
+            :save="authorization.save">
+    </bvc2-dialog-authorization-list>
+</div>

@@ -1,0 +1,9 @@
+<notify>
+	<commandname>insmsg</commandname>
+	<operation>send</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<content>${subject}</content>
+</notify>

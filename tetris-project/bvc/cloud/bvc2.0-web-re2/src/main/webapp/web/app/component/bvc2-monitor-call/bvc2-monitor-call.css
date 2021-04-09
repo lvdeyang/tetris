@@ -1,0 +1,6 @@
+/* reset */
+.bvc2-monitor-call *{box-sizing:border-box!important;}
+.bvc2-monitor-call .el-scrollbar__wrap{overflow-x: hidden;}
+.bvc2-monitor-call .el-table__header-wrapper{display:none!important;}
+.custom-tree-node{flex:1; display:flex; align-items:center; justify-content:space-between;}
+.dialog-show{position:fixed; margin-top:-250px; margin-left:-410px; left:50%; top:50%;}

@@ -1,0 +1,6 @@
+
+.bvc2-dialog-authorization-list{line-height: 59px;}
+.bvc2-dialog-authorization-list .el-dialog__header{text-align:center; padding:0;}
+.bvc2-dialog-authorization-list .el-dialog__body{padding:10px;padding-bottom:0;}
+.bvc2-dialog-authorization-list .el-dialog__footer{padding-top:0; padding-bottom:0;}
+.bvc2-tree-authorization-list{overflow: auto;}

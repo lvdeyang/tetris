@@ -1,0 +1,21 @@
+.bvc2-tab-buttons{width:100%; height:100%; text-align:right;}
+.bvc2-tab-buttons .dialog-update-spokesman .el-dialog{width:60%;}
+.bvc2-tab-buttons .dialog-update-spokesman .el-dialog__header{text-align:center; padding:0;}
+.bvc2-tab-buttons .dialog-update-spokesman .el-dialog__body{padding:10px; padding-bottom:0;}
+.bvc2-tab-buttons .dialog-update-spokesman .el-dialog__footer{padding-top:0; padding-bottom:0;}
+
+.bvc2-tab-buttons .dialog-update-roles .el-dialog{width:60%;}
+.bvc2-tab-buttons .dialog-update-roles .el-dialog__header{text-align:center; padding:0;}
+.bvc2-tab-buttons .dialog-update-roles .el-dialog__body{padding:10px; padding-bottom:0;}
+.bvc2-tab-buttons .dialog-update-roles .el-dialog__footer{padding-top:0; padding-bottom:0;}
+.bvc2-tab-button{width:40px; height:40px; border-radius:100%; padding:0;}
+
+.bvc2-tab-buttons .dialog-add-members .el-dialog{width:20%;}
+.bvc2-tab-buttons .dialog-add-members .el-dialog__header{text-align:center; padding:0;}
+.bvc2-tab-buttons .dialog-add-members .el-dialog__body{padding:10px; padding-bottom:0; overflow: auto}
+.bvc2-tab-buttons .dialog-add-members .el-dialog__footer{padding-top:0; padding-bottom:0;}
+
+.bvc2-tab-buttons .dialog-remove-members .el-dialog{width:20%;}
+.bvc2-tab-buttons .dialog-remove-members .el-dialog__header{text-align:center; padding:0;}
+.bvc2-tab-buttons .dialog-remove-members .el-dialog__body{padding:10px; padding-bottom:0; overflow: auto}
+.bvc2-tab-buttons .dialog-remove-members .el-dialog__footer{padding-top:0; padding-bottom:0;}
