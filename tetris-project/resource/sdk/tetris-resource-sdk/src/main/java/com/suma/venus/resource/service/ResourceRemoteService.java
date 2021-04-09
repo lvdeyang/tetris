@@ -100,12 +100,20 @@ public class ResourceRemoteService {
 	 */
 	public String queryLocalLayerId() throws Exception{
 		
-		List<WorkNodePO> nodeList= workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+		List<WorkNodePO> nodeList= workNodeDao.findByType(NodeType.ACCESS_LIANWANG);
+		List<WorkNodePO> qtNodeList= workNodeDao.findByType(NodeType.ACCESS_QTLIANGWANG);
+		
+		if(nodeList != null && nodeList.size() > 0
+				&& qtNodeList != null && qtNodeList.size() > 0){
+			throw new BaseException(StatusCode.ERROR, "暂不支持多个类型的联网");
+		}
 		
 		WorkNodePO workNode = null;
 		
 		if(nodeList != null && nodeList.size() > 0){
 			workNode = nodeList.get(0);
+		}else if(qtNodeList != null && qtNodeList.size() > 0){
+			workNode = qtNodeList.get(0);
 		}
 		
 		if(workNode == null || workNode.getNodeUid() == null){

@@ -511,7 +511,7 @@ public class ResourceService {
 		return map;
 	}
 
-	/** 根据folerIds查询folders(分组) */
+	/** 根据folerIds查询folders(分组) //查询可以优化成批量*/
 	public Map<Long, FolderPO> queryFoleders(Set<Long> folderIds) {
 		Map<Long, FolderPO> map = new HashMap<Long, FolderPO>();
 		if (null == folderIds) {

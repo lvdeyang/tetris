@@ -37,6 +37,18 @@ public interface PrivilegeDAO extends CommonDao<PrivilegePO>{
 	@Query("select max(p.orderNum) from PrivilegePO p where p.pCode=?1")
 	public Integer findMaxOrderNumByPcode(String pCode);
 	
+	/**
+	 * 查找有效的PrivilegePO，也就是在role_privilege_map中有对应关系的<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年3月15日 下午1:41:59
+	 * @param bundleId_ bundleId后边添加"-%"后缀
+	 * @return
+	 */
+	@Query(value = "select * from privilegepo p left join role_privilege_map m on p.id = m.privilege_id where resource_indentity like ?1", nativeQuery = true)
+	public List<PrivilegePO> findEffectiveByBundleId(String bundleId_);
+	
 	@Query(value = "select * from privilegepo p left join role_privilege_map m on p.id = m.privilege_id where m.role_id = ?1", nativeQuery = true)
 	public List<PrivilegePO> findByRoleId(Long roleId);
 	
