@@ -1336,7 +1336,7 @@ public class VodService {
 	 */
 	public int findSerial(List<PageTaskPO> taskList){
 		if(taskList.size() == 0){
-			return 1;
+			return 0;
 		}
 		
 		PageInfoPO pageInfo = taskList.get(0).getPageInfo();
