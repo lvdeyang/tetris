@@ -1,0 +1,12 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-settings,
+.zk-settings *{box-sizing:border-box!important;}
+.zk-settings .el-scrollbar__wrap{overflow-x: hidden;}
+
+.zk-settings .el-tabs__item{font-size:16px;}
+
+.zk-settings .el-radio__inner{width:20px; height:20px;}
+.zk-settings .el-radio__inner::after{width:6px; height:6px;}
+.zk-settings .el-radio__label{font-size:16px; position:relative; top:1px;}
+.zk-settings .el-radio+.el-radio{margin-left:80px;}

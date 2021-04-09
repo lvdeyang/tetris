@@ -1,0 +1,161 @@
+/*主页主题颜色*/
+
+.monitor_skin {
+    background-color: #171A1F;
+}
+
+.monitorNav {
+    height: 90px;
+    border-bottom: 2px solid #299ede;
+}
+
+.monitorNavContainer {
+    padding-left: 15px;
+    padding-right: 50px;
+}
+
+.pointer {
+    cursor: pointer;
+    width: 90px;
+    height: 90px;
+}
+
+.userinfo {
+    display: inline-block;
+    margin-top: 29px;
+    padding-right: 25px;
+}
+
+.bell {
+    height: 90px;
+}
+
+.fullscreen {
+    height: 90px;
+}
+
+.bellImage {
+    display: inline-block;
+    margin-top: 33px;
+    padding-right: 25px;
+}
+
+.fullscreenImage {
+    display: inline-block;
+    margin-top: 33px;
+}
+
+.monitorLeft {
+    width: 240px;
+    position: absolute;
+    background-color: #232a2d;
+    height: 868px;
+    top: 90px;
+    border-color: #232a2d
+}
+
+.monitorSearch {
+    margin-top: 10px;
+}
+
+.sortStrategy {
+    float: right;
+}
+
+.sortImage {
+    display: inline-block;
+}
+
+.terminalGroup {
+    margin-top: 56px;
+    height: 792px;
+    width: 100%;
+    overflow: auto;
+}
+
+.groupHead {
+    background: #232a2d;
+    border-color: #2D3439;
+}
+
+.groupBody {
+    background-color: #23272B;
+}
+
+.groupTitle {
+    color: #2DAFF8;
+    text-decoration: none;
+}
+
+.groupItem {
+    font-size: 14px;
+    color: #FFFFFF
+}
+
+.groupPanel {
+    border: none;
+}
+
+.monitorSplit {
+    right: 60px;
+    left: 270px;
+    margin-left: 0;
+    top: 90px;
+    position: absolute;
+    width: 1530px;
+    height: 868px;
+}
+
+.monitorRight {
+    width: 100px;
+    position: absolute;
+    right: 0px;
+    top: 90px;
+    height: 868px;
+    background-color: #232a2d;
+}
+
+.moreFuction {
+    bottom: 0;
+    position: absolute;
+}
+
+.titleName {
+    font-size: 20px;
+    color: #FFFFFF;
+    padding-left: 10px;
+}
+
+.loginName {
+    font-size: 14px;
+    color: #BFDFD9;
+    padding-left: 5px;
+}
+
+.monitorButtons {
+    padding-left: 200px
+}
+
+.clearImage {
+    display: inline-block;
+    margin: 40px 15px 0 15px;
+}
+
+.splitNumImage {
+    display: inline-block;
+    margin: 15px 15px 0 15px;
+}
+
+.moreFunctImage {
+    display: inline-block;
+    margin: 40px 15px 0 15px;
+}
+
+#sortDiv {
+    margin-top: 10px;
+}
+
+.sortTitle {
+    color: #FFFFFF;
+    vertical-align: bottom
+}

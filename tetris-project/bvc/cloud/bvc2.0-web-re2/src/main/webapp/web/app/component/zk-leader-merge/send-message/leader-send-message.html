@@ -1,0 +1,309 @@
+<div class="zk-business-command-message">
+    <div class="title">发送通知</div>
+
+    <el-tabs tab-position="left" v-model="currentTab" style="position: absolute;top: 100px;left: 70px;height: 80%;right: 72px;">
+        <el-tab-pane label="新建通知" name="0">
+            <div style="position:absolute; left:110px; top:0; right:0; bottom:0; z-index:2;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="width:350px; height:100%; border-right:1px solid #143a86;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                :data="tree.data"
+                                node-key="id"
+                                :props="tree.props">
+                                <span slot-scope="{node,data}">
+                                    <el-checkbox v-if="data.type==='USER'" v-model="data.checked" @change="onUserCheckChange(data)">
+                                        <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                        <span style="position:relative; top:1px;font-size: 18px">{{data.name}}</span>
+                                    </el-checkbox>
+                                    <span v-else>
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span style="font-size:18px;">{{data.name}}</span>
+                                    </span>
+                                </span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                    <!--上面的-->
+                    <div style="position:absolute; left:350px; top:0; right:0; bottom:0;">
+                        <div style="height:60%; width:100%;">
+                            <!--预览的窗口 未做-->
+                            <!--<div style="width:49%; height:100%; float:left;"></div>-->
+                            <div style="width:90%; height:100%; float:left; position:relative;left:10px;background-color: #1e2343;border-radius: 13px;">
+                                <div>
+                                    <el-form label-width="80px">
+                                        <el-form-item label="模板名称:">
+                                            <el-input v-model="message.style.name" size="mini" style="width:148px; float:left;"></el-input>
+                                            <el-button style="margin-left:10px; height:28px; width:28px; font-size:14px; padding:0; position:relative; top:1px;" size="mini" circle type="primary" title="保存模板" @click="handleSaveStyleTemplates">
+                                                <span class="icon-save"></span>
+                                            </el-button>
+                                            <el-button style="margin-left:6px; height:28px; width:28px; font-size:14px; padding:0; position:relative; top:1px;" size="mini" circle type="primary" title="选择模板" @click="handleStyleTemplates">
+                                                <span class="icon-table" style="position:relative; top:1px;"></span>
+                                            </el-button>
+                                        </el-form-item>
+                                    </el-form>
+                                </div>
+                                <div style="position:absolute; top:40px; left:0; right:8px; bottom:0;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-form label-width="80px">
+                                            <el-form-item style="white-space:pre; margin-bottom:0;" label="字       体:">
+                                                <el-select v-model="message.style.fontFamily" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="宋体" value="宋体"></el-option>
+                                                    <el-option label="黑体" value="黑体"></el-option>
+                                                    <el-option label="楷体" value="楷体"></el-option>
+                                                    <el-option label="仿宋" value="仿宋"></el-option>
+                                                    <el-option label="微软雅黑" value="微软雅黑"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="white-space:pre; margin-bottom:0;" label="字       号:">
+                                                <el-select v-model="message.style.fontSize" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="1" value="1"></el-option>
+                                                    <el-option label="2" value="2"></el-option>
+                                                    <el-option label="3" value="3"></el-option>
+                                                    <el-option label="4" value="4"></el-option>
+                                                    <el-option label="5" value="5"></el-option>
+                                                    <el-option label="6" value="6"></el-option>
+                                                    <el-option label="7" value="7"></el-option>
+                                                    <el-option label="8" value="8"></el-option>
+                                                    <el-option label="9" value="9"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="white-space:pre; margin-bottom:0;" label="字       型:">
+                                                <el-select v-model="message.style.textDecoration" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="常规" value="常规"></el-option>
+                                                    <el-option label="加粗" value="加粗"></el-option>
+                                                    <el-option label="斜体" value="斜体"></el-option>
+                                                    <el-option label="下划线" value="下划线"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="margin-bottom:0;" label="字体颜色:">
+                                                <el-select v-model="message.style.color" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="黑色" value="黑色"></el-option>
+                                                    <el-option label="红色" value="红色"></el-option>
+                                                    <el-option label="黄色" value="黄色"></el-option>
+                                                    <el-option label="绿色" value="绿色"></el-option>
+                                                    <el-option label="白色" value="白色"></el-option>
+                                                    <el-option label="紫色" value="紫色"></el-option>
+                                                    <el-option label="橙色" value="橙色"></el-option>
+                                                    <el-option label="蓝色" value="蓝色"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="margin-bottom:0;" label="滚动速度:">
+                                                <el-select v-model="message.style.rollingSpeed" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="最快" value="最快"></el-option>
+                                                    <el-option label="较快" value="较快"></el-option>
+                                                    <el-option label="正常" value="正常"></el-option>
+                                                    <el-option label="较慢" value="较慢"></el-option>
+                                                    <el-option label="最慢" value="最慢"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="margin-bottom:0;" label="滚动方式:">
+                                                <el-select v-model="message.style.rollingMode" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="从右到左" value="从右到左"></el-option>
+                                                    <el-option label="从左到右" value="从左到右"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="margin-bottom:0;" label="滚动位置:">
+                                                <el-select v-model="message.style.rollingLocation" placeholder="请选择" size="mini" style="width:100%;">
+                                                    <el-option label="左对齐" value="左对齐"></el-option>
+                                                    <el-option label="居中" value="居中"></el-option>
+                                                    <el-option label="右对齐" value="右对齐"></el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item style="margin-bottom:0;" label="滚动时间:">
+                                                <el-checkbox v-model="message.style.rollingTimeUnlimited" style="color: #cfdae6">无限制</el-checkbox>
+                                                <el-input v-if="message.style.rollingTimeUnlimited" v-model="message.style.rollingTime" size="mini" style="width:50px; margin-left:10px;" :disabled="true"></el-input>
+                                                <el-input v-else v-model="message.style.rollingTime" size="mini" style="width:50px; margin-left:10px;"></el-input>
+                                                <span style="color: #cfdae6">分钟(1~10)</span>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                        </div>
+                        <!--下面的-->
+                        <div style="height:40%; width:100%; position:relative;">
+                            <div style="position:absolute; left:10px; top:20px; right:0; bottom:0;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <div style="width:90%; height:50%;">
+                                        <el-input
+                                            resize="none"
+                                            class="message-content"
+                                            type="textarea"
+                                            style="width:100%; height:100%;"
+                                            placeholder="请输入通知内容"
+                                            v-model="message.content">
+                                        </el-input>
+                                    </div>
+                                    <div style="width:100%; height:50%; padding:10px;">
+                                        <el-tag v-if="tree.select.length <= 0" size="small" type="info">您还没有选择通知成员</el-tag>
+                                        <el-scrollbar v-else style="height:100%;">
+                                            <el-tag v-for="user in tree.select" :key="user.id" type="primary" closable @close="handleTagRemove(user)">{{user.name}}</el-tag>
+                                        </el-scrollbar>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="position:absolute; left:0; bottom:12px; padding-top:13px;">
+                            <el-checkbox style="margin-left:10px;color: #cfdae6" v-model="message.forcedRolling">通知内容未占满屏幕时允许滚动</el-checkbox>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="停止通知" name="1">
+            <div style="position:absolute; left:100px; top:0; right:0; bottom:0;"></div>
+        </el-tab-pane>
+    </el-tabs>
+
+    <!--底部按钮-->
+    <div style="width:100%; height:50px; position:absolute; bottom:0;">
+        <div style="width:100%; height:100%; position:relative;">
+            <div style="height:100%; width:100%; position:absolute;left:0; right:0; top:0; padding-top:11px;text-align: center;">
+                <el-button size="medium" type="danger" @click="handleMessageList">操作</el-button>
+                <el-button size="medium" type="primary" @click="handleSendMessage">发送</el-button>
+                <el-button size="medium" @click="handleWindowClose">取消</el-button>
+            </div>
+        </div>
+    </div>
+
+    <!--点停止出来的模板-->
+    <template>
+        <el-dialog
+                title="通知列表"
+                :visible.sync="dialog.messageList.visible"
+                :before-close="handleMessageListClose">
+            <div class="dialog-body">
+                <el-table
+                        :data="dialog.messageList.data">
+                    <el-table-column
+                            prop="date"
+                            label="日期"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                        prop="content"
+                        label="通知内容">
+                    </el-table-column>
+                    <el-table-column
+                        prop="members"
+                        label="接收用户">
+                    </el-table-column>
+                    <el-table-column
+                            prop="status"
+                            label="当前状态">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="80">
+                        <template slot-scope="scope">
+                            <el-button v-if="scope.row.status==='正在通知'" type="text" icon="el-icon-error" title="停止通知" style="padding:0; font-size:18px;" @click="stopMessage(scope)"></el-button>
+                            <el-button v-if="scope.row.status==='通知结束'" type="text" icon="el-icon-bell" title="再次通知" style="padding:0; font-size:18px;" @click="messageAgain(scope)"></el-button>
+                            <el-button type="text" icon="el-icon-delete" title="删除通知" style="padding:0; font-size:18px;" @click="deleteMessage(scope)"></el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <div style="position:absolute;bottom:85px;left:500px;">
+                    <el-pagination
+                            background
+                            layout="total, prev, pager, next"
+                            @current-change="handleMessageCurrentChange"
+                            :page-size="dialog.messageList.page.pageSize"
+                            :pager-count="5"
+                            :current-page.sync="dialog.messageList.page.currentPage"
+                            :total="dialog.messageList.page.total">
+                    </el-pagination>
+                </div>
+                <div style="position: absolute;bottom: 20px;width: 100%;text-align: center">
+                    <el-button size="medium" @click="handleMessageListClose">取消/关闭</el-button>
+                    <el-button size="medium" type="danger" @click="stopAllMessage">全部停止</el-button>
+                </div>
+            </span>
+        </el-dialog>
+    </template>
+
+    <!--模板-->
+    <template>
+        <el-dialog
+                title="样式模板"
+                :visible.sync="dialog.styleTemplates.visible"
+                :before-close="handleStyleTemplatesClose">
+            <div class="dialog-body">
+                <el-table
+                        :data="dialog.styleTemplates.data"
+                        highlight-current-row
+                        :row-key="styleTemplateRowKey"
+                        @current-change="handleCurrentStyleTemplateChange">
+                    <el-table-column
+                            prop="name"
+                            label="模板名称">
+                    </el-table-column>
+                    <el-table-column
+                            prop="fontFamily"
+                            label="字体">
+                    </el-table-column>
+                    <el-table-column
+                            prop="fontSize"
+                            label="字号">
+                    </el-table-column>
+                    <el-table-column
+                            prop="textDecoration"
+                            label="字型">
+                    </el-table-column>
+                    <el-table-column
+                            prop="color"
+                            label="字体颜色">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rollingSpeed"
+                            label="滚动速度">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rollingMode"
+                            label="滚动方向">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rollingLocation"
+                            label="对齐方式">
+                    </el-table-column>
+                    <el-table-column
+                            label="滚动时间">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.rollingTimeUnlimited">无限制</span>
+                            <span v-else>{{scope.row.rollingTime}}分钟</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="50">
+                        <template slot-scope="scope">
+                            <el-button type="text" icon="el-icon-delete" title="删除模板" style="padding:0; font-size:18px;" @click="removeStyleTemplate(scope)"></el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <div style="position:absolute;bottom:85px;left:500px;">
+                    <el-pagination
+                            background
+                            layout="total, prev, pager, next"
+                            @current-change="handleStyleTemplatesCurrentChange"
+                            :page-size="dialog.styleTemplates.page.pageSize"
+                            :pager-count="5"
+                            :current-page.sync="dialog.styleTemplates.page.currentPage"
+                            :total="dialog.styleTemplates.page.total">
+                    </el-pagination>
+                </div>
+                <div style="position: absolute;bottom: 20px;width: 100%;text-align: center">
+                    <el-button size="medium" @click="handleStyleTemplatesClose">取消</el-button>
+                    <el-button size="medium" type="danger" @click="handleStyleTemplatesChange">确定</el-button>
+                </div>
+            </span>
+        </el-dialog>
+    </template>
+
+</div>

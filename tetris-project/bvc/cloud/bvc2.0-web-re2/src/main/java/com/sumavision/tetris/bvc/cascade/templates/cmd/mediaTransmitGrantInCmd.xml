@@ -1,0 +1,12 @@
+<!-- 指挥媒体转发授权 -->
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>fauthon</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<!-- 本操作发起成员ID-->
+	<op>00000000001</op>
+	<!-- 本操作相关成员ID-->
+	<mid>00000000002</mid>
+</notify>

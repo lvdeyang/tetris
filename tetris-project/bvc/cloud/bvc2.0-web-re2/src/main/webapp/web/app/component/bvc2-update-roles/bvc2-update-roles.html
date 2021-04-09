@@ -1,0 +1,42 @@
+<div class="update-roles">
+    <div class="group-members" v-loading="treeLoading">
+        <el-tree
+                ref="$roleTree"
+                :data="members"
+                node-key="key"
+                default-expand-all
+                show-checkbox
+                @node-drag-start="handleDragStart"
+                :props="defaultProps"
+                :render-content="renderContent"
+                draggable
+                :allow-drop="allowDrop"
+                :allow-drag="allowDrag">
+        </el-tree>
+    </div>
+    <div class="group-role">
+        <el-row :gutter="10" style="margin:0;">
+            <el-col v-for="(role, index) in roles" :span="12" :key="role.id">
+                <el-card shadow="hover" :style="cardMargin(index)" v-loading="role.loading">
+                    <div slot="header" class="clearfix">
+                        <span>{{role.name}}</span>
+                        <el-button style="position:absolute; top:.75em; right:.75em; padding:0;" type="text" @click="removeRoleMembers(role)">清空</el-button>
+                    </div>
+                    <div @drop="roleSet($event, role)" @dragover="allowNativeDrop($event)">
+                        <template v-if="role.members.length>0">
+                            <div v-for="member in role.members" :key="member.id" class="text item">
+                                <el-tag
+                                        :key="member.id"
+                                        closable
+                                        @close="handleClose(role, member)">
+                                    {{member.bundleName}}
+                                </el-tag>
+                            </div>
+                        </template>
+                        <template v-else>{{'未设置'}}</template>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+    </div>
+</div>

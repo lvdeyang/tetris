@@ -1,0 +1,9 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>replacestart</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${topid}</op>
+	<targid>${mid}</targid>
+</notify>

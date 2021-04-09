@@ -1,0 +1,52 @@
+<div class="zk-header" style="width:100%; height:40px; background-color:#37404F; line-height:40px;">
+    <div style="width:100%; height:100%; position:relative; padding-left:20px; padding-right:20px;">
+        <span></span>
+        <span style="font-size:15px; color:#fff; font-weight:700;">网格化视频指挥系统</span>
+        <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:10px; margin-right:10px;"/>
+        <img :src="baseUrl+'images/zk/sumavision.png'" style="height:20px; position:relative; top:5px;"/>
+        <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:10px; margin-right:10px;"/>
+
+        <div style="position:absolute; left:316px; top:0; bottom:0;">
+            <!--<span class="header-button" style="float:left;">
+                <img :src="baseUrl+'images/zk/desktop-file.png'" style="width:24px; position:relative; top:7px;" title="文件管理" @click=""/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:11px; margin-left:10px; margin-right:10px; float:left;"/>-->
+            <span class="header-button"  style="float:left;">
+                <img :src="baseUrl+'images/zk/desktop-business.png'" style="width:28px; position:relative; top:8px;" title="业务管理" @click="showSettings"/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:11px; margin-left:10px; margin-right:10px; float:left;"/>
+            <!--<span class="header-button"  style="float:left;">
+                <img :src="baseUrl+'images/zk/desktop-media.ico'" style="width:26px; position:relative; top:7px;" title="录像管理"/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:11px; margin-left:10px; margin-right:10px; float:left;"/>
+            <span class="header-button"  style="float:left;">
+                <img :src="baseUrl+'images/zk/desktop-user.png'" style="width:26px; position:relative; top:7px;" title="用户管理"/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:11px; margin-left:10px; margin-right:10px; float:left;;"/>
+            <span class="header-button"  style="float:left;">
+                <img :src="baseUrl+'images/zk/desktop-resource.png'" style="width:26px; position:relative; top:7px;" title="资源管理"/>
+            </span>-->
+        </div>
+
+        <div style="height:100%; line-height:40px; position:absolute; right:20px; top:0;">
+            <span style="font-size:15px; font-weight:700; color:#fff;">{{dateTime}}</span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:10px; margin-right:10px;"/>
+            <span style="font-size:15px; font-weight:700; color:#fff;">{{user.name}}</span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:10px; margin-right:5px;"/>
+            <!--<span class="header-button">
+                <img :src="baseUrl+'images/zk/desktop-business.png'" style="width:28px; position:relative; top:8px;" title="业务管理" @click="showSettings"/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:10px; margin-right:10px;"/>-->
+            <span class="header-button" style="position:relative;" @click="showMessagePanel">
+                <el-badge v-if="messageNum>0" :value="messageNum" class="item">
+                    <img :src="baseUrl+'images/zk/Forum.png'" style="position:relative; top:5px; width:22px; height:28px;" title="消息列表"/>
+                </el-badge>
+                <img v-else :src="baseUrl+'images/zk/Forum.png'" style="position:relative; top:7px; width:22px; height:28px;" title="消息列表"/>
+            </span>
+            <img :src="baseUrl+'images/zk/divider.png'" style="position:relative; top:6px; margin-left:5px; margin-right:5px;"/>
+            <span class="header-button">
+                <img :src="baseUrl+'images/zk/exit.png'" style="position:relative; top:6px;" title="退出系统"/>
+            </span>
+        </div>
+    </div>
+</div>

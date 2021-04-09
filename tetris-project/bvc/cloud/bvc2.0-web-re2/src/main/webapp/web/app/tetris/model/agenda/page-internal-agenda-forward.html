@@ -1,0 +1,289 @@
+<mi-frame id="page-internal-agenda-forward-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">议程转发</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-internal-agenda">{{agendaName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>议程转发</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建转发</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除转发</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="源"
+                                align="left">
+                            <template slot-scope="scope">
+                                <div :key="i"
+                                     v-for="(source, i) in scope.row.sources">
+                                    <el-tag
+                                        closable
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        :disable-transitions="false"
+                                        @close="handleRemoveSource(source, scope)">
+                                        {{source.sourceName}}（<span class="layout-position-selection-type" @click="handleLayoutPositionSelectionTypeChange(source)">{{sourceSummary(source)}}</span>）
+                                    </el-tag>
+                                </div>
+                                <el-button size="mini" @click="handleAddSource(scope)" icon="icon-plus">&nbsp;&nbsp;添加源</el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column width="50">
+                            <template slot-scope="scope">
+                                <span class="icon-arrow-right" style="font-size:34px; color:#F56C6C;"></span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="目的"
+                                align="left">
+                            <template slot-scope="scope">
+                                <div :key="i"
+                                     v-for="(destination, i) in scope.row.destinations">
+                                    <el-tag
+                                        closable
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        :disable-transitions="false"
+                                        @close="handleRemoveDestination(destination, scope)">
+                                        {{destination.destinationName}}
+                                    </el-tag>
+                                </div>
+                                <el-button size="mini" @click="handleAddDestination(scope)" icon="icon-plus">&nbsp;&nbsp;添加目的</el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="虚拟源设置"
+                                align="left">
+                            <template slot-scope="scope">
+                                <div :key="i"
+                                     v-for="(layout, i) in scope.row.layouts">
+                                    <el-tag
+                                        closable
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        :disable-transitions="false"
+                                        @close="handleRemoveLayoutScope(layout, scope)">
+                                        源数目：{{layout.sourceNumber}}，画面：<span>{{layout.layoutName}}</span>
+                                    </el-tag>
+                                </div>
+                                <el-button size="mini" @click="handleAddLayoutScope(scope)" icon="icon-plus">&nbsp;&nbsp;添加虚拟源映射</el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音频设置"
+                                align="left"
+                                width="150">
+                            <template slot-scope="scope">
+                                <div v-if="!agenda.globalCustomAudio">
+                                    <div v-for="(audioType, i) in audioTypes">
+                                        <el-radio :key="i" v-model="scope.row.audioType" :label="audioType.key" @change="handleAudioTypeChange($event, scope)">{{audioType.value}}</el-radio>
+                                    </div>
+                                </div>
+                                <div v-else>-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音量"
+                                align="left"
+                                width="150">
+                            <template slot-scope="scope">
+                                <el-slider style="width:100px;" v-if="!agenda.globalCustomAudio" @change="handleVolumeChange($event, scope)" v-model="scope.row.volume"></el-slider>
+                                <div v-else>-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="音频源"
+                                align="left">
+                            <template slot-scope="scope">
+                                <div v-if="!agenda.globalCustomAudio && scope.row.audioType==='CUSTOM'" :key="i"
+                                     v-for="(audio, i) in scope.row.audios">
+                                    <el-tag
+                                        closable
+                                        size="medium"
+                                        style="margin-bottom:5px;"
+                                        :disable-transitions="false"
+                                        @close="handleRemoveCustomAudio(audio, scope)">
+                                        {{audio.sourceName}}
+                                    </el-tag>
+                                </div>
+                                <el-button v-if="!agenda.globalCustomAudio && scope.row.audioType==='CUSTOM'" size="mini" @click="handleAddCustomAudio(scope)" icon="icon-plus">&nbsp;&nbsp;添加音频</el-button>
+                                <div v-if="agenda.globalCustomAudio || scope.row.audioType!=='CUSTOM'">-</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="100"
+                                align="left">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="删除转发" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 选择源 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="选择源"
+                width="400px"
+                :visible.sync="dialog.addSource.visible"
+                @close="handleAddSourceClose">
+
+            <div style="max-height:400px; overflow-y:auto;">
+                <el-tree
+                    default-expend-all
+                    ref="addSourceTree"
+                    :props="dialog.addSource.props"
+                    node-key="id"
+                    show-checkbox
+                    :data="dialog.addSource.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddSourceClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddSourceSubmit" :loading="dialog.addSource.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 设置布局顺序 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="设置布局顺序"
+                width="400px"
+                :visible.sync="dialog.layoutPositionSelectionTypeChange.visible"
+                @close="handleLayoutPositionSelectionTypeChangeClose">
+
+            <el-checkbox v-model="dialog.layoutPositionSelectionTypeChange.autoIncrement" style="margin-bottom:10px;">自增长</el-checkbox>
+            <br/>
+            <el-input-number
+                    style="width:100%; margin-bottom:10px;"
+                    size="mini"
+                    v-if="!dialog.layoutPositionSelectionTypeChange.autoIncrement"
+                    v-model="dialog.layoutPositionSelectionTypeChange.serialNum"
+                    :min="1"></el-input-number>
+            <el-checkbox
+                    style="margin-bottom:10px;"
+                    v-if="!dialog.layoutPositionSelectionTypeChange.autoIncrement"
+                    v-model="dialog.layoutPositionSelectionTypeChange.isLoop">开启轮询</el-checkbox>
+            <br/>
+            <el-input
+                    v-if="dialog.layoutPositionSelectionTypeChange.isLoop"
+                    v-model="dialog.layoutPositionSelectionTypeChange.loopTime"
+                    size="mini">
+                <template slot="append">秒</template>
+            </el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleLayoutPositionSelectionTypeChangeClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleLayoutPositionSelectionTypeChangeSubmit" :loading="dialog.layoutPositionSelectionTypeChange.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 选择目的 -->
+        <el-dialog
+                append-to-body
+                :close-on-click-modal="false"
+                title="选择目的"
+                width="400px"
+                :visible.sync="dialog.addDestination.visible"
+                @close="handleAddDestinationClose">
+
+            <div style="max-height:400px;">
+                <el-tree
+                        ref="addDestinationTree"
+                        :props="dialog.addDestination.props"
+                        node-key="id"
+                        show-checkbox
+                        :data="dialog.addDestination.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddDestinationClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddDestinationSubmit" :loading="dialog.addDestination.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加虚拟源设置 -->
+        <el-dialog
+            :close-on-click-modal="false"
+            title="设置虚拟源"
+            width="400px"
+            :visible.sync="dialog.addLayoutScope.visible"
+            @close="handleAddLayoutScopeClose">
+            <div style="margin-bottom:10px;">
+                <div style="width:50%; float:left; padding-right:10px; box-sizing:border-box;">
+                    <el-input-number size="small" v-model="dialog.addLayoutScope.min" :min="1" :max="20" style="width:100%;"></el-input-number>
+                </div>
+                <div style="width:50%; float:left; padding-left:10px; box-sizing:border-box;">
+                    <el-input-number size="small" v-model="dialog.addLayoutScope.max" :min="dialog.addLayoutScope.min" :max="20" style="width:100%;"></el-input-number>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+            <div style="max-height:400px;">
+                <el-tree
+                        ref="addLayoutScopeTree"
+                        :props="dialog.addLayoutScope.props"
+                        node-key="id"
+                        highlight-current
+                        :data="dialog.addLayoutScope.layouts">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddLayoutScopeClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddLayoutScopeSubmit" :loading="dialog.addLayoutScope.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加音频 -->
+        <el-dialog
+            append-to-body
+            :close-on-click-modal="false"
+            title="添加音频"
+            width="400px"
+            :visible.sync="dialog.addCustomAudio.visible"
+            @close="handleAddCustomAudioClose">
+
+            <div style="max-height:400px; overflow-y:auto;">
+                <el-tree
+                        default-expand-all
+                        ref="addCustomAudioTree"
+                        :props="dialog.addCustomAudio.props"
+                        node-key="id"
+                        show-checkbox
+                        :data="dialog.addCustomAudio.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddCustomAudioClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddCustomAudioSubmit" :loading="dialog.addCustomAudio.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

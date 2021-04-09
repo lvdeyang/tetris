@@ -1,0 +1,99 @@
+<div class="container">
+    <div class="message">
+        <!--切分屏按钮-->
+        <div class="screenCtrl">
+            <div title="1屏" @click="layoutChange(0)">
+                <img v-if="!buttons.one" :src="baseUrl+'images/zk-leader/btns/one.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/oneActive.png'"/>
+            </div>
+            <div title="2屏" @click="layoutChange(5)">
+                <img v-if="!buttons.two" :src="baseUrl+'images/zk-leader/btns/two.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/twoActive.png'"/>
+            </div>
+            <div title="4屏" @click="layoutChange(1)">
+                <img v-if="!buttons.four" :src="baseUrl+'images/zk-leader/btns/four.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/fourActive.png'"/>
+            </div>
+            <div title="6屏" @click="layoutChange(2)">
+                <img v-if="!buttons.six" :src="baseUrl+'images/zk-leader/btns/six.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/sixActive.png'"/>
+            </div>
+            <div title="9屏" @click="layoutChange(3)">
+                <img v-if="!buttons.nine" :src="baseUrl+'images/zk-leader/btns/nine.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/nineActive.png'"/>
+            </div>
+            <div title="16屏" @click="layoutChange(4)">
+                <img v-if="!buttons.sixteen" :src="baseUrl+'images/zk-leader/btns/sixteen.png'"/>
+                <img v-else :src="baseUrl+'images/zk-leader/btns/sixteenActive.png'"/>
+            </div>
+            <div title="上一页" style="font-size:14px;" @click="handlePrePage"><span class="icon-chevron-left"></span></div>
+            <span style="font-size:14px; color:#fff; float:left; position:relative; top:1px;">{{page.currentPage}}/{{page.total}}</span>
+            <div title="下一页" style="font-size:14px;" @click="handleNextPage"><span class="icon-chevron-right"></span></div>
+            <div title="全部上屏" style="font-size:16px;" @click="jv230totalForward"><span class="icon-external-link"></span></div>
+            <div title="上屏列表" style="font-size:16px;" @click="jv230ForwardList"><span class="icon-list"></span></div>
+            <!--换一批-->
+            <!--<div class="change" @click="replace">
+                <img src="../../../../../images/zk-leader/change.png" alt="换一批">
+            </div>-->
+        </div>
+        <!--历史消息
+        <div class="msgBg">
+            <img src="../../../../../images/zk-leader/msg.png" alt="">
+        </div>-->
+
+        <div class="btn">
+            <!--查看历史消息-->
+            <div v-if="newMessage.length<=0" class="tagMessage" @click="showMessagePanel">
+                <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
+            </div>
+            
+            <el-popover 
+            	v-else
+			  	placement="top-start"
+			  	trigger="hover">
+			  	<div class="popover-line" v-for="message in newMessage">
+			  		<el-badge :value="message.count>99?'99+':message.count">
+			  			<span class="grounp-link" @click="openHistoryMessage(message)">{{message.groupName}}</span>
+			  		</el-badge>
+			  	</div>
+			  	<div slot="reference" class="tagMessage" @click="showMessagePanel">
+	                <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
+	            </div>
+			</el-popover>
+            
+            <!--录制任务管理-->
+            <div class="record" @click="recManage">
+                <img src="../../../../../images/zk-leader/recordManage.png" alt="录制任务">
+                </div>
+            <!--下载任务-->
+            <div class="download" @click="download">
+                <img src="../../../../../images/zk-leader/downloadManage.png" alt="下载任务">
+                </div>
+
+            <!-- 字幕管理 -->
+            <div class="subtitle" @click="publish">
+                <img src="../../../../../images/zk-leader/subtitleManage.png" alt="字幕管理">
+                </div>
+        </div>
+
+        <!--滚动消息
+        <div class="msgContent" ref="msgContent">
+            <div id="message-container"
+                 style="position:absolute;bottom:0;width:100%;height:100%;background-color: rgba(0,0,0,0); cursor:pointer;font-size:inherit;overflow-y:auto">
+                <p class="container" v-for="item in callBoard">{{item}}</p>
+            </div>
+        </div>
+        <div class="sendMsg">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="position:absolute; left:0; top:0; right:100px; bottom:0;">
+                    <input type="text" placeholder="发送内容" class="sendMsgContent" v-model="instantMessage" @keyup="keyCodeSend"/>
+                </div>
+                <button class="sendMsgBtn" @click="sendInstantMessage">发送</button>
+            </div>
+        </div>-->
+    </div>
+    <!--底部折叠按钮
+    <el-button size="small" @click="showOrHide">》折叠列表</el-button>
+    -->
+
+</div>

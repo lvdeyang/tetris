@@ -1,0 +1,75 @@
+<div class="leader-dialog-add-group" style="width:100%; height:100%; position:relative; background-color:#206ec366;">
+    <!--筛选条件-->
+    <div class="search">
+        <el-input placeholder="输入文件名称" v-model="filterText" style="width:300px; border:0;"></el-input>
+        <el-select v-model="recordMode" placeholder="请选择">
+            <el-option value="MANUAL" label="手动录制">手动录制</el-option>
+            <el-option value="SCHEDULING" label="排期录制">排期录制</el-option>
+        </el-select>
+        <el-date-picker
+                v-model="date"
+                type="datetimerange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+        </el-date-picker>
+        <el-button type="primary" @click="search">搜索</el-button>
+    </div>
+    <!--内容-->
+    <div style="position:absolute; left:1px; top:45px; right:1px; bottom:85px;">
+        <div style="position:absolute; top:5px; left:0; bottom:0; right:0;">
+            <el-table
+                    :data="pageData"
+                    style="width: 100%"
+                    height="100%">
+                <el-table-column
+                        prop="fileName"
+                        label="文件名">
+                </el-table-column>
+                <el-table-column
+                        prop="type"
+                        label="录制模式">
+                    <template></template>
+                </el-table-column>
+                <el-table-column
+                        prop="videoSource"
+                        label="视频源">
+                </el-table-column>
+                <el-table-column
+                        prop="audioSource"
+                        label="音频源">
+                </el-table-column>
+                <el-table-column
+                        prop="startTime"
+                        label="开始时间">
+                </el-table-column>
+                <el-table-column
+                        prop="endTime"
+                        label="结束时间">
+                </el-table-column>
+                <el-table-column
+                        prop="mode"
+                        label="任务模式">
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                        width="150">
+                    <template slot-scope="scope">
+                        <el-tooltip class="item" effect="dark" content="停止" placement="bottom">
+                            <el-button type="text" style="padding:0; font-size:20px;"><span class="icon-stop" @click="stopTask(scope.row.id)"></span>
+                            </el-button>
+                        </el-tooltip>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination background @current-change="deviceCurrentChange" :current-page="deviceCurrentPage"
+                           :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                           :total="deviceData.totalData.length">
+            </el-pagination>
+        </div>
+    </div>
+    <!--底部按钮-->
+    <div style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+        <el-button size="small" @click="cancel" type="warning">关闭页面</el-button>
+    </div>
+</div>

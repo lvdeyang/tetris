@@ -1,0 +1,25 @@
+<div class="set-small-screen">
+    <div class="small-screen-members" >
+        <el-tree
+            ref="tree"
+            :data="members"
+            node-key="key"
+            default-expand-all
+            @node-drag-start="handleDragStart"
+            :props="defaultProps"
+            :render-content="renderContent"
+            draggable
+            :allow-drop="allowDrop"
+            :allow-drag="allowDrag">
+        </el-tree>
+    </div>
+    <div class="small-screen-source">
+        <el-card shadow="hover">
+            <div slot="header" class="clearfix">
+                <span>小屏源</span>
+                <el-button style="position:absolute; top:.75em; right:.75em; padding:0;" type="text" @click="removeSmallScreen()">清空</el-button>
+            </div>
+            <div @drop="smallScreenSet($event)" @dragover="allowNativeDrop($event)">{{(name && name!='')?name:'未设置'}}</div>
+        </el-card>
+    </div>
+</div>

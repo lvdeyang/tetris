@@ -1,0 +1,52 @@
+<div class="bvc2-monitor-currenttask "
+  style="width: 100%; height: 100%; padding-left: 10px; padding-right: 10px; box-sizing: border-box; background-color: rgb(255, 255, 255);overflow: auto;">
+  <div class="curTask" style="max-height: calc(100% - 100px);overflow: auto;">
+    <el-button type="primary" size="small" @click="addTask">添加任务</el-button>
+    <p>当前任务：{{curTask}}</p>
+    <el-table :data="table.data" :row-class-name="tableRowClass">
+      <el-table-column prop="titleName" label="任务名称" width="180"></el-table-column>
+      <el-table-column prop="beginTime" label="开始时间" width="180"></el-table-column>
+      <!-- <el-table-column prop="address" label="地址"></el-table-column> -->
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button type="text" @click="setCur(scope.row)" v-if="!scope.row.currentTask">设为当前任务</el-button>
+          <el-tag type="success" v-else>当前任务</el-tag>
+          <el-button @click="editTask(scope.row)" type="text" size="small">修改</el-button>
+          <el-button type="text" size="small" @click="deleteRow(scope.row)" v-show="!scope.row.currentTask">删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-dialog :title="dialog.title" :visible.sync="dialog.visible">
+      <el-form label-width="120px" :model="dialog.form" ref="addTaskForm">
+        <el-form-item label="任务名称">
+          <el-input v-model="dialog.form.titleName"></el-input>
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <el-date-picker v-model="dialog.form.beginTime" type="datetime" placeholder="选择日期时间"
+            format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="是否设为当前">
+          <el-switch v-model="dialog.form.isCurrentTask" active-color="#13ce66" inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :disabled="addDisabled" @click="addTaskSubmit" v-show="dialog.isCreate">创建任务</el-button>
+          <el-button type="primary" :disabled="addDisabled" @click="addTaskSubmit" v-show="!dialog.isCreate">修改任务</el-button>
+          <el-button @click="cancel">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <!-- </el-tab-pane>
+    </el-tabs> -->
+  </div>
+  <div
+    style="width:100%; height:52px; position:absolute; left:-40px; bottom:15px; box-sizing:border-box; padding-top:10px;">
+    <el-pagination style="float:right;" background @size-change="handleSizeChange" @current-change="handleCurrentChange"
+      :current-page="table.page.currentPage" :page-sizes="[20, 50, 100, 500, 1000]" :page-size="table.page.pageSize"
+      layout="total, sizes, prev, pager, next, jumper" :total="table.page.total">
+    </el-pagination>
+  </div>
+</div>

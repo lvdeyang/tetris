@@ -1,0 +1,36 @@
+<div class="zk-header">
+    <div class="content">
+        <div class="leftTime leftTime1">
+            <p class="date">{{date}}</p>
+            <p class="time">{{time}}</p>
+        </div>
+        <div class="leftTime leftTime2">
+            <p class="date">{{fightDate}}</p>
+            <p class="time">{{fightTime}}</p>
+            <!--<span class="el-icon-time setTimeIcon" style="position: absolute;right: 22px;bottom: 23px;font-size: 24px;cursor: pointer;color: #cafffa" @click="openSetTime"></span>-->
+        </div>
+        <div class="center">
+            <span>网络化作战指挥系统</span>
+        </div>
+        <div class="right">
+            <span class="icon-user" style="font-size: 30px;position: absolute;left: 40px;top:28px;color: #b7d0dc"></span>
+            <div style="position: absolute;top:0;left: 70px;height: 100%;width: 140px;overflow:hidden;">
+                <span :class="usernameLength>=5? 'username animate':'username'">{{user.name}}</span>
+            </div>
+        </div>
+        <div class="right">
+            <p style="font-size: 14px;line-height: 44px;margin-left: -10px;color: #b7d0dc">
+                <span style="">资源</span>
+                <span style="margin-left:14px;">设置</span>
+                <span style="margin-left:14px;">预览</span>
+                <span style="margin-left:14px;">退出</span>
+            </p>
+            <p class="images">
+                <img src="../../../../../images/zk-leader/management.png" @click="showBvc" title="资源" style="margin: 0 3px; position:relative; right:6px;">
+                <img src="../../../../../images/zk-leader/setting.png" @click="showSettings" title="系统设置" style="position:relative; right:3px;">
+                <img src="../../../../../images/zk-leader/preview.png" @click="refreshPreview" title="本地预览" style="position:relative; right:5px;">
+                <img src="../../../../../images/zk-leader/exit.png" title="退出" @click="closeExit" style="position:relative; right:4px;">
+            </p>
+        </div>
+    </div>
+</div>

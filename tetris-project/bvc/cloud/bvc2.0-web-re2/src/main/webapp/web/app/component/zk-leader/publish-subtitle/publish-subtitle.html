@@ -1,0 +1,32 @@
+<div class="layer">
+    <div class="win-header">
+        <span class="win-header-title">发布字幕</span>
+        <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
+    </div>
+    <!--内容-->
+    <div style="position: absolute;top: 60px;left: 30px;bottom: 50px;right: 30px;">
+        <el-table
+                :data="leftData"
+                height="95%"
+                highlight-current-row
+                @row-click="clickRow">
+            <el-table-column
+                    prop="name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="username"
+                    label="创建人">
+            </el-table-column>
+        </el-table>
+    </div>
+   <el-pagination background @current-change="leftCurrentChange" :current-page="leftCurrentPage"
+                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                       :total="total">
+        </el-pagination>
+    <!--底部按钮-->
+    <div style="height:50px;position:absolute; right:60px; bottom:0;">
+        <el-button size="small" @click="leftConfirm" type="primary">确定选择</el-button>
+    </div>
+
+</div>

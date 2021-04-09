@@ -1,0 +1,31 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>start</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<grouptype>${groupType}</grouptype>
+	<subject>${subject}</subject>
+	<stime>${stime}<stime>
+	<bizinfo>
+		<biztype>cnf</biztype>
+		<bizname>${bizname}</bizname>
+		<creatorid>${creatorid}</creatorid>
+		<topid>${topid}</topid>
+		<mlist>
+			<#if mlist??>
+				<#list mlist as m>
+					<minfo>
+						<mid>${m.mid}</mid>
+						<mname>${m.mname}</mname>
+						<mtype>${m.mtype}</mtype>
+						<#if m.pid??>
+							<pid>${m.pid}</pid>
+						</#if>
+					</minfo>
+				</#list>
+			</#if>
+		</mlist>
+	</bizinfo>
+</notify> 

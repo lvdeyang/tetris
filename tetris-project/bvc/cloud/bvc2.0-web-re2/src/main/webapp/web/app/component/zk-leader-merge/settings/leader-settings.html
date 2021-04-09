@@ -1,0 +1,97 @@
+<div class="zk-settings" style="width:100%; height:100%; position:relative;">
+    <div class="title">系统设置</div>
+    <div class="content">
+        <el-tabs tab-position="left" style="height:100%;">
+            <el-tab-pane label="呼叫设置">
+                <div style="padding-left:20px;">
+                    <div style="margin-bottom:40px;">
+                        <div style="font-size:20px; margin-bottom:20px;">呼叫应答方式</div>
+                        <div>
+                            <el-radio-group v-model="callResponseMode" @change="handleCallResponseModeChange">
+                                <el-radio label="0">手动</el-radio>
+                                <el-radio label="1">自动</el-radio>
+                            </el-radio-group>
+                        </div>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="视频转发">
+                <div style="padding-left:20px;">
+                    <div style="margin-bottom:40px;">
+                        <div style="font-size:20px; margin-bottom:20px;">视频转发应答方式</div>
+                        <div>
+                            <el-radio-group v-model="videoSendAnswerMode" @change="handleVideoSendAnswerModeChange">
+                                <el-radio label="0">手动</el-radio>
+                                <el-radio label="1">自动</el-radio>
+                            </el-radio-group>
+                        </div>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="修改密码">
+                <div style="padding-left:20px;">
+                    <div style="margin:45px 0 40px;">
+                        <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="120px"
+                                 class="demo-ruleForm">
+                            <el-form-item label="旧密码" prop="oldPass">
+                                <el-input type="password" v-model="ruleForm.oldPass"></el-input>
+                            </el-form-item>
+                            <el-form-item label="新密码" prop="newPass">
+                                <el-input type="password" v-model="ruleForm.newPass" auto-complete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="确认新密码" prop="checkPass">
+                                <el-input type="password" v-model="ruleForm.checkPass" auto-complete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" style="margin-left: 100px" @click="submitForm('ruleForm')">
+                                    提交
+                                </el-button>
+                                <el-button @click="resetForm('ruleForm')">重置</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="转发关系">
+                <div style="padding-left:20px;">
+                    <div style="font-size:20px; margin-bottom:20px;">转发关系</div>
+                    <div style="height: 410px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-table
+                                    :data="table2.data"
+                                    v-loading="loading"
+                                    element-loading-text="拼命加载中"
+                                    element-loading-spinner="el-icon-loading"
+                                    element-loading-background="rgba(0, 0, 0, 0.8)"
+                                    style="width: 100%">
+                                <el-table-column
+                                        prop="businessType"
+                                        label="业务类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="srcInfo"
+                                        label="源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="dstInfo"
+                                        label="目的">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="dstVideoBitrate"
+                                        label="视频">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="dstAudioBitrate"
+                                        label="音频">
+                                </el-table-column>
+                            </el-table>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+    <div class="close" @click="closeMask">
+        <img src="../../../../../images/zk-leader/close.png" alt="">
+    </div>
+</div>

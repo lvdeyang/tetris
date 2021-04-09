@@ -1,0 +1,83 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?uylz60');
+  src:  url('fonts/icomoon.eot?uylz60#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?uylz60') format('truetype'),
+    url('fonts/icomoon.woff?uylz60') format('woff'),
+    url('fonts/icomoon.svg?uylz60#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="graph-node-icon-"], [class*=" graph-node-icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.graph-node-icon-uniE900:before {
+  content: "\e900";
+}
+.graph-node-icon-1 .path1:before {
+  content: "\e901";
+}
+.graph-node-icon-1 .path2:before {
+  content: "\e902";
+  margin-left: -1em;
+}
+.graph-node-icon-1 .path3:before {
+  content: "\e903";
+  margin-left: -1em;
+}
+.graph-node-icon-1 .path4:before {
+  content: "\e904";
+  margin-left: -1em;
+}
+.graph-node-icon-1 .path5:before {
+  content: "\e905";
+  margin-left: -1em;
+  opacity: 0.98;
+}
+.graph-node-icon-1 .path6:before {
+  content: "\e906";
+  margin-left: -1em;
+  opacity: 0.98;
+}
+.graph-node-icon-2 .path1:before {
+  content: "\e907";
+}
+.graph-node-icon-2 .path2:before {
+  content: "\e908";
+  margin-left: -1em;
+  opacity: 0.98;
+}
+.graph-node-icon-2 .path3:before {
+  content: "\e909";
+  margin-left: -1em;
+  opacity: 0.98;
+}
+.graph-node-icon-3:before {
+  content: "\e90a";
+}
+.graph-node-icon-4:before {
+  content: "\e90b";
+}
+.graph-node-icon-5:before {
+  content: "\e90c";
+}
+.graph-node-icon-6:before {
+  content: "\e90d";
+}
+.graph-node-icon-7:before {
+  content: "\e90e";
+}

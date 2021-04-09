@@ -1,0 +1,125 @@
+<div class="outFile">
+    <div class="win-header">
+        <span class="win-header-title">外部文件夹</span>
+        <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
+    </div>
+    <div class="win-body">
+        <div style="width:100%; height:100%; position:relative;">
+            <!--筛选条件-->
+            <div class="add">
+                <div class="btn-add-external-folder" @click="search">添加外部文件夹</div>
+            </div>
+            <!--内容-->
+            <div style="position:absolute; left:0; top:32px; right:0; bottom:0;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <el-table
+                                    :data="fileDatas"
+                                    style="width: 100%"
+                                    height="100%">
+                                <el-table-column
+                                        prop="name"
+                                        label="别名">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="ip"
+                                        label="ip">
+                                    <template></template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="port"
+                                        label="端口">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="folderPath"
+                                        label="文件夹路径">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="protocolType"
+                                        label="协议">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="username"
+                                        label="用户名">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="password"
+                                        label="密码">
+                                </el-table-column>
+                                <el-table-column
+                                        label="操作"
+                                        width="150">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="修改" placement="bottom">
+                                            <el-button type="text" style="padding:0; font-size:20px;"><span class="el-icon-edit-outline" @click="editRow(scope.row)"></span>
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
+                                            <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #d64040" @click="removeRow(scope.row.id)">
+                                                <span class="icon-trash"></span></el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <div style="height:50px; position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
+                        <el-pagination background @current-change="currentChange" :current-page="currentPage"
+                                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                       :total="total">
+                        </el-pagination>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--底部按钮
+    <div style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+        <el-button size="small" @click="cancel" type="warning">关闭页面</el-button>
+    </div>-->
+
+    <!--对话框-->
+    <el-dialog :title="!editButton?'添加外部文件夹':'修改外部文件夹'" :visible.sync="dialogVisible">
+        <el-form :model="form">
+            <el-form-item label="别名" :label-width="formLabelWidth">
+                <el-input v-model="form.alias"></el-input>
+            </el-form-item>
+
+            <el-form-item label="ip" :label-width="formLabelWidth">
+                <el-input v-model="form.ip"></el-input>
+            </el-form-item>
+
+            <el-form-item label="端口" :label-width="formLabelWidth">
+                <el-input v-model="form.port"></el-input>
+            </el-form-item>
+
+            <el-form-item label="路径" :label-width="formLabelWidth">
+                <el-input v-model="form.path"></el-input>
+            </el-form-item>
+
+            <el-form-item label="协议" :label-width="formLabelWidth">
+                <el-input v-model="form.deal" readonly></el-input>
+            </el-form-item>
+
+            <el-form-item label="用户名" :label-width="formLabelWidth">
+                <el-input v-model="form.username"></el-input>
+            </el-form-item>
+
+            <el-form-item label="密码" :label-width="formLabelWidth">
+                <el-input v-model="form.password" type="password"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <div class="btn-dialog-cancel" @click="closeDialog">取 消</div>
+            <div class="btn-dialog-submit"  v-if="!editButton"  @click="addSubmit">确 定</div>
+            <div class="btn-dialog-edit" v-if="editButton" @click="editSubmit">修 改</div>
+            <br style="clear:both;"/>
+            <!--<el-button @click="closeDialog" size="small">关 闭</el-button>
+            <el-button v-if="!editButton" size="small" type="primary" @click="addSubmit">确 定</el-button>
+            <el-button v-if="editButton" size="small" type="primary" @click="editSubmit">修 改</el-button>-->
+        </div>
+    </el-dialog>
+
+</div>

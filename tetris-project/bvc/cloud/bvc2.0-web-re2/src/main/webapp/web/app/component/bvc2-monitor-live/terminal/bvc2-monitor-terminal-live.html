@@ -1,0 +1,222 @@
+<div class="bvc2-monitor-terminal-live" style="width:100%; height:100%; padding:10px; box-sizing:border-box;">
+    <div style="width:100%; height:100%; position:relative;">
+        <div style="position:absolute; left:0; top:0; right:390px; bottom:0;">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="position:absolute; left:0; top:0; right:0; bottom:100px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="width:100%; height:100%;" id="player-container">
+                            <!-- 播放器插件 -->
+                        </div>
+                    </div>
+                </div>
+                <div style="width:100%; height:100px; position:absolute; left:0; bottom:0; padding:5px;">
+                    <div class="monitor92-l02" style="width:100%; height:100%; border:1px solid #ebeef5; background-color:#fff; padding:9px;">
+                        <div class="bvc2-layout-buttons">
+                            <div v-for="button in buttons" :class="button.active?'bvc2-layout-button active':'bvc2-layout-button'" :data-id="button.id" @click="layoutChange(button)">
+                                <div class="bvc2-layout-button-icon"></div>
+                                <div class="bvc2-layout-button-text">{{button.name}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="monitor92-l02" style="width:380px; height:100%; position:absolute; top:0; right:0; border:1px solid #ebeef5; background-color:#fff;">
+            <div class="monitor92-m01 monitor92-f03 monitor92-h4" style="line-height:40px; text-align:center; border-bottom:1px solid #ebeef5;">
+                视频资源列表
+            </div>
+            <div style="position:absolute; left:0; top:41px; right:0; bottom:0;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            :data="tree.data"
+                            :props="tree.props">
+                        <span class="custom-tree-node" slot-scope="{node, data}">
+                            <span v-if="data.type === 'FOLDER'" style="cursor:pointer;">
+                                <span :class="data.icon"></span>
+                                <span>{{node.label}}</span>
+                            </span>
+                            <span v-else style="cursor:move;" draggable="true" @dragstart="handleDragStart(data, $event)">
+                                <span :class="data.icon" :style="data.style"></span>
+                                <span>{{node.label}}</span>
+                            </span>
+                        </span>
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+    <template>
+
+        <el-dialog
+                title="选择频道"
+                :visible.sync="dialog.selectChannel.visible"
+                width="400px"
+                :before-close="handleSelectChannelClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="视频频道">
+                    <el-select v-model="dialog.selectChannel.selectedVideoChannelId" style="width:100%;">
+                        <el-option :key="video.channelId" v-for="video in dialog.selectChannel.encodeVideos" :label="video.name" :value="video.channelId"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item v-if="dialog.selectChannel.encodeAudios.length > 0" label="音频频道">
+                    <el-select v-model="dialog.selectChannel.selectedAudioChannelId" style="width:100%;">
+                        <el-option :key="audio.channelId" v-for="audio in dialog.selectChannel.encodeAudios" :label="audio.name" :value="audio.channelId"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectChannelCommit" :loading="dialog.selectChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="选择上屏设备"
+                :visible.sync="dialog.selectDstChannel.visible"
+                width="420px"
+                :before-close="handleSelectDstChannelClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; top:-30px; bottom:-30px; left:-20px; right:-20px; padding-left:10px; padding-right:10px;">
+                    <div style="width:100%; height:100%; box-sizing:border-box; position:relative; border:1px solid #ebebeb;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    :data="dialog.selectDstChannel.tree.data"
+                                    :props="dialog.selectDstChannel.tree.props">
+                                <span class="custom-tree-node" slot-scope="{node, data}">
+                                    <el-radio v-if="(!data.children || data.children.length<=0) && data.id.indexOf('Video')>=0" v-model="dialog.selectDstChannel.tree.currentVideo" :label="data.param">
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </el-radio>
+                                    <el-radio v-else-if="(!data.children || data.children.length<=0) && data.id.indexOf('Audio')>=0" v-model="dialog.selectDstChannel.tree.currentAudio" :label="data.param">
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </el-radio>
+                                    <span v-else>
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </span>
+                                </span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectDstChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectDstChannelCommit" :loading="dialog.selectDstChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <bvc2-dialog-single-osd ref="bvc2DialogSingleOsd" @selected-osd="onSelectedOsd"></bvc2-dialog-single-osd>
+
+        <el-dialog
+                title="添加录制任务"
+                :visible.sync="dialog.addRecord.visible"
+                width="440px"
+                :before-close="handleAddRecordClose">
+
+            <el-form label-width="0">
+                <el-form-item style="margin-bottom:10px;">
+                    <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式" @change="addRecordModeChange" style="width:150px;">
+                        <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
+                        <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item style="margin-bottom:10px;">
+                    <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入文件名称"></el-input>
+                </el-form-item>
+                <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;">
+                    <el-date-picker
+                            size="medium"
+                            v-model="dialog.addRecord.timeScope"
+                            type="datetimerange"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            :default-time="['12:00:00']">
+                    </el-date-picker>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddRecordClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddRecordCommit" :loading="dialog.addRecord.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <bvc2-monitor-ptzctrl ref="bvc2MonitorPtzctrl"></bvc2-monitor-ptzctrl>
+
+        <el-dialog
+                title="绑定解码器"
+                :visible.sync="dialog.decodeBind.visible"
+                class="decodeBind"
+                width="1024px"
+                :before-close="handleDecodeBindClose">
+
+            <div style="height:600px; width:100%; position:relative;">
+                <div style="position:absolute; left:-20px; top:-30px; right:-20px; bottom:-30px; padding-left:10px; padding-right:10px;">
+                    <div style="width:100%; height:100%; position:relative; border:1px solid #ebebeb;">
+                        <div style="width:380px; height:100%; border-right:1px solid #ebebeb;">
+                            <el-scrollbar style="height:100%;">
+                                <el-tree
+                                        :data="dialog.decodeBind.tree.data"
+                                        :props="dialog.decodeBind.tree.props">
+                                <span class="custom-tree-node" slot-scope="{node, data}">
+                                    <el-radio v-if="(!data.children || data.children.length<=0) && data.id.indexOf('Video')>=0" v-model="dialog.decodeBind.tree.currentVideo" :label="data.param">
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </el-radio>
+                                    <el-radio v-else-if="(!data.children || data.children.length<=0) && data.id.indexOf('Audio')>=0" v-model="dialog.decodeBind.tree.currentAudio" :label="data.param">
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </el-radio>
+                                    <span v-else>
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </span>
+                                </span>
+                                </el-tree>
+                            </el-scrollbar>
+                        </div>
+                        <div style="position:absolute; left:381px; top:0; right:0; bottom:0;">
+                            <el-scrollbar style="height:100%;">
+                                <el-table
+                                        :data="dialog.decodeBind.table.data"
+                                        style="width: 100%">
+                                    <el-table-column
+                                            label="视频">
+                                        <template slot-scope="scope">
+                                            <span>{{scope.row.dstVideoBundleName}}-{{scope.row.dstVideoChannelName}}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="音频">
+                                        <template slot-scope="scope">
+                                            <span>{{scope.row.dstAudioBundleName}}-{{scope.row.dstAudioChannelName}}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            width="80"
+                                            label="操作">
+                                        <template slot-scope="scope">
+                                            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleDecodeBindRemove(scope)"></el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-scrollbar>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleDecodeBindClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleDecodeBindCommit" :loading="dialog.decodeBind.loading">绑定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+</div>

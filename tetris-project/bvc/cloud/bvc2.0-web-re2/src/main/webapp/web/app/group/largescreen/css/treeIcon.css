@@ -1,0 +1,35 @@
+/* 默认设备状态 */
+.Tetris.tree .close a span.root{background:url(../images/base/tree/instTree/icon_default/folder_close.png) no-repeat center center;}
+.Tetris.tree .open a span.root{background:url(../images/base/tree/instTree/icon_default/folder_open.png) no-repeat center center;}
+.Tetris.tree a span.inst{background:url(../images/base/tree/instTree/icon_default/instSmall.png) no-repeat center center;}
+.Tetris.tree a span.account{background:url(../images/base/tree/instTree/icon_default/accountSmall.png) no-repeat center center;}
+.Tetris.tree a span.device{background:url(../images/base/tree/instTree/icon_default/deviceSmall.png) no-repeat center center;}
+.Tetris.tree a span.device.decoder{background:url(../images/base/tree/instTree/icon_default/dev_decoder.png) no-repeat center center;}
+.Tetris.tree a span.device.encoder{background:url(../images/base/tree/instTree/icon_default/dev_encoder.png) no-repeat center center;}
+.Tetris.tree a span.device.encoder-decoder{background:url(../images/base/tree/instTree/icon_default/dev_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree a span.device.double-encoder-decoder{background:url(../images/base/tree/instTree/icon_default/dev_double_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree a span.device.web, .Tetris.tree a span.device.mobile{background:url(../images/base/tree/instTree/icon_default/accountSmall.png) no-repeat center center;}
+
+/* 离线设备状态 */
+
+.Tetris.tree .offline a span.device.decoder{background:url(../images/base/tree/instTree/icon_offline/dev_decoder.png) no-repeat center center;}
+.Tetris.tree .offline a span.device.encoder{background:url(../images/base/tree/instTree/icon_offline/dev_encoder.png) no-repeat center center;}
+.Tetris.tree .offline a span.device.encoder-decoder{background:url(../images/base/tree/instTree/icon_offline/dev_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .offline a span.device.double-encoder-decoder{background:url(../images/base/tree/instTree/icon_offline/dev_double_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .offline a span.device.web, .Tetris.tree .offline a span.device.mobile{background:url(../images/base/tree/instTree/icon_offline/accountSmall.png) no-repeat center center;}
+
+/* 在线设备状态 */
+
+.Tetris.tree .online a span.device.decoder{background:url(../images/base/tree/instTree/icon_online/dev_decoder.png) no-repeat center center;}
+.Tetris.tree .online a span.device.encoder{background:url(../images/base/tree/instTree/icon_online/dev_encoder.png) no-repeat center center;}
+.Tetris.tree .online a span.device.encoder-decoder{background:url(../images/base/tree/instTree/icon_online/dev_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .online a span.device.double-encoder-decoder{background:url(../images/base/tree/instTree/icon_online/dev_double_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .online a span.device.web, .Tetris.tree .online a span.device.mobile{background:url(../images/base/tree/instTree/icon_online/accountSmall.png) no-repeat center center;}
+
+/* 呼通设备状态 */
+
+.Tetris.tree .holdon a span.device.decoder{background:url(../images/base/tree/instTree/icon_holdon/dev_decoder.png) no-repeat center center;}
+.Tetris.tree .holdon a span.device.encoder{background:url(../images/base/tree/instTree/icon_holdon/dev_encoder.png) no-repeat center center;}
+.Tetris.tree .holdon a span.device.encoder-decoder{background:url(../images/base/tree/instTree/icon_holdon/dev_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .holdon a span.device.double-encoder-decoder{background:url(../images/base/tree/instTree/icon_holdon/dev_double_encoder_decoder.png) no-repeat center center;}
+.Tetris.tree .holdon a span.device.web, .Tetris.tree .holdon a span.device.mobile{background:url(../images/base/tree/instTree/icon_holdon/accountSmall.png) no-repeat center center;}

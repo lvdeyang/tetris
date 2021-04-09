@@ -1,0 +1,583 @@
+<mi-frame id="page-terminal-editor-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">终端编辑器</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-terminal">{{terminalName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>终端编辑器</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="never" style="width:100%; height:100%;">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:0;">
+                <div style="position:relative; width:100%; height:100%;">
+                    <div style="width:51px; height:100%; box-sizing:border-box; border-right:1px solid #ebebeb; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); z-index:1; position:relative;">
+                        <div style="width:100%; height:100%; display:table;">
+                            <div style="width:100%; height:100%; display:table-cell; vertical-align:middle;">
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-top:1px solid #ebebeb; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建屏幕" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddPhysicalScreen">
+                                            <span class="graph-node-icon-uniE900"></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建视频编码通道" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddVideoEncodeChannel">
+                                            <span class="graph-node-icon-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建视频解码通道" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddVideoDecodeChannel">
+                                            <span class="graph-node-icon-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建音频编码通道" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddAudioEncodeChannel">
+                                            <span class="graph-node-icon-4"></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建音频解码通道" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddAudioDecodeChannel">
+                                            <span class="graph-node-icon-5"></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                                <div style="height:50px; width:50px; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-tooltip class="item" effect="dark" content="创建音频输出" placement="right">
+                                        <el-button style="width:100%; height:100%; border-radius:0; border:0; padding:0; text-align:center; font-size:24px;" @click="handleAddAudioOutput">
+                                            <span class="graph-node-icon-6"></span>
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="position:absolute; left:51px; top:2px; right:25%; bottom:0; background-color:#fff;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <div style="position:absolute; left:51px; top:0; right:0; bottom:0;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <div style="width:100%; height:100%;" class="terminal-graph"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="width:25%; height:100%; box-sizing:border-box; border-left:1px solid #ebebeb; position:absolute; top:0; right:0; box-shadow:0 0 20px rgba(0, 0, 0, 0.1);">
+                        <div style="width:100%; height:100%; position:relative;" class="physical-screen-layout">
+                            <div style="height:48px; box-sizing:border-box; padding:10px;">
+                                <el-select style="border-radius:0;" size="mini" v-model="physicalScreenLayout.columns" :disabled="!physicalScreenLayout.enable" @change="handleLayoutColumnsChange">
+                                    <el-option :label="1" :value="1"></el-option>
+                                    <el-option :label="2" :value="2"></el-option>
+                                    <el-option :label="3" :value="3"></el-option>
+                                    <el-option :label="4" :value="4"></el-option>
+                                    <el-option :label="5" :value="5"></el-option>
+                                    <el-option :label="6" :value="6"></el-option>
+                                </el-select>
+                                <span class="el-icon-close"></span>
+                                <el-select style="border-radius:0;" size="mini" v-model="physicalScreenLayout.rows" :disabled="!physicalScreenLayout.enable" @change="handleLayoutRowsChange">
+                                    <el-option :label="1" :value="1"></el-option>
+                                    <el-option :label="2" :value="2"></el-option>
+                                    <el-option :label="3" :value="3"></el-option>
+                                    <el-option :label="4" :value="4"></el-option>
+                                    <el-option :label="5" :value="5"></el-option>
+                                    <el-option :label="6" :value="6"></el-option>
+                                </el-select>
+                                <el-checkbox style="float:right; margin-top:3px;" v-model="physicalScreenLayout.enable" @change="handlePhysicalScreenLayoutEnableChange">开启屏幕布局</el-checkbox>
+                            </div>
+                            <div style="position:absolute; left:0; top:48px; right:0; bottom:48px; padding:0 10px;">
+                                <table :class="physicalScreenLayout.enable?'':'disabled'">
+                                    <tr v-for="row in physicalScreenLayout.rows">
+                                        <td v-for="column in physicalScreenLayout.columns" @click="setPhysicalScreenLayout(column, row)">{{getPhysicalScreenName(column, row)}}</td>
+                                    </tr>
+                                </table>
+                                <terminal-editor-channel-dialog ref="setPhysicalScreenLayout" @on-channel-selected="onPhysicalScreenLayoutSet"></terminal-editor-channel-dialog>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加物理屏幕"
+                :visible.sync="dialog.addPhysicalScreen.visible"
+                width="400px"
+                :before-close="handleAddPhysicalScreenClose">
+
+            <el-input v-model="dialog.addPhysicalScreen.name" placeholder="请输入物理屏幕名称"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddPhysicalScreenClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddPhysicalScreenSubmit" :loading="dialog.addPhysicalScreen.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改物理屏幕"
+                :visible.sync="dialog.editPhysicalScreen.visible"
+                width="400px"
+                :before-close="handleEditPhysicalScreenClose">
+
+            <el-input v-model="dialog.editPhysicalScreen.name" placeholder="请输入物理屏幕名称"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditPhysicalScreenClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditPhysicalScreenSubmit" :loading="dialog.editPhysicalScreen.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="删除物理屏幕"
+                :visible.sync="dialog.removePhysicalScreen.visible"
+                width="400px"
+                :before-close="handleRemovePhysicalScreenClose">
+
+            <el-checkbox v-model="dialog.removePhysicalScreen.removeChildren">删除子节点</el-checkbox>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleRemovePhysicalScreenClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleRemovePhysicalScreenSubmit" :loading="dialog.removePhysicalScreen.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加视频编码通道"
+                :visible.sync="dialog.addVideoEncodeChannel.visible"
+                width="500px"
+                :before-close="handleAddVideoEncodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="addVideoEncodeChannelSelectChannel" @on-channel-selected="onVideoEncodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.addVideoEncodeChannel.name" placeholder="请输入视频编码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddVideoEncodeChannelSelectChannel('选择音频编码通道', 'AUDIO_ENCODE')">关联音频编码通道</el-button></td>
+                        <td v-if="dialog.addVideoEncodeChannel.selectAudioChannel">{{dialog.addVideoEncodeChannel.selectAudioChannel.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddVideoEncodeChannelRemoveChannel()"></el-button></td>
+                    </tr>
+                    <tr v-for="(videoChannelParam, i) in videoChannelParams" :key="i">
+                        <td><el-button type="primary" size="mini" style="width:100%;" @click="handleAddVideoEncodeChannelSelectChannel('选择视频编码通道', 'VIDEO_ENCODE', videoChannelParam)">关联{{videoChannelParam.value}}通道</el-button></td>
+                        <td v-if="videoChannelParam.target">{{videoChannelParam.target.terminalBundleName}} - {{videoChannelParam.target.bundleType}} - {{videoChannelParam.target.channelId}}</td>
+                        <td v-else></td>
+                        <td style="text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddVideoEncodeChannelRemoveChannel(videoChannelParam)"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddVideoEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddVideoEncodeChannelSubmit" :loading="dialog.addVideoEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改视频编码通道"
+                :visible.sync="dialog.editVideoEncodeChannel.visible"
+                width="500px"
+                :before-close="handleEditVideoEncodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="editVideoEncodeChannelSelectChannel" @on-channel-selected="onEditVideoEncodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.editVideoEncodeChannel.name" placeholder="请输入视频编码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr v-for="(videoChannelParam, i) in videoChannelParams" :key="i">
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleEditVideoEncodeChannelSelectChannel(videoChannelParam)">关联{{videoChannelParam.value}}通道</el-button></td>
+                        <td v-if="videoChannelParam.target">{{videoChannelParam.target.terminalBundleName}} - {{videoChannelParam.target.bundleType}} - {{videoChannelParam.target.channelId}}</td>
+                        <td v-else></td>
+                        <td  style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleEditVideoEncodeChannelRemoveChannel(videoChannelParam)"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditVideoEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditVideoEncodeChannelSubmit" :loading="dialog.editVideoEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="移动视频编码通道"
+                :visible.sync="dialog.moveVideoEncodeChannel.visible"
+                width="500px"
+                :before-close="handleMoveVideoEncodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="moveVideoEncodeChannelSelectChannel" @on-channel-selected="onMoveVideoEncodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleMoveVideoEncodeChannelSelectChannel">关联音频编码通道</el-button></td>
+                        <td v-if="dialog.moveVideoEncodeChannel.selectAudioChannel">{{dialog.moveVideoEncodeChannel.selectAudioChannel.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleMoveVideoEncodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleMoveVideoEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleMoveVideoEncodeChannelSubmit" :loading="dialog.moveVideoEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+            :close-on-click-modal="false"
+            title="添加视频解码通道"
+            :visible.sync="dialog.addVideoDecodeChannel.visible"
+            width="500px"
+            :before-close="handleAddVideoDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="addVideoDecodeChannelSelectChannel" @on-channel-selected="onAddVideoDecodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.addVideoDecodeChannel.name" placeholder="请输入视频解码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddVideoDecodeChannelSelectChannel('选择物理屏幕', 'PHYSICAL_SCREEN')">关联物理屏幕</el-button></td>
+                        <td v-if="dialog.addVideoDecodeChannel.selectPhysicalScreen">{{dialog.addVideoDecodeChannel.selectPhysicalScreen.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddVideoDecodeChannelRemoveChannel()"></el-button></td>
+                    </tr>
+                    <tr v-for="(videoChannelParam, i) in videoChannelParams" :key="i">
+                        <td><el-button type="primary" size="mini" style="width:100%;" @click="handleAddVideoDecodeChannelSelectChannel('选择视频解码通道', 'VIDEO_DECODE', videoChannelParam)">关联{{videoChannelParam.value}}通道</el-button></td>
+                        <td v-if="videoChannelParam.target">{{videoChannelParam.target.terminalBundleName}} - {{videoChannelParam.target.bundleType}} - {{videoChannelParam.target.channelId}}</td>
+                        <td v-else></td>
+                        <td style="text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddVideoDecodeChannelRemoveChannel(videoChannelParam)"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddVideoDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddVideoDecodeChannelSubmit" :loading="dialog.addVideoDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改视频解码通道"
+                :visible.sync="dialog.editVideoDecodeChannel.visible"
+                width="500px"
+                :before-close="handleEditVideoDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="editVideoDecodeChannelSelectChannel" @on-channel-selected="onEditVideoDecodeChannellSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.editVideoDecodeChannel.name" placeholder="请输入视频解码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr v-for="(videoChannelParam, i) in videoChannelParams" :key="i">
+                        <td><el-button type="primary" size="mini" style="width:100%;" @click="handleEditVideoDecodeChannelSelectChannel(videoChannelParam)">关联{{videoChannelParam.value}}通道</el-button></td>
+                        <td v-if="videoChannelParam.target">{{videoChannelParam.target.terminalBundleName}} - {{videoChannelParam.target.bundleType}} - {{videoChannelParam.target.channelId}}</td>
+                        <td v-else></td>
+                        <td style="text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleEditVideoDecodeChannelRemoveChannel(videoChannelParam)"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditVideoDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditVideoDecodeChannelSubmit" :loading="dialog.editVideoDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="移动视频解码通道"
+                :visible.sync="dialog.moveVideoDecodeChannel.visible"
+                width="500px"
+                :before-close="handleMoveVideoDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="moveVideoDecodeChannelSelectChannel" @on-channel-selected="onMoveVideoDecodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleMoveVideoDecodeChannelSelectChannel">关联物理屏幕</el-button></td>
+                        <td v-if="dialog.moveVideoDecodeChannel.selectPhysicalScreen">{{dialog.moveVideoDecodeChannel.selectPhysicalScreen.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleMoveVideoDecodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleMoveVideoDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleMoveVideoDecodeChannelSubmit" :loading="dialog.moveVideoDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+            :close-on-click-modal="false"
+            title="添加音频编码通道"
+            :visible.sync="dialog.addAudioEncodeChannel.visible"
+            width="500px"
+            :before-close="handleAddAudioEncodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="addAudioEncodeChannelSelectChannel" @on-channel-selected="onAddAudioEncodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.addAudioEncodeChannel.name" placeholder="请输入音频编码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddAudioEncodeChannelSelectChannel">关联音频通道</el-button></td>
+                        <td v-if="dialog.addAudioEncodeChannel.selectTerminalBundleAudioChannel">{{dialog.addAudioEncodeChannel.selectTerminalBundleAudioChannel.terminalBundleName}} - {{dialog.addAudioEncodeChannel.selectTerminalBundleAudioChannel.bundleType}} - {{dialog.addAudioEncodeChannel.selectTerminalBundleAudioChannel.channelId}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddAudioEncodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAudioEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAudioEncodeChannelSubmit" :loading="dialog.addAudioEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改音频编码通道"
+                :visible.sync="dialog.editAudioEncodeChannel.visible"
+                width="500px"
+                :before-close="handleEditAudioEncodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="editAudioEncodeChannelSelectChannel" @on-channel-selected="onEditAudioEncodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.editAudioEncodeChannel.name" placeholder="请输入音频编码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleEditAudioEncodeChannelSelectChannel">关联音频通道</el-button></td>
+                        <td v-if="dialog.editAudioEncodeChannel.selectTerminalBundleAudioChannel">{{dialog.editAudioEncodeChannel.selectTerminalBundleAudioChannel.terminalBundleName}} - {{dialog.editAudioEncodeChannel.selectTerminalBundleAudioChannel.bundleType}} - {{dialog.editAudioEncodeChannel.selectTerminalBundleAudioChannel.channelId}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleEditAudioEncodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAudioEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAudioEncodeChannelSubmit" :loading="dialog.editAudioEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="删除音频编码通道"
+                :visible.sync="dialog.removeAudioEncodeChannel.visible"
+                width="400px"
+                :before-close="handleRemoveAudioEncodeChannelClose">
+
+            <el-checkbox v-model="dialog.removeAudioEncodeChannel.removeChildren">删除子节点</el-checkbox>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleRemoveAudioEncodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleRemoveAudioEncodeChannelSubmit" :loading="dialog.removeAudioEncodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+            :close-on-click-modal="false"
+            title="添加音频解码通道"
+            :visible.sync="dialog.addAudioDecodeChannel.visible"
+            width="500px"
+            :before-close="handleAddAudioDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="addAudioDecodeChannelSelectChannel" @on-channel-selected="onAddAudioDecodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.addAudioDecodeChannel.name" placeholder="请输入音频解码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddAudioDecodeChannelSelectChannel('选择音频输出', 'AUDIO_OUTPUT')">关联音频输出</el-button></td>
+                        <td v-if="dialog.addAudioDecodeChannel.selectTerminalAudioOutput">{{dialog.addAudioDecodeChannel.selectTerminalAudioOutput.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddAudioDecodeChannelRemoveChannel('AUDIO_OUTPUT')"></el-button></td>
+                    </tr>
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddAudioDecodeChannelSelectChannel('选择音频解码通道', 'AUDIO_DECODE')">关联音频通道</el-button></td>
+                        <td v-if="dialog.addAudioDecodeChannel.selectTerminalBundleAudioChannel">{{dialog.addAudioDecodeChannel.selectTerminalBundleAudioChannel.terminalBundleName}} - {{dialog.addAudioDecodeChannel.selectTerminalBundleAudioChannel.bundleType}} - {{dialog.addAudioDecodeChannel.selectTerminalBundleAudioChannel.channelId}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddAudioDecodeChannelRemoveChannel('AUDIO_DECODE')"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAudioDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAudioDecodeChannelSubmit" :loading="dialog.addAudioDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改音频解码通道"
+                :visible.sync="dialog.editAudioDecodeChannel.visible"
+                width="500px"
+                :before-close="handleEditAudioDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="editAudioDecodeChannelSelectChannel" @on-channel-selected="onEditAudioDecodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.editAudioDecodeChannel.name" placeholder="请输入音频解码通道名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleEditAudioDecodeChannelSelectChannel">关联音频通道</el-button></td>
+                        <td v-if="dialog.editAudioDecodeChannel.selectTerminalBundleAudioChannel">{{dialog.editAudioDecodeChannel.selectTerminalBundleAudioChannel.terminalBundleName}} - {{dialog.editAudioDecodeChannel.selectTerminalBundleAudioChannel.bundleType}} - {{dialog.editAudioDecodeChannel.selectTerminalBundleAudioChannel.channelId}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleEditAudioDecodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAudioDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAudioDecodeChannelSubmit" :loading="dialog.editAudioDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="移动音频解码通道"
+                :visible.sync="dialog.moveAudioDecodeChannel.visible"
+                width="500px"
+                :before-close="handleMoveAudioDecodeChannelClose">
+
+            <terminal-editor-channel-dialog ref="moveAudioDecodeChannelSelectChannel" @on-channel-selected="onMoveAudioDecodeChannelSelectedChannel"></terminal-editor-channel-dialog>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleMoveAudioDecodeChannelSelectChannel">关联音频输出</el-button></td>
+                        <td v-if="dialog.moveAudioDecodeChannel.selectTerminalAudioOutput">{{dialog.moveAudioDecodeChannel.selectTerminalAudioOutput.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleMoveAudioDecodeChannelRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleMoveAudioDecodeChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleMoveAudioDecodeChannelSubmit" :loading="dialog.moveAudioDecodeChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="添加音频输出"
+                :visible.sync="dialog.addAudioOutput.visible"
+                width="500px"
+                :before-close="handleAddAudioOutputClose">
+
+            <terminal-editor-channel-dialog ref="AddAudioOutputSelectChannel" @on-channel-selected="onAddAudioOutputSelectedChannel"></terminal-editor-channel-dialog>
+
+            <el-input style="margin-bottom:10px;" v-model="dialog.addAudioOutput.name" placeholder="请输入音频输出名称"></el-input>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleAddAudioOutputSelectChannel">关联物理屏幕</el-button></td>
+                        <td v-if="dialog.addAudioOutput.selectPhysicalScreen">{{dialog.addAudioOutput.selectPhysicalScreen.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleAddAudioOutputRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddAudioOutputClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddAudioOutputSubmit" :loading="dialog.addAudioOutput.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改音频输出"
+                :visible.sync="dialog.editAudioOutput.visible"
+                width="400px"
+                :before-close="handleEditAudioOutputClose">
+
+            <el-input v-model="dialog.editAudioOutput.name" placeholder="请输入物理屏幕名称"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditAudioOutputClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditAudioOutputSubmit" :loading="dialog.editAudioOutput.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="移动音频输出"
+                :visible.sync="dialog.moveAudioOutput.visible"
+                width="500px"
+                :before-close="handleMoveAudioOutputClose">
+
+            <terminal-editor-channel-dialog ref="moveAudioOutputSelectChannel" @on-channel-selected="onMoveAudioOutputSelectedChannel"></terminal-editor-channel-dialog>
+
+            <div style="width:100%; max-height:200px; overflow-y:auto;">
+                <table class="channel-tables">
+                    <tr>
+                        <td style="width:150px;"><el-button type="primary" size="mini" style="width:100%;" @click="handleMoveAudioOutputSelectChannel">关联物理屏幕</el-button></td>
+                        <td v-if="dialog.moveAudioOutput.selectPhysicalScreen">{{dialog.moveAudioOutput.selectPhysicalScreen.name}}</td>
+                        <td v-else></td>
+                        <td style="width:30px; text-align:center;"><el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleMoveAudioOutputRemoveChannel"></el-button></td>
+                    </tr>
+                </table>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleMoveAudioOutputClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleMoveAudioOutputSubmit" :loading="dialog.moveAudioOutput.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="删除音频输出"
+                :visible.sync="dialog.removeAudioOutput.visible"
+                width="400px"
+                :before-close="handleRemoveAudioOutputClose">
+
+            <el-checkbox v-model="dialog.removeAudioOutput.removeChildren">删除子节点</el-checkbox>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleRemoveAudioOutputClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleRemoveAudioOutputSubmit" :loading="dialog.removeAudioOutput.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <div class="contextmenu" v-if="contextmenu.visible" :style="'left:' + contextmenu.x + 'px; top:' + contextmenu.y + 'px;'">
+            <div><el-button size="small" style="border-radius:0; border:0; width:100%;" type="primary" v-if="contextmenu.edit" @click="handleEditGraphNode">&nbsp;&nbsp;&nbsp;&nbsp;修改&nbsp;&nbsp;&nbsp;&nbsp;</el-button></div>
+            <div><el-button size="small" style="border-radius:0; border:0; width:100%;" type="primary" v-if="contextmenu.move" @click="handleMoveGraphNode">&nbsp;&nbsp;&nbsp;&nbsp;移动&nbsp;&nbsp;&nbsp;&nbsp;</el-button></div>
+            <div><el-button size="small" style="border-radius:0; border:0; width:100%;" type="danger" v-if="contextmenu.remove" @click="handleRemoveGraphNode">&nbsp;&nbsp;&nbsp;&nbsp;删除&nbsp;&nbsp;&nbsp;&nbsp;</el-button></div>
+        </div>
+
+    </template>
+
+</mi-frame>

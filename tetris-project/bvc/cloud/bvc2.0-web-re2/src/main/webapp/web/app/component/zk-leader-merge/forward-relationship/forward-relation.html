@@ -1,0 +1,34 @@
+<div class="container">
+    <div class="title">转发关系</div>
+    <div style="position: absolute; left: 75px; top: 115px; right: 90px; bottom: 63px;">
+        <el-scrollbar style="height:100%;">
+            <el-table
+                    :data="table2.data"
+                    style="width: 100%">
+                <el-table-column
+                        prop="businessType"
+                        label="业务类型">
+                </el-table-column>
+                <el-table-column
+                        prop="srcInfo"
+                        label="源">
+                </el-table-column>
+                <el-table-column
+                        prop="dstInfo"
+                        label="目的">
+                </el-table-column>
+                <el-table-column
+                        prop="dstVideoBitrate"
+                        label="视频">
+                </el-table-column>
+                <el-table-column
+                        prop="dstAudioBitrate"
+                        label="音频">
+                </el-table-column>
+            </el-table>
+        </el-scrollbar>
+    </div>
+    <div style="position: absolute;bottom: 0;width: 100%;text-align: center">
+        <img src="../../../../../images/zk-leader/close.png" alt="" @click="handleClose">
+    </div>
+</div>

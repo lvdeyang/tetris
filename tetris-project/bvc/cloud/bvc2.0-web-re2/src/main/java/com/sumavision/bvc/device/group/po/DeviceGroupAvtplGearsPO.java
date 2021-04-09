@@ -1,0 +1,215 @@
+package com.sumavision.bvc.device.group.po;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.sumavision.bvc.system.enumeration.AudioFormat;
+import com.sumavision.bvc.system.enumeration.GearsLevel;
+import com.sumavision.bvc.system.enumeration.Resolution;
+import com.sumavision.bvc.system.enumeration.VideoFormat;
+import com.sumavision.tetris.bvc.model.terminal.channel.ChannelParamsType;
+import com.sumavision.tetris.orm.po.AbstractBasePO;
+
+/**
+ * 
+* @ClassName: 参数档位 
+* @author zy
+* @date 2018年7月31日 上午10:00:03 
+*
+ */
+@Entity
+@Table(name = "BVC_DEVICE_GROUP_AVTPL_GEARS")
+public class DeviceGroupAvtplGearsPO extends AbstractBasePO{
+
+	private static final long serialVersionUID = 1L;
+	
+	/** 档位名称 */ 
+	private String name;
+	
+	/** 视频码率 */
+    private String videoBitRate;
+    
+    /** 视频备用码率（二轮重构多码率不再使用） */
+	private String videoBitRateSpare;
+	
+	/** 视频分辨率 */
+	private Resolution VideoResolution;
+	
+	/** 视频备用分辨率（二轮重构多码率不再使用） */
+	private Resolution VideoResolutionSpare;
+
+	/** 视频帧率 */
+	private String fps;
+	
+	/** 视频编码格式 */
+	private VideoFormat videoFormat;
+	
+	/** 音频编码格式 */
+	private AudioFormat audioFormat;
+	
+	/** 音频码率 */
+	private String AudioBitRate;
+	
+	/** 档位 */
+	private GearsLevel level;
+	
+	/** 关联参数模板 */
+	private DeviceGroupAvtplPO avtpl;
+
+	private ChannelParamsType channelParamsType;
+	
+	@Column(name = "NAME")
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	@Column(name = "VIDEO_BIT_RATE")
+	public String getVideoBitRate() {
+		return videoBitRate;
+	}
+	
+	public void setVideoBitRate(String videoBitRate) {
+		this.videoBitRate = videoBitRate;
+	}
+	
+	@Column(name = "VIDEO_BIT_RATE_SPARE")
+	public String getVideoBitRateSpare() {
+		return videoBitRateSpare;
+	}
+	
+	public void setVideoBitRateSpare(String videoBitRateSpare) {
+		this.videoBitRateSpare = videoBitRateSpare;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_RESOLUTION")
+	public Resolution getVideoResolution() {
+		return VideoResolution;
+	}
+
+	public void setVideoResolution(Resolution videoResolution) {
+		VideoResolution = videoResolution;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_RESOLUTION_SPARE")
+	public Resolution getVideoResolutionSpare() {
+		return VideoResolutionSpare;
+	}
+
+	public void setVideoResolutionSpare(Resolution videoResolutionSpare) {
+		VideoResolutionSpare = videoResolutionSpare;
+	}
+
+	@Column(name = "FPS")
+	public String getFps() {
+		return fps;
+	}
+
+	public void setFps(String fps) {
+		this.fps = fps;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "VIDEO_FORMAT")
+	public VideoFormat getVideoFormat() {
+		return videoFormat;
+	}
+
+	public void setVideoFormat(VideoFormat videoFormat) {
+		this.videoFormat = videoFormat;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "AUDIO_FORMAT")
+	public AudioFormat getAudioFormat() {
+		return audioFormat;
+	}
+
+	public void setAudioFormat(AudioFormat audioFormat) {
+		this.audioFormat = audioFormat;
+	}
+
+	@Column(name = "AUDIO_BIT_RATE")
+	public String getAudioBitRate() {
+		return AudioBitRate;
+	}
+	
+	public void setAudioBitRate(String audioBitRate) {
+		AudioBitRate = audioBitRate;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "LEVEL")
+	public GearsLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(GearsLevel level) {
+		this.level = level;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "AVTPL_ID")
+	public DeviceGroupAvtplPO getAvtpl() {
+		return avtpl;
+	}
+
+	public void setAvtpl(DeviceGroupAvtplPO avtpl) {
+		this.avtpl = avtpl;
+	}
+
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CHANNEL_PARAMS_TYPE")
+	public ChannelParamsType getChannelParamsType() {
+		return channelParamsType;
+	}
+
+	public void setChannelParamsType(ChannelParamsType channelParamsType) {
+		this.channelParamsType = channelParamsType;
+	}
+
+
+	/**
+	 * @Title: 从系统资源中复制数据 
+	 * @param entity 系统资源
+	 * @return AvtplGearsPO 设备组资源
+	 */
+	public DeviceGroupAvtplGearsPO set(com.sumavision.bvc.system.po.AvtplGearsPO entity){
+		this.setUuid(entity.getUuid());
+		this.setUpdateTime(new Date());
+		this.setName(entity.getName());
+		this.setVideoBitRate(entity.getVideoBitRate());
+		this.setVideoBitRateSpare(entity.getVideoBitRateSpare());
+		this.setVideoResolution(entity.getVideoResolution());
+		this.setVideoResolutionSpare(entity.getVideoResolutionSpare());
+		this.setFps(entity.getFps());
+		this.setVideoFormat(entity.getVideoFormat());
+		this.setAudioFormat(entity.getAudioFormat());
+		this.setAudioBitRate(entity.getAudioBitRate());
+		this.setLevel(entity.getLevel());
+		if(GearsLevel.LEVEL_4.equals(entity.getLevel())){
+			this.setChannelParamsType(ChannelParamsType.UHD);
+		}else if(GearsLevel.LEVEL_3.equals(entity.getLevel())){
+			this.setChannelParamsType(ChannelParamsType.HD);
+		}else if(GearsLevel.LEVEL_2.equals(entity.getLevel())){
+			this.setChannelParamsType(ChannelParamsType.STANDARD);
+		}else if(GearsLevel.LEVEL_1.equals(entity.getLevel())){
+			this.setChannelParamsType(ChannelParamsType.GENERAL);
+		}
+		return this;
+	}
+	
+}

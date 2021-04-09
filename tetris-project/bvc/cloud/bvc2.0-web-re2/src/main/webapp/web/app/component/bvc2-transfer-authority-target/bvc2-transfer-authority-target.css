@@ -1,0 +1,3 @@
+.bvc2-transfer-authority-target .el-transfer-panel{ width: 250px !important;}
+.bvc2-transfer-authority-target .el-transfer-panel .el-transfer-panel__header .el-checkbox .el-checkbox__input{display: none}
+.el-transfer-panel__item.el-checkbox .el-checkbox__label {overflow: unset}

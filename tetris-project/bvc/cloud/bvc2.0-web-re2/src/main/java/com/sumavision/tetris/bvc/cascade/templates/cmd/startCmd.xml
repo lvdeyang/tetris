@@ -1,0 +1,12 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>start</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<grouptype>preset</grouptype>
+	<subject>${subject}</subject>
+	<stime>${stime}</stime>
+</notify>
+

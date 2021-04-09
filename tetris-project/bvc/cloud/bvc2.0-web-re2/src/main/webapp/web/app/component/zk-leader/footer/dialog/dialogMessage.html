@@ -1,0 +1,31 @@
+<div class="container">
+    <div class="win-header">
+    	<span class="win-header-title">{{currentGroupName}}-消息<el-badge v-if="newMessage>0" :value="newMessage" class="item"></el-badge></span>
+    	<span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
+    </div>
+    
+    <div class="win-body">
+        <div class="full-box">
+        	<div class="top">
+        		<div class="message-scope" 
+        			@scroll="onMessageScopeScroll" 
+        			v-loading="loading"
+        			element-loading-text="拼命加载中"
+				      element-loading-spinner="el-icon-loading"
+				      element-loading-background="rgba(0, 0, 0, 0.5)">
+        			<template v-for="msg, index in historyInstantMsg">{{msg}}<br v-if="index!=historyInstantMsg.length-1"/></template>
+        		</div>
+        	</div>
+        	<div class="bottom">
+        		<div class="full-box">
+        			<div class="left">
+        				<el-input v-model="instantMessage" :disabled="currentGroupId?false:true" size="small" class="sendMsgContent"></el-input>
+        			</div>
+        			<div class="right">
+        				<button class="sendMsgBtn" :disabled="currentGroupId?false:true" @click="sendInstantMessage">发送</button>
+        			</div>
+        		</div>
+        	</div>
+        </div>
+    </div>
+</div>

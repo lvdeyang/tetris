@@ -1,0 +1,5 @@
+.dialog-tree .el-dialog__body{padding-top:0; padding-bottom:20px;}
+.dialog-tree .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:scroll!important;}
+
+#page-internal-agenda-forward-wrapper .layout-position-selection-type{cursor:pointer;}
+#page-internal-agenda-forward-wrapper .layout-position-selection-type:hover{text-decoration:underline;}

@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: tetris-bvc-business-zsy
+  cloud:
+#    config:
+#      uri: http://localhost:8769
+#      fail-fast: true
+    client:
+      ipAddress: 192.165.56.77
+  profiles:
+    active: pro
+  datasource:
+    base:
+      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      username: root
+      password: sumavisionrd
+#      url: jdbc:mysql://192.165.56.131:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+#      username: sumadb
+#      password: Sumavision@300079
+      driver-class-name: com.mysql.jdbc.Driver
+      initial-size : 10
+      min-idle : 20
+      max-active : 100
+      validation-query : SELECT 1
+      test-while-idle : true
+      test-on-borrow : true
+      time-between-eviction-runs-millis : 600000
+      min-evictable-idle-time-millis : 3600000
+    resource:
+#      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+#      username: root
+#      password: sumavisionrd
+      url: jdbc:mysql://192.165.56.131:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      username: sumadb
+      password: Sumavision@300079
+      driver-class-name: com.mysql.jdbc.Driver
+      initial-size : 10
+      min-idle : 20
+      max-active : 100
+      validation-query : SELECT 1
+      test-while-idle : true
+      test-on-borrow : true
+      time-between-eviction-runs-millis : 600000
+      min-evictable-idle-time-millis : 3600000
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+  thymeleaf:
+    cache: false
+    
+  #spring mvc视图
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+server:
+  port: 8099
+#  jsp-servlet: 
+#    init-parameters: 
+#      development: false
+ribbon:
+  ReadTimeout: 120000
+  ConnectTimeout: 30000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.165.56.131:8081/eureka/
+  instance:
+    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    prefer-ip-address: true
+connectCenterLayerID: suma-venus-access-lianwang    
+#security:
+#  oauth2:
+#    resource:
+#      #指定resource的唯一标识
+#      id: ${spring.application.name}
+#      #是否使用token info
+#      prefer-token-info: false
+#      #指定user info的URI
+#      user-info-uri: http://192.165.56.77:8881/uaa/users/current
+
+emergent:
+  #应急广播，喊话系统的IP端口
+  smartexpressIssueUrl: 10.10.40.251:8480
+  
+#指挥相关配置
+command:
+  #指挥/会议文字切换
+  commandString: 指挥
+  #创建本地预览的模式，0关闭，1使用摄像头，2使用绑定的编码器
+  localPreviewMode: 2
+  #2个ntp服务器
+  ntp1IP: 192.165.56.131
+  ntp1Port: 1234
+  ntp2IP: 192.165.56.132
+  ntp2Port: 5678
+log:
+  home: /usr/sbin/sumavision/log/tomcat_venus_business
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 3GB    
+  

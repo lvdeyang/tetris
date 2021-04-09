@@ -1,0 +1,84 @@
+<div class="bvc2-monitor-forword-list"
+  style="width:100%; height:100%; padding:10px; position:relative; box-sizing:border-box; background-color:#fff;">
+  <el-button size='small' type='primary' @click="openForword" v-if="originType !== 'OUTER'">配置转发</el-button>
+  <el-button size='small' type='primary' @click="openBandwidth"  v-if="originType !== 'OUTER'">配置站点带宽</el-button>  
+  <!-- <el-button size='small' type='primary' @click="openBandwidth" v-if="buttonIsShow">配置站点带宽</el-button> -->
+  <el-tag type="danger" style="margin-left: 10px;">当前转发数：{{totleForword}}/200</el-tag>  
+  <div style="position:absolute; left:10px; top:60px; right:10px; bottom:60px;">
+    <el-tabs v-model="activeName" @tab-click="handleClick"  >
+      <template v-for="item in stationList">
+        <el-tab-pane :label="item.stationName" :name="item.identity" :key="item.identity" v-if="item.originType == originType">
+          <div v-if="item.identity != 'self'&& originType !== 'OUTER'">
+            <el-tag type="danger" style="margin-left: 10px;">当前占用带宽/总带宽：{{currentWidth}}/{{totalWidth}}</el-tag>
+            <el-tag type="danger" style="margin-left: 10px;">当前外域转发/最大转发：{{table.page.total}}/{{currentWidthTotleNum}}</el-tag>
+          </div>
+        </el-tab-pane>
+      </template>
+      
+    </el-tabs>
+    <el-table :data="tableData" height="100%" style="width:100%">
+
+      <el-table-column label="源视频设备" prop="videoBundleName" sortable>
+      </el-table-column>
+      <!-- <el-table-column label="源视频通道" prop="videoChannelName">
+      </el-table-column> -->
+      <!-- <el-table-column label="源音频设备" prop="audioBundleName">
+      </el-table-column> -->
+      <!-- <el-table-column label="源音频通道" prop="audioChannelName">
+      </el-table-column> -->
+
+      <el-table-column label="目标视频设备" prop="dstVideoBundleName" sortable>
+      </el-table-column>
+      <!-- <el-table-column label="目标视频通道" prop="dstVideoChannelName">
+      </el-table-column> -->
+      <!-- <el-table-column label="目标音频设备" prop="dstAudioBundleName">
+      </el-table-column> -->
+      <!-- <el-table-column label="目标音频通道" prop="dstAudioChannelName">
+      </el-table-column> -->
+
+      <!-- <el-table-column label="osd" prop="osdName">
+      </el-table-column>
+      <el-table-column label="osd创建者" prop="osdUsername">
+      </el-table-column> -->
+
+      <!-- <el-table-column label="任务类型" prop="type">
+      </el-table-column> -->
+
+      <el-table-column label="操作" width="200">
+        <template slot-scope="scope">
+          <!-- <el-tooltip class="item" effect="dark" content="修改字幕" placement="bottom">
+            <el-button type="text" style="padding:0; font-size:17px;" @click="changeOsd(scope)"><span>字</span>
+            </el-button>
+          </el-tooltip> -->
+          <!-- <el-tooltip class="item" effect="dark" content="字幕控制" placement="bottom">
+                        <el-button type="text" icon="el-icon-edit" style="padding:0; font-size:18px;" @click="osdControl(scope)"></el-button>
+                    </el-tooltip>-->
+          <el-tooltip class="item" effect="dark" content="删除转发" placement="bottom">
+            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="rowDelete(scope)">
+            </el-button>
+          </el-tooltip>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+
+  <div style="height:50px; width:100%; position:absolute; left:0; bottom:10px; padding-top:8px; padding-right:10px;">
+    <el-pagination style="float:right;" background @size-change="handleSizeChange" @current-change="handleCurrentChange"
+      :current-page="table.page.currentPage" :page-sizes="[10,20,50]" :page-size="table.page.pageSize"
+      layout="total, sizes, prev, pager, next, jumper" :total="table.page.total">
+    </el-pagination>
+  </div>
+
+  <bvc2-dialog-single-osd ref="bvc2DialogSingleOsd" @selected-osd="onSelectedOsd">
+  </bvc2-dialog-single-osd>
+  <el-dialog v-if="dialog.forword.visible" title="配置转发" :visible.sync="dialog.forword.visible" width="60%"
+    :before-close="handleforwordClose">
+    <bvc2-monitor-forword></bvc2-monitor-forword>
+  </el-dialog>
+
+
+  <el-dialog v-if="dialog.bandwidth.visible" title="配置站点带宽" :visible.sync="dialog.bandwidth.visible" width="80%"
+    :before-close="handlebandwidthClose">
+    <bvc2-monitor-forword-bandwidth :origin-type="originType"></bvc2-monitor-forword-bandwidth>
+  </el-dialog>
+</div>

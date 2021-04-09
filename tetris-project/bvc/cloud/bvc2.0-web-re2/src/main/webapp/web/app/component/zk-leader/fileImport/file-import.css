@@ -1,0 +1,208 @@
+body{
+    background-color:transparent;
+}
+.fileImport{
+    width:100%;
+    height:100%;
+    position:relative;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
+    border-radius:4px;
+}
+
+.fileImport .win-header{
+    height:40px;
+    background-color:#3668a9;
+    border-radius:4px 4px 0 0;
+}
+
+.fileImport .win-header .win-header-title{
+    float:left;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+}
+
+.fileImport .win-header .win-header-close{
+    float:right;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.fileImport .win-body{
+    position:absolute;
+    left:0;
+    top:40px;
+    padding:10px;
+    right:0;
+    bottom:0;
+    background-color:#0f2a4d;
+    border-radius:0 0 4px 4px;
+}
+
+.btn-add-osd,
+.btn-import-commit,
+.btn-select-folder,
+.btn-handle-search,
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    color:#fff;
+    background-color:#2562f7;
+    padding:5px 14px;
+    border-radius:13px;
+    cursor:pointer;
+    display:inline-block;
+    font-size:12px;
+}
+
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    padding:7px 18px;
+    float:right;
+}
+
+.btn-dialog-cancel{
+    margin-left:14px;
+    background-color:#204a6b;
+}
+
+.btn-import-commit{
+    z-index: 100;
+    position: relative;
+}
+
+.left,.right{
+    box-sizing: border-box;
+    float: left;
+    width: 59%;
+    height: 100%;
+    overflow: hidden;
+}
+.right{
+    padding-left:10px;
+}
+.left{
+    padding-right:10px;
+    width: 40%;
+    border-right: 1px solid #11366b;
+}
+/*閲嶇疆table鐨勬牱寮�*/
+.el-table,
+.el-table__expanded-cell {
+    background-color: transparent;
+    color: #c2f9ff;
+}
+
+.el-table thead {
+    color: #00e4fd;
+}
+
+.el-table th,
+.el-table tr {
+    background-color: transparent;
+}
+
+.fileImport .el-table td,
+.fileImport .el-table th.is-leaf{
+    border-bottom: 1px solid #11366b;
+}
+
+.fileImport .el-table--border::after,
+.fileImport .el-table--group::after,
+.fileImport .el-table::before{
+    background-color: #11366b;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover td{
+    background-color:#061f3e;
+}
+
+.fileImport .el-table--enable-row-hover .el-table__body tr:hover {
+    border:1px solid #0595b9;
+}
+
+.fileImport .el-pagination.is-background .el-pager li:not(.disabled).active{
+    background-color: #2562f7;
+}
+
+.fileImport .el-pagination.is-background .btn-next,
+.fileImport .el-pagination.is-background .btn-prev,
+.fileImport .el-pagination.is-background .el-pager li{
+    background-color:#ffffff00;
+}
+
+.fileImport .el-button--text{
+    color:#72b7fb;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped.current-row td, .el-table__body tr.current-row>td, .el-table__body tr.hover-row.current-row>td, .el-table__body tr.hover-row.el-table__row--striped.current-row>td, .el-table__body tr.hover-row.el-table__row--striped>td, .el-table__body tr.hover-row>td{
+    background-color: #061f3e;
+}
+
+/*閲嶇疆鍒嗛〉鏍峰紡*/
+.el-pagination__total,.el-pagination__jump {
+    color: #c0c1c3;
+}
+
+/*閲嶇疆瀵硅瘽妗嗘牱寮�*/
+.el-dialog__wrapper{
+    top:-80px;
+    overflow: hidden;
+}
+.el-dialog{
+    width:800px;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
+}
+.el-dialog__title {
+    color: #9c9c9c;
+    font-weight: 600;
+}
+
+/*閲嶇疆鏍戝舰鑿滃崟*/
+.el-tree {
+    background-color: transparent;
+    color: #fff;
+}
+.el-input__inner{
+    background-color: #0b2d5a;
+    border:1px solid #17407e;
+    color: #fff;
+}
+.el-range-editor .el-range-input {
+    background-color: #0d6079;
+}
+
+.el-tree-node__content:hover {
+    background-color: #001f7533;
+}
+
+.el-tree-node:focus>.el-tree-node__content{
+    background-color: #001f7533;
+}
+.el-scrollbar__wrap{
+    overflow-x: hidden;
+}
+
+/*重置表格滚动条的样式*/
+  ::-webkit-scrollbar {
+      width: 4px;
+      height: 10px;
+  }
+
+/*//滚动条的滑块*/
+  ::-webkit-scrollbar-thumb {
+      background-color: #4F5F73;
+      border-radius: 3px;
+  }
+
+.tree-node-folder-name{color:#fff; display:inline-block; max-width:250px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; position:relative; top:3px;}
+.tree-node-file-name{color:#fff; display:inline-block; max-width:250px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; position:relative; top:5px;}
+

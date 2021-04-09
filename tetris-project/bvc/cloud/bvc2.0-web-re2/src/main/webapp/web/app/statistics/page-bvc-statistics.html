@@ -1,0 +1,48 @@
+<div id="page-bvc-statistics-wrapper" class="page-wrapper">
+    <bvc-headerbar :sysusername="header.user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:10px; background-color:#fff;">
+                <div style="width:100%; height:430px; border:1px solid #F2F3F7; border-radius:5px; padding:10px; box-sizing:border-box;">
+                    <div style="width:50%; height:350px; float:left;">
+                        <div class="per-number" style="width:100%; height:100%;"></div>
+                    </div>
+                    <div style="width:50%; height:350px; float:left;">
+                        <div class="per-duration" style="width:100%; height:100%;"></div>
+                    </div>
+                    <div style="clear:both;"></div>
+                    <div style="height:60px; width:100%; text-align:center;">
+                        <el-pagination
+                                background
+                                layout="total, prev, pager, next, jumper, sizes"
+                                :page-size="page.pageSize"
+                                :current-page="page.currentPage"
+                                :page-sizes="page.pageSizes"
+                                :total="page.total"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange">
+                        </el-pagination>
+                    </div>
+                </div>
+                <div style="width:100%; height:400px;">
+                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:0; padding-right:5px; float:left; box-sizing:border-box;">
+                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                            <div class="total-number" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
+                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-left:5px; padding-right:5px; float:left; box-sizing:border-box;">
+                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                            <div class="total-times" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
+                    <div style="width:33.333%; height:100%; padding-top:10px; padding-bottom:10px; padding-right:0; padding-left:5px; float:left; box-sizing:border-box;">
+                        <div style="border:1px solid #F2F3F7; border-radius:5px; height:100%; width:100%;">
+                            <div class="total-duration" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+    </div>
+</div>

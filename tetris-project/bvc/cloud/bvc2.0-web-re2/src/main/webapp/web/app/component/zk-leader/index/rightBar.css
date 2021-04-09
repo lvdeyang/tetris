@@ -1,0 +1,657 @@
+html, body {
+    background-color: transparent;
+}
+
+#app {
+    overflow: hidden;
+}
+
+ul, li, div {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.right-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 370px;
+    height: 100%;;
+    overflow: hidden;
+}
+
+/* 鍙充晶tab鍜岃彍鍗� start */
+.tabBar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 370px;
+}
+
+/*椤堕儴鍒囨崲鏍囬*/
+.switch {
+    position: absolute;
+    left: 50px;
+    width: 318px;
+    height: 50px;
+    border-radius: 12px 12px 0 0;
+    background: #52cffb21;
+    z-index: 1;
+}
+
+.switch li {
+    display: inline-block;
+    width: 49%;
+    font-size: 18px;
+    font-weight: bold;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #000;
+    background: #204a6b;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+
+/*椤堕儴鏍囬鍏锋湁楂樹寒鐨勬牱寮�*/
+.highLight {
+    position: absolute;
+    top: 0;
+    left: 7px;
+    width: 145px;
+    height: 4px;
+    border-radius: 3px;
+    background-color: #00e9ff;
+    box-shadow: 0 1px 10px #51dff4;
+}
+
+li.focusLight {
+    color: #00e9ff;
+    background: #0c446f;
+}
+
+/*宸︿晶鐨勫鑸�夐」鏍囬*/
+.el-tabs__nav {
+    top: 50px;
+}
+
+/*缁欒繖5涓爣棰樺姞婊氬姩鏉�*/
+.el-tabs__nav-scroll {
+    overflow: auto;
+}
+
+/*缁欐粴鍔ㄦ潯淇敼榛樿鏍峰紡*/
+.el-tabs__nav-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+/*tab鍙充晶鑷姩鍔犺浇鐨勬粴鍔ㄦ潯鐨勬暣浣撳鍣紝榛樿鏄伆鑹�*/
+.el-tabs__nav-wrap::after {
+    background-color: #204a6b;
+}
+
+/* 绂佹妯悜婊氬姩鏉� */
+.secondMenu .el-scrollbar__wrap,
+.commandTable .el-scrollbar__wrap {
+    overflow-x: hidden;
+}
+
+.el-tabs--left .el-tabs__header.is-left {
+    margin-right: 0;
+}
+
+.firstMenu {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 50px;
+    width: 318px;
+    padding: 5px 0;
+    z-index: 9;
+}
+
+/*鎸囨尌涓婇潰鐨勬寜閽�*/
+.commandBtn{
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    text-align: center;
+}
+.commandBtn span{
+    margin: 0 15px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.commandName{
+    display: inline-block;
+    /*width: 200px;*/
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.commandTable{
+    position:absolute;
+    left: 0;
+    top: 75px;
+    width:310px;
+    bottom:215px;
+    overflow: hidden;
+}
+
+/*宸︿晶tab瀵瑰簲鐨勫彸渚х殑瀹瑰櫒鐨勫搴�*/
+.el-tabs__content {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    bottom: 140px;
+    width: 100%;
+    /*background: #52cffb21;*/
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.el-tabs__item {
+    margin: 2px 0;
+    padding: 0;
+    width: 50px;
+    height: 120px;
+    background-color: #204a6b;
+    border-radius: 10px 0 0 10px;
+}
+
+.fontPic {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+/*绂佹鍥剧墖鎷栨嫿*/
+img {
+    -webkit-user-drag: none;
+}
+
+.is-left .is-active {
+   /* background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);*/
+    background-color:#2562f7;
+}
+
+/* 鏍戝舰缁勪欢寮�濮� */
+.el-tree {
+    width: 320px;
+    min-height: 50px;
+    background-color: transparent;
+}
+
+/* 鑿滃崟鏈�澶栧眰绾� */
+.el-tree-node {
+    margin: 1px 0 0;
+}
+
+/* 鏍戝舰缁勪欢鐨勬爣棰樻枃瀛�,鑷畾涔� span*/
+.headline {
+    width: 100%;
+    color: #cfdae6;
+    font-family: "Microsoft YaHei";
+    font-size: 20px;
+    height: 30px;
+    line-height: 30px;
+    background-color: #2d4e68e6;
+}
+.headline .el-checkbox__label{font-size: 20px!important; color: #cfdae6!important;}
+
+.headFont {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 111px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*褰曞儚鍥炴斁鐨勯暱搴︿笉涓�鏍�*/
+.sheadFont {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 220px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*鎸囨尌宸ヤ綔鍙扮殑灞炴�х殑鐢ㄦ埛鍚�*/
+.headFonts {
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 155px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+/*澶嶉�夋鐨勬牱寮�*/
+.el-checkbox__inner {
+    margin-left: -3px;
+    border: 1px solid #7590A3;
+    background-color: transparent;
+}
+
+/*鍚嶇О鍜屽閫夋涔嬮棿鐨勮窛绂�*/
+.el-checkbox__label {
+    margin-left: -3px;
+}
+
+.el-tree-node__content {
+    padding-left: 0;
+    height: 40px;
+    border-bottom: 1px solid #0a1432;
+    border-radius: 0 10px 0 0;
+}
+
+.is-expanded .el-tree-node__children .el-tree-node__content {
+    background: transparent;
+}
+
+.el-tree-node__content:hover {
+    background-color: #173D5C;
+}
+
+/* 鐐瑰嚮鐨勯偅涓眰绾э紝棰滆壊杈冩殫锛岃兘鐪嬪嚭鏉ユ寜涓嬬殑鏁堟灉 */
+.el-tree-node:focus > .el-tree-node__content {
+    background-color: #133549;
+    box-shadow: 0 0 54px #6a65a2 inset;
+}
+
+/* 灞曞紑灞傜骇缁撴瀯锛岀殑姣忎竴绾х殑鏍峰紡 */
+.el-tree-node:focus > .el-tree-node__children .el-tree-node__content {
+    background-color: transparent;
+}
+
+/*灞曞紑鐨勫眰绾х殑鑳屾櫙鑹�*/
+.is-expanded .el-tree-node__children {
+    background-color: transparent;
+}
+
+/*鎶樺彔鐨勬寜閽�*/
+.el-radio-button__inner {
+    padding: 12px 17px;
+    background-color: #204a6b;
+    border: 0;
+    border-radius: 10px 0 0 10px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+}
+
+.el-radio-button:first-child .el-radio-button__inner {
+    border: 0;
+}
+
+.el-radio-button__inner:hover {
+    color: #fff;
+}
+.scrollTab{
+    position:absolute;
+    left:0;
+    top:0;
+    width:310px;
+    bottom:0;
+    overflow: hidden;
+}
+/* 鎺у埗鐐瑰嚮鍚庣殑鍥炬爣鍜屽唴瀹圭殑鏄剧ず end */
+
+/* 搴曢儴鍥炬爣 */
+.footer {
+    position: absolute;
+    left: 50px;
+    bottom: 0;
+    width: 320px;
+    z-index: 4;
+    background-color: #173d5c;
+    border-radius: 0 0 12px 12px;
+}
+
+.customIcon {
+    position: relative;
+    float: left;
+    margin: 5px 10px;
+    width: 60px;
+    height: 60px;
+    line-height: 72px;
+    text-align: center;
+    border-radius: 12px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+    cursor:pointer;
+}
+
+.customIcon img:active{
+	opacity:.8;
+}
+
+.el-button--text {
+    position: absolute;
+    top: -3px;
+    left: 10px;
+}
+.commandBtn .el-button--text{
+    position: unset;
+    margin-top: -20px;
+    font-size: 18px;
+}
+
+/*绂佺敤鐨勬寜閽兘涓嶆樉绀�*/
+.disable {
+    background: gray;
+    display: none;
+}
+
+.customIcon i {
+    font-size: 36px;
+    color: #fff;
+}
+
+.context-menu {
+    position: fixed;
+    top: 100px;
+    right: 0;
+    background-color: #163D5C;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px 0 rgba(95, 91, 91, 0.38);
+    font-size: 16px;
+    color: #C7D2DD;
+    z-index: 12;
+}
+
+.context-menu .header {
+    padding: 5px 60px;
+    max-width: 150px;
+    font-weight: 700;
+    border-bottom: 1px solid #e4e7ed;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.menu .menuIcon {
+    margin-right: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ECFF;
+}
+
+.context-menu .menu {
+    padding: 6px 10px;
+    border-bottom: 1px solid #464646;
+    cursor: pointer;
+}
+
+.context-menu .menu:not(.disable):hover {
+    background-color: #409eff;
+    color: #fff;
+}
+
+.context-menu .menu.disable {
+    cursor: not-allowed;
+    color: #c0c4cc;
+}
+
+/*绗簩閮ㄥ垎 鎸囨尌宸ヤ綔鍙�*/
+.secondMenu {
+    position: absolute;
+    top: 51px;
+    bottom: 50px;
+    right: 0;
+    width: 370px;
+    border-radius: 0 0 12px 12px;
+}
+
+.status {
+    display: inline-block;
+    width: 97px;
+    line-height: 30px;
+    border-radius: 15px;
+    color: #e36264;
+    text-align: center;
+    font-weight: bold;
+}
+
+.status i {
+    margin-right: 8px;
+}
+
+.status.start {
+    color: #00ff14;
+}
+
+.status.pause {
+    color: #ffc800;
+}
+
+.status.remind {
+    color: #00fff3;
+}
+
+.status.stop {
+    color: #e36264;
+}
+
+/*涓嬫媺妗嗘牱寮忎慨鏀�*/
+.el-input__inner {
+    background-color: #0b2d5a;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid #17407e;
+}
+
+/*绠ご鐨勬牱寮�*/
+.el-select .el-input .el-select__caret {
+    margin-right: 10px;
+    font-size: 28px;
+    color: #00e8fe;
+    font-weight: bold;
+}
+
+/*涓嬫媺鍒楄〃灞曞紑鐨勯潰鏉�*/
+div.el-select-dropdown {
+    background-color: #204a6b;
+    border: none;
+    max-width: 300px;
+}
+
+.el-select-group__title {
+    font-size: 18px;
+    color: #fff;
+}
+
+/*鍔犲嚭涓嬫媺鑿滃崟鐨勬í鍚戞粴鍔ㄦ潯*/
+.el-select-dropdown__item {
+    width: 600px;
+    font-size: 18px;
+    color: #409EFF;
+    /*鍘绘帀鐪佺暐鍙�*/
+    text-overflow: inherit;
+}
+
+/*閫変腑鐨勬牱寮忕殑瀛椾綋棰滆壊*/
+.el-select-dropdown__item.selected {
+    color: #00e9ff;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+    background-color: #204a6b;
+}
+
+.btnContainer {
+    position: absolute;
+    padding: 2px;
+    width: 313px;
+    bottom: 0;
+    left: 0;
+    background-color: #173d5c;
+    border-radius: 0 0 12px 12px;
+    z-index: 4;
+}
+
+.option-button {
+    position: relative;
+    float: left;
+    margin: 2px 9px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+    border-radius: 12px;
+}
+
+.option-button.disable {
+    display: none;
+}
+
+.option-button img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor:pointer;
+}
+
+.option-button img:active {
+    opacity: .8;
+}
+
+/*鎸囨尌宸ヤ綔鍙扮殑鏍戠殑妯悜婊氬姩鏉�*/
+.el-scrollbar__bar.is-horizontal {
+    display: none;
+}
+
+/*popover寮瑰嚭妗嗙殑鏍峰紡*/
+.el-popover {
+    background: #3d475a;
+    border: 1px solid #076792;
+    color: #ffffff;
+}
+
+.el-dialog {
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
+}
+.el-dialog__title {
+    color: #fff;
+    font-weight: 600;
+}
+
+/*绗笁閮ㄥ垎鑿滃崟*/
+.thirdMenu {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 50px;
+    width: 318px;
+}
+
+.meetList {
+    position: absolute;
+    margin-top: 5px;
+    bottom: 75px;
+    top: 0;
+}
+
+.meetList .title {
+    color: #c0a16b;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.meetList .content {
+    display: inline-block;
+    width: 130px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+    vertical-align: middle;
+}
+
+.attendance {
+    position: absolute;
+    top: 51px;
+    left: 45px;
+    bottom: 50px;
+    width: 317px;
+    background: #00000030;
+}
+
+.recordTitle{
+    margin: 0;
+    height: 30px;
+    line-height: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #34a7ff;
+    background-color: #0808088c;
+    text-align: center;
+}
+
+.searchCondition{
+    margin-top: 10px;
+    height: 200px;
+    border: 1px solid red;
+}
+
+.el-dialog__body {
+    padding: 30px 20px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    color:#fff;
+    background-color:#2562f7;
+    padding:5px 14px;
+    border-radius:13px;
+    cursor:pointer;
+    display:inline-block;
+    font-size:12px;
+}
+
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    padding:7px 18px;
+    float:right;
+}
+
+.btn-dialog-cancel{
+    margin-left:14px;
+    background-color:#204a6b;
+}
+.el-tabs__active-bar.is-left{display:none!important;}
+
+.checkbox-temp-meeting{
+    width: 100%;
+    margin-top: 10px;
+    text-align: right;
+    color: #fff;
+}

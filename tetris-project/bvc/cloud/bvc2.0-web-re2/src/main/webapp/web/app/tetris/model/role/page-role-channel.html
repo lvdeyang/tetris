@@ -1,0 +1,109 @@
+<mi-frame id="page-role-channel-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">角色通道</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-role">{{roleName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>角色通道</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建通道</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除通道</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="通道类型"
+                                prop="typeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="350">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="关联终端通道" placement="bottom-end">
+                                    <el-button type="text" icon="icon-link" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditTerminalChannel(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除终端" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 新建角色对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建通道"
+                :visible.sync="dialog.createRoleChannel.visible"
+                width="500px"
+                :before-close="handleCreateRoleChannelClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.createRoleChannel.name"></el-input>
+                </el-form-item>
+                <el-form-item label="通道类型">
+                    <el-select v-model="dialog.createRoleChannel.type" style="width:100%;">
+                        <el-option v-for="item in channelTypes" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateRoleChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateRoleChannelSubmit" :loading="dialog.createRoleChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改角色对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改通道"
+                :visible.sync="dialog.editRoleChannel.visible"
+                width="500px"
+                :before-close="handleEditRoleChannelClose">
+
+            <el-form label-width="80px">
+                <el-form-item label="名称">
+                    <el-input v-model="dialog.editRoleChannel.name"></el-input>
+                </el-form-item>
+                <el-form-item label="通道类型">
+                    <el-select v-model="dialog.editRoleChannel.type" style="width:100%;">
+                        <el-option v-for="item in channelTypes" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditRoleChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditRoleChannelSubmit" :loading="dialog.editRoleChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

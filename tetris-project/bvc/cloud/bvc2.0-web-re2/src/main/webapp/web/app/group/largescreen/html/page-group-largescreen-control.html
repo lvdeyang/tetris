@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>大屏控制</title>
+    <link rel="stylesheet" href="../css/tree.css" type="text/css">
+    <style type="text/css">
+        .float_r{float:right;}
+        .float_l{float:left;}
+
+        /* 公共样式 *//* theme */
+        .spider_vertical {border-bottom:1px solid transparent; width:100%;}
+        .spider_vertical {border-color:rgba(4,50,65,1); box-shadow: 1px 1px 1px rgba(218,239,246,0.3);}
+
+        .top .lgToolBar{height:70px;width:100%;position:absolute;border-radius:4px;border:1px solid #125068;background-color: #115671;
+            box-shadow: 1px 1px 1px #113f57}
+        .lgToolBar .funcBtnArea{float:left;width:100%;height:60px;margin-top:10px;}
+        .funcBtnArea .tool-bar-icon{display:inline-block;width:40px;height:40px; margin-left: 40px;margin-top: 10px;cursor: pointer;}
+        .funcBtnArea .tool-bar-icon>img{width:35px;height:35px;opacity: .85;transition:width 300ms;}
+        .funcBtnArea .tool-bar-icon>img:hover{opacity:1;box-shadow: 1px 1px 1px #fff,-1px -1px 1px #fff;}
+        .funcBtnArea .clipSource>img:hover,.funcBtnArea .scaleSource>img:hover,.funcBtnArea .screenFit>img:hover,.funcBtnArea .saveSource>img:hover,.funcBtnArea .clearSource>img:hover,.funcBtnArea .onscreenSource .downscreenSource .lockSource .unlockSource .backHomePage>img:hover{width: 40px;}
+        .funcBtnArea .unlockSource{display: none;}
+        .funcBtnArea .backHomePage{width: 60px;color: white;}
+
+        .stroke{border: 1px solid #0E3C4A !important;}
+
+        /* theme -- 蓝色渐变 */
+        .gradient_green{
+            background: -webkit-gradient(linear,0 70%,0 100%,from(rgba(18,104,131,1)), to(rgba(13,62,78,1)));
+            background: -webkit-linear-gradient(rgba(18,104,131,1),rgba(18,104,131,1),rgba(18,104,131,1), rgba(13,62,78,1));
+            background: -o-linear-gradient(rgba(18,104,131,1),rgba(18,104,131,1),rgba(18,104,131,1), rgba(13,62,78,1));
+            background: -moz-linear-gradient(rgba(18,104,131,1),rgba(18,104,131,1),rgba(18,104,131,1), rgba(13,62,78,1));
+            background: -ms-linear-gradient(top, rgba(18,104,131,1),rgba(18,104,131,1),rgba(18,104,131,1), rgba(13,62,78,1));
+            background: linear-gradient(rgba(18,104,131,1),rgba(18,104,131,1),rgba(18,104,131,1), rgba(13,62,78,1));
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#126883', endColorstr='#0D3E4E',GradientType=0 );
+        }
+
+        .wrapper{width:100%; height:100%; position:relative;}
+        .full-screen-container{background:url(../images/background.png) center center; position:fixed; left:0; top:0; width:100%; height:100%; padding:10px;}
+        .full-screen-container>div>.top{width:100%; height:80px; background-color:#126883;}
+        .full-screen-container>div>.bottom{width:100%; position:absolute; top:85px; left:0; bottom:0;}
+        .full-screen-container>div>.bottom .left{height:100%; width:350px; position:relative;}
+        .full-screen-container>div>.bottom .middle{position:absolute; left:355px; top:0; right:355px; bottom:0; background-color:#000; overflow:hidden;}
+        .full-screen-container>div>.bottom .right{height:100%; width:350px; position:absolute; top:0; right:0;}
+
+        .full-screen-container>div>.bottom .left>.content>div{overflow:hidden;}
+
+        .screen{background-color:#fff; border:1px dashed rgba(0,0,0,0.2);}
+        .screen td{border-style:dashed;}
+
+        .full-screen-container>div>.bottom .right>div>.top{width:100%; height:350px;}
+        .full-screen-container>div>.bottom .right>div>.bottom{position:absolute; top:355px; left:0; bottom:0; right:0;}
+
+        .full-screen-container>div>.bottom .left>.title,
+        .full-screen-container>div>.bottom .right>div>.top>div>.title,
+        .full-screen-container>div>.bottom .right>div>.bottom>div>.title{height:30px; width:100%; line-height:30px; color:#fff; text-align:center;}
+
+        .full-screen-container .tree{overflow: auto; width: 100%;height: 100%;}
+
+        .full-screen-container>div>.bottom .right>div>.top>div>.templateProperty{height: 45%;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.templateName{color: #fff; padding-left: 30px; font-size: 15px;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.templateList{height:80%; color: #fff; overflow: auto; padding-left: 30px; font-size: 15px;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.templateList>.template{height:20%; padding-top: 2px; margin-top: 10px; padding-left: 7px; width: 70px; cursor: pointer;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.templateList>.chosen{background-color: #0c3545;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.cancelTemplate{width: 80px; margin-left: 30px; float: left; margin-top: 5px;}
+
+        .full-screen-container>div>.bottom .right>div>.top>div>.pollingProperty{position: absolute; top: 85%; height: 15%; width: 100%; overflow: auto;}
+        .full-screen-container>div>.bottom .right>div>.top>div>.pollingProperty>.tree{width: 100%;}
+
+        .full-screen-container>div>.bottom .right>div>.top>div>.deviceProperty{width: 100%; height: 30%}
+        .deviceProperty .coordinateArea{float:left;margin-right:10px;width:100%;height:100%;margin-top:5px; border-radius:2px;padding-left:20px;}
+        .coordinateArea .coordinateAreaText{float:left; width:30px; margin-top: 15px}
+        .coordinateArea>span{float: left;font-size:18px;color:#fff;margin-right: 20px;width: 43%}
+        .coordinateArea .textAera{width: 65px;margin-top: 15px;color:#333;font-size:16px;}
+        .coordinateArea .screenConfigBtn{width:60px; margin-top: 20px; cursor: pointer;}
+
+        .full-screen-container>div>.bottom .right>div>.top>div>div> .config-row-column{ width: 185px; height: 20%; margin-left: 20px; float: left; margin-top: 5px;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div> .config-row-column> label{width:15px; color: rgba(255,255,255,1);}
+        .full-screen-container>div>.bottom .right>div>.top>div>div> .config-row-column> button{width:40px;}
+        .full-screen-container>div>.bottom .right>div>.top>div>div>.config-row-column> select{width:45px;}
+
+        .full-screen-container>div>.bottom .left>.content{position:absolute; top:31px; left:0; right:0; bottom:0;height: 96%;}
+        .full-screen-container>div>.bottom .right>div>.top>div>.content{position:absolute; top:31px; left:0; right:0; bottom:0;}
+        .full-screen-container>div>.bottom .right>div>.bottom>div>.content{position:absolute; top:61px; left:0; right:0; bottom:0;overflow: auto;}
+        .screen .actualSourceItem{position:absolute;background-color:rgb(22, 145, 184);border:2px #ccc solid}
+        .screen .sourceActive{border:2px black solid;cursor:move;}
+        .screen .sourceLocked{border: 2px black dashed;}
+        .screen .sourceHidden{display: none;}
+        .actualSourceItem .actualSourceItemMsg{position: absolute;color:#fff;font-size: 18px;margin:auto; left:0; top:42%; right:0; bottom:0; text-align:center;}
+
+        .viewPort{width:300px; background-color:#000; margin:auto; margin-top:20px; position:relative;}
+        .viewPort-range{width:300px; margin:auto; margin-top:10px;}
+        .viewPort-range>input{float:left; width:260px;}
+        .viewPort-range>span{display:inline-block; line-height:21px; width:40px; float:left; text-align:right; color:#fff;}
+
+        .view-window-wrapper{position:absolute; left:0; top:0; z-index:1;}
+        .view-widnow{width:100%; height:100%; border:1px solid red;}
+
+        .middle .scale-fragment-wrap{position: absolute;display:none;border:1px dashed #dcb836; cursor:auto;z-index:100;}
+        .middle .scale-fragment-wrap>div{position: absolute;width:8px;height:8px;background-color: #eee;}
+        .scale-fragment-wrap .fragment-left-top{top:-4px;left:-4px;cursor: se-resize;}
+        .scale-fragment-wrap .fragment-top-all{top:-4px;left:50%;margin-left: -4px;cursor: n-resize;}
+        .scale-fragment-wrap .fragment-right-top{top:-4px;right:-4px;cursor: ne-resize;}
+        .scale-fragment-wrap .fragment-right-all{top:50%;right:-4px;margin-top: -4px;cursor: e-resize}
+        .scale-fragment-wrap .fragment-right-bottom{bottom:-4px;right:-4px;cursor: nw-resize;}
+        .scale-fragment-wrap .fragment-bottom-all{bottom:-4px;left:50%;margin-left: -4px;cursor: s-resize;}
+        .scale-fragment-wrap .fragment-left-bottom{bottom:-4px;left:-4px;cursor: sw-resize;}
+        .scale-fragment-wrap .fragment-left-all{top:50%;left:-4px;margin-top: -4px;cursor: w-resize;}
+
+        /*音量条样式*/
+        .volumeGainIcon{background:url(../images/base/volumn/volumeIcon.png) no-repeat;width:40px;height:40px;float:left;margin:12px 0 0 30px;}
+        .volumeValue{color:#fff;width:40px;height:40px;float:left;margin-left:200px;text-align:center;}
+        ul.lanren{width:100%;height:8%;display:inline-block;}
+        .volumescale_panel{color:#999;width:200px;position:absolute;line-height:18px;left:70px;top:22px;display: inline-block}
+        .volumescale span{background:url(../images/base/volumn/volumeScroll.gif) no-repeat;width:8px;height:16px;position:absolute;left:1px;top:-6px;cursor:pointer;}
+        .volumescale{ background-repeat: repeat-x; background-position: 0 100%; background-color: #E4E4E4; border-left: 1px #83BBD9 solid; width:200px; height: 3px; position: relative; font-size: 0px; border-radius: 3px; }
+        .volumescale div{ background-repeat: repeat-x; background-color: #3BE3FF; width:3px; position: absolute; height: 3px; left: 0; bottom: 0; }
+        .lanren li{line-height:50px;position:relative;height:50px;list-style:none;display:inline-block;}
+        .height_90{height:90%;}
+
+        /*内容栏*/
+        .bottom .contentBottom{height:30px;width:100%;}
+        .contentBottom>span{display: inline-block;width:25px; height:25px;cursor: pointer;margin-top:2px;}
+        .contentBottom .leftIcon{margin-left:30px;float:left;}
+        .contentBottom .dragIcon{display: none}
+        .contentBottom .float_r{margin-right: 30px;}
+        .contentBottom span>img{width:25px; height:25px;}
+
+        .content .contentListItem{list-style-type: none;font-size: 16px;color: #fff;border-bottom: 1px solid #48a9c7;height: 40px;padding-left: 26px;
+            line-height: 40px;letter-spacing: 1px;cursor: pointer;background-color: inherit;transition: background 0.3s ease-in;position: relative;}
+        .content .contentListItem.contentActive{background: rgba(0,0,0,0.5)}
+
+        .content .display-icon,.content .hidden-icon,.content .locked-icon,.content .unlocked-icon{float: right;margin-right: 10px;cursor: pointer;}
+        .content .hidden-icon,.content .locked-icon{display: none;}
+        .content .display-icon>img,.content .hidden-icon>img{width: 35px;height: 35px;}
+        .content .locked-icon>img,.content .unlocked-icon>img{width: 30px;height: 30px;}
+
+        /*模板样式*/
+        .layout-auto{width:100%; height:100%; border-collapse:collapse;}
+        .layout-auto thead td{height:0!important; border:0!important;}
+        .layout-auto tbody td{background-color:#fff; border:1px dashed #777; text-align:center;}
+        .layout-auto tbody td.active{background-color:#f4f4f4;}
+        .layout-auto tbody td.over{border-style:solid;}
+        .layout-auto tbody td.error{background-color:#ffb4b4;}
+        .layout-auto tbody td.high-light{background-color:#f4f4f4;}
+        .layout-auto tbody td, .layout-auto tbody td>*{
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Chrome/Safari/Opera */
+            -khtml-user-select: none; /* Konqueror */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently not supported by any browser */
+        }
+        /* 表单样式 */
+        .zkForm{display:block; width:100%; height:auto;}
+        .zkForm .row{display:table-row;}
+        .zkForm .cell{display:table-cell; padding:5px; vertical-align:middle;}
+
+        .zkForm .cell.lg label{font-size:15px;}
+        .zkForm .cell label{font-size:14px; margin:0;}
+        .zkForm .cell.sm label{font-size:13px;}
+        .zkForm .formCol{margin-right:10px; display:inline-block;}
+
+        .zkForm label{color:#fff;}
+
+        /* base css */
+        .width_8{width:6%;}
+        .width_46{width:47%;}
+        .width_100{width:100%;}
+        .height_100{height:100%;}
+        .float_l{float:left;}
+
+    </style>
+    <link rel="stylesheet" href="../css/jquery.Jcrop.min.css" type="text/css">
+    <link rel="stylesheet" href="../css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="../css/treeIcon.css" type="text/css">
+    <link rel="stylesheet" href="../css/zk_Background.css">
+    <link rel="stylesheet" href="../css/zk_Table.css">
+    <link rel="stylesheet" href="../css/zk_Component.css">
+    <link rel="stylesheet" href="../malihu-custom-scrollbar-plugin-master/jquery.mCustomScrollbar.css">
+</head>
+<body>
+
+<div class="full-screen-container">
+    <div class="wrapper">
+        <div class="top border_radius_10 stroke">
+            <!--顶部工具栏-->
+            <div class="lgToolBar width_100">
+                <div class="funcBtnArea" ondragstart="return false">
+                    <span class="backHomePage glyphicon glyphicon-hand-left tool-bar-icon">返回</span>
+                    <span title="裁剪选中源" class="clipSource tool-bar-icon"><img src="../images/clip-source.png"/></span>
+                    <span title="缩放选中源" class="scaleSource tool-bar-icon"><img src="../images/zoom-source.png"/></span>
+                    <!--<span title="选屏贴合" class="screenFit tool-bar-icon"><img src="../images/screen-fit.png"/></span>-->
+                    <span title="保存配置" class="saveSource tool-bar-icon"><img src="../images/save-config.png"/></span>
+                    <span title="清空配置" class="clearSource tool-bar-icon"><img src="../images/clear-all-source.png"/></span>
+                    <span title="上屏" class="onscreenSource tool-bar-icon"><img src="../images/on-screen.png"/></span>
+                    <span title="下屏" class="downscreenSource tool-bar-icon"><img src="../images/down-one-step.png"/></span>
+                    <span title="锁定布局" class="lockSource tool-bar-icon"><img src="../images/unlocked-source.png"/></span>
+                    <span title="解锁布局" class="unlockSource tool-bar-icon"><img src="../images/locked-source.png"/></span>
+                    <span title="设置音频" class="setAudio tool-bar-icon"><img src="../images/set-audio.png"/></span>
+                </div>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="wrapper">
+                <div class="left gradient_green border_radius_10 stroke">
+                    <div class="title">资源列表</div>
+                    <div class="spider_vertical counter_v"></div>
+                    <div class="content">
+                        <div class="wrapper" id="source-list"></div>
+                    </div>
+                </div>
+                <div id="screen-wrapper" class="middle border_radius_10 stroke">
+                    <!-- <table border="1" class="screen"></table> -->
+                </div>
+                <div class="right">
+                    <div class="wrapper">
+                        <div class="top gradient_green border_radius_10 stroke">
+                            <div class="wrapper">
+                                <div class="title">属性面板</div>
+                                <div class="spider_vertical counter_v"></div>
+                                <div class="templateProperty" style="display: none">
+                                    <div class="templateName">模板列表</div>
+                                    <div class="templateList">
+                                        <div class="template oneScreen">一分屏</div>
+                                        <div class="template twoScreen">左右分屏</div>
+                                        <div class="template fourScreen">四分屏</div>
+                                        <div class="template fiveScreen">五分屏</div>
+                                        <div class="template sixScreen">六分屏</div>
+                                        <div class="template nineScreen">九分屏</div>
+                                    </div>
+                                    <div class="spider_vertical counter_v"></div>
+                                    <div class="config-row-column">
+                                        <label for="row">行</label>
+                                        <select id="row">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3" selected>3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                        <label for="column">列</label>
+                                        <select id="column">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3" selected>3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                        <button class="ls-config-commit-btn">确定</button>
+                                    </div>
+                                    <button class="cancelTemplate">取消模板</button>
+                                </div>
+                                <div class="spider_vertical counter_v"></div>
+                                <div class="deviceProperty" style="display: none">
+                                    <div class="coordinateArea">
+											<span class="screenPosX">
+												<span class="coordinateAreaText">X:</span>
+												<input class="textAera inputPosX" type="text" placeholder="横坐标"/>像素
+											</span>
+											<span class="screenPosY">
+												<span class="coordinateAreaText">Y:</span>
+												<input class="textAera inputPosY" type="text" placeholder="纵坐标"/>像素
+											</span>
+											<span class="screenWidth">
+												<span class="coordinateAreaText">W:</span>
+												<input class="textAera inputWidth" type="text" placeholder="长度"/>像素
+											</span>
+											<span class="screenHeight">
+												<span class="coordinateAreaText">H:</span>
+												<input class="textAera inputHeight" type="text" placeholder="宽度"/>像素
+											</span>
+                                        <button id="screenConfigBtn" class="screenConfigBtn">确定</button>
+                                    </div>
+                                </div>
+                                <div class="pollingProperty" style="display: none">
+                                    <div class="spider_vertical counter_v"></div>
+                                    <button class="pollingText" style="width: 120px; height: 35px; font-size: 16px; margin-left: 25px; margin-top: 8px;">选择轮询设备</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom gradient_green border_radius_10 stroke">
+                            <div class="wrapper">
+                                <div class="title">内容列表</div>
+                                <div class="spider_vertical counter_v"></div>
+                                <div class="content"></div>
+                                <div class="contentBottom">
+                                    <span class="dragIcon leftIcon" title="允许拖拽内容栏"><img src="../images/drag.png"/></span>
+                                    <span class="nodragIcon leftIcon" title="禁止拖拽内容栏"><img src="../images/nodrag.png"/></span>
+                                    <span class="trashIcon float_r" title="删除当前选中源"><img src="../images/trash.png"/></span>
+                                </div>
+                                <div class="spider_vertical counter_v"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript" src="../../../../lib/frame/jQuery/jquery-2.2.3.min.js"></script>
+<script type="text/javascript" src="../../../../lib/frame/jQuery/jquery.json.js"></script>
+<script type="text/javascript" src="../malihu-custom-scrollbar-plugin-master/jquery.mCustomScrollbar.js"></script>
+<script type="text/javascript" src="../js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="../js/drag.js"></script>
+<script type="text/javascript" src="../js/tree.js"></script>
+<script type="text/javascript" src="../js/jquery-sortable.js"></script>
+<script type="text/javascript" src="../js/jQuery.layout.auto.js"></script>
+<script type="text/javascript" src="../js/zk_Component.js"></script>
+<script type="text/javascript" src="../js/gC.js"></script>
+<script type="text/javascript" src="../js/mainFrame.js"></script>
+<script type="text/javascript" src="../js/page-group-largescreen-control.js"></script>
+<script type="text/javascript" src="../js/gFn.js"></script>
+<script type="text/javascript">
+    //自执行初始化方法  这个方法在callback方法之后执行
+    $(function(){
+        var _href = window.location.href;
+        var _param = _href.split('?')[1];
+        mainFrame.appMain = largeScreenConf.initData(parseInt(_param.split('&')[0]), parseInt(_param.split('&')[1]));
+        zk_Component.createAlert('zk_Alert_default');
+        zk_Component.createWindow({
+            id:'zk_Window_default',
+            locale:'zh_CN'
+        });
+    });
+</script>
+</html>

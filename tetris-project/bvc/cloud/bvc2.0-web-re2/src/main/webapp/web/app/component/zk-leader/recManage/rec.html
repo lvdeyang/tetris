@@ -1,0 +1,85 @@
+<div class="leader-dialog-add-group">
+    <div class="win-header">
+        <span class="win-header-title">录制任务管理</span>
+        <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
+    </div>
+    <div class="win-body">
+        <div style="width:100%; height:100%; position:relative;">
+            <!--筛选条件-->
+            <div class="search">
+                <el-input placeholder="输入文件名称" v-model="filterText" style="width:300px; border:0;"></el-input>
+                <el-select v-model="recordMode" placeholder="请选择">
+                    <el-option value="MANUAL" label="手动录制">手动录制</el-option>
+                    <el-option value="SCHEDULING" label="排期录制">排期录制</el-option>
+                </el-select>
+                <el-date-picker
+                        v-model="date"
+                        type="datetimerange"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期">
+                </el-date-picker>
+                <div style="position:relative; top:2px; display:inline-block; cursor:pointer; height:30px;line-height: 30px;background-color:#2562f7; padding:0 20px; font-size:16px; border-radius:20px; border:1px solid #17407e; color:#fff;" @click="search">搜索</div>
+            </div>
+            <!--内容-->
+            <div style="position:absolute; left:1px; top:50px; right:1px; bottom:0;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <el-table
+                                    :data="tasks"
+                                    style="width:100%"
+                                    height="100%">
+                                <el-table-column
+                                        prop="fileName"
+                                        label="文件名">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="录制模式">
+                                    <template></template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="videoSource"
+                                        label="视频源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="audioSource"
+                                        label="音频源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="startTime"
+                                        label="开始时间">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="endTime"
+                                        label="结束时间">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="mode"
+                                        label="任务模式">
+                                </el-table-column>
+                                <el-table-column
+                                        label="操作"
+                                        width="150">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="停止" placement="bottom">
+                                            <el-button type="text" style="padding:0; font-size:20px;"><span class="icon-stop" @click="stopTask(scope.row.id)"></span>
+                                            </el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <div style="position:absolute; bottom:0; left:0; right:0; height:50px; padding-top:9px; box-sizing:border-box;">
+                        <el-pagination background @current-change="deviceCurrentChange" :current-page="deviceCurrentPage"
+                                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                       :total="total">
+                        </el-pagination>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

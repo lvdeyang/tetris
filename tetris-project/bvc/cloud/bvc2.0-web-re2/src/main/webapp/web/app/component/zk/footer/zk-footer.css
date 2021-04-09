@@ -1,0 +1,4 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-footer *{box-sizing:border-box!important;}
+.zk-footer .el-scrollbar__wrap{overflow-x: hidden;}

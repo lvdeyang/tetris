@@ -1,0 +1,196 @@
+<mi-frame id="page-group-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">会议管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>会议管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:30%; height:100%; box-sizing:border-box; padding-right:10px;">
+            <div style="width:100%; height:100%; position:relative; background-color:#fff; box-sizing:border-box; border:1px solid #d3dce6;">
+                <div style="height:50px; padding:9px 10px; box-sizing:border-box;">
+                    <el-input
+                            v-model="filter"
+                            class="search"
+                            placeholder="请输入内容"
+                            size="small"
+                            style="border-radius:0;">
+                        <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                    </el-input>
+                </div>
+                <div style="position:absolute; top:50px; left:10px; right:10px; bottom:10px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                            show-checkbox
+                            ref="deviceTree"
+                            :data="deviceTree.data"
+                            :props="deviceTree.props"
+                            :filter-node-method="filterNodeByName">
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span style="position:relative; top:1px;" v-if="(scope.data.type==='FOLDER' || scope.data.type==='CONTACTS_FOLDER') && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span style="position:relative; top:1px;" v-if="(scope.data.type==='FOLDER' || scope.data.type==='CONTACTS_FOLDER') && scope.node.expanded" class="icon-folder-open"></span>
+                                <span style="position:relative; top:1px;" v-if="scope.data.type==='CONFERENCE_HALL'" class="graph-node-icon-7"></span>
+                                <span style="position:relative; top:1px;" v-if="scope.data.type==='USER'" class="icon-user"></span>
+                                <span style="position:relative; top:1px;">{{scope.node.label}}</span>
+                                <el-tooltip v-if="scope.data.type==='CONFERENCE_HALL' || scope.data.type==='USER'" effect="dark" content="添加联系人" placement="right">
+                                    <el-button type="text" style="padding:0; float:right; position:relative; right:12px;">
+                                        <span class="feather-icon-star" style="font-size:16px; position:relative; top:2px;"></span>
+                                    </el-button>
+                                </el-tooltip>
+                            </span>
+                        </el-tree>
+                        <el-tree
+                            show-checkbox
+                            ref="contactsTree"
+                            :data="contacts.data"
+                            :props="contacts.props"
+                            :filter-node-method="filterNodeByName"
+                            default-expend-all>
+                            <span slot-scope="scope" style="font-size:14px; display:inline-block; width:100%;">
+                                <span style="position:relative; top:2px; font-size:16px; margin-right:-2px; right:1px;" v-if="scope.data.type === 'CONTACTS_FOLDER'" class="feather-icon-star"></span>
+                                <span style="position:relative; top:1px;" v-if="scope.data.type==='FOLDER' && !scope.node.expanded" class="icon-folder-close"></span>
+                                <span style="position:relative; top:1px;" v-if="scope.data.type==='FOLDER' && scope.node.expanded" class="icon-folder-open"></span>
+                                <span style="position:relative; top:1px;">{{scope.node.label}}</span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+        </div>
+        <div style="position:absolute; left:30%; top:0; right:0; bottom:0; background-color:#fff; box-sizing:border-box; border:1px solid #d3dce6;">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="height:50px; width:100%; box-sizing:border-box; padding:9px 10px;">
+                    <el-button size="small" @click="handleAddGroup"><span class="icon-plus"></span>创建会议</el-button>
+                </div>
+                <div style="position:absolute; left:10px; top:50px; right:10px; bottom:10px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <el-scrollbar style="height:100%;">
+                            <el-table
+                                    :data="group.rows"
+                                    style="width: 100%">
+                                <el-table-column
+                                        prop="name"
+                                        label="名称">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="statusName"
+                                        label="状态">
+                                </el-table-column>
+                                <el-table-column
+                                        label="操作"
+                                        width="250">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
+                                            <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="操作会议" placement="bottom-end">
+                                            <el-button type="text" style="font-size:18px; padding:0; margin-left:20px;" @click="gotoCustomAgenda(scope)"><span class="icon-signin" style="font-size:22px;"></span></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="一键刷新" placement="bottom-end">
+                                            <el-button type="text" style="font-size:18px; padding:0; margin-left:20px;" @click="handleRefresh(scope)"><span class="icon-refresh" style="font-size:20px;"></span></el-button>
+                                        </el-tooltip>
+                                        <!--<el-tooltip class="item" effect="dark" content="一键重置" placement="bottom-end">
+                                            <el-button type="text" style="font-size:18px; padding:0; margin-left:20px;" @click="handleReset(scope)"><span class="icon-undo" style="font-size:20px;"></span></el-button>
+                                        </el-tooltip>-->
+                                        <el-tooltip class="item" effect="dark" content="删除会议" placement="bottom-end">
+                                            <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新建会议 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建会议"
+                :visible.sync="dialog.addGroup.visible"
+                width="500px"
+                :before-close="handleAddGroupClose">
+
+            <el-input size="small" v-model="dialog.addGroup.name" placeholder="会议名称" style="margin-bottom:10px;"></el-input>
+
+            <el-checkbox v-model="dialog.addGroup.handleOrder" style="margin-bottom:10px;">预约会议</el-checkbox>
+            <el-radio-group v-if="dialog.addGroup.handleOrder" v-model="dialog.addGroup.groupOrderType" style="position:relative; bottom:2px; left:12px;">
+                <el-radio v-for="(groupOrderType,i) in groupOrderTypes" :key="i" :label="groupOrderType.value">{{groupOrderType.name}}</el-radio>
+            </el-radio-group>
+            <el-date-picker
+                    v-if="dialog.addGroup.handleOrder"
+                    style="margin-bottom:10px; width:100%;"
+                    v-model="dialog.addGroup.timeScope"
+                    size="small"
+                    type="datetimerange"
+                    :picker-options="pickerOptions"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    align="right">
+            </el-date-picker>
+            <br/>
+            <el-radio-group v-model="dialog.addGroup.groupLockType" style="margin-bottom:10px;">
+                <el-radio v-for="(groupLockType,i) in groupLockTypes" :key="i" :label="groupLockType.value">{{groupLockType.name}}</el-radio>
+            </el-radio-group>
+            <div style="height:30px; width:100%; box-sizing:border-box; margin-bottom:10px;">
+                <div style="float:left; line-height:30px;">
+                    当前主席:
+                    <span v-if="dialog.addGroup.chairmanType==='USER'" class="icon-user"></span>
+                    <span v-if="dialog.addGroup.chairmanType==='CONFERENCE_HALL'" class="graph-node-icon-7"></span>
+                    {{dialog.addGroup.chairmanName}}
+                </div>
+                <div style="width:200px; float:right">
+                    <el-input v-model="dialog.addGroup.filterText" size="mini"><i slot="prefix" class="el-input__icon el-icon-search"></i></el-input>
+                </div>
+            </div>
+
+            <div style="border:1px solid #dcdfe6; border-radius:4px; box-sizing:border-box; width:100%; max-height:200px; overflow-y:auto; padding:10px;">
+                <div v-for="(hall,i) in dialog.addGroup.filterHalls" :key="'h'+i" style="width:50%; float:left; line-height:25px;">
+                    <el-radio v-model="dialog.addGroup.radio" :label="hall.id + '-' + hall.type" @change="handleChairmanChange">
+                        <span class="graph-node-icon-7" style="margin-right:1px;"></span>
+                        <span>{{hall.name}}</span>
+                    </el-radio>
+                </div>
+                <br v-if="dialog.addGroup.filterHalls.length > 0" style="clear:both;"/>
+                <div v-for="(user,i) in dialog.addGroup.filterUsers" :key="'u'+i" style="width:50%; float:left; line-height:25px;">
+                    <el-radio v-model="dialog.addGroup.radio" :label="user.id + '-' + user.type" @change="handleChairmanChange">
+                        <span class="icon-user" style="margin-right:3px; position:relative; left:2px;"></span>
+                        <span style="position:relative;">{{user.name}}</span>
+                    </el-radio>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddGroupClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddGroupSubmit" :loading="dialog.addGroup.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改会议 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改会议"
+                :visible.sync="dialog.editGroup.visible"
+                width="500px"
+                :before-close="handleEditGroupClose">
+
+            <el-input size="small" v-model="dialog.editGroup.name" placeholder="会议名称" style="margin-bottom:10px;"></el-input>
+
+            <el-radio-group v-model="dialog.editGroup.groupLockType" style="margin-bottom:10px;">
+                <el-radio v-for="(groupLockType,i) in groupLockTypes" :key="i" :label="groupLockType.value">{{groupLockType.name}}</el-radio>
+            </el-radio-group>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditGroupClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditGroupSubmit" :loading="dialog.editGroup.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

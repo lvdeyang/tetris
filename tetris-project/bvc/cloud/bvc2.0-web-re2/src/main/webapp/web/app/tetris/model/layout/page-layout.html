@@ -1,0 +1,187 @@
+<mi-frame id="page-layout-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">虚拟源管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>虚拟源管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <div style="position:absolute; left:0; right:0; top:0; bottom:0;">
+                <div style="position:relative; width:50%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #ebebeb; padding:20px;">
+
+                    <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建虚拟源</el-button>
+                    <el-button type="warning" size="small"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除虚拟源</el-button>
+
+                    <div style="position:absolute; top:66px; bottom:50px; left:0; right:0; padding:0 20px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-table
+                                    highlight-current-row
+                                    :data="table.rows"
+                                    :row-key="rowKey"
+                                    :current-row-key="rowKey(table.current)"
+                                    style="width:100%"
+                                    @current-change="currentRowChange">
+                                <el-table-column
+                                        type="selection"
+                                        width="55">
+                                </el-table-column>
+                                <el-table-column
+                                        label="名称"
+                                        prop="name">
+                                </el-table-column>
+                                <el-table-column
+                                        label="操作"
+                                        width="350">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
+                                            <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click.stop="handleRowEdit(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="显示配置" placement="bottom-end">
+                                            <el-button type="text" icon="el-icon-setting" style="font-size:20px; padding:0; margin-left:20px;" @click.stop="gotoLayoutForward(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="删除虚拟源" placement="bottom-end">
+                                            <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click.stop="handleRowDelete(scope)"></el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-scrollbar>
+                    </div>
+                    <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                        <el-pagination
+                                style="float:right;"
+                                background
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="table.currentPage"
+                                :page-sizes="table.pageSizes"
+                                :page-size="table.pageSize"
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total="table.total">
+                        </el-pagination>
+                    </div>
+                </div>
+                <div style="width:50%; height:100%; float:left; position:relative;">
+                    <div style="height:400px; padding-top:10px; padding-bottom:10px; box-sizing:border-box;">
+                        <div style="width:380px; height:380px; margin:auto; box-sizing:border-box; background-color:#000; position:relative;">
+                            <div v-for="position in positions.rows" :style="positionStyle(position, 380, 380)" class="position-preview">
+                                <div>布局{{position.serialNum}}（{{position.typeName}}）</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position:absolute; top:400px; left:0; bottom:0; right:0; box-sizing:border-box; border-top:1px solid #ebebeb;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <div style="width:200px; height:100%; box-sizing:border-box; border-right:1px solid #ebebeb; position:relative;">
+                                <div style="position:absolute; left:0; top:0; bottom:38px; right:0; box-sizing:border-box; border-bottom:1px solid #ebebeb;">
+                                    <el-scrollbar style="height:100%;">
+                                        <div v-for="position in positions.rows" :class="'layout-position'+ (position.current?' current':'')" @click.stop="handlePositionCurrentChange(position)">布局{{position.serialNum}}（{{position.typeName}}）<span class="el-icon-delete" @click.stop="handleRemovePosition(position)"></span></div>
+                                    </el-scrollbar>
+                                </div>
+                                <div style="height:38px; position:absolute; left:0; bottom:0; right:0; box-sizing:border-box; padding:5px 10px;">
+                                    <el-button type="primary" size="mini" style="margin:0; width:100%; border-radius:0;" v-if="!table.current" disabled>添加布局</el-button>
+                                    <el-button type="primary" size="mini" style="margin:0; width:100%; border-radius:0;" v-else @click="handleAddPositions">添加布局</el-button>
+                                </div>
+                            </div>
+                            <div v-if="positions.current" class="form-scope" style="position:absolute; left:200px; top:0; right:0; height:100%;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <div style="position:absolute; left:0; top:0; bottom:38px; right:0; box-sizing:border-box; border-bottom:1px solid #ebebeb; padding-left:10px; padding-right:10px;">
+                                        <el-scrollbar style="height:100%;">
+                                            <el-form label-position="top" label-width="80px">
+                                                <el-form-item label="类型">
+                                                    <el-select size="small" v-model="positions.current.type" placeholder="选择布局类型" style="width:100%;">
+                                                        <el-option
+                                                            v-for="positionType in positionTypes"
+                                                            :key="positionType.value"
+                                                            :label="positionType.label"
+                                                            :value="positionType.value">
+                                                        </el-option>
+                                                    </el-select>
+                                                </el-form-item>
+                                                <el-form-item label="左偏移">
+                                                    <el-input-number size="small" v-model="positions.current.x" :min="0" :max="10000" :step="100" style="width:100%;"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="上偏移">
+                                                    <el-input-number size="small" v-model="positions.current.y" :min="0" :max="10000" :step="100" style="width:100%;"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="宽度">
+                                                    <el-input-number size="small" v-model="positions.current.width" :min="0" :max="10000" :step="100" style="width:100%;"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="高度">
+                                                    <el-input-number size="small" v-model="positions.current.height" :min="0" :max="10000" :step="100" style="width:100%;"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="涂层">
+                                                    <el-input-number size="small" v-model="positions.current.zIndex" :min="0" :step="1" style="width:100%;"></el-input-number>
+                                                </el-form-item>
+                                            </el-form>
+                                        </el-scrollbar>
+                                    </div>
+                                    <div style="height:38px; position:absolute; left:0; bottom:0; right:0; box-sizing:border-box;">
+                                        <div style="width:50%; height:100%; float:left; box-sizing:border-box; padding:5px 5px 5px 10px;">
+                                            <el-button type="primary" size="mini" style="margin:0; width:100%; border-radius:0;" @click="savePositionsEdit">保存</el-button>
+                                        </div>
+                                        <div style="width:50%; height:100%; float:left; box-sizing:border-box; padding:5px 10px 5px 5px;">
+                                            <el-button type="primary" size="mini" style="margin:0; width:100%; border-radius:0;" @click="cancelPositionsEdit">取消</el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </el-card>
+
+        <el-dialog
+                title="添加虚拟源"
+                :visible.sync="dialog.addLayout.visible"
+                width="500px"
+                :before-close="handleAddLayoutClose"
+                :close-on-click-modal="false">
+
+            <el-input v-model="dialog.addLayout.name" placeholder="请输入虚拟源名称"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddLayoutClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddLayoutSubmit" :loading="dialog.addLayout.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="修改虚拟源"
+                :visible.sync="dialog.editLayout.visible"
+                width="500px"
+                :before-close="handleEditLayoutClose"
+                :close-on-click-modal="false">
+
+            <el-input v-model="dialog.editLayout.name" placeholder="请输入虚拟源名称"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditLayoutClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditLayoutSubmit" :loading="dialog.editLayout.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="添加虚拟源"
+                :visible.sync="dialog.addPositions.visible"
+                width="500px"
+                :before-close="handleAddPositionsClose"
+                :close-on-click-modal="false">
+
+            <el-input-number v-model="dialog.addPositions.number" :min="1" style="width:100%;"></el-input-number>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddPositionsClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddPositionsSubmit" :loading="dialog.addPositions.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

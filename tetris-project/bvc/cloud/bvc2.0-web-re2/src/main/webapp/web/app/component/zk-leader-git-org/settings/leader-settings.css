@@ -1,0 +1,106 @@
+/* reset */
+html, body {
+    overflow: hidden;
+}
+
+.zk-settings,
+.zk-settings * {
+    box-sizing: border-box !important;
+}
+
+.zk-settings {
+    background: #000 url("../../../../../images/zk-leader/popMsg.png") no-repeat center;
+    background-size: 100% 100%;
+    color: white;
+}
+
+.title {
+    position: absolute;
+    top: 38px;
+    left: 448px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.content {
+    position: absolute;
+    top: 65px;
+    left: 55px;
+    height: 485px;
+    width: 870px;
+}
+
+.zk-settings .el-scrollbar__wrap {
+    overflow-x: hidden;
+}
+
+.el-tabs__item {
+    color: #fff;
+    font-size: 18px;
+}
+
+.zk-settings .el-radio__inner {
+    width: 20px;
+    height: 20px;
+}
+
+.zk-settings .el-radio {
+    color: #d2ced2;
+    font-size: 18px;
+}
+
+.zk-settings .el-radio__inner::after {
+    width: 6px;
+    height: 6px;
+}
+
+.zk-settings .el-radio__label {
+    font-size: 16px;
+    position: relative;
+    top: 1px;
+}
+
+.zk-settings .el-radio + .el-radio {
+    margin-left: 80px;
+}
+
+.close {
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    height: 60px;
+}
+
+.el-form-item__label{
+    color:#d2ced2;
+    font-size: 18px;
+}
+.el-input__inner{
+    background-color: transparent;
+    border: 1px solid #909fc3 ;
+    width: 350px;
+}
+
+
+/*转发关系*/
+.el-table, .el-table__expanded-cell,.el-table th, .el-table tr{
+    background-color: transparent;
+}
+.el-table th, .el-table tr, .el-table__empty-block {
+    background: #1E2343;
+}
+.el-table {
+    border-radius: 13px 13px 0 0;
+}
+
+.el-table th>.cell{
+    font-size: 16px;
+    color: #6dc3ff;
+}
+.el-table--enable-row-hover .el-table__body tr:hover>td{
+    background-color: #173144;
+}
+.el-table td{
+    color: #fff;
+    border-bottom: 1px solid #3c3f44;
+}

@@ -1,0 +1,53 @@
+<div class="cast-devices">
+    <div class="win-header">
+        <span class="win-header-title">关联设备</span>
+        <span class="win-header-close" @click="handleDecodeBindClose"><span class="el-icon-close"></span></span>
+    </div>
+    <div class="treeContent">
+        <el-scrollbar style="height:100%;">
+            <el-tree
+            		default-expand-all
+                    :data="dialog.decodeBind.tree.data"
+                    :props="dialog.decodeBind.tree.props">
+                                <span class="custom-tree-node" slot-scope="{node, data}">
+                                     <el-radio v-if="data.type === 'BUNDLE'"
+                                               v-model="dialog.decodeBind.tree.currentBundle" :label="data.param">
+                                         <span :class="data.icon"
+                                               :style="data.style+' position:relative; top:1px;'"></span>
+                                         <span style="position:relative; top:2px;font-size: 18px">{{node.label}}</span>
+                                     </el-radio>
+                                    <span v-else>
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span>{{node.label}}</span>
+                                    </span>
+                                </span>
+            </el-tree>
+        </el-scrollbar>
+    </div>
+    <div class="listContent">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:0;">
+                <el-scrollbar class="no-scroll-x" style="height:100%;">
+                    <el-table
+                            :data="dialog.decodeBind.table.data"
+                            style="width: 100%;">
+                        <el-table-column
+                                prop="name"
+                                label="设备">
+                        </el-table-column>
+                        <el-table-column
+                                width="80"
+                                label="操作">
+                            <template slot-scope="scope">
+                                <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;"
+                                           @click="handleDecodeBindRemove(scope)"></el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; height:40px;line-height:40px;text-align:center; border-top: 1px solid #1c3e5d;">
+        <el-button size="medium" type="primary" @click="handleDecodeBindCommit" :loading="dialog.decodeBind.loading">绑定
+        </el-button>
+    </div>
+</div>

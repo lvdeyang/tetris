@@ -1,0 +1,5 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-footer-dialog-save-scheme,
+.zk-footer-dialog-save-scheme *{box-sizing:border-box!important;}
+.zk-footer-dialog-save-scheme .el-scrollbar__wrap{overflow-x: hidden;}

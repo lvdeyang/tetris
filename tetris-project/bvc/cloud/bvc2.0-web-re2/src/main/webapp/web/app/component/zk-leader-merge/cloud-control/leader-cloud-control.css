@@ -1,0 +1,142 @@
+/* reset */
+.bvc2-monitor-ptzctrl {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: #000 url("../../../../../images/zk-leader/popMsg.png") no-repeat center;
+    background-size: 100% 100%;
+    color: #fff;
+}
+.title {
+    position: absolute;
+    top: 37px;
+    left: 409px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+.el-tag.active {
+    background-color: #66b1ff;
+    color: #fff;
+}
+
+.el-tag {
+    cursor: pointer;
+}
+
+.el-tag {
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+button.define,button.default {
+    background-color: #043554e3;
+    border: 1px solid #043554e3;
+    color: #00c9ff;
+}
+
+.define:active {
+    color: #409EFF;
+    outline: 0;
+}
+/*鼠标松开后的样式*/
+.define:hover {
+    color: #409EFF;
+    border-color: #043554e3;
+    background-color: #043554e3;
+}
+/*鼠标松开后的样式*/
+.define:focus {
+    color: #409EFF;
+    border-color: #043554e3;
+    background-color: #043554e3;
+}
+
+/*聚焦时的样式*/
+.default:focus{
+    color: #409EFF;
+    border-color: #031b2d;
+    background-color: #031b2d;
+}
+
+
+.el-button--normal {
+    color: #00c9ff;
+    background-color: #000000;
+    border-color: #00a3f7;
+}
+
+.el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.el-button.el-button--normal:focus, .el-button.el-button--normal:hover {
+    color: #409EFF;
+    border-color: #00a3f7;
+    background-color: #000;
+}
+
+.addClick {
+    background-color: #3bb3e0;
+    padding: 10px;
+    position: relative;
+    text-decoration: none;
+    color: #fff;
+    border: solid 1px #186f8f;
+    background-image: linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(44, 160, 202) 0%, rgb(62, 184, 229) 100%);
+    background-image: -webkit-gradient(
+            linear,
+            left bottom,
+            left top,
+            color-stop(0, rgb(44, 160, 202)),
+            color-stop(1, rgb(62, 184, 229))
+    );
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.addClick:hover {
+    color: #fff;
+    box-shadow: none;
+    border: solid 1px #186f8f;
+}
+
+.addClick:focus {
+    color: #fff;
+}
+
+.el-tag {
+    background-color: rgb(46, 36, 36);
+    color: #00c9ff;
+}
+
+.el-tag.active {
+    background-color: #6b0000;
+}
+.el-input--mini .el-input__inner{
+    background-color: transparent;
+    border: 1px solid #00c9ff;
+    color: #fff;
+    font-size: 18px;
+}
+.close{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+/*弹出的框*/
+.el-dialog{
+    background: -webkit-linear-gradient(left top, #2a697a,#0D4C6B,#113E65);
+}
+

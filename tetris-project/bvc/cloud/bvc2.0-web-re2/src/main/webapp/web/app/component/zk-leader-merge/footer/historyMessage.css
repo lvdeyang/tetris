@@ -1,0 +1,236 @@
+html,body{
+    background-color: transparent;
+}
+.message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+}
+.screenCtrl{
+    position: absolute;
+    padding-left: 15px;
+    top:0;
+    left: 0;
+    width: 16%;
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    background: url("../../../../../images/zk-leader/splitScreen.png") no-repeat center;
+    background-size: 100% 100%;
+}
+.screenCtrl div{
+    float: left;
+    width: 26px;
+    height: 22px;
+    margin: 10px 6px;
+}
+
+.msgBg{
+    position: absolute;
+    top:5px;
+    left:20%;
+    z-index: 1;
+}
+.msgContent {
+    position: absolute;
+    top: 0;
+    left: 29%;
+    right: 0;
+    height: 70px;
+    font-size: 16px;
+    color: #eaeaec;
+    background:#13a9d691 url(../../../../../images/zk-leader/msgContent.png) no-repeat center;
+    overflow: hidden;
+}
+
+.msgContent p{
+    margin: 0;
+    padding: 0 5px;
+    line-height: 23px;
+    word-break:break-all;
+    word-wrap:break-word ;
+}
+
+/*修改消息界面和 整体的默认的滚动条样式*/
+::-webkit-scrollbar{/*滚动条整体样式*/
+    width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+}
+::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,0.1);
+}
+
+.note {
+    line-height: 20px;
+}
+
+.tagMessage {
+    position: absolute;
+    top: 48px;
+    left:21%;
+    border: 1px solid #f8a036;
+    border-radius: 13px;
+    background-color: #f8a036;
+}
+.record{
+    position: absolute;
+    top: 80px;
+    left:21%;
+    padding: 0 5px;
+    border: 1px solid #f8a036;
+    border-radius: 13px;
+    background-color: #f8a036;
+    color: #fff;
+    cursor: default;
+}
+.forward{
+    position: absolute;
+    top:5px;
+    right: 0;
+    border: 1px solid #f8a036;
+    border-radius: 13px;
+    background-color: #f8a036;
+}
+img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    /*禁止图片拖拽*/
+    -webkit-user-drag: none;
+}
+
+.el-button{
+    position: absolute;
+    padding: 18px 8px;
+    top:5px;
+    right: 0;
+    background: #204a6b;
+    border-radius: 0 10px 10px 0;
+    border: 0;
+    font-weight: bold;
+    font-size: 14px;
+    color: #00e9ff;
+}
+.el-button:active,.el-button:hover,.el-button:focus {
+    color: #00e9ff;
+    background-color: #204a6b;
+    outline: 0;
+}
+
+.sendMsg{
+    position:absolute;
+    left:29%;
+    right: 0;
+    top:69px;
+    height:40px;
+    box-sizing:border-box;
+    background-color:#2d4e684a;
+    box-sizing: border-box;
+}
+
+.sendMsgContent{
+    width: 90%;
+    height: 34px;
+    float: left;
+    border: 0;
+    background-color: #41444645;
+    color: #f8a036;
+    font-size: 16px;
+    text-indent: 10px;
+}
+
+.sendMsgContent:focus{
+    outline:0;
+}
+
+.sendMsgContent::-webkit-input-placeholder{
+    color:#f8a036;
+    font-size:16px;
+}
+.sendMsgContent:-moz-placeholder,body{
+    color:#00e9ff;
+    font-size:16px;
+}
+.sendMsgContent::-moz-placeholder{
+    color:#00e9ff;
+    font-size:16px;
+}
+.sendMsgContent:-ms-input-placeholder{
+    color:#00e9ff;
+    font-size:16px;
+}
+
+.sendMsgBtn{
+    margin: 0;
+    display: inline-block;
+    width: 98px;
+    height: 24px;
+    line-height: 22px;
+    border-radius: 11px;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    float: left;
+    cursor: pointer;
+    border: 0;
+    background-color: #f8a036;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+@media screen and (max-width:1366px){
+    .message{
+        width: 90%;
+    }
+    .msgContent, .sendMsg{
+        left: 34%;
+    }
+    .sendMsgContent{
+        width: 74%;
+    }
+}
+
+@media screen and (max-width:1100px){
+    .message{
+        width: 90%;
+    }
+    .msgContent, .sendMsg{
+        left: 36%;
+    }
+    .sendMsgContent{
+        width: 74%;
+    }
+}
+
+@media screen and (max-width:800px){
+    .message{
+        width: 86%;
+    }
+    .msgContent, .sendMsg{
+        left: 44%;
+    }
+    .sendMsgContent{
+        width: 66%;
+    }
+}
+
+@media screen and (max-width:600px){
+    .message{
+        width:84%;
+    }
+    .msgContent, .sendMsg{
+        left: 48%;
+    }
+    .sendMsgContent{
+        width: 66%;
+    }
+}
+

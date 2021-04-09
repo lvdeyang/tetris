@@ -1,0 +1,53 @@
+<div class="zk-footer-dialog-cast-devices" style="width:100%; height:100%; background-color:#fff; position:relative;">
+    <div style="height:100%; width:100%; position:relative;">
+        <div style="width:100%; height:100%;">
+            <div style="width:100%; height:100%; position:relative; border:1px solid #ebebeb;">
+                <div style="width:380px; height:100%; border-right:1px solid #ebebeb;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                :data="dialog.decodeBind.tree.data"
+                                :props="dialog.decodeBind.tree.props">
+                                <span class="custom-tree-node" slot-scope="{node, data}">
+                                     <el-radio v-if="data.type === 'BUNDLE'" v-model="dialog.decodeBind.tree.currentBundle" :label="data.param">
+                                         <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                         <span style="font-size:14px; position:relative; top:2px;">{{node.label}}</span>
+                                     </el-radio>
+                                    <span v-else>
+                                        <span :class="data.icon" :style="data.style"></span>
+                                        <span style="font-size:14px;">{{node.label}}</span>
+                                    </span>
+                                </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="position:absolute; left:381px; top:0; right:0; bottom:0;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                            <el-scrollbar class="no-scroll-x" style="height:100%;">
+                                <el-table
+                                        :data="dialog.decodeBind.table.data"
+                                        style="width: 100%">
+                                    <el-table-column
+                                            prop="name"
+                                            label="设备">
+                                    </el-table-column>
+                                    <el-table-column
+                                            width="80"
+                                            label="操作">
+                                        <template slot-scope="scope">
+                                            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px;" @click="handleDecodeBindRemove(scope)"></el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-scrollbar>
+                        </div>
+                        <div style="position:absolute; bottom:0; left:0; right:0; height:50px; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+                            <el-button size="small" @click="handleDecodeBindClose">取消</el-button>
+                            <el-button size="small" type="primary" @click="handleDecodeBindCommit" :loading="dialog.decodeBind.loading">绑定</el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

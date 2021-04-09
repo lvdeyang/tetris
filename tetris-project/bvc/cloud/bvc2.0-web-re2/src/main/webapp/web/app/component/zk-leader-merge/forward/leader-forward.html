@@ -1,0 +1,130 @@
+<div class="zk-business-forward">
+    <div style="position:absolute; left:75px; top:105px; right:0; bottom:50px;width:870px;">
+        <div style="width:100%; height:100%; position:relative;">
+            <div style="width:100%; height:385px;">
+                <div style="width:45%; height:100%; float:left; position:relative;background-color: #1E2343;margin:0 30px;border-radius: 13px">
+                    <el-tabs v-model="currentTab" type="card">
+                        <el-tab-pane label="文件资源" name="0">
+                            <div style="position:absolute; left:0; top:37px; right:0; bottom:0;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-tree
+                                                :data="tree.resource.data"
+                                                node-key="id"
+                                                :props="tree.props">
+                                            <span slot-scope="{node,data}">
+                                                <el-checkbox v-if="data.type==='VOD_RESOURCE'" v-model="data.checked" @change="onVodResourceCheckChange(data)">
+                                                    <span class="icon-file-alt" style="position:relative; top:1px;font-size: 16px"></span>
+                                                    <span style="position:relative; top:1px;font-size: 16px">{{data.name}}</span>
+                                                </el-checkbox>
+                                                <span v-else>
+                                                    <span class="icon-folder-close"></span>
+                                                    <span>{{data.name}}</span>
+                                                </span>
+                                            </span>
+                                        </el-tree>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                        </el-tab-pane>
+                        <el-tab-pane label="设备资源" name="1">
+                            <div style="position:absolute; left:0; top:37px; right:0; bottom:0;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-tree
+                                                :data="tree.device.data"
+                                                node-key="id"
+                                                :props="tree.props">
+                                            <span slot-scope="{node,data}">
+                                                <el-checkbox v-if="data.type==='BUNDLE'" v-model="data.checked" @change="onBundleCheckChange(data)">
+                                                    <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                                    <span style="position:relative; top:1px;font-size: 18px">{{data.name}}</span>
+                                                </el-checkbox>
+                                                <span v-else>
+                                                    <span :class="data.icon" :style="data.style"></span>
+                                                    <span>{{data.name}}</span>
+                                                </span>
+                                            </span>
+                                        </el-tree>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+                <div style="width:45%; height:100%; float:left; position:relative;border-radius: 13px;background-color: #1E2343">
+                    <el-tabs type="card">
+                        <el-tab-pane label="成员列表">
+                            <div style="position:absolute; left:0; top:37px; right:0; bottom:0;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <el-scrollbar style="height:100%;">
+                                        <el-tree
+                                                :data="tree.members.data"
+                                                node-key="id"
+                                                :props="tree.props">
+                                            <span slot-scope="{node,data}">
+                                                <el-checkbox v-if="data.type==='USER'" @change="onUserCheckChange(data)">
+                                                    <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                                    <span style="position:relative; top:1px;font-size: 18px">{{data.name}}</span>
+                                                </el-checkbox>
+                                                <span v-else>
+                                                    <span :class="data.icon" :style="data.style"></span>
+                                                    <span>{{data.name}}</span>
+                                                </span>
+                                            </span>
+                                        </el-tree>
+                                    </el-scrollbar>
+                                </div>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+            </div>
+            <div style="width:100%; height:25%;position: absolute;top:400px;background-color: #1E2343;border-radius: 13px">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            style="width: 100%">
+                        <el-table-column
+                            prop="time"
+                            label="转发时间">
+                        </el-table-column>
+                        <el-table-column
+                            prop="srcInfo"
+                            label="转发资源">
+                        </el-table-column>
+                        <el-table-column
+                                prop="dstUserInfo"
+                                label="接收用户">
+                        </el-table-column>
+                        <el-table-column
+                                prop="status"
+                                label="当前状态">
+                        </el-table-column>
+                        <el-table-column
+                                label="转发操作"
+                                width="100">
+                            <template slot-scope="scope">
+                                <el-button type="text" style="padding:0; font-size:18px;" icon="el-icon-delete" @click="handleRowRemove(scope)"></el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+    <div class="title" v-if="page==='指挥'">指挥转发</div>
+    <div class="title" v-else-if="page==='会议'">会议转发</div>
+    <div style="height:50px; width:100%; position:absolute; left:0; bottom:40px;text-align: center">
+        <el-pagination
+                background
+                :pager-count="11"
+                :page-size="table.pageSize"
+                @current-change="currentChange"
+                layout="prev, pager, next"
+                :total="table.total">
+        </el-pagination>
+        <el-button size="medium" type="primary" @click="handleForward">转发</el-button>
+        <el-button size="medium" @click="handleClose">关闭</el-button>
+    </div>
+</div>

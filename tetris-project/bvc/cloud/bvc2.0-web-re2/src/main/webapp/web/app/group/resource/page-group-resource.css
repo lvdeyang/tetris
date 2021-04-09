@@ -1,0 +1,4 @@
+/* 暂时用来隐藏resource的table中的el-icon-delete删除按钮 */
+.page-group-resource-wrapper .el-icon-delete{display: none}
+/* 暂时用来隐藏resource的table中的el-checkbox */
+.page-group-resource-wrapper .el-checkbox{display: none}

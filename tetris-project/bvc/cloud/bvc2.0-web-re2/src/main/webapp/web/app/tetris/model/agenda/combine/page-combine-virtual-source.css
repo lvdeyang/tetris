@@ -1,0 +1,68 @@
+#page-combine-virtual-source-wrapper .border-light-gray{border:1px solid #d3dce6;}
+#page-combine-virtual-source-wrapper .left{width:20%; height:100%; position:absolute; left:0; top:0; box-sizing:border-box; background-color:#fff;}
+#page-combine-virtual-source-wrapper .middle{position:absolute; left:20%; top:0; right:20%; bottom:0; box-sizing:border-box; padding:0 5px;}
+#page-combine-virtual-source-wrapper .middle .top{width:100%; height:100%; position:relative;}
+#page-combine-virtual-source-wrapper .middle .top .buttons{height:50px; width:100%; box-sizing:border-box; background-color:#fff;}
+#page-combine-virtual-source-wrapper .middle .top .layout{position:absolute; left:0; top:0; bottom:0; right:0; box-sizing:border-box; padding:5px 0;}
+#page-combine-virtual-source-wrapper .middle .bottom{width:100%; height:20%; position:relative;}
+#page-combine-virtual-source-wrapper .middle .bottom .destinations{width:50%; height:100%; float:left; background-color:#fff; box-sizing:border-box;}
+#page-combine-virtual-source-wrapper .middle .bottom .settings{height:100%; position:absolute; left:50%; top:0; right:0; bottom:0; box-sizing:border-box; padding-left:5px;}
+#page-combine-virtual-source-wrapper div.right{width:20%; height:100%; position:absolute; right:0; top:0; box-sizing:border-box; background-color:#fff;}
+
+#page-combine-virtual-source-wrapper .group-action-button{width:36px; height:36px; line-height:36px; padding:0; text-align:center; border-radius:100%;}
+#page-combine-virtual-source-wrapper .tab-action-button{width:30px; height:30px; border-radius:4px; padding:0; line-height:28px; text-align:center; font-size:18px;}
+
+#page-combine-virtual-source-wrapper .el-tabs__header,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__header{margin:0;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__nav,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__nav{border:0;}
+#page-combine-virtual-source-wrapper .el-tabs__item,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__item{height:30px; line-height:27px; padding:0 10px;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__item,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__item{border-top:1px solid #e4e7ed; border-bottom-color:#e4e7ed; color:#606266;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__item:hover,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__item:hover{color:#409EFF;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__item:first-child,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__item:first-child{border-left:1px solid #e4e7ed; border-top-left-radius:4px; border-bottom-left-radius:4px;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__item:last-child,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__item:last-child{border-right:1px solid #e4e7ed; border-top-right-radius:4px; border-bottom-right-radius:4px;}
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header .el-tabs__item.is-active,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header .el-tabs__item.is-active{color:#fff; background-color:#409EFF; border-color:#409EFF;}
+#page-combine-virtual-source-wrapper .el-tabs__nav-next,
+#page-combine-virtual-source-wrapper .el-tabs__nav-prev,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__nav-next,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__nav-prev{line-height:31px; box-sizing:border-box; transition:.1s;}
+#page-combine-virtual-source-wrapper .el-tabs__nav-next:hover,
+#page-combine-virtual-source-wrapper .el-tabs__nav-prev:hover,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__nav-next:hover,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs__nav-prev:hover{color:#409eff; background-color:#ecf5ff;}
+
+#page-combine-virtual-source-wrapper .el-tabs--card>.el-tabs__header,
+#page-combine-virtual-source-wrapper-edit-role .el-tabs--card>.el-tabs__header{border:0;}
+
+#page-combine-virtual-source-wrapper .search .el-input__inner{height:30px; line-height:28px; box-sizing:border-box;}
+#page-combine-virtual-source-wrapper .search .el-input__icon{line-height:normal;}
+
+#page-combine-virtual-source-wrapper .el-table__expanded-cell[class*=cell]{padding:10px 10px 10px 10px;}
+
+#page-combine-virtual-source-wrapper .layout-button,
+#page-combine-virtual-source-wrapper .layout-button *{transition:.1s;}
+#page-combine-virtual-source-wrapper .layout-button{width:140px; height:150px; box-sizing:border-box; padding:10px 20px; float:left; background-color:#fff; cursor:pointer;}
+#page-combine-virtual-source-wrapper .layout-button>div:first-child{width:101px; height:101px; box-sizing:border-box; border:1px solid #606266; position:relative;}
+#page-combine-virtual-source-wrapper .layout-button>div:first-child .position{position:absolute; border:1px solid #606266; box-sizing:border-box; margin:-1px;}
+#page-combine-virtual-source-wrapper .layout-button>div:last-child{height:30px; line-height:30px; overflow:visible; text-align:center; font-size:14px; color:#606266;}
+#page-combine-virtual-source-wrapper .layout-button.active{background-color:#409EFF;}
+#page-combine-virtual-source-wrapper .layout-button.active>div:first-child{border-color:#fff;}
+#page-combine-virtual-source-wrapper .layout-button.active>div:first-child .position{border-color:#fff;}
+#page-combine-virtual-source-wrapper .layout-button.active>div:last-child{color:#fff;}
+#page-combine-virtual-source-wrapper .layout-button:hover:not(.active){background-color:#ecf5ff;}
+
+#forward-layout-position-container .position{position:absolute; border:1px solid #606266; box-sizing:border-box; margin:0px; background-color:#fff;}
+
+.role-members:hover{background-color:#f5f7fa;}
+
+#speaker-set-dialog .el-dialog{overflow:hidden;}
+#speaker-set-dialog .el-dialog__header{display:none!important;}
+#speaker-set-dialog .el-dialog__body{padding:0!important;}
+#speaker-set-dialog .speaker-item{line-height:34px; padding-left:10px; padding-right:10px; cursor:pointer; transition:.1s;}
+#speaker-set-dialog .speaker-item:hover{background-color:#ecf5ff; color:#409eff;}

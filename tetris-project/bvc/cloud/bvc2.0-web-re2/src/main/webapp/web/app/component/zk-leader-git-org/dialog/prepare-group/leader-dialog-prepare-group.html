@@ -1,0 +1,146 @@
+<div class="leader-dialog-prepare-group" style="width:100%; height:100%; position:relative; background-color:#133c6b;">
+  <el-tabs tab-position="left" style="height:100%;" v-model="currentTab">
+    <el-tab-pane label="安排会议" name="prepareCommand">
+      <div style="position:absolute; left:100px; top:0; right:4px; bottom:0;">
+        <div style="width:100%; height:100%; position:relative;">
+          <div style="height:50x;line-height: 50px; width:100%; box-sizing:border-box;">
+            <el-input style="width:40%; float:left;margin: 0 5px" v-model="commandName" placeholder="请输入会议名称">
+            </el-input>
+            <el-input style="width:40%; float:left;margin: 0 5px" v-model="filterUser" placeholder="筛选用户">
+            </el-input>
+            <el-button type="primary" size="medium" @click="changeSearch">搜索</el-button>
+          </div>
+          <div style="position:absolute; left:1px; top:50px; right:1px; bottom:50px;background:linear-gradient(rgb(40, 60, 105), rgb(51, 114, 119), rgb(15, 58, 102));">
+            <div style="width:100%; height:100%; overflow:auto;">
+              <div class="checkbox">
+                <el-select v-model="selected1" filterable @blur="searchBlur($event,1)" @change='func2()'>
+                  <el-option v-for="option in options2" :value="option.id" :label="option.name" :key="option.id">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-select v-model="selected2" filterable @blur="searchBlur($event,2)" @change='func3()'>
+                  <el-option v-for="option in options3" :value="option.id" :label="option.name" :key="option.id">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-select v-model="selected3" filterable @blur="searchBlur($event,3)" @change='func4()'>
+                  <el-option v-for="option in options4" :value="option.id" :label="option.name" :key="option.id">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-select v-model="selected4" filterable @blur="searchBlur($event,4)" @change='func5()'>
+                  <el-option v-for="option in options5" :value="option.id" :label="option.name" :key="option.id">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-select v-model="selected5" filterable @blur="searchBlur($event,5)" @change='func6()'>
+                  <el-option v-for="option in options6" :value="option.id" :label="option.name" :key="option.id">
+                    {{ option.name }}
+                  </el-option>
+                </el-select>
+                <el-button @click="reset" size="small" type="primary">清空选项</el-button>
+              </div>
+
+              <div class="table">
+                <el-button type="primary" size="medium" @click="selectAll">选择全部</el-button>
+                <el-button type="primary" size="medium" @click="unsetAll">取消选择</el-button>
+                <el-table ref="multipleTable" :data="pageData" tooltip-effect="dark" style="width: 100%" border
+                  @select="handleSelect" @select-all="selectCurrentPage">
+                  <el-table-column type="selection" width="55">
+                  </el-table-column>
+                  <el-table-column label="ID" width="120">
+                    <template slot-scope="scope">{{ scope.row.id }}</template>
+                  </el-table-column>
+                  <el-table-column prop="name" label="用户名">
+                  </el-table-column>
+                </el-table>
+
+                <el-pagination background @current-change="handleCurrentChange" :current-page="leftCurrentPage"
+                  :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                  :total=searchTableData.length>
+                </el-pagination>
+              </div>
+
+              <div class="haveChoosed">
+                <div>
+                  <el-button type="primary" size="medium" @click="unsetSomeAll">取消选择</el-button>
+                  <el-input style="width:70%;" v-model="searchText" placeholder="搜索用户"></el-input>
+                </div>
+                <div class="selectedTag">
+                  <el-table ref="selectTable" :data="selectedPage" :row-key="getRowKey" tooltip-effect="dark"
+                    style="width: 100%" border @selection-change="deleteChange">
+                    <el-table-column type="selection" :reserve-selection="true" width="55">
+                    </el-table-column>
+                    <el-table-column prop="name" label="用户名">
+                    </el-table-column>
+                    <el-table-column label="操作" width="110">
+                      <template slot-scope="scope">
+                        <span class="el-icon-delete" style="color:#ffbb1c;font-weight: 600;" @click="deleteSelected(scope.row)">删除</span>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+
+                  <el-pagination background @current-change="selectCurrentChange" :current-page="rightCurrentPage"
+                    :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                    :total="searchSelectedData.length">
+                  </el-pagination>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+            <el-button size="small" @click="cancel" type="warning">取消</el-button>
+            <el-button size="small" type="primary" @click="addCommand('提交')">确定</el-button>
+          </div>
+        </div>
+
+        <!-- 起名重名的情况 -->
+        <div>
+          <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+            <span>抱歉，您起的会议名称已被占用，系统为您分配了下面的名字，您是否同意？</span>
+            <el-input v-model="dialogInput"></el-input>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="addCommand('同意')">同意</el-button>
+            </span>
+          </el-dialog>
+        </div>
+      </div>
+    </el-tab-pane>
+    <el-tab-pane label="我的会议" name="myCommand">
+      <div style="position:absolute; left:100px; top:0; right:4px; bottom:0;">
+        <div style="width:100%; height:100%; position:relative;">
+          <div style="width:100%; height:50px;line-height: 50px; box-sizing:border-box; padding-top:4px;">
+            <el-input placeholder="输入会议名称，筛选会议" v-model="filterCommand"></el-input>
+          </div>
+          <div style="position:absolute; left:1px; top:44px; right:1px; bottom:50px;">
+            <el-table ref="myCommandTable" :data="myCommand.filterData" style="width: 100%" height="100%">
+              <el-table-column prop="name" label="名称">
+              </el-table-column>
+              <el-table-column label="状态">
+                <template slot-scope="scope">{{scope.row.bundleStatus==='bundle-online'?'开始':'停止'}}</template>
+              </el-table-column>
+              <el-table-column label="操作" width="150">
+                <template slot-scope="scope">
+                  <el-tooltip class="item" effect="dark" content="进入会议" placement="bottom">
+                    <el-button type="text" @click="enterCommand(scope)" style="padding:0; font-size:20px;"><span
+                        class="icon-signin"></span></el-button>
+                  </el-tooltip>
+                  <el-tooltip class="item" effect="dark" content="删除会议" placement="bottom">
+                    <el-button type="text" @click="removeCommand(scope)"
+                      style="padding:0; font-size:20px; margin-left:30px;"><span class="icon-trash"></span></el-button>
+                  </el-tooltip>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div
+            style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+            <el-button size="small" @click="cancel" type="warning">取消</el-button>
+          </div>
+        </div>
+      </div>
+    </el-tab-pane>
+  </el-tabs>
+</div>

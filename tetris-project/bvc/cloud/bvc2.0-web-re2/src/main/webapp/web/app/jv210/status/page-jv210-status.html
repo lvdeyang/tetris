@@ -1,0 +1,89 @@
+﻿<div id="page-jv210-status-wrapper" class="page-wrapper">
+	<!--<bvc2-header-->
+	<!--:links="header.links"-->
+	<!--:user="header.user"></bvc2-header>-->
+	<bvc-headerbar :sysusername="header.user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+	<div class="page-body-new">
+		<!--<div class="page-body" style="padding:0;">-->
+		<el-container style="width:100%; height:100%">
+			<!--<el-aside width="auto;">-->
+			<!--<bvc2-system-nav-side :active="side.active"></bvc2-system-nav-side>-->
+			<!--</el-aside>-->
+			<bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+                <template>
+                  <el-button style="position:fixed;top:100px;z-index:2000"  @click="refreshData">刷新</el-button>
+				  <el-table style="margin-top:25px;"
+				    @expand-change="expandChange"
+				  	ref="monitorTable"
+				    :data="monitorData"
+				    style="width: 100%">
+				    <el-table-column type="expand">
+				      <template slot-scope="props">
+				        <p v-for="channel in props.row.channels">
+				                      频道ID:{{channel.id}}
+				        /频道名称:{{typeof channel.name!='undefined'?channel.name:0}}
+				        /频道类型:{{typeof channel.type!='undefined'?channel.type:0}}
+				        /状态:{{typeof channel.status!='undefined'?channel.status:0}}
+				        /参数:{{typeof channel.param!='undefined'?channel.param:0}}
+				        <template>
+				        <div style="margin-top:5px;margin-left:50px">
+				          {{typeof channel.local!='undefined'?channel.local:0}}
+				        </div>
+				        <div style="margin-top:5px;margin-left:50px" v-for="stream in channel.peer">
+				               {{stream.stream}}
+				           </div>
+				        </template>
+				
+				        </p>
+				      </template>
+				    </el-table-column>
+                                    
+				    <el-table-column
+				      label="认证结果"
+				      prop="certify">
+				    </el-table-column>
+<el-table-column
+				      label="在线状态"
+				      prop="online">
+				    </el-table-column>
+				    <el-table-column
+				      label="用户名"
+				      prop="user">
+				    </el-table-column>
+				    <el-table-column
+				      label="Sip地址"
+				      prop="sipUri">
+				    </el-table-column>
+				    <el-table-column
+				      label="BundleID"
+				      prop="bundleID">
+				    </el-table-column>
+				    <el-table-column
+				      label="callid"
+				      prop="callid">
+				    </el-table-column>
+				    <el-table-column
+				      label="会话类型"
+				      >
+				      
+				      <template slot-scope="props">{{typec(props.row)}}</template>
+				      
+				    </el-table-column>
+				    
+				     <el-table-column
+				      label="呼叫者"
+				      prop="call_ctx.caller_name">
+				    </el-table-column>
+					<el-table-column label="操作" align="center" min-width="100">
+				　　　　<template slot-scope="props">
+				　　　　　　<el-button type="text" @click="redirectWeb(props.row.sipUri)">设备管理</el-button>
+				　　　　</template>
+				　　</el-table-column>
+				  </el-table>
+				</template>
+            </el-main>
+      </el-container>
+      
+    </div>
+</div>

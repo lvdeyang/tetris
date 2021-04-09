@@ -1,0 +1,106 @@
+/* reset */
+html, body{overflow:hidden;}
+.cast-devices{
+    width:1022px;
+    height:598px;
+    background-color: #0F2A4D;
+    border:1px solid #123e80;
+}
+.win-header {
+    height: 40px;
+    background-color: #3668a9;
+    border-radius: 4px 4px 0 0;
+}
+
+.win-header .win-header-title {
+    float: left;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+}
+
+.win-header .win-header-close {
+    float: right;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+.treeContent{
+    width: 370px;
+    border-right: 1px solid #1c3e5d;
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 40px;
+    overflow: hidden;
+}
+
+.el-scrollbar__wrap{
+    overflow-x: hidden;
+}
+
+.el-tree{
+    background-color: transparent;
+    color: #cfdae6;
+    font-size: 18px;
+}
+
+.el-tree-node__content:hover,.el-tree-node:focus>.el-tree-node__content{
+    background-color: transparent;
+}
+.el-tree-node__content{
+    height: 30px;
+}
+.listContent{
+    position: absolute;
+    left: 440px;
+    top: 60px;
+    width: 540px;
+    bottom: 50px;
+}
+.el-table th, .el-table tr, .el-table__empty-block {
+    background: #001B3D;
+}
+.el-table {
+    border-radius: 13px 13px 0 0;
+}
+.el-tabs--card > .el-tabs__header .el-tabs__nav {
+    border: none;
+}
+
+.el-tabs--card > .el-tabs__header .el-tabs__item.is-active, .el-tabs--card > .el-tabs__header {
+    border-bottom: none;
+}
+
+.el-table thead{
+    font-size: 16px;
+    color: #9ed2f7;
+}
+.el-table td{
+    color: #fff;
+}
+.el-table th.is-leaf{
+    border-bottom: 1px solid #0d389c
+}
+.el-table--enable-row-hover .el-table__body tr:hover>td{
+    background-color: #25335a;
+}
+/*单元格下面的边框*/
+.el-table--border::after, .el-table--group::after, .el-table::before{
+   background-color: #0d389c;
+}
+.cast-devices .no-scroll-x .el-scrollbar__wrap{overflow-x:hidden; border-bottom:1px solid #ebebeb;}
+.el-button--primary {
+    background-color: #2562F7;
+    border: none;
+    border-radius: 33px;
+    color: #fff;
+    padding: 8px 20px;
+}
+
+.el-button--primary:focus, .el-button--primary:hover {
+    background-color: #2562F7;
+    border: none;
+}
