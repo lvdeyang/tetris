@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.eb.YingJGBEXTCALLDLL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +120,15 @@ public class ApiTerminalController {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		ColumnVO column = columnService.query(userVO, id, page);
 
-		return column;
+		JSONObject json= (JSONObject) JSONObject.toJSON(column);
+		SignatureResponse response=new SignatureResponse();
+		response.setMessage(json.toJSONString());
+		YingJGBEXTCALLDLL.openDevice(1);
+		response.setSign(YingJGBEXTCALLDLL.platformCalculateSignature(1,1,
+				response.getMessage().getBytes(StandardCharsets.UTF_8)));
+		YingJGBEXTCALLDLL.closeDevice(1);
+
+		return response;
 	}
 	
 	/**
@@ -268,8 +277,14 @@ public class ApiTerminalController {
 
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryByRegion(user, id, province, city, district, page);
-
-		return column;
+		JSONObject json= (JSONObject) JSONObject.toJSON(column);
+		SignatureResponse response=new SignatureResponse();
+		response.setMessage(json.toJSONString());
+		YingJGBEXTCALLDLL.openDevice(1);
+		response.setSign(YingJGBEXTCALLDLL.platformCalculateSignature(1,1,
+				response.getMessage().getBytes(StandardCharsets.UTF_8)));
+		YingJGBEXTCALLDLL.closeDevice(1);
+		return response;
 	}
 	
 	/**
@@ -320,8 +335,14 @@ public class ApiTerminalController {
 		
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		List<ArticleVO> list = columnService.search(user, search, page);
-		
-		return new HashMapWrapper<String, Object>().put("articles", list)
+		JSONArray array= (JSONArray) JSONArray.toJSON(list);
+		SignatureResponse response=new SignatureResponse();
+		response.setMessage(array.toJSONString());
+		YingJGBEXTCALLDLL.openDevice(1);
+		response.setSign(YingJGBEXTCALLDLL.platformCalculateSignature(1,1,
+				response.getMessage().getBytes(StandardCharsets.UTF_8)));
+		YingJGBEXTCALLDLL.closeDevice(1);
+		return new HashMapWrapper<String, Object>().put("response", response)
 												   .getMap();
 	}
 	
