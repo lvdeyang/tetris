@@ -86,6 +86,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private List<MediaAudioVO> children;
 	
+	private String tagString;
+	
 	/**是否置顶1是，0否*/
 	private Integer isTop=0;
 	
@@ -94,6 +96,14 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	private Integer sample;
 	private Integer bitrate;//bps
 	
+	public String getTagString() {
+		return tagString;
+	}
+
+	public void setTagString(String tagString) {
+		this.tagString = tagString;
+	}
+
 	public String getName() {
 		return name;
 	}

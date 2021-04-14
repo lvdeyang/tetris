@@ -169,7 +169,7 @@ public class MediaVideoQuery {
 			folderTree.add(folderDao.findOne(id[0]));
 		}
 		
-		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
+		if (folderTree == null ||folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

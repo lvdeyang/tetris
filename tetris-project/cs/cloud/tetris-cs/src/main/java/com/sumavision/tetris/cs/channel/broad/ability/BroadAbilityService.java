@@ -74,6 +74,7 @@ import com.sumavision.tetris.cs.schedule.ScheduleDAO;
 import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
+import com.sumavision.tetris.cs.schedule.exception.ProgramStartTimeIsNullException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleExpiredException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.cs.util.http.HttpUtil;
@@ -393,6 +394,10 @@ public class BroadAbilityService {
 			Long now = DateUtil.getLongDate();
 			//开始播发"yyyy-MM-dd HH:mm:ss"时间
 			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
+			//如果排期时间为0点，则取排期中第一个节目的开始时间
+			if (scheduleVO.getBroadDate().endsWith("00:00:00")) {
+				broadDate =  getScreenTime(scheduleVO.getId());
+			}
 			//开始播发long时间
 			final Long broadDateLong = broadDate.getTime();
 			//单节目单结束时间
@@ -443,63 +448,65 @@ public class BroadAbilityService {
 				List<BroadAbilityBroadRequestInputPrevVO> requestInputPrevVOs = new ArrayList<BroadAbilityBroadRequestInputPrevVO>();
 				String mediaType = "";
 				//遍历节目单数组，添加任务输入
-				for (ScreenVO screenVO : screenVOs) {
-					String type = screenVO.getType();
-					String screenDuration = screenVO.getDuration();
-					if (screenDuration == null || screenDuration.isEmpty() || screenDuration.equals("-")) continue;
-					if (type != null) {
-						switch (type) {
-						case "AUDIO":
-						case "VIDEO":
-							BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
-							List<BroadAbilityBroadRequestInputPrevFileVO> fileArray = new ArrayList<BroadAbilityBroadRequestInputPrevFileVO>();
-							if(screenVO.getCount()!=0){
-								inputPrevFileVO.setCount(screenVO.getCount());
-							}else{
-								inputPrevFileVO.setCount(1);
+				if (screenVOs != null && screenVOs.size()>0) {
+					for (ScreenVO screenVO : screenVOs) {
+						String type = screenVO.getType();
+						String screenDuration = screenVO.getDuration();
+						if (screenDuration == null || screenDuration.isEmpty() || screenDuration.equals("-")) continue;
+						if (type != null) {
+							switch (type) {
+							case "AUDIO":
+							case "VIDEO":
+								BroadAbilityBroadRequestInputPrevFileVO inputPrevFileVO = new BroadAbilityBroadRequestInputPrevFileVO();
+								List<BroadAbilityBroadRequestInputPrevFileVO> fileArray = new ArrayList<BroadAbilityBroadRequestInputPrevFileVO>();
+								if(screenVO.getCount()!=0){
+									inputPrevFileVO.setCount(screenVO.getCount());
+								}else{
+									inputPrevFileVO.setCount(1);
+								}
+								
+								inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
+								.setDuration(Long.parseLong(screenVO.getDuration()))
+								.setSeek(0l);
+								fileArray.add(inputPrevFileVO);
+								//设置file类型源的sources
+								requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile_array(fileArray));
+								break;
+							case "AUDIO_STREAM":
+							case "VIDEO_STREAM":
+								BroadAbilityBroadRequestInputPrevStreamVO inputStreamVO = new BroadAbilityBroadRequestInputPrevStreamVO().setDuration(Long.parseLong(screenDuration));
+								if (type.equals("AUDIO_STREAM")) {
+									inputStreamVO.setUrl(screenVO.getPreviewUrl());
+								} else {
+									String url = screenVO.getPreviewUrl();
+									if (url.isEmpty()) continue;
+									List<String> urls = JSONArray.parseArray(url, String.class);
+									if (urls.isEmpty()) continue;
+									inputStreamVO.setUrl(urls.get(0));
+								}
+								inputStreamVO.setLocalIp(abilityIp);
+								//根据url判断源类型
+								String urlString = inputStreamVO.getUrl();
+								if(urlString.contains("RTMP")||urlString.contains("rtmp")){
+									inputStreamVO.setType("rtmp");
+								}else{
+									inputStreamVO.setType("udp_ts");
+								}
+								
+								//设置stream类型源的sources
+								requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO()
+										//.setType("")
+										//.setUrl(inputStreamVO.getUrl())
+										//.setStartTime(inputStreamVO.getStartTime())
+										//.setEndTime(inputStreamVO.getEndTime())
+										.setStream(inputStreamVO));
+							default:
+								break;
 							}
-							
-							inputPrevFileVO.setUrl(screenVO.getPreviewUrl().indexOf("m3u8")!=-1?screenVO.getPreviewUrl():adapter.changeHttpToFtp(screenVO.getPreviewUrl()))
-							.setDuration(Long.parseLong(screenVO.getDuration()))
-							.setSeek(0l);
-							fileArray.add(inputPrevFileVO);
-							//设置file类型源的sources
-							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO().setType("file").setFile_array(fileArray));
-							break;
-						case "AUDIO_STREAM":
-						case "VIDEO_STREAM":
-							BroadAbilityBroadRequestInputPrevStreamVO inputStreamVO = new BroadAbilityBroadRequestInputPrevStreamVO().setDuration(Long.parseLong(screenDuration));
-							if (type.equals("AUDIO_STREAM")) {
-								inputStreamVO.setUrl(screenVO.getPreviewUrl());
-							} else {
-								String url = screenVO.getPreviewUrl();
-								if (url.isEmpty()) continue;
-								List<String> urls = JSONArray.parseArray(url, String.class);
-								if (urls.isEmpty()) continue;
-								inputStreamVO.setUrl(urls.get(0));
+							if (mediaType.isEmpty()) {
+								if ("AUDIO".equals(type) || "AUDIO_STREAM".equals(type)) mediaType = "audio";
+								if ("VIDEO".equals(type) || "VIDEO_STREAM".equals(type)) mediaType = "video";
 							}
-							inputStreamVO.setLocalIp(abilityIp);
-							//根据url判断源类型
-							String urlString = inputStreamVO.getUrl();
-							if(urlString.contains("RTMP")||urlString.contains("rtmp")){
-								inputStreamVO.setType("rtmp");
-							}else{
-								inputStreamVO.setType("udp_ts");
-							}
-							
-							//设置stream类型源的sources
-							requestInputPrevVOs.add(new BroadAbilityBroadRequestInputPrevVO()
-									//.setType("")
-									//.setUrl(inputStreamVO.getUrl())
-									//.setStartTime(inputStreamVO.getStartTime())
-									//.setEndTime(inputStreamVO.getEndTime())
-									.setStream(inputStreamVO));
-						default:
-							break;
-						}
-						if (mediaType.isEmpty()) {
-							if ("AUDIO".equals(type) || "AUDIO_STREAM".equals(type)) mediaType = "audio";
-							if ("VIDEO".equals(type) || "VIDEO_STREAM".equals(type)) mediaType = "video";
 						}
 					}
 				}
@@ -2495,10 +2502,32 @@ public class BroadAbilityService {
 		try {
 			HttpUtil.httpPost(url, jsonObject,true);
 		} catch (Exception e) {
+			System.out.println("----------------------------此处错误只涉及声纹比对-----------------");
 			e.printStackTrace();
 		}
 		
 	}
 	
+	/**
+	 * 排期中第一个节目的开始时间<br/>
+	 * <b>作者:</b>614<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年4月12日 下午2:35:03
+	 * @param scheduleId 排期id
+ 	 */
+	public Date getScreenTime(Long scheduleId)throws Exception{
+		ProgramVO programVO = programQuery.getProgram(scheduleId);
+		List<ScreenVO> screenVOs = programVO.getScreenInfo();
+		Date startTime = new Date();
+		if (screenVOs != null&& screenVOs.size()>0) {
+			SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
+			if (screenVOs.get(0).getStartTime() != null && !screenVOs.get(0).getStartTime().equals("")) {
+				startTime = DateUtil.parse(screenVOs.get(0).getStartTime(), DateUtil.dateTimePattern);
+			}else {
+				startTime = DateUtil.parse(schedulePO.getBroadDate(), DateUtil.dateTimePattern);
+			}
+		}
+		return startTime;
+	}
 
 }

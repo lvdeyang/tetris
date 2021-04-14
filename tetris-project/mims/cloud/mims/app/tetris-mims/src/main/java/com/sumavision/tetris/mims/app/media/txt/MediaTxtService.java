@@ -444,7 +444,7 @@ public class MediaTxtService {
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
 		entity.setFolderId(folder.getId());
-		entity.setUploadStatus(UploadStatus.COMPLETE);
+		entity.setUploadStatus(UploadStatus.UPLOADING);
 		entity.setContent(content);
 		entity.setUpdateTime(date);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);

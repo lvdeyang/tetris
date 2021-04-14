@@ -6,6 +6,7 @@ define([
     'restfull',
     'jquery',
     'vue',
+    'muse-ui',
     'element-ui',
     'css!' + window.APPPATH + 'cs/dialog/program/program-screen.css'
 ], function (tpl, ajax, $, Vue) {
@@ -17,6 +18,10 @@ define([
         template: tpl,
         data: function () {
             return {
+                channelId:'',
+                activeName: '',
+                editableTabs: [],
+                tabIndex: 7,
                 visible: false,
                 loading: false,
                 channelData: {},
@@ -75,9 +80,250 @@ define([
                 broadWayStream: '轮播推流',
                 broadWayFile: '下载文件',
                 broadWayTerminal: '终端播发',
+                importData:{
+                    channelId:''
+                },
             }
         },
         methods: {
+            handleChange:function(file, fileList) {
+                var self = this;
+                const fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
+                const whiteList = ["xls", "xlsx"];
+
+                if (whiteList.indexOf(fileSuffix) === -1) {
+
+                    self.$message({
+                        message: '上传文件只能是xls或xlsx格式',
+                        type: 'warning'
+                    });
+                    return;
+                }
+            },
+
+            handleUploadCommit:function(file){
+                var self = this;
+                self.importData.channelId=self.channelData.id;
+            },
+            handleUploadSuccess:function(response, file, fileList){
+                var self = this;
+                if (response.status == 200) {
+                    self.$message({
+                        type: 'success',
+                        message: '导入成功'
+                    });
+                    self.NowFormatDate();
+                    self.queryProgram(self.activeName);
+                }else{
+                    self.$message({
+                        message: response.message,
+                        type: 'warning'
+                    });
+                }
+
+            },
+            handleExportCommit:function(){
+                var self = this;
+                ajax.download('/cs/schedule/export/'+self.channelData.id, null, function (data) {
+                    var $a = $('#page-schedule-export');
+                    $a[0].download = self.channelData.name+'节目单.xls';
+                    $a[0].href = window.URL.createObjectURL(data);
+                    $a[0].click();
+                    self.$message({
+                        type: 'success',
+                        message: '导出成功'
+                    });
+                });
+
+
+                /*window.open("/cs/schedule/export")
+                 ajax.post('/cs/schedule/export', null, function (data, status) {
+
+                 if (status == 200) {
+                 self.$message({
+                 message: '导出成功',
+                 type: 'success'
+                 });
+                 }
+                 }, null, ajax.NO_ERROR_CATCH_CODE)*/
+            },
+            openNew:function(channelData){
+                var self= this;
+                self.NowFormatDate();
+                self.channelData = channelData;
+                self.channelId=channelData.id;
+                var params = {
+                    channelId:self.channelId,
+                    date:self.activeName,
+                }
+                ajax.post("/cs/schedule/get/or/add",params, function(data,status){
+                    if (status == 200 && data){
+                        self.scheduleData = data;
+                        var questData = {
+                            channelId: self.channelId,
+                            scheduleId: self.scheduleData.id
+                        };
+                        ajax.post("/cs/channel/template", questData, function(data, status) {
+                            if (status == 200 && data) {
+                                var currentScreenIndex = 0;
+                                for (var i = 0; i < data.length; i++){
+                                    if (currentScreenIndex == 0
+                                        && self.scheduleData.program
+                                        && self.scheduleData.program.screenNum == data[i].screenNum
+                                        && self.scheduleData.program.screenId == data[i].id) {
+                                        currentScreenIndex = i;
+                                        for (var j = 0; j < self.scheduleData.program.screenInfo.length; j++) {
+                                            for (var k = 0; k < data[i].screen.length; k++) {
+                                                if (self.scheduleData.program.screenInfo[j].serialNum == data[i].screen[k].no){
+                                                    if (!data[i].screen[k].data) data[i].screen[k].data = [];
+                                                    data[i].screen[k].data.push(self.scheduleData.program.screenInfo[j]);
+                                                    if (!data[i].screen[k].contentType) {
+                                                        if (self.channelData.broadWay == self.broadWayStream) {
+                                                            data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '视频资源';
+                                                        } else {
+                                                            data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '仓库资源';
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    for (var k = 0; k < data[i].screen.length; k++) {
+                                        if(self.channelData.autoBroad){
+                                            data[i].screen[k].contentType="音频资源";
+                                        }else{
+                                            if (!data[i].screen[k].contentType) data[i].screen[k].contentType = self.channelData.broadWay == self.broadWayStream ? '视频资源' : '仓库资源';
+                                        }
+                                    }
+                                    self.options.list.push(data[i]);
+                                }
+                                if (self.options.list && self.options.list.length > 0) {
+                                    self.options.currentName = self.options.list[currentScreenIndex].name;
+                                    self.handleScreenOptionsChange(self.options.currentName);
+                                }
+                                self.handleOrientOptionChange(null, self.scheduleData.program && self.scheduleData.program.orient ? self.scheduleData.program.orient : 'horizontal');
+                            }
+                        });
+                    }
+                })
+                self.options.list.splice(0,self.options.list.length);
+
+                ajax.post('/cs/program/content/type/get', {channelId: self.channelId}, function(data, status) {
+                    self.contentOptions.list.splice(0, self.contentOptions.list.length);
+                    if (status == 200 && data && data.length) {
+                        self.contentOptions.list = self.contentOptions.list.concat(data);
+                    }
+                });
+
+                self.visible = true;
+            },
+            dateChange:function(){
+                var self= this;
+                if(self.activeName === null || self.activeName === ""){
+                    self.NowFormatDate();
+                    self.queryProgram(self.activeName);
+                }else{
+                    self.getAllWeek(self.activeName);
+                    console.log(self.activeName);
+                    self.queryProgram(self.activeName);
+                }
+            },
+            queryProgram:function(date){
+                var self= this;
+                var params = {
+                    channelId:self.channelId,
+                    date:date
+                }
+                self.scheduleData = {};
+                ajax.post("/cs/schedule/get/or/add",params, function(data,status){
+                    if (status == 200 && data){
+                        Vue.set(self,'scheduleData',data);
+                        console.log(self.scheduleData);
+                        var questData = {
+                            channelId: self.channelId,
+                            scheduleId: self.scheduleData.id
+                        };
+                        self.options.list.splice(0,self.options.list.length);
+                        ajax.post("/cs/channel/template", questData, function(data, status) {
+                            if (status == 200 && data) {
+                                var currentScreenIndex = 0;
+                                for (var i = 0; i < data.length; i++){
+                                    if (currentScreenIndex == 0
+                                        && self.scheduleData.program
+                                        && self.scheduleData.program.screenNum == data[i].screenNum
+                                        && self.scheduleData.program.screenId == data[i].id) {
+                                        currentScreenIndex = i;
+                                        for (var j = 0; j < self.scheduleData.program.screenInfo.length; j++) {
+                                            for (var k = 0; k < data[i].screen.length; k++) {
+                                                if (self.scheduleData.program.screenInfo[j].serialNum == data[i].screen[k].no){
+                                                    if (!data[i].screen[k].data) data[i].screen[k].data = [];
+                                                    data[i].screen[k].data.push(self.scheduleData.program.screenInfo[j]);
+                                                    if (!data[i].screen[k].contentType) {
+                                                        if (self.channelData.broadWay == self.broadWayStream) {
+                                                            data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '视频资源';
+                                                        } else {
+                                                            data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '仓库资源';
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    for (var k = 0; k < data[i].screen.length; k++) {
+                                        if(self.channelData.autoBroad){
+                                            data[i].screen[k].contentType="音频资源";
+                                        }else{
+                                            if (!data[i].screen[k].contentType) data[i].screen[k].contentType = self.channelData.broadWay == self.broadWayStream ? '视频资源' : '仓库资源';
+                                        }
+                                    }
+                                    self.options.list.push(data[i]);
+                                }
+                                if (self.options.list && self.options.list.length > 0) {
+                                    self.options.currentName = self.options.list[currentScreenIndex].name;
+                                    self.handleScreenOptionsChange(self.options.currentName);
+                                }
+                                self.handleOrientOptionChange(null, self.scheduleData.program && self.scheduleData.program.orient ? self.scheduleData.program.orient : 'horizontal');
+                            }
+                        });
+                    }
+                })
+            },
+            NowFormatDate:function() {
+            var self = this;
+            var date = new Date();
+            var seperator1 = "-";
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var strDate = date.getDate();
+            if (month >= 1 && month <= 9) {
+                month = "0" + month;
+            }
+            if (strDate >= 0 && strDate <= 9) {
+                strDate = "0" + strDate;
+            }
+            var currentdate = year + seperator1 + month + seperator1 + strDate;
+                self.activeName = currentdate;
+            self.getAllWeek(currentdate);
+            },
+            getAllWeek:function(date){
+                var self = this;
+                ajax.post('/cs/program/get/all/week', {date}, function (data, status) {
+                    if (data && data.length > 0) {
+                        self.editableTabs.splice(0,self.editableTabs.length)
+                        for (var i = 0; i < data.length; i++) {
+                            self.editableTabs.push(data[i]);
+                            self.activeName= date;
+                        }
+                    }
+                }, null, ajax.NO_ERROR_CATCH_CODE);
+            },
+            handleClick:function(tab, event) {
+                var self = this;
+                console.log(tab.name);
+                self.queryProgram(tab.name);
+            },
             open: function (url, channelData, scheduleData) {
                 var self = this;
                 self.url = url;
@@ -474,6 +720,11 @@ define([
                 self.options.list.splice(0, self.options.list.length);
                 self.$emit(ON_PROGRAM_SCREEN_CLOSE);
             }
+        },
+        created:function(){
+            var  self = this;
+            var myDate = new Date();
+            self.NowFormatDate();
         },
         filters: {
             resourceType: function (row) {

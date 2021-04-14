@@ -107,4 +107,22 @@ public class ProgramController {
 		}
 		return screenContentTypes;
 	}
+	
+	/**
+	 * 查询当前日期最近一个周<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>614<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年4月6日 下午1:16:55
+	 * @param date 选择日期
+	 * @return DateVO 星期表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/all/week")
+	public Object getAllWeek(String date)throws Exception{
+		
+		return programQuery.getAllWeek(date);
+	}
+	
 }

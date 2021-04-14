@@ -1,6 +1,9 @@
 package com.sumavision.tetris.mims.app.media.tag;
 
+import java.text.Collator;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
@@ -106,6 +109,24 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 	public TagVO setHotCount(Long hotCount) {
 		this.hotCount = hotCount;
 		return this;
+	}
+	
+	/**
+	 * @author 614
+	 * 对标签进行排序
+	 */
+	public static final class TagComparator implements Comparator<TagVO>{
+		
+		@Override
+		public int compare(TagVO o1, TagVO o2) {
+			Collator instance = Collator.getInstance(Locale.CHINA);
+			
+			String str1 = o1.getName();
+			String str2 = o2.getName();
+			
+			return instance.compare(str1, str2);
+
+		}		
 	}
 	
 }

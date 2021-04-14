@@ -9,6 +9,10 @@ require.config({
         'jquery':window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
         'json':window.LIBPATH + 'frame/jQuery/jquery.json',
         'element-ui':window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+        'muse-ui':window.LIBPATH + 'ui/muse-ui-3.0.2/3.0.2/muse-ui.min',
+
+
+        //'element-ui':window.LIBPATH + 'ui/element-ui2.15.1/2.15.1/index.min',
 
         'TweenLite':window.LIBPATH + 'TweenMax/cmd/TweenLite',
 
@@ -89,6 +93,7 @@ require([
     'menu',
     'config',
     'restfull',
+    'muse-ui',
     'element-ui',
     'css!' + window.APPPATH + 'reset.css'
 ], function(storage, Vue, router, context, menuUtil, config, ajax){

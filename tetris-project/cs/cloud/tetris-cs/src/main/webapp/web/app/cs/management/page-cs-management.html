@@ -6,9 +6,7 @@
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
         <el-breadcrumb-item>菜单管理</el-breadcrumb-item>
     </template>
-
     <template>
-
         <div style="width:100%; height:100%; position:relative;">
             <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading"
                      :element-loading-text=loadingText>
@@ -78,7 +76,7 @@
                                         <el-tooltip class="item" effect="dark" content="节目单排期" placement="bottom">
                                             <el-button type="text" icon="feather-icon-clipboard"
                                                        class="channelManage"
-                                                       @click="editSchedule(scope)">
+                                                       @click="textSchedule(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="播发地区管理" placement="bottom"
@@ -648,12 +646,13 @@
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp" placeholder="请输入IP地址 例：127.0.0.1"></el-input>
                                 </el-form-item>
                                 <el-form-item :label="'本地IP ' + i">
-                                    <el-select v-model="dialog.setOutput.output[i-1].localIp" placeholder="请选择本地IP">
-		                                <el-option
-		                                        v-for="item in dialog.setOutput.localIpOptions"
-		                                        :value="item">
-		                                </el-option>
-                            		</el-select>
+                                    <el-input v-model="dialog.setOutput.output[i-1].localIp" placeholder="请输入本地IP地址 例：127.0.0.1"></el-input>
+                                    <!--<el-select v-model="dialog.setOutput.output[i-1].localIp" placeholder="请选择本地IP">-->
+		                                <!--<el-option-->
+		                                        <!--v-for="item in dialog.setOutput.localIpOptions"-->
+		                                        <!--:value="item">-->
+		                                <!--</el-option>-->
+                            		<!--</el-select>-->
                                 </el-form-item>
                                 <el-form-item :label="'可用初始端口 ' + i" v-if="dialog.setOutput.output[i-1].outputType=='UDP_TS'">
                                     <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort" oninput="value=value.replace(/[^\d]/g,'')"></el-input>

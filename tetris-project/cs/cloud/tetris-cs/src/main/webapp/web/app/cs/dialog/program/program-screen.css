@@ -39,3 +39,7 @@ input::-webkit-inner-spin-button{
     margin-top: 20px;
     margin-left: 20px;
 }
+
+.demo-date-picker {
+    margin: 8px;
+}
