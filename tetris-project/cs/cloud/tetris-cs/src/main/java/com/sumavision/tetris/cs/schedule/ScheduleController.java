@@ -269,4 +269,22 @@ public class ScheduleController {
         outputStream.flush();
         outputStream.close();
 	}
+	
+	/**
+	 * 查询选择日期的排期，如没有，则创建一个排期<br/>
+	 * <b>作者:</b>614<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2021年4月6日 上午11:29:12
+	 * @param channelId
+	 * @param date
+	 * @return ScheduleVO
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/or/add")
+	public Object getOrAdd(Long channelId,String date) throws Exception{
+		
+		return scheduleService.getOrAdd(channelId, date);
+	}
 }

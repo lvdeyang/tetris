@@ -7,8 +7,12 @@
 
     <div class="content">
         <div class="content-wrapper">
-            <el-input :placeholder="i18n.placeholderIconSearch" size="small" suffix-icon="el-icon-search"></el-input>
+            <!--<el-input :placeholder="i18n.placeholderIconSearch" size="small" suffix-icon="el-icon-search"></el-input>-->
             <div class="tree-wrapper">
+                <el-input
+                        placeholder="输入关键字进行过滤"
+                        v-model="filterText">
+                </el-input>
                 <el-tree
                         v-loading="loading"
                         ref="tagTree"
@@ -19,6 +23,7 @@
                         show-checkbox
                         :default-checked-keys="checked"
                         :expand-on-click-node="false"
+                        :filter-node-method="filterNode"
                         default-expand-all
                         highlight-current>
                 </el-tree>

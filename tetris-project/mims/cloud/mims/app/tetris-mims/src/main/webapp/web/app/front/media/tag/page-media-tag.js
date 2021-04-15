@@ -59,11 +59,20 @@ define([
                         hotCount:"",
                         data: {}
                     }
-                }
+                },
+                filterText: '',
             },
             computed: {},
-            watch: {},
+            watch: {
+                filterText: function(val) {
+                    this.$refs.tagTree.filter(val);
+                }
+            },
             methods: {
+                filterNode: function(value, data) {
+                    if (!value) return true;
+                    return data.name.indexOf(value) !== -1;
+                },
                 getTagList: function () {
                     var self = this;
                     self.loading.tree = true;

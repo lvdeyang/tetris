@@ -254,7 +254,7 @@ public class ApiServerMediaController {
 			MediaPicturePO entity = mediaPictureService.addTask(user, name, tagNames, null, remark, taskParam, folder, addition);
 			return new MediaPictureVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_TXT)){
-			MediaTxtPO entity = mediaTxtService.addTask(user, name, tagNames, null, remark, task, folder, false, addition);
+			MediaTxtPO entity = mediaTxtService.addTask(user, name, tagNames, null, remark, task, folder, true, addition);
 			return new MediaTxtVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_VIDEO)){
 			MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class); 

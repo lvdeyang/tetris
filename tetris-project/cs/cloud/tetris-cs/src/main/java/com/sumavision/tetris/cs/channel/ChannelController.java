@@ -32,6 +32,8 @@ import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
 import com.sumavision.tetris.cs.template.ChannelTemplatePO;
 import com.sumavision.tetris.cs.template.ChannelTemplateService;
 import com.sumavision.tetris.cs.template.ChannelTemplateVo;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeProfileVO;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -59,6 +61,9 @@ public class ChannelController {
 	@Autowired
 	private BroadAbilityService broadAbilityService;
 	
+	@Autowired
+	private StreamTranscodeQuery streamTranscodeQuery;
+	
 	//@Autowired
 	//private AlarmFeignClientService alarmFeignClientService;
 	
@@ -77,7 +82,9 @@ public class ChannelController {
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
 		//初始化时设置转换告警地址
-		capacityService.setAlarmUrl("192.165.56.17");
+		StreamTranscodeProfileVO streamTranscodeProfileVO = streamTranscodeQuery.getProfile();
+		String abilityIp = streamTranscodeProfileVO.getToolIp();
+		capacityService.setAlarmUrl(abilityIp);
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
 	/**

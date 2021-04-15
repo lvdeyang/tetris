@@ -156,7 +156,7 @@ public class MediaAudioStreamQuery {
 			folderTree.add(folderDao.findOne(id[0]));
 		}
 		
-		if (folderTree.isEmpty()) return new ArrayList<MediaAudioStreamVO>();
+		if (folderTree == null ||folderTree.isEmpty()) return new ArrayList<MediaAudioStreamVO>();
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

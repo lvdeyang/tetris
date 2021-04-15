@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.tag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ public class TagQuery {
 		List<TagPO> rootTagPOs = tagDAO.findRootByGroupId(user.getGroupId());
 		
 		List<TagVO> rootTagVOs = TagVO.getConverter(TagVO.class).convert(rootTagPOs, TagVO.class);
+		Collections.sort(rootTagVOs, new TagVO.TagComparator());
 		
 		return rootTagVOs;
 	}

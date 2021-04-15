@@ -2,7 +2,6 @@ package com.sumavision.tetris.cs.schedule;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -13,15 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.api.ApiServerScheduleCastVO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoDAO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoDAO;
-import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
 import com.sumavision.tetris.cs.menu.CsResourceDAO;
 import com.sumavision.tetris.cs.menu.CsResourcePO;
-import com.sumavision.tetris.cs.menu.CsResourceQuery;
 import com.sumavision.tetris.cs.program.ProgramDAO;
 import com.sumavision.tetris.cs.program.ProgramPO;
+import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenDAO;
@@ -29,7 +25,6 @@ import com.sumavision.tetris.cs.program.ScreenPO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ProgramNotExistsException;
-import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
@@ -74,6 +69,9 @@ public class ScheduleService {
 
 	@Autowired
 	private ProgramDAO programDao;
+	
+	@Autowired
+	private ProgramQuery programQuery;
 	
 	/**
 	 * 添加排期<br/>
@@ -525,4 +523,31 @@ public class ScheduleService {
 			}
 		}	
 	}
+
+	public ScheduleVO getOrAdd(Long channelId, String date) throws Exception{
+		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+		if (schedulePOs != null&& schedulePOs.size()>0) {
+			for (SchedulePO schedulePO : schedulePOs) {
+				if (schedulePO.getBroadDate().startsWith(date)) {
+					ScheduleVO scheduleVO =new ScheduleVO().set(schedulePO);
+					scheduleVO.setProgram(programQuery.getProgram(scheduleVO.getId()));
+					return scheduleVO;
+				}
+			}
+		}
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date da = simpleDateFormat.parse(date);
+        String broadDate = df.format(da);
+        ScheduleVO scheduleVO = add(channelId, broadDate, "", "");
+        return scheduleVO;
+	}
+	
+	public static void main(String[] args) throws Exception {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = simpleDateFormat.parse("2021-04-06");
+        System.out.println(date);   //Tue Apr 06 00:00:00 CST 2021
+        System.out.println(df.format(date));  //2021-04-06 00:00:00
+    }
 }

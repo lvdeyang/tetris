@@ -12,6 +12,10 @@
             <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
                 <div style="box-sizing:border-box; width:420px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:1px solid #ebeef5;">
                     <div style="width:100%; height:100%; position:relative">
+                        <el-input
+                                placeholder="输入关键字进行过滤"
+                                v-model="filterText">
+                        </el-input>
                         <el-scrollbar style="height:100%;">
                             <el-tree
                                     v-loading="loading.tree"
@@ -23,6 +27,7 @@
                                     check-strictly
                                     default-expand-all
                                     highlight-current
+                                    :filter-node-method="filterNode"
                                     @current-change="currentTreeNodeChange">
 
                             <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">

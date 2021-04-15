@@ -10,6 +10,7 @@ define([
     'commons',
     'vue',
     'element-ui',
+    'muse-ui',
     'mi-frame',
     'mi-lightbox',
     'cs-user-dialog',
@@ -34,6 +35,7 @@ define([
         new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
+                date: undefined,
                 myHeaders: {
                     'tetris-001':window.localStorage.getItem(config.ajax.header_auth_token)
                 },
@@ -1288,7 +1290,7 @@ define([
                         ajax.post('/cs/channel/broadcast/modify', questData, function (data, status) {
                             callback();
                             if (status != 200) return;
-                            
+
                         }, null, ajax.NO_ERROR_CATCH_CODE);
                     });
                 },
@@ -1570,7 +1572,7 @@ define([
                 },
                 handleChannelResourceCommit: function () {
                     var self = this;
-                    
+
                     var reslist=self.dialog.channel.dialog.chooseResource.chooseNode;
                     if(self.dialog.channel.dialog.type=='add'){
                     	self.dialog.addProgram.backfileUrl=reslist[0].previewUrl;
@@ -1582,7 +1584,7 @@ define([
                         self.dialog.editChannel.backfileDuration=reslist[0].duration;
                         self.dialog.editChannel.backfileName=reslist[0].name;
                         self.dialog.editChannel.backfileType=reslist[0].type;
-                    }      
+                    }
                     self.dialog.channel.dialog.chooseResource.visible = false;
                 },
                 selectMuneResource:function(b){
@@ -1653,6 +1655,12 @@ define([
                     self.dialog.editSchedules.visible = true;
                     self.dialog.editSchedules.data = row;
                     self.loadSchedule();
+                },
+                textSchedule:function(scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.test.visible = true;
+                    self.$refs.programScreen.openNew(scope.row);
                 },
                 handleEditSchedulesClose: function () {
                     var self = this;

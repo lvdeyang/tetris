@@ -62,7 +62,7 @@
                                 <span :class="scope.row.icon" :style="scope.row.style"></span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="文件名">
+                        <el-table-column label="文件名" prop="name" sortable>
                             <template slot-scope="scope">
                                 <el-button v-if="scope.row.type==='FOLDER'" type="text" style="padding:0; color:inherit;"><a class="folder-link" :href="'#/page-media-audio/'+scope.row.id">{{scope.row.name}}</a></el-button>
                                 <span v-else>{{scope.row.name}}</span>
@@ -108,8 +108,14 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="是否置顶" width="140">
+                        <el-table-column label="标签" width="150">
+                            <template slot-scope="scope">{{scope.row.tagString}}</template>
+                        </el-table-column>
+                        <el-table-column label="是否置顶" width="80">
                             <template slot-scope="scope">{{scope.row.isTop==1?'已置顶':'否'}}</template>
+                        </el-table-column>
+                        <el-table-column label="时长" width="80" prop="duration"sortable>
+                            <template slot-scope="scope">{{scope.row.duration}}</template>
                         </el-table-column>
                         <el-table-column label="编码" width="80">
                             <template slot-scope="scope">{{scope.row.codec}}</template>
@@ -123,13 +129,13 @@
                         <el-table-column label="码率" width="80">
                             <template slot-scope="scope">{{scope.row.bitrate}}</template>
                         </el-table-column>
-                        <el-table-column label="大小" width="80">
+                        <el-table-column label="大小" width="100" prop="size" sortable>
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                         </el-table-column>
-                        <el-table-column label="下载量" width="100">
+                        <el-table-column label="下载量" width="100" prop="downloadCount" sortable>
                             <template slot-scope="scope">{{scope.row.downloadCount}}</template>
                         </el-table-column>
-                        <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>
+                        <el-table-column prop="updateTime" label="创建时间" width="180" sortable></el-table-column>
                         <el-table-column label="审核状态" width="180">
                             <template slot-scope="scope">
                                 <el-button v-if="scope.row.processInstanceId" type="text" style="padding:0;" @click="doProcessPreview(scope)">{{scope.row.reviewStatus}}</el-button>
@@ -218,6 +224,7 @@
                 :visible.sync="dialog.batchUpload.visible"
                 width="500px"
                 :before-close="handleBatchUploadAudioClose">
+            <el-text style="color: #F56C6C">提示:文件名中请勿包含空格或者特殊字符!</el-text>
             <div style="height: 400px">
                 <el-scrollbar style="height:100%;">
                     <el-tree

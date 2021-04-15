@@ -24,3 +24,7 @@
 .channelManage:last-child{
     margin-right: 0;
 }
+
+.demo-date-picker {
+    margin: 8px;
+}

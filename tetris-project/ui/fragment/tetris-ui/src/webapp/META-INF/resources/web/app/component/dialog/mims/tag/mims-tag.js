@@ -23,6 +23,7 @@ define([
         template: tpl,
         data: function () {
             return {
+                filterText: '',
                 i18n:i18n,
                 visible: false,
                 loading: false,
@@ -39,6 +40,10 @@ define([
             }
         },
         methods: {
+            filterNode:function(value, data) {
+                if (!value) return true;
+                return data.name.indexOf(value) !== -1;
+            },
             open: function (uri, checked) {
                 var self = this;
                 self.visible = true;
@@ -102,6 +107,11 @@ define([
                 };
 
                 self.$emit(ON_TAG_DIALOG_CLOSE, checked, selected, startLoading, endLoading, close);
+            }
+        },
+        watch: {
+            filterText:function (val) {
+                this.$refs.tagTree.filter(val);
             }
         },
         mounted: function () {

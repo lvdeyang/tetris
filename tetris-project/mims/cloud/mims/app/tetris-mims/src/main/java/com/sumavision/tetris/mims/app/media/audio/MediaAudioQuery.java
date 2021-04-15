@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -157,7 +158,19 @@ public class MediaAudioQuery {
 					user.getId().toString());
 			if(audios!=null && audios.size()>0){
 				for(MediaAudioPO audio:audios){
-					rows.add(new MediaAudioVO().set(audio));
+					MediaAudioVO mediaAudioVO = new MediaAudioVO().set(audio);
+					if (audio.getDuration()!= null) {
+						long milliseconds = audio.getDuration();
+				        Date date = new Date(milliseconds);
+						SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+						String dateStr = sdf.format(date);
+						mediaAudioVO.setDuration(dateStr);
+					}
+					if (audio.getTags()!= null&& !"".equals(audio.getTags())) {
+						mediaAudioVO.setTagString(audio.getTags());
+					}
+					
+					rows.add(mediaAudioVO);
 				}
 			}
 			
@@ -220,7 +233,7 @@ public class MediaAudioQuery {
 			folderTree.add(folderDao.findOne(id[0]));
 		}
 		
-		if (folderTree.isEmpty()) return new ArrayList<MediaAudioVO>();
+		if (folderTree == null ||folderTree.isEmpty()) return new ArrayList<MediaAudioVO>();
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
